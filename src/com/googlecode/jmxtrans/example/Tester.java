@@ -6,11 +6,14 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
+/**
+ * This class produces the json that is in example.json.
+ * 
+ * @author jon
+ */
 public class Tester {
 
-    /**
-     * @param args
-     */
+    /** */
     public static void main(String[] args) throws Exception {
         Server server = new Server("w2", "1099");
         server.setNumQueryThreads(2);

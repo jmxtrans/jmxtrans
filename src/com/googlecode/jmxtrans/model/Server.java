@@ -105,6 +105,7 @@ public class Server {
     /**
      * The jmx url to connect to. Builds this from host/port.
      */
+    @JsonIgnore
     public String getUrl() {
         if (this.host == null || this.port == null) {
             throw new RuntimeException("host or port is null");
