@@ -1,0 +1,29 @@
+{
+  "servers" : [ {
+    "port" : "1099",
+    "host" : "w2",
+    "queries" : [ {
+      "obj" : "java.lang:type=Memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage" ],
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter"
+      } ]
+    }, {
+      "obj" : "java.lang:name=CMS Old Gen,type=MemoryPool",
+      "attr" : [ "Usage" ],
+      "keys" : [ "committed" ],
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter"
+      } ]
+    }, {
+      "obj" : "java.lang:name=ConcurrentMarkSweep,type=GarbageCollector",
+      "attr" : [ "LastGcInfo" ],
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter",
+        "templateFile" : "rrd-template-example.xml",
+        "outputFile" : "target/template-example.rrd"
+      } ]
+    } ],
+    "url" : "service:jmx:rmi:///jndi/rmi://w2:1099/jmxrmi"
+  } ]
+}

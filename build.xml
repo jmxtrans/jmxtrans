@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+
+<!--
+	Build file for jmxtrans.
+-->
+<project name="jmxtrans" default="jar" basedir=".">
+
+	<property name="name" value="${ant.project.name}" />
+
+	<property file="user.properties" />
+	<property file="${user.home}/build.properties" />
+	<property file="build.properties" />
+	<property file="build.credentials.properties" />
+
+	<property name="base.dir" location="." />
+
+	<property name="build.debug" value="on" />
+	<property name="build.deprecation" value="on" />
+
+	<property name="ant.build.javac.target" value="1.5" />
+	<property name="ant.build.javac.source" value="1.5" />
+
+	<property name="build.dir" location="target" />
+	<property name="build.classes.dir" location="${build.dir}/classes" />
+	<property name="build.javadoc.dir" location="${build.dir}/javadoc" />
+	<property name="build.jar.file" location="${build.dir}/${name}.jar" />
+
+	<property name="docs.dir" value="${build.dir}/docs" />
+	<property name="javadoc.dir" value="javadoc" />
+
+	<property name="lib.dir" location="lib" />
+	<property name="src.dir" location="src" />
+
+	<tstamp/>
+	<tstamp>
+		<format property="YEAR" pattern="yyyy" />
+	</tstamp>
+
+	<path id="master.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<path id="run.classpath">
+		<pathelement location="${build.classes.dir}" />
+		<path refid="master.classpath" />
+	</path>
+
+	<target name="init">
+		<typedef resource="com/googlecode/svntask/svntask.xml">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="**/svnkit.jar"/>
+					<include name="**/svntask.jar"/>
+				</fileset>
+			</classpath>
+		</typedef>
+
+		<svn><info path="${basedir}" revisionProperty="revisionVersion" /></svn>
+
+		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpath="${lib.dir}/ant-googlecode-0.0.2.jar" name="gcupload"/>
+
+		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
+		<property name="version" value="${revisionVersion}" />
+		<property name="build.version" value="${revisionVersion}" />
+
+		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
+		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+ 	<target name="classes" depends="init">
+		<mkdir dir="${build.classes.dir}" />
+
+		<javac srcdir="${src.dir}"
+				destdir="${build.classes.dir}"
+				debug="${build.debug}"
+				deprecation="${build.deprecation}"
+		        includeantruntime="false"
+			>
+			<classpath refid="master.classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="classes">
+		<jar destfile="${build.jar.file}" basedir="${build.classes.dir}">
+			<manifest>
+				<attribute name="Specification-Version" value="${version}" />
+				<attribute name="Implementation-Version" value="${TODAY}" />
+				<attribute name="Main-Class" value="com.googlecode.jmxlogger.Version" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="javadoc" depends="classes">
+		<javadoc
+			destdir="${build.javadoc.dir}"
+			packagenames="*"
+			classpathref="run.classpath"
+			author="true"
+			version="true"
+			Windowtitle="jmxlogger javadoc"
+		>
+			<fileset dir="${src.dir}">
+				<exclude name="**/test/**" />
+				<exclude name="**/*.xml" />
+			</fileset>
+			<doctitle><![CDATA[<h1>jmxtrans</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright &#169; ${YEAR} Jon Stevens and a gang of pencils. All Rights Reserved. Build version: ${build.version}</i>]]></bottom>
+		</javadoc>
+
+		<sync todir="${javadoc.dir}" includeEmptyDirs="true">
+			<fileset dir="${build.javadoc.dir}" />
+			<preserveintarget>
+				<include name="**/.svn/**"/>
+			</preserveintarget>
+		</sync>
+	</target>
+
+	<target name="dist" depends="clean, jar, javadoc">
+		<copy todir="${build.dist.dir}">
+			<fileset dir="${build.dir}">
+				<include name="javadoc/**" />
+			</fileset>
+
+			<fileset dir=".">
+				<include name="build.xml" />
+				<include name="README.html" />
+			</fileset>
+		</copy>
+
+		<copy todir="${build.dist.dir}">
+			<fileset dir="${build.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="${build.dist.dir}/lib">
+			<fileset dir="lib">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="${build.dist.dir}/src">
+			<fileset dir="${base.dir}/src">
+				<include name="**" />
+			</fileset>
+		</copy>
+
+		<dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
+		<basename property="build.dist.dir.basename" file="${build.dist.dir}" />
+
+		<zip zipfile="${build.dist.zip}" basedir="${build.dist.dir.dirname}">
+			<include name="${build.dist.dir.basename}/**" />
+		</zip>
+	</target>
+
+	<target name="upload" depends="init">
+		<gcupload projectname="sardine"
+			userName="${gc.username}"
+			password="${gc.password}"
+			filename="${build.dist.zip}"
+			targetfilename="${build.dist.zip}"
+			summary="Sardine distribution"
+			labels="Featured, Type-Package, OpSys-All" />
+	</target>
+</project>

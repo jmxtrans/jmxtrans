@@ -1,0 +1,18 @@
+{
+  "servers" : [ {
+    "port" : "1099",
+    "host" : "w2",
+    "queries" : [ {
+      "obj" : "java.lang:type=Memory",
+      "attr" : [ "HeapMemoryUsage" ],
+      "keys" : [ "max", "committed", "init", "used" ],
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.RRDToolWriter",
+        "templateFile" : "heapmemory-rrd-template.xml",
+        "outputFile" : "target/heap.rrd",
+        "binaryPath" : "/opt/local/bin"
+      } ]
+    } ],
+    "url" : "service:jmx:rmi:///jndi/rmi://w2:1099/jmxrmi"
+  } ]
+}

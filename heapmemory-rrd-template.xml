@@ -1,0 +1,55 @@
+<rrd_def>
+     <path>${database}</path>
+     <!-- not mandatory
+     <start>1000123456</start> -->
+     <!-- not mandatory -->
+     <step>60</step>
+     <!-- at least one datasource must be supplied -->
+     <datasource>
+         <name>max</name>
+         <type>GAUGE</type>
+         <heartbeat>400</heartbeat>
+         <min>U</min>
+         <max>U</max>
+     </datasource>
+     <datasource>
+         <name>committed</name>
+         <type>GAUGE</type>
+         <heartbeat>400</heartbeat>
+         <min>U</min>
+         <max>U</max>
+     </datasource>
+     <datasource>
+         <name>init</name>
+         <type>GAUGE</type>
+         <heartbeat>400</heartbeat>
+         <min>U</min>
+         <max>U</max>
+     </datasource>
+     <datasource>
+         <name>used</name>
+         <type>GAUGE</type>
+         <heartbeat>400</heartbeat>
+         <min>U</min>
+         <max>U</max>
+     </datasource>
+     <!-- at least one archive must be supplied -->
+     <archive>
+         <cf>AVERAGE</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+     <archive>
+         <cf>MIN</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+     <archive>
+         <cf>MAX</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+ </rrd_def>
