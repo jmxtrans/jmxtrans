@@ -34,6 +34,12 @@ public interface OutputWriter {
     public File getBinaryPath();
     public void setBinaryPath(File binaryPath);
 
+    public String getHost();
+    public void setHost(String host);
+
+    public Integer getPort();
+    public void setPort(Integer port);
+
     /**
      * This is run when the object is instantiated.
      */

@@ -20,7 +20,7 @@ public class VelocityWriter extends BaseOutputWriter {
     public VelocityWriter() {
     }
 
-    public void doWrite(Query query) {
+    public void doWrite(Query query) throws Exception {
         // TODO Auto-generated method stub
         
     }

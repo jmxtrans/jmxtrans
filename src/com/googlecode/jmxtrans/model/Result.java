@@ -14,10 +14,14 @@ public class Result {
     private String typeName;
     private String description;
     private Map<String, Object> values;
+    private long epoch;
 
-    public Result() { }
+    public Result() {
+        epoch = System.currentTimeMillis();
+    }
 
     public Result(String attributeName) {
+        this();
         this.setAttributeName(attributeName);
     }
 
@@ -69,9 +73,16 @@ public class Result {
         return attributeName;
     }
 
-    @Override
-    public String toString() {
-        return "Result [attributeName=" + attributeName + ", className=" + className + ", typeName=" + typeName + ", description=" + description + ", values=" + values + "]";
+    public void setEpoch(long epoch) {
+        this.epoch = epoch;
     }
 
+    public long getEpoch() {
+        return this.epoch;
+    }
+
+    @Override
+    public String toString() {
+        return "Result [attributeName=" + attributeName + ", className=" + className + ", typeName=" + typeName + ", description=" + description + ", values=" + values + ", epoch=" + epoch + "]";
+    }
 }

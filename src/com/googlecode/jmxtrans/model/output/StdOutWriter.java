@@ -18,7 +18,7 @@ public class StdOutWriter extends BaseOutputWriter {
         // nothing to validate
     }
 
-    public void doWrite(Query query) {
+    public void doWrite(Query query) throws Exception {
         for (Result r : query.getResults()) {
             System.out.println(r);
         }

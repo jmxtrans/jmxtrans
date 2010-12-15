@@ -15,6 +15,9 @@ public abstract class BaseOutputWriter implements OutputWriter {
     private File templateFile;
     private File binaryPath;
     
+    private String host;
+    private Integer port;
+    
     public File getOutputFile() {
         return outputFile;
     }
@@ -37,5 +40,21 @@ public abstract class BaseOutputWriter implements OutputWriter {
 
     public File getBinaryPath() {
         return binaryPath;
+    }
+
+    public String getHost() {
+        return this.host;
+    }
+    
+    public void setHost(String host) {
+        this.host = host;
+    }
+    
+    public Integer getPort() {
+        return this.port;
+    }
+    
+    public void setPort(Integer port) {
+        this.port = port;
     }
 }
