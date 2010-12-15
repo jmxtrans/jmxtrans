@@ -29,40 +29,49 @@ public class JmxTransformer extends SignalInterceptor {
     private File jsonDir = new File(".");
     private int numFileThreads = 0;
     private boolean runEndlessly = false;
-
+    private boolean isRunning = false;
+    
     /** */
     public static void main(String[] args) throws Exception {
         JmxTransformer transformer = new JmxTransformer();
         transformer.register("TERM");
+        transformer.register("INT");
+        transformer.register("KILL");
+        transformer.register("ABRT");
         transformer.doMain(args);
+        return;
     }
 
     /**
      * The real main method.
      */
     private void doMain(String[] args) throws Exception {
-        parseOptions(args);
+        if (!parseOptions(args)) {
+            return;
+        }
 
-        if (runEndlessly) {
-            while (runEndlessly) {
-                execute();
-                Thread.sleep(1000 * 60);
-            }
-        } else {
+        while (runEndlessly) {
+            isRunning = true;
             execute();
+            isRunning = false;
+            Thread.sleep(1000 * 60);
+        }
+
+        if (!runEndlessly) {
+            isRunning = true;
+            execute();
+            isRunning = false;
         }
     }
 
     /** */
-    private void parseOptions(String[] args) throws Exception {
+    private boolean parseOptions(String[] args) throws Exception {
         CommandLineParser parser = new GnuParser();
         CommandLine cl = parser.parse(getOptions(), args);
         Option[] options = cl.getOptions();
-        if (options.length == 0) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("java -jar com.googlecode.jmxtrans.JmxTransformer", getOptions());
-            throw new RuntimeException("Please specify the correct options");
-        }
+
+        boolean result = true;
+        
         for (Option option : options) {
             if (option.getOpt().equals("j")) {
                 File tmp = new File(option.getValue());
@@ -74,8 +83,13 @@ public class JmxTransformer extends SignalInterceptor {
                 setNumFileThreads(Integer.valueOf(option.getValue()));
             } else if (option.getOpt().equals("e")) {
                 setRunEndlessly(true);
+            } else if (option.getOpt().equals("h")) {
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("java -jar jmxtrans-all.jar", getOptions());
+                result = false;
             }
         }
+        return result;
     }
 
     /**
@@ -84,13 +98,18 @@ public class JmxTransformer extends SignalInterceptor {
      */
     private void execute() throws Exception {
         if (numFileThreads > 0) {
-            ExecutorService service = Executors.newFixedThreadPool(numFileThreads);
-            List<Callable<Object>> threads = new ArrayList<Callable<Object>>();
-            for (File file : getJsonFiles()) {
-                ProcessFileThread pqt = new ProcessFileThread(this, file);
-                threads.add(Executors.callable(pqt));
+            ExecutorService service = null;
+            try {
+                service = Executors.newFixedThreadPool(numFileThreads);
+                List<Callable<Object>> threads = new ArrayList<Callable<Object>>();
+                for (File file : getJsonFiles()) {
+                    ProcessFileThread pqt = new ProcessFileThread(this, file);
+                    threads.add(Executors.callable(pqt));
+                }
+                service.invokeAll(threads);
+            } finally {
+                service.shutdown();
             }
-            service.invokeAll(threads);
         } else {
             for (File file : getJsonFiles()) {
                 processJsonFile(file);
@@ -104,6 +123,7 @@ public class JmxTransformer extends SignalInterceptor {
         options.addOption("j", true, "Directory where json configuration is stored. Default is .");
         options.addOption("t", true, "Maximum number of threads to start for processing each json file. Default is 0.");
         options.addOption("e", false, "Run endlessly. Default false.");
+        options.addOption("h", false, "Help");
         return options;
     }
 
@@ -188,10 +208,17 @@ public class JmxTransformer extends SignalInterceptor {
         return runEndlessly;
     }
 
+    /**
+     * Waits until the execution finishes before stopping.
+     */
     @Override
     protected boolean handle(String signame) {
-        if (signame.equals("TERM")) {
-            this.runEndlessly = false;
+        while (this.isRunning) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                // ignored
+            }
         }
         return true;
     }

@@ -45,13 +45,18 @@ public class JmxUtils {
     public static void processQueriesForServer(final MBeanServerConnection mbeanServer, Server server) throws Exception {
         
         if (server.isQueriesMultiThreaded()) {
-            ExecutorService service = Executors.newFixedThreadPool(server.getNumQueryThreads());
-            List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
-            for (Query query : server.getQueries()) {
-                ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, query);
-                threads.add(Executors.callable(pqt));
+            ExecutorService service = null;
+            try {
+                service = Executors.newFixedThreadPool(server.getNumQueryThreads());
+                List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
+                for (Query query : server.getQueries()) {
+                    ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, query);
+                    threads.add(Executors.callable(pqt));
+                }
+                service.invokeAll(threads);
+            } finally {
+                service.shutdown();
             }
-            service.invokeAll(threads);
         } else {
             for (Query query : server.getQueries()) {
                 processQuery(mbeanServer, query);
@@ -211,13 +216,18 @@ public class JmxUtils {
     public static void execute(JmxProcess process) throws Exception {
         
         if (process.isServersMultiThreaded()) {
-            ExecutorService service = Executors.newFixedThreadPool(process.getNumMultiThreadedServers());
-            List<Callable<Object>> threads = new ArrayList<Callable<Object>>(process.getServers().size());
-            for (Server server : process.getServers()) {
-                ProcessServerThread pqt = new ProcessServerThread(server);
-                threads.add(Executors.callable(pqt));
+            ExecutorService service = null;
+            try {
+                service = Executors.newFixedThreadPool(process.getNumMultiThreadedServers());
+                List<Callable<Object>> threads = new ArrayList<Callable<Object>>(process.getServers().size());
+                for (Server server : process.getServers()) {
+                    ProcessServerThread pqt = new ProcessServerThread(server);
+                    threads.add(Executors.callable(pqt));
+                }
+                service.invokeAll(threads);
+            } finally {
+                service.shutdown();
             }
-            service.invokeAll(threads);
         } else {
             for (Server server : process.getServers()) {
                 processServer(server);

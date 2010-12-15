@@ -91,7 +91,7 @@
 			<manifest>
 				<attribute name="Specification-Version" value="${version}" />
 				<attribute name="Implementation-Version" value="${TODAY}" />
-				<attribute name="Main-Class" value="com.googlecode.jmxlogger.Version" />
+				<attribute name="Main-Class" value="com.googlecode.jmxtrans.JmxTransformer" />
 			</manifest>
 		</jar>
 	</target>
@@ -122,13 +122,26 @@
 	</target>
 
 	<target name="dist" depends="clean, jar, javadoc">
+		<zip destfile="${build.dir}/jmxtrans-all.jar">
+		    <zipgroupfileset dir="lib">
+		    	<include name="*.jar" />
+                <exclude name="ant*.jar" />
+                <exclude name="*sources*.jar" />
+                <exclude name="*junit*.jar" />
+                <exclude name="*svn*.jar" />
+		    </zipgroupfileset>
+            <zipgroupfileset dir="${build.dir}" includes="jmxtrans.jar"/>
+		</zip>
+		
 		<copy todir="${build.dist.dir}">
 			<fileset dir="${build.dir}">
 				<include name="javadoc/**" />
 			</fileset>
 
 			<fileset dir=".">
-				<include name="build.xml" />
+				<include name="*.xml" />
+                <include name="*.json" />
+                <include name="*.sh" />
 				<include name="README.html" />
 			</fileset>
 		</copy>
