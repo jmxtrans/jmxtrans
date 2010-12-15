@@ -12,7 +12,6 @@
         "outputFile" : "target/heap.rrd",
         "binaryPath" : "/opt/local/bin"
       } ]
-    } ],
-    "url" : "service:jmx:rmi:///jndi/rmi://w2:1099/jmxrmi"
+    } ]
   } ]
 }
