@@ -173,12 +173,12 @@
 	</target>
 
 	<target name="upload" depends="init">
-		<gcupload projectname="sardine"
+		<gcupload projectname="${ant.project.name}"
 			userName="${gc.username}"
 			password="${gc.password}"
 			filename="${build.dist.zip}"
 			targetfilename="${build.dist.zip}"
-			summary="Sardine distribution"
+			summary="${ant.project.name} distribution"
 			labels="Featured, Type-Package, OpSys-All" />
 	</target>
 </project>
