@@ -135,4 +135,9 @@ public class Query {
     public Server getServer() {
         return server;
     }
+
+    @Override
+    public String toString() {
+        return "Query [obj=" + obj + ", attr=" + attr + ", keys=" + keys + "]";
+    }
 }
