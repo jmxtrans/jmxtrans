@@ -22,6 +22,8 @@ public class InterestingInfo {
         gw.addSetting(GraphiteWriter.HOST, "localhost");
         gw.addSetting(GraphiteWriter.PORT, 2003);
         
+//        StdOutWriter gw = new StdOutWriter();
+        
         Query q = new Query();
         q.setObj("java.lang:type=Memory");
         q.addAttr("HeapMemoryUsage");
@@ -50,6 +52,10 @@ public class InterestingInfo {
         q3.addAttr("LastGcInfo");
         q3.addKey("memoryUsageAfterGc");
         q3.addKey("memoryUsageBeforeGc");
+        q3.addKey("committed");
+        q3.addKey("init");
+        q3.addKey("max");
+        q3.addKey("used");
         q3.addOutputWriter(gw);
         server.addQuery(q4);
 
