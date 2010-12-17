@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.model.output;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -32,12 +33,20 @@ import com.googlecode.jmxtrans.util.BaseOutputWriter;
  */
 public class RRDToolWriter extends BaseOutputWriter {
 
+    private File outputFile = null;
+    private File templateFile = null;
+    private File binaryPath = null;
+    
     /** */
     public RRDToolWriter() {
     }
 
     public void validateSetup() throws Exception {
-        if (this.getOutputFile() == null || this.getTemplateFile() == null || this.getBinaryPath() == null) {
+        outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
+        templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
+        binaryPath = new File((String) this.getSettings().get(BINARY_PATH));
+
+        if (outputFile == null || templateFile == null || binaryPath == null) {
             throw new RuntimeException("output, template and binary path file can't be null");
         }
     }
@@ -69,9 +78,9 @@ public class RRDToolWriter extends BaseOutputWriter {
      */
     protected void rrdToolUpdate(String template, String data) throws Exception {
         List<String> commands = new ArrayList<String>();
-        commands.add(this.getBinaryPath() + "/rrdtool");
+        commands.add(binaryPath + "/rrdtool");
         commands.add("update");
-        commands.add(this.getOutputFile().getCanonicalPath());
+        commands.add(outputFile.getCanonicalPath());
         commands.add("-t");
         commands.add(template);
         commands.add("N:" + data);
@@ -85,11 +94,11 @@ public class RRDToolWriter extends BaseOutputWriter {
      * If the database file doesn't exist, it'll get created, otherwise, it'll be returned in r/w mode.
      */
     protected RrdDef getDatabaseTemplateSpec() throws Exception {
-        RrdDefTemplate t = new RrdDefTemplate(this.getTemplateFile());
-        t.setVariable("database", this.getOutputFile().getCanonicalPath());
+        RrdDefTemplate t = new RrdDefTemplate(templateFile);
+        t.setVariable("database", this.outputFile.getCanonicalPath());
         RrdDef def = t.getRrdDef();
-        if (!this.getOutputFile().exists()) {
-            FileUtils.forceMkdir(this.getOutputFile().getParentFile());
+        if (!this.outputFile.exists()) {
+            FileUtils.forceMkdir(this.outputFile.getParentFile());
             rrdToolCreateDatabase(def);
         }
         return def;
@@ -100,9 +109,9 @@ public class RRDToolWriter extends BaseOutputWriter {
      */
     protected void rrdToolCreateDatabase(RrdDef def) throws Exception {
         List<String> commands = new ArrayList<String>();
-        commands.add(this.getBinaryPath() + "/rrdtool");
+        commands.add(this.binaryPath + "/rrdtool");
         commands.add("create");
-        commands.add(this.getOutputFile().getCanonicalPath());
+        commands.add(this.outputFile.getCanonicalPath());
         commands.add("-s");
         commands.add(String.valueOf(def.getStep()));
         

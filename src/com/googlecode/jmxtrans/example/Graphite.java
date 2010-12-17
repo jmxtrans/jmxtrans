@@ -23,18 +23,18 @@ public class Graphite {
         q.addAttr("HeapMemoryUsage");
         q.addAttr("NonHeapMemoryUsage");
         GraphiteWriter gw = new GraphiteWriter();
-        gw.setHost("192.168.192.133");
-        gw.setPort(2003);
+        gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
+        gw.addSetting(GraphiteWriter.PORT, 2003);
         q.addOutputWriter(gw);
         server.addQuery(q);
 
         JmxProcess jmx = new JmxProcess(server);
         JmxUtils.prettyPrintJson(jmx);
 
-        for (int i = 0; i < 160; i++) {
-            JmxUtils.execute(jmx);
-            Thread.sleep(1000);
-        }
+//        for (int i = 0; i < 160; i++) {
+//            JmxUtils.execute(jmx);
+//            Thread.sleep(1000);
+//        }
     }
 
 }

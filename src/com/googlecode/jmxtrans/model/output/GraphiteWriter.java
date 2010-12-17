@@ -20,11 +20,17 @@ import com.googlecode.jmxtrans.util.BaseOutputWriter;
  */
 public class GraphiteWriter extends BaseOutputWriter {
 
+    private String host = null;
+    private Integer port = null;
+    
     public GraphiteWriter() {
     }
     
     public void validateSetup() throws Exception {
-        if (this.getHost() == null || this.getPort() == null) {
+        host = (String) this.getSettings().get(HOST);
+        port = (Integer) this.getSettings().get(PORT);
+        
+        if (host == null || port == null) {
             throw new RuntimeException("Host and port can't be null");
         }
     }
@@ -46,7 +52,7 @@ public class GraphiteWriter extends BaseOutputWriter {
     }
 
     private Writer connect() throws Exception {
-        Socket socket = new Socket(this.getHost(), this.getPort());
+        Socket socket = new Socket(host, port);
         return new PrintWriter(socket.getOutputStream(), true);
     }
 }

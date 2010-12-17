@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +27,18 @@ import com.googlecode.jmxtrans.util.BaseOutputWriter;
  */
 public class RRDWriter extends BaseOutputWriter {
 
+    private File outputFile = null;
+    private File templateFile = null;
+
     /** */
     public RRDWriter() {
     }
 
     public void validateSetup() throws Exception {
-        if (this.getOutputFile() == null || this.getTemplateFile() == null) {
+        outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
+        templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
+
+        if (outputFile == null || templateFile == null) {
             throw new RuntimeException("output file and template file can't be null");
         }
     }
@@ -67,14 +74,14 @@ public class RRDWriter extends BaseOutputWriter {
      */
     protected RrdDb createOrOpenDatabase() throws Exception {
         RrdDb result = null;
-        if (!this.getOutputFile().exists()) {
-            FileUtils.forceMkdir(this.getOutputFile().getParentFile());
-            RrdDefTemplate t = new RrdDefTemplate(this.getTemplateFile());
-            t.setVariable("database", this.getOutputFile().getCanonicalPath());
+        if (!this.outputFile.exists()) {
+            FileUtils.forceMkdir(this.outputFile.getParentFile());
+            RrdDefTemplate t = new RrdDefTemplate(this.templateFile);
+            t.setVariable("database", this.outputFile.getCanonicalPath());
             RrdDef def = t.getRrdDef();
             result = new RrdDb(def);
         } else {
-            result = new RrdDb(this.getOutputFile().getCanonicalPath());
+            result = new RrdDb(this.outputFile.getCanonicalPath());
         }
         return result;
     }

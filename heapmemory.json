@@ -8,9 +8,11 @@
       "keys" : [ "max", "committed", "init", "used" ],
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.RRDToolWriter",
-        "templateFile" : "heapmemory-rrd-template.xml",
-        "outputFile" : "target/heap.rrd",
-        "binaryPath" : "/opt/local/bin"
+        "settings" : {
+            "templateFile" : "heapmemory-rrd-template.xml",
+            "outputFile" : "target/heap.rrd",
+            "binaryPath" : "/opt/local/bin"
+        }
       } ]
     } ]
   } ]

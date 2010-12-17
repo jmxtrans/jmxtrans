@@ -25,6 +25,7 @@ import javax.management.remote.JMXServiceURL;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
+import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -273,7 +274,7 @@ public class JmxUtils {
 
             JmxUtils.processQueriesForServer(mbeanServer, server);
         } catch (IOException e) {
-            log.error("Problem connecting to host: " + server.getHost() + ":" + server.getPort(), e.getCause());
+            log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
         } finally {
             if (conn != null) {
                 conn.close();
@@ -287,6 +288,7 @@ public class JmxUtils {
      */
     public static void printJson(JmxProcess process) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES, false);
         System.out.println(mapper.writeValueAsString(process));
     }
 
@@ -296,6 +298,7 @@ public class JmxUtils {
      */
     public static void prettyPrintJson(JmxProcess process) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES, false);
         ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
         System.out.println(writer.writeValueAsString(process));
     }

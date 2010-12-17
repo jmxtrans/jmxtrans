@@ -1,6 +1,6 @@
 package com.googlecode.jmxtrans;
 
-import java.io.File;
+import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -25,23 +25,18 @@ public interface OutputWriter {
 
     public void doWrite(Query query) throws Exception;
     
-    public File getTemplateFile();
-    public void setTemplateFile(File template);
-    
-    public File getOutputFile();
-    public void setOutputFile(File outputFile);
-
-    public File getBinaryPath();
-    public void setBinaryPath(File binaryPath);
-
-    public String getHost();
-    public void setHost(String host);
-
-    public Integer getPort();
-    public void setPort(Integer port);
+    /**
+     * Settings allow you to configure your Writers with whatever they might need.
+     */
+    public Map<String, Object> getSettings();
 
     /**
-     * This is run when the object is instantiated.
+     * Settings allow you to configure your Writers with whatever they might need.
+     */
+    public void setSettings(Map<String, Object> settings);
+    
+    /**
+     * This is run when the object is instantiated. You want to get the settings and validate them.
      */
     public void validateSetup() throws Exception;
 }
