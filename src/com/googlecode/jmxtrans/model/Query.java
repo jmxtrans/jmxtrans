@@ -18,6 +18,8 @@ import com.googlecode.jmxtrans.OutputWriter;
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
 public class Query {
+    private Server server;
+    
     private List<OutputWriter> outputWriters;
 
     private String obj;
@@ -122,5 +124,15 @@ public class Query {
             this.outputWriters = new ArrayList<OutputWriter>();
         }
         this.outputWriters.add(filter);
+    }
+
+    @JsonIgnore
+    public void setServer(Server server) {
+        this.server = server;
+    }
+
+    @JsonIgnore
+    public Server getServer() {
+        return server;
     }
 }

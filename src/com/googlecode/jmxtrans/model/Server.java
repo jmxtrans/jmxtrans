@@ -25,6 +25,7 @@ public class Server {
     private String username;
     private String password;
     private String url;
+    private String cronExpression;
 
     private List<Query> queries = new ArrayList<Query>();
     
@@ -157,5 +158,25 @@ public class Server {
     
     public Integer getNumQueryThreads() {
         return numQueryThreads;
+    }
+
+    /**
+     * Each server can set a cronExpression for the scheduler.
+     * If the cronExpression is null, then the job is run immediately
+     * and once. Otherwise, it is added to the scheduler for immediate
+     * execution and run according to the cronExpression.
+     */
+    public void setCronExpression(String cronExpression) {
+        this.cronExpression = cronExpression;
+    }
+
+    public String getCronExpression() {
+        return cronExpression;
+    }
+
+    @Override
+    public String toString() {
+        return "Server [host=" + host + ", port=" + port + ", username=" + username + ", password=" + password + ", url=" + url + ", cronExpression="
+                + cronExpression + ", queries=" + queries + "numQueryThreads=" + numQueryThreads + "]";
     }
 }

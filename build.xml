@@ -87,6 +87,15 @@
 	</target>
 
 	<target name="jar" depends="classes">
+        <sync todir="${build.classes.dir}">
+            <preserveintarget>
+                <include name="**/*.class"/>
+            </preserveintarget>
+            <fileset dir="src" defaultexcludes="yes">
+                <include name="**/*.xml"/>
+                <include name="**/*.properties"/>
+            </fileset>
+        </sync>
 		<jar destfile="${build.jar.file}" basedir="${build.classes.dir}">
 			<manifest>
 				<attribute name="Specification-Version" value="${version}" />
@@ -96,6 +105,19 @@
 		</jar>
 	</target>
 
+    <target name="jar-all" depends="jar">
+        <zip destfile="${build.dir}/jmxtrans-all.jar">
+            <zipgroupfileset dir="lib">
+                <include name="*.jar" />
+                <exclude name="ant*.jar" />
+                <exclude name="*sources*.jar" />
+                <exclude name="*junit*.jar" />
+                <exclude name="*svn*.jar" />
+            </zipgroupfileset>
+            <zipgroupfileset dir="${build.dir}" includes="jmxtrans.jar"/>
+        </zip>
+    </target>
+	
 	<target name="javadoc" depends="classes">
 		<javadoc
 			destdir="${build.javadoc.dir}"
@@ -121,18 +143,7 @@
 		</sync>
 	</target>
 
-	<target name="dist" depends="clean, jar, javadoc">
-		<zip destfile="${build.dir}/jmxtrans-all.jar">
-		    <zipgroupfileset dir="lib">
-		    	<include name="*.jar" />
-                <exclude name="ant*.jar" />
-                <exclude name="*sources*.jar" />
-                <exclude name="*junit*.jar" />
-                <exclude name="*svn*.jar" />
-		    </zipgroupfileset>
-            <zipgroupfileset dir="${build.dir}" includes="jmxtrans.jar"/>
-		</zip>
-		
+	<target name="dist" depends="clean, jar, jar-all, javadoc">
 		<copy todir="${build.dist.dir}">
 			<fileset dir="${build.dir}">
 				<include name="javadoc/**" />
@@ -155,6 +166,7 @@
 		<copy todir="${build.dist.dir}/lib">
 			<fileset dir="lib">
 				<include name="*.jar" />
+				<exclude name="*-sources.jar" />
 			</fileset>
 		</copy>
 

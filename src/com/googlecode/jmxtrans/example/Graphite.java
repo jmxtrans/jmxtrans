@@ -7,7 +7,8 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
- * This class produces the json that is in example.json.
+ * This class hits a Graphite server running on port 2003
+ * and sends the memory usage data to it for graphing.
  * 
  * @author jon
  */
@@ -28,7 +29,8 @@ public class Graphite {
         server.addQuery(q);
 
         JmxProcess jmx = new JmxProcess(server);
-        
+        JmxUtils.prettyPrintJson(jmx);
+
         for (int i = 0; i < 160; i++) {
             JmxUtils.execute(jmx);
             Thread.sleep(1000);

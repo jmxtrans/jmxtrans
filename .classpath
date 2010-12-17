@@ -9,6 +9,11 @@
 	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.6.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/jrobin-1.5.9.jar" sourcepath="lib/jrobin-1.5.9-sources.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-1.8.4.jar" sourcepath="lib/quartz-1.8.4-sources.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="lib/jpathwatch-0-93-rc1.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="output" path="_eclipse"/>
 </classpath>

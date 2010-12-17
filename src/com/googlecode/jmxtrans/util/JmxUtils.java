@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,8 @@ import javax.management.remote.JMXServiceURL;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.googlecode.jmxtrans.OutputWriter;
 import com.googlecode.jmxtrans.model.JmxProcess;
@@ -38,6 +41,8 @@ import com.googlecode.jmxtrans.model.Server;
  */
 public class JmxUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
+
     /**
      * Either invokes the queries multithreaded (max threads == server.getMultiThreaded())
      * or invokes them one at a time.
@@ -50,6 +55,7 @@ public class JmxUtils {
                 service = Executors.newFixedThreadPool(server.getNumQueryThreads());
                 List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
                 for (Query query : server.getQueries()) {
+                    query.setServer(server);
                     ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, query);
                     threads.add(Executors.callable(pqt));
                 }
@@ -59,6 +65,7 @@ public class JmxUtils {
             }
         } else {
             for (Query query : server.getQueries()) {
+                query.setServer(server);
                 processQuery(mbeanServer, query);
             }
         }
@@ -265,6 +272,8 @@ public class JmxUtils {
             MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
             JmxUtils.processQueriesForServer(mbeanServer, server);
+        } catch (IOException e) {
+            log.error("Problem connecting to host: " + server.getHost() + ":" + server.getPort(), e.getCause());
         } finally {
             if (conn != null) {
                 conn.close();
@@ -290,10 +299,15 @@ public class JmxUtils {
         ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
         System.out.println(writer.writeValueAsString(process));
     }
-    
+
+    /**
+     * Uses jackson to load json configuration from a File into a full object
+     * tree representation of that json.
+     */
     public static JmxProcess getJmxProcess(File file) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
+        jmx.setName(file.getName());
         return jmx;
     }
 }

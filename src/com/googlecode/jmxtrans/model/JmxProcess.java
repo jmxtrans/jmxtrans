@@ -14,6 +14,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @JsonSerialize(include=Inclusion.NON_NULL)
 public class JmxProcess {
 
+    private String name;
     private List<Server> servers = new ArrayList<Server>();
     private Integer numMultiThreadedServers;
     
@@ -56,5 +57,13 @@ public class JmxProcess {
     
     public Integer getNumMultiThreadedServers() {
         return numMultiThreadedServers;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 }
