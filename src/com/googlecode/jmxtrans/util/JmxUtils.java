@@ -88,6 +88,7 @@ public class JmxUtils {
             try {
                 processQuery(mbeanServer, query);
             } catch (Exception e) {
+                log.error("Error executing query", e);
                 throw new RuntimeException(e);
             }
         }
@@ -120,7 +121,11 @@ public class JmxUtils {
                 AttributeList al = (AttributeList) attr;
                 for (Object obj : al) {
                     Attribute attribute = (Attribute) obj;
-                    resList.add(getResult(resList, attribute.getName(), (CompositeDataSupport) attribute.getValue(), query));
+                    if (attribute.getValue() instanceof CompositeDataSupport) {
+                        resList.add(getResult(resList, attribute.getName(), (CompositeDataSupport) attribute.getValue(), query));
+                    } else {
+                        resList.add(getResult(attribute.getName(), attribute.getValue()));
+                    }
                 }
             }
         }
