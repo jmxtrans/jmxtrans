@@ -20,17 +20,22 @@ public class ServerJob implements Job {
     private static final Logger log = LoggerFactory.getLogger(ServerJob.class);
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        if (log.isDebugEnabled()) {
-            log.debug("Started job " + ServerJob.class.getName());
-        }
         JobDataMap map = context.getMergedJobDataMap();
         Server server = (Server) map.get("server");
+
+        if (log.isDebugEnabled()) {
+            log.debug("Started server job: " + server);
+        }
         
         try {
             JmxUtils.processServer(server);
         } catch (Exception e) {
             log.error("Error", e);
             throw new JobExecutionException(e);
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Finished server job: " + server);
         }
     }
 }
