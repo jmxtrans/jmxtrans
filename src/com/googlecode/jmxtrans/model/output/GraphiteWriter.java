@@ -40,7 +40,7 @@ public class GraphiteWriter extends BaseOutputWriter {
         try {
             for (Result r : query.getResults()) {
                 for (Entry<String, Object> values : r.getValues().entrySet()) {
-                    String fullPath = "servers." + query.getServer().getHost() + "." + query.getServer().getPort() + "." + r.getDescription() + "." + r.getAttributeName() + "." + values.getKey();
+                    String fullPath = "servers." + query.getServer().getHost().replace('.', '_') + "." + query.getServer().getPort() + "." + r.getDescription() + "." + r.getAttributeName() + "." + values.getKey();
                     String line = fullPath + " " + values.getValue() + " " + r.getEpoch() / 1000 + "\n";
                     writer.write(line);
                 }
