@@ -128,8 +128,8 @@
 			Windowtitle="jmxlogger javadoc"
 		>
 			<fileset dir="${src.dir}">
-				<exclude name="**/test/**" />
 				<exclude name="**/*.xml" />
+                <exclude name="**/*.properties" />
 			</fileset>
 			<doctitle><![CDATA[<h1>jmxtrans</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright &#169; ${YEAR} Jon Stevens and a gang of pencils. All Rights Reserved. Build version: ${build.version}</i>]]></bottom>
