@@ -94,9 +94,15 @@ public class JmxUtils {
     }
 
     public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
+        
         if (query.getAttr() == null) {
             return;
         }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Start executing query: " + query);
+        }
+
         List<Result> resList = new ArrayList<Result>();
 
         int size = query.getAttr().size();
@@ -123,6 +129,10 @@ public class JmxUtils {
 
         // Now run the filters.
         runFiltersForQuery(query);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Finished executing query: " + query);
+        }
     }
 
     private static void runFiltersForQuery(Query query) throws Exception {
