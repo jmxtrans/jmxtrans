@@ -176,7 +176,7 @@ public class Server {
 
     @Override
     public String toString() {
-        return "Server [host=" + host + ", port=" + port + ", username=" + username + ", password=" + password + ", url=" + url + ", cronExpression="
+        return "Server [host=" + host + ", port=" + port + ", url=" + url + ", cronExpression="
                 + cronExpression + ", queries=" + queries + "numQueryThreads=" + numQueryThreads + "]";
     }
 }
