@@ -1,5 +1,6 @@
 com.googlecode.jmxtrans
 com.googlecode.jmxtrans.example
+com.googlecode.jmxtrans.jobs
 com.googlecode.jmxtrans.model
 com.googlecode.jmxtrans.model.output
 com.googlecode.jmxtrans.util
