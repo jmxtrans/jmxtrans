@@ -4,6 +4,7 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
+import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
@@ -19,36 +20,29 @@ public class InterestingInfo {
         server.setNumQueryThreads(2);
 
         GraphiteWriter gw = new GraphiteWriter();
-        gw.addSetting(GraphiteWriter.HOST, "localhost");
+        gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
         gw.addSetting(GraphiteWriter.PORT, 2003);
         
-//        StdOutWriter gw = new StdOutWriter();
+        StdOutWriter sw = new StdOutWriter();
         
         Query q = new Query();
         q.setObj("java.lang:type=Memory");
         q.addAttr("HeapMemoryUsage");
         q.addAttr("NonHeapMemoryUsage");
         q.addOutputWriter(gw);
+        q.addOutputWriter(sw);
         server.addQuery(q);
 
         Query q2 = new Query("java.lang:type=Threading");
         q2.addAttr("DaemonThreadCount");
         q2.addAttr("PeakThreadCount");
         q2.addAttr("ThreadCount");
-        q2.addAttr("ThreadCount");
         q2.addOutputWriter(gw);
+        q2.addOutputWriter(sw);
         server.addQuery(q2);
 
         Query q3 = new Query();
         q3.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector");
-        q3.addAttr("LastGcInfo");
-        q3.addKey("memoryUsageAfterGc");
-        q3.addKey("memoryUsageBeforeGc");
-        q3.addOutputWriter(gw);
-        server.addQuery(q3);
-
-        Query q4 = new Query();
-        q3.setObj("java.lang:name=ParNew,type=GarbageCollector");
         q3.addAttr("LastGcInfo");
         q3.addKey("memoryUsageAfterGc");
         q3.addKey("memoryUsageBeforeGc");
@@ -57,11 +51,25 @@ public class InterestingInfo {
         q3.addKey("max");
         q3.addKey("used");
         q3.addOutputWriter(gw);
+        q3.addOutputWriter(sw);
+        server.addQuery(q3);
+
+        Query q4 = new Query();
+        q4.setObj("java.lang:name=ParNew,type=GarbageCollector");
+        q4.addAttr("LastGcInfo");
+        q4.addKey("memoryUsageAfterGc");
+        q4.addKey("memoryUsageBeforeGc");
+        q4.addKey("committed");
+        q4.addKey("init");
+        q4.addKey("max");
+        q4.addKey("used");
+        q4.addOutputWriter(gw);
+        q4.addOutputWriter(sw);
         server.addQuery(q4);
 
         JmxProcess jmx = new JmxProcess(server);
         JmxUtils.prettyPrintJson(jmx);
-//        JmxUtils.execute(jmx);
+        JmxUtils.execute(jmx);
     }
 
 }

@@ -113,7 +113,7 @@ public class JmxUtils {
             if (attr instanceof CompositeDataSupport) {
                 resList.add(getResult(resList, attributeName, (CompositeDataSupport) attr, query));
             } else {
-                resList.add(getResult(attributeName, attr));
+                resList.add(getResult((Attribute)attr));
             }
         } else if (size > 1) {
             Object attr = mbeanServer.getAttributes(new ObjectName(query.getObj()), query.getAttr().toArray(new String[query.getAttr().size()]));
@@ -124,7 +124,7 @@ public class JmxUtils {
                     if (attribute.getValue() instanceof CompositeDataSupport) {
                         resList.add(getResult(resList, attribute.getName(), (CompositeDataSupport) attribute.getValue(), query));
                     } else {
-                        resList.add(getResult(attribute.getName(), attribute.getValue()));
+                        resList.add(getResult(attribute));
                     }
                 }
             }
@@ -210,9 +210,14 @@ public class JmxUtils {
     /**
      * Used when the object is effectively a java type
      */
-    private static Result getResult(String attributeName, Object obj) {
-        Result r = new Result(attributeName);
-        r.addValue("value", obj.toString());
+    private static Result getResult(Attribute attribute) {
+        String name = attribute.getName();
+        String obj = attribute.getValue().toString();
+        Result r = new Result(name);
+        r.setClassName(attribute.getClass().getName());
+        r.setTypeName(r.getClassName());
+        r.setDescription(name);
+        r.addValue("value", obj);
         return r;
     }
     

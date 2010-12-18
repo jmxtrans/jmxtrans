@@ -278,7 +278,6 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     }
 
     /** */
-    @Override
     public void fileModified(File file) throws Exception {
         if (isJsonFile(file)) {
             deleteJobsInFile(serverScheduler, file);
@@ -290,7 +289,6 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     }
 
     /** */
-    @Override
     public void fileDeleted(File file) throws Exception {
         if (isJsonFile(file)) {
             deleteJobsInFile(serverScheduler, file);
@@ -301,7 +299,6 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     }
 
     /** */
-    @Override
     public void fileAdded(File file) throws Exception {
         if (isJsonFile(file)) {
             scheduleJobsInFile(serverScheduler, file);
