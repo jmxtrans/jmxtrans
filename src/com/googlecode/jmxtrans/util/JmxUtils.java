@@ -174,7 +174,7 @@ public class JmxUtils {
                         // ie: attributeName=LastGcInfo.Par Survivor Space
                         // i haven't seen this be smaller or larger than List<1>, but might as well loop it.
                         StringBuilder sb = new StringBuilder();
-                        for (Object entryKey : (List)entryKeys) {
+                        for (Object entryKey : (List<?>)entryKeys) {
                             sb.append(".");
                             sb.append(entryKey);
                         }

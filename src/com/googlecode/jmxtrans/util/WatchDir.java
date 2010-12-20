@@ -57,7 +57,7 @@ public class WatchDir extends Thread {
             signalledKey.reset();
 
             try {
-                for (WatchEvent e : list) {
+                for (WatchEvent<?> e : list) {
                     if (e.kind() == StandardWatchEventKind.ENTRY_CREATE) {
                         Path context = (Path) e.context();
                         watched.fileAdded(new File(context.toString()));

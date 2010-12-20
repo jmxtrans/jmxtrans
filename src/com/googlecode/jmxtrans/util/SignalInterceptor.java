@@ -79,7 +79,8 @@ public abstract class SignalInterceptor {
         }
     }
 
-    private static class SignalInterceptorException extends Exception {
+    @SuppressWarnings("serial")
+	private static class SignalInterceptorException extends Exception {
 
         SignalInterceptorException(String signal, Throwable cause) {
             super("Unable to register for SIG" + signal, cause);
