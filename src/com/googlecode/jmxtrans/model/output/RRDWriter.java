@@ -15,6 +15,7 @@ import org.jrobin.core.Sample;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it doesn't already exist.
@@ -56,7 +57,7 @@ public class RRDWriter extends BaseOutputWriter {
             for (Result res : results) {
                 Map<String, Object> values = res.getValues();
                 for (Entry<String, Object> entry : values.entrySet()) {
-                    if (dsNames.contains(entry.getKey())) {
+                    if (dsNames.contains(entry.getKey()) && JmxUtils.isNumeric(entry.getValue())) {
                         sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
                     }
                 }

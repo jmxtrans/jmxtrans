@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * This output writer sends data to a host/port combination
@@ -45,7 +46,7 @@ public class GraphiteWriter extends BaseOutputWriter {
         try {
             for (Result r : query.getResults()) {
                 for (Entry<String, Object> values : r.getValues().entrySet()) {
-                    if (isNumberType(values.getValue())) {
+                    if (JmxUtils.isNumeric(values.getValue())) {
                         String fullPath = "servers." + query.getServer().getHost().replace('.', '_') + "." + query.getServer().getPort() + "." + r.getTypeName() + "." + r.getAttributeName() + "." + values.getKey();
                         String line = fullPath + " " + values.getValue() + " " + r.getEpoch() / 1000 + "\n";
                         writer.write(line);
@@ -61,9 +62,5 @@ public class GraphiteWriter extends BaseOutputWriter {
     private Writer connect() throws Exception {
         Socket socket = new Socket(host, port);
         return new PrintWriter(socket.getOutputStream(), true);
-    }
-    
-    private boolean isNumberType(Object value) {
-        return (value instanceof String || value instanceof Number || value instanceof Integer || value instanceof Long || value instanceof Double || value instanceof Float);
     }
 }

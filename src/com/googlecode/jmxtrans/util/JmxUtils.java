@@ -23,6 +23,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
@@ -332,5 +333,12 @@ public class JmxUtils {
         JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
         jmx.setName(file.getName());
         return jmx;
+    }
+
+    /**
+     * Useful for figuring out if an Object is a number.
+     */
+    public static boolean isNumeric(Object value) {
+        return ((value instanceof String && StringUtils.isNumeric((String)value)) || value instanceof Number || value instanceof Integer || value instanceof Long || value instanceof Double || value instanceof Float);
     }
 }
