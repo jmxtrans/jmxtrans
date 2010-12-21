@@ -5,10 +5,14 @@ import java.io.File;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
+/**
+ * Shows how to process a file.
+ * @author jon
+ */
 public class HeapMemory {
 
     /**
-     * @param args
+     * 
      */
     public static void main(String[] args) throws Exception {
 
