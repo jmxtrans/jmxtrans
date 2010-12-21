@@ -13,8 +13,7 @@
         "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter"
       } ],
       "obj" : "java.lang:name=CMS Old Gen,type=MemoryPool",
-      "attr" : [ "Usage" ],
-      "keys" : [ "committed" ]
+      "attr" : [ "Usage" ]
     }, {
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter",
@@ -22,8 +21,7 @@
         }
       } ],
       "obj" : "java.lang:name=ConcurrentMarkSweep,type=GarbageCollector",
-      "attr" : [ "LastGcInfo" ],
-      "keys" : [ "startTime", "memoryUsageAfterGc", "max" ]
+      "attr" : [ "LastGcInfo" ]
     } ],
     "numQueryThreads" : 2
   } ]

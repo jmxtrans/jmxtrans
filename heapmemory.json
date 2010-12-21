@@ -4,8 +4,7 @@
     "host" : "w2",
     "queries" : [ {
       "obj" : "java.lang:type=Memory",
-      "attr" : [ "HeapMemoryUsage" ],
-      "keys" : [ "max", "committed", "init", "used" ],
+      "attr" : [ "HeapMemoryUsage" ]
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.RRDToolWriter",
         "settings" : {
