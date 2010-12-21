@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectInstance;
@@ -101,35 +102,32 @@ public class JmxUtils {
 
     public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
         
-        if (query.getAttr() == null) {
-            return;
-        }
-
         if (log.isDebugEnabled()) {
             log.debug("Start executing query: " + query);
         }
 
         List<Result> resList = new ArrayList<Result>();
-        MBeanInfo info = mbeanServer.getMBeanInfo(new ObjectName(query.getObj()));
-        ObjectInstance oi = mbeanServer.getObjectInstance(new ObjectName(query.getObj()));
 
-        int size = query.getAttr().size();
-        if (size == 1) {
-            String attributeName = query.getAttr().get(0);
-            Object attr = mbeanServer.getAttribute(new ObjectName(query.getObj()), attributeName);
+        ObjectName oName = new ObjectName(query.getObj());
 
-            if (attr instanceof Attribute) {
-                getResult(resList, info, oi, (Attribute)attr, query);
-            } else {
-                getResult(resList, info, oi, new Attribute(attributeName, attr), query);
+        Set<ObjectName> queryNames = mbeanServer.queryNames(oName, null);
+        for (ObjectName queryName : queryNames) {
+            MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
+            ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
+
+            List<String> queryAttributes = query.getAttr();
+            if (queryAttributes == null || queryAttributes.size() == 0) {
+                MBeanAttributeInfo[] attrs = info.getAttributes();
+                for (MBeanAttributeInfo attrInfo : attrs) {
+                    query.addAttr(attrInfo.getName());
+                }
             }
-        } else if (size > 1) {
-            AttributeList al = mbeanServer.getAttributes(new ObjectName(query.getObj()), query.getAttr().toArray(new String[query.getAttr().size()]));
+            AttributeList al = mbeanServer.getAttributes(queryName, query.getAttr().toArray(new String[query.getAttr().size()]));
             for (Attribute attribute : al.asList()) {
                 getResult(resList, info, oi, (Attribute)attribute, query);
             }
         }
-
+        
         query.setResults(resList);
 
         // Now run the filters.
