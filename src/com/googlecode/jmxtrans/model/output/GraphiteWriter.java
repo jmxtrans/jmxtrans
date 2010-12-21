@@ -47,7 +47,7 @@ public class GraphiteWriter extends BaseOutputWriter {
             for (Result r : query.getResults()) {
                 for (Entry<String, Object> values : r.getValues().entrySet()) {
                     if (JmxUtils.isNumeric(values.getValue())) {
-                        String fullPath = "servers." + query.getServer().getHost().replace('.', '_') + "." + query.getServer().getPort() + "." + r.getTypeName() + "." + r.getAttributeName() + "." + values.getKey();
+                        String fullPath = "servers." + query.getServer().getHost().replace('.', '_') + "." + query.getServer().getPort() + "." + r.getClassName() + "." + r.getAttributeName() + "." + values.getKey();
                         String line = fullPath + " " + values.getValue() + " " + r.getEpoch() / 1000 + "\n";
                         writer.write(line);
                     }

@@ -44,12 +44,6 @@ public class InterestingInfo {
         Query q3 = new Query();
         q3.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector");
         q3.addAttr("LastGcInfo");
-        q3.addKey("memoryUsageAfterGc");
-        q3.addKey("memoryUsageBeforeGc");
-        q3.addKey("committed");
-        q3.addKey("init");
-        q3.addKey("max");
-        q3.addKey("used");
         q3.addOutputWriter(gw);
         q3.addOutputWriter(sw);
         server.addQuery(q3);
@@ -57,12 +51,6 @@ public class InterestingInfo {
         Query q4 = new Query();
         q4.setObj("java.lang:name=ParNew,type=GarbageCollector");
         q4.addAttr("LastGcInfo");
-        q4.addKey("memoryUsageAfterGc");
-        q4.addKey("memoryUsageBeforeGc");
-        q4.addKey("committed");
-        q4.addKey("init");
-        q4.addKey("max");
-        q4.addKey("used");
         q4.addOutputWriter(gw);
         q4.addOutputWriter(sw);
         server.addQuery(q4);

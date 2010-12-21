@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +15,11 @@ import java.util.concurrent.Executors;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
+import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.TabularDataSupport;
@@ -106,28 +110,23 @@ public class JmxUtils {
         }
 
         List<Result> resList = new ArrayList<Result>();
+        MBeanInfo info = mbeanServer.getMBeanInfo(new ObjectName(query.getObj()));
+        ObjectInstance oi = mbeanServer.getObjectInstance(new ObjectName(query.getObj()));
 
         int size = query.getAttr().size();
         if (size == 1) {
             String attributeName = query.getAttr().get(0);
             Object attr = mbeanServer.getAttribute(new ObjectName(query.getObj()), attributeName);
-            if (attr instanceof CompositeDataSupport) {
-                resList.add(getResult(resList, attributeName, (CompositeDataSupport) attr, query));
+
+            if (attr instanceof Attribute) {
+                getResult(resList, info, oi, (Attribute)attr, query);
             } else {
-                resList.add(getResult((Attribute)attr));
+                getResult(resList, info, oi, new Attribute(attributeName, attr), query);
             }
         } else if (size > 1) {
-            Object attr = mbeanServer.getAttributes(new ObjectName(query.getObj()), query.getAttr().toArray(new String[query.getAttr().size()]));
-            if (attr instanceof AttributeList) {
-                AttributeList al = (AttributeList) attr;
-                for (Object obj : al) {
-                    Attribute attribute = (Attribute) obj;
-                    if (attribute.getValue() instanceof CompositeDataSupport) {
-                        resList.add(getResult(resList, attribute.getName(), (CompositeDataSupport) attribute.getValue(), query));
-                    } else {
-                        resList.add(getResult(attribute));
-                    }
-                }
+            AttributeList al = mbeanServer.getAttributes(new ObjectName(query.getObj()), query.getAttr().toArray(new String[query.getAttr().size()]));
+            for (Attribute attribute : al.asList()) {
+                getResult(resList, info, oi, (Attribute)attribute, query);
             }
         }
 
@@ -141,6 +140,110 @@ public class JmxUtils {
         }
     }
 
+    /**
+     * Populates the Result objects. This is a recursive function. Query contains the
+     * keys that we want to get the values of.
+     */
+    private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, String attributeName, CompositeData cds, Query query) {
+        CompositeType t = cds.getCompositeType();
+        
+        Result r = getNewResultObject(info, oi, attributeName);
+
+        Set<String> keys = t.keySet();
+        for (String key : keys) {
+            Object value = cds.get(key);                
+            if (value instanceof TabularDataSupport) {
+                TabularDataSupport tds = (TabularDataSupport) value;
+
+                processTabularDataSupport(resList, info, oi, r, attributeName, tds, query);
+                r.addValue(key, value.toString());
+            } else if (value instanceof CompositeDataSupport) {
+                // now recursively go through everything.
+                CompositeDataSupport cds2 = (CompositeDataSupport) value;
+                getResult(resList, info, oi, attributeName, (CompositeDataSupport)cds2, query);
+                return; // because we don't want to add to the list yet.
+            } else {
+                r.addValue(key, value.toString());
+            }
+        }
+        resList.add(r);
+    }
+
+    /** */
+    private static void processTabularDataSupport(List<Result> resList, MBeanInfo info, ObjectInstance oi, Result r, String attributeName, TabularDataSupport tds, Query query) {
+        Set<Entry<Object,Object>> entries = tds.entrySet();
+        for (Entry<Object, Object> entry : entries) {
+            Object entryKeys = entry.getKey();
+            if (entryKeys instanceof List) {
+                // ie: attributeName=LastGcInfo.Par Survivor Space
+                // i haven't seen this be smaller or larger than List<1>, but might as well loop it.
+                StringBuilder sb = new StringBuilder();
+                for (Object entryKey : (List<?>)entryKeys) {
+                    sb.append(".");
+                    sb.append(entryKey);
+                }
+                String attributeName2 = sb.toString();
+                Object entryValue = entry.getValue();
+                if (entryValue instanceof CompositeDataSupport) {
+                    getResult(resList, info, oi, attributeName + attributeName2, (CompositeDataSupport)entryValue, query);
+                }
+            } else {
+                throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: " + entryKeys.getClass());
+            }
+        }
+    }
+
+    /**
+     * Builds up the base Result object
+     */
+    private static Result getNewResultObject(MBeanInfo info, ObjectInstance oi, String attributeName) {
+        Result r = new Result(attributeName);
+        r.setClassName(info.getClassName());
+        r.setTypeName(oi.getObjectName().getCanonicalKeyPropertyListString());
+        r.setDescription(info.getDescription());
+        return r;
+    }
+
+    /**
+     * Used when the object is effectively a java type
+     */
+    private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, Attribute attribute, Query query) {
+        Object value = attribute.getValue();
+        if (value != null) {
+            if (value instanceof CompositeDataSupport) {
+                getResult(resList, info, oi, attribute.getName(), (CompositeData) value, query);
+            } else if (value instanceof CompositeData[]) {
+                for (CompositeData cd : (CompositeData[])value) {
+                    getResult(resList, info, oi, attribute.getName(), cd, query);
+                }
+            } else if (value instanceof ObjectName[]) {
+                Result r = getNewResultObject(info, oi, attribute.getName());
+                for (ObjectName obj : (ObjectName[])value) {
+                    r.addValue(obj.getCanonicalName(), obj.getKeyPropertyListString());
+                }
+                resList.add(r);
+            } else if (value.getClass().isArray()) {
+                // OMFG: this is nutty. some of the items in the array can be primitive! great interview question!
+                Result r = getNewResultObject(info, oi, attribute.getName());
+                for (int i = 0; i < Array.getLength(value); i++) {
+                    Object val = Array.get(value, i);
+                    r.addValue(attribute.getName() + "." + i, val);
+                }
+                resList.add(r);
+            } else if (value instanceof TabularDataSupport) {
+                TabularDataSupport tds = (TabularDataSupport) value;
+                Result r = getNewResultObject(info, oi, attribute.getName());
+                processTabularDataSupport(resList, info, oi, r, attribute.getName(), tds, query);
+                resList.add(r);
+            } else {
+                Result r = getNewResultObject(info, oi, attribute.getName());
+                r.addValue(attribute.getName(), value.toString());
+                resList.add(r);
+            }
+        }
+    }
+
+    /** */
     private static void runFiltersForQuery(Query query) throws Exception {
         List<OutputWriter> filters = query.getOutputWriters();
         if (filters != null) {
@@ -150,78 +253,6 @@ public class JmxUtils {
         }
     }
 
-    /**
-     * Populates the Result objects. This is a recursive function. Query contains the
-     * keys that we want to get the values of.
-     */
-    private static Result getResult(List<Result> results, String attributeName, CompositeDataSupport cds, Query query) {
-        CompositeType t = cds.getCompositeType();
-        
-        Result r = new Result(attributeName);
-        r.setClassName(t.getClassName());
-        r.setDescription(t.getDescription());
-        r.setTypeName(t.getTypeName());
-
-        Set<String> keys = t.keySet();
-        List<String> keysToGet = query.getKeys();
-        for (String key : keys) {
-            Object value = cds.get(key);                
-            if (value instanceof TabularDataSupport) {
-                TabularDataSupport tds = (TabularDataSupport) value;
-                Set<Entry<Object,Object>> entries = tds.entrySet();
-                for (Entry<Object, Object> entry : entries) {
-                    Object entryKeys = entry.getKey();
-                    if (entryKeys instanceof List) {
-                        // ie: attributeName=LastGcInfo.Par Survivor Space
-                        // i haven't seen this be smaller or larger than List<1>, but might as well loop it.
-                        StringBuilder sb = new StringBuilder();
-                        for (Object entryKey : (List<?>)entryKeys) {
-                            sb.append(".");
-                            sb.append(entryKey);
-                        }
-                        String attributeName2 = sb.toString();
-                        Object entryValue = entry.getValue();
-                        if (entryValue instanceof CompositeDataSupport) {
-                            // we ignore the result here cause we just want to walk the tree
-                            getResult(results, attributeName + attributeName2, (CompositeDataSupport)entryValue, query);
-                        }
-                    } else {
-                        throw new RuntimeException("TODO: Need to handle this condition. entryKeys is: " + entryKeys.getClass());
-                    }
-                }
-                // if defined, only include keys we want.
-                if (keysToGet == null || keysToGet.contains(key)) {
-                    r.addValue(key, value);
-                }
-            } else if (value instanceof CompositeDataSupport) {
-                // chances are that we got here as a result of the recursive call above.
-                CompositeDataSupport cds2 = (CompositeDataSupport) value;
-                Result tmp = getResult(results, attributeName, (CompositeDataSupport)cds2, query);
-                results.add(tmp);
-            } else {
-                // if defined, only include keys we want.
-                if (keysToGet == null || keysToGet.contains(key)) {
-                    r.addValue(key, value.toString());
-                }
-            }
-        }
-        return r;
-    }
-    
-    /**
-     * Used when the object is effectively a java type
-     */
-    private static Result getResult(Attribute attribute) {
-        String name = attribute.getName();
-        String obj = attribute.getValue().toString();
-        Result r = new Result(name);
-        r.setClassName(attribute.getClass().getName());
-        r.setTypeName(r.getClassName());
-        r.setDescription(name);
-        r.addValue("value", obj);
-        return r;
-    }
-    
     /**
      * Generates the proper username/password environment for JMX connections.
      */
@@ -284,13 +315,20 @@ public class JmxUtils {
     }
 
     /**
+     * Helper method for connecting to a Server. You need to close the resulting connection.
+     */
+    public static JMXConnector getServerConnection(Server server) throws Exception {
+        JMXServiceURL url = new JMXServiceURL(server.getUrl());
+        return JMXConnectorFactory.connect(url, getEnvironment(server));
+    }
+
+    /**
      * Does the work for processing a Server object.
      */
     public static void processServer(Server server) throws Exception {
         JMXConnector conn = null;
         try {
-            JMXServiceURL url = new JMXServiceURL(server.getUrl());
-            conn = JMXConnectorFactory.connect(url, getEnvironment(server));
+            conn = getServerConnection(server);
             MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
             JmxUtils.processQueriesForServer(mbeanServer, server);
@@ -339,6 +377,8 @@ public class JmxUtils {
      * Useful for figuring out if an Object is a number.
      */
     public static boolean isNumeric(Object value) {
-        return ((value instanceof String && StringUtils.isNumeric((String)value)) || value instanceof Number || value instanceof Integer || value instanceof Long || value instanceof Double || value instanceof Float);
+        return ((value instanceof String && StringUtils.isNumeric((String)value)) || 
+                value instanceof Number || value instanceof Integer || 
+                value instanceof Long || value instanceof Double || value instanceof Float);
     }
 }

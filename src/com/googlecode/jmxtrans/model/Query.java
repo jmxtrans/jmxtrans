@@ -24,7 +24,6 @@ public class Query {
 
     private String obj;
     private List<String> attr;
-    private List<String> keys;
     private List<Result> results;
 
     public Query() { }
@@ -41,24 +40,6 @@ public class Query {
     public Query(String obj, List<String> attr) {
         this.obj = obj;
         this.attr = attr;
-    }
-
-    public Query(String obj, String attr, String key) {
-        this.obj = obj;
-        addAttr(attr);
-        this.addKey(key);
-    }
-
-    public Query(String obj, List<String> attr, String key) {
-        this.obj = obj;
-        this.attr = attr;
-        this.addKey(key);
-    }
-
-    public Query(String obj, String attr, List<String> keys) {
-        this.obj = obj;
-        addAttr(attr);
-        this.keys = keys;
     }
 
     public void setObj(String obj) {
@@ -82,21 +63,6 @@ public class Query {
             this.attr = new ArrayList<String>();
         }
         this.attr.add(attr);
-    }
-
-    public List<String> getKeys() {
-        return keys;
-    }
-
-    public void setKeys(List<String> keys) {
-        this.keys = keys;
-    }
-
-    public void addKey(String key) {
-        if (this.keys == null) {
-            this.keys = new ArrayList<String>();
-        }
-        this.keys.add(key);
     }
 
     public void setResults(List<Result> results) {
@@ -138,6 +104,6 @@ public class Query {
 
     @Override
     public String toString() {
-        return "Query [obj=" + obj + ", attr=" + attr + ", keys=" + keys + "]";
+        return "Query [obj=" + obj + ", attr=" + attr + "]";
     }
 }
