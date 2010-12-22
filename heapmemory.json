@@ -10,7 +10,8 @@
         "settings" : {
             "templateFile" : "heapmemory-rrd-template.xml",
             "outputFile" : "target/heap.rrd",
-            "binaryPath" : "/opt/local/bin"
+            "binaryPath" : "/opt/local/bin",
+            "debug" : true
         }
       } ]
     } ]

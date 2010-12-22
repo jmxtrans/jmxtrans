@@ -102,10 +102,6 @@ public class JmxUtils {
 
     public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
         
-        if (log.isDebugEnabled()) {
-            log.debug("Start executing query: " + query);
-        }
-
         List<Result> resList = new ArrayList<Result>();
 
         ObjectName oName = new ObjectName(query.getObj());
@@ -127,6 +123,9 @@ public class JmxUtils {
                 getResult(resList, info, oi, (Attribute)attribute, query);
             }
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Executed query: " + query);
+        }
         
         query.setResults(resList);
 
@@ -134,7 +133,7 @@ public class JmxUtils {
         runFiltersForQuery(query);
 
         if (log.isDebugEnabled()) {
-            log.debug("Finished executing query: " + query);
+            log.debug("Finished running filters: " + query);
         }
     }
 

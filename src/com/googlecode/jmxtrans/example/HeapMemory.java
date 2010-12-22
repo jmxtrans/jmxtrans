@@ -18,11 +18,12 @@ public class HeapMemory {
 
         JmxProcess jmx = JmxUtils.getJmxProcess(new File("heapmemory.json"));
         JmxUtils.printJson(jmx);
+        JmxUtils.execute(jmx);
         
-        for (int i = 0; i < 160; i++) {
-            JmxUtils.execute(jmx);
-            Thread.sleep(1000);
-        }
+//        for (int i = 0; i < 160; i++) {
+//            JmxUtils.execute(jmx);
+//            Thread.sleep(1000);
+//        }
 
         System.out.println("done!");
     }

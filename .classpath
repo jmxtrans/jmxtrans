@@ -4,7 +4,7 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang-2.5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.5.jar" sourcepath="lib/commons-lang-2.5-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-core-asl-1.6.3.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.6.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>

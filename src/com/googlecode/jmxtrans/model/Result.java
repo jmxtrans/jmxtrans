@@ -1,7 +1,7 @@
 package com.googlecode.jmxtrans.model;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Represents the result of a query.
@@ -59,7 +59,7 @@ public class Result {
     
     public void addValue(String key, Object value) {
         if (this.values == null) {
-            values = new HashMap<String, Object>();
+            values = new TreeMap<String, Object>();
         }
         
         values.put(key, value);

@@ -16,6 +16,8 @@ import org.jrobin.core.ArcDef;
 import org.jrobin.core.DsDef;
 import org.jrobin.core.RrdDef;
 import org.jrobin.core.RrdDefTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -33,6 +35,8 @@ import com.googlecode.jmxtrans.util.JmxUtils;
  * @author jon
  */
 public class RRDToolWriter extends BaseOutputWriter {
+
+    private static final Logger log = LoggerFactory.getLogger(RRDToolWriter.class);
 
     private File outputFile = null;
     private File templateFile = null;
@@ -52,6 +56,30 @@ public class RRDToolWriter extends BaseOutputWriter {
         }
     }
 
+    /**
+     * Datasources must be less than 21 characters in length, so
+     * work to strip out the names to make it shorter. Not ideal at all.
+     */
+    public String getDataSourceName(String name) {
+        String newname = name.replace(" ", "");
+        newname = newname.replace(".", "");
+        newname = newname.replace("Space", "");
+        newname = newname.replace("Info", "");
+        newname = newname.replace("Usage", "");
+        if (newname.length() > 20) {
+            newname = StringUtils.abbreviateMiddle(newname, null, 20);
+        }
+        return newname;
+    }
+
+    public String getShortAttributeName(String attrName) {
+        int index = attrName.indexOf('.');
+        if (index < 0) {
+            return attrName;
+        }
+        return attrName.substring(index);
+    }
+
     /** */
     public void doWrite(Query query) throws Exception {
         RrdDef def = getDatabaseTemplateSpec();
@@ -63,17 +91,34 @@ public class RRDToolWriter extends BaseOutputWriter {
 
         // go over all the results and look for datasource names that map to keys from the result values
         for (Result res : results) {
+            log.debug(res.toString());
             Map<String, Object> values = res.getValues();
             if (values != null) {
                 for (Entry<String, Object> entry : values.entrySet()) {
-                    if (dsNames.contains(entry.getKey()) && JmxUtils.isNumeric(entry.getValue())) {
-                        dataMap.put(entry.getKey(), entry.getValue().toString());
+                    String shortAttrName = getShortAttributeName(res.getAttributeName());
+                    String keyStr = StringUtils.capitalize(entry.getKey());
+                    
+                    String key = null;
+                    if (keyStr.startsWith(shortAttrName)) {
+                        key = getDataSourceName(keyStr);
+                    } else {
+                        key = getDataSourceName(shortAttrName + keyStr);
+                    }
+                    if (isDebugEnabled()) {
+                        log.debug("Generated DataSource name:value: " + key + " : " + entry.getValue());
+                    }
+                    if (dsNames.contains(key) && JmxUtils.isNumeric(entry.getValue())) {
+                        dataMap.put(key, entry.getValue().toString());
                     }
                 }
             }
         }
         
-        rrdToolUpdate(StringUtils.join(dataMap.keySet(), ':'), StringUtils.join(dataMap.values(), ':'));
+        if (dataMap.keySet().size() > 0 && dataMap.values().size() > 0) {
+            rrdToolUpdate(StringUtils.join(dataMap.keySet(), ':'), StringUtils.join(dataMap.values(), ':'));
+        } else {
+            log.error("Nothing was logged for query: " + query);
+        }
     }
 
     /**

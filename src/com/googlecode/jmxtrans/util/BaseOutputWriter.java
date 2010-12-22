@@ -17,7 +17,10 @@ public abstract class BaseOutputWriter implements OutputWriter {
     public static final String OUTPUT_FILE = "outputFile";
     public static final String TEMPLATE_FILE = "templateFile";
     public static final String BINARY_PATH = "binaryPath";
+    public static final String DEBUG = "debug";
 
+    private Boolean debugEnabled = null;
+    
     private Map<String, Object> settings;
 
     public void addSetting(String key, Object value) {
@@ -33,5 +36,12 @@ public abstract class BaseOutputWriter implements OutputWriter {
     
     public void setSettings(Map<String, Object> settings) {
         this.settings = settings;
+    }
+    
+    public boolean isDebugEnabled() {
+        if (debugEnabled == null) {
+            debugEnabled =  this.getSettings().containsKey(DEBUG) ? (Boolean) this.getSettings().get(DEBUG) : Boolean.FALSE;
+        }
+        return debugEnabled != null ? debugEnabled : false;
     }
 }
