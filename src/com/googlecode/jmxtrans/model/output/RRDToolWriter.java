@@ -129,10 +129,14 @@ public class RRDToolWriter extends BaseOutputWriter {
                     } else {
                         key = getDataSourceName(shortAttrName + keyStr);
                     }
-                    if (isDebugEnabled()) {
+                    
+                    boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
+
+                    if (isDebugEnabled() && isNumeric) {
                         log.debug("Generated DataSource name:value: " + key + " : " + entry.getValue());
                     }
-                    if (dsNames.contains(key) && JmxUtils.isNumeric(entry.getValue())) {
+
+                    if (dsNames.contains(key) && isNumeric) {
                         dataMap.put(key, entry.getValue().toString());
                     }
                 }
