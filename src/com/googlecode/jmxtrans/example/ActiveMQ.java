@@ -1,7 +1,9 @@
 package com.googlecode.jmxtrans.example;
 
+import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.GraphiteWriter;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
@@ -19,13 +21,24 @@ public class ActiveMQ {
     /** */
     public static void main(String[] args) throws Exception {
 
-        Server server = new Server("localhost", "1099");
+        Server server = new Server("w2", "1105");
+        GraphiteWriter gw = new GraphiteWriter();
+        gw.addSetting(GraphiteWriter.HOST, "graphite");
+        gw.addSetting(GraphiteWriter.PORT, 2003);
 
         Query q = new Query();
-        q.setObj("org.apache.activemq:BrokerName=localhost,Connection=*,ConnectorName=openwire,Type=Connection");
+        q.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker");
         q.addOutputWriter(new StdOutWriter());
+        q.addOutputWriter(gw);
         server.addQuery(q);
+        JmxProcess process = new JmxProcess(server);
 
-        JmxUtils.processServer(server);
+        JmxUtils.prettyPrintJson(process);
+        
+        for (int i = 0; i < 160; i++) {
+            JmxUtils.processServer(server);
+            Thread.sleep(1000);
+        }
+
     }
 }
