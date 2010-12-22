@@ -57,23 +57,48 @@ public class RRDToolWriter extends BaseOutputWriter {
     }
 
     /**
-     * Datasources must be less than 21 characters in length, so
-     * work to strip out the names to make it shorter. Not ideal at all.
+     * rrd datasources must be less than 21 characters in length, so
+     * work to strip out the names to make it shorter. Not ideal at all,
+     * but works.
      */
-    public String getDataSourceName(String name) {
+    public static String getDataSourceName(String name) {
         String newname = name.replace(" ", "");
         newname = newname.replace(".", "");
         newname = newname.replace("Space", "");
         newname = newname.replace("Info", "");
         newname = newname.replace("Usage", "");
-        if (newname.length() > 20) {
-            newname = StringUtils.abbreviateMiddle(newname, null, 20);
-        }
+        newname = abbreviateMiddle(newname, 20);
         return newname;
     }
 
-    public String getShortAttributeName(String attrName) {
-        int index = attrName.indexOf('.');
+    /**
+     * Chops out characters in the middle of the string so that
+     * the overall length is length. If str is <= length, it just
+     * returns str. I had to write my own method cause commons-lang
+     * StringUtils doesn't have a method like this.
+     */
+    public static String abbreviateMiddle(String str, int length) {
+        if (str.length() <= length) {
+            return str;
+        }
+        int targetSting = length;
+        
+        int startOffset = targetSting / 2 + targetSting % 2;
+        int endOffset = str.length() - targetSting / 2;
+        
+        StringBuilder builder = new StringBuilder(length);
+        builder.append(str.substring(0,startOffset));
+        builder.append(str.substring(endOffset));
+
+        return builder.toString();
+    }
+    
+    /**
+     * If an attribute has a . in the name, just return everything
+     * after the last dot.
+     */
+    public static String getShortAttributeName(String attrName) {
+        int index = attrName.lastIndexOf('.');
         if (index < 0) {
             return attrName;
         }
