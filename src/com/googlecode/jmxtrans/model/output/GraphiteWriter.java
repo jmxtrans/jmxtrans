@@ -3,6 +3,7 @@ package com.googlecode.jmxtrans.model.output;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
@@ -45,11 +46,14 @@ public class GraphiteWriter extends BaseOutputWriter {
         Writer writer = connect();
         try {
             for (Result r : query.getResults()) {
-                for (Entry<String, Object> values : r.getValues().entrySet()) {
-                    if (JmxUtils.isNumeric(values.getValue())) {
-                        String fullPath = "servers." + query.getServer().getHost().replace('.', '_') + "." + query.getServer().getPort() + "." + r.getClassName() + "." + r.getAttributeName() + "." + values.getKey();
-                        String line = fullPath + " " + values.getValue() + " " + r.getEpoch() / 1000 + "\n";
-                        writer.write(line);
+                Map<String, Object> resultValues = r.getValues();
+                if (resultValues != null) {
+                    for (Entry<String, Object> values : resultValues.entrySet()) {
+                        if (JmxUtils.isNumeric(values.getValue())) {
+                            String fullPath = "servers." + query.getServer().getHost().replace('.', '_') + "." + query.getServer().getPort() + "." + r.getClassName() + "." + r.getAttributeName() + "." + values.getKey();
+                            String line = fullPath + " " + values.getValue() + " " + r.getEpoch() / 1000 + "\n";
+                            writer.write(line);
+                        }
                     }
                 }
             }

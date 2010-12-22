@@ -64,9 +64,11 @@ public class RRDToolWriter extends BaseOutputWriter {
         // go over all the results and look for datasource names that map to keys from the result values
         for (Result res : results) {
             Map<String, Object> values = res.getValues();
-            for (Entry<String, Object> entry : values.entrySet()) {
-                if (dsNames.contains(entry.getKey()) && JmxUtils.isNumeric(entry.getValue())) {
-                    dataMap.put(entry.getKey(), entry.getValue().toString());
+            if (values != null) {
+                for (Entry<String, Object> entry : values.entrySet()) {
+                    if (dsNames.contains(entry.getKey()) && JmxUtils.isNumeric(entry.getValue())) {
+                        dataMap.put(entry.getKey(), entry.getValue().toString());
+                    }
                 }
             }
         }
