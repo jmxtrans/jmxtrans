@@ -56,9 +56,11 @@ public class RRDWriter extends BaseOutputWriter {
             // go over all the results and look for datasource names that map to keys from the result values
             for (Result res : results) {
                 Map<String, Object> values = res.getValues();
-                for (Entry<String, Object> entry : values.entrySet()) {
-                    if (dsNames.contains(entry.getKey()) && JmxUtils.isNumeric(entry.getValue())) {
-                        sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
+                if (values != null) {
+                    for (Entry<String, Object> entry : values.entrySet()) {
+                        if (dsNames.contains(entry.getKey()) && JmxUtils.isNumeric(entry.getValue())) {
+                            sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
+                        }
                     }
                 }
             }
