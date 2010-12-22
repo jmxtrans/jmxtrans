@@ -280,6 +280,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     /** */
     public void fileModified(File file) throws Exception {
         if (isJsonFile(file)) {
+            Thread.sleep(1000);
             deleteJobsInFile(serverScheduler, file);
             scheduleJobsInFile(serverScheduler, file);
             if (log.isDebugEnabled()) {
@@ -291,6 +292,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     /** */
     public void fileDeleted(File file) throws Exception {
         if (isJsonFile(file)) {
+            Thread.sleep(1000);
             deleteJobsInFile(serverScheduler, file);
             if (log.isDebugEnabled()) {
                 log.debug("File deleted: " + file);
@@ -301,6 +303,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     /** */
     public void fileAdded(File file) throws Exception {
         if (isJsonFile(file)) {
+            Thread.sleep(1000);
             scheduleJobsInFile(serverScheduler, file);
             if (log.isDebugEnabled()) {
                 log.debug("File added: " + file);
