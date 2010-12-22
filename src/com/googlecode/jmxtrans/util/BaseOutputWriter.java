@@ -3,6 +3,8 @@ package com.googlecode.jmxtrans.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.googlecode.jmxtrans.OutputWriter;
 
 /**
@@ -38,6 +40,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
         this.settings = settings;
     }
     
+    @JsonIgnore
     public boolean isDebugEnabled() {
         if (debugEnabled == null) {
             debugEnabled =  this.getSettings().containsKey(DEBUG) ? (Boolean) this.getSettings().get(DEBUG) : Boolean.FALSE;

@@ -24,7 +24,6 @@ import com.googlecode.jmxtrans.util.JmxUtils;
  */
 public class GraphiteWriter extends BaseOutputWriter {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
 
     private String host = null;
@@ -42,6 +41,12 @@ public class GraphiteWriter extends BaseOutputWriter {
         }
     }
 
+    public String cleanupName(String name) {
+        String clean = name.replace('.', '_');
+        clean = clean.replace(" ", "");
+        return clean;
+    }
+
     public void doWrite(Query query) throws Exception {
         Writer writer = connect();
         try {
@@ -50,8 +55,19 @@ public class GraphiteWriter extends BaseOutputWriter {
                 if (resultValues != null) {
                     for (Entry<String, Object> values : resultValues.entrySet()) {
                         if (JmxUtils.isNumeric(values.getValue())) {
-                            String fullPath = "servers." + query.getServer().getHost().replace('.', '_') + "." + query.getServer().getPort() + "." + r.getClassName() + "." + r.getAttributeName() + "." + values.getKey();
+                            String keyStr = null;
+                            if (values.getKey().startsWith(r.getAttributeName())) {
+                                keyStr = values.getKey();
+                            } else {
+                                keyStr = r.getAttributeName() + "." + values.getKey();
+                            }
+                            String fullPath = "servers." + cleanupName(query.getServer().getHost()) + "_" + 
+                                                query.getServer().getPort() + "." + 
+                                                cleanupName(r.getClassName()) + "." + cleanupName(keyStr);
                             String line = fullPath + " " + values.getValue() + " " + r.getEpoch() / 1000 + "\n";
+                            if (isDebugEnabled()) {
+                                log.debug("Graphite Message: " + line.trim());
+                            }
                             writer.write(line);
                         }
                     }

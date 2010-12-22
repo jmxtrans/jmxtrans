@@ -19,17 +19,19 @@ public class Graphite {
         Server server = new Server("w2", "1099");
 
         Query q = new Query();
-        q.setObj("java.lang:type=Memory");
-        q.addAttr("HeapMemoryUsage");
-        q.addAttr("NonHeapMemoryUsage");
+        q.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep");
+//        q.addAttr("HeapMemoryUsage");
+//        q.addAttr("NonHeapMemoryUsage");
         GraphiteWriter gw = new GraphiteWriter();
         gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
         gw.addSetting(GraphiteWriter.PORT, 2003);
+        gw.addSetting(GraphiteWriter.DEBUG, true);
         q.addOutputWriter(gw);
         server.addQuery(q);
 
         JmxProcess jmx = new JmxProcess(server);
         JmxUtils.prettyPrintJson(jmx);
+        JmxUtils.execute(jmx);
 
 //        for (int i = 0; i < 160; i++) {
 //            JmxUtils.execute(jmx);
