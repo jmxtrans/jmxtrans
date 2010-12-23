@@ -44,7 +44,8 @@ public class RRDToolWriter extends BaseOutputWriter {
     private File binaryPath = null;
     private static final char[] PERIOD = {'.'};
     private static final char[] INITIALS = {' ', '.'};
-    
+    private static final String GENERATE = "generate";
+
     /** */
     public RRDToolWriter() {
     }
@@ -104,6 +105,20 @@ public class RRDToolWriter extends BaseOutputWriter {
                     }
                 }
             }
+        }
+        
+        if (isDebugEnabled() && this.getBooleanSetting(GENERATE)) {
+            StringBuilder sb = new StringBuilder("\n");
+            for (Result res : results) {
+                Map<String, Object> values = res.getValues();
+                if (values != null) {
+                    for (Entry<String, Object> entry : values.entrySet()) {
+                        String key = getDataSourceName(res.getAttributeName(), entry.getKey());
+                        sb.append("<datasource><name>" + key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+                    }
+                }
+            }
+            log.debug(sb.toString());
         }
         
         if (dataMap.keySet().size() > 0 && dataMap.values().size() > 0) {

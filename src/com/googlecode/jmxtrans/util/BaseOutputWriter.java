@@ -40,6 +40,10 @@ public abstract class BaseOutputWriter implements OutputWriter {
         this.settings = settings;
     }
     
+    public boolean getBooleanSetting(String key) {
+        return this.getSettings().containsKey(key) ? (Boolean) this.getSettings().get(key) : Boolean.FALSE;
+    }
+
     @JsonIgnore
     public boolean isDebugEnabled() {
         if (debugEnabled == null) {
