@@ -144,7 +144,7 @@ public class JmxUtils {
     private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, String attributeName, CompositeData cds, Query query) {
         CompositeType t = cds.getCompositeType();
         
-        Result r = getNewResultObject(info, oi, attributeName);
+        Result r = getNewResultObject(info, oi, attributeName, query);
 
         Set<String> keys = t.keySet();
         for (String key : keys) {
@@ -194,11 +194,11 @@ public class JmxUtils {
     /**
      * Builds up the base Result object
      */
-    private static Result getNewResultObject(MBeanInfo info, ObjectInstance oi, String attributeName) {
+    private static Result getNewResultObject(MBeanInfo info, ObjectInstance oi, String attributeName, Query query) {
         Result r = new Result(attributeName);
+        r.setQuery(query);
         r.setClassName(info.getClassName());
         r.setTypeName(oi.getObjectName().getCanonicalKeyPropertyListString());
-        r.setDescription(info.getDescription());
         return r;
     }
 
@@ -215,14 +215,14 @@ public class JmxUtils {
                     getResult(resList, info, oi, attribute.getName(), cd, query);
                 }
             } else if (value instanceof ObjectName[]) {
-                Result r = getNewResultObject(info, oi, attribute.getName());
+                Result r = getNewResultObject(info, oi, attribute.getName(), query);
                 for (ObjectName obj : (ObjectName[])value) {
                     r.addValue(obj.getCanonicalName(), obj.getKeyPropertyListString());
                 }
                 resList.add(r);
             } else if (value.getClass().isArray()) {
                 // OMFG: this is nutty. some of the items in the array can be primitive! great interview question!
-                Result r = getNewResultObject(info, oi, attribute.getName());
+                Result r = getNewResultObject(info, oi, attribute.getName(), query);
                 for (int i = 0; i < Array.getLength(value); i++) {
                     Object val = Array.get(value, i);
                     r.addValue(attribute.getName() + "." + i, val);
@@ -230,11 +230,11 @@ public class JmxUtils {
                 resList.add(r);
             } else if (value instanceof TabularDataSupport) {
                 TabularDataSupport tds = (TabularDataSupport) value;
-                Result r = getNewResultObject(info, oi, attribute.getName());
+                Result r = getNewResultObject(info, oi, attribute.getName(), query);
                 processTabularDataSupport(resList, info, oi, r, attribute.getName(), tds, query);
                 resList.add(r);
             } else {
-                Result r = getNewResultObject(info, oi, attribute.getName());
+                Result r = getNewResultObject(info, oi, attribute.getName(), query);
                 r.addValue(attribute.getName(), value.toString());
                 resList.add(r);
             }

@@ -25,6 +25,7 @@ public class Query {
     private String obj;
     private List<String> attr;
     private List<Result> results;
+    private List<String> keys;
 
     public Query() { }
 
@@ -63,6 +64,21 @@ public class Query {
             this.attr = new ArrayList<String>();
         }
         this.attr.add(attr);
+    }
+
+    public void setKeys(List<String> keys) {
+        this.keys = keys;
+    }
+
+    public List<String> getKeys() {
+        return keys;
+    }
+
+    public void addKey(String key) {
+        if (this.keys == null) {
+            this.keys = new ArrayList<String>();
+        }
+        this.keys.add(key);
     }
 
     public void setResults(List<Result> results) {

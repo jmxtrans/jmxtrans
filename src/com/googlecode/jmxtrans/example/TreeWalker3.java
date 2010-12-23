@@ -1,6 +1,10 @@
 package com.googlecode.jmxtrans.example;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.management.AttributeNotFoundException;
@@ -14,20 +18,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
- * Walks a JMX tree and prints out all of the attribute values actually using the JmxTrans api.
+ * Walks a JMX tree and prints out all of the unique typenames and their attributes.
  * 
  * This is a good test of the core engine of JmxTrans to ensure that it covers all cases.
  * 
  * @author jon
  */
-public class TreeWalker2 {
+public class TreeWalker3 {
 
-    private static final Logger log = LoggerFactory.getLogger(TreeWalker2.class);
+    private static final Logger log = LoggerFactory.getLogger(TreeWalker3.class);
 
     /** */
     public static void main(String[] args) throws Exception {
@@ -38,7 +42,7 @@ public class TreeWalker2 {
             conn = JmxUtils.getServerConnection(server);
             MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
             
-            TreeWalker2 tw = new TreeWalker2();
+            TreeWalker3 tw = new TreeWalker3();
             tw.walkTree(mbeanServer);
         } catch (IOException e) {
             log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
@@ -54,13 +58,15 @@ public class TreeWalker2 {
         
         // key here is null, null returns everything!
         Set<ObjectName> mbeans = connection.queryNames(null, null);
+        
+        Map<String, String> output = new HashMap<String, String>();
+        
         for (ObjectName name : mbeans) {
             MBeanInfo info = connection.getMBeanInfo(name);
             MBeanAttributeInfo[] attrs = info.getAttributes();
 
             Query query = new Query();
             query.setObj(name.getCanonicalName());
-            query.addOutputWriter(new StdOutWriter());
             
             for (MBeanAttributeInfo attrInfo : attrs) {
                 query.addAttr(attrInfo.getName());
@@ -71,6 +77,17 @@ public class TreeWalker2 {
             } catch (AttributeNotFoundException anfe) {
                 log.error("Error", anfe);
             }
+            
+            List<Result> results = query.getResults();
+            for (Result result : results) {
+                output.put(result.getTypeName(), query.getAttr().toString());
+            }
+        }
+        
+        for (Entry<String, String> entry : output.entrySet()) {
+            log.debug(entry.getKey());
+            log.debug(entry.getValue());
+            log.debug("-----------------------------------------");
         }
     }
 }

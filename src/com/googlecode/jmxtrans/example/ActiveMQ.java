@@ -1,5 +1,8 @@
 package com.googlecode.jmxtrans.example;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
@@ -23,18 +26,114 @@ public class ActiveMQ {
         Server server = new Server("w2", "1105");
         server.setAlias("w2_activemq_1105");
         GraphiteWriter gw = new GraphiteWriter();
-        gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
+//        gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
+        gw.addSetting(GraphiteWriter.HOST, "localhost");
         gw.addSetting(GraphiteWriter.PORT, 2003);
-        gw.addSetting(GraphiteWriter.DEBUG, true);
 
+        // use this to add data to GW path
+        List<String> typeNames = new ArrayList<String>();
+        typeNames.add("destinationName");
+        typeNames.add("Destination");
+        gw.addSetting(GraphiteWriter.TYPE_NAMES, typeNames);
+        gw.addSetting(GraphiteWriter.DEBUG, false);
+        
         Query q = new Query();
-        q.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker");
+        q.setObj("org.apache.activemq:BrokerName=localhost,Type=Subscription,clientId=*,consumerId=*,destinationName=*,destinationType=Queue,persistentMode=Non-Durable");
+        q.addAttr("PendingQueueSize");
+        q.addAttr("DispatchedQueueSize");
+        q.addAttr("EnqueueCounter");
+        q.addAttr("DequeueCounter");
+        q.addAttr("MessageCountAwaitingAcknowledge");
+        q.addAttr("DispachedCounter");
         q.addOutputWriter(gw);
         server.addQuery(q);
+
+        Query q2 = new Query();
+        q2.setObj("org.apache.activemq:BrokerName=localhost,Destination=ActiveMQ.Advisory.Consumer.Queue.*,Type=Topic");
+        q2.addAttr("QueueSize");
+        q2.addAttr("MaxEnqueueTime");
+        q2.addAttr("MinEnqueueTime");
+        q2.addAttr("AverageEnqueueTime");
+        q2.addAttr("InFlightCount");
+        q2.addAttr("ConsumerCount");
+        q2.addAttr("ProducerCount");
+        q2.addAttr("DispatchCount");
+        q2.addAttr("DequeueCount");
+        q2.addAttr("EnqueueCount");
+        q2.addAttr("Subscriptions");
+        q2.addOutputWriter(gw);
+        server.addQuery(q2);
+
+        Query q3 = new Query();
+        q3.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Queue");
+        q3.addAttr("QueueSize");
+        q3.addAttr("MaxEnqueueTime");
+        q3.addAttr("MinEnqueueTime");
+        q3.addAttr("AverageEnqueueTime");
+        q3.addAttr("InFlightCount");
+        q3.addAttr("ConsumerCount");
+        q3.addAttr("ProducerCount");
+        q3.addAttr("DispatchCount");
+        q3.addAttr("DequeueCount");
+        q3.addAttr("EnqueueCount");
+        q3.addAttr("Subscriptions");
+        q3.addOutputWriter(gw);
+        server.addQuery(q3);
+
+        Query q4 = new Query();
+        q4.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Topic");
+        q4.addAttr("QueueSize");
+        q4.addAttr("MaxEnqueueTime");
+        q4.addAttr("MinEnqueueTime");
+        q4.addAttr("AverageEnqueueTime");
+        q4.addAttr("InFlightCount");
+        q4.addAttr("ConsumerCount");
+        q4.addAttr("ProducerCount");
+        q4.addAttr("DispatchCount");
+        q4.addAttr("DequeueCount");
+        q4.addAttr("EnqueueCount");
+        q4.addAttr("Subscriptions");
+        q4.addOutputWriter(gw);
+        server.addQuery(q4);
+
+        Query q5 = new Query();
+        q5.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker");
+        q5.addOutputWriter(gw);
+        server.addQuery(q5);
+        
+        Query q6 = new Query();
+        q6.setObj("java.lang:type=Memory");
+        q6.addAttr("HeapMemoryUsage");
+        q6.addAttr("NonHeapMemoryUsage");
+        q6.addOutputWriter(gw);
+        server.addQuery(q6);
+
+        Query q7 = new Query("java.lang:type=Threading");
+        q7.addAttr("DaemonThreadCount");
+        q7.addAttr("PeakThreadCount");
+        q7.addAttr("ThreadCount");
+        q7.addAttr("CurrentThreadCpuTime");
+        q7.addAttr("CurrentThreadUserTime");
+        q7.addAttr("TotalStartedThreadCount");
+        q7.addOutputWriter(gw);
+        server.addQuery(q7);
+
+        Query q8 = new Query();
+        q8.setObj("java.lang:name=*,type=GarbageCollector");
+        q8.addKey("committed");
+        q8.addKey("init");
+        q8.addKey("max");
+        q8.addKey("used");
+        q8.addKey("duration");
+        q8.addKey("CollectionCount");
+        q8.addKey("CollectionTime");
+        q8.addOutputWriter(gw);
+        server.addQuery(q8);
+        
         JmxProcess process = new JmxProcess(server);
 
         JmxUtils.prettyPrintJson(process);
-        JmxUtils.processServer(server);
+//        JmxUtils.processServer(server);
 
 //        for (int i = 0; i < 160; i++) {
 //            JmxUtils.processServer(server);
