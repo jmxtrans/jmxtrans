@@ -117,6 +117,9 @@ public class GraphiteWriter extends BaseOutputWriter {
     }
 
     private String handleTypeName(String typeName) {
+        if (getTypeNames() == null && getTypeNames().size() == 0) {
+            return null;
+        }
         String[] tokens = typeName.split(",");
         boolean foundIt = false;
         for (String token : tokens) {
