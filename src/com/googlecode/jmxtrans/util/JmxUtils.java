@@ -151,8 +151,7 @@ public class JmxUtils {
             Object value = cds.get(key);                
             if (value instanceof TabularDataSupport) {
                 TabularDataSupport tds = (TabularDataSupport) value;
-
-                processTabularDataSupport(resList, info, oi, r, attributeName, tds, query);
+                processTabularDataSupport(resList, info, oi, r, attributeName + "." + key, tds, query);
                 r.addValue(key, value.toString());
             } else if (value instanceof CompositeDataSupport) {
                 // now recursively go through everything.
@@ -183,9 +182,11 @@ public class JmxUtils {
                 Object entryValue = entry.getValue();
                 if (entryValue instanceof CompositeDataSupport) {
                     getResult(resList, info, oi, attributeName + attributeName2, (CompositeDataSupport)entryValue, query);
+                } else {
+                    throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryValue is: " + entryValue.getClass().getCanonicalName());
                 }
             } else {
-                throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: " + entryKeys.getClass());
+                throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: " + entryKeys.getClass().getCanonicalName());
             }
         }
     }

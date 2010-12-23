@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.jrobin.core.ArcDef;
 import org.jrobin.core.DsDef;
 import org.jrobin.core.RrdDef;
@@ -41,6 +42,8 @@ public class RRDToolWriter extends BaseOutputWriter {
     private File outputFile = null;
     private File templateFile = null;
     private File binaryPath = null;
+    private static final char[] PERIOD = {'.'};
+    private static final char[] INITIALS = {' ', '.'};
     
     /** */
     public RRDToolWriter() {
@@ -58,51 +61,20 @@ public class RRDToolWriter extends BaseOutputWriter {
 
     /**
      * rrd datasources must be less than 21 characters in length, so
-     * work to strip out the names to make it shorter. Not ideal at all,
-     * but works.
+     * work to make it shorter. Not ideal at all, but works fairly 
+     * well it seems.
      */
-    public static String getDataSourceName(String name) {
-        String newname = name.replace(" ", "");
-        newname = newname.replace(".", "");
-        newname = newname.replace("Space", "");
-        newname = newname.replace("Info", "");
-        newname = newname.replace("Usage", "");
-        newname = abbreviateMiddle(newname, 20);
-        return newname;
-    }
-
-    /**
-     * Chops out characters in the middle of the string so that
-     * the overall length is length. If str is <= length, it just
-     * returns str. I had to write my own method cause commons-lang
-     * StringUtils doesn't have a method like this.
-     */
-    public static String abbreviateMiddle(String str, int length) {
-        if (str.length() <= length) {
-            return str;
-        }
-        int targetSting = length;
+    public static String getDataSourceName(String str, String entry) {
+        String caps = WordUtils.capitalize(str, PERIOD);
+        String[] split = StringUtils.splitByCharacterTypeCamelCase(caps);
+        String join = StringUtils.join(split, '.');
+        String result = WordUtils.initials(join, INITIALS);
         
-        int startOffset = targetSting / 2 + targetSting % 2;
-        int endOffset = str.length() - targetSting / 2;
-        
-        StringBuilder builder = new StringBuilder(length);
-        builder.append(str.substring(0,startOffset));
-        builder.append(str.substring(endOffset));
-
-        return builder.toString();
-    }
-    
-    /**
-     * If an attribute has a . in the name, just return everything
-     * after the last dot.
-     */
-    public static String getShortAttributeName(String attrName) {
-        int index = attrName.lastIndexOf('.');
-        if (index < 0) {
-            return attrName;
+        if (result.length() + entry.length() < 21) {
+            return result + WordUtils.capitalize(entry);
+        } else {
+            return result + WordUtils.initials(entry);
         }
-        return attrName.substring(index);
     }
 
     /** */
@@ -120,16 +92,7 @@ public class RRDToolWriter extends BaseOutputWriter {
             Map<String, Object> values = res.getValues();
             if (values != null) {
                 for (Entry<String, Object> entry : values.entrySet()) {
-                    String shortAttrName = getShortAttributeName(res.getAttributeName());
-                    String keyStr = StringUtils.capitalize(entry.getKey());
-                    
-                    String key = null;
-                    if (keyStr.startsWith(shortAttrName)) {
-                        key = getDataSourceName(keyStr);
-                    } else {
-                        key = getDataSourceName(shortAttrName + keyStr);
-                    }
-                    
+                    String key = getDataSourceName(res.getAttributeName(), entry.getKey());
                     boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
 
                     if (isDebugEnabled() && isNumeric) {
