@@ -20,6 +20,7 @@ public class Server {
 
     private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
     private static final String BACK = "/jmxrmi";
+    private String alias;
     private String host;
     private String port;
     private String username;
@@ -42,6 +43,22 @@ public class Server {
         this.addQuery(query);
     }
 
+    /**
+     * Some writers (GraphiteWriter) use the alias in generation of the unique key which references
+     * this server.
+     */
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    /**
+     * Some writers (GraphiteWriter) use the alias in generation of the unique key which references
+     * this server.
+     */
+    public String getAlias() {
+        return alias;
+    }
+    
     public void setHost(String host) {
         this.host = host;
     }

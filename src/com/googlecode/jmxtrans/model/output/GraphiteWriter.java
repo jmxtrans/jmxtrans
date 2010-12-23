@@ -61,8 +61,16 @@ public class GraphiteWriter extends BaseOutputWriter {
                             } else {
                                 keyStr = r.getAttributeName() + "." + values.getKey();
                             }
-                            String fullPath = "servers." + cleanupName(query.getServer().getHost()) + "_" + 
-                                                query.getServer().getPort() + "." + 
+                            
+                            String alias = null;
+                            if (query.getServer().getAlias() != null) {
+                                alias = query.getServer().getAlias();
+                            } else {
+                                alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+                            }
+                            alias = cleanupName(alias);
+                            
+                            String fullPath = "servers." + alias + "." + 
                                                 cleanupName(r.getClassName()) + "." + cleanupName(keyStr);
                             String line = fullPath + " " + values.getValue() + " " + r.getEpoch() / 1000 + "\n";
                             if (isDebugEnabled()) {
