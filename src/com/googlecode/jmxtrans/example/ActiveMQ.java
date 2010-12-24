@@ -1,8 +1,5 @@
 package com.googlecode.jmxtrans.example;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
@@ -20,23 +17,23 @@ import com.googlecode.jmxtrans.util.JmxUtils;
  */
 public class ActiveMQ {
 
+    private static final String GW_HOST = "192.168.192.133";
+
     /** */
     public static void main(String[] args) throws Exception {
 
         Server server = new Server("w2", "1105");
         server.setAlias("w2_activemq_1105");
         GraphiteWriter gw = new GraphiteWriter();
-//        gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
-        gw.addSetting(GraphiteWriter.HOST, "localhost");
+        gw.addSetting(GraphiteWriter.HOST, GW_HOST);
+//        gw.addSetting(GraphiteWriter.HOST, "localhost");
         gw.addSetting(GraphiteWriter.PORT, 2003);
 
         // use this to add data to GW path
-        List<String> typeNames = new ArrayList<String>();
-        typeNames.add("destinationName");
-        typeNames.add("Destination");
-        gw.addSetting(GraphiteWriter.TYPE_NAMES, typeNames);
-        gw.addSetting(GraphiteWriter.DEBUG, false);
-        
+        gw.addTypeName("destinationName");
+        gw.addTypeName("Destination");
+        gw.addSetting(GraphiteWriter.DEBUG, true);
+
         Query q = new Query();
         q.setObj("org.apache.activemq:BrokerName=localhost,Type=Subscription,clientId=*,consumerId=*,destinationName=*,destinationType=Queue,persistentMode=Non-Durable");
         q.addAttr("PendingQueueSize");
@@ -129,11 +126,22 @@ public class ActiveMQ {
         q8.addKey("CollectionTime");
         q8.addOutputWriter(gw);
         server.addQuery(q8);
-        
-        JmxProcess process = new JmxProcess(server);
 
+        GraphiteWriter gw2 = new GraphiteWriter();
+        gw2.addSetting(GraphiteWriter.HOST, GW_HOST);
+        gw2.addSetting(GraphiteWriter.PORT, 2003);
+
+        gw2.addTypeName("name");
+        gw2.addSetting(GraphiteWriter.DEBUG, true);
+
+        Query q9 = new Query();
+        q9.setObj("java.lang:type=MemoryPool,name=*");
+        q9.addOutputWriter(gw2);
+        server.addQuery(q9);
+
+        JmxProcess process = new JmxProcess(server);
         JmxUtils.prettyPrintJson(process);
-//        JmxUtils.processServer(server);
+        JmxUtils.processServer(server);
 
 //        for (int i = 0; i < 160; i++) {
 //            JmxUtils.processServer(server);

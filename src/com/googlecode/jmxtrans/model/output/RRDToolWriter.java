@@ -65,8 +65,12 @@ public class RRDToolWriter extends BaseOutputWriter {
      * work to make it shorter. Not ideal at all, but works fairly 
      * well it seems.
      */
-    public static String getDataSourceName(String str, String entry) {
-        String caps = WordUtils.capitalize(str, PERIOD);
+    public String getDataSourceName(String typeName, String attributeName, String entry) {
+        String typeNameClean = "";
+        if (typeName != null) {
+            typeNameClean = cleanupStr(typeName);
+        }
+        String caps = WordUtils.capitalize(typeNameClean + "." + attributeName, PERIOD);
         String[] split = StringUtils.splitByCharacterTypeCamelCase(caps);
         String join = StringUtils.join(split, '.');
         String result = WordUtils.initials(join, INITIALS);
@@ -93,7 +97,7 @@ public class RRDToolWriter extends BaseOutputWriter {
             Map<String, Object> values = res.getValues();
             if (values != null) {
                 for (Entry<String, Object> entry : values.entrySet()) {
-                    String key = getDataSourceName(res.getAttributeName(), entry.getKey());
+                    String key = getDataSourceName(retrieveTypeNameValue(res.getTypeName()), res.getAttributeName(), entry.getKey());
                     boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
 
                     if (isDebugEnabled() && isNumeric) {
@@ -113,8 +117,11 @@ public class RRDToolWriter extends BaseOutputWriter {
                 Map<String, Object> values = res.getValues();
                 if (values != null) {
                     for (Entry<String, Object> entry : values.entrySet()) {
-                        String key = getDataSourceName(res.getAttributeName(), entry.getKey());
-                        sb.append("<datasource><name>" + key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+                        boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
+                        if (isNumeric) {
+                            String key = getDataSourceName(retrieveTypeNameValue(res.getTypeName()), res.getAttributeName(), entry.getKey());
+                            sb.append("<datasource><name>" + key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+                        }
                     }
                 }
             }

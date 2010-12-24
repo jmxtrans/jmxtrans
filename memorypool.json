@@ -1,0 +1,20 @@
+{
+  "servers" : [ {
+    "port" : "1099",
+    "host" : "w2",
+    "queries" : [ {
+      "obj" : "java.lang:type=MemoryPool,name=*",
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.RRDToolWriter",
+        "settings" : {
+            "templateFile" : "memorypool-rrd-template.xml",
+            "outputFile" : "target/memorypool.rrd",
+            "binaryPath" : "/opt/local/bin",
+            "typeNames" : ["name"],
+            "debug" : true,
+            "generate" : true
+        }
+      } ]
+    } ]
+  } ]
+}

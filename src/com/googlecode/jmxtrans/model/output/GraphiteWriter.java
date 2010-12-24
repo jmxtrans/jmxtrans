@@ -3,12 +3,10 @@ package com.googlecode.jmxtrans.model.output;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +29,6 @@ public class GraphiteWriter extends BaseOutputWriter {
     private String host = null;
     private Integer port = null;
     
-    public static final String TYPE_NAMES = "typeNames";
-    private List<String> typeNames = null;
-    
     public GraphiteWriter() {
     }
     
@@ -44,15 +39,6 @@ public class GraphiteWriter extends BaseOutputWriter {
         if (host == null || port == null) {
             throw new RuntimeException("Host and port can't be null");
         }
-    }
-
-    public String cleanupName(String name) {
-        if (name == null) {
-            return null;
-        }
-        String clean = name.replace('.', '_');
-        clean = clean.replace(" ", "");
-        return clean;
     }
 
     public void doWrite(Query query) throws Exception {
@@ -79,21 +65,21 @@ public class GraphiteWriter extends BaseOutputWriter {
                             } else {
                                 alias = query.getServer().getHost() + "_" + query.getServer().getPort();
                             }
-                            alias = cleanupName(alias);
+                            alias = cleanupStr(alias);
 
                             StringBuilder sb = new StringBuilder();
                             sb.append("servers.");
                             sb.append(alias);
                             sb.append(".");
-                            sb.append(cleanupName(r.getClassName()));
+                            sb.append(cleanupStr(r.getClassName()));
                             sb.append(".");
 
-                            String typeName = cleanupName(handleTypeName(r.getTypeName()));
+                            String typeName = cleanupStr(retrieveTypeNameValue(r.getTypeName()));
                             if (typeName != null) {
                                 sb.append(typeName);
                                 sb.append(".");
                             }
-                            sb.append(cleanupName(keyStr));
+                            sb.append(cleanupStr(keyStr));
 
                             sb.append(" ");
                             sb.append(values.getValue());
@@ -116,44 +102,9 @@ public class GraphiteWriter extends BaseOutputWriter {
         }
     }
 
-    private String handleTypeName(String typeName) {
-        List<String> typeNames = getTypeNames();
-        if (typeNames == null || typeNames.size() == 0) {
-            return null;
-        }
-        String[] tokens = typeName.split(",");
-        boolean foundIt = false;
-        for (String token : tokens) {
-            String[] keys = token.split("=");
-            for (String key : keys) {
-                // we want the next item in the array.
-                if (foundIt) {
-                    return key;
-                }
-                if (typeNames.contains(key)) {
-                    foundIt = true;
-                }
-            }
-        }
-        return null;
-    }
-
     private Writer connect() throws Exception {
         Socket socket = new Socket(host, port);
         return new PrintWriter(socket.getOutputStream(), true);
     }
 
-    public void setTypeNames(List<String> typeNames) {
-        this.getSettings().put(TYPE_NAMES, typeNames);
-        this.typeNames = typeNames;
-    }
-
-    @JsonIgnore
-    @SuppressWarnings("unchecked")
-    public List<String> getTypeNames() {
-        if (this.typeNames == null) {
-            this.typeNames = (List<String>) this.getSettings().get(TYPE_NAMES);
-        }
-        return this.typeNames;
-    }
 }
