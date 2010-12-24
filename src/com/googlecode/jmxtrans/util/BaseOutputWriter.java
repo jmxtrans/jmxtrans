@@ -1,8 +1,9 @@
 package com.googlecode.jmxtrans.util;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -23,29 +24,33 @@ public abstract class BaseOutputWriter implements OutputWriter {
     public static final String DEBUG = "debug";
     public static final String TYPE_NAMES = "typeNames";
 
-    private List<String> typeNames = null;
     private Boolean debugEnabled = null;
     private Map<String, Object> settings;
 
+    /** */
     public void addSetting(String key, Object value) {
         getSettings().put(key, value);
     }
 
+    /** */
     public Map<String, Object> getSettings() {
         if (this.settings == null) {
-            this.settings = new HashMap<String, Object>();
+            this.settings = new TreeMap<String, Object>();
         }
         return this.settings;
     }
     
+    /** */
     public void setSettings(Map<String, Object> settings) {
         this.settings = settings;
     }
     
+    /** */
     public boolean getBooleanSetting(String key) {
         return this.getSettings().containsKey(key) ? (Boolean) this.getSettings().get(key) : Boolean.FALSE;
     }
 
+    /** */
     @JsonIgnore
     public boolean isDebugEnabled() {
         if (debugEnabled == null) {
@@ -54,20 +59,23 @@ public abstract class BaseOutputWriter implements OutputWriter {
         return debugEnabled != null ? debugEnabled : false;
     }
 
+    /** */
     public void setTypeNames(List<String> typeNames) {
         this.getSettings().put(TYPE_NAMES, typeNames);
-        this.typeNames = typeNames;
     }
 
+    /** */
     @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getTypeNames() {
-        if (this.typeNames == null) {
-            this.typeNames = (List<String>) this.getSettings().get(TYPE_NAMES);
+        if (!this.getSettings().containsKey(TYPE_NAMES)) {
+            List<String> tmp = new ArrayList<String>();
+            this.getSettings().put(TYPE_NAMES, tmp);
         }
-        return this.typeNames;
+        return (List<String>) this.getSettings().get(TYPE_NAMES);
     }
 
+    /** */
     public void addTypeName(String str) {
         this.getTypeNames().add(str);
     }

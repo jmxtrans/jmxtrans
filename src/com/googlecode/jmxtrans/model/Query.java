@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
@@ -17,15 +18,15 @@ import com.googlecode.jmxtrans.OutputWriter;
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
+@JsonPropertyOrder(value={"obj", "attr", "keys", "outputWriters"})
 public class Query {
     private Server server;
     
-    private List<OutputWriter> outputWriters;
-
     private String obj;
     private List<String> attr;
-    private List<Result> results;
     private List<String> keys;
+    private List<OutputWriter> outputWriters;
+    private List<Result> results;
 
     public Query() { }
 
