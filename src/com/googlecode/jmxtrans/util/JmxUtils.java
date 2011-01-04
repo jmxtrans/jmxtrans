@@ -3,6 +3,7 @@ package com.googlecode.jmxtrans.util;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.rmi.UnmarshalException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -118,23 +119,35 @@ public class JmxUtils {
                     query.addAttr(attrInfo.getName());
                 }
             }
-            AttributeList al = mbeanServer.getAttributes(queryName, query.getAttr().toArray(new String[query.getAttr().size()]));
-            for (Attribute attribute : al.asList()) {
-                getResult(resList, info, oi, (Attribute)attribute, query);
+
+            try {
+                if (query.getAttr() != null && query.getAttr().size() > 0) {
+                    log.debug("Started query: " + query);
+                    AttributeList al = mbeanServer.getAttributes(queryName, query.getAttr().toArray(new String[query.getAttr().size()]));
+                    for (Attribute attribute : al.asList()) {
+                        getResult(resList, info, oi, (Attribute)attribute, query);
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Finished query.");
+                    }
+
+                    query.setResults(resList);
+
+                    // Now run the filters.
+                    runFiltersForQuery(query);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Finished running filters: " + query);
+                    }
+                }
+            } catch (UnmarshalException ue) {
+                if (ue.getCause() != null && ue.getCause() instanceof ClassNotFoundException) {
+                    log.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: " +
+                    		"http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
+                }
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Executed query: " + query);
-        }
         
-        query.setResults(resList);
-
-        // Now run the filters.
-        runFiltersForQuery(query);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Finished running filters: " + query);
-        }
     }
 
     /**
