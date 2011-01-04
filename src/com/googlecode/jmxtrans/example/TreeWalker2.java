@@ -31,7 +31,7 @@ public class TreeWalker2 {
 
     /** */
     public static void main(String[] args) throws Exception {
-        Server server = new Server("w2", "1105");
+        Server server = new Server("localhost", "1099");
 
         JMXConnector conn = null;
         try {
