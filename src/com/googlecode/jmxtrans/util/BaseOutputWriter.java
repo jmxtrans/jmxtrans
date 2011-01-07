@@ -56,7 +56,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
                 result = (Boolean)foo;
             }
         }
-        return result;
+        return result != null ? result : false;
     }
 
     /** */
