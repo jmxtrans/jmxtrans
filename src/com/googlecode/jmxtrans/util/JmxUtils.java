@@ -103,12 +103,13 @@ public class JmxUtils {
 
     public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
         
-        List<Result> resList = new ArrayList<Result>();
-
         ObjectName oName = new ObjectName(query.getObj());
 
         Set<ObjectName> queryNames = mbeanServer.queryNames(oName, null);
         for (ObjectName queryName : queryNames) {
+                        
+            List<Result> resList = new ArrayList<Result>();
+
             MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
             ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
 
@@ -123,6 +124,7 @@ public class JmxUtils {
             try {
                 if (query.getAttr() != null && query.getAttr().size() > 0) {
                     log.debug("Started query: " + query);
+
                     AttributeList al = mbeanServer.getAttributes(queryName, query.getAttr().toArray(new String[query.getAttr().size()]));
                     for (Attribute attribute : al.asList()) {
                         getResult(resList, info, oi, (Attribute)attribute, query);

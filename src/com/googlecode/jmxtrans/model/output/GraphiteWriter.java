@@ -74,7 +74,7 @@ public class GraphiteWriter extends BaseOutputWriter {
                             sb.append(cleanupStr(r.getClassName()));
                             sb.append(".");
 
-                            String typeName = cleanupStr(retrieveTypeNameValue(r.getTypeName()));
+                            String typeName = cleanupStr(getConcatedTypeNameValues(r.getTypeName()));
                             if (typeName != null) {
                                 sb.append(typeName);
                                 sb.append(".");

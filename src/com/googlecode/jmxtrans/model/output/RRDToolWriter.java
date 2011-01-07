@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -42,9 +43,8 @@ public class RRDToolWriter extends BaseOutputWriter {
     private File outputFile = null;
     private File templateFile = null;
     private File binaryPath = null;
-    private static final char[] PERIOD = {'.'};
+    public static final String GENERATE = "generate";
     private static final char[] INITIALS = {' ', '.'};
-    private static final String GENERATE = "generate";
 
     /** */
     public RRDToolWriter() {
@@ -66,20 +66,24 @@ public class RRDToolWriter extends BaseOutputWriter {
      * well it seems.
      */
     public String getDataSourceName(String typeName, String attributeName, String entry) {
-        String typeNameClean = "";
+
+        String result = null;
         if (typeName != null) {
-            typeNameClean = cleanupStr(typeName);
-        }
-        String caps = WordUtils.capitalize(typeNameClean + "." + attributeName, PERIOD);
-        String[] split = StringUtils.splitByCharacterTypeCamelCase(caps);
-        String join = StringUtils.join(split, '.');
-        String result = WordUtils.initials(join, INITIALS);
-        
-        if (result.length() + entry.length() < 21) {
-            return result + WordUtils.capitalize(entry);
+            result = typeName + attributeName + entry;
         } else {
-            return result + WordUtils.initials(entry);
+            result = attributeName + entry;
         }
+
+        if (attributeName.length() > 15) {
+            String[] split = StringUtils.splitByCharacterTypeCamelCase(attributeName);
+            String join = StringUtils.join(split, '.');
+            attributeName = WordUtils.initials(join, INITIALS);
+        }
+        result = attributeName + DigestUtils.md5Hex(result);
+
+        result = StringUtils.left(result, 19);
+        
+        return result;
     }
 
     /** */
@@ -88,7 +92,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 
         List<String> dsNames = getDsNames(def.getDsDefs());
         List<Result> results = query.getResults();
-
+        
         Map<String, String> dataMap = new TreeMap<String, String>();
 
         // go over all the results and look for datasource names that map to keys from the result values
@@ -97,7 +101,7 @@ public class RRDToolWriter extends BaseOutputWriter {
             Map<String, Object> values = res.getValues();
             if (values != null) {
                 for (Entry<String, Object> entry : values.entrySet()) {
-                    String key = getDataSourceName(retrieveTypeNameValue(res.getTypeName()), res.getAttributeName(), entry.getKey());
+                    String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
                     boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
 
                     if (isDebugEnabled() && isNumeric) {
@@ -111,27 +115,38 @@ public class RRDToolWriter extends BaseOutputWriter {
             }
         }
         
+        doGenerate(results);
+        
+        if (dataMap.keySet().size() > 0 && dataMap.values().size() > 0) {
+            rrdToolUpdate(StringUtils.join(dataMap.keySet(), ':'), StringUtils.join(dataMap.values(), ':'));
+        } else {
+            log.error("Nothing was logged for query: " + query);
+        }
+    }
+
+    private void doGenerate(List<Result> results) throws Exception {
         if (isDebugEnabled() && this.getBooleanSetting(GENERATE)) {
             StringBuilder sb = new StringBuilder("\n");
+            List<String> keys = new ArrayList<String>();
+
             for (Result res : results) {
                 Map<String, Object> values = res.getValues();
                 if (values != null) {
                     for (Entry<String, Object> entry : values.entrySet()) {
                         boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
                         if (isNumeric) {
-                            String key = getDataSourceName(retrieveTypeNameValue(res.getTypeName()), res.getAttributeName(), entry.getKey());
-                            sb.append("<datasource><name>" + key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+                            String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
+                            if (keys.contains(key)) {
+                                throw new Exception("Duplicate datasource name found: '" + key + "'. Please try to add more typeName keys to the writer to make the name more unique. " + res.toString());
+                            }
+                            keys.add(key);
+                            
+                            sb.append("<datasource><!-- " + res.getTypeName() + ":" + res.getAttributeName() + ":" + entry.getKey() + " --><name>" + key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
                         }
                     }
                 }
             }
             log.debug(sb.toString());
-        }
-        
-        if (dataMap.keySet().size() > 0 && dataMap.values().size() > 0) {
-            rrdToolUpdate(StringUtils.join(dataMap.keySet(), ':'), StringUtils.join(dataMap.values(), ':'));
-        } else {
-            log.error("Nothing was logged for query: " + query);
         }
     }
 

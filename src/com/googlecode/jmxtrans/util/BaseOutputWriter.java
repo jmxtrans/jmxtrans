@@ -47,14 +47,23 @@ public abstract class BaseOutputWriter implements OutputWriter {
     
     /** */
     public boolean getBooleanSetting(String key) {
-        return this.getSettings().containsKey(key) ? (Boolean) this.getSettings().get(key) : Boolean.FALSE;
+        Boolean result = null;
+        if (this.getSettings().containsKey(key)) {
+            Object foo = this.getSettings().get(key);
+            if (foo instanceof String) {
+                result = Boolean.valueOf((String)foo);
+            } else if (foo instanceof Boolean) {
+                result = (Boolean)foo;
+            }
+        }
+        return result;
     }
 
     /** */
     @JsonIgnore
     public boolean isDebugEnabled() {
         if (debugEnabled == null) {
-            debugEnabled =  this.getSettings().containsKey(DEBUG) ? (Boolean) this.getSettings().get(DEBUG) : Boolean.FALSE;
+            return getBooleanSetting(DEBUG);
         }
         return debugEnabled != null ? debugEnabled : false;
     }
@@ -88,12 +97,25 @@ public abstract class BaseOutputWriter implements OutputWriter {
      * 
      * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the string
      */
-    protected String retrieveTypeNameValue(String typeNameStr) {
+    protected String getConcatedTypeNameValues(String typeNameStr) {
         List<String> typeNames = getTypeNames();
         if (typeNames == null || typeNames.size() == 0) {
             return null;
         }
         String[] tokens = typeNameStr.split(",");
+        StringBuilder sb = new StringBuilder();
+        for (String key : typeNames) {
+            String result = getTypeNameValue(key, tokens);
+            if (result != null) {
+                sb.append(result);
+                sb.append("_");
+            }
+        }
+        return sb.toString();
+    }
+
+    /** */
+    private String getTypeNameValue(String typeName, String[] tokens) {
         boolean foundIt = false;
         for (String token : tokens) {
             String[] keys = token.split("=");
@@ -102,7 +124,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
                 if (foundIt) {
                     return key;
                 }
-                if (typeNames.contains(key)) {
+                if (typeName.equals(key)) {
                     foundIt = true;
                 }
             }
@@ -117,7 +139,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
         if (name == null) {
             return null;
         }
-        String clean = name.replace('.', '_');
+        String clean = name.replace(".", "_");
         clean = clean.replace(" ", "");
         return clean;
     }
