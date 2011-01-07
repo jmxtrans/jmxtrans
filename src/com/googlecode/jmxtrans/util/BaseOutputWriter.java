@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.jmxtrans.OutputWriter;
@@ -111,7 +112,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
                 sb.append("_");
             }
         }
-        return sb.toString();
+        return StringUtils.chomp(sb.toString(), "_");
     }
 
     /** */
