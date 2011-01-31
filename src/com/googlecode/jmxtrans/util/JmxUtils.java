@@ -29,7 +29,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
@@ -44,7 +43,7 @@ import com.googlecode.jmxtrans.model.Server;
 
 /**
  * The worker code.
- * 
+ *
  * @author jon
  */
 public class JmxUtils {
@@ -56,7 +55,7 @@ public class JmxUtils {
      * or invokes them one at a time.
      */
     public static void processQueriesForServer(final MBeanServerConnection mbeanServer, Server server) throws Exception {
-        
+
         if (server.isQueriesMultiThreaded()) {
             ExecutorService service = null;
             try {
@@ -90,7 +89,7 @@ public class JmxUtils {
             this.mbeanServer = mbeanServer;
             this.query = query;
         }
-        
+
         public void run() {
             try {
                 processQuery(mbeanServer, query);
@@ -102,12 +101,12 @@ public class JmxUtils {
     }
 
     public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
-        
+
         ObjectName oName = new ObjectName(query.getObj());
 
         Set<ObjectName> queryNames = mbeanServer.queryNames(oName, null);
         for (ObjectName queryName : queryNames) {
-                        
+
             List<Result> resList = new ArrayList<Result>();
 
             MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
@@ -145,11 +144,11 @@ public class JmxUtils {
             } catch (UnmarshalException ue) {
                 if (ue.getCause() != null && ue.getCause() instanceof ClassNotFoundException) {
                     log.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: " +
-                    		"http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
+                            "http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
                 }
             }
         }
-        
+
     }
 
     /**
@@ -158,12 +157,12 @@ public class JmxUtils {
      */
     private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, String attributeName, CompositeData cds, Query query) {
         CompositeType t = cds.getCompositeType();
-        
+
         Result r = getNewResultObject(info, oi, attributeName, query);
 
         Set<String> keys = t.keySet();
         for (String key : keys) {
-            Object value = cds.get(key);                
+            Object value = cds.get(key);
             if (value instanceof TabularDataSupport) {
                 TabularDataSupport tds = (TabularDataSupport) value;
                 processTabularDataSupport(resList, info, oi, r, attributeName + "." + key, tds, query);
@@ -287,7 +286,7 @@ public class JmxUtils {
      * or invokes them one at a time.
      */
     public static void execute(JmxProcess process) throws Exception {
-        
+
         if (process.isServersMultiThreaded()) {
             ExecutorService service = null;
             try {
@@ -317,7 +316,7 @@ public class JmxUtils {
         public ProcessServerThread(Server server) {
             this.server = server;
         }
-        
+
         public void run() {
             try {
                 processServer(server);
@@ -390,8 +389,46 @@ public class JmxUtils {
      * Useful for figuring out if an Object is a number.
      */
     public static boolean isNumeric(Object value) {
-        return ((value instanceof String && StringUtils.isNumeric((String)value)) || 
-                value instanceof Number || value instanceof Integer || 
+        return ((value instanceof String && isNumeric((String)value)) ||
+                value instanceof Number || value instanceof Integer ||
                 value instanceof Long || value instanceof Double || value instanceof Float);
     }
+
+    /**
+     * <p>Checks if the String contains only unicode digits.
+     * A decimal point is a digit and returns true.</p>
+     *
+     * <p><code>null</code> will return <code>false</code>.
+     * An empty String ("") will return <code>true</code>.</p>
+     *
+     * <pre>
+     * StringUtils.isNumeric(null)   = false
+     * StringUtils.isNumeric("")     = true
+     * StringUtils.isNumeric("  ")   = false
+     * StringUtils.isNumeric("123")  = true
+     * StringUtils.isNumeric("12 3") = false
+     * StringUtils.isNumeric("ab2c") = false
+     * StringUtils.isNumeric("12-3") = false
+     * StringUtils.isNumeric("12.3") = true
+     * </pre>
+     *
+     * @param str  the String to check, may be null
+     * @return <code>true</code> if only contains digits, and is non-null
+     */
+    public static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            char cat = str.charAt(i);
+            if (cat == '.') {
+                continue;
+            } else if (Character.isDigit(cat) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
