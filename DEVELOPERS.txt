@@ -1,0 +1,19 @@
+How to do a release:
+
+#1. Create a file called build.credentials.properties in the top level project directory.
+
+#2. Add two properties (and fill them in with your google code u/p):
+gc.username=
+gc.password=
+
+#3. Make changes to the code and commit them.
+
+#4. svn up; ant dist; ant upload
+
+#5. Now, commit the javadoc directory.
+
+#6. Go to http://code.google.com/p/jmxtrans/downloads/list
+
+#7. Click on Summary for the previous version.
+
+#8. Change Label from Featured to Deprecated.
