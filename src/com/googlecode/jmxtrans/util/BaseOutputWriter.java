@@ -134,7 +134,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
     }
 
     /**
-     * Replaces all . with _ and removes all spaces.
+     * Replaces all . with _ and removes all spaces and double/single quotes.
      */
     protected String cleanupStr(String name) {
         if (name == null) {
@@ -142,6 +142,8 @@ public abstract class BaseOutputWriter implements OutputWriter {
         }
         String clean = name.replace(".", "_");
         clean = clean.replace(" ", "");
+        clean = clean.replace("\"", "");
+        clean = clean.replace("'", "");
         return clean;
     }
 
