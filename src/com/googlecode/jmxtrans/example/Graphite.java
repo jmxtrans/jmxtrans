@@ -26,12 +26,13 @@ public class Graphite {
         gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
         gw.addSetting(GraphiteWriter.PORT, 2003);
         gw.addSetting(GraphiteWriter.DEBUG, true);
+        gw.addSetting(GraphiteWriter.ROOT_PREFIX, "jon.foo.bar");
         q.addOutputWriter(gw);
         server.addQuery(q);
 
         JmxProcess jmx = new JmxProcess(server);
         JmxUtils.prettyPrintJson(jmx);
-        JmxUtils.execute(jmx);
+//        JmxUtils.execute(jmx);
 
 //        for (int i = 0; i < 160; i++) {
 //            JmxUtils.execute(jmx);

@@ -25,22 +25,32 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 public class GraphiteWriter extends BaseOutputWriter {
 
     private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
+    public static final String ROOT_PREFIX = "rootPrefix";
 
     private String host = null;
     private Integer port = null;
+    private String rootPrefix = "servers";
     
+    /** */
     public GraphiteWriter() {
     }
     
+    /** */
     public void validateSetup() throws Exception {
         host = (String) this.getSettings().get(HOST);
         port = (Integer) this.getSettings().get(PORT);
-        
+
         if (host == null || port == null) {
             throw new RuntimeException("Host and port can't be null");
         }
+
+        String rootPrefixTmp = (String) this.getSettings().get(ROOT_PREFIX);
+        if (rootPrefixTmp != null) {
+        	rootPrefix = rootPrefixTmp;
+        }
     }
 
+    /** */
     public void doWrite(Query query) throws Exception {
         Writer writer = connect();
         try {
@@ -68,7 +78,8 @@ public class GraphiteWriter extends BaseOutputWriter {
                             }
 
                             StringBuilder sb = new StringBuilder();
-                            sb.append("servers.");
+                            sb.append(rootPrefix);
+                            sb.append(".");
                             sb.append(alias);
                             sb.append(".");
                             sb.append(cleanupStr(r.getClassName()));
@@ -102,6 +113,7 @@ public class GraphiteWriter extends BaseOutputWriter {
         }
     }
 
+    /** */
     private Writer connect() throws Exception {
         Socket socket = new Socket(host, port);
         return new PrintWriter(socket.getOutputStream(), true);
