@@ -64,8 +64,8 @@ public class GraphiteWriter extends BaseOutputWriter {
                                 alias = query.getServer().getAlias();
                             } else {
                                 alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+                                alias = cleanupStr(alias);
                             }
-                            alias = cleanupStr(alias);
 
                             StringBuilder sb = new StringBuilder();
                             sb.append("servers.");
