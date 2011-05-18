@@ -18,7 +18,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 /**
  * This output writer sends data to a host/port combination
  * in the Graphite format.
- * 
+ *
  * @see <a href="http://graphite.wikidot.com/getting-your-data-into-graphite">http://graphite.wikidot.com/getting-your-data-into-graphite</a>
  * @author jon
  */
@@ -30,11 +30,11 @@ public class GraphiteWriter extends BaseOutputWriter {
     private String host = null;
     private Integer port = null;
     private String rootPrefix = "servers";
-    
+
     /** */
     public GraphiteWriter() {
     }
-    
+
     /** */
     public void validateSetup() throws Exception {
         host = (String) this.getSettings().get(HOST);
@@ -68,7 +68,7 @@ public class GraphiteWriter extends BaseOutputWriter {
                             } else {
                                 keyStr = r.getAttributeName() + "." + values.getKey();
                             }
-                            
+
                             String alias = null;
                             if (query.getServer().getAlias() != null) {
                                 alias = query.getServer().getAlias();
@@ -82,7 +82,14 @@ public class GraphiteWriter extends BaseOutputWriter {
                             sb.append(".");
                             sb.append(alias);
                             sb.append(".");
-                            sb.append(cleanupStr(r.getClassName()));
+
+                            // Allow people to use something other than the classname as the output.
+                            if (r.getClassNameAlias() != null) {
+                                sb.append(r.getClassNameAlias());
+                            } else {
+                                sb.append(cleanupStr(r.getClassName()));
+                            }
+
                             sb.append(".");
 
                             String typeName = cleanupStr(getConcatedTypeNameValues(r.getTypeName()));

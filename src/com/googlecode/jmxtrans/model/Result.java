@@ -9,7 +9,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * Represents the result of a query.
- * 
+ *
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
@@ -38,13 +38,20 @@ public class Result {
     public Query getQuery() {
         return query;
     }
-    
+
     public void setClassName(String className) {
         this.className = className;
     }
 
     public String getClassName() {
         return className;
+    }
+
+    /**
+     * Specified as part of the query.
+     */
+    public String getClassNameAlias() {
+        return query.getResultAlias();
     }
 
     public void setTypeName(String typeName) {
@@ -62,7 +69,7 @@ public class Result {
     public Map<String, Object> getValues() {
         return values;
     }
-    
+
     public void addValue(String key, Object value) {
         if (this.values == null) {
             values = new TreeMap<String, Object>();

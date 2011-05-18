@@ -12,18 +12,19 @@ import com.googlecode.jmxtrans.OutputWriter;
 
 /**
  * Represents a JMX Query to ask for obj, attr and one or more keys.
- * 
+ *
  * Once the query has been executed, it'll have a list of results.
- * 
+ *
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
-@JsonPropertyOrder(value={"obj", "attr", "keys", "outputWriters"})
+@JsonPropertyOrder(value={"obj", "attr", "resultAlias", "keys", "outputWriters"})
 public class Query {
     private Server server;
-    
+
     private String obj;
     private List<String> attr;
+    private String resultAlias;
     private List<String> keys;
     private List<OutputWriter> outputWriters;
     private List<Result> results;
@@ -50,6 +51,20 @@ public class Query {
 
     public String getObj() {
         return obj;
+    }
+
+    /**
+     * The alias allows you to specify what you would like the results of the query to go into.
+     */
+    public void setResultAlias(String resultAlias) {
+        this.resultAlias = resultAlias;
+    }
+
+    /**
+     * The alias allows you to specify what you would like the results of the query to go into.
+     */
+    public String getResultAlias() {
+        return resultAlias;
     }
 
     public void setAttr(List<String> attr) {
@@ -101,7 +116,7 @@ public class Query {
     public List<OutputWriter> getOutputWriters() {
         return outputWriters;
     }
-    
+
     public void addOutputWriter(OutputWriter filter) {
         if (this.outputWriters == null) {
             this.outputWriters = new ArrayList<OutputWriter>();
@@ -121,6 +136,6 @@ public class Query {
 
     @Override
     public String toString() {
-        return "Query [obj=" + obj + ", attr=" + attr + "]";
+        return "Query [server=" + server + ", obj=" + obj + ", objAlias=" + resultAlias + ", attr=" + attr + "]";
     }
 }
