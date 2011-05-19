@@ -136,6 +136,6 @@ public class Query {
 
     @Override
     public String toString() {
-        return "Query [server=" + server + ", obj=" + obj + ", objAlias=" + resultAlias + ", attr=" + attr + "]";
+        return "Query [" + ", obj=" + obj + ", objAlias=" + resultAlias + ", attr=" + attr + "]";
     }
 }
