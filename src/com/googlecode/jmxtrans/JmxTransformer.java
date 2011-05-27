@@ -33,10 +33,10 @@ import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
 
 /**
- * Main() class that takes an argument which is the directory 
- * to look in for files which contain json data that defines 
+ * Main() class that takes an argument which is the directory
+ * to look in for files which contain json data that defines
  * queries to run against JMX servers.
- * 
+ *
  * @author jon
  */
 public class JmxTransformer extends SignalInterceptor implements WatchedCallback {
@@ -44,11 +44,11 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
     private static String QUARTZ_SERVER_PROPERTIES = null;
     private static int SECONDS_BETWEEN_SERVER_JOB_RUNS = 60;
-    
+
     private File jsonDir = new File(".");
     private boolean runEndlessly = false;
     private Scheduler serverScheduler = null;
-    
+
     private WatchDir watcher;
 
     /** */
@@ -109,12 +109,12 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             scheduleJob(scheduler, jsonFile, server);
         }
     }
-    
+
     /**
      * Schedules an individual job.
      */
     private void scheduleJob(Scheduler scheduler, File jsonFile, Server server) throws Exception {
-        
+
         // The Jobs name is related to the file it was contained in.
         String name = jsonFile.getCanonicalPath() + "-" + server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis();
         JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
@@ -124,15 +124,15 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         jd.setJobDataMap(map);
 
         Trigger trigger = null;
-        
+
         if (server.getCronExpression() != null && CronExpression.isValidExpression(server.getCronExpression())) {
             trigger = new CronTrigger();
             ((CronTrigger)trigger).setCronExpression(server.getCronExpression());
-            ((CronTrigger)trigger).setName(Long.valueOf(System.currentTimeMillis()).toString());
+            ((CronTrigger)trigger).setName(server.getHost() + server.getPort() + Long.valueOf(System.currentTimeMillis()).toString());
             ((CronTrigger)trigger).setStartTime(new Date());
         } else {
             Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(SECONDS_BETWEEN_SERVER_JOB_RUNS);
-            minuteTrigger.setName(Long.valueOf(System.currentTimeMillis()).toString());
+            minuteTrigger.setName(server.getHost() + server.getPort() + Long.valueOf(System.currentTimeMillis()).toString());
             minuteTrigger.setStartTime(new Date());
 
             trigger = minuteTrigger;
@@ -144,7 +144,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         }
     }
 
-    /** 
+    /**
      * Deletes all of the Jobs related to a file.
      */
     private void deleteJobsInFile(Scheduler scheduler, File jsonFile) throws Exception {
@@ -186,7 +186,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         Option[] options = cl.getOptions();
 
         boolean result = true;
-        
+
         for (Option option : options) {
             if (option.getOpt().equals("j")) {
                 File tmp = new File(option.getValue());
@@ -233,7 +233,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public File getJsonDir() {
         return jsonDir;
     }
-    
+
     /**
      * Looks in the jsonDir for files that end with .json as the suffix.
      */
