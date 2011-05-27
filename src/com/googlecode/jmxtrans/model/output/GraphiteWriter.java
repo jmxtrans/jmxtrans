@@ -30,7 +30,7 @@ public class GraphiteWriter extends BaseOutputWriter {
     private String host = null;
     private Integer port = null;
     private String rootPrefix = "servers";
-
+    
     /** */
     public GraphiteWriter() {
     }
@@ -52,7 +52,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 
     /** */
     public void doWrite(Query query) throws Exception {
-        Writer writer = connect();
+    	Socket socket = new Socket(host, port);
+        Writer writer = new PrintWriter(socket.getOutputStream(), true);
         try {
             for (Result r : query.getResults()) {
                 if (isDebugEnabled()) {
@@ -117,13 +118,7 @@ public class GraphiteWriter extends BaseOutputWriter {
             writer.flush();
         } finally {
             IOUtils.closeQuietly(writer);
+            socket.close();
         }
     }
-
-    /** */
-    private Writer connect() throws Exception {
-        Socket socket = new Socket(host, port);
-        return new PrintWriter(socket.getOutputStream(), true);
-    }
-
 }
