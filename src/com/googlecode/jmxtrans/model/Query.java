@@ -3,6 +3,8 @@ package com.googlecode.jmxtrans.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -137,5 +139,59 @@ public class Query {
     @Override
     public String toString() {
         return "Query [obj=" + obj + ", objAlias=" + resultAlias + ", attr=" + attr + "]";
+    }
+
+    /** */
+    @Override
+    public boolean equals(Object o) {
+    	if (o == null) {
+    		return false;
+    	}
+		if (o == this) {
+			return true;
+		}
+		if (o.getClass() != this.getClass()) {
+			return false;
+		}
+    	
+    	if (!(o instanceof Query)) {
+    		return false;
+    	}
+
+    	Query other = (Query)o;
+    	
+    	int sizeL = 0;
+    	int sizeR = 0;
+    	if (this.getOutputWriters() != null) {
+    		sizeL = this.getOutputWriters().size();
+    	}
+    	if (other.getOutputWriters() != null) {
+    		sizeR = other.getOutputWriters().size();
+    	}
+
+    	return new EqualsBuilder()
+    						.append(this.getObj(), other.getObj())
+    						.append(this.getKeys(), other.getKeys())
+    						.append(this.getAttr(), other.getAttr())
+    						.append(this.getResultAlias(), other.getResultAlias())
+    						.append(sizeL, sizeR)
+    						.isEquals();
+    }
+    
+    /** */
+    @Override
+    public int hashCode() {
+    	int sizeL = 0;
+    	if (this.getOutputWriters() != null) {
+    		sizeL = this.getOutputWriters().size();
+    	}
+
+    	return new HashCodeBuilder(41, 97)
+    						.append(this.getObj())
+    						.append(this.getKeys())
+    						.append(this.getAttr())
+    						.append(this.getResultAlias())
+    						.append(sizeL)
+    						.toHashCode();
     }
 }

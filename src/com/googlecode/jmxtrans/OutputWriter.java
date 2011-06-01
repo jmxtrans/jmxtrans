@@ -7,6 +7,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * Interface which defines a writer for taking jmx data and 
@@ -38,5 +39,5 @@ public interface OutputWriter {
     /**
      * This is run when the object is instantiated. You want to get the settings and validate them.
      */
-    public void validateSetup() throws Exception;
+    public void validateSetup() throws ValidationException;
 }

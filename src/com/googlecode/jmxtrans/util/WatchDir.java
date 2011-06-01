@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import name.pachler.nio.file.ClosedWatchServiceException;
@@ -24,11 +25,13 @@ public class WatchDir extends Thread {
     private WatchService watchService = null;
     private WatchedCallback watched = null;
     
-    /** */
-    public WatchDir(File dir, WatchedCallback watched) throws Exception {
+    /**
+     * 
+     */
+    public WatchDir(File dir, WatchedCallback watched) throws IOException {
         this.watched = watched;
         watchService = FileSystems.getDefault().newWatchService();
-        Path watchedPath = Paths.get(dir.getCanonicalPath());
+        Path watchedPath = Paths.get(dir.getAbsolutePath());
         watchedPath.register(watchService, StandardWatchEventKind.ENTRY_CREATE, StandardWatchEventKind.ENTRY_DELETE, StandardWatchEventKind.ENTRY_MODIFY);
     }
 
@@ -45,7 +48,7 @@ public class WatchDir extends Thread {
                 continue;
             } catch (ClosedWatchServiceException cwse) {
                 // other thread closed watch service
-                log.debug("watch service closed, terminating.");
+                log.debug("Watch service closed, terminating.");
                 break;
             }
 

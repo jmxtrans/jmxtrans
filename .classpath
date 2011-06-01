@@ -13,8 +13,10 @@
 	<classpathentry kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="lib/jpathwatch-0-93-rc1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.3.jar" sourcepath="lib/commons-codec-1.3-sources.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.9b2.jar"/>
+	<classpathentry kind="lib" path="lib/jpathwatch-0-94.jar"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="output" path="_eclipse"/>
 </classpath>

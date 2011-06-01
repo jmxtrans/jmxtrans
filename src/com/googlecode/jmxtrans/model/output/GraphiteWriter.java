@@ -14,6 +14,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This output writer sends data to a host/port combination
@@ -36,12 +37,12 @@ public class GraphiteWriter extends BaseOutputWriter {
     }
 
     /** */
-    public void validateSetup() throws Exception {
+    public void validateSetup() throws ValidationException {
         host = (String) this.getSettings().get(HOST);
         port = (Integer) this.getSettings().get(PORT);
 
         if (host == null || port == null) {
-            throw new RuntimeException("Host and port can't be null");
+            throw new ValidationException("Host and port can't be null");
         }
 
         String rootPrefixTmp = (String) this.getSettings().get(ROOT_PREFIX);

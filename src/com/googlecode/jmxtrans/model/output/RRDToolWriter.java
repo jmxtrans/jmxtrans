@@ -25,6 +25,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it doesn't already exist.
@@ -50,13 +51,13 @@ public class RRDToolWriter extends BaseOutputWriter {
     public RRDToolWriter() {
     }
 
-    public void validateSetup() throws Exception {
+    public void validateSetup() throws ValidationException {
         outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
         templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
         binaryPath = new File((String) this.getSettings().get(BINARY_PATH));
 
         if (outputFile == null || templateFile == null || binaryPath == null) {
-            throw new RuntimeException("output, template and binary path file can't be null");
+            throw new ValidationException("output, template and binary path file can't be null");
         }
     }
 

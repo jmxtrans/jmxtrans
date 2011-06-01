@@ -9,6 +9,7 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This class isn't finished yet.
@@ -25,7 +26,7 @@ public class VelocityWriter extends BaseOutputWriter {
         
     }
     
-    public void validateSetup() throws Exception {
+    public void validateSetup() throws ValidationException {
         // TODO
     }
 

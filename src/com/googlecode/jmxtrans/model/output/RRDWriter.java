@@ -16,6 +16,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it doesn't already exist.
@@ -35,12 +36,12 @@ public class RRDWriter extends BaseOutputWriter {
     public RRDWriter() {
     }
 
-    public void validateSetup() throws Exception {
+    public void validateSetup() throws ValidationException {
         outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
         templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
 
         if (outputFile == null || templateFile == null) {
-            throw new RuntimeException("output file and template file can't be null");
+            throw new ValidationException("output file and template file can't be null");
         }
     }
 

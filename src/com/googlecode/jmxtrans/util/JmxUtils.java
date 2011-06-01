@@ -29,6 +29,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
@@ -49,6 +51,31 @@ import com.googlecode.jmxtrans.model.Server;
 public class JmxUtils {
 
     private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
+
+    /**
+     * Merges two lists of servers (and their queries). Based on the equality of both sets of objects.
+     * Public for testing purposes.
+     */
+    public static void mergeServerLists(List<Server> existing, List<Server> adding) {
+        for (Server server : adding) {
+        	if (existing.contains(server)) {
+        		Server found = existing.get(existing.indexOf(server));
+
+        		List<Query> queries = server.getQueries();
+        		for (Query q : queries) {
+        			try {
+	        			// no need to check for existing since this method already does that
+	    				found.addQuery(q);
+        			} catch (ValidationException ex) {
+        				// catching this exception because we don't want to stop processing
+        				log.error("Error adding query: " + q + " to server" + server, ex);
+        			}
+        		}
+        	} else {
+        		existing.add(server);
+        	}
+        }
+    }
 
     /**
      * Either invokes the queries multithreaded (max threads == server.getMultiThreaded())
@@ -378,7 +405,7 @@ public class JmxUtils {
      * Uses jackson to load json configuration from a File into a full object
      * tree representation of that json.
      */
-    public static JmxProcess getJmxProcess(File file) throws Exception {
+    public static JmxProcess getJmxProcess(File file) throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();
         JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
         jmx.setName(file.getName());

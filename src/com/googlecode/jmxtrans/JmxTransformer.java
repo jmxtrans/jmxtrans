@@ -3,6 +3,7 @@ package com.googlecode.jmxtrans;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,11 +14,13 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.FilenameUtils;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
@@ -29,6 +32,7 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.SignalInterceptor;
+import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
 
@@ -45,9 +49,10 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     private static String QUARTZ_SERVER_PROPERTIES = null;
     private static int SECONDS_BETWEEN_SERVER_JOB_RUNS = 60;
 
-    private File jsonDir = new File(".");
-    private boolean runEndlessly = false;
-    private Scheduler serverScheduler = null;
+    private File jsonDirOrFile;
+
+    private boolean runEndlessly;
+    private Scheduler serverScheduler;
 
     private WatchDir watcher;
 
@@ -87,36 +92,57 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         serverScheduler = serverSchedFact.getScheduler();
         serverScheduler.start();
 
-        watcher = new WatchDir(jsonDir, this);
-        watcher.start();
-
-        for (File file : getJsonFiles(getJsonDir())) {
-            scheduleJobsInFile(serverScheduler, file);
+        File dirToWatch = null;
+        if (getJsonDirOrFile().isFile()) {
+        	dirToWatch = new File(FilenameUtils.getFullPath(getJsonDirOrFile().getAbsolutePath()));
+        } else {
+        	dirToWatch = getJsonDirOrFile();
         }
 
+        watcher = new WatchDir(dirToWatch, this);
+        watcher.start();
+
+        processFiles(serverScheduler, getJsonFiles());
+        
         if (!runEndlessly) {
             this.handle("TERM");
         }
     }
 
     /**
-     * Sucks in a File and creates jobs for each Server in the file.
+     * Adds files, which turn into jobs into the scheduler.
      */
-    private void scheduleJobsInFile(Scheduler scheduler, File jsonFile) throws Exception {
-        JmxProcess process = JmxUtils.getJmxProcess(jsonFile);
+    private void processFiles(Scheduler scheduler, List<File> jsonFiles) {
 
-        for (Server server : process.getServers()) {
-            scheduleJob(scheduler, jsonFile, server);
+    	List<Server> mergedServers = new ArrayList<Server>();
+
+    	for (File jsonFile : jsonFiles) {
+            JmxProcess process;
+			try {
+				process = JmxUtils.getJmxProcess(jsonFile);
+	            JmxUtils.mergeServerLists(mergedServers, process.getServers());
+			} catch (Exception ex) {
+				log.error("Error parsing json: " + jsonFile, ex);
+			}
+        }
+
+        for (Server server : mergedServers) {
+            try {
+				scheduleJob(scheduler, server);
+			} catch (ParseException ex) {
+				log.error("Error parsing cron expression: " + server.getCronExpression(), ex);
+			} catch (SchedulerException ex) {
+				log.error("Error scheduling job for server: " + server, ex);
+			}
         }
     }
-
+    
     /**
      * Schedules an individual job.
      */
-    private void scheduleJob(Scheduler scheduler, File jsonFile, Server server) throws Exception {
+    private void scheduleJob(Scheduler scheduler, Server server) throws ParseException, SchedulerException {
 
-        // The Jobs name is related to the file it was contained in.
-        String name = jsonFile.getCanonicalPath() + "-" + server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis();
+        String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis();
         JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
 
         JobDataMap map = new JobDataMap();
@@ -128,11 +154,11 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         if (server.getCronExpression() != null && CronExpression.isValidExpression(server.getCronExpression())) {
             trigger = new CronTrigger();
             ((CronTrigger)trigger).setCronExpression(server.getCronExpression());
-            ((CronTrigger)trigger).setName(server.getHost() + server.getPort() + Long.valueOf(System.currentTimeMillis()).toString());
+            ((CronTrigger)trigger).setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
             ((CronTrigger)trigger).setStartTime(new Date());
         } else {
             Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(SECONDS_BETWEEN_SERVER_JOB_RUNS);
-            minuteTrigger.setName(server.getHost() + server.getPort() + Long.valueOf(System.currentTimeMillis()).toString());
+            minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
             minuteTrigger.setStartTime(new Date());
 
             trigger = minuteTrigger;
@@ -145,9 +171,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     }
 
     /**
-     * Deletes all of the Jobs related to a file.
+     * Deletes all of the Jobs
      */
-    private void deleteJobsInFile(Scheduler scheduler, File jsonFile) throws Exception {
+    private void deleteAllJobs(Scheduler scheduler) throws Exception {
         List<JobDetail> allJobs = new ArrayList<JobDetail>();
         String[] jobGroups = scheduler.getJobGroupNames();
         for (String jobGroup : jobGroups) {
@@ -158,11 +184,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         }
 
         for (JobDetail jd : allJobs) {
-            if (jd.getName().startsWith(jsonFile.getCanonicalPath() + "-")) {
-                scheduler.deleteJob(jd.getName(), jd.getGroup());
-                if (log.isDebugEnabled()) {
-                    log.debug("Deleted scheduled job: " + jd.getName() + " group: " + jd.getGroup());
-                }
+            scheduler.deleteJob(jd.getName(), jd.getGroup());
+            if (log.isDebugEnabled()) {
+                log.debug("Deleted scheduled job: " + jd.getName() + " group: " + jd.getGroup());
             }
         }
     }
@@ -179,8 +203,10 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         return runEndlessly;
     }
 
-    /** */
-    private boolean parseOptions(String[] args) throws Exception {
+    /**
+     * Parse the options given on the command line.
+     */
+    private boolean parseOptions(String[] args) throws ValidationException, org.apache.commons.cli.ParseException {
         CommandLineParser parser = new GnuParser();
         CommandLine cl = parser.parse(getOptions(), args);
         Option[] options = cl.getOptions();
@@ -191,16 +217,22 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             if (option.getOpt().equals("j")) {
                 File tmp = new File(option.getValue());
                 if (!tmp.exists() && !tmp.isDirectory()) {
-                    throw new RuntimeException("Path to json directory is invalid: " + tmp);
+                    throw new ValidationException("Path to json directory is invalid: " + tmp);
                 }
-                setJsonDir(tmp);
+                setJsonDirOrFile(tmp);
+            } else if (option.getOpt().equals("f")) {
+                File tmp = new File(option.getValue());
+                if (!tmp.exists() && !tmp.isFile()) {
+                    throw new ValidationException("Path to json file is invalid: " + tmp);
+                }
+                setJsonDirOrFile(tmp);
             } else if (option.getOpt().equals("e")) {
                 setRunEndlessly(true);
             } else if (option.getOpt().equals("q")) {
                 QUARTZ_SERVER_PROPERTIES = option.getValue();
                 File file = new File(QUARTZ_SERVER_PROPERTIES);
                 if (!file.exists()) {
-                    throw new RuntimeException("Could not find path to the quartz properties file: " + file.getCanonicalPath());
+                    throw new ValidationException("Could not find path to the quartz properties file: " + file.getAbsolutePath());
                 }
             } else if (option.getOpt().equals("s")) {
                 SECONDS_BETWEEN_SERVER_JOB_RUNS = Integer.valueOf(option.getValue());
@@ -210,6 +242,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
                 result = false;
             }
         }
+        if (result == true && this.getJsonDirOrFile() == null) {
+        	throw new ValidationException("Please specify either the -f or -j option.");
+        }
         return result;
     }
 
@@ -217,6 +252,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public Options getOptions() {
         Options options = new Options();
         options.addOption("j", true, "Directory where json configuration is stored. Default is .");
+        options.addOption("f", true, "A single json file to execute.");
         options.addOption("e", false, "Run endlessly. Default false.");
         options.addOption("q", true, "Path to quartz configuration file.");
         options.addOption("s", true, "Seconds between server job runs (not defined with cron). Default: 60");
@@ -225,21 +261,31 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     }
 
     /** */
-    public void setJsonDir(File jsonDir) {
-        this.jsonDir = jsonDir;
-    }
+    public void setJsonDirOrFile(File jsonDirOrFile) {
+		this.jsonDirOrFile = jsonDirOrFile;
+	}
 
     /** */
-    public File getJsonDir() {
-        return jsonDir;
-    }
+	public File getJsonDirOrFile() {
+		return jsonDirOrFile;
+	}
 
-    /**
-     * Looks in the jsonDir for files that end with .json as the suffix.
+	/**
+     * If getJsonFile() is a file, then that is all we load. Otherwise,
+     * look in the jsonDir for files. 
+     * 
+     * Files must end with .json as the suffix.
      */
-    private List<File> getJsonFiles(File jsonDir) {
-        File[] files = jsonDir.listFiles();
-        List<File> result = new ArrayList<File>();
+    private List<File> getJsonFiles() {
+    	File[] files = null;
+    	if (getJsonDirOrFile() != null && getJsonDirOrFile().isFile()) {
+    		files = new File[1];
+    		files[0] = getJsonDirOrFile();
+    	} else {
+            files = getJsonDirOrFile().listFiles();
+    	}
+
+    	List<File> result = new ArrayList<File>();
         for (File file : files) {
             if (isJsonFile(file)) {
                 result.add(file);
@@ -274,6 +320,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
      * Are we a file and a json file?
      */
     private boolean isJsonFile(File file) {
+    	if (getJsonDirOrFile().isFile()) {
+    		return file.equals(getJsonDirOrFile());
+    	}
         return file.isFile() && file.getName().endsWith(".json");
     }
 
@@ -281,8 +330,8 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public void fileModified(File file) throws Exception {
         if (isJsonFile(file)) {
             Thread.sleep(1000);
-            deleteJobsInFile(serverScheduler, file);
-            scheduleJobsInFile(serverScheduler, file);
+            deleteAllJobs(serverScheduler);
+            processFiles(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File modified: " + file);
             }
@@ -293,7 +342,8 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public void fileDeleted(File file) throws Exception {
         if (isJsonFile(file)) {
             Thread.sleep(1000);
-            deleteJobsInFile(serverScheduler, file);
+            deleteAllJobs(serverScheduler);
+            processFiles(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File deleted: " + file);
             }
@@ -304,7 +354,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public void fileAdded(File file) throws Exception {
         if (isJsonFile(file)) {
             Thread.sleep(1000);
-            scheduleJobsInFile(serverScheduler, file);
+            processFiles(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File added: " + file);
             }
