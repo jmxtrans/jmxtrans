@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -15,6 +17,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -29,9 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.SignalInterceptor;
+import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
@@ -44,6 +51,7 @@ import com.googlecode.jmxtrans.util.WatchedCallback;
  * @author jon
  */
 public class JmxTransformer extends SignalInterceptor implements WatchedCallback {
+
     private static final Logger log = LoggerFactory.getLogger(JmxTransformer.class);
 
     private static String QUARTZ_SERVER_PROPERTIES = null;
@@ -55,6 +63,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     private Scheduler serverScheduler;
 
     private WatchDir watcher;
+
+    private Map<String, KeyedObjectPool> poolMap;
+    private List<Server> mergedServers = new ArrayList<Server>();
 
     /** */
     public static void main(String[] args) throws Exception {
@@ -102,19 +113,45 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         watcher = new WatchDir(dirToWatch, this);
         watcher.start();
 
+        setupObjectPooling();
+
         processFiles(serverScheduler, getJsonFiles());
-        
+
         if (!runEndlessly) {
             this.handle("TERM");
         }
     }
 
     /**
+     * Override this method if you'd like to add your own object pooling.
+     */
+    protected void setupObjectPooling() {
+        if (this.poolMap == null) {
+            this.poolMap = new HashMap<String, KeyedObjectPool>();
+
+            GenericKeyedObjectPool pool = new GenericKeyedObjectPool(new SocketFactory());
+            // TODO: allow for more configuration options?
+            pool.setTestOnBorrow(true);
+
+            this.poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
+        }
+    }
+
+    /**
+     * Allows you to modify the object pool map.
+     */
+    @JsonIgnore
+    public Map<String, KeyedObjectPool> getObjectPoolMap() {
+        if (poolMap == null) {
+            setupObjectPooling();
+        }
+        return poolMap;
+    }
+
+    /**
      * Adds files, which turn into jobs into the scheduler.
      */
     private void processFiles(Scheduler scheduler, List<File> jsonFiles) {
-
-    	List<Server> mergedServers = new ArrayList<Server>();
 
     	for (File jsonFile : jsonFiles) {
             JmxProcess process;
@@ -128,7 +165,16 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
         for (Server server : mergedServers) {
             try {
-				scheduleJob(scheduler, server);
+
+                // need to inject the poolMap
+                for (Query query : server.getQueries()) {
+                    for (OutputWriter writer : query.getOutputWriters()) {
+                        writer.setObjectPoolMap(poolMap);
+                    }
+                }
+
+                // Now schedule the jobs for execution.
+                scheduleJob(scheduler, server);
 			} catch (ParseException ex) {
 				log.error("Error parsing cron expression: " + server.getCronExpression(), ex);
 			} catch (SchedulerException ex) {
@@ -136,7 +182,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 			}
         }
     }
-    
+
     /**
      * Schedules an individual job.
      */
@@ -146,7 +192,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
 
         JobDataMap map = new JobDataMap();
-        map.put("server", server);
+        map.put(Server.class.getName(), server);
         jd.setJobDataMap(map);
 
         Trigger trigger = null;
@@ -272,8 +318,8 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 	/**
      * If getJsonFile() is a file, then that is all we load. Otherwise,
-     * look in the jsonDir for files. 
-     * 
+     * look in the jsonDir for files.
+     *
      * Files must end with .json as the suffix.
      */
     private List<File> getJsonFiles() {

@@ -13,7 +13,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 /**
  * This is a quartz job that is responsible for executing a Server object
  * on a cron schedule that is defined within the Server object.
- * 
+ *
  * @author jon
  */
 public class ServerJob implements Job {
@@ -21,19 +21,19 @@ public class ServerJob implements Job {
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap map = context.getMergedJobDataMap();
-        Server server = (Server) map.get("server");
+        Server server = (Server) map.get(Server.class.getName());
 
         if (log.isDebugEnabled()) {
             log.debug("Started server job: " + server);
         }
-        
+
         try {
             JmxUtils.processServer(server);
         } catch (Exception e) {
             log.error("Error", e);
             throw new JobExecutionException(e);
         }
-        
+
         if (log.isDebugEnabled()) {
             log.debug("Finished server job: " + server);
         }

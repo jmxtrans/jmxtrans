@@ -2,6 +2,8 @@ package com.googlecode.jmxtrans.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -20,8 +22,9 @@ import com.googlecode.jmxtrans.OutputWriter;
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
-@JsonPropertyOrder(value={"obj", "attr", "resultAlias", "keys", "outputWriters"})
+@JsonPropertyOrder(value={"obj", "attr", "resultAlias", "keys", "settings", "outputWriters"})
 public class Query {
+
     private Server server;
 
     private String obj;
@@ -30,6 +33,26 @@ public class Query {
     private List<String> keys;
     private List<OutputWriter> outputWriters;
     private List<Result> results;
+
+    private Map<String, Object> settings;
+
+    /** */
+    public void addSetting(String key, Object value) {
+        getSettings().put(key, value);
+    }
+
+    /** */
+    public Map<String, Object> getSettings() {
+        if (this.settings == null) {
+            this.settings = new TreeMap<String, Object>();
+        }
+        return this.settings;
+    }
+
+    /** */
+    public void setSettings(Map<String, Object> settings) {
+        this.settings = settings;
+    }
 
     public Query() { }
 
@@ -47,10 +70,16 @@ public class Query {
         this.attr = attr;
     }
 
+    /**
+     * The JMX object representation: java.lang:type=Memory
+     */
     public void setObj(String obj) {
         this.obj = obj;
     }
 
+    /**
+     * The JMX object representation: java.lang:type=Memory
+     */
     public String getObj() {
         return obj;
     }
@@ -119,11 +148,11 @@ public class Query {
         return outputWriters;
     }
 
-    public void addOutputWriter(OutputWriter filter) {
+    public void addOutputWriter(OutputWriter writer) {
         if (this.outputWriters == null) {
             this.outputWriters = new ArrayList<OutputWriter>();
         }
-        this.outputWriters.add(filter);
+        this.outputWriters.add(writer);
     }
 
     @JsonIgnore
@@ -153,13 +182,13 @@ public class Query {
 		if (o.getClass() != this.getClass()) {
 			return false;
 		}
-    	
+
     	if (!(o instanceof Query)) {
     		return false;
     	}
 
     	Query other = (Query)o;
-    	
+
     	int sizeL = 0;
     	int sizeR = 0;
     	if (this.getOutputWriters() != null) {
@@ -174,10 +203,11 @@ public class Query {
     						.append(this.getKeys(), other.getKeys())
     						.append(this.getAttr(), other.getAttr())
     						.append(this.getResultAlias(), other.getResultAlias())
+    						.append(this.getSettings(), other.getSettings())
     						.append(sizeL, sizeR)
     						.isEquals();
     }
-    
+
     /** */
     @Override
     public int hashCode() {
@@ -192,6 +222,7 @@ public class Query {
     						.append(this.getAttr())
     						.append(this.getResultAlias())
     						.append(sizeL)
+                            .append(this.getSettings())
     						.toHashCode();
     }
 }

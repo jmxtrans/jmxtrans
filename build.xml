@@ -31,7 +31,6 @@
 	<property name="lib.dir" location="lib" />
 	<property name="src.dir" location="src" />
 
-	<tstamp/>
 	<tstamp>
 		<format property="YEAR" pattern="yyyy" />
 	</tstamp>
@@ -118,7 +117,7 @@
             <zipgroupfileset dir="${build.dir}" includes="jmxtrans.jar"/>
         </zip>
     </target>
-	
+
 	<target name="javadoc" depends="classes">
 		<javadoc
 			destdir="${build.javadoc.dir}"

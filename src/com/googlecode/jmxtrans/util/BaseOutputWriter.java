@@ -6,13 +6,14 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.jmxtrans.OutputWriter;
 
 /**
  * Implements the common code for output filters.
- * 
+ *
  * @author jon
  */
 public abstract class BaseOutputWriter implements OutputWriter {
@@ -40,12 +41,12 @@ public abstract class BaseOutputWriter implements OutputWriter {
         }
         return this.settings;
     }
-    
+
     /** */
     public void setSettings(Map<String, Object> settings) {
         this.settings = settings;
     }
-    
+
     /** */
     public boolean getBooleanSetting(String key) {
         Boolean result = null;
@@ -93,9 +94,9 @@ public abstract class BaseOutputWriter implements OutputWriter {
     /**
      * Given a typeName string, get the first match from the typeNames setting.
      * In other words, suppose you have:
-     * 
+     *
      * typeName=name=PS Eden Space,type=MemoryPool
-     * 
+     *
      * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the string
      */
     protected String getConcatedTypeNameValues(String typeNameStr) {
@@ -147,4 +148,11 @@ public abstract class BaseOutputWriter implements OutputWriter {
         return clean;
     }
 
+    /**
+     * A do nothing method.
+     */
+    @Override
+    public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {
+        // Do nothing.
+    }
 }

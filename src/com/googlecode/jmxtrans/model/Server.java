@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
@@ -18,10 +19,15 @@ import com.googlecode.jmxtrans.util.ValidationException;
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
+@JsonPropertyOrder(value={"alias", "host", "port", "username", "password", "cronExpression", "numQueryThreads"})
 public class Server {
 
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
     private static final String BACK = "/jmxrmi";
+    public static final String SOCKET_FACTORY_POOL = "SocketFactory";
+
+    private JmxProcess jmxProcess;
+
     private String alias;
     private String host;
     private String port;
@@ -32,7 +38,7 @@ public class Server {
     private Integer numQueryThreads;
 
     private List<Query> queries = new ArrayList<Query>();
-    
+
     public Server() { }
 
     /** */
@@ -40,12 +46,27 @@ public class Server {
         this.host = host;
         this.port = port;
     }
-    
+
     /** */
     public Server(String host, String port, Query query) throws ValidationException {
         this.host = host;
         this.port = port;
         this.addQuery(query);
+    }
+
+    /**
+     * The parent container in json
+     */
+    public void setJmxProcess(JmxProcess jmxProcess) {
+        this.jmxProcess = jmxProcess;
+    }
+
+    /**
+     * The parent container in json
+     */
+    @JsonIgnore
+    public JmxProcess getJmxProcess() {
+        return jmxProcess;
     }
 
     /**
@@ -63,7 +84,7 @@ public class Server {
     public String getAlias() {
         return alias;
     }
-    
+
     /** */
     public void setHost(String host) {
         this.host = host;
@@ -160,11 +181,11 @@ public class Server {
     public void setUrl(String url) {
         this.url = url;
     }
-    
+
     /**
      * If there are queries and results that have been executed,
      * this is just a shortcut to get all the Results.
-     * 
+     *
      * @return null if there are no queries or empty list if there are no results.
      */
     @JsonIgnore
@@ -183,6 +204,7 @@ public class Server {
         return results;
     }
 
+    /** */
     @JsonIgnore
     public boolean isQueriesMultiThreaded() {
         return this.numQueryThreads != null && this.numQueryThreads > 0;
@@ -194,7 +216,7 @@ public class Server {
     public void setNumQueryThreads(Integer numQueryThreads) {
         this.numQueryThreads = numQueryThreads;
     }
-    
+
     /**
      * The number of query threads for this server.
      */
@@ -241,13 +263,13 @@ public class Server {
 		if (o.getClass() != this.getClass()) {
 			return false;
 		}
-    	
+
     	if (!(o instanceof Server)) {
     		return false;
     	}
 
     	Server other = (Server)o;
-    	
+
     	return new EqualsBuilder()
     							.append(this.getHost(), other.getHost())
     							.append(this.getPort(), other.getPort())
@@ -257,7 +279,7 @@ public class Server {
     							.append(this.getUsername(), other.getUsername())
     							.append(this.getPassword(), other.getPassword()).isEquals();
     }
-    
+
     /** */
     @Override
     public int hashCode() {

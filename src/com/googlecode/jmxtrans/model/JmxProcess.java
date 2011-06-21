@@ -17,8 +17,9 @@ public class JmxProcess {
     private String name;
     private List<Server> servers = new ArrayList<Server>();
     private Integer numMultiThreadedServers;
-    
-    public JmxProcess() { }
+
+    public JmxProcess() {
+    }
 
     public JmxProcess(Server server) {
         this.addServer(server);
@@ -30,13 +31,17 @@ public class JmxProcess {
 
     public void setServers(List<Server> servers) {
         this.servers = servers;
+        for (Server server : this.servers) {
+            server.setJmxProcess(this);
+        }
     }
 
     public List<Server> getServers() {
         return servers;
     }
-    
+
     public void addServer(Server server) {
+        server.setJmxProcess(this);
         this.servers.add(server);
     }
 
@@ -54,7 +59,7 @@ public class JmxProcess {
     public void setNumMultiThreadedServers(Integer numMultiThreadedServers) {
         this.numMultiThreadedServers = numMultiThreadedServers;
     }
-    
+
     public Integer getNumMultiThreadedServers() {
         return numMultiThreadedServers;
     }
