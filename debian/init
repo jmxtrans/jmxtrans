@@ -1,0 +1,69 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:     @PACKAGE@
+# Required-Start:  $time $network $remote_fs $syslog
+# Required-Stop:   $time $network $remote_fs $syslog
+# Default-Start:    2 3 4 5
+# Default-Stop:     0 1 6
+# Short-Description:    @PACKAGE@
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+if [ -f /etc/default/@PACKAGE@ ]; then
+    source /etc/default/@PACKAGE@
+fi
+
+PIDFILE="/var/run/@PACKAGE@.pid"
+STARTCMD="
+          if [ -f /etc/default/@PACKAGE@ ]; then source /etc/default/@PACKAGE@ ; fi ; \
+          cd /usr/share/@PACKAGE@ ; \
+          ./@START_SCRIPT@ start "
+
+
+do_start() {
+    start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
+        --chuid jmxtrans:jmxtrans -u jmxtrans -g jmxtrans -v \
+        --exec /bin/bash -- -c "$STARTCMD"
+}
+
+do_stop() {
+    su - marin -c "
+                   if [ -f /etc/default/@PACKAGE@ ]; then source /etc/default/@PACKAGE@ ; fi ; \
+                   cd /usr/share/@PACKAGE@; ./@START_SCRIPT@ stop"
+}
+
+do_status() {
+    su -l -c "cd /usr/share/@PACKAGE@; ./@START_SCRIPT@ status" jmxtrans
+}
+
+case "$1" in
+  start)
+    log_daemon_msg "Starting @PACKAGE@" "@PACKAGE@"
+    do_start
+    log_end_msg 0
+    ;;
+  stop)
+    log_daemon_msg "Stopping @PACKAGE@" "@PACKAGE@"
+    do_stop
+    log_end_msg 0
+    ;;
+
+  restart|reload|force-reload|try-restart)
+    log_daemon_msg "Restarting @PACKAGE@" "@PACKAGE@"
+    do_stop
+    do_start
+    log_end_msg 0
+    ;;
+
+  status)
+    log_daemon_msg "Status @PACKAGE@" "@PACKAGE@"
+    do_status
+    log_end_msg 0
+    ;;
+
+  *)
+    log_action_msg "Usage: /etc/init.d/@PACKAGE@ {start|stop|reload|force-reload|restart|try-restart|status}"
+    exit 1
+esac

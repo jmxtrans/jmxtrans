@@ -1,0 +1,51 @@
+#!/usr/bin/make -f
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+
+clean:
+	dh_testdir
+	dh_testroot
+	dh_clean
+
+setup-perms:
+	find opt -name "*.sh" | xargs chmod -f ugo+x
+	
+binary: binary-indep
+binary-indep: setup-perms 
+	dh_prep
+	dh_testdir
+	dh_testroot
+	dh_installdirs
+	dh_install
+	dh_installchangelogs
+	dh_installdocs
+#	dh_installexamples
+#	dh_installmenu
+	dh_installdebconf
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_python
+	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+#	dh_installman
+	dh_lintian
+#	dh_link
+#	dh_strip
+	dh_compress
+	dh_fixperms
+#	dh_perl
+#	dh_makeshlibs
+	dh_installdeb
+#	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+%:
+	dh	$@
+
+.PHONY: clean binary binary-indep setup-perms

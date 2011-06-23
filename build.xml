@@ -31,9 +31,12 @@
 	<property name="lib.dir" location="lib" />
 	<property name="src.dir" location="src" />
 
-	<tstamp>
-		<format property="YEAR" pattern="yyyy" />
-	</tstamp>
+    <tstamp>
+        <format property="NOW" pattern="yyyyMMdd-hh:mm:ss" />
+        <!-- Wed, 19 Jan 2011 18:19:37 -0800 -->
+        <format property="PROPER_NOW" pattern="E, dd MMM yyyy hh:mm:ss ZZ" />
+        <format property="YEAR" pattern="yyyy" />
+    </tstamp>
 
 	<path id="master.classpath">
 		<fileset dir="${lib.dir}">
@@ -184,6 +187,21 @@
 			<include name="${build.dist.dir.basename}/**" />
 		</zip>
 	</target>
+
+    <target name="debian" depends="dist">
+        <filter token="PACKAGE" value="jmxtrans" />
+        <copy todir="${target.dir}/jmxtrans/debian" filtering="true">
+            <fileset dir="debian">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <unzip src="${build.dist.zip}" dest="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans" />
+        <chmod file="${target.dir}/jmxtrans/debian/rules" perm="ugo+rx"/>
+
+        <exec executable="/usr/bin/debuild" dir="${target.dir}/jmxtrans" failonerror="true">
+            <arg line="-b"/>
+        </exec>
+    </target>
 
 	<target name="upload" depends="init">
 		<gcupload projectname="${ant.project.name}"
