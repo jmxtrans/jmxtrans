@@ -37,6 +37,7 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.OptionsException;
 import com.googlecode.jmxtrans.util.SignalInterceptor;
+import com.googlecode.jmxtrans.util.StartupException;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
@@ -67,17 +68,15 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     /** */
     public static void main(String[] args) throws Exception {
         JmxTransformer transformer = new JmxTransformer();
+
+        // Register signal handlers
         transformer.registerQuietly("TERM");
         transformer.registerQuietly("INT");
         transformer.registerQuietly("ABRT");
         transformer.registerQuietly("KILL");
-        try {
-            transformer.doMain(args);
-        } catch (Exception e) {
-            log.error("Error", e);
-            throw new Exception(e);
-        }
-        return;
+
+        // Start the process
+        transformer.doMain(args);
     }
 
     /**
@@ -87,38 +86,45 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         if (!parseOptions(args)) {
             return;
         }
-        // start the server scheduler which loops over all the Server jobs
-        StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
-        InputStream stream = null;
-        if (QUARTZ_SERVER_PROPERTIES == null) {
-            QUARTZ_SERVER_PROPERTIES = "/quartz.server.properties";
-            stream = JmxTransformer.class.getResourceAsStream(QUARTZ_SERVER_PROPERTIES);
-        } else {
-            stream = new FileInputStream(QUARTZ_SERVER_PROPERTIES);
+
+        try {
+            // start the server scheduler which loops over all the Server jobs
+            StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
+            InputStream stream = null;
+            if (QUARTZ_SERVER_PROPERTIES == null) {
+                QUARTZ_SERVER_PROPERTIES = "/quartz.server.properties";
+                stream = JmxTransformer.class.getResourceAsStream(QUARTZ_SERVER_PROPERTIES);
+            } else {
+                stream = new FileInputStream(QUARTZ_SERVER_PROPERTIES);
+            }
+            serverSchedFact.initialize(stream);
+            serverScheduler = serverSchedFact.getScheduler();
+            serverScheduler.start();
+
+            File dirToWatch = null;
+            if (getJsonDirOrFile().isFile()) {
+            	dirToWatch = new File(FilenameUtils.getFullPath(getJsonDirOrFile().getAbsolutePath()));
+            } else {
+            	dirToWatch = getJsonDirOrFile();
+            }
+
+            // start the watcher
+            watcher = new WatchDir(dirToWatch, this);
+            watcher.start();
+
+            // object pooling
+            setupObjectPooling();
+
+            // process all the json files into Server objects
+            List<Server> servers = processFilesIntoServers(serverScheduler, getJsonFiles());
+
+            // process the servers into jobs
+            processServersIntoJobs(serverScheduler, servers);
+
+        } catch (Exception e) {
+            runEndlessly = false;
+            log.error(e.getMessage(), e.getCause());
         }
-        serverSchedFact.initialize(stream);
-        serverScheduler = serverSchedFact.getScheduler();
-        serverScheduler.start();
-
-        File dirToWatch = null;
-        if (getJsonDirOrFile().isFile()) {
-        	dirToWatch = new File(FilenameUtils.getFullPath(getJsonDirOrFile().getAbsolutePath()));
-        } else {
-        	dirToWatch = getJsonDirOrFile();
-        }
-
-        // start the watcher
-        watcher = new WatchDir(dirToWatch, this);
-        watcher.start();
-
-        // object pooling
-        setupObjectPooling();
-
-        // process all the json files into Server objects
-        List<Server> servers = processFilesIntoServers(serverScheduler, getJsonFiles());
-
-        // process the servers into jobs
-        processServersIntoJobs(serverScheduler, servers);
 
         if (!runEndlessly) {
             this.handle("TERM");
@@ -165,7 +171,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     /**
      * Processes all the json files and manages the dedup process
      */
-    private List<Server> processFilesIntoServers(Scheduler scheduler, List<File> jsonFiles) {
+    private List<Server> processFilesIntoServers(Scheduler scheduler, List<File> jsonFiles) throws StartupException {
 
         List<Server> mergedServers = new ArrayList<Server>();
 
@@ -178,7 +184,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 				}
 	            JmxUtils.mergeServerLists(mergedServers, process.getServers());
 			} catch (Exception ex) {
-				log.error("Error parsing json: " + jsonFile, ex);
+			    throw new StartupException("Error parsing json: " + jsonFile, ex);
 			}
         }
 
@@ -189,8 +195,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
      * Processes all the Servers into Job's
      *
      * Needs to be called after processFiles()
+     * @throws StartupException
      */
-    private void processServersIntoJobs(Scheduler scheduler, List<Server> servers) {
+    private void processServersIntoJobs(Scheduler scheduler, List<Server> servers) throws StartupException {
         for (Server server : servers) {
             try {
 
@@ -209,11 +216,11 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
                 // Now schedule the jobs for execution.
                 scheduleJob(scheduler, server);
             } catch (ParseException ex) {
-                log.error("Error parsing cron expression: " + server.getCronExpression(), ex);
+                throw new StartupException("Error parsing cron expression: " + server.getCronExpression(), ex);
             } catch (SchedulerException ex) {
-                log.error("Error scheduling job for server: " + server, ex);
+                throw new StartupException("Error scheduling job for server: " + server, ex);
             } catch (ValidationException ex) {
-                log.error("Error validating setup for query", ex);
+                throw new StartupException("Error validating json setup for query", ex);
             }
         }
     }
