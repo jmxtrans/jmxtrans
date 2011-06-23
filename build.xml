@@ -154,6 +154,7 @@
                 <include name="*.json" />
                 <include name="*.sh" />
 				<include name="README.html" />
+                <exclude name="test-*.json" />
 			</fileset>
 		</copy>
 
