@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -92,21 +93,46 @@ public class JmxUtils {
                 if (log.isDebugEnabled()) {
                     log.debug("----- Creating " + server.getQueries().size() + " query threads");
                 }
+
                 List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
                 for (Query query : server.getQueries()) {
                     query.setServer(server);
                     ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, query);
                     threads.add(Executors.callable(pqt));
                 }
+
                 service.invokeAll(threads);
+
             } finally {
-                service.shutdown();
+                shutdownAndAwaitTermination(service);
             }
         } else {
             for (Query query : server.getQueries()) {
                 query.setServer(server);
                 processQuery(mbeanServer, query);
             }
+        }
+    }
+
+    /**
+     * Copied from the Executors javadoc.
+     */
+    private static void shutdownAndAwaitTermination(ExecutorService service) {
+        service.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!service.awaitTermination(60, TimeUnit.SECONDS)) {
+                service.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!service.awaitTermination(60, TimeUnit.SECONDS)) {
+                    log.error("Pool did not terminate");
+                }
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            service.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
         }
     }
 

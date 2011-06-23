@@ -391,6 +391,14 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             if (watcher != null) {
                 watcher.stopService();
             }
+
+            for (KeyedObjectPool pool : getObjectPoolMap().values()) {
+                try {
+                    pool.close();
+                } catch (Exception ex) {
+                    // ignore.
+                }
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
