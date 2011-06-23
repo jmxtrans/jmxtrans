@@ -498,10 +498,15 @@ public class JmxUtils {
         Map<String, KeyedObjectPool> poolMap = new HashMap<String, KeyedObjectPool>();
 
         GenericKeyedObjectPool pool = new GenericKeyedObjectPool(new SocketFactory());
+
         // TODO: allow for more configuration options?
         pool.setTestOnBorrow(true);
-        // Unlimited active items in the pool
         pool.setMaxActive(-1);
+        pool.setMaxIdle(-1);
+
+        pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
+        pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+
         poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
 
         return poolMap;
