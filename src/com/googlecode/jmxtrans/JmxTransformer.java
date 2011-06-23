@@ -118,11 +118,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             // object pooling
             setupObjectPooling();
 
-            // process all the json files into Server objects
-            processFilesIntoServers(serverScheduler, getJsonFiles());
-
-            // process the servers into jobs
-            processServersIntoJobs(serverScheduler);
+            startupSystem();
 
         } catch (Exception e) {
             runEndlessly = false;
@@ -132,6 +128,17 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         if (!runEndlessly) {
             this.handle("TERM");
         }
+    }
+
+    /**
+     * Processes files into Server objects and then processesServers into jobs
+     */
+    private void startupSystem() throws LifecycleException {
+        // process all the json files into Server objects
+        processFilesIntoServers(serverScheduler, getJsonFiles());
+
+        // process the servers into jobs
+        processServersIntoJobs(serverScheduler);
     }
 
     /**
@@ -445,11 +452,11 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public void fileModified(File file) throws Exception {
         if (isJsonFile(file)) {
             Thread.sleep(1000);
-            deleteAllJobs(serverScheduler);
-            processFilesIntoServers(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File modified: " + file);
             }
+            deleteAllJobs(serverScheduler);
+            startupSystem();
         }
     }
 
@@ -457,11 +464,11 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public void fileDeleted(File file) throws Exception {
         if (isJsonFile(file)) {
             Thread.sleep(1000);
-            deleteAllJobs(serverScheduler);
-            processFilesIntoServers(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File deleted: " + file);
             }
+            deleteAllJobs(serverScheduler);
+            startupSystem();
         }
     }
 
@@ -469,10 +476,10 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public void fileAdded(File file) throws Exception {
         if (isJsonFile(file)) {
             Thread.sleep(1000);
-            processFilesIntoServers(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File added: " + file);
             }
+            startupSystem();
         }
     }
 }
