@@ -24,7 +24,7 @@ public class ServerJob implements Job {
         Server server = (Server) map.get(Server.class.getName());
 
         if (log.isDebugEnabled()) {
-            log.debug("Started server job: " + server);
+            log.debug("+++++ Started server job: " + server);
         }
 
         try {
@@ -35,7 +35,7 @@ public class ServerJob implements Job {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Finished server job: " + server);
+            log.debug("+++++ Finished server job: " + server);
         }
     }
 }

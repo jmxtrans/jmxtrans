@@ -13,8 +13,8 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.SocketDetails;
 import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.SocketFactory.Details;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
@@ -36,10 +36,13 @@ public class GraphiteWriter extends BaseOutputWriter {
 
     private Map<String, KeyedObjectPool> poolMap;
     private KeyedObjectPool pool;
-    private Details details;
+    private SocketDetails details;
 
-    /** */
+    /**
+     * Uses JmxUtils.getDefaultPoolMap()
+     */
     public GraphiteWriter() {
+        this.poolMap = JmxUtils.getDefaultPoolMap();
     }
 
     /** */
@@ -48,7 +51,7 @@ public class GraphiteWriter extends BaseOutputWriter {
     }
 
     /** */
-    public void validateSetup() throws ValidationException {
+    public void validateSetup(Query query) throws ValidationException {
         host = (String) this.getSettings().get(HOST);
         Object portObj = this.getSettings().get(PORT);
         if (portObj instanceof String) {
@@ -58,28 +61,25 @@ public class GraphiteWriter extends BaseOutputWriter {
         }
 
         if (host == null || port == null) {
-            throw new ValidationException("Host and port can't be null");
+            throw new ValidationException("Host and port can't be null", query);
         }
 
-        details = new Details(host, port);
+        details = new SocketDetails(host, port);
 
         String rootPrefixTmp = (String) this.getSettings().get(ROOT_PREFIX);
         if (rootPrefixTmp != null) {
         	rootPrefix = rootPrefixTmp;
         }
+
+        this.pool = poolMap.get(Server.SOCKET_FACTORY_POOL);
     }
 
     /** */
     public void doWrite(Query query) throws Exception {
 
-        // FIXME: this is ugly. Maybe OutputWriter's need an init() method that runs before validateSetup().
-        if (this.pool == null) {
-            this.pool = poolMap.get(Server.SOCKET_FACTORY_POOL);
-        }
-
-        Socket socket = (Socket) pool.borrowObject(details);
+        Socket socket = (Socket) pool.borrowObject(details.toString());
         try {
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 
             for (Result r : query.getResults()) {
                 if (isDebugEnabled()) {
@@ -143,7 +143,7 @@ public class GraphiteWriter extends BaseOutputWriter {
                 }
             }
         } finally {
-            pool.returnObject(details, socket);
+            pool.returnObject(details.toString(), socket);
         }
     }
 

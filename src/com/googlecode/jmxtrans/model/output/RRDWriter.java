@@ -20,11 +20,11 @@ import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it doesn't already exist.
- * 
+ *
  * It will then write the contents of the Query (the Results) to the database.
- * 
+ *
  * This uses the JRobin rrd format and is incompatible with the C version of rrd.
- * 
+ *
  * @author jon
  */
 public class RRDWriter extends BaseOutputWriter {
@@ -36,12 +36,12 @@ public class RRDWriter extends BaseOutputWriter {
     public RRDWriter() {
     }
 
-    public void validateSetup() throws ValidationException {
+    public void validateSetup(Query query) throws ValidationException {
         outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
         templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
 
         if (outputFile == null || templateFile == null) {
-            throw new ValidationException("output file and template file can't be null");
+            throw new ValidationException("output file and template file can't be null", query);
         }
     }
 
@@ -53,7 +53,7 @@ public class RRDWriter extends BaseOutputWriter {
             Sample sample = db.createSample();
             List<String> dsNames = Arrays.asList(db.getDsNames());
             List<Result> results = query.getResults();
-            
+
             // go over all the results and look for datasource names that map to keys from the result values
             for (Result res : results) {
                 Map<String, Object> values = res.getValues();

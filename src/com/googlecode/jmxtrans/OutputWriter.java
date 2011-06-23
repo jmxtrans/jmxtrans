@@ -40,7 +40,13 @@ public interface OutputWriter {
     /**
      * This is run when the object is instantiated. You want to get the settings and validate them.
      */
-    public void validateSetup() throws ValidationException;
+    public void validateSetup(Query query) throws ValidationException;
 
+    /**
+     * Some writers, like GraphiteWriter will use this for object pooling. Things like
+     * Socket connections to remote servers that we are writing to are ripe for pooling.
+     *
+     * This is super extensible as a map because we could have multiple object pools.
+     */
     public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap);
 }

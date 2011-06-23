@@ -9,8 +9,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.googlecode.jmxtrans.OutputWriter;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
@@ -21,6 +22,8 @@ import com.googlecode.jmxtrans.util.ValidationException;
 @JsonSerialize(include=Inclusion.NON_NULL)
 @JsonPropertyOrder(value={"alias", "host", "port", "username", "password", "cronExpression", "numQueryThreads"})
 public class Server {
+
+    private static final Logger log = LoggerFactory.getLogger(Server.class);
 
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
     private static final String BACK = "/jmxrmi";
@@ -125,10 +128,13 @@ public class Server {
         return password;
     }
 
-    /** */
+    /**
+     * Won't add the same query (determined by equals()) 2x.
+     */
     public void setQueries(List<Query> queries) throws ValidationException {
-        validateSetup(queries);
-        this.queries = queries;
+        for (Query q : queries) {
+            addQuery(q);
+        }
     }
 
     /** */
@@ -140,26 +146,10 @@ public class Server {
      * Adds a query. Won't add the same query (determined by equals()) 2x.
      */
     public void addQuery(Query q) throws ValidationException {
-        validateSetup(q);
         if (!this.queries.contains(q)) {
-        	this.queries.add(q);
-        }
-    }
-
-    /** */
-    private void validateSetup(List<Query> queries) throws ValidationException {
-        for (Query q : queries) {
-            validateSetup(q);
-        }
-    }
-
-    /** */
-    private void validateSetup(Query query) throws ValidationException {
-        List<OutputWriter> writers = query.getOutputWriters();
-        if (writers != null) {
-            for (OutputWriter w : writers) {
-                w.validateSetup();
-            }
+            this.queries.add(q);
+        } else {
+            log.debug("Skipped duplicate query: " + q + " for server: " + this);
         }
     }
 
@@ -248,7 +238,7 @@ public class Server {
     @Override
     public String toString() {
         return "Server [host=" + host + ", port=" + port + ", url=" + url + ", cronExpression="
-                + cronExpression + ", queries=" + queries + ", numQueryThreads=" + numQueryThreads + "]";
+                + cronExpression + ", numQueryThreads=" + numQueryThreads + "]";
     }
 
     /** */

@@ -2,8 +2,6 @@ package com.googlecode.jmxtrans.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -22,7 +20,7 @@ import com.googlecode.jmxtrans.OutputWriter;
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
-@JsonPropertyOrder(value={"obj", "attr", "resultAlias", "keys", "settings", "outputWriters"})
+@JsonPropertyOrder(value={"obj", "attr", "resultAlias", "keys", "outputWriters"})
 public class Query {
 
     private Server server;
@@ -33,26 +31,6 @@ public class Query {
     private List<String> keys;
     private List<OutputWriter> outputWriters;
     private List<Result> results;
-
-    private Map<String, Object> settings;
-
-    /** */
-    public void addSetting(String key, Object value) {
-        getSettings().put(key, value);
-    }
-
-    /** */
-    public Map<String, Object> getSettings() {
-        if (this.settings == null) {
-            this.settings = new TreeMap<String, Object>();
-        }
-        return this.settings;
-    }
-
-    /** */
-    public void setSettings(Map<String, Object> settings) {
-        this.settings = settings;
-    }
 
     public Query() { }
 
@@ -167,7 +145,7 @@ public class Query {
 
     @Override
     public String toString() {
-        return "Query [obj=" + obj + ", objAlias=" + resultAlias + ", attr=" + attr + "]";
+        return "Query [obj=" + obj + ", resultAlias=" + resultAlias + ", attr=" + attr + "]";
     }
 
     /** */
@@ -203,7 +181,6 @@ public class Query {
     						.append(this.getKeys(), other.getKeys())
     						.append(this.getAttr(), other.getAttr())
     						.append(this.getResultAlias(), other.getResultAlias())
-    						.append(this.getSettings(), other.getSettings())
     						.append(sizeL, sizeR)
     						.isEquals();
     }
@@ -222,7 +199,6 @@ public class Query {
     						.append(this.getAttr())
     						.append(this.getResultAlias())
     						.append(sizeL)
-                            .append(this.getSettings())
     						.toHashCode();
     }
 }

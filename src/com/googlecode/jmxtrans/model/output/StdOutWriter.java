@@ -7,18 +7,18 @@ import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * Basic filter good for testing that just outputs the Result objects using System.out.
- * 
+ *
  * @author jon
  */
 public class StdOutWriter extends BaseOutputWriter {
 
     public StdOutWriter() {
     }
-    
+
     /**
      * nothing to validate
      */
-    public void validateSetup() throws ValidationException {
+    public void validateSetup(Query query) throws ValidationException {
     }
 
     public void doWrite(Query query) throws Exception {

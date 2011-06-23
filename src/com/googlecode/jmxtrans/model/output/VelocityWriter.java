@@ -13,7 +13,7 @@ import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This class isn't finished yet.
- * 
+ *
  * @author jon
  */
 public class VelocityWriter extends BaseOutputWriter {
@@ -23,10 +23,10 @@ public class VelocityWriter extends BaseOutputWriter {
 
     public void doWrite(Query query) throws Exception {
         // TODO Auto-generated method stub
-        
+
     }
-    
-    public void validateSetup() throws ValidationException {
+
+    public void validateSetup(Query query) throws ValidationException {
         // TODO
     }
 
@@ -34,7 +34,7 @@ public class VelocityWriter extends BaseOutputWriter {
      * Uses velocity to generate output for a List of JmxProcess.
      */
     protected void genVelocityOutput(List<JmxProcess> processes) throws Exception {
-        
+
         // Generate settings XML using Velocity
 
 //        for (JmxProcess process : processes) {

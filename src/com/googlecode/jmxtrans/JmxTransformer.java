@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +17,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.pool.KeyedObjectPool;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
@@ -37,8 +35,8 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.OptionsException;
 import com.googlecode.jmxtrans.util.SignalInterceptor;
-import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
@@ -65,7 +63,6 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     private WatchDir watcher;
 
     private Map<String, KeyedObjectPool> poolMap;
-    private List<Server> mergedServers = new ArrayList<Server>();
 
     /** */
     public static void main(String[] args) throws Exception {
@@ -110,12 +107,18 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         	dirToWatch = getJsonDirOrFile();
         }
 
+        // start the watcher
         watcher = new WatchDir(dirToWatch, this);
         watcher.start();
 
+        // object pooling
         setupObjectPooling();
 
-        processFiles(serverScheduler, getJsonFiles());
+        // process all the json files into Server objects
+        List<Server> servers = processFilesIntoServers(serverScheduler, getJsonFiles());
+
+        // process the servers into jobs
+        processServersIntoJobs(serverScheduler, servers);
 
         if (!runEndlessly) {
             this.handle("TERM");
@@ -127,13 +130,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
      */
     protected void setupObjectPooling() {
         if (this.poolMap == null) {
-            this.poolMap = new HashMap<String, KeyedObjectPool>();
-
-            GenericKeyedObjectPool pool = new GenericKeyedObjectPool(new SocketFactory());
-            // TODO: allow for more configuration options?
-            pool.setTestOnBorrow(true);
-
-            this.poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
+            this.poolMap = JmxUtils.getDefaultPoolMap();
         }
     }
 
@@ -148,38 +145,76 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         return poolMap;
     }
 
+    /** */
+    private void validateSetup(List<Query> queries) throws ValidationException {
+        for (Query q : queries) {
+            validateSetup(q);
+        }
+    }
+
+    /** */
+    private void validateSetup(Query query) throws ValidationException {
+        List<OutputWriter> writers = query.getOutputWriters();
+        if (writers != null) {
+            for (OutputWriter w : writers) {
+                w.validateSetup(query);
+            }
+        }
+    }
+
     /**
-     * Adds files, which turn into jobs into the scheduler.
+     * Processes all the json files and manages the dedup process
      */
-    private void processFiles(Scheduler scheduler, List<File> jsonFiles) {
+    private List<Server> processFilesIntoServers(Scheduler scheduler, List<File> jsonFiles) {
+
+        List<Server> mergedServers = new ArrayList<Server>();
 
     	for (File jsonFile : jsonFiles) {
             JmxProcess process;
 			try {
 				process = JmxUtils.getJmxProcess(jsonFile);
+				if (log.isDebugEnabled()) {
+				    log.debug("Loaded file: " + jsonFile.getAbsolutePath());
+				}
 	            JmxUtils.mergeServerLists(mergedServers, process.getServers());
 			} catch (Exception ex) {
 				log.error("Error parsing json: " + jsonFile, ex);
 			}
         }
 
-        for (Server server : mergedServers) {
+    	return mergedServers;
+    }
+
+    /**
+     * Processes all the Servers into Job's
+     *
+     * Needs to be called after processFiles()
+     */
+    private void processServersIntoJobs(Scheduler scheduler, List<Server> servers) {
+        for (Server server : servers) {
             try {
 
                 // need to inject the poolMap
                 for (Query query : server.getQueries()) {
+                    query.setServer(server);
+
                     for (OutputWriter writer : query.getOutputWriters()) {
                         writer.setObjectPoolMap(poolMap);
                     }
                 }
 
+                // Now validate the setup of each of the OutputWriter's per query.
+                validateSetup(server.getQueries());
+
                 // Now schedule the jobs for execution.
                 scheduleJob(scheduler, server);
-			} catch (ParseException ex) {
-				log.error("Error parsing cron expression: " + server.getCronExpression(), ex);
-			} catch (SchedulerException ex) {
-				log.error("Error scheduling job for server: " + server, ex);
-			}
+            } catch (ParseException ex) {
+                log.error("Error parsing cron expression: " + server.getCronExpression(), ex);
+            } catch (SchedulerException ex) {
+                log.error("Error scheduling job for server: " + server, ex);
+            } catch (ValidationException ex) {
+                log.error("Error validating setup for query", ex);
+            }
         }
     }
 
@@ -252,7 +287,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     /**
      * Parse the options given on the command line.
      */
-    private boolean parseOptions(String[] args) throws ValidationException, org.apache.commons.cli.ParseException {
+    private boolean parseOptions(String[] args) throws OptionsException, org.apache.commons.cli.ParseException {
         CommandLineParser parser = new GnuParser();
         CommandLine cl = parser.parse(getOptions(), args);
         Option[] options = cl.getOptions();
@@ -263,13 +298,13 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             if (option.getOpt().equals("j")) {
                 File tmp = new File(option.getValue());
                 if (!tmp.exists() && !tmp.isDirectory()) {
-                    throw new ValidationException("Path to json directory is invalid: " + tmp);
+                    throw new OptionsException("Path to json directory is invalid: " + tmp);
                 }
                 setJsonDirOrFile(tmp);
             } else if (option.getOpt().equals("f")) {
                 File tmp = new File(option.getValue());
                 if (!tmp.exists() && !tmp.isFile()) {
-                    throw new ValidationException("Path to json file is invalid: " + tmp);
+                    throw new OptionsException("Path to json file is invalid: " + tmp);
                 }
                 setJsonDirOrFile(tmp);
             } else if (option.getOpt().equals("e")) {
@@ -278,7 +313,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
                 QUARTZ_SERVER_PROPERTIES = option.getValue();
                 File file = new File(QUARTZ_SERVER_PROPERTIES);
                 if (!file.exists()) {
-                    throw new ValidationException("Could not find path to the quartz properties file: " + file.getAbsolutePath());
+                    throw new OptionsException("Could not find path to the quartz properties file: " + file.getAbsolutePath());
                 }
             } else if (option.getOpt().equals("s")) {
                 SECONDS_BETWEEN_SERVER_JOB_RUNS = Integer.valueOf(option.getValue());
@@ -289,7 +324,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             }
         }
         if (result == true && this.getJsonDirOrFile() == null) {
-        	throw new ValidationException("Please specify either the -f or -j option.");
+        	throw new OptionsException("Please specify either the -f or -j option.");
         }
         return result;
     }
@@ -377,7 +412,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         if (isJsonFile(file)) {
             Thread.sleep(1000);
             deleteAllJobs(serverScheduler);
-            processFiles(serverScheduler, getJsonFiles());
+            processFilesIntoServers(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File modified: " + file);
             }
@@ -389,7 +424,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
         if (isJsonFile(file)) {
             Thread.sleep(1000);
             deleteAllJobs(serverScheduler);
-            processFiles(serverScheduler, getJsonFiles());
+            processFilesIntoServers(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File deleted: " + file);
             }
@@ -400,7 +435,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     public void fileAdded(File file) throws Exception {
         if (isJsonFile(file)) {
             Thread.sleep(1000);
-            processFiles(serverScheduler, getJsonFiles());
+            processFilesIntoServers(serverScheduler, getJsonFiles());
             if (log.isDebugEnabled()) {
                 log.debug("File added: " + file);
             }

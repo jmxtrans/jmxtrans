@@ -29,6 +29,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -87,6 +89,9 @@ public class JmxUtils {
             ExecutorService service = null;
             try {
                 service = Executors.newFixedThreadPool(server.getNumQueryThreads());
+                if (log.isDebugEnabled()) {
+                    log.debug("----- Creating " + server.getQueries().size() + " query threads");
+                }
                 List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
                 for (Query query : server.getQueries()) {
                     query.setServer(server);
@@ -127,6 +132,9 @@ public class JmxUtils {
         }
     }
 
+    /**
+     * Responsible for processing individual Queries.
+     */
     public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
 
         ObjectName oName = new ObjectName(query.getObj());
@@ -149,23 +157,22 @@ public class JmxUtils {
 
             try {
                 if (query.getAttr() != null && query.getAttr().size() > 0) {
-                    log.debug("Started query: " + query);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Executing queryName: " + queryName.getCanonicalName() + " from query: " + query);
+                    }
 
                     AttributeList al = mbeanServer.getAttributes(queryName, query.getAttr().toArray(new String[query.getAttr().size()]));
                     for (Attribute attribute : al.asList()) {
                         getResult(resList, info, oi, (Attribute)attribute, query);
                     }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Finished query.");
-                    }
 
                     query.setResults(resList);
 
-                    // Now run the filters.
-                    runFiltersForQuery(query);
+                    // Now run the OutputWriters.
+                    runOutputWritersForQuery(query);
 
                     if (log.isDebugEnabled()) {
-                        log.debug("Finished running filters: " + query);
+                        log.debug("Finished running outputWriters for query: " + query);
                     }
                 }
             } catch (UnmarshalException ue) {
@@ -283,11 +290,11 @@ public class JmxUtils {
     }
 
     /** */
-    private static void runFiltersForQuery(Query query) throws Exception {
-        List<OutputWriter> filters = query.getOutputWriters();
-        if (filters != null) {
-            for (OutputWriter filter : filters) {
-                filter.doWrite(query);
+    private static void runOutputWritersForQuery(Query query) throws Exception {
+        List<OutputWriter> writers = query.getOutputWriters();
+        if (writers != null) {
+            for (OutputWriter writer : writers) {
+                writer.doWrite(query);
             }
         }
     }
@@ -458,4 +465,18 @@ public class JmxUtils {
         return true;
     }
 
+    /**
+     * Helper method which returns a default PoolMap.
+     */
+    public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
+        Map<String, KeyedObjectPool> poolMap = new HashMap<String, KeyedObjectPool>();
+
+        GenericKeyedObjectPool pool = new GenericKeyedObjectPool(new SocketFactory());
+        // TODO: allow for more configuration options?
+        pool.setTestOnBorrow(true);
+
+        poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
+
+        return poolMap;
+    }
 }

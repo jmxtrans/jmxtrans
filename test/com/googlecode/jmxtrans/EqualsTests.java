@@ -17,7 +17,7 @@ public class EqualsTests {
 		s1.setNumQueryThreads(Integer.valueOf(123));
 		s1.setPassword("pass");
 		s1.setUsername("user");
-		
+
 		Server s2 = new Server();
 		s2.setAlias("alias");
 		s2.setHost("host");
@@ -38,7 +38,7 @@ public class EqualsTests {
 		Assert.assertTrue(s1.equals(s2));
 		Assert.assertNotSame(s1, s3);
 	}
-	
+
 	public void testQuery() {
 		Query q1 = new Query();
 		q1.addAttr("foo");
@@ -68,13 +68,34 @@ public class EqualsTests {
 
 		Assert.assertEquals(q1, q2);
 		Assert.assertTrue(q1.equals(q2));
-		Assert.assertNotSame(q1, q3);
-		
+		Assert.assertFalse(q1.equals(q3));
+
 		q1.setResultAlias(null);
 		q2.setResultAlias(null);
 
 		Assert.assertEquals(q1, q2);
 		Assert.assertTrue(q1.equals(q2));
+	}
+
+	public void testQuery2() {
+        Query q1 = new Query();
+        q1.addAttr("foo");
+        q1.addAttr("bar");
+        q1.addKey("key1");
+        q1.addKey("key2");
+        q1.setObj("*");
+        q1.setResultAlias("alias");
+
+        // not same as q1
+        Query q2 = new Query();
+        q2.addAttr("foo");
+        q2.addAttr("bar");
+        q2.addKey("key1");
+        q2.addKey("key2");
+        q2.setObj("obj");
+        q2.setResultAlias("alias");
+
+        Assert.assertFalse(q1.equals(q2));
 	}
 }
 
