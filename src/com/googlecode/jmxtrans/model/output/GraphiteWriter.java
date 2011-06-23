@@ -13,8 +13,8 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.SocketDetails;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.SocketDetails;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
@@ -64,20 +64,19 @@ public class GraphiteWriter extends BaseOutputWriter {
             throw new ValidationException("Host and port can't be null", query);
         }
 
-        details = new SocketDetails(host, port);
-
         String rootPrefixTmp = (String) this.getSettings().get(ROOT_PREFIX);
         if (rootPrefixTmp != null) {
         	rootPrefix = rootPrefixTmp;
         }
 
+        this.details = new SocketDetails(host, port);
         this.pool = poolMap.get(Server.SOCKET_FACTORY_POOL);
     }
 
     /** */
     public void doWrite(Query query) throws Exception {
 
-        Socket socket = (Socket) pool.borrowObject(details.toString());
+        Socket socket = (Socket) pool.borrowObject(details);
         try {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 
@@ -143,7 +142,7 @@ public class GraphiteWriter extends BaseOutputWriter {
                 }
             }
         } finally {
-            pool.returnObject(details.toString(), socket);
+            pool.returnObject(details, socket);
         }
     }
 

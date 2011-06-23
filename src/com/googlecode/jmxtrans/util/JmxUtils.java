@@ -500,7 +500,8 @@ public class JmxUtils {
         GenericKeyedObjectPool pool = new GenericKeyedObjectPool(new SocketFactory());
         // TODO: allow for more configuration options?
         pool.setTestOnBorrow(true);
-
+        // Unlimited active items in the pool
+        pool.setMaxActive(-1);
         poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
 
         return poolMap;

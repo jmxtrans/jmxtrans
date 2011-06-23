@@ -22,8 +22,7 @@ public class SocketFactory extends BaseKeyedPoolableObjectFactory {
      */
     @Override
     public Object makeObject(Object key) throws Exception {
-        SocketDetails details = SocketDetails.fromString((String) key);
-//        SocketDetails details = (SocketDetails) key;
+        SocketDetails details = (SocketDetails) key;
         Socket socket = new Socket(details.getHost(), details.getPort());
         socket.setKeepAlive(true);
         return socket;

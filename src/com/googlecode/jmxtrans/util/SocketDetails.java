@@ -6,7 +6,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 /**
  * Class which holds the details about the socket connection. Primarily host/port.
  */
-public final class SocketDetails implements java.io.Serializable {
+public class SocketDetails implements java.io.Serializable {
     private String host;
     private int port;
 
@@ -56,7 +56,6 @@ public final class SocketDetails implements java.io.Serializable {
                             .append(this.getHost(), other.getHost())
                             .append(this.getPort(), other.getPort())
                             .isEquals();
-        System.out.println("equals is called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " + result);
         return result;
     }
 
@@ -66,7 +65,6 @@ public final class SocketDetails implements java.io.Serializable {
                                     .append(this.getHost())
                                     .append(this.getPort())
                                     .toHashCode();
-        System.out.println("hashCode is called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " + result);
 
         return result;
     }
