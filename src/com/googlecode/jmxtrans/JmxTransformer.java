@@ -37,7 +37,7 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.OptionsException;
 import com.googlecode.jmxtrans.util.SignalInterceptor;
-import com.googlecode.jmxtrans.util.StartupException;
+import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
@@ -64,6 +64,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     private WatchDir watcher;
 
     private Map<String, KeyedObjectPool> poolMap;
+
+    private List<Server> masterServersList = new ArrayList<Server>();
+
 
     /** */
     public static void main(String[] args) throws Exception {
@@ -116,10 +119,10 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             setupObjectPooling();
 
             // process all the json files into Server objects
-            List<Server> servers = processFilesIntoServers(serverScheduler, getJsonFiles());
+            processFilesIntoServers(serverScheduler, getJsonFiles());
 
             // process the servers into jobs
-            processServersIntoJobs(serverScheduler, servers);
+            processServersIntoJobs(serverScheduler);
 
         } catch (Exception e) {
             runEndlessly = false;
@@ -171,9 +174,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
     /**
      * Processes all the json files and manages the dedup process
      */
-    private List<Server> processFilesIntoServers(Scheduler scheduler, List<File> jsonFiles) throws StartupException {
-
-        List<Server> mergedServers = new ArrayList<Server>();
+    private void processFilesIntoServers(Scheduler scheduler, List<File> jsonFiles) throws LifecycleException {
 
     	for (File jsonFile : jsonFiles) {
             JmxProcess process;
@@ -182,23 +183,21 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 				if (log.isDebugEnabled()) {
 				    log.debug("Loaded file: " + jsonFile.getAbsolutePath());
 				}
-	            JmxUtils.mergeServerLists(mergedServers, process.getServers());
+	            JmxUtils.mergeServerLists(masterServersList, process.getServers());
 			} catch (Exception ex) {
-			    throw new StartupException("Error parsing json: " + jsonFile, ex);
+			    throw new LifecycleException("Error parsing json: " + jsonFile, ex);
 			}
         }
 
-    	return mergedServers;
     }
 
     /**
      * Processes all the Servers into Job's
      *
      * Needs to be called after processFiles()
-     * @throws StartupException
      */
-    private void processServersIntoJobs(Scheduler scheduler, List<Server> servers) throws StartupException {
-        for (Server server : servers) {
+    private void processServersIntoJobs(Scheduler scheduler) throws LifecycleException {
+        for (Server server : masterServersList) {
             try {
 
                 // need to inject the poolMap
@@ -207,6 +206,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
                     for (OutputWriter writer : query.getOutputWriters()) {
                         writer.setObjectPoolMap(poolMap);
+                        writer.start();
                     }
                 }
 
@@ -216,11 +216,11 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
                 // Now schedule the jobs for execution.
                 scheduleJob(scheduler, server);
             } catch (ParseException ex) {
-                throw new StartupException("Error parsing cron expression: " + server.getCronExpression(), ex);
+                throw new LifecycleException("Error parsing cron expression: " + server.getCronExpression(), ex);
             } catch (SchedulerException ex) {
-                throw new StartupException("Error scheduling job for server: " + server, ex);
+                throw new LifecycleException("Error scheduling job for server: " + server, ex);
             } catch (ValidationException ex) {
-                throw new StartupException("Error validating json setup for query", ex);
+                throw new LifecycleException("Error validating json setup for query", ex);
             }
         }
     }
@@ -391,14 +391,19 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
             log.debug("Got signame: " + signame);
         }
         try {
+
+            // Shutdown the scheduler
             if (serverScheduler != null) {
                 serverScheduler.shutdown(true);
                 log.debug("Shutdown server scheduler!");
             }
+
+            // Shutdown the file watch service
             if (watcher != null) {
                 watcher.stopService();
             }
 
+            // Shutdown the pools
             for (KeyedObjectPool pool : getObjectPoolMap().values()) {
                 try {
                     pool.close();
@@ -406,6 +411,20 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
                     // ignore.
                 }
             }
+
+            // Shutdown the outputwriters
+            for (Server server : masterServersList) {
+                for (Query query : server.getQueries()) {
+                    for (OutputWriter writer : query.getOutputWriters()) {
+                        try {
+                            writer.stop();
+                        } catch (LifecycleException ex) {
+                            log.error("Error stopping writer: " + writer);
+                        }
+                    }
+                }
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -30,6 +30,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.codehaus.jackson.JsonParseException;
@@ -511,4 +512,104 @@ public class JmxUtils {
 
         return poolMap;
     }
+
+    public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+        String keyStr = null;
+        if (values.getKey().startsWith(result.getAttributeName())) {
+            keyStr = values.getKey();
+        } else {
+            keyStr = result.getAttributeName() + "." + values.getKey();
+        }
+
+        String alias = null;
+        if (query.getServer().getAlias() != null) {
+            alias = query.getServer().getAlias();
+        } else {
+            alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+            alias = cleanupStr(alias);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (rootPrefix != null) {
+            sb.append(rootPrefix);
+            sb.append(".");
+        }
+        sb.append(alias);
+        sb.append(".");
+
+        // Allow people to use something other than the classname as the output.
+        if (result.getClassNameAlias() != null) {
+            sb.append(result.getClassNameAlias());
+        } else {
+            sb.append(cleanupStr(result.getClassName()));
+        }
+
+        sb.append(".");
+
+        String typeName = cleanupStr(getConcatedTypeNameValues(typeNames, result.getTypeName()));
+        if (typeName != null) {
+            sb.append(typeName);
+            sb.append(".");
+        }
+        sb.append(cleanupStr(keyStr));
+
+        return sb.toString();
+    }
+
+    /**
+     * Replaces all . with _ and removes all spaces and double/single quotes.
+     */
+    public static String cleanupStr(String name) {
+        if (name == null) {
+            return null;
+        }
+        String clean = name.replace(".", "_");
+        clean = clean.replace(" ", "");
+        clean = clean.replace("\"", "");
+        clean = clean.replace("'", "");
+        return clean;
+    }
+
+    /**
+     * Given a typeName string, get the first match from the typeNames setting.
+     * In other words, suppose you have:
+     *
+     * typeName=name=PS Eden Space,type=MemoryPool
+     *
+     * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the string
+     */
+    public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
+        if (typeNames == null || typeNames.size() == 0) {
+            return null;
+        }
+        String[] tokens = typeNameStr.split(",");
+        StringBuilder sb = new StringBuilder();
+        for (String key : typeNames) {
+            String result = getTypeNameValue(key, tokens);
+            if (result != null) {
+                sb.append(result);
+                sb.append("_");
+            }
+        }
+        return StringUtils.chomp(sb.toString(), "_");
+    }
+
+    /** */
+    private static String getTypeNameValue(String typeName, String[] tokens) {
+        boolean foundIt = false;
+        for (String token : tokens) {
+            String[] keys = token.split("=");
+            for (String key : keys) {
+                // we want the next item in the array.
+                if (foundIt) {
+                    return key;
+                }
+                if (typeName.equals(key)) {
+                    foundIt = true;
+                }
+            }
+        }
+        return null;
+    }
+
 }

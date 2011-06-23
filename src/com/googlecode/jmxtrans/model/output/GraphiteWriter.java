@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -80,55 +81,24 @@ public class GraphiteWriter extends BaseOutputWriter {
         try {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 
-            for (Result r : query.getResults()) {
+            List<String> typeNames = this.getTypeNames();
+
+            for (Result result : query.getResults()) {
                 if (isDebugEnabled()) {
-                    log.debug(r.toString());
+                    log.debug(result.toString());
                 }
-                Map<String, Object> resultValues = r.getValues();
+                Map<String, Object> resultValues = result.getValues();
                 if (resultValues != null) {
                     for (Entry<String, Object> values : resultValues.entrySet()) {
                         if (JmxUtils.isNumeric(values.getValue())) {
-                            String keyStr = null;
-                            if (values.getKey().startsWith(r.getAttributeName())) {
-                                keyStr = values.getKey();
-                            } else {
-                                keyStr = r.getAttributeName() + "." + values.getKey();
-                            }
-
-                            String alias = null;
-                            if (query.getServer().getAlias() != null) {
-                                alias = query.getServer().getAlias();
-                            } else {
-                                alias = query.getServer().getHost() + "_" + query.getServer().getPort();
-                                alias = cleanupStr(alias);
-                            }
-
                             StringBuilder sb = new StringBuilder();
-                            sb.append(rootPrefix);
-                            sb.append(".");
-                            sb.append(alias);
-                            sb.append(".");
 
-                            // Allow people to use something other than the classname as the output.
-                            if (r.getClassNameAlias() != null) {
-                                sb.append(r.getClassNameAlias());
-                            } else {
-                                sb.append(cleanupStr(r.getClassName()));
-                            }
-
-                            sb.append(".");
-
-                            String typeName = cleanupStr(getConcatedTypeNameValues(r.getTypeName()));
-                            if (typeName != null) {
-                                sb.append(typeName);
-                                sb.append(".");
-                            }
-                            sb.append(cleanupStr(keyStr));
+                            sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
 
                             sb.append(" ");
                             sb.append(values.getValue());
                             sb.append(" ");
-                            sb.append(r.getEpoch() / 1000);
+                            sb.append(result.getEpoch() / 1000);
                             sb.append("\n");
 
                             String line = sb.toString();

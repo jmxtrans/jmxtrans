@@ -8,6 +8,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
@@ -24,6 +25,9 @@ import com.googlecode.jmxtrans.util.ValidationException;
 @JsonSerialize(include=Inclusion.NON_NULL)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public interface OutputWriter {
+
+    public void start() throws LifecycleException;
+    public void stop() throws LifecycleException;
 
     public void doWrite(Query query) throws Exception;
 

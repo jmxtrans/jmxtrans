@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -100,52 +99,14 @@ public abstract class BaseOutputWriter implements OutputWriter {
      * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the string
      */
     protected String getConcatedTypeNameValues(String typeNameStr) {
-        List<String> typeNames = getTypeNames();
-        if (typeNames == null || typeNames.size() == 0) {
-            return null;
-        }
-        String[] tokens = typeNameStr.split(",");
-        StringBuilder sb = new StringBuilder();
-        for (String key : typeNames) {
-            String result = getTypeNameValue(key, tokens);
-            if (result != null) {
-                sb.append(result);
-                sb.append("_");
-            }
-        }
-        return StringUtils.chomp(sb.toString(), "_");
-    }
-
-    /** */
-    private String getTypeNameValue(String typeName, String[] tokens) {
-        boolean foundIt = false;
-        for (String token : tokens) {
-            String[] keys = token.split("=");
-            for (String key : keys) {
-                // we want the next item in the array.
-                if (foundIt) {
-                    return key;
-                }
-                if (typeName.equals(key)) {
-                    foundIt = true;
-                }
-            }
-        }
-        return null;
+        return JmxUtils.getConcatedTypeNameValues(this.getTypeNames(), typeNameStr);
     }
 
     /**
      * Replaces all . with _ and removes all spaces and double/single quotes.
      */
     protected String cleanupStr(String name) {
-        if (name == null) {
-            return null;
-        }
-        String clean = name.replace(".", "_");
-        clean = clean.replace(" ", "");
-        clean = clean.replace("\"", "");
-        clean = clean.replace("'", "");
-        return clean;
+        return JmxUtils.cleanupStr(name);
     }
 
     /**
@@ -153,6 +114,22 @@ public abstract class BaseOutputWriter implements OutputWriter {
      */
     @Override
     public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {
+        // Do nothing.
+    }
+
+    /**
+     * A do nothing method.
+     */
+    @Override
+    public void start() throws LifecycleException {
+        // Do nothing.
+    }
+
+    /**
+     * A do nothing method.
+     */
+    @Override
+    public void stop() throws LifecycleException {
         // Do nothing.
     }
 }
