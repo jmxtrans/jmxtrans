@@ -1,4 +1,7 @@
-How to do a release:
+How to do a release (must be on an Ubuntu machine):
+
+#0. aptitude install build-essential devscripts debhelper sun-java6-jdk ant1.8 ntp ssh-server
+
 
 #1. Create a file called build.credentials.properties in the top level project directory.
 
@@ -8,7 +11,7 @@ gc.password=
 
 #3. Make changes to the code and commit them.
 
-#4. svn up; ant dist; ant upload
+#4. svn up; ant debian; ant upload
 
 #5. Now, commit the javadoc directory.
 
