@@ -8,20 +8,21 @@ if [ -e "$CONF_FILE" ]; then
 	. "$CONF_FILE"
 fi
 
-JPS=${JPS:-"/usr/bin/jps"}
+LOG_DIR=${LOG_DIR:-"."}
+JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
+JSON_DIR=${JSON_DIR:-"."}
+SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
+
+JPS=${JPS:-"/usr/bin/jps -l"}
 JAVA=${JAVA:-"/usr/bin/java"}
 PSCMD="$JPS | grep -i jmxtrans | awk '{ print \$1 };'"
-JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"}
+JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Djmxtrans.log.dir=$LOG_DIR"}
 NEW_SIZE=${NEW_SIZE:-"64M"}
 NEW_RATIO=${NEW_RATIO:-"8"}
 HEAP_SIZE=${HEAP_SIZE:-"512M"}
 CPU_CORES=${CPU_CORES:-"1"}
 MONITOR_OPTS=${MONITOR_OPTS:-"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=2101"}
 GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}M -Xmx${HEAP_SIZE}M -XX:+UseConcMarkSweepGC -XX:NewRatio=${NEW_RATIO} -XX:NewSize=${NEW_SIZE}m -XX:MaxNewSize=${NEW_SIZE}m -XX:MaxTenuringThreshold=16 -XX:GCTimeRatio=9 -XX:PermSize=384m -XX:MaxPermSize=384m -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=85 -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_CORES -Dsun.rmi.dgc.server.gcInterval=28800000 -Dsun.rmi.dgc.client.gcInterval=28800000"}
-
-JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
-JSON_DIR=${JSON_DIR:-"."}
-SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
 
 JPS_RUNNABLE=`$JPS 2>&1`
 if [ $? != 0 ]; then
