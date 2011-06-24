@@ -1,19 +1,19 @@
 #!/usr/bin/make -f
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 
 clean:
 	dh_testdir
 	dh_testroot
-	dh_clean
+#	dh_clean
 
 setup-perms:
-	find debian/tmp/jmxtrans -name "*.sh" | xargs chmod -f ugo+x
+	chmod -f ugo+x debian/tmp/usr/share/@PACKAGE@/*.sh || true
 	
 binary: binary-indep
 binary-indep: setup-perms 
-	dh_prep
+#	dh_prep
 	dh_testdir
 	dh_testroot
 	dh_installdirs

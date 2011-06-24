@@ -224,13 +224,12 @@
                 <include name="**"/>
             </fileset>
         </copy>
-        <unzip src="${build.dist.zip}" dest="${target.dir}/jmxtrans/debian/tmp/usr/share/temp" />
+        <unzip src="${build.dist.zip}" dest="${target.dir}/jmxtrans/debian/tmp/usr/share" />
         <move todir="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans">
-            <fileset dir="${target.dir}/jmxtrans/debian/tmp/usr/share/temp">
+            <fileset dir="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans-${sVersionRevision}">
                 <include name="**"/>
             </fileset>
         </move>
-        <delete dir="${target.dir}/jmxtrans/debian/tmp/usr/share/temp" />
         <chmod file="${target.dir}/jmxtrans/debian/rules" perm="ugo+rx"/>
 
         <exec executable="/usr/bin/debuild" dir="${target.dir}/jmxtrans" failonerror="true">
