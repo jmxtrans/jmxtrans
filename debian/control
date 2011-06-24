@@ -7,6 +7,6 @@ Package: @PACKAGE@
 Architecture: amd64
 Section: admin
 Priority: optional
-Depends: ${misc:Depends}, default-jdk
+Depends: ${misc:Depends}, java2-runtime
 Description: @FULL_VERSION@ - @PACKAGE@
  dependency package, installs @PACKAGE@
