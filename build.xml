@@ -103,9 +103,16 @@
 
 		<javac srcdir="${src.dir}"
 				destdir="${build.classes.dir}"
-				debug="${build.debug}"
-				deprecation="${build.deprecation}"
-		        includeantruntime="false"
+                optimize="off"
+                deprecation="off"
+                debug="on"
+                debuglevel="lines,vars,source"
+                source="1.5"
+                target="1.5"
+                encoding="UTF-8"
+                verbose="off"
+                fork="false"
+                includeantruntime="false"
 			>
             <classpath path="${toString:javac.classpath}"/>
 		</javac>

@@ -16,26 +16,24 @@ if [ -f /etc/default/@PACKAGE@ ]; then
 fi
 
 PIDFILE="/var/run/@PACKAGE@.pid"
-STARTCMD="
-          if [ -f /etc/default/@PACKAGE@ ]; then source /etc/default/@PACKAGE@ ; fi ; \
+
+RUNCMD="if [ -f /etc/default/@PACKAGE@ ]; then source /etc/default/@PACKAGE@ ; fi ; \
           cd /usr/share/@PACKAGE@ ; \
-          ./@START_SCRIPT@ start "
+          ./jmxtrans.sh"
 
 
 do_start() {
     start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
         --chuid jmxtrans:jmxtrans -u jmxtrans -g jmxtrans -v \
-        --exec /bin/bash -- -c "$STARTCMD"
+        --exec /bin/bash -- -c "$RUNCMD start"
 }
 
 do_stop() {
-    su - marin -c "
-                   if [ -f /etc/default/@PACKAGE@ ]; then source /etc/default/@PACKAGE@ ; fi ; \
-                   cd /usr/share/@PACKAGE@; ./@START_SCRIPT@ stop"
+    su - jmxtrans -c "$RUNCMD stop"
 }
 
 do_status() {
-    su -l -c "cd /usr/share/@PACKAGE@; ./@START_SCRIPT@ status" jmxtrans
+    su - jmxtrans -c "$RUNCMD status"
 }
 
 case "$1" in

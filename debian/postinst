@@ -68,21 +68,30 @@ case "$1" in
 
         # create /etc/default/ and package file if it doesn't exist
         if [ ! -e /etc/default/@PACKAGE@ ]; then
-            echo "# default file for package @PACKAGE@"   > "$CONFIG"
+            echo "# default file for package @PACKAGE@" > "$CONFIG"
         fi
 
+        mkdir -p /var/lib/@PACKAGE@ || true
+        chown jmxtrans:jmxtrans /var/lib/@PACKAGE@
+
         # populate defaults file
+        purge_line "$CONFIG" "SECONDS_BETWEEN_RUNS"
+        echo "export SECONDS_BETWEEN_RUNS="60" >> "$CONFIG"
+
+        purge_line "$CONFIG" "JSON_DIR"
+        echo "export JSON_DIR="/var/lib/@PACKAGE@" >> "$CONFIG"
+
         purge_line "$CONFIG" "HEAP_SIZE"
-        echo "export HEAP_SIZE=${HEAP_SIZE}"    >> "$CONFIG"
+        echo "export HEAP_SIZE=${HEAP_SIZE}" >> "$CONFIG"
 
         purge_line "$CONFIG" "NEW_SIZE"
-        echo "export NEW_SIZE=${NEW_SIZE}"      >> "$CONFIG"
+        echo "export NEW_SIZE=${NEW_SIZE}" >> "$CONFIG"
 
         purge_line "$CONFIG" "CPU_CORES"
-        echo "export CPU_CORES=${CPU_CORES}"    >> "$CONFIG"
+        echo "export CPU_CORES=${CPU_CORES}" >> "$CONFIG"
 
         purge_line "$CONFIG" "NEW_RATIO"
-        echo "export NEW_RATIO=${NEW_RATIO}"    >> "$CONFIG"
+        echo "export NEW_RATIO=${NEW_RATIO}" >> "$CONFIG"
 
         chmod 644 "${CONFIG}" || true
     ;;
