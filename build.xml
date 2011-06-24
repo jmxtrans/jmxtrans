@@ -15,7 +15,8 @@
     <property file="${alexandria.home}/jar.properties" />
 	<property file="build.credentials.properties" />
 
-	<property name="build.dir" location="target" />
+    <property name="target.dir" location="target" />
+	<property name="build.dir" location="${target.dir}" />
 	<property name="build.classes.dir" location="${build.dir}/classes" />
 	<property name="build.javadoc.dir" location="${build.dir}/javadoc" />
 	<property name="build.jar.file" location="${build.dir}/${name}.jar" />
@@ -39,13 +40,6 @@
             <pathelement location="${alexandria.home}/${ant-contrib.jar}"/>
         </classpath>
     </taskdef>
-
-    <filter token="NOW" value="${NOW}" />
-    <filter token="PROPER_NOW" value="${PROPER_NOW}" />
-    <filter token="YEAR" value="${YEAR}" />
-    <filter token="FULL_VERSION" value="${sVersion}" />
-    <filter token="VERSION" value="${sVersionRevision}" />
-    <filter token="BRANCH_NAME" value="${sVersionBranchName}" />
 
     <spath id="sweetened.classpath">
         <sfilelist dir="${alexandria.home}">
@@ -218,6 +212,13 @@
 
     <target name="debian" depends="dist">
         <filter token="PACKAGE" value="jmxtrans" />
+        <filter token="NOW" value="${NOW}" />
+        <filter token="PROPER_NOW" value="${PROPER_NOW}" />
+        <filter token="YEAR" value="${YEAR}" />
+        <filter token="FULL_VERSION" value="${sVersion}" />
+        <filter token="VERSION" value="${sVersionRevision}" />
+        <filter token="BRANCH_NAME" value="${sVersionBranchName}" />
+
         <copy todir="${target.dir}/jmxtrans/debian" filtering="true">
             <fileset dir="debian">
                 <include name="**"/>
