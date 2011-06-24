@@ -6,28 +6,21 @@
 <project name="jmxtrans" default="jar" basedir=".">
 
 	<property name="name" value="${ant.project.name}" />
+    <property name="base.dir" location="." />
 
-	<property file="user.properties" />
-	<property file="${user.home}/build.properties" />
-	<property file="build.properties" />
+    <property file="user.properties" />
+    <property file="${user.home}/build.properties" />
+    <property file="jar.properties"/>
+    <property name="alexandria.home" value="${base.dir}" />
+    <property file="${alexandria.home}/jar.properties" />
 	<property file="build.credentials.properties" />
-
-	<property name="base.dir" location="." />
-
-	<property name="build.debug" value="on" />
-	<property name="build.deprecation" value="on" />
-
-	<property name="ant.build.javac.target" value="1.5" />
-	<property name="ant.build.javac.source" value="1.5" />
 
 	<property name="build.dir" location="target" />
 	<property name="build.classes.dir" location="${build.dir}/classes" />
 	<property name="build.javadoc.dir" location="${build.dir}/javadoc" />
 	<property name="build.jar.file" location="${build.dir}/${name}.jar" />
 
-	<property name="docs.dir" value="${build.dir}/docs" />
 	<property name="javadoc.dir" value="javadoc" />
-
 	<property name="lib.dir" location="lib" />
 	<property name="src.dir" location="src" />
 
@@ -38,12 +31,47 @@
         <format property="YEAR" pattern="yyyy" />
     </tstamp>
 
-	<path id="master.classpath">
-		<fileset dir="${lib.dir}">
-			<include name="**/*.jar" />
-            <exclude name="**/*-sources.jar" />
-		</fileset>
-	</path>
+    <typedef resource="com/googlecode/sweetened/sweetened.xml" classpath="${alexandria.home}/${sweetened.jar}:${alexandria.home}/${svnkit.jar}" />
+    <sweetenedVersion />
+
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="${alexandria.home}/${ant-contrib.jar}"/>
+        </classpath>
+    </taskdef>
+
+    <filter token="NOW" value="${NOW}" />
+    <filter token="PROPER_NOW" value="${PROPER_NOW}" />
+    <filter token="YEAR" value="${YEAR}" />
+    <filter token="FULL_VERSION" value="${sVersion}" />
+    <filter token="VERSION" value="${sVersionRevision}" />
+    <filter token="BRANCH_NAME" value="${sVersionBranchName}" />
+
+    <spath id="sweetened.classpath">
+        <sfilelist dir="${alexandria.home}">
+            <sfile name="${commons-cli.jar}" scope="compile" src="${alexandria.home}/${commons-cli.src}" />
+            <sfile name="${commons-codec.jar}" scope="compile" src="${alexandria.home}/${commons-codec.src}" />
+            <sfile name="${commons-io.jar}" scope="compile" src="${alexandria.home}/${commons-io.src}" />
+            <sfile name="${commons-lang.jar}" scope="compile" src="${alexandria.home}/${commons-lang.src}" />
+            <sfile name="${commons-logging.jar}" scope="compile" src="${alexandria.home}/${commons-logging.src}" />
+            <sfile name="${commons-pool.jar}" scope="compile" src="${alexandria.home}/${commons-pool.src}" />
+            <sfile name="${jackson-core.jar}" scope="compile" src="${alexandria.home}/${jackson.src}" />
+            <sfile name="${jackson-mapper.jar}" scope="compile" src="${alexandria.home}/${jackson.src}" />
+            <sfile name="${jpathwatch.jar}" scope="compile" />
+            <sfile name="${jrobin.jar}" scope="compile" src="${alexandria.home}/${jrobin.src}" />
+            <sfile name="${junit.jar}" scope="unit" src="${alexandria.home}/${junit.src}" />
+            <sfile name="${log4j.jar}" scope="compile" src="${alexandria.home}/${log4j.src}" />
+            <sfile name="${quartz.jar}" scope="compile" src="${alexandria.home}/${quartz.src}" />
+            <sfile name="${slf4j-api.jar}" scope="compile" src="${alexandria.home}/${slf4j-api.src}" />
+            <sfile name="${slf4j-log4j.jar}" scope="runtime" src="${alexandria.home}/${slf4j-log4j.src}" />
+            <sfile name="${velocity.jar}" scope="compile" src="${alexandria.home}/${velocity.src}" />
+        </sfilelist>
+    </spath>
+
+    <spath id="javac.classpath" scope="compile" parent="sweetened.classpath" />
+    <spath id="javadoc.classpath" scope="all" parent="sweetened.classpath" />
+    <spath id="unit.classpath" scope="all" parent="sweetened.classpath" />
+    <spath id="all.classpath" scope="all" parent="sweetened.classpath" />
 
 	<path id="run.classpath">
 		<pathelement location="${build.classes.dir}" />
@@ -85,7 +113,7 @@
 				deprecation="${build.deprecation}"
 		        includeantruntime="false"
 			>
-			<classpath refid="master.classpath" />
+            <classpath path="${toString:javac.classpath}"/>
 		</javac>
 	</target>
 
@@ -125,7 +153,6 @@
 		<javadoc
 			destdir="${build.javadoc.dir}"
 			packagenames="*"
-			classpathref="run.classpath"
 			author="true"
 			version="true"
 			Windowtitle="jmxlogger javadoc"
@@ -136,6 +163,7 @@
 			</fileset>
 			<doctitle><![CDATA[<h1>jmxtrans</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright &#169; ${YEAR} Jon Stevens and a gang of pencils. All Rights Reserved. Build version: ${build.version}</i>]]></bottom>
+            <classpath path="${toString:javadoc.classpath}" />
 		</javadoc>
 
 		<sync todir="${javadoc.dir}" includeEmptyDirs="true">
@@ -212,4 +240,37 @@
 			summary="${ant.project.name} distribution"
 			labels="Featured, Type-Package, OpSys-All" />
 	</target>
+
+    <target name=".eclipse" description="Generate eclipse project metadata">
+        <sweetenedClasspath file=".classpath">
+            <sweetenedBits refid="unit.classpath" />
+            <data>
+                <classpath>
+                    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+                    <sweetenedEntries />
+                    <classpathentry kind="src" path="src"/>
+                    <classpathentry kind="src" path="test"/>
+                    <classpathentry kind="output" path="_eclipse"/>
+                </classpath>
+            </data>
+        </sweetenedClasspath>
+        <echoxml file=".project">
+            <projectDescription>
+                <name>${name}-${sVersionBranchName}</name>
+                <comment></comment>
+                <projects>
+                </projects>
+                <buildSpec>
+                    <buildCommand>
+                        <name>org.eclipse.jdt.core.javabuilder</name>
+                        <arguments>
+                        </arguments>
+                    </buildCommand>
+                </buildSpec>
+                <natures>
+                    <nature>org.eclipse.jdt.core.javanature</nature>
+                </natures>
+            </projectDescription>
+        </echoxml>
+    </target>
 </project>
