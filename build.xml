@@ -252,6 +252,26 @@
 			targetfilename="${build.dist.zip}"
 			summary="${ant.project.name} distribution"
 			labels="Featured, Type-Package, OpSys-All" />
+
+	    <!-- hacky, but need both path to file and filename -->
+	    <path id="file.deb">
+            <fileset dir="${target.dir}" includes="*.deb" />
+        </path>
+	    <property name="file.deb.path" refid="file.deb" />
+        <pathconvert property="file.deb.target" targetos="unix">
+            <path>
+                <fileset dir="${target.dir}" includes="*.deb" />
+            </path>
+            <mapper type="flatten"/>
+        </pathconvert>
+
+	    <gcupload projectname="${ant.project.name}"
+            userName="${gc.username}"
+            password="${gc.password}"
+            filename="${file.deb.path}"
+            targetfilename="${file.deb.target}"
+            summary="${ant.project.name} debian distribution"
+            labels="Featured, Type-Installer, OpSys-Linux, Debian" />
 	</target>
 
     <target name=".eclipse" description="Generate eclipse project metadata">
