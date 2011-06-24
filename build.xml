@@ -181,19 +181,19 @@
 				<include name="javadoc/**" />
 			</fileset>
 
-			<fileset dir=".">
+			<fileset dir="${base.dir}">
 				<include name="*.xml" />
                 <include name="*.json" />
                 <include name="*.sh" />
 				<include name="README.html" />
                 <exclude name="test-*.json" />
+                <exclude name="*.log" />
+                <exclude name="build.credentials.properties" />
 			</fileset>
-		</copy>
 
-		<copy todir="${build.dist.dir}">
-			<fileset dir="${build.dir}">
-				<include name="*.jar" />
-			</fileset>
+		    <fileset dir="${build.dir}">
+                <include name="*.jar" />
+            </fileset>
 		</copy>
 
 		<copy todir="${build.dist.dir}/lib">
