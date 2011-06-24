@@ -9,7 +9,7 @@ clean:
 	dh_clean
 
 setup-perms:
-	find tmp/jmxtrans -name "*.sh" | xargs chmod -f ugo+x
+	find debian/tmp/jmxtrans -name "*.sh" | xargs chmod -f ugo+x
 	
 binary: binary-indep
 binary-indep: setup-perms 
