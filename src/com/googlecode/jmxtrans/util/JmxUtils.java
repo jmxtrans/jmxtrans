@@ -516,13 +516,13 @@ public class JmxUtils {
 		Map<String, KeyedObjectPool> poolMap = new HashMap<String, KeyedObjectPool>();
 
 		GenericKeyedObjectPool pool = new GenericKeyedObjectPool(new SocketFactory());
-
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);
 		pool.setMaxIdle(-1);
-
 		pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
 		pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+
+		poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
 
 		GenericKeyedObjectPool jmxPool = new GenericKeyedObjectPool(new JmxConnectionFactory());
 		jmxPool.setTestOnBorrow(true);

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -73,10 +74,11 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 		JmxTransformer transformer = new JmxTransformer();
 
 		// Register signal handlers
+        transformer.registerQuietly("HUP");
+        transformer.registerQuietly("INT");
+        transformer.registerQuietly("ABRT");
+        transformer.registerQuietly("KILL");
 		transformer.registerQuietly("TERM");
-		transformer.registerQuietly("INT");
-		transformer.registerQuietly("ABRT");
-		transformer.registerQuietly("KILL");
 
 		// Start the process
 		transformer.doMain(args);
@@ -242,7 +244,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 		JobDataMap map = new JobDataMap();
 		map.put(Server.class.getName(), server);
-		map.put(Server.SOCKET_FACTORY_POOL, this.getObjectPoolMap().get(Server.SOCKET_FACTORY_POOL));
+		map.put(Server.JMX_CONNECTION_FACTORY_POOL, this.getObjectPoolMap().get(Server.JMX_CONNECTION_FACTORY_POOL));
 		jd.setJobDataMap(map);
 
 		Trigger trigger = null;
@@ -403,20 +405,22 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 			// Shutdown the scheduler
 			if (this.serverScheduler != null) {
 				this.serverScheduler.shutdown(true);
-				log.debug("Shutdown server scheduler!");
+				log.debug("Shutdown server scheduler");
 			}
 
 			// Shutdown the file watch service
 			if (this.watcher != null) {
 				this.watcher.stopService();
+				log.debug("Shutdown watch service");
 			}
 
 			// Shutdown the pools
-			for (KeyedObjectPool pool : this.getObjectPoolMap().values()) {
+			for (Entry<String, KeyedObjectPool> entry : this.getObjectPoolMap().entrySet()) {
 				try {
-					pool.close();
+					entry.getValue().close();
+                    log.debug("Closed object pool factory: " + entry.getKey());
 				} catch (Exception ex) {
-					// ignore.
+                    log.error("Error closing object pool factory: " + entry.getKey());
 				}
 			}
 
@@ -426,8 +430,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 					for (OutputWriter writer : query.getOutputWriters()) {
 						try {
 							writer.stop();
+							log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
 						} catch (LifecycleException ex) {
-							log.error("Error stopping writer: " + writer);
+							log.error("Error stopping writer: " + writer.getClass().getSimpleName() + " for query: " + query);
 						}
 					}
 				}

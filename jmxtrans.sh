@@ -60,7 +60,7 @@ start() {
 stop() {
 	PID=$(eval $PSCMD)
 	if [ ! -z "$PID" ]; then
-		kill -1 "$PID"
+		kill -15 "$PID"
 		echo -n "Stopping jmxtrans"
 		while (true); do
 			PID=$(eval $PSCMD)
