@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.model.output;
 
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.SocketDetails;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
@@ -37,7 +37,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 
     private Map<String, KeyedObjectPool> poolMap;
     private KeyedObjectPool pool;
-    private SocketDetails details;
+    private InetSocketAddress address;
 
     /**
      * Uses JmxUtils.getDefaultPoolMap()
@@ -70,14 +70,14 @@ public class GraphiteWriter extends BaseOutputWriter {
         	rootPrefix = rootPrefixTmp;
         }
 
-        this.details = new SocketDetails(host, port);
+        this.address = new InetSocketAddress(host, port);
         this.pool = poolMap.get(Server.SOCKET_FACTORY_POOL);
     }
 
     /** */
     public void doWrite(Query query) throws Exception {
 
-        Socket socket = (Socket) pool.borrowObject(details);
+        Socket socket = (Socket) pool.borrowObject(address);
         try {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 
@@ -112,7 +112,7 @@ public class GraphiteWriter extends BaseOutputWriter {
                 }
             }
         } finally {
-            pool.returnObject(details, socket);
+            pool.returnObject(address, socket);
         }
     }
 

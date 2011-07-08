@@ -93,31 +93,10 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 		}
 
 		try {
-			// start the server scheduler which loops over all the Server jobs
-			StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
-			InputStream stream = null;
-			if (QUARTZ_SERVER_PROPERTIES == null) {
-				QUARTZ_SERVER_PROPERTIES = "/quartz.server.properties";
-				stream = JmxTransformer.class.getResourceAsStream(QUARTZ_SERVER_PROPERTIES);
-			} else {
-				stream = new FileInputStream(QUARTZ_SERVER_PROPERTIES);
-			}
-			serverSchedFact.initialize(stream);
-			this.serverScheduler = serverSchedFact.getScheduler();
-			this.serverScheduler.start();
+		    this.startupScheduler();
 
-			File dirToWatch = null;
-			if (this.getJsonDirOrFile().isFile()) {
-				dirToWatch = new File(FilenameUtils.getFullPath(this.getJsonDirOrFile().getAbsolutePath()));
-			} else {
-				dirToWatch = this.getJsonDirOrFile();
-			}
+		    this.startupWatchdir();
 
-			// start the watcher
-			this.watcher = new WatchDir(dirToWatch, this);
-			this.watcher.start();
-
-			// object pooling
 			this.setupObjectPooling();
 
 			this.startupSystem();
@@ -133,11 +112,59 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	}
 
 	/**
+	 * Startup the watchdir service.
+	 */
+	private void startupWatchdir() throws Exception {
+        File dirToWatch = null;
+        if (this.getJsonDirOrFile().isFile()) {
+            dirToWatch = new File(FilenameUtils.getFullPath(this.getJsonDirOrFile().getAbsolutePath()));
+        } else {
+            dirToWatch = this.getJsonDirOrFile();
+        }
+
+        // start the watcher
+        this.watcher = new WatchDir(dirToWatch, this);
+        this.watcher.start();
+	}
+
+	/**
+	 * start the server scheduler which loops over all the Server jobs
+	 */
+	private void startupScheduler() throws Exception {
+        StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
+        InputStream stream = null;
+        if (QUARTZ_SERVER_PROPERTIES == null) {
+            QUARTZ_SERVER_PROPERTIES = "/quartz.server.properties";
+            stream = JmxTransformer.class.getResourceAsStream(QUARTZ_SERVER_PROPERTIES);
+        } else {
+            stream = new FileInputStream(QUARTZ_SERVER_PROPERTIES);
+        }
+        serverSchedFact.initialize(stream);
+        this.serverScheduler = serverSchedFact.getScheduler();
+        this.serverScheduler.start();
+	}
+
+	/**
+	 * Handy method which runs the JmxProcess
+	 */
+	public void executeStandalone(JmxProcess process) throws Exception {
+	    this.masterServersList = process.getServers();
+
+        this.startupScheduler();
+        this.setupObjectPooling();
+
+	    this.processServersIntoJobs(this.serverScheduler);
+
+	    Thread.sleep(10 * 1000);
+	    this.handle("TERM");
+	}
+
+	/**
 	 * Processes files into Server objects and then processesServers into jobs
 	 */
 	private void startupSystem() throws LifecycleException {
 		// process all the json files into Server objects
-		this.processFilesIntoServers(this.serverScheduler, this.getJsonFiles());
+		this.processFilesIntoServers(this.getJsonFiles());
 
 		// process the servers into jobs
 		this.processServersIntoJobs(this.serverScheduler);
@@ -183,7 +210,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	/**
 	 * Processes all the json files and manages the dedup process
 	 */
-	private void processFilesIntoServers(Scheduler scheduler, List<File> jsonFiles) throws LifecycleException {
+	private void processFilesIntoServers(List<File> jsonFiles) throws LifecycleException {
 
 		for (File jsonFile : jsonFiles) {
 			JmxProcess process;

@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.example;
 
+import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
@@ -9,7 +10,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * This class produces the json that is in example.json.
- * 
+ *
  * @author jon
  */
 public class InterestingInfo {
@@ -22,9 +23,9 @@ public class InterestingInfo {
         GraphiteWriter gw = new GraphiteWriter();
         gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
         gw.addSetting(GraphiteWriter.PORT, 2003);
-        
+
         StdOutWriter sw = new StdOutWriter();
-        
+
         Query q = new Query();
         q.setObj("java.lang:type=Memory");
         q.addAttr("HeapMemoryUsage");
@@ -55,9 +56,10 @@ public class InterestingInfo {
         q4.addOutputWriter(sw);
         server.addQuery(q4);
 
-        JmxProcess jmx = new JmxProcess(server);
-        JmxUtils.prettyPrintJson(jmx);
-        JmxUtils.execute(jmx);
+        JmxProcess process = new JmxProcess(server);
+        JmxUtils.prettyPrintJson(process);
+        JmxTransformer transformer = new JmxTransformer();
+        transformer.executeStandalone(process);
     }
 
 }

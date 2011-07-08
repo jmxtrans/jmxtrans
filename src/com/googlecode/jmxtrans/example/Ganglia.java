@@ -1,9 +1,10 @@
 package com.googlecode.jmxtrans.example;
 
+import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.output.GraphiteWriter;
+import com.googlecode.jmxtrans.model.output.GangliaWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
@@ -12,7 +13,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
  *
  * @author jon
  */
-public class Graphite {
+public class Ganglia {
 
     /** */
     public static void main(String[] args) throws Exception {
@@ -22,18 +23,19 @@ public class Graphite {
         q.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep");
 //        q.addAttr("HeapMemoryUsage");
 //        q.addAttr("NonHeapMemoryUsage");
-        GraphiteWriter gw = new GraphiteWriter();
-        gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
-        gw.addSetting(GraphiteWriter.PORT, 2003);
-        gw.addSetting(GraphiteWriter.DEBUG, true);
-        gw.addSetting(GraphiteWriter.ROOT_PREFIX, "jon.foo.bar");
+        GangliaWriter gw = new GangliaWriter();
+        gw.addSetting(GangliaWriter.HOST, "10.0.3.16");
+        gw.addSetting(GangliaWriter.PORT, 8649);
+        gw.addSetting(GangliaWriter.DEBUG, true);
+        gw.addSetting(GangliaWriter.GROUP_NAME, "memory2");
         q.addOutputWriter(gw);
         server.addQuery(q);
 
         JmxProcess process = new JmxProcess(server);
         JmxUtils.prettyPrintJson(process);
-//        JmxTransformer transformer = new JmxTransformer();
-//        transformer.executeStandalone(process);
+
+        JmxTransformer transformer = new JmxTransformer();
+        transformer.executeStandalone(process);
 
 //        for (int i = 0; i < 160; i++) {
 //            JmxUtils.execute(jmx);

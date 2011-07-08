@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.example;
 
+import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
@@ -65,7 +66,9 @@ public class ActiveMQ2 {
 
 		JmxProcess process = new JmxProcess(server);
 		JmxUtils.prettyPrintJson(process);
-		JmxUtils.execute(process);
+
+		JmxTransformer transformer = new JmxTransformer();
+        transformer.executeStandalone(process);
 
 //        for (int i = 0; i < 160; i++) {
 //            JmxUtils.processServer(server);

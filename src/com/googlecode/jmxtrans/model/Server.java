@@ -12,6 +12,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.googlecode.jmxtrans.util.DatagramSocketFactory;
 import com.googlecode.jmxtrans.util.JmxConnectionFactory;
 import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
@@ -31,6 +32,7 @@ public class Server {
 	private static final String BACK = "/jmxrmi";
 	public static final String SOCKET_FACTORY_POOL = SocketFactory.class.getSimpleName();
 	public static final String JMX_CONNECTION_FACTORY_POOL = JmxConnectionFactory.class.getSimpleName();
+    public static final String DATAGRAM_SOCKET_FACTORY_POOL = DatagramSocketFactory.class.getSimpleName();
 
 	private JmxProcess jmxProcess;
 

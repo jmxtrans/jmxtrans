@@ -533,7 +533,16 @@ public class JmxUtils {
 
 		poolMap.put(Server.JMX_CONNECTION_FACTORY_POOL, jmxPool);
 
-		return poolMap;
+        GenericKeyedObjectPool dsPool = new GenericKeyedObjectPool(new DatagramSocketFactory());
+        dsPool.setTestOnBorrow(true);
+        dsPool.setMaxActive(-1);
+        dsPool.setMaxIdle(-1);
+        dsPool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
+        dsPool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+
+        poolMap.put(Server.DATAGRAM_SOCKET_FACTORY_POOL, dsPool);
+
+        return poolMap;
 	}
 
 	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
@@ -578,6 +587,35 @@ public class JmxUtils {
 
 		return sb.toString();
 	}
+
+    public static String getKeyString2(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+        String keyStr = null;
+        if (values.getKey().startsWith(result.getAttributeName())) {
+            keyStr = values.getKey();
+        } else {
+            keyStr = result.getAttributeName() + "." + values.getKey();
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        // Allow people to use something other than the classname as the output.
+        if (result.getClassNameAlias() != null) {
+            sb.append(result.getClassNameAlias());
+        } else {
+            sb.append(cleanupStr(result.getClassName()));
+        }
+
+        sb.append(".");
+
+        String typeName = cleanupStr(getConcatedTypeNameValues(typeNames, result.getTypeName()));
+        if (typeName != null) {
+            sb.append(typeName);
+            sb.append(".");
+        }
+        sb.append(cleanupStr(keyStr));
+
+        return sb.toString();
+    }
 
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
