@@ -85,6 +85,13 @@ public class GangliaWriter extends BaseOutputWriter {
 
             List<String> typeNames = this.getTypeNames();
 
+            String spoofedHostname = null;
+            if (StringUtils.isNotEmpty(query.getServer().getAlias())) {
+                spoofedHostname = query.getServer().getAlias();
+            } else {
+                spoofedHostname = query.getServer().getHost();
+            }
+
             for (Result result : query.getResults()) {
                 if (isDebugEnabled()) {
                     log.debug(result.toString());
@@ -93,7 +100,8 @@ public class GangliaWriter extends BaseOutputWriter {
                 if (resultValues != null) {
                     for (Entry<String, Object> values : resultValues.entrySet()) {
                         if (JmxUtils.isNumeric(values.getValue())) {
-                            emitMetric(socket, query.getServer().getHost(),
+
+                            emitMetric(socket, spoofedHostname,
                                     JmxUtils.getKeyString2(query, result, values, typeNames, null),
                                     "int32",
                                     values.getValue().toString());
