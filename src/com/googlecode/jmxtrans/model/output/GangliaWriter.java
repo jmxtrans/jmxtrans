@@ -180,7 +180,7 @@ public class GangliaWriter extends BaseOutputWriter {
         packet = new DatagramPacket(buffer, offset, address);
         socket.send(packet);
 
-        log.debug("Emitting metric " + name + ", type " + type + ", value " + value);
+        log.debug("Emitting metric " + name + ", type " + type + ", value " + value + " for host: " + hostName);
     }
 
     /**

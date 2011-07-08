@@ -18,16 +18,16 @@ public class Ganglia {
     /** */
     public static void main(String[] args) throws Exception {
         Server server = new Server("w2", "1099");
+        server.setAlias("fooalias");
 
         Query q = new Query();
         q.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep");
-//        q.addAttr("HeapMemoryUsage");
-//        q.addAttr("NonHeapMemoryUsage");
+
         GangliaWriter gw = new GangliaWriter();
         gw.addSetting(GangliaWriter.HOST, "10.0.3.16");
         gw.addSetting(GangliaWriter.PORT, 8649);
         gw.addSetting(GangliaWriter.DEBUG, true);
-        gw.addSetting(GangliaWriter.GROUP_NAME, "memory2");
+        gw.addSetting(GangliaWriter.GROUP_NAME, "memory");
         q.addOutputWriter(gw);
         server.addQuery(q);
 
