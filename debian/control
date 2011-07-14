@@ -4,7 +4,7 @@ Maintainer: Jon Stevens <latchkey@gmail.com>
 Standards-Version: 3.9.1
 
 Package: @PACKAGE@
-Architecture: amd64
+Architecture: all
 Section: admin
 Priority: optional
 Depends: ${misc:Depends}, java2-runtime
