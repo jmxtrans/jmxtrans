@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+# chkconfig: - 90 60
+# pidfile: /var/run/jmxtrans.pid
+# config: /etc/sysconfig/jmxtrans
+#
+### BEGIN INIT INFO
+# Provides: jmxtrans
+# Required-Start: $local_fs $remote_fs $network $named
+# Required-Stop: $local_fs $remote_fs $network
+# Short-Description: run jmxtrans daemon
+# Description: jmxtrans jmxtrans is very powerful tool which reads json
+#              configuration files of servers/ports and jmx domains - attributes - types
+#              and then outputs the data in whatever format you want via special 'Writer' objects which you can code up yourself.
+#              It does this with a very efficient engine design that will scale to querying thousands of machines.
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+if [ -f /etc/sysconfig/jmxtrans ]; then
+    . /etc/sysconfig/jmxtrans
+fi
+
+RETVAL=0
+prog="jmxtrans"
+user="jmxtrans"
+exec="/usr/share/jmxtrans/jmxtrans.sh"
+lockfile=/var/lock/subsys/jmxtrans
+config=/etc/sysconfig/jmxtrans
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon --user=$user $exec start
+    #$exec start
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    $exec stop
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+}
+
+status() {
+    $exec status
+}
+
+restart() {
+    daemon --user=$user $exec restart
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status
+        RETVAL=$?
+        ;;
+  restart|force-reload|reload)
+        restart
+        ;;
+  *)
+        echo $"Usage: $prog {start|stop|restart|force-reload|reload|status}"
+        RETVAL=2
+esac
+
+exit $RETVAL
