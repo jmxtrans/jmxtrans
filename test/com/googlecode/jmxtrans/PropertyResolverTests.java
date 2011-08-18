@@ -1,5 +1,7 @@
 package com.googlecode.jmxtrans;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.junit.Assert;
@@ -39,4 +41,18 @@ public class PropertyResolverTests {
         Assert.assertEquals("1099", map.get("port"));
         Assert.assertEquals(new Integer(10), map.get("count"));
     }
+
+    @Test
+    public void testList() {
+        List<String> list = new ArrayList<String>();
+        list.add("${myhost}");
+        list.add("${myport}");
+        list.add("count");
+
+        PropertyResolver.resolveList(list);
+        Assert.assertEquals("w2", list.get(0));
+        Assert.assertEquals("1099", list.get(1));
+        Assert.assertEquals("count", list.get(2));
+    }
+
 }
