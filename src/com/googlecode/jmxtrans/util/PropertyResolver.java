@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
+import java.util.List;
 import java.util.Map;
 
 /***
@@ -95,6 +96,17 @@ public class PropertyResolver {
 
             if (val instanceof String)
                 map.put(key, resolveProps((String) val));
+        }
+    }
+
+    /**
+     * Parse List and resolve Strings value with resolveProps
+     */
+    public static void resolveList(List<String> list) {
+
+        for (int i = 0; i < list.size(); i++) {
+            String val = list.get(i);
+            list.set(i, resolveProps(val));
         }
     }
 }
