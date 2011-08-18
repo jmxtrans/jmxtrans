@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.util.PropertyResolver;
 
 /**
  * Represents a JMX Query to ask for obj, attr and one or more keys.
@@ -52,7 +53,7 @@ public class Query {
      * The JMX object representation: java.lang:type=Memory
      */
     public void setObj(String obj) {
-        this.obj = obj;
+        this.obj = PropertyResolver.resolveProps(obj);
     }
 
     /**
@@ -151,54 +152,54 @@ public class Query {
     /** */
     @Override
     public boolean equals(Object o) {
-    	if (o == null) {
-    		return false;
-    	}
-		if (o == this) {
-			return true;
-		}
-		if (o.getClass() != this.getClass()) {
-			return false;
-		}
+        if (o == null) {
+            return false;
+        }
+        if (o == this) {
+            return true;
+        }
+        if (o.getClass() != this.getClass()) {
+            return false;
+        }
 
-    	if (!(o instanceof Query)) {
-    		return false;
-    	}
+        if (!(o instanceof Query)) {
+            return false;
+        }
 
-    	Query other = (Query)o;
+        Query other = (Query)o;
 
-    	int sizeL = 0;
-    	int sizeR = 0;
-    	if (this.getOutputWriters() != null) {
-    		sizeL = this.getOutputWriters().size();
-    	}
-    	if (other.getOutputWriters() != null) {
-    		sizeR = other.getOutputWriters().size();
-    	}
+        int sizeL = 0;
+        int sizeR = 0;
+        if (this.getOutputWriters() != null) {
+            sizeL = this.getOutputWriters().size();
+        }
+        if (other.getOutputWriters() != null) {
+            sizeR = other.getOutputWriters().size();
+        }
 
-    	return new EqualsBuilder()
-    						.append(this.getObj(), other.getObj())
-    						.append(this.getKeys(), other.getKeys())
-    						.append(this.getAttr(), other.getAttr())
-    						.append(this.getResultAlias(), other.getResultAlias())
-    						.append(sizeL, sizeR)
-    						.isEquals();
+        return new EqualsBuilder()
+                            .append(this.getObj(), other.getObj())
+                            .append(this.getKeys(), other.getKeys())
+                            .append(this.getAttr(), other.getAttr())
+                            .append(this.getResultAlias(), other.getResultAlias())
+                            .append(sizeL, sizeR)
+                            .isEquals();
     }
 
     /** */
     @Override
     public int hashCode() {
-    	int sizeL = 0;
-    	if (this.getOutputWriters() != null) {
-    		sizeL = this.getOutputWriters().size();
-    	}
+        int sizeL = 0;
+        if (this.getOutputWriters() != null) {
+            sizeL = this.getOutputWriters().size();
+        }
 
-    	return new HashCodeBuilder(41, 97)
-    						.append(this.getObj())
-    						.append(this.getKeys())
-    						.append(this.getAttr())
-    						.append(this.getResultAlias())
-    						.append(sizeL)
-    						.toHashCode();
+        return new HashCodeBuilder(41, 97)
+                            .append(this.getObj())
+                            .append(this.getKeys())
+                            .append(this.getAttr())
+                            .append(this.getResultAlias())
+                            .append(sizeL)
+                            .toHashCode();
     }
 }

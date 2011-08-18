@@ -44,6 +44,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
     /** */
     public void setSettings(Map<String, Object> settings) {
         this.settings = settings;
+        PropertyResolver.resolveMap(this.settings);
     }
 
     /** */
