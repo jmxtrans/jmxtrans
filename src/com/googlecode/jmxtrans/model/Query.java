@@ -79,6 +79,7 @@ public class Query {
 
     public void setAttr(List<String> attr) {
         this.attr = attr;
+        PropertyResolver.resolveList(this.attr);
     }
 
     public List<String> getAttr() {
@@ -94,6 +95,7 @@ public class Query {
 
     public void setKeys(List<String> keys) {
         this.keys = keys;
+        PropertyResolver.resolveList(this.keys);
     }
 
     public List<String> getKeys() {
