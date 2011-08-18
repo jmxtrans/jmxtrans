@@ -1,5 +1,8 @@
 package com.googlecode.jmxtrans.util;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 /***
  *
  * Property Resolver
@@ -83,4 +86,16 @@ public class PropertyResolver {
         return (sb.toString());
     }
 
+    /**
+     * Parse Map and resolve Strings value with resolveProps
+     */
+    public static void resolveMap(Map<String, Object> map) {
+
+        for (String key : map.keySet()) {
+            Object val = map.get(key);
+
+            if (val instanceof String)
+                map.put(key, resolveProps((String)val));
+        }
+    }
 }

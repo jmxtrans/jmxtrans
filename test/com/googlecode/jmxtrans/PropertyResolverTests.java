@@ -1,5 +1,7 @@
 package com.googlecode.jmxtrans;
 
+import java.util.TreeMap;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,5 +25,18 @@ public class PropertyResolverTests {
         s1 = "${myhost} : ${myaltport:2099}";
         s2 = PropertyResolver.resolveProps(s1);
         Assert.assertEquals("w2 : 2099", s2);
+    }
+
+    @Test
+    public void testMap() {
+        TreeMap<String, Object> map = new TreeMap<String, Object>();
+        map.put("host", "${myhost}");
+        map.put("port", "${myport}");
+        map.put("count", new Integer(10));
+
+        PropertyResolver.resolveMap(map);
+        Assert.assertEquals("w2", map.get("host"));
+        Assert.assertEquals("1099", map.get("port"));
+        Assert.assertEquals(new Integer(10), map.get("count"));
     }
 }
