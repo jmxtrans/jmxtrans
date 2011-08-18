@@ -1,7 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
 import java.util.Map;
-import java.util.TreeMap;
 
 /***
  *
@@ -95,7 +94,7 @@ public class PropertyResolver {
             Object val = map.get(key);
 
             if (val instanceof String)
-                map.put(key, resolveProps((String)val));
+                map.put(key, resolveProps((String) val));
         }
     }
 }
