@@ -5,7 +5,7 @@ FILENAME=$2
 # Specify the commonly used configuration options below in a config file.
 CONF_FILE=${CONF_FILE:-"jmxtrans.conf"}
 if [ -e "$CONF_FILE" ]; then
-	. "$CONF_FILE"
+    . "$CONF_FILE"
 fi
 
 LOG_DIR=${LOG_DIR:-"."}
@@ -42,71 +42,95 @@ if [ $? != 0 ]; then
 fi
 
 start() {
-	PID=$(eval $PSCMD)
-	if [ ! -z "$PID" ]; then
-		echo "jmxtrans appears to already be running @ pid: $PID"
-		exit 1
-	fi
+    if [ ! -z "$PIDFILE" ]; then
+        if [ -r "$PIDFILE" ]; then
+            PID=$(cat $PIDFILE)
+        fi
+    else
+        PID=$(eval $PSCMD)
+    fi
 
-	if [ -z "$FILENAME" ]; then
-		EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS"}
-	else
-		EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS"}
-	fi
+    if [ ! -z "$PID" ]; then
+        echo "jmxtrans appears to already be running @ pid: $PID"
+        exit 1
+    fi
 
-	$JAVA -server $JAVA_OPTS $GC_OPTS $MONITOR_OPTS $EXEC 2>&1 &
+    if [ -z "$FILENAME" ]; then
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS"}
+    else
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS"}
+    fi
+
+    $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS $EXEC 2>&1 &
+
+    if [ ! -z "$PIDFILE" ]; then
+      echo $! > "$PIDFILE"
+    fi
+
 }
 
 stop() {
-	PID=$(eval $PSCMD)
-	if [ ! -z "$PID" ]; then
-		kill -15 "$PID"
-		echo -n "Stopping jmxtrans"
-		while (true); do
-			PID=$(eval $PSCMD)
-			if [ ! -z "$PID" ]; then
-				echo -n "."
-				sleep 1
-			else
-				echo ""
-				break
-			fi
-		done
-	else
-		echo "jmxtrans was not running"
-	fi
+    if [ ! -z "$PIDFILE" ]; then
+        if [ -r "$PIDFILE" ]; then
+            PID=$(cat $PIDFILE)
+        fi
+    else
+        PID=$(eval $PSCMD)
+    fi
+    if [ ! -z "$PID" ]; then
+        kill -15 "$PID"
+        echo -n "Stopping jmxtrans"
+        while (true); do
+            PID=$(eval $PSCMD)
+            if [ ! -z "$PID" ]; then
+                echo -n "."
+                sleep 1
+            else
+                echo ""
+                break
+            fi
+        done
+    else
+        echo "jmxtrans was not running"
+    fi
 }
 
 restart() {
-	stop
-	start
+    stop
+    start
 }
 
 status() {
-	PID=$(eval $PSCMD)
-	if [ ! -z "$PID" ]; then
-		echo "jmxtrans appears to be running at pid: $PID"
-	else
-		echo "jmxtrans is not running."
-	fi
+    if [ ! -z "$PIDFILE" ]; then
+        if [ -r "$PIDFILE" ]; then
+            PID=$(cat $PIDFILE)
+        fi
+    else
+        PID=$(eval $PSCMD)
+    fi
+    if [ ! -z "$PID" ]; then
+        echo "jmxtrans appears to be running at pid: $PID"
+    else
+        echo "jmxtrans is not running."
+    fi
 }
 
 case $1 in
-	start)
-		start
-	;;
-	stop)
-		stop
-	;;
-	restart)
-		restart
-	;;
-	status)
-		status
-	;;
-	*)
-		echo $"Usage: $0 {start|stop|restart|status} [filename.json]"
-	;;
+    start)
+        start
+    ;;
+    stop)
+        stop
+    ;;
+    restart)
+        restart
+    ;;
+    status)
+        status
+    ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|status} [filename.json]"
+    ;;
 esac
 
 exit 0
