@@ -245,15 +245,8 @@
     </target>
 
     <target name="rpm" depends="dist">
-        <filter token="PACKAGE" value="jmxtrans" />
-        <filter token="NOW" value="${NOW}" />
-        <filter token="PROPER_NOW" value="${PROPER_NOW}" />
-        <filter token="YEAR" value="${YEAR}" />
-        <filter token="FULL_VERSION" value="${sVersion}" />
-        <filter token="VERSION" value="${sVersionRevision}" />
-        <filter token="BRANCH_NAME" value="${sVersionBranchName}" />
 
-        <copy todir="${target.dir}/jmxtrans/rpm" filtering="true">
+        <copy todir="${target.dir}/jmxtrans/rpm" >
             <fileset dir="rpm">
                 <include name="**"/>
             </fileset>
