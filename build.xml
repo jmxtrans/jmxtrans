@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 
 <!--
-	Build file for jmxtrans.
+    Build file for jmxtrans.
 -->
 <project name="jmxtrans" default="jar" basedir=".">
 
-	<property name="name" value="${ant.project.name}" />
+    <property name="name" value="${ant.project.name}" />
     <property name="base.dir" location="." />
 
     <property file="user.properties" />
@@ -13,17 +13,17 @@
     <property file="jar.properties"/>
     <property name="alexandria.home" value="${base.dir}" />
     <property file="${alexandria.home}/jar.properties" />
-	<property file="build.credentials.properties" />
+    <property file="build.credentials.properties" />
 
     <property name="target.dir" location="target" />
-	<property name="build.dir" location="${target.dir}" />
-	<property name="build.classes.dir" location="${build.dir}/classes" />
-	<property name="build.javadoc.dir" location="${build.dir}/javadoc" />
-	<property name="build.jar.file" location="${build.dir}/${name}.jar" />
+    <property name="build.dir" location="${target.dir}" />
+    <property name="build.classes.dir" location="${build.dir}/classes" />
+    <property name="build.javadoc.dir" location="${build.dir}/javadoc" />
+    <property name="build.jar.file" location="${build.dir}/${name}.jar" />
 
-	<property name="javadoc.dir" value="javadoc" />
-	<property name="lib.dir" location="lib" />
-	<property name="src.dir" location="src" />
+    <property name="javadoc.dir" value="javadoc" />
+    <property name="lib.dir" location="lib" />
+    <property name="src.dir" location="src" />
 
     <tstamp>
         <format property="NOW" pattern="yyyyMMdd-hh:mm:ss" />
@@ -67,42 +67,42 @@
     <spath id="unit.classpath" scope="all" parent="sweetened.classpath" />
     <spath id="all.classpath" scope="all" parent="sweetened.classpath" />
 
-	<path id="run.classpath">
-		<pathelement location="${build.classes.dir}" />
-		<path refid="master.classpath" />
-	</path>
+    <path id="run.classpath">
+        <pathelement location="${build.classes.dir}" />
+        <path refid="master.classpath" />
+    </path>
 
-	<target name="init">
-		<typedef resource="com/googlecode/svntask/svntask.xml">
-			<classpath>
-				<fileset dir="${lib.dir}">
-					<include name="**/svnkit.jar"/>
-					<include name="**/svntask.jar"/>
-				</fileset>
-			</classpath>
-		</typedef>
+    <target name="init">
+        <typedef resource="com/googlecode/svntask/svntask.xml">
+            <classpath>
+                <fileset dir="${lib.dir}">
+                    <include name="**/svnkit.jar"/>
+                    <include name="**/svntask.jar"/>
+                </fileset>
+            </classpath>
+        </typedef>
 
-		<svn><info path="${basedir}" revisionProperty="revisionVersion" /></svn>
+        <svn><info path="${basedir}" revisionProperty="revisionVersion" /></svn>
 
-		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpath="${lib.dir}/ant-googlecode-0.0.2.jar" name="gcupload"/>
+        <taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpath="${lib.dir}/ant-googlecode-0.0.2.jar" name="gcupload"/>
 
-		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
-		<property name="version" value="${revisionVersion}" />
-		<property name="build.version" value="${revisionVersion}" />
+        <!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
+        <property name="version" value="${revisionVersion}" />
+        <property name="build.version" value="${revisionVersion}" />
 
-		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
-		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
-	</target>
+        <property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
+        <property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
+    </target>
 
-	<target name="clean">
-		<delete dir="${build.dir}" />
-	</target>
+    <target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
 
- 	<target name="classes" depends="init">
-		<mkdir dir="${build.classes.dir}" />
+     <target name="classes" depends="init">
+        <mkdir dir="${build.classes.dir}" />
 
-		<javac srcdir="${src.dir}"
-				destdir="${build.classes.dir}"
+        <javac srcdir="${src.dir}"
+                destdir="${build.classes.dir}"
                 optimize="off"
                 deprecation="off"
                 debug="on"
@@ -113,12 +113,12 @@
                 verbose="off"
                 fork="false"
                 includeantruntime="false"
-			>
+            >
             <classpath path="${toString:javac.classpath}"/>
-		</javac>
-	</target>
+        </javac>
+    </target>
 
-	<target name="jar" depends="classes">
+    <target name="jar" depends="classes">
         <sync todir="${build.classes.dir}">
             <preserveintarget>
                 <include name="**/*.class"/>
@@ -128,14 +128,14 @@
                 <include name="**/*.properties"/>
             </fileset>
         </sync>
-		<jar destfile="${build.jar.file}" basedir="${build.classes.dir}">
-			<manifest>
-				<attribute name="Specification-Version" value="${version}" />
-				<attribute name="Implementation-Version" value="${TODAY}" />
-				<attribute name="Main-Class" value="com.googlecode.jmxtrans.JmxTransformer" />
-			</manifest>
-		</jar>
-	</target>
+        <jar destfile="${build.jar.file}" basedir="${build.classes.dir}">
+            <manifest>
+                <attribute name="Specification-Version" value="${version}" />
+                <attribute name="Implementation-Version" value="${TODAY}" />
+                <attribute name="Main-Class" value="com.googlecode.jmxtrans.JmxTransformer" />
+            </manifest>
+        </jar>
+    </target>
 
     <target name="jar-all" depends="jar">
         <zip destfile="${build.dir}/jmxtrans-all.jar">
@@ -150,72 +150,72 @@
         </zip>
     </target>
 
-	<target name="javadoc" depends="classes">
-		<javadoc
-			destdir="${build.javadoc.dir}"
-			packagenames="*"
-			author="true"
-			version="true"
-			Windowtitle="jmxlogger javadoc"
-		>
-			<fileset dir="${src.dir}">
-				<exclude name="**/*.xml" />
+    <target name="javadoc" depends="classes">
+        <javadoc
+            destdir="${build.javadoc.dir}"
+            packagenames="*"
+            author="true"
+            version="true"
+            Windowtitle="jmxlogger javadoc"
+        >
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.xml" />
                 <exclude name="**/*.properties" />
-			</fileset>
-			<doctitle><![CDATA[<h1>jmxtrans</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright &#169; ${YEAR} Jon Stevens and a gang of pencils. All Rights Reserved. Build version: ${build.version}</i>]]></bottom>
+            </fileset>
+            <doctitle><![CDATA[<h1>jmxtrans</h1>]]></doctitle>
+            <bottom><![CDATA[<i>Copyright &#169; ${YEAR} Jon Stevens and a gang of pencils. All Rights Reserved. Build version: ${build.version}</i>]]></bottom>
             <classpath path="${toString:javadoc.classpath}" />
-		</javadoc>
+        </javadoc>
 
-		<sync todir="${javadoc.dir}" includeEmptyDirs="true">
-			<fileset dir="${build.javadoc.dir}" />
-			<preserveintarget>
-				<include name="**/.svn/**"/>
-			</preserveintarget>
-		</sync>
-	</target>
+        <sync todir="${javadoc.dir}" includeEmptyDirs="true">
+            <fileset dir="${build.javadoc.dir}" />
+            <preserveintarget>
+                <include name="**/.svn/**"/>
+            </preserveintarget>
+        </sync>
+    </target>
 
-	<target name="dist" depends="clean, jar, jar-all, javadoc">
-		<copy todir="${build.dist.dir}">
-			<fileset dir="${build.dir}">
-				<include name="javadoc/**" />
-			</fileset>
+    <target name="dist" depends="clean, jar, jar-all, javadoc">
+        <copy todir="${build.dist.dir}">
+            <fileset dir="${build.dir}">
+                <include name="javadoc/**" />
+            </fileset>
 
-			<fileset dir="${base.dir}">
-				<include name="*.xml" />
+            <fileset dir="${base.dir}">
+                <include name="*.xml" />
                 <include name="*.json" />
                 <include name="*.sh" />
-				<include name="README.html" />
+                <include name="README.html" />
                 <exclude name="test-*.json" />
                 <exclude name="*.log" />
                 <exclude name="build.credentials.properties" />
-			</fileset>
+            </fileset>
 
-		    <fileset dir="${build.dir}">
+            <fileset dir="${build.dir}">
                 <include name="*.jar" />
             </fileset>
-		</copy>
+        </copy>
 
-		<copy todir="${build.dist.dir}/lib">
-			<fileset dir="lib">
-				<include name="*.jar" />
-				<exclude name="*-sources.jar" />
-			</fileset>
-		</copy>
+        <copy todir="${build.dist.dir}/lib">
+            <fileset dir="lib">
+                <include name="*.jar" />
+                <exclude name="*-sources.jar" />
+            </fileset>
+        </copy>
 
-		<copy todir="${build.dist.dir}/src">
-			<fileset dir="${base.dir}/src">
-				<include name="**" />
-			</fileset>
-		</copy>
+        <copy todir="${build.dist.dir}/src">
+            <fileset dir="${base.dir}/src">
+                <include name="**" />
+            </fileset>
+        </copy>
 
-		<dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
-		<basename property="build.dist.dir.basename" file="${build.dist.dir}" />
+        <dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
+        <basename property="build.dist.dir.basename" file="${build.dist.dir}" />
 
-		<zip zipfile="${build.dist.zip}" basedir="${build.dist.dir.dirname}">
-			<include name="${build.dist.dir.basename}/**" />
-		</zip>
-	</target>
+        <zip zipfile="${build.dist.zip}" basedir="${build.dist.dir.dirname}">
+            <include name="${build.dist.dir.basename}/**" />
+        </zip>
+    </target>
 
     <target name="debian" depends="dist">
         <filter token="PACKAGE" value="jmxtrans" />
@@ -244,20 +244,47 @@
         </exec>
     </target>
 
-	<target name="upload" depends="init">
-		<gcupload projectname="${ant.project.name}"
-			userName="${gc.username}"
-			password="${gc.password}"
-			filename="${build.dist.zip}"
-			targetfilename="${build.dist.zip}"
-			summary="${ant.project.name} distribution"
-			labels="Featured, Type-Package, OpSys-All" />
+    <target name="rpm" depends="dist">
+        <filter token="PACKAGE" value="jmxtrans" />
+        <filter token="NOW" value="${NOW}" />
+        <filter token="PROPER_NOW" value="${PROPER_NOW}" />
+        <filter token="YEAR" value="${YEAR}" />
+        <filter token="FULL_VERSION" value="${sVersion}" />
+        <filter token="VERSION" value="${sVersionRevision}" />
+        <filter token="BRANCH_NAME" value="${sVersionBranchName}" />
 
-	    <!-- hacky, but need both path to file and filename -->
-	    <path id="file.deb">
+        <copy todir="${target.dir}/jmxtrans/rpm" filtering="true">
+            <fileset dir="rpm">
+                <include name="**"/>
+            </fileset>
+        </copy>
+
+        <mkdir dir="${target.dir}/jmxtrans/rpm/BUILD" />
+        <mkdir dir="${target.dir}/jmxtrans/rpm/RPMS" />
+        <mkdir dir="${target.dir}/jmxtrans/rpm/SRPMS" />
+        <mkdir dir="${target.dir}/jmxtrans/rpm/TEMP" />
+
+        <copy file="${build.dist.zip}" todir="${target.dir}/jmxtrans/rpm/SOURCES"/>
+
+        <exec executable="/usr/bin/rpmbuild" dir="${target.dir}/jmxtrans/rpm" failonerror="true">
+            <arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version}' --define='RELEASE 0' --define='JMXTRANS_SOURCE jmxtrans-${version}.zip' SPECS/jmxtrans.spec"/>
+        </exec>
+    </target>
+
+    <target name="upload" depends="init">
+        <gcupload projectname="${ant.project.name}"
+            userName="${gc.username}"
+            password="${gc.password}"
+            filename="${build.dist.zip}"
+            targetfilename="${build.dist.zip}"
+            summary="${ant.project.name} distribution"
+            labels="Featured, Type-Package, OpSys-All" />
+
+        <!-- hacky, but need both path to file and filename -->
+        <path id="file.deb">
             <fileset dir="${target.dir}" includes="*.deb" />
         </path>
-	    <property name="file.deb.path" refid="file.deb" />
+        <property name="file.deb.path" refid="file.deb" />
         <pathconvert property="file.deb.target" targetos="unix">
             <path>
                 <fileset dir="${target.dir}" includes="*.deb" />
@@ -265,14 +292,14 @@
             <mapper type="flatten"/>
         </pathconvert>
 
-	    <gcupload projectname="${ant.project.name}"
+        <gcupload projectname="${ant.project.name}"
             userName="${gc.username}"
             password="${gc.password}"
             filename="${file.deb.path}"
             targetfilename="${file.deb.target}"
             summary="${ant.project.name} debian distribution"
             labels="Featured, Type-Installer, OpSys-Linux, Debian" />
-	</target>
+    </target>
 
     <target name=".eclipse" description="Generate eclipse project metadata">
         <sweetenedClasspath file=".classpath">
