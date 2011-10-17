@@ -37,7 +37,7 @@ public class PropertyResolver {
     }
 
     /**
-     * Parse a String and replace vars ˆ la ant (${key} from System Properties
+     * Parse a String and replace vars a la ant (${key} from System Properties
      * Support complex Strings like :
      *
      * "${myhost}"
