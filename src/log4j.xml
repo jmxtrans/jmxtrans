@@ -27,7 +27,7 @@
     </appender>
 
     <logger name="com.googlecode.jmxtrans">
-        <level value="debug"/>
+        <level value="${jmxtrans.log.level}"/>
     </logger>
 
     <logger name="org.quartz">
