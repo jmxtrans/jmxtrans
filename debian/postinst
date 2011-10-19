@@ -79,7 +79,7 @@ case "$1" in
             echo "export NEW_SIZE=${NEW_SIZE}" >> "$CONFIG"
             echo "export CPU_CORES=${CPU_CORES}" >> "$CONFIG"
             echo "export NEW_RATIO=${NEW_RATIO}" >> "$CONFIG"
-            echo "export JMXTRANS_LOG_LEVEL=debug" >> "$CONFIG"
+            echo "export LOG_LEVEL=debug" >> "$CONFIG"
         fi
 
         chmod 644 "${CONFIG}" || true

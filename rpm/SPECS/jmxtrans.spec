@@ -82,7 +82,7 @@ if [ $1 = 1 ]; then
   echo "export NEW_SIZE=${NEW_SIZE}" >> %{xconf}
   echo "export CPU_CORES=${CPU_CORES}" >> %{xconf}
   echo "export NEW_RATIO=${NEW_RATIO}" >> %{xconf}
-  echo "export JMXTRANS_LOG_LEVEL=debug" >> %{xconf}
+  echo "export LOG_LEVEL=debug" >> %{xconf}
 
 fi
 

@@ -25,8 +25,8 @@ MAX_PERM_SIZE=${MAX_PERM_SIZE:-"384"}
 CPU_CORES=${CPU_CORES:-"1"}
 IO_FRACTION=${IO_FRACTION:-"85"}
 JMX_PORT=${JMX_PORT:-"2101"}
-JMXTRANS_LOG_LEVEL=${JMXTRANS_LOG_LEVEL:-"debug"}
-JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${JMXTRANS_LOG_LEVEL}"
+LOG_LEVEL=${LOG_LEVEL:-"debug"}
+JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL}"
 
 
 MONITOR_OPTS=${MONITOR_OPTS:-"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=${JMX_PORT}"}
