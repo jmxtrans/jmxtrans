@@ -29,6 +29,7 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.naming.Context;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
@@ -327,6 +328,34 @@ public class JmxUtils {
 	}
 
 	/**
+	 * Helper method for connecting to a Server. You need to close the resulting connection.
+	 */
+	public static JMXConnector getServerConnection(Server server) throws Exception {
+		JMXServiceURL url = new JMXServiceURL(server.getUrl());
+
+		if (server.getProtocolProviderPackages() != null && server.getProtocolProviderPackages().contains("weblogic"))
+			return JMXConnectorFactory.connect(url, getWebLogicEnvironment(server));
+		else
+			return JMXConnectorFactory.connect(url, getEnvironment(server));
+
+	}
+
+	/**
+	 * Generates the proper username/password environment for JMX connections.
+	 */
+	public static Map<String, String> getWebLogicEnvironment(Server server) {
+		Map<String, String> environment = new HashMap<String, String>();
+		String username = server.getUsername();
+		String password = server.getPassword();
+		if ((username != null) && (password != null)) {
+			environment.put(JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, server.getProtocolProviderPackages());
+			environment.put(Context.SECURITY_PRINCIPAL, username);
+			environment.put(Context.SECURITY_CREDENTIALS, password);
+		}
+		return environment;
+	}
+
+	/**
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	public static Map<String, String[]> getEnvironment(Server server) {
@@ -337,6 +366,7 @@ public class JmxUtils {
 			String[] credentials = new String[2];
 			credentials[0] = username;
 			credentials[1] = password;
+
 			environment.put(JMXConnector.CREDENTIALS, credentials);
 		}
 		return environment;
@@ -403,14 +433,6 @@ public class JmxUtils {
 				throw new RuntimeException(e);
 			}
 		}
-	}
-
-	/**
-	 * Helper method for connecting to a Server. You need to close the resulting connection.
-	 */
-	public static JMXConnector getServerConnection(Server server) throws Exception {
-		JMXServiceURL url = new JMXServiceURL(server.getUrl());
-		return JMXConnectorFactory.connect(url, getEnvironment(server));
 	}
 
 	/**
@@ -533,16 +555,16 @@ public class JmxUtils {
 
 		poolMap.put(Server.JMX_CONNECTION_FACTORY_POOL, jmxPool);
 
-        GenericKeyedObjectPool dsPool = new GenericKeyedObjectPool(new DatagramSocketFactory());
-        dsPool.setTestOnBorrow(true);
-        dsPool.setMaxActive(-1);
-        dsPool.setMaxIdle(-1);
-        dsPool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
-        dsPool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+		GenericKeyedObjectPool dsPool = new GenericKeyedObjectPool(new DatagramSocketFactory());
+		dsPool.setTestOnBorrow(true);
+		dsPool.setMaxActive(-1);
+		dsPool.setMaxIdle(-1);
+		dsPool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
+		dsPool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
 
-        poolMap.put(Server.DATAGRAM_SOCKET_FACTORY_POOL, dsPool);
+		poolMap.put(Server.DATAGRAM_SOCKET_FACTORY_POOL, dsPool);
 
-        return poolMap;
+		return poolMap;
 	}
 
 	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
@@ -588,34 +610,34 @@ public class JmxUtils {
 		return sb.toString();
 	}
 
-    public static String getKeyString2(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
-        String keyStr = null;
-        if (values.getKey().startsWith(result.getAttributeName())) {
-            keyStr = values.getKey();
-        } else {
-            keyStr = result.getAttributeName() + "." + values.getKey();
-        }
+	public static String getKeyString2(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+		String keyStr = null;
+		if (values.getKey().startsWith(result.getAttributeName())) {
+			keyStr = values.getKey();
+		} else {
+			keyStr = result.getAttributeName() + "." + values.getKey();
+		}
 
-        StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-        // Allow people to use something other than the classname as the output.
-        if (result.getClassNameAlias() != null) {
-            sb.append(result.getClassNameAlias());
-        } else {
-            sb.append(cleanupStr(result.getClassName()));
-        }
+		// Allow people to use something other than the classname as the output.
+		if (result.getClassNameAlias() != null) {
+			sb.append(result.getClassNameAlias());
+		} else {
+			sb.append(cleanupStr(result.getClassName()));
+		}
 
-        sb.append(".");
+		sb.append(".");
 
-        String typeName = cleanupStr(getConcatedTypeNameValues(typeNames, result.getTypeName()));
-        if (typeName != null) {
-            sb.append(typeName);
-            sb.append(".");
-        }
-        sb.append(cleanupStr(keyStr));
+		String typeName = cleanupStr(getConcatedTypeNameValues(typeNames, result.getTypeName()));
+		if (typeName != null) {
+			sb.append(typeName);
+			sb.append(".");
+		}
+		sb.append(cleanupStr(keyStr));
 
-        return sb.toString();
-    }
+		return sb.toString();
+	}
 
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
