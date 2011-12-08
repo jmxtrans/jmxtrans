@@ -1,0 +1,34 @@
+{
+  "servers":[
+    {
+      "port":"1099",
+      "host":"localhost",
+      "queries":[
+        {
+          "obj":"org.apache.activemq:BrokerName=localhost,Destination=*,Type=Queue",
+          "attr":[
+            "QueueSize",
+            "MaxEnqueueTime",
+            "MinEnqueueTime",
+            "AverageEnqueueTime",
+            "InFlightCount",
+            "ConsumerCount",
+            "ProducerCount",
+            "DispatchCount",
+            "DequeueCount",
+            "EnqueueCount",
+            "Subscriptions"
+          ],
+
+          "outputWriters":[
+            {
+              "@class":"com.googlecode.jmxtrans.model.output.StdOutWriter",
+              "settings":{
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
