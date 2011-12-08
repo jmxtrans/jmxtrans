@@ -73,24 +73,11 @@
 	</path>
 
 	<target name="init">
-		<typedef resource="com/googlecode/svntask/svntask.xml">
-			<classpath>
-				<fileset dir="${lib.dir}">
-					<include name="**/svnkit.jar"/>
-					<include name="**/svntask.jar"/>
-				</fileset>
-			</classpath>
-		</typedef>
-
-		<svn>
-			<info path="${basedir}" revisionProperty="revisionVersion" />
-		</svn>
-
 		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpath="${lib.dir}/ant-googlecode-0.0.2.jar" name="gcupload"/>
 
 		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
-		<property name="version" value="${revisionVersion}" />
-		<property name="build.version" value="${revisionVersion}" />
+		<property name="version" value="${sRevisionVersion}" />
+		<property name="build.version" value="${sRevisionVersion}" />
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
 		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
@@ -104,18 +91,17 @@
 		<mkdir dir="${build.classes.dir}" />
 
 		<javac srcdir="${src.dir}"
-								destdir="${build.classes.dir}"
-								optimize="off"
-								deprecation="off"
-								debug="on"
-								debuglevel="lines,vars,source"
-								source="1.5"
-								target="1.5"
-								encoding="UTF-8"
-								verbose="off"
-								fork="false"
-								includeantruntime="false"
-						>
+				destdir="${build.classes.dir}"
+				optimize="off"
+				deprecation="off"
+				debug="on"
+				debuglevel="lines,vars,source"
+				source="1.5"
+				target="1.5"
+				encoding="UTF-8"
+				verbose="off"
+				fork="false"
+				includeantruntime="false">
 			<classpath path="${toString:javac.classpath}"/>
 		</javac>
 	</target>
@@ -146,7 +132,7 @@
 				<exclude name="ant*.jar" />
 				<exclude name="*sources*.jar" />
 				<exclude name="*junit*.jar" />
-				<exclude name="*svn*.jar" />
+				<exclude name="*org.eclipse.git*.jar" />
 			</zipgroupfileset>
 			<zipgroupfileset dir="${build.dir}" includes="jmxtrans.jar"/>
 		</zip>
@@ -158,8 +144,7 @@
 			packagenames="*"
 			author="true"
 			version="true"
-			Windowtitle="jmxlogger javadoc"
-		>
+			Windowtitle="jmxlogger javadoc">
 			<fileset dir="${src.dir}">
 				<exclude name="**/*.xml" />
 				<exclude name="**/*.properties" />
@@ -174,7 +159,7 @@
 		<sync todir="${javadoc.dir}" includeEmptyDirs="true">
 			<fileset dir="${build.javadoc.dir}" />
 			<preserveintarget>
-				<include name="**/.svn/**"/>
+				<include name="**/.git**"/>
 			</preserveintarget>
 		</sync>
 	</target>
@@ -270,12 +255,12 @@
 
 	<target name="upload" depends="init">
 		<gcupload projectname="${ant.project.name}"
-								userName="${gc.username}"
-								password="${gc.password}"
-								filename="${build.dist.zip}"
-								targetfilename="${build.dist.zip}"
-								summary="${ant.project.name} distribution"
-								labels="Featured, Type-Package, OpSys-All" />
+				userName="${gc.username}"
+				password="${gc.password}"
+				filename="${build.dist.zip}"
+				targetfilename="${build.dist.zip}"
+				summary="${ant.project.name} distribution"
+				labels="Featured, Type-Package, OpSys-All" />
 
 		<!-- hacky, but need both path to file and filename -->
 		<path id="file.deb">
@@ -290,12 +275,12 @@
 		</pathconvert>
 
 		<gcupload projectname="${ant.project.name}"
-								userName="${gc.username}"
-								password="${gc.password}"
-								filename="${file.deb.path}"
-								targetfilename="${file.deb.target}"
-								summary="${ant.project.name} debian distribution"
-								labels="Featured, Type-Installer, OpSys-Linux, Debian" />
+				userName="${gc.username}"
+				password="${gc.password}"
+				filename="${file.deb.path}"
+				targetfilename="${file.deb.target}"
+				summary="${ant.project.name} debian distribution"
+				labels="Featured, Type-Installer, OpSys-Linux, Debian" />
 	</target>
 
 	<target name=".eclipse" description="Generate eclipse project metadata">
