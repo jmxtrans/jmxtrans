@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -21,7 +22,7 @@ import com.googlecode.jmxtrans.util.PropertyResolver;
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
-@JsonPropertyOrder(value={"obj", "attr", "resultAlias", "keys", "outputWriters"})
+@JsonPropertyOrder(value={"obj", "attr", "typeNames", "resultAlias", "keys", "outputWriters"})
 public class Query {
 
     private Server server;
@@ -32,6 +33,7 @@ public class Query {
     private List<String> keys;
     private List<OutputWriter> outputWriters;
     private List<Result> results;
+    private Set<String> typeNames;
 
     public Query() { }
 
@@ -75,6 +77,22 @@ public class Query {
      */
     public String getResultAlias() {
         return resultAlias;
+    }
+
+    public void setTypeNames(Set<String> typeNames) {
+        this.typeNames = typeNames;
+    }
+
+    /**
+     * The list of type names used in a JMX bean string when querying with a wildcard
+     * which is used to expose the actual type name value to the key string. e.g. for this JMX name
+     *
+     * typeName=name=PS Eden Space,type=MemoryPool
+     *
+     * If you add a typeName("name"), then it'll retrieve 'PS Eden Space' from the string
+     */
+    public Set<String> getTypeNames() {
+        return typeNames;
     }
 
     public void setAttr(List<String> attr) {
