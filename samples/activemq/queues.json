@@ -19,11 +19,14 @@
             "EnqueueCount",
             "Subscriptions"
           ],
+          "typeNames" : ["Destination"],
+          "resultAlias" : "ActiveMQ.Queue",
 
           "outputWriters":[
             {
-              "@class":"com.googlecode.jmxtrans.model.output.StdOutWriter",
+              "@class":"com.googlecode.jmxtrans.model.output.KeyOutWriter",
               "settings":{
+                "outputFile" : "logs/output.txt"
               }
             }
           ]

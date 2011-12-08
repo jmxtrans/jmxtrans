@@ -17,14 +17,14 @@
     		"EnqueueCount",
     		"Subscriptions"
   		],
+      "typeNames" : ["Destination"],
       "resultAlias" : "ActiveMQ.Queue",
 
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriter",
         "settings" : {
           "port" : 2003,
-          "host" : "192.168.1.88",
-          "typeNames" : ["Destination"]
+          "host" : "192.168.1.88"
         }
       } ]
     } ]

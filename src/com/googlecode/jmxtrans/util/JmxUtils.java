@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -600,7 +601,7 @@ public class JmxUtils {
 
 		sb.append(".");
 
-		String typeName = cleanupStr(getConcatedTypeNameValues(typeNames, result.getTypeName()));
+		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
 		if (typeName != null) {
 			sb.append(typeName);
 			sb.append(".");
@@ -629,7 +630,7 @@ public class JmxUtils {
 
 		sb.append(".");
 
-		String typeName = cleanupStr(getConcatedTypeNameValues(typeNames, result.getTypeName()));
+		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
 		if (typeName != null) {
 			sb.append(typeName);
 			sb.append(".");
@@ -639,7 +640,8 @@ public class JmxUtils {
 		return sb.toString();
 	}
 
-	/**
+
+    /**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
 	 */
 	public static String cleanupStr(String name) {
@@ -677,6 +679,29 @@ public class JmxUtils {
 		return StringUtils.chomp(sb.toString(), "_");
 	}
 
+
+    /**
+   	 * Given a typeName string, get the first match from the typeNames setting.
+   	 * In other words, suppose you have:
+   	 *
+   	 * typeName=name=PS Eden Space,type=MemoryPool
+   	 *
+   	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the string
+   	 */
+    public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
+        Set<String> queryTypeNames = query.getTypeNames();
+        if (queryTypeNames != null && queryTypeNames.size() > 0) {
+            List<String> allNames = new ArrayList<String>(queryTypeNames);
+            for (String name : typeNames) {
+                if (!allNames.contains(name)) {
+                    allNames.add(name);
+                }
+            }
+            return getConcatedTypeNameValues(allNames, typeName);
+        } else {
+            return getConcatedTypeNameValues(typeNames, typeName);
+        }
+    }
 	/** */
 	private static String getTypeNameValue(String typeName, String[] tokens) {
 		boolean foundIt = false;
