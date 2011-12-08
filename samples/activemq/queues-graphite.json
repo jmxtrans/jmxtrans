@@ -1,0 +1,32 @@
+{
+  "servers" : [ {
+    "port" : "1099",
+    "host" : "localhost",
+    "queries" : [ {
+      "obj" : "org.apache.activemq:BrokerName=localhost,Destination=*,Type=Queue",
+      "attr" : [
+        "QueueSize",
+    		"MaxEnqueueTime",
+    		"MinEnqueueTime",
+    		"AverageEnqueueTime",
+    		"InFlightCount",
+    		"ConsumerCount",
+    		"ProducerCount",
+    		"DispatchCount",
+    		"DequeueCount",
+    		"EnqueueCount",
+    		"Subscriptions"
+  		],
+      "resultAlias" : "ActiveMQ.Queue",
+
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+        "settings" : {
+          "port" : 2003,
+          "host" : "192.168.1.88",
+          "typeNames" : ["Destination"]
+        }
+      } ]
+    } ]
+  } ]
+}
