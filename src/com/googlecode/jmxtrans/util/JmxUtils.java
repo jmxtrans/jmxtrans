@@ -2,13 +2,10 @@ package com.googlecode.jmxtrans.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Array;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +19,6 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -61,7 +57,7 @@ public class JmxUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
 
-    /**
+	/**
 	 * Merges two lists of servers (and their queries). Based on the equality of both sets of objects.
 	 * Public for testing purposes.
 	 */
@@ -335,10 +331,6 @@ public class JmxUtils {
 	 * Helper method for connecting to a Server. You need to close the resulting connection.
 	 */
 	public static JMXConnector getServerConnection(Server server) throws Exception {
-        if (server.isLocal()) {
-            MBeanServer mbeanServer = server.getLocalMBeanServer();
-            return new LocalJMXConnector(mbeanServer);
-        }
 		JMXServiceURL url = new JMXServiceURL(server.getUrl());
 
 		if (server.getProtocolProviderPackages() != null && server.getProtocolProviderPackages().contains("weblogic"))
@@ -348,7 +340,7 @@ public class JmxUtils {
 
 	}
 
-    /**
+	/**
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	public static Map<String, String> getWebLogicEnvironment(Server server) {
@@ -488,17 +480,6 @@ public class JmxUtils {
 		ObjectMapper mapper = new ObjectMapper();
 		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
 		jmx.setName(file.getName());
-		return jmx;
-	}
-
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(String name, InputStream in) throws JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		JmxProcess jmx = mapper.readValue(in, JmxProcess.class);
-		jmx.setName(name);
 		return jmx;
 	}
 
@@ -659,7 +640,7 @@ public class JmxUtils {
 	}
 
 
-    /**
+	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
 	 */
 	public static String cleanupStr(String name) {
@@ -698,28 +679,30 @@ public class JmxUtils {
 	}
 
 
-    /**
-   	 * Given a typeName string, get the first match from the typeNames setting.
-   	 * In other words, suppose you have:
-   	 *
-   	 * typeName=name=PS Eden Space,type=MemoryPool
-   	 *
-   	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the string
-   	 */
-    public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
-        Set<String> queryTypeNames = query.getTypeNames();
-        if (queryTypeNames != null && queryTypeNames.size() > 0) {
-            List<String> allNames = new ArrayList<String>(queryTypeNames);
-            for (String name : typeNames) {
-                if (!allNames.contains(name)) {
-                    allNames.add(name);
-                }
-            }
-            return getConcatedTypeNameValues(allNames, typeName);
-        } else {
-            return getConcatedTypeNameValues(typeNames, typeName);
-        }
-    }
+	/**
+	 * Given a typeName string, get the first match from the typeNames setting.
+	 * In other words, suppose you have:
+	 *
+	 * typeName=name=PS Eden Space,type=MemoryPool
+	 *
+	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
+	 * string
+	 */
+	public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
+		Set<String> queryTypeNames = query.getTypeNames();
+		if (queryTypeNames != null && queryTypeNames.size() > 0) {
+			List<String> allNames = new ArrayList<String>(queryTypeNames);
+			for (String name : typeNames) {
+				if (!allNames.contains(name)) {
+					allNames.add(name);
+				}
+			}
+			return getConcatedTypeNameValues(allNames, typeName);
+		} else {
+			return getConcatedTypeNameValues(typeNames, typeName);
+		}
+	}
+
 	/** */
 	private static String getTypeNameValue(String typeName, String[] tokens) {
 		boolean foundIt = false;

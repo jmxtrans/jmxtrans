@@ -21,7 +21,6 @@
           ],
           "typeNames" : ["Destination"],
           "resultAlias" : "ActiveMQ.Queue",
-
           "outputWriters":[
             {
               "@class":"com.googlecode.jmxtrans.model.output.KeyOutWriter",
