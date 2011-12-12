@@ -2,6 +2,8 @@ package com.googlecode.jmxtrans.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Array;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -58,7 +61,7 @@ public class JmxUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
 
-	/**
+    /**
 	 * Merges two lists of servers (and their queries). Based on the equality of both sets of objects.
 	 * Public for testing purposes.
 	 */
@@ -332,6 +335,10 @@ public class JmxUtils {
 	 * Helper method for connecting to a Server. You need to close the resulting connection.
 	 */
 	public static JMXConnector getServerConnection(Server server) throws Exception {
+        if (server.isLocal()) {
+            MBeanServer mbeanServer = server.getLocalMBeanServer();
+            return new LocalJMXConnector(mbeanServer);
+        }
 		JMXServiceURL url = new JMXServiceURL(server.getUrl());
 
 		if (server.getProtocolProviderPackages() != null && server.getProtocolProviderPackages().contains("weblogic"))
@@ -341,7 +348,7 @@ public class JmxUtils {
 
 	}
 
-	/**
+    /**
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	public static Map<String, String> getWebLogicEnvironment(Server server) {
@@ -481,6 +488,17 @@ public class JmxUtils {
 		ObjectMapper mapper = new ObjectMapper();
 		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
 		jmx.setName(file.getName());
+		return jmx;
+	}
+
+	/**
+	 * Uses jackson to load json configuration from a File into a full object
+	 * tree representation of that json.
+	 */
+	public static JmxProcess getJmxProcess(String name, InputStream in) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		JmxProcess jmx = mapper.readValue(in, JmxProcess.class);
+		jmx.setName(name);
 		return jmx;
 	}
 

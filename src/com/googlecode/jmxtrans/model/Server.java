@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +19,15 @@ import com.googlecode.jmxtrans.util.PropertyResolver;
 import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
 
+import javax.management.MBeanServer;
+
 /**
  * Represents a jmx server that we want to connect to.
  * This also stores the queries that we want to execute against the server.
  * @author jon
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
-@JsonPropertyOrder(value={"alias", "host", "port", "username", "password", "cronExpression", "numQueryThreads", "protocolProviderPackages"})
+@JsonPropertyOrder(value={"alias", "local", "host", "port", "username", "password", "cronExpression", "numQueryThreads", "protocolProviderPackages"})
 public class Server {
 
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
@@ -47,9 +50,13 @@ public class Server {
 	private String cronExpression;
 	private Integer numQueryThreads;
 
+    // if using local JMX to embed JmxTrans to query the local MBeanServer
+    private boolean local;
+    private MBeanServer localMBeanServer;
+
 	private List<Query> queries = new ArrayList<Query>();
 
-	public Server() { }
+    public Server() { }
 
 	/** */
 	public Server(String host, String port) {
@@ -78,6 +85,19 @@ public class Server {
 	public JmxProcess getJmxProcess() {
 		return this.jmxProcess;
 	}
+
+    @JsonIgnore
+    public MBeanServer getLocalMBeanServer() {
+        if (localMBeanServer == null) {
+            localMBeanServer = ManagementFactory.getPlatformMBeanServer();
+        }
+        return localMBeanServer;
+    }
+
+    public void setLocalMBeanServer(MBeanServer localMBeanServer) {
+        this.localMBeanServer = localMBeanServer;
+    }
+
 
 	/**
 	 * Some writers (GraphiteWriter) use the alias in generation of the unique key which references
@@ -135,7 +155,19 @@ public class Server {
 		return this.password;
 	}
 
-	/**
+    /**
+     * Whether the current local Java process should be used or not (useful for polling the embedded JVM when
+     * using JmxTrans inside a JVM to poll JMX stats and push them remotely)
+     */
+    public boolean isLocal() {
+        return local;
+    }
+
+    public void setLocal(boolean local) {
+        this.local = local;
+    }
+
+    /**
 	 * Won't add the same query (determined by equals()) 2x.
 	 */
 	public void setQueries(List<Query> queries) throws ValidationException {
