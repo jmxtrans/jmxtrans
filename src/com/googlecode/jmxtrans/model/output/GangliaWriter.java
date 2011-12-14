@@ -56,6 +56,14 @@ public class GangliaWriter extends BaseOutputWriter {
     }
 
     /**
+     * Allows one to set the object pool for socket connections to graphite
+     */
+    @Override
+    public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {
+        this.poolMap = poolMap;
+    }
+
+    /**
      * Validates the host/port and does some other setup.
      */
     public void validateSetup(Query query) throws ValidationException {
