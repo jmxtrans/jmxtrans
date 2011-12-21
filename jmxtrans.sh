@@ -113,8 +113,10 @@ status() {
     fi
     if [ ! -z "$PID" ]; then
         echo "jmxtrans appears to be running at pid: $PID"
+	exit 0
     else
         echo "jmxtrans is not running."
+	exit 3
     fi
 }
 
