@@ -17,56 +17,56 @@
  */
 package com.googlecode.jmxtrans.util;
 
+import java.io.IOException;
+import java.util.Map;
+
 import javax.management.ListenerNotFoundException;
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.remote.JMXConnector;
 import javax.security.auth.Subject;
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Represents a connection to a local {@link MBeanServerConnection}
  */
 public class LocalJMXConnector implements JMXConnector {
-    private final MBeanServerConnection serverConnection;
+	private final MBeanServerConnection serverConnection;
 
-    public LocalJMXConnector(MBeanServerConnection serverConnection) {
-        this.serverConnection = serverConnection;
-    }
+	public LocalJMXConnector(MBeanServerConnection serverConnection) {
+		this.serverConnection = serverConnection;
+	}
 
-    public void connect() throws IOException {
-    }
+	public void connect() throws IOException {
+	}
 
-    public void connect(Map<String, ?> env) throws IOException {
-    }
+	public void connect(Map<String, ?> env) throws IOException {
+	}
 
-    public MBeanServerConnection getMBeanServerConnection() throws IOException {
-        return serverConnection;
-    }
+	public MBeanServerConnection getMBeanServerConnection() throws IOException {
+		return serverConnection;
+	}
 
-    public MBeanServerConnection getMBeanServerConnection(Subject delegationSubject) throws IOException {
-        return serverConnection;
-    }
+	public MBeanServerConnection getMBeanServerConnection(Subject delegationSubject) throws IOException {
+		return serverConnection;
+	}
 
-    public void close() throws IOException {
-    }
+	public void close() throws IOException {
+	}
 
-    public void addConnectionNotificationListener(NotificationListener listener, NotificationFilter filter, Object handback) {
-        // TODO
-    }
+	public void addConnectionNotificationListener(NotificationListener listener, NotificationFilter filter, Object handback) {
+		// TODO
+	}
 
-    public void removeConnectionNotificationListener(NotificationListener listener) throws ListenerNotFoundException {
-        // TODO
-    }
+	public void removeConnectionNotificationListener(NotificationListener listener) throws ListenerNotFoundException {
+		// TODO
+	}
 
-    public void removeConnectionNotificationListener(NotificationListener l, NotificationFilter f, Object handback) throws ListenerNotFoundException {
-        // TODO
-    }
+	public void removeConnectionNotificationListener(NotificationListener l, NotificationFilter f, Object handback) throws ListenerNotFoundException {
+		// TODO
+	}
 
-    public String getConnectionId() throws IOException {
-        return "LocalJMXConnector";
-    }
+	public String getConnectionId() throws IOException {
+		return "LocalJMXConnector";
+	}
 }
