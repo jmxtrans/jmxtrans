@@ -2,9 +2,11 @@ package com.googlecode.jmxtrans.model.output;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,8 +67,7 @@ public class GangliaWriter extends BaseOutputWriter {
 			return typeName;
 		}
 		
-		public String asString( Object value )
-		{
+		public String asString( Object value )	{
 			return value == null ? "" : value.toString();
 		}
 	}
@@ -93,6 +94,7 @@ public class GangliaWriter extends BaseOutputWriter {
 
     private Map<String, KeyedObjectPool> poolMap;
     private KeyedObjectPool pool;
+	private Set<MetricMetaData> emittedMetadata = new HashSet<MetricMetaData>( );
     private InetSocketAddress address;
     private String groupName;
 	private String spoofedHostname;
@@ -130,7 +132,7 @@ public class GangliaWriter extends BaseOutputWriter {
         }
 		// Construct the InetAddress of the gmond and the DataGram socket pool
 		address = new InetSocketAddress( host, port );
-		pool = this.poolMap.get(Server.DATAGRAM_SOCKET_FACTORY_POOL);
+		pool = this.poolMap.get( Server.DATAGRAM_SOCKET_FACTORY_POOL );
 		
 		// Determine the spoofed hostname
 		spoofedHostname = getSpoofedHostName( query.getServer().getHost(), query.getServer().getAlias() );
@@ -198,10 +200,12 @@ public class GangliaWriter extends BaseOutputWriter {
 						// Find the data type of this value
 						final DataType type = DataType.forValue( values.getValue() );
 						if( type != null ){
-                            emitMetric(socket, spoofedHostname,
-                                    JmxUtils.getKeyString2(query, result, values, typeNames, null),
-                                    type,
-                                    values.getValue().toString());
+                            emitMetric(
+								socket,
+								spoofedHostname,
+								JmxUtils.getKeyString2(query, result, values, typeNames, null),
+								type,
+								values.getValue().toString());
                         }
                     }
                 }
@@ -212,57 +216,70 @@ public class GangliaWriter extends BaseOutputWriter {
         }
     }
 
-    protected void emitMetric(DatagramSocket socket, String hostName, String name, DataType type, String value)
+    protected void emitMetric(DatagramSocket socket, String hostName, String metricName, DataType type, String value)
             throws IOException
     {
-        if (name == null) {
+        if (metricName == null) {
             log.warn("Metric was emitted with no name.");
             return;
         } else if (value == null) {
-            log.warn("Metric name " + name + " was emitted with a null value.");
+            log.warn("Metric name " + metricName + " was emitted with a null value.");
             return;
         } else if (type == null) {
-            log.warn("Metric name " + name + ", value " + value + " has no type.");
+            log.warn("Metric name " + metricName + ", value " + value + " has no type.");
             return;
         }
 		
         // The following XDR recipe was done through a careful reading of
         // gm_protocol.x in Ganglia 3.1 and carefully examining the output of
         // the gmetric utility with strace.
-		sendMetricMetadata( socket, hostName, name, type );
+		
+		// Send the metric metadata if we have not already done so
+		maybeSendMetricMetadata( socket, hostName, metricName, type );
 		
 		// Now we send out a message with the actual value.
-        // Technically, we only need to send out the metadata message once for
-        // each metric, but I don't want to have to record which metrics we did and
-        // did not send.
-        offset = 0;
+        offset = 0; // reset the offset
         xdr_int(133); // we are sending a string value
         xdr_string(hostName); // hostName
-        xdr_string(name); // metric name
+        xdr_string(metricName); // metric name
         xdr_int(1); // spoof = True
         xdr_string("%s"); // format field
         xdr_string(type.asString( value )); // metric value
 
         socket.send( new DatagramPacket(buffer, offset, address) );
 
-        log.debug("Emitting metric " + name + ", type " + type + ", value " + value + " for host: " + hostName);
+        log.debug("Emitted metric " + metricName + ", type " + type + ", value " + value + " for host: " + hostName);
     }
-
-	private void sendMetricMetadata(
+	
+	private void maybeSendMetricMetadata(
 		DatagramSocket socket,
 		String hostName,
 		String name,
 		DataType type )
 		throws IOException
 	{
+		final MetricMetaData metaData = new MetricMetaData( hostName, name, type );
+		// If we have not already emitted the metadata for this metric, do so now
+		if( !emittedMetadata.contains( metaData ) ) {
+			sendMetricMetadata( socket, metaData );
+			emittedMetadata.add( metaData );
+			log.debug( "Emmitted metric metadata: " + metaData.toString() );
+		}
+	}
+
+	private void sendMetricMetadata(
+		DatagramSocket socket,
+		MetricMetaData metaData )
+		throws IOException
+	{
 		// First we send out a metadata message
 		offset = 0;
 		xdr_int(128); // metric_id = metadata_msg
-		xdr_string(hostName); // hostname
-		xdr_string(name); // metric name
+		xdr_string(metaData.hostName); // hostname
+		xdr_string(metaData.metricName); // metric name
 		xdr_int(1); // spoof = True
-		xdr_string(type.getTypeName()); // metric type
-		xdr_string(name); // metric name
+		xdr_string(metaData.type.getTypeName()); // metric type
+		xdr_string(metaData.metricName); // metric name
 		xdr_string(units); // units
 		xdr_int(slope.ordinal()); // slope see gmetric.c
 		xdr_int(tmax); // tmax, the maximum time between metrics
@@ -316,5 +333,43 @@ public class GangliaWriter extends BaseOutputWriter {
         buffer[offset++] = (byte) ((i >> 8) & 0xff);
         buffer[offset++] = (byte) (i & 0xff);
     }
+	
+	private class MetricMetaData {
+		
+		private final String hostName;
+		private final String metricName;
+		private final DataType type;
+
+		private MetricMetaData( final String hostName, final String metricName, final DataType type ) {
+			this.hostName = hostName;
+			this.metricName = metricName;
+			this.type = type;
+		}
+
+		public boolean equals( Object o ) {
+			if( this == o ) return true;
+			if( o == null || getClass() != o.getClass() ) return false;
+			MetricMetaData that = (MetricMetaData) o;
+			if( hostName != null ? !hostName.equals( that.hostName ) : that.hostName != null ) return false;
+			if( metricName != null ? !metricName.equals( that.metricName ) : that.metricName != null ) return false;
+			if( type != that.type ) return false;
+			return true;
+		}
+
+		public int hashCode() {
+			int result = hostName != null ? hostName.hashCode() : 0;
+			result = 31 * result + ( metricName != null ? metricName.hashCode() : 0 );
+			result = 31 * result + ( type != null ? type.hashCode() : 0 );
+			return result;
+		}
+
+		public String toString() {
+			return "MetricMetaData{" +
+				"hostName='" + hostName + '\'' +
+				", metricName='" + metricName + '\'' +
+				", type=" + type +
+				'}';
+		}
+	}
 
 }
