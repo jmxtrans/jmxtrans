@@ -101,7 +101,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 
 						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, null));
 						sb.append("\t");
-						sb.append(values.getValue());
+						sb.append(values.getValue().toString());
 						sb.append("\t");
 						sb.append(result.getEpoch());
 

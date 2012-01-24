@@ -228,14 +228,14 @@ public class JmxUtils {
 			if (value instanceof TabularDataSupport) {
 				TabularDataSupport tds = (TabularDataSupport) value;
 				processTabularDataSupport(resList, info, oi, r, attributeName + "." + key, tds, query);
-				r.addValue(key, value.toString());
+				r.addValue(key, value);
 			} else if (value instanceof CompositeDataSupport) {
 				// now recursively go through everything.
 				CompositeDataSupport cds2 = (CompositeDataSupport) value;
 				getResult(resList, info, oi, attributeName, cds2, query);
 				return; // because we don't want to add to the list yet.
 			} else {
-				r.addValue(key, value.toString());
+				r.addValue(key, value);
 			}
 		}
 		resList.add(r);
@@ -311,7 +311,7 @@ public class JmxUtils {
 				resList.add(r);
 			} else {
 				Result r = getNewResultObject(info, oi, attribute.getName(), query);
-				r.addValue(attribute.getName(), value.toString());
+				r.addValue(attribute.getName(), value);
 				resList.add(r);
 			}
 		}
@@ -487,9 +487,7 @@ public class JmxUtils {
 	 * Useful for figuring out if an Object is a number.
 	 */
 	public static boolean isNumeric(Object value) {
-		return (((value instanceof String) && isNumeric((String)value)) ||
-				(value instanceof Number) || (value instanceof Integer) ||
-				(value instanceof Long) || (value instanceof Double) || (value instanceof Float));
+		return ((value instanceof Number) || ((value instanceof String) && isNumeric((String)value)));
 	}
 
 	/**
@@ -514,19 +512,19 @@ public class JmxUtils {
 	 * @return <code>true</code> if only contains digits, and is non-null
 	 */
 	public static boolean isNumeric(String str) {
-		if (str == null) {
-			return false;
+		if (StringUtils.isEmpty( str )) {
+			return str != null; // Null = false, empty = true
 		}
-		int sz = str.length();
-		for (int i = 0; i < sz; i++) {
-			char cat = str.charAt(i);
-			if (cat == '.') {
+		int decimals = 0;
+		for( Character c : str.toCharArray() ) {
+			if (c == '.' && ++decimals == 1) {
 				continue;
-			} else if (Character.isDigit(cat) == false) {
+			} else if (!Character.isDigit(c)) {
 				return false;
 			}
 		}
-		return true;
+		// a single period is not a number
+		return decimals < str.length();
 	}
 
 	/**

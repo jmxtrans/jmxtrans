@@ -96,7 +96,7 @@ public class GraphiteWriter extends BaseOutputWriter {
                             sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
 
                             sb.append(" ");
-                            sb.append(values.getValue());
+                            sb.append(values.getValue().toString());
                             sb.append(" ");
                             sb.append(result.getEpoch() / 1000);
                             sb.append("\n");

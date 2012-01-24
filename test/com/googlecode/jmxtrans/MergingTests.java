@@ -94,13 +94,15 @@ public class MergingTests {
 		JmxUtils.mergeServerLists(existing, adding);
 
 		Assert.assertTrue(existing.size() == 2);
-		Assert.assertTrue(existing.get(1).getQueries().size() == 3);
+		Assert.assertTrue(existing.get(0).getQueries().size() == 1); // q1 and q2 are equal
+		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and q2 are equal, q3 is different
 
 		s2.addQuery(q3);
 		JmxUtils.mergeServerLists(existing, adding);
 
 		Assert.assertTrue(existing.size() == 2);
-		Assert.assertTrue(existing.get(0).getQueries().size() == 3);
+		Assert.assertTrue(existing.get(0).getQueries().size() == 2); // q1 and q2 are equal, q3 is different
+		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and q2 are equal, q3 is different
 	}
 }
 
