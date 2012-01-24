@@ -11,19 +11,19 @@ import static org.junit.Assert.assertTrue;
  */
 public class JmxUtilsTests
 {
-	@Test
-	public void testIsNumeric()
-	{
-		assertFalse( JmxUtils.isNumeric(null) );
-		assertTrue( JmxUtils.isNumeric("") ); // this is "true" for historical reasons
-		assertFalse( JmxUtils.isNumeric("  ") );
-		assertTrue( JmxUtils.isNumeric("123") );
-		assertFalse( JmxUtils.isNumeric("12 3") );
-		assertFalse( JmxUtils.isNumeric("ab2c") );
-		assertFalse( JmxUtils.isNumeric("12-3") );
-		assertTrue( JmxUtils.isNumeric("12.3") );
-		assertFalse( JmxUtils.isNumeric( "12.3.3.3" ) );
-		assertTrue( JmxUtils.isNumeric( ".2" ) );
-		assertFalse( JmxUtils.isNumeric( "." ) );
-	}
+    @Test
+    public void testIsNumeric()
+    {
+        assertFalse( JmxUtils.isNumeric(null) );
+        assertTrue( JmxUtils.isNumeric("") ); // this is "true" for historical reasons
+        assertFalse( JmxUtils.isNumeric("  ") );
+        assertTrue( JmxUtils.isNumeric("123") );
+        assertFalse( JmxUtils.isNumeric("12 3") );
+        assertFalse( JmxUtils.isNumeric("ab2c") );
+        assertFalse( JmxUtils.isNumeric("12-3") );
+        assertTrue( JmxUtils.isNumeric("12.3") );
+        assertFalse( JmxUtils.isNumeric( "12.3.3.3" ) );
+        assertTrue( JmxUtils.isNumeric( ".2" ) );
+        assertFalse( JmxUtils.isNumeric( "." ) );
+    }
 }

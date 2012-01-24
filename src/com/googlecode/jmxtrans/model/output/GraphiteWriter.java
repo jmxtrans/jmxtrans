@@ -67,7 +67,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 
         String rootPrefixTmp = (String) this.getSettings().get(ROOT_PREFIX);
         if (rootPrefixTmp != null) {
-        	rootPrefix = rootPrefixTmp;
+            rootPrefix = rootPrefixTmp;
         }
 
         this.address = new InetSocketAddress(host, port);

@@ -29,86 +29,86 @@ import com.googlecode.jmxtrans.util.ValidationException;
  */
 public class KeyOutWriter extends BaseOutputWriter {
 
-	private static final String LOG_PATTERN = "%m%n";
-	private static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
-	private static final int MAX_LOG_BACKUP_FILES = 200;
-	private static final String MAX_LOG_FILE_SIZE = "10MB";
-	private Logger logger;
+    private static final String LOG_PATTERN = "%m%n";
+    private static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
+    private static final int MAX_LOG_BACKUP_FILES = 200;
+    private static final String MAX_LOG_FILE_SIZE = "10MB";
+    private Logger logger;
 
-	public KeyOutWriter() {
-	}
+    public KeyOutWriter() {
+    }
 
-	/**
-	 * Creates the logging
-	 */
-	public void validateSetup(Query query) throws ValidationException {
-		String fileStr = (String)this.getSettings().get("outputFile");
-		if (fileStr == null) {
-			throw new ValidationException("You must specify an outputFile setting.", query);
-		}
+    /**
+     * Creates the logging
+     */
+    public void validateSetup(Query query) throws ValidationException {
+        String fileStr = (String)this.getSettings().get("outputFile");
+        if (fileStr == null) {
+            throw new ValidationException("You must specify an outputFile setting.", query);
+        }
 
-		try {
-			String maxLogFileSize = (String)this.getSettings().get("maxLogFileSize");
-			Integer maxLogBackupFiles = (Integer)this.getSettings().get("maxLogBackupFiles");
-			PatternLayout pl = new PatternLayout(LOG_PATTERN);
+        try {
+            String maxLogFileSize = (String)this.getSettings().get("maxLogFileSize");
+            Integer maxLogBackupFiles = (Integer)this.getSettings().get("maxLogBackupFiles");
+            PatternLayout pl = new PatternLayout(LOG_PATTERN);
 
-			final RollingFileAppender appender = new RollingFileAppender(pl, fileStr, true);
-			appender.setImmediateFlush(true);
-			appender.setBufferedIO(false);
-			appender.setBufferSize(LOG_IO_BUFFER_SIZE_BYTES);
+            final RollingFileAppender appender = new RollingFileAppender(pl, fileStr, true);
+            appender.setImmediateFlush(true);
+            appender.setBufferedIO(false);
+            appender.setBufferSize(LOG_IO_BUFFER_SIZE_BYTES);
 
-			if (maxLogFileSize == null) {
-				appender.setMaxFileSize(MAX_LOG_FILE_SIZE);
-			} else {
-				appender.setMaxFileSize(maxLogFileSize);
-			}
+            if (maxLogFileSize == null) {
+                appender.setMaxFileSize(MAX_LOG_FILE_SIZE);
+            } else {
+                appender.setMaxFileSize(maxLogFileSize);
+            }
 
-			if (maxLogBackupFiles == null) {
-				appender.setMaxBackupIndex(MAX_LOG_BACKUP_FILES);
-			} else {
-				appender.setMaxBackupIndex(maxLogBackupFiles);
-			}
+            if (maxLogBackupFiles == null) {
+                appender.setMaxBackupIndex(MAX_LOG_BACKUP_FILES);
+            } else {
+                appender.setMaxBackupIndex(maxLogBackupFiles);
+            }
 
-			LoggerFactory loggerFactory = new LoggerFactory() {
-				@Override
-				public Logger makeNewLoggerInstance(String name) {
-					Logger logger = Logger.getLogger(name);
-					logger.addAppender(appender);
-					logger.setLevel(Level.INFO);
-					logger.setAdditivity(false);
-					return logger;
-				}
-			};
+            LoggerFactory loggerFactory = new LoggerFactory() {
+                @Override
+                public Logger makeNewLoggerInstance(String name) {
+                    Logger logger = Logger.getLogger(name);
+                    logger.addAppender(appender);
+                    logger.setLevel(Level.INFO);
+                    logger.setAdditivity(false);
+                    return logger;
+                }
+            };
 
-			logger = loggerFactory.makeNewLoggerInstance("KeyOutWriter" + this.hashCode());
-		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query);
-		}
-	}
+            logger = loggerFactory.makeNewLoggerInstance("KeyOutWriter" + this.hashCode());
+        } catch (IOException e) {
+            throw new ValidationException("Failed to setup log4j", query);
+        }
+    }
 
-	/**
-	 * The meat of the output. Very similar to GraphiteWriter.
-	 */
-	public void doWrite(Query query) throws Exception {
-		List<String> typeNames = getTypeNames();
+    /**
+     * The meat of the output. Very similar to GraphiteWriter.
+     */
+    public void doWrite(Query query) throws Exception {
+        List<String> typeNames = getTypeNames();
 
-		for (Result result : query.getResults()) {
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Entry<String, Object> values : resultValues.entrySet()) {
-					if (JmxUtils.isNumeric(values.getValue())) {
-						StringBuilder sb = new StringBuilder();
+        for (Result result : query.getResults()) {
+            Map<String, Object> resultValues = result.getValues();
+            if (resultValues != null) {
+                for (Entry<String, Object> values : resultValues.entrySet()) {
+                    if (JmxUtils.isNumeric(values.getValue())) {
+                        StringBuilder sb = new StringBuilder();
 
-						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, null));
-						sb.append("\t");
-						sb.append(values.getValue().toString());
-						sb.append("\t");
-						sb.append(result.getEpoch());
+                        sb.append(JmxUtils.getKeyString(query, result, values, typeNames, null));
+                        sb.append("\t");
+                        sb.append(values.getValue().toString());
+                        sb.append("\t");
+                        sb.append(result.getEpoch());
 
-						logger.info(sb.toString());
-					}
-				}
-			}
-		}
-	}
+                        logger.info(sb.toString());
+                    }
+                }
+            }
+        }
+    }
 }

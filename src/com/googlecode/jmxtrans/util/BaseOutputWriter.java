@@ -47,72 +47,72 @@ public abstract class BaseOutputWriter implements OutputWriter {
         PropertyResolver.resolveMap(this.settings);
     }
 
-	/**
-	 * Returns a boolean value for the key, defaults to false if not specified.
-	 * This is equivalent to calling {@link #getBooleanSetting(String, Boolean) getBooleanSetting(key,false)}.
-	 * 
-	 * @param key the key value to get the boolean setting for
-	 * @return the value set for the key, defaults to false
-	 */
-	public Boolean getBooleanSetting( String key ) {
-		return getBooleanSetting( key, false );
-	}
+    /**
+     * Returns a boolean value for the key, defaults to false if not specified.
+     * This is equivalent to calling {@link #getBooleanSetting(String, Boolean) getBooleanSetting(key,false)}.
+     * 
+     * @param key the key value to get the boolean setting for
+     * @return the value set for the key, defaults to false
+     */
+    public Boolean getBooleanSetting( String key ) {
+        return getBooleanSetting( key, false );
+    }
 
-	/**
-	 * Gets a Boolean value for the key, returning the default value given if not specified or not a valid boolean value.
-	 * 
-	 * @param key the key to get the boolean setting for
-	 * @param defaultVal the default value to return if the setting was not specified or was not coercible to a Boolean value
-	 * @return the Boolean value for the setting
-	 */
+    /**
+     * Gets a Boolean value for the key, returning the default value given if not specified or not a valid boolean value.
+     * 
+     * @param key the key to get the boolean setting for
+     * @param defaultVal the default value to return if the setting was not specified or was not coercible to a Boolean value
+     * @return the Boolean value for the setting
+     */
     public Boolean getBooleanSetting( String key, Boolean defaultVal ) {
         Boolean result = null;
-		final Object value = this.getSettings().get(key);
+        final Object value = this.getSettings().get(key);
         if (value != null) {
-			if (value instanceof Boolean) {
-				result = (Boolean)value;
-			} else if (value instanceof String) {
+            if (value instanceof Boolean) {
+                result = (Boolean)value;
+            } else if (value instanceof String) {
                 result = Boolean.valueOf((String)value);
-			}
+            }
         }
         return result != null ? result : defaultVal;
     }
 
-	/**
-	 * Gets an Integer value for the key, returning the default value given if not specified or not a valid numeric value.
-	 * 
-	 * @param key the key to get the Integer setting for
-	 * @param defaultVal the default value to return if the setting was not specified or was not coercible to an Integer value
-	 * @return the Integer value for the setting
-	 */
-	public Integer getIntegerSetting( String key, Integer defaultVal ) {
-		Integer result = null;
-		final Object value = this.getSettings().get( key );
-		if( value != null ) {
-			if( value instanceof Number ) {
-				result = ( (Number)value ).intValue();
-			} else if ( value instanceof String ) {
-				try {
-					result = Integer.parseInt( (String)value );
-				} catch( NumberFormatException e ) {
-					// An Integer value could not be coerced from the String, we will return the default 
-				}
-			}
-		}
-		return result != null ? result : defaultVal;
-	}
+    /**
+     * Gets an Integer value for the key, returning the default value given if not specified or not a valid numeric value.
+     * 
+     * @param key the key to get the Integer setting for
+     * @param defaultVal the default value to return if the setting was not specified or was not coercible to an Integer value
+     * @return the Integer value for the setting
+     */
+    public Integer getIntegerSetting( String key, Integer defaultVal ) {
+        Integer result = null;
+        final Object value = this.getSettings().get( key );
+        if( value != null ) {
+            if( value instanceof Number ) {
+                result = ( (Number)value ).intValue();
+            } else if ( value instanceof String ) {
+                try {
+                    result = Integer.parseInt( (String)value );
+                } catch( NumberFormatException e ) {
+                    // An Integer value could not be coerced from the String, we will return the default 
+                }
+            }
+        }
+        return result != null ? result : defaultVal;
+    }
 
-	/**
-	 * Gets a String value for the setting, returning the default value if not specified.
-	 * 
-	 * @param key the key to get the String setting for
-	 * @param defaultVal the default value to return if the setting was not specified
-	 * @return the String value for the setting
-	 */
-	public String getStringSetting( String key, String defaultVal ) {
-		final Object value = this.getSettings().get( key );
-		return value != null ? value.toString() : defaultVal;
-	}
+    /**
+     * Gets a String value for the setting, returning the default value if not specified.
+     * 
+     * @param key the key to get the String setting for
+     * @param defaultVal the default value to return if the setting was not specified
+     * @return the String value for the setting
+     */
+    public String getStringSetting( String key, String defaultVal ) {
+        final Object value = this.getSettings().get( key );
+        return value != null ? value.toString() : defaultVal;
+    }
 
     /** */
     @JsonIgnore
