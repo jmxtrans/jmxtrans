@@ -25,7 +25,7 @@ import com.googlecode.jmxtrans.util.ValidationException;
 /**
  * A cool writer for Ganglia. This is heavily inspired and somewhat copied from
  * code in Hadoop (GangliaContext).
- * 
+ *
  * @author jon
  */
 public class GangliaWriter extends BaseOutputWriter {
@@ -33,7 +33,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	private enum Slope {
 		ZERO, POSITIVE, NEGATIVE, BOTH;
 
-		private static Slope fromName(final String slopeName) {
+		private static Slope fromName(String slopeName) {
 			for (Slope slope : values())
 				if (slopeName.equalsIgnoreCase(slope.name()))
 					return slope;
@@ -120,8 +120,8 @@ public class GangliaWriter extends BaseOutputWriter {
 	 * Validates the host/port and does some other setup.
 	 */
 	public void validateSetup(Query query) throws ValidationException {
-		final Integer port = getIntegerSetting(PORT, DEFAULT_PORT);
-		final String host = getStringSetting(HOST, null);
+		Integer port = getIntegerSetting(PORT, DEFAULT_PORT);
+		String host = getStringSetting(HOST, null);
 		if (host == null) {
 			throw new ValidationException("Host can't be null", query);
 		}
@@ -146,7 +146,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	/**
 	 * Determines the spoofed host name to be used when emitting metrics to a
 	 * gmond process. Spoofed host names are of the form IP:hostname.
-	 * 
+	 *
 	 * @param host
 	 *            the host of the gmond (ganglia monitor) to which we are
 	 *            connecting, not null
@@ -162,7 +162,7 @@ public class GangliaWriter extends BaseOutputWriter {
 		if (StringUtils.isNotEmpty(alias)) {
 			// If the alias was supplied in the appropriate format, use it
 			// directly
-			final Matcher hostIpMatcher = PATTERN_HOST_IP.matcher(alias);
+			Matcher hostIpMatcher = PATTERN_HOST_IP.matcher(alias);
 			if (hostIpMatcher.matches())
 				return alias;
 			// Otherwise, use the alias as the host
@@ -200,7 +200,7 @@ public class GangliaWriter extends BaseOutputWriter {
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
 						// Find the data type of this value
-						final DataType type = DataType.forValue(values.getValue());
+						DataType type = DataType.forValue(values.getValue());
 						if (type != null) {
 							emitMetric(socket, spoofedHostname, JmxUtils.getKeyString2(query, result, values, typeNames, null), type, values
 									.getValue().toString());
@@ -248,7 +248,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	}
 
 	private void maybeSendMetricMetadata(DatagramSocket socket, String hostName, String name, DataType type) throws IOException {
-		final MetricMetaData metaData = new MetricMetaData(hostName, name, type);
+		MetricMetaData metaData = new MetricMetaData(hostName, name, type);
 		// If we have not already emitted the metadata for this metric, do so
 		// now
 		if (!emittedMetadata.contains(metaData)) {
@@ -323,11 +323,11 @@ public class GangliaWriter extends BaseOutputWriter {
 
 	private class MetricMetaData {
 
-		private final String hostName;
-		private final String metricName;
-		private final DataType type;
+		private String hostName;
+		private String metricName;
+		private DataType type;
 
-		private MetricMetaData(final String hostName, final String metricName, final DataType type) {
+		private MetricMetaData(String hostName, String metricName, DataType type) {
 			this.hostName = hostName;
 			this.metricName = metricName;
 			this.type = type;

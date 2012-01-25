@@ -15,8 +15,8 @@ import static org.junit.Assert.assertNull;
 public class BaseOutputWriterTests {
 	@Test
 	public void testBaseOutputWriterSettingsBoolean() {
-		final BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		final Map<String, Object> settingsMap = new HashMap<String, Object>();
+		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
+		Map<String, Object> settingsMap = new HashMap<String, Object>();
 		outputWriter.setSettings(settingsMap);
 		// Test the unset case
 		assertEquals(Boolean.FALSE, outputWriter.getBooleanSetting("bool", false));
@@ -48,8 +48,8 @@ public class BaseOutputWriterTests {
 
 	@Test
 	public void testBaseOutputWriterSettingsInteger() {
-		final BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		final Map<String, Object> settingsMap = new HashMap<String, Object>();
+		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
+		Map<String, Object> settingsMap = new HashMap<String, Object>();
 		outputWriter.setSettings(settingsMap);
 		// Test the unset case
 		assertEquals(1, outputWriter.getIntegerSetting("int", 1).intValue());
@@ -79,8 +79,8 @@ public class BaseOutputWriterTests {
 
 	@Test
 	public void testBaseOutputWriterSettingsString() {
-		final BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		final Map<String, Object> settingsMap = new HashMap<String, Object>();
+		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
+		Map<String, Object> settingsMap = new HashMap<String, Object>();
 		outputWriter.setSettings(settingsMap);
 		// Test the unset case
 		assertEquals("NOT_SET", outputWriter.getStringSetting("str", "NOT_SET"));
