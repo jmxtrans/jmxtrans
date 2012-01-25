@@ -291,13 +291,27 @@ public class GangliaWriter extends BaseOutputWriter {
 	 * Puts a string into the buffer by first writing the size of the string as
 	 * an int, followed by the bytes of the string, padded if necessary to a
 	 * multiple of 4.
+	 * If the String value exceeds the available length of the buffer, this will
+	 * trim the String to fit and add an ellipsis at the end.
 	 */
 	protected void xdr_string(String s) {
 		byte[] bytes = s.getBytes();
 		int len = bytes.length;
-		xdr_int(len);
-		System.arraycopy(bytes, 0, buffer, offset, len);
-		offset += len;
+		// The available buffer is equal to the total buffer size, minus our current offset, minus 4 bytes
+		// to write the xdr integer length value
+		int availableBuffer = BUFFER_SIZE - offset - 4;
+		if( len < availableBuffer ) {
+			xdr_int(len);
+			System.arraycopy(bytes, 0, buffer, offset, len);
+			offset += len;
+		} else {
+			xdr_int( availableBuffer );
+			bytes[ availableBuffer - 1 ] = '.';
+			bytes[ availableBuffer - 2 ] = '.';
+			bytes[ availableBuffer - 3 ] = '.';
+			System.arraycopy( bytes, 0, buffer, offset, availableBuffer );
+			offset += availableBuffer;
+		}
 		pad();
 	}
 
