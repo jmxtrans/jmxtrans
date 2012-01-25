@@ -44,10 +44,10 @@ import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
 
 /**
- * Main() class that takes an argument which is the directory
- * to look in for files which contain json data that defines
- * queries to run against JMX servers.
- *
+ * Main() class that takes an argument which is the directory to look in for
+ * files which contain json data that defines queries to run against JMX
+ * servers.
+ * 
  * @author jon
  */
 public class JmxTransformer extends SignalInterceptor implements WatchedCallback {
@@ -68,16 +68,15 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 	private List<Server> masterServersList = new ArrayList<Server>();
 
-
 	/** */
 	public static void main(String[] args) throws Exception {
 		JmxTransformer transformer = new JmxTransformer();
 
 		// Register signal handlers
-        transformer.registerQuietly("HUP");
-        transformer.registerQuietly("INT");
-        transformer.registerQuietly("ABRT");
-        transformer.registerQuietly("KILL");
+		transformer.registerQuietly("HUP");
+		transformer.registerQuietly("INT");
+		transformer.registerQuietly("ABRT");
+		transformer.registerQuietly("KILL");
 		transformer.registerQuietly("TERM");
 
 		// Start the process
@@ -93,9 +92,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 		}
 
 		try {
-		    this.startupScheduler();
+			this.startupScheduler();
 
-		    this.startupWatchdir();
+			this.startupWatchdir();
 
 			this.setupObjectPooling();
 
@@ -115,51 +114,52 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	 * Startup the watchdir service.
 	 */
 	private void startupWatchdir() throws Exception {
-        File dirToWatch = null;
-        if (this.getJsonDirOrFile().isFile()) {
-            dirToWatch = new File(FilenameUtils.getFullPath(this.getJsonDirOrFile().getAbsolutePath()));
-        } else {
-            dirToWatch = this.getJsonDirOrFile();
-        }
+		File dirToWatch = null;
+		if (this.getJsonDirOrFile().isFile()) {
+			dirToWatch = new File(FilenameUtils.getFullPath(this.getJsonDirOrFile().getAbsolutePath()));
+		} else {
+			dirToWatch = this.getJsonDirOrFile();
+		}
 
-        // start the watcher
-        this.watcher = new WatchDir(dirToWatch, this);
-        this.watcher.start();
+		// start the watcher
+		this.watcher = new WatchDir(dirToWatch, this);
+		this.watcher.start();
 	}
 
 	/**
 	 * start the server scheduler which loops over all the Server jobs
 	 */
 	private void startupScheduler() throws Exception {
-        StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
-        InputStream stream = null;
-        if (QUARTZ_SERVER_PROPERTIES == null) {
-            QUARTZ_SERVER_PROPERTIES = "/quartz.server.properties";
-            stream = JmxTransformer.class.getResourceAsStream(QUARTZ_SERVER_PROPERTIES);
-        } else {
-            stream = new FileInputStream(QUARTZ_SERVER_PROPERTIES);
-        }
-        serverSchedFact.initialize(stream);
-        this.serverScheduler = serverSchedFact.getScheduler();
-        this.serverScheduler.start();
+		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
+		InputStream stream = null;
+		if (QUARTZ_SERVER_PROPERTIES == null) {
+			QUARTZ_SERVER_PROPERTIES = "/quartz.server.properties";
+			stream = JmxTransformer.class.getResourceAsStream(QUARTZ_SERVER_PROPERTIES);
+		} else {
+			stream = new FileInputStream(QUARTZ_SERVER_PROPERTIES);
+		}
+		serverSchedFact.initialize(stream);
+		this.serverScheduler = serverSchedFact.getScheduler();
+		this.serverScheduler.start();
 	}
 
 	/**
 	 * Handy method which runs the JmxProcess
 	 */
 	public void executeStandalone(JmxProcess process) throws Exception {
-	    this.masterServersList = process.getServers();
+		this.masterServersList = process.getServers();
 
-        this.startupScheduler();
-        this.setupObjectPooling();
+		this.startupScheduler();
+		this.setupObjectPooling();
 
-	    this.processServersIntoJobs(this.serverScheduler);
+		this.processServersIntoJobs(this.serverScheduler);
 
-	    // Sleep for 10 seconds to wait for jobs to complete.
-	    // There should be a better way, but it seems that way isn't working right now.
-	    Thread.sleep(10 * 1000);
+		// Sleep for 10 seconds to wait for jobs to complete.
+		// There should be a better way, but it seems that way isn't working
+		// right now.
+		Thread.sleep(10 * 1000);
 
-	    this.handle("TERM");
+		this.handle("TERM");
 	}
 
 	/**
@@ -232,7 +232,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 	/**
 	 * Processes all the Servers into Job's
-	 *
+	 * 
 	 * Needs to be called after processFiles()
 	 */
 	private void processServersIntoJobs(Scheduler scheduler) throws LifecycleException {
@@ -249,7 +249,8 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 					}
 				}
 
-				// Now validate the setup of each of the OutputWriter's per query.
+				// Now validate the setup of each of the OutputWriter's per
+				// query.
 				this.validateSetup(server.getQueries());
 
 				// Now schedule the jobs for execution.
@@ -281,9 +282,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 		if ((server.getCronExpression() != null) && CronExpression.isValidExpression(server.getCronExpression())) {
 			trigger = new CronTrigger();
-			((CronTrigger)trigger).setCronExpression(server.getCronExpression());
-			((CronTrigger)trigger).setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
-			((CronTrigger)trigger).setStartTime(new Date());
+			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
+			((CronTrigger) trigger).setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			((CronTrigger) trigger).setStartTime(new Date());
 		} else {
 			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(SECONDS_BETWEEN_SERVER_JOB_RUNS);
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
@@ -320,8 +321,8 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	}
 
 	/**
-	 * If this is true, then this class will execute the main()
-	 * loop and then wait 60 seconds until running again.
+	 * If this is true, then this class will execute the main() loop and then
+	 * wait 60 seconds until running again.
 	 */
 	public void setRunEndlessly(boolean runEndlessly) {
 		this.runEndlessly = runEndlessly;
@@ -399,9 +400,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	}
 
 	/**
-	 * If getJsonFile() is a file, then that is all we load. Otherwise,
-	 * look in the jsonDir for files.
-	 *
+	 * If getJsonFile() is a file, then that is all we load. Otherwise, look in
+	 * the jsonDir for files.
+	 * 
 	 * Files must end with .json as the suffix.
 	 */
 	private List<File> getJsonFiles() {
@@ -448,9 +449,9 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 			for (Entry<String, KeyedObjectPool> entry : this.getObjectPoolMap().entrySet()) {
 				try {
 					entry.getValue().close();
-                    log.debug("Closed object pool factory: " + entry.getKey());
+					log.debug("Closed object pool factory: " + entry.getKey());
 				} catch (Exception ex) {
-                    log.error("Error closing object pool factory: " + entry.getKey());
+					log.error("Error closing object pool factory: " + entry.getKey());
 				}
 			}
 

@@ -12,38 +12,39 @@ import org.slf4j.LoggerFactory;
  */
 public class SocketFactory extends BaseKeyedPoolableObjectFactory {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(SocketFactory.class);
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory.getLogger(SocketFactory.class);
 
-    /** constructor */
-    public SocketFactory() {}
+	/** constructor */
+	public SocketFactory() {
+	}
 
-    /**
-     * Creates the socket and the writer to go with it.
-     */
-    @Override
-    public Object makeObject(Object key) throws Exception {
-        InetSocketAddress details = (InetSocketAddress) key;
-        Socket socket = new Socket(details.getHostName(), details.getPort());
-        socket.setKeepAlive(true);
-        return socket;
-    }
+	/**
+	 * Creates the socket and the writer to go with it.
+	 */
+	@Override
+	public Object makeObject(Object key) throws Exception {
+		InetSocketAddress details = (InetSocketAddress) key;
+		Socket socket = new Socket(details.getHostName(), details.getPort());
+		socket.setKeepAlive(true);
+		return socket;
+	}
 
-    /**
-     * Closes the socket.
-     */
-    @Override
-    public void destroyObject(Object key, Object obj) throws Exception {
-        Socket socket = (Socket) obj;
-        socket.close();
-    }
+	/**
+	 * Closes the socket.
+	 */
+	@Override
+	public void destroyObject(Object key, Object obj) throws Exception {
+		Socket socket = (Socket) obj;
+		socket.close();
+	}
 
-    /**
-     * Validates that the socket is good.
-     */
-    @Override
-    public boolean validateObject(Object key, Object obj) {
-        Socket socket = (Socket) obj;
-        return socket.isBound() && ! socket.isClosed() && socket.isConnected() && ! socket.isInputShutdown() && ! socket.isOutputShutdown();
-    }
+	/**
+	 * Validates that the socket is good.
+	 */
+	@Override
+	public boolean validateObject(Object key, Object obj) {
+		Socket socket = (Socket) obj;
+		return socket.isBound() && !socket.isClosed() && socket.isConnected() && !socket.isInputShutdown() && !socket.isOutputShutdown();
+	}
 }

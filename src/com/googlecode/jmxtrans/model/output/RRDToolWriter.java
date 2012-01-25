@@ -29,13 +29,14 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
- * This takes a JRobin template.xml file and then creates the database if it doesn't already exist.
- *
+ * This takes a JRobin template.xml file and then creates the database if it
+ * doesn't already exist.
+ * 
  * It will then write the contents of the Query (the Results) to the database.
- *
- * This method exec's out to use the command line version of rrdtool. You need to specify the
- * path to the directory where the binary rrdtool lives.
- *
+ * 
+ * This method exec's out to use the command line version of rrdtool. You need
+ * to specify the path to the directory where the binary rrdtool lives.
+ * 
  * @author jon
  */
 public class RRDToolWriter extends BaseOutputWriter {
@@ -46,7 +47,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	private File templateFile = null;
 	private File binaryPath = null;
 	public static final String GENERATE = "generate";
-	private static final char[] INITIALS = {' ', '.'};
+	private static final char[] INITIALS = { ' ', '.' };
 
 	/** */
 	public RRDToolWriter() {
@@ -63,9 +64,8 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	/**
-	 * rrd datasources must be less than 21 characters in length, so
-	 * work to make it shorter. Not ideal at all, but works fairly
-	 * well it seems.
+	 * rrd datasources must be less than 21 characters in length, so work to
+	 * make it shorter. Not ideal at all, but works fairly well it seems.
 	 */
 	public String getDataSourceName(String typeName, String attributeName, String entry) {
 
@@ -97,7 +97,8 @@ public class RRDToolWriter extends BaseOutputWriter {
 
 		Map<String, String> dataMap = new TreeMap<String, String>();
 
-		// go over all the results and look for datasource names that map to keys from the result values
+		// go over all the results and look for datasource names that map to
+		// keys from the result values
 		for (Result res : results) {
 			log.debug(res.toString());
 			Map<String, Object> values = res.getValues();
@@ -139,11 +140,13 @@ public class RRDToolWriter extends BaseOutputWriter {
 						if (isNumeric) {
 							String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
 							if (keys.contains(key)) {
-								throw new Exception("Duplicate datasource name found: '" + key + "'. Please try to add more typeName keys to the writer to make the name more unique. " + res.toString());
+								throw new Exception("Duplicate datasource name found: '" + key
+										+ "'. Please try to add more typeName keys to the writer to make the name more unique. " + res.toString());
 							}
 							keys.add(key);
 
-							sb.append("<datasource><!-- " + res.getTypeName() + ":" + res.getAttributeName() + ":" + entry.getKey() + " --><name>" + key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+							sb.append("<datasource><!-- " + res.getTypeName() + ":" + res.getAttributeName() + ":" + entry.getKey() + " --><name>"
+									+ key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
 						}
 					}
 				}
@@ -170,7 +173,8 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	/**
-	 * If the database file doesn't exist, it'll get created, otherwise, it'll be returned in r/w mode.
+	 * If the database file doesn't exist, it'll get created, otherwise, it'll
+	 * be returned in r/w mode.
 	 */
 	protected RrdDef getDatabaseTemplateSpec() throws Exception {
 		RrdDefTemplate t = new RrdDefTemplate(templateFile);
@@ -238,15 +242,15 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	/**
-	"rrdtool create temperature.rrd --step 300 \\\n" +
-	"         DS:temp:GAUGE:600:-273:5000 \\\n" +
-	"         RRA:AVERAGE:0.5:1:1200 \\\n" +
-	"         RRA:MIN:0.5:12:2400 \\\n" +
-	"         RRA:MAX:0.5:12:2400 \\\n" +
-	"         RRA:AVERAGE:0.5:12:2400"
+	 * "rrdtool create temperature.rrd --step 300 \\\n" +
+	 * "         DS:temp:GAUGE:600:-273:5000 \\\n" +
+	 * "         RRA:AVERAGE:0.5:1:1200 \\\n" +
+	 * "         RRA:MIN:0.5:12:2400 \\\n" + "         RRA:MAX:0.5:12:2400 \\\n"
+	 * + "         RRA:AVERAGE:0.5:12:2400"
 	 */
 	private String getDsDefStr(DsDef def) {
-		return "DS:" + def.getDsName() + ":" + def.getDsType() + ":" + def.getHeartbeat() + ":" + formatDouble(def.getMinValue()) + ":" + formatDouble(def.getMaxValue());
+		return "DS:" + def.getDsName() + ":" + def.getDsType() + ":" + def.getHeartbeat() + ":" + formatDouble(def.getMinValue()) + ":"
+				+ formatDouble(def.getMaxValue());
 	}
 
 	/**

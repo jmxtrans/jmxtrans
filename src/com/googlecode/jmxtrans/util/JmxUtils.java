@@ -50,7 +50,7 @@ import com.googlecode.jmxtrans.model.Server;
 
 /**
  * The worker code.
- *
+ * 
  * @author jon
  */
 public class JmxUtils {
@@ -58,8 +58,8 @@ public class JmxUtils {
 	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
 
 	/**
-	 * Merges two lists of servers (and their queries). Based on the equality of both sets of objects.
-	 * Public for testing purposes.
+	 * Merges two lists of servers (and their queries). Based on the equality of
+	 * both sets of objects. Public for testing purposes.
 	 */
 	public static void mergeServerLists(List<Server> existing, List<Server> adding) {
 		for (Server server : adding) {
@@ -69,10 +69,12 @@ public class JmxUtils {
 				List<Query> queries = server.getQueries();
 				for (Query q : queries) {
 					try {
-						// no need to check for existing since this method already does that
+						// no need to check for existing since this method
+						// already does that
 						found.addQuery(q);
 					} catch (ValidationException ex) {
-						// catching this exception because we don't want to stop processing
+						// catching this exception because we don't want to stop
+						// processing
 						log.error("Error adding query: " + q + " to server" + server, ex);
 					}
 				}
@@ -83,8 +85,8 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Either invokes the queries multithreaded (max threads == server.getMultiThreaded())
-	 * or invokes them one at a time.
+	 * Either invokes the queries multithreaded (max threads ==
+	 * server.getMultiThreaded()) or invokes them one at a time.
 	 */
 	public static void processQueriesForServer(final MBeanServerConnection mbeanServer, Server server) throws Exception {
 
@@ -205,8 +207,8 @@ public class JmxUtils {
 				}
 			} catch (UnmarshalException ue) {
 				if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
-					log.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: " +
-							"http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
+					log.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: "
+							+ "http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
 				}
 			}
 		}
@@ -214,8 +216,8 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Populates the Result objects. This is a recursive function. Query contains the
-	 * keys that we want to get the values of.
+	 * Populates the Result objects. This is a recursive function. Query
+	 * contains the keys that we want to get the values of.
 	 */
 	private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, String attributeName, CompositeData cds, Query query) {
 		CompositeType t = cds.getCompositeType();
@@ -242,27 +244,31 @@ public class JmxUtils {
 	}
 
 	/** */
-	private static void processTabularDataSupport(List<Result> resList, MBeanInfo info, ObjectInstance oi, Result r, String attributeName, TabularDataSupport tds, Query query) {
-		Set<Entry<Object,Object>> entries = tds.entrySet();
+	private static void processTabularDataSupport(List<Result> resList, MBeanInfo info, ObjectInstance oi, Result r, String attributeName,
+			TabularDataSupport tds, Query query) {
+		Set<Entry<Object, Object>> entries = tds.entrySet();
 		for (Entry<Object, Object> entry : entries) {
 			Object entryKeys = entry.getKey();
 			if (entryKeys instanceof List) {
 				// ie: attributeName=LastGcInfo.Par Survivor Space
-				// i haven't seen this be smaller or larger than List<1>, but might as well loop it.
+				// i haven't seen this be smaller or larger than List<1>, but
+				// might as well loop it.
 				StringBuilder sb = new StringBuilder();
-				for (Object entryKey : (List<?>)entryKeys) {
+				for (Object entryKey : (List<?>) entryKeys) {
 					sb.append(".");
 					sb.append(entryKey);
 				}
 				String attributeName2 = sb.toString();
 				Object entryValue = entry.getValue();
 				if (entryValue instanceof CompositeDataSupport) {
-					getResult(resList, info, oi, attributeName + attributeName2, (CompositeDataSupport)entryValue, query);
+					getResult(resList, info, oi, attributeName + attributeName2, (CompositeDataSupport) entryValue, query);
 				} else {
-					throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryValue is: " + entryValue.getClass().getCanonicalName());
+					throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryValue is: "
+							+ entryValue.getClass().getCanonicalName());
 				}
 			} else {
-				throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: " + entryKeys.getClass().getCanonicalName());
+				throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: "
+						+ entryKeys.getClass().getCanonicalName());
 			}
 		}
 	}
@@ -287,17 +293,18 @@ public class JmxUtils {
 			if (value instanceof CompositeDataSupport) {
 				getResult(resList, info, oi, attribute.getName(), (CompositeData) value, query);
 			} else if (value instanceof CompositeData[]) {
-				for (CompositeData cd : (CompositeData[])value) {
+				for (CompositeData cd : (CompositeData[]) value) {
 					getResult(resList, info, oi, attribute.getName(), cd, query);
 				}
 			} else if (value instanceof ObjectName[]) {
 				Result r = getNewResultObject(info, oi, attribute.getName(), query);
-				for (ObjectName obj : (ObjectName[])value) {
+				for (ObjectName obj : (ObjectName[]) value) {
 					r.addValue(obj.getCanonicalName(), obj.getKeyPropertyListString());
 				}
 				resList.add(r);
 			} else if (value.getClass().isArray()) {
-				// OMFG: this is nutty. some of the items in the array can be primitive! great interview question!
+				// OMFG: this is nutty. some of the items in the array can be
+				// primitive! great interview question!
 				Result r = getNewResultObject(info, oi, attribute.getName(), query);
 				for (int i = 0; i < Array.getLength(value); i++) {
 					Object val = Array.get(value, i);
@@ -328,7 +335,8 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Helper method for connecting to a Server. You need to close the resulting connection.
+	 * Helper method for connecting to a Server. You need to close the resulting
+	 * connection.
 	 */
 	public static JMXConnector getServerConnection(Server server) throws Exception {
 		JMXServiceURL url = new JMXServiceURL(server.getUrl());
@@ -373,8 +381,8 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Either invokes the servers multithreaded (max threads == jmxProcess.getMultiThreaded())
-	 * or invokes them one at a time.
+	 * Either invokes the servers multithreaded (max threads ==
+	 * jmxProcess.getMultiThreaded()) or invokes them one at a time.
 	 */
 	public static void execute(JmxProcess process) throws Exception {
 
@@ -439,21 +447,22 @@ public class JmxUtils {
 	 * Does the work for processing a Server object.
 	 */
 	public static void processServer(Server server, JMXConnector conn) throws Exception {
-//		try {
-			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
-			JmxUtils.processQueriesForServer(mbeanServer, server);
-//		} catch (IOException e) {
-//			log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
-//		} finally {
-//			if (conn != null) {
-//				conn.close();
-//			}
-//		}
+		// try {
+		MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
+		JmxUtils.processQueriesForServer(mbeanServer, server);
+		// } catch (IOException e) {
+		// log.error("Problem processing queries for server: " +
+		// server.getHost() + ":" + server.getPort(), e);
+		// } finally {
+		// if (conn != null) {
+		// conn.close();
+		// }
+		// }
 	}
 
 	/**
-	 * Utility function good for testing things. Prints out the json
-	 * tree of the JmxProcess.
+	 * Utility function good for testing things. Prints out the json tree of the
+	 * JmxProcess.
 	 */
 	public static void printJson(JmxProcess process) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
@@ -462,8 +471,8 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Utility function good for testing things. Prints out the json
-	 * tree of the JmxProcess.
+	 * Utility function good for testing things. Prints out the json tree of the
+	 * JmxProcess.
 	 */
 	public static void prettyPrintJson(JmxProcess process) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
@@ -487,16 +496,20 @@ public class JmxUtils {
 	 * Useful for figuring out if an Object is a number.
 	 */
 	public static boolean isNumeric(Object value) {
-		return ((value instanceof Number) || ((value instanceof String) && isNumeric((String)value)));
+		return ((value instanceof Number) || ((value instanceof String) && isNumeric((String) value)));
 	}
 
 	/**
-	 * <p>Checks if the String contains only unicode digits.
-	 * A decimal point is a digit and returns true.</p>
-	 *
-	 * <p><code>null</code> will return <code>false</code>.
-	 * An empty String ("") will return <code>true</code>.</p>
-	 *
+	 * <p>
+	 * Checks if the String contains only unicode digits. A decimal point is a
+	 * digit and returns true.
+	 * </p>
+	 * 
+	 * <p>
+	 * <code>null</code> will return <code>false</code>. An empty String ("")
+	 * will return <code>true</code>.
+	 * </p>
+	 * 
 	 * <pre>
 	 * StringUtils.isNumeric(null)   = false
 	 * StringUtils.isNumeric("")     = true
@@ -507,12 +520,13 @@ public class JmxUtils {
 	 * StringUtils.isNumeric("12-3") = false
 	 * StringUtils.isNumeric("12.3") = true
 	 * </pre>
-	 *
-	 * @param str  the String to check, may be null
+	 * 
+	 * @param str
+	 *            the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
 	 */
 	public static boolean isNumeric(String str) {
-		if (StringUtils.isEmpty( str )) {
+		if (StringUtils.isEmpty(str)) {
 			return str != null; // Null = false, empty = true
 		}
 		int decimals = 0;
@@ -532,7 +546,7 @@ public class JmxUtils {
 
 	/**
 	 * Helper method which returns a default PoolMap.
-	 *
+	 * 
 	 * TODO: allow for more configuration options?
 	 */
 	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
@@ -640,7 +654,6 @@ public class JmxUtils {
 		return sb.toString();
 	}
 
-
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
 	 */
@@ -658,10 +671,11 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 *
+	 * 
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 *
-	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the string
+	 * 
+	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
+	 * string
 	 */
 	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
 		if ((typeNames == null) || (typeNames.size() == 0)) {
@@ -679,13 +693,12 @@ public class JmxUtils {
 		return StringUtils.chomp(sb.toString(), "_");
 	}
 
-
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 *
+	 * 
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 *
+	 * 
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
 	 */

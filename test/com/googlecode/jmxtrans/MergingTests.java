@@ -15,7 +15,7 @@ public class MergingTests {
 
 	@Test
 	public void testMerge() throws Exception {
-		
+
 		Query q1 = new Query();
 		q1.addAttr("foo");
 		q1.addAttr("bar");
@@ -51,7 +51,7 @@ public class MergingTests {
 		s1.setUsername("user");
 		s1.addQuery(q1);
 		s1.addQuery(q2);
-		
+
 		// same as s1
 		Server s2 = new Server();
 		s2.setAlias("alias");
@@ -82,7 +82,8 @@ public class MergingTests {
 		adding.add(s2);
 		JmxUtils.mergeServerLists(existing, adding);
 
-		// should only have one server with 1 query since we just added the same server and same query.
+		// should only have one server with 1 query since we just added the same
+		// server and same query.
 		Assert.assertTrue(existing.size() == 1);
 		Assert.assertTrue(existing.get(0).getQueries().size() == 1);
 
@@ -94,15 +95,32 @@ public class MergingTests {
 		JmxUtils.mergeServerLists(existing, adding);
 
 		Assert.assertTrue(existing.size() == 2);
-		Assert.assertTrue(existing.get(0).getQueries().size() == 1); // q1 and q2 are equal
-		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and q2 are equal, q3 is different
+		Assert.assertTrue(existing.get(0).getQueries().size() == 1); // q1 and
+																		// q2
+																		// are
+																		// equal
+		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and
+																		// q2
+																		// are
+																		// equal,
+																		// q3 is
+																		// different
 
 		s2.addQuery(q3);
 		JmxUtils.mergeServerLists(existing, adding);
 
 		Assert.assertTrue(existing.size() == 2);
-		Assert.assertTrue(existing.get(0).getQueries().size() == 2); // q1 and q2 are equal, q3 is different
-		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and q2 are equal, q3 is different
+		Assert.assertTrue(existing.get(0).getQueries().size() == 2); // q1 and
+																		// q2
+																		// are
+																		// equal,
+																		// q3 is
+																		// different
+		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and
+																		// q2
+																		// are
+																		// equal,
+																		// q3 is
+																		// different
 	}
 }
-

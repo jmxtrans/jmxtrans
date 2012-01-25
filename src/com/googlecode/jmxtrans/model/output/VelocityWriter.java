@@ -13,55 +13,56 @@ import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This class isn't finished yet.
- *
+ * 
  * @author jon
  */
 public class VelocityWriter extends BaseOutputWriter {
 
-    public VelocityWriter() {
-    }
+	public VelocityWriter() {
+	}
 
-    public void doWrite(Query query) throws Exception {
-        // TODO Auto-generated method stub
+	public void doWrite(Query query) throws Exception {
+		// TODO Auto-generated method stub
 
-    }
+	}
 
-    public void validateSetup(Query query) throws ValidationException {
-        // TODO
-    }
+	public void validateSetup(Query query) throws ValidationException {
+		// TODO
+	}
 
-    /**
-     * Uses velocity to generate output for a List of JmxProcess.
-     */
-    protected void genVelocityOutput(List<JmxProcess> processes) throws Exception {
+	/**
+	 * Uses velocity to generate output for a List of JmxProcess.
+	 */
+	protected void genVelocityOutput(List<JmxProcess> processes) throws Exception {
 
-        // Generate settings XML using Velocity
+		// Generate settings XML using Velocity
 
-//        for (JmxProcess process : processes) {
-//            for (Server server : process.getServers()) {
+		// for (JmxProcess process : processes) {
+		// for (Server server : process.getServers()) {
 
-//                VelocityEngine ve = getVelocityEngine();
-//                VelocityContext context = new VelocityContext();
-//                context.put("results", );
-//                StringWriter writer = new StringWriter();
-//                ve.mergeTemplate("conf.zend/crawler_settings.xml", "UTF-8", context, writer);
-//            }
-//        }
-    }
+		// VelocityEngine ve = getVelocityEngine();
+		// VelocityContext context = new VelocityContext();
+		// context.put("results", );
+		// StringWriter writer = new StringWriter();
+		// ve.mergeTemplate("conf.zend/crawler_settings.xml", "UTF-8", context,
+		// writer);
+		// }
+		// }
+	}
 
-    /**
-     * Sets velocity up to load resources from a list of paths.
-     */
-    protected VelocityEngine getVelocityEngine(List<String> paths) throws Exception {
-        VelocityEngine ve = new VelocityEngine();
-        ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
-        ve.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
-        ve.setProperty("cp.resource.loader.cache", "true");
-        ve.setProperty("cp.resource.loader.path", StringUtils.join(paths, ","));
-        ve.setProperty("cp.resource.loader.modificationCheckInterval ", "10");
-        ve.setProperty("input.encoding", "UTF-8");
-        ve.setProperty("output.encoding", "UTF-8");
-        ve.setProperty("runtime.log", "");
-        return ve;
-    }
+	/**
+	 * Sets velocity up to load resources from a list of paths.
+	 */
+	protected VelocityEngine getVelocityEngine(List<String> paths) throws Exception {
+		VelocityEngine ve = new VelocityEngine();
+		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
+		ve.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+		ve.setProperty("cp.resource.loader.cache", "true");
+		ve.setProperty("cp.resource.loader.path", StringUtils.join(paths, ","));
+		ve.setProperty("cp.resource.loader.modificationCheckInterval ", "10");
+		ve.setProperty("input.encoding", "UTF-8");
+		ve.setProperty("output.encoding", "UTF-8");
+		ve.setProperty("runtime.log", "");
+		return ve;
+	}
 }

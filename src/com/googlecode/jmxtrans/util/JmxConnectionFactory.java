@@ -19,7 +19,8 @@ public class JmxConnectionFactory extends BaseKeyedPoolableObjectFactory {
 	private static final Logger log = LoggerFactory.getLogger(JmxConnectionFactory.class);
 
 	/** constructor */
-	public JmxConnectionFactory() {}
+	public JmxConnectionFactory() {
+	}
 
 	/**
 	 * Creates the connection.

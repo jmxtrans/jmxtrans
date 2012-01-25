@@ -10,7 +10,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * This example shows how to query ehcache for its statistics information.
- *
+ * 
  * @author jon
  */
 public class Ehcache {
@@ -40,7 +40,7 @@ public class Ehcache {
 		q.addAttr("ObjectCount");
 		q.addAttr("MemoryStoreObjectCount");
 		q.addAttr("DiskStoreObjectCount");
-//        q.addOutputWriter(new StdOutWriter());
+		// q.addOutputWriter(new StdOutWriter());
 		q.addOutputWriter(gw);
 		server.addQuery(q);
 
@@ -48,12 +48,12 @@ public class Ehcache {
 		JmxUtils.prettyPrintJson(process);
 
 		JmxTransformer transformer = new JmxTransformer();
-        transformer.executeStandalone(process);
+		transformer.executeStandalone(process);
 
-//        for (int i = 0; i < 160; i++) {
-//            JmxUtils.processServer(server);
-//            Thread.sleep(1000);
-//        }
+		// for (int i = 0; i < 160; i++) {
+		// JmxUtils.processServer(server);
+		// Thread.sleep(1000);
+		// }
 
 	}
 }

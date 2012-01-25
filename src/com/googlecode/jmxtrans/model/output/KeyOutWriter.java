@@ -18,13 +18,13 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
- * Writes out data in the same format as the GraphiteWriter, except to a file and tab delimited.
- * Takes advantage of Log4J RollingFileAppender to automatically handle rolling the files after
- * they reach a certain size.
- *
- * The default max size of the log files are 10MB (maxLogFileSize)
- * The default number of rolled files to keep is 200 (maxLogBackupFiles)
- *
+ * Writes out data in the same format as the GraphiteWriter, except to a file
+ * and tab delimited. Takes advantage of Log4J RollingFileAppender to
+ * automatically handle rolling the files after they reach a certain size.
+ * 
+ * The default max size of the log files are 10MB (maxLogFileSize) The default
+ * number of rolled files to keep is 200 (maxLogBackupFiles)
+ * 
  * @author jon
  */
 public class KeyOutWriter extends BaseOutputWriter {
@@ -42,14 +42,14 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * Creates the logging
 	 */
 	public void validateSetup(Query query) throws ValidationException {
-		String fileStr = (String)this.getSettings().get("outputFile");
+		String fileStr = (String) this.getSettings().get("outputFile");
 		if (fileStr == null) {
 			throw new ValidationException("You must specify an outputFile setting.", query);
 		}
 
 		try {
-			String maxLogFileSize = (String)this.getSettings().get("maxLogFileSize");
-			Integer maxLogBackupFiles = (Integer)this.getSettings().get("maxLogBackupFiles");
+			String maxLogFileSize = (String) this.getSettings().get("maxLogFileSize");
+			Integer maxLogBackupFiles = (Integer) this.getSettings().get("maxLogBackupFiles");
 			PatternLayout pl = new PatternLayout(LOG_PATTERN);
 
 			final RollingFileAppender appender = new RollingFileAppender(pl, fileStr, true);

@@ -10,11 +10,11 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * This example shows how to query an ActiveMQ server for some information.
- *
+ * 
  * The point of this example is to show that * works as part of the objectName.
  * It also shows that you don't have to set an attribute to get for a query.
  * jmxtrans will get all attributes on an object if you don't specify any.
- *
+ * 
  * @author jon
  */
 public class ActiveMQ {
@@ -28,7 +28,7 @@ public class ActiveMQ {
 		server.setAlias("w2_activemq_1105");
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(BaseOutputWriter.HOST, GW_HOST);
-//        gw.addSetting(GraphiteWriter.HOST, "localhost");
+		// gw.addSetting(GraphiteWriter.HOST, "localhost");
 		gw.addSetting(BaseOutputWriter.PORT, 2003);
 
 		// use this to add data to GW path
@@ -143,13 +143,13 @@ public class ActiveMQ {
 
 		JmxProcess process = new JmxProcess(server);
 		JmxUtils.prettyPrintJson(process);
-        JmxTransformer transformer = new JmxTransformer();
-        transformer.executeStandalone(process);
+		JmxTransformer transformer = new JmxTransformer();
+		transformer.executeStandalone(process);
 
-//        for (int i = 0; i < 160; i++) {
-//            JmxUtils.processServer(server);
-//            Thread.sleep(1000);
-//        }
+		// for (int i = 0; i < 160; i++) {
+		// JmxUtils.processServer(server);
+		// Thread.sleep(1000);
+		// }
 
 	}
 }

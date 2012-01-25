@@ -10,7 +10,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * This example shows how to query hibernate for its statistics information.
- *
+ * 
  * @author jon
  */
 public class Hibernate {
@@ -60,19 +60,19 @@ public class Hibernate {
 		q.addAttr("CloseStatementCount");
 		q.addAttr("PrepareStatementCount");
 		q.addAttr("OptimisticFailureCount");
-//        q.addOutputWriter(new StdOutWriter());
+		// q.addOutputWriter(new StdOutWriter());
 		q.addOutputWriter(gw);
 		server.addQuery(q);
 
 		JmxProcess process = new JmxProcess(server);
 		JmxUtils.prettyPrintJson(process);
-        JmxTransformer transformer = new JmxTransformer();
-        transformer.executeStandalone(process);
+		JmxTransformer transformer = new JmxTransformer();
+		transformer.executeStandalone(process);
 
-//        for (int i = 0; i < 160; i++) {
-//            JmxUtils.processServer(server);
-//            Thread.sleep(1000);
-//        }
+		// for (int i = 0; i < 160; i++) {
+		// JmxUtils.processServer(server);
+		// Thread.sleep(1000);
+		// }
 
 	}
 }

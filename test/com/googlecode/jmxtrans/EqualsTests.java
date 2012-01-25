@@ -78,24 +78,23 @@ public class EqualsTests {
 	}
 
 	public void testQuery2() {
-        Query q1 = new Query();
-        q1.addAttr("foo");
-        q1.addAttr("bar");
-        q1.addKey("key1");
-        q1.addKey("key2");
-        q1.setObj("*");
-        q1.setResultAlias("alias");
+		Query q1 = new Query();
+		q1.addAttr("foo");
+		q1.addAttr("bar");
+		q1.addKey("key1");
+		q1.addKey("key2");
+		q1.setObj("*");
+		q1.setResultAlias("alias");
 
-        // not same as q1
-        Query q2 = new Query();
-        q2.addAttr("foo");
-        q2.addAttr("bar");
-        q2.addKey("key1");
-        q2.addKey("key2");
-        q2.setObj("obj");
-        q2.setResultAlias("alias");
+		// not same as q1
+		Query q2 = new Query();
+		q2.addAttr("foo");
+		q2.addAttr("bar");
+		q2.addKey("key1");
+		q2.addKey("key2");
+		q2.setObj("obj");
+		q2.setResultAlias("alias");
 
-        Assert.assertFalse(q1.equals(q2));
+		Assert.assertFalse(q1.equals(q2));
 	}
 }
-

@@ -22,12 +22,14 @@ import com.googlecode.jmxtrans.util.ValidationException;
 import javax.management.MBeanServer;
 
 /**
- * Represents a jmx server that we want to connect to.
- * This also stores the queries that we want to execute against the server.
+ * Represents a jmx server that we want to connect to. This also stores the
+ * queries that we want to execute against the server.
+ * 
  * @author jon
  */
-@JsonSerialize(include=Inclusion.NON_NULL)
-@JsonPropertyOrder(value={"alias", "local", "host", "port", "username", "password", "cronExpression", "numQueryThreads", "protocolProviderPackages"})
+@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonPropertyOrder(value = { "alias", "local", "host", "port", "username", "password", "cronExpression", "numQueryThreads",
+		"protocolProviderPackages" })
 public class Server {
 
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
@@ -50,13 +52,14 @@ public class Server {
 	private String cronExpression;
 	private Integer numQueryThreads;
 
-    // if using local JMX to embed JmxTrans to query the local MBeanServer
-    private boolean local;
-    private MBeanServer localMBeanServer;
+	// if using local JMX to embed JmxTrans to query the local MBeanServer
+	private boolean local;
+	private MBeanServer localMBeanServer;
 
 	private List<Query> queries = new ArrayList<Query>();
 
-    public Server() { }
+	public Server() {
+	}
 
 	/** */
 	public Server(String host, String port) {
@@ -86,30 +89,29 @@ public class Server {
 		return this.jmxProcess;
 	}
 
-    @JsonIgnore
-    public MBeanServer getLocalMBeanServer() {
-        if (localMBeanServer == null) {
-            localMBeanServer = ManagementFactory.getPlatformMBeanServer();
-        }
-        return localMBeanServer;
-    }
+	@JsonIgnore
+	public MBeanServer getLocalMBeanServer() {
+		if (localMBeanServer == null) {
+			localMBeanServer = ManagementFactory.getPlatformMBeanServer();
+		}
+		return localMBeanServer;
+	}
 
-    public void setLocalMBeanServer(MBeanServer localMBeanServer) {
-        this.localMBeanServer = localMBeanServer;
-    }
-
+	public void setLocalMBeanServer(MBeanServer localMBeanServer) {
+		this.localMBeanServer = localMBeanServer;
+	}
 
 	/**
-	 * Some writers (GraphiteWriter) use the alias in generation of the unique key which references
-	 * this server.
+	 * Some writers (GraphiteWriter) use the alias in generation of the unique
+	 * key which references this server.
 	 */
 	public void setAlias(String alias) {
 		this.alias = PropertyResolver.resolveProps(alias);
 	}
 
 	/**
-	 * Some writers (GraphiteWriter) use the alias in generation of the unique key which references
-	 * this server.
+	 * Some writers (GraphiteWriter) use the alias in generation of the unique
+	 * key which references this server.
 	 */
 	public String getAlias() {
 		return this.alias;
@@ -155,19 +157,20 @@ public class Server {
 		return this.password;
 	}
 
-    /**
-     * Whether the current local Java process should be used or not (useful for polling the embedded JVM when
-     * using JmxTrans inside a JVM to poll JMX stats and push them remotely)
-     */
-    public boolean isLocal() {
-        return local;
-    }
+	/**
+	 * Whether the current local Java process should be used or not (useful for
+	 * polling the embedded JVM when using JmxTrans inside a JVM to poll JMX
+	 * stats and push them remotely)
+	 */
+	public boolean isLocal() {
+		return local;
+	}
 
-    public void setLocal(boolean local) {
-        this.local = local;
-    }
+	public void setLocal(boolean local) {
+		this.local = local;
+	}
 
-    /**
+	/**
 	 * Won't add the same query (determined by equals()) 2x.
 	 */
 	public void setQueries(List<Query> queries) throws ValidationException {
@@ -193,8 +196,8 @@ public class Server {
 	}
 
 	/**
-	 * The jmx url to connect to. If null, it builds this from host/port with a standard configuration. Other
-	 * JVM's may want to set this value.
+	 * The jmx url to connect to. If null, it builds this from host/port with a
+	 * standard configuration. Other JVM's may want to set this value.
 	 */
 	@JsonIgnore
 	public String getUrl() {
@@ -212,10 +215,11 @@ public class Server {
 	}
 
 	/**
-	 * If there are queries and results that have been executed,
-	 * this is just a shortcut to get all the Results.
-	 *
-	 * @return null if there are no queries or empty list if there are no results.
+	 * If there are queries and results that have been executed, this is just a
+	 * shortcut to get all the Results.
+	 * 
+	 * @return null if there are no queries or empty list if there are no
+	 *         results.
 	 */
 	@JsonIgnore
 	public List<Result> getResults() {
@@ -254,20 +258,20 @@ public class Server {
 	}
 
 	/**
-	 * Each server can set a cronExpression for the scheduler.
-	 * If the cronExpression is null, then the job is run immediately
-	 * and once. Otherwise, it is added to the scheduler for immediate
-	 * execution and run according to the cronExpression.
+	 * Each server can set a cronExpression for the scheduler. If the
+	 * cronExpression is null, then the job is run immediately and once.
+	 * Otherwise, it is added to the scheduler for immediate execution and run
+	 * according to the cronExpression.
 	 */
 	public void setCronExpression(String cronExpression) {
 		this.cronExpression = cronExpression;
 	}
 
 	/**
-	 * Each server can set a cronExpression for the scheduler.
-	 * If the cronExpression is null, then the job is run immediately
-	 * and once. Otherwise, it is added to the scheduler for immediate
-	 * execution and run according to the cronExpression.
+	 * Each server can set a cronExpression for the scheduler. If the
+	 * cronExpression is null, then the job is run immediately and once.
+	 * Otherwise, it is added to the scheduler for immediate execution and run
+	 * according to the cronExpression.
 	 */
 	public String getCronExpression() {
 		return this.cronExpression;
@@ -276,8 +280,8 @@ public class Server {
 	/** */
 	@Override
 	public String toString() {
-		return "Server [host=" + this.host + ", port=" + this.port + ", url=" + this.url + ", cronExpression="
-				+ this.cronExpression + ", numQueryThreads=" + this.numQueryThreads + "]";
+		return "Server [host=" + this.host + ", port=" + this.port + ", url=" + this.url + ", cronExpression=" + this.cronExpression
+				+ ", numQueryThreads=" + this.numQueryThreads + "]";
 	}
 
 	/** */
@@ -297,36 +301,27 @@ public class Server {
 			return false;
 		}
 
-		Server other = (Server)o;
+		Server other = (Server) o;
 
-		return new EqualsBuilder()
-								.append(this.getHost(), other.getHost())
-								.append(this.getPort(), other.getPort())
-								.append(this.getNumQueryThreads(), other.getNumQueryThreads())
-								.append(this.getCronExpression(), other.getCronExpression())
-								.append(this.getAlias(), other.getAlias())
-								.append(this.getUsername(), other.getUsername())
-								.append(this.getPassword(), other.getPassword()).isEquals();
+		return new EqualsBuilder().append(this.getHost(), other.getHost()).append(this.getPort(), other.getPort())
+				.append(this.getNumQueryThreads(), other.getNumQueryThreads()).append(this.getCronExpression(), other.getCronExpression())
+				.append(this.getAlias(), other.getAlias()).append(this.getUsername(), other.getUsername())
+				.append(this.getPassword(), other.getPassword()).isEquals();
 	}
 
 	/** */
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(13, 21)
-										.append(this.getHost())
-										.append(this.getPort())
-										.append(this.getNumQueryThreads())
-										.append(this.getCronExpression())
-										.append(this.getAlias())
-										.append(this.getUsername())
-										.append(this.getPassword()).toHashCode();
+		return new HashCodeBuilder(13, 21).append(this.getHost()).append(this.getPort()).append(this.getNumQueryThreads())
+				.append(this.getCronExpression()).append(this.getAlias()).append(this.getUsername()).append(this.getPassword()).toHashCode();
 	}
 
 	/**
 	 * This is some obtuse shit for enabling weblogic support.
-	 *
-	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.html
-	 *
+	 * 
+	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
+	 * html
+	 * 
 	 * You'd set this to: weblogic.management.remote
 	 */
 	public String getProtocolProviderPackages() {
@@ -335,9 +330,10 @@ public class Server {
 
 	/**
 	 * This is some obtuse shit for enabling weblogic support.
-	 *
-	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.html
-	 *
+	 * 
+	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
+	 * html
+	 * 
 	 * You'd set this to: weblogic.management.remote
 	 */
 	public void setProtocolProviderPackages(String protocolProviderPackages) {

@@ -10,11 +10,11 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * This example shows how to query an ActiveMQ server for some information.
- *
+ * 
  * The point of this example is to show that * works as part of the objectName.
  * It also shows that you don't have to set an attribute to get for a query.
  * jmxtrans will get all attributes on an object if you don't specify any.
- *
+ * 
  * @author jon
  */
 public class ActiveMQ2 {
@@ -68,12 +68,12 @@ public class ActiveMQ2 {
 		JmxUtils.prettyPrintJson(process);
 
 		JmxTransformer transformer = new JmxTransformer();
-        transformer.executeStandalone(process);
+		transformer.executeStandalone(process);
 
-//        for (int i = 0; i < 160; i++) {
-//            JmxUtils.processServer(server);
-//            Thread.sleep(1000);
-//        }
+		// for (int i = 0; i < 160; i++) {
+		// JmxUtils.processServer(server);
+		// Thread.sleep(1000);
+		// }
 
 	}
 }

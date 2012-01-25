@@ -19,58 +19,60 @@ import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
- * Walks a JMX tree and prints out all of the attribute values actually using the JmxTrans api.
+ * Walks a JMX tree and prints out all of the attribute values actually using
+ * the JmxTrans api.
  * 
- * This is a good test of the core engine of JmxTrans to ensure that it covers all cases.
+ * This is a good test of the core engine of JmxTrans to ensure that it covers
+ * all cases.
  * 
  * @author jon
  */
 public class TreeWalker2 {
 
-    private static final Logger log = LoggerFactory.getLogger(TreeWalker2.class);
+	private static final Logger log = LoggerFactory.getLogger(TreeWalker2.class);
 
-    /** */
-    public static void main(String[] args) throws Exception {
-        Server server = new Server("localhost", "1099");
+	/** */
+	public static void main(String[] args) throws Exception {
+		Server server = new Server("localhost", "1099");
 
-        JMXConnector conn = null;
-        try {
-            conn = JmxUtils.getServerConnection(server);
-            MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
-            
-            TreeWalker2 tw = new TreeWalker2();
-            tw.walkTree(mbeanServer);
-        } catch (IOException e) {
-            log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
-    }
+		JMXConnector conn = null;
+		try {
+			conn = JmxUtils.getServerConnection(server);
+			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
-    /** */
-    public void walkTree(MBeanServerConnection connection) throws Exception {
-        
-        // key here is null, null returns everything!
-        Set<ObjectName> mbeans = connection.queryNames(null, null);
-        for (ObjectName name : mbeans) {
-            MBeanInfo info = connection.getMBeanInfo(name);
-            MBeanAttributeInfo[] attrs = info.getAttributes();
+			TreeWalker2 tw = new TreeWalker2();
+			tw.walkTree(mbeanServer);
+		} catch (IOException e) {
+			log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
+	}
 
-            Query query = new Query();
-            query.setObj(name.getCanonicalName());
-            query.addOutputWriter(new StdOutWriter());
-            
-            for (MBeanAttributeInfo attrInfo : attrs) {
-                query.addAttr(attrInfo.getName());
-            }
-            
-            try {
-                JmxUtils.processQuery(connection, query);
-            } catch (AttributeNotFoundException anfe) {
-                log.error("Error", anfe);
-            }
-        }
-    }
+	/** */
+	public void walkTree(MBeanServerConnection connection) throws Exception {
+
+		// key here is null, null returns everything!
+		Set<ObjectName> mbeans = connection.queryNames(null, null);
+		for (ObjectName name : mbeans) {
+			MBeanInfo info = connection.getMBeanInfo(name);
+			MBeanAttributeInfo[] attrs = info.getAttributes();
+
+			Query query = new Query();
+			query.setObj(name.getCanonicalName());
+			query.addOutputWriter(new StdOutWriter());
+
+			for (MBeanAttributeInfo attrInfo : attrs) {
+				query.addAttr(attrInfo.getName());
+			}
+
+			try {
+				JmxUtils.processQuery(connection, query);
+			} catch (AttributeNotFoundException anfe) {
+				log.error("Error", anfe);
+			}
+		}
+	}
 }
