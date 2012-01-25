@@ -500,7 +500,7 @@ public class JmxUtils {
 	 * <pre>
 	 * StringUtils.isNumeric(null)   = false
 	 * StringUtils.isNumeric("")     = true
-	 * StringUtils.isNumeric("	")   = false
+	 * StringUtils.isNumeric("  ")   = false
 	 * StringUtils.isNumeric("123")  = true
 	 * StringUtils.isNumeric("12 3") = false
 	 * StringUtils.isNumeric("ab2c") = false
@@ -522,7 +522,7 @@ public class JmxUtils {
 			cat = str.charAt(i);
 			if (cat == '.' && ++decimals == 1) {
 				continue;
-			} else if (!Character.isDigit(cat)) {
+			} else if (Character.isDigit(cat) == false) {
 				return false;
 			}
 		}
