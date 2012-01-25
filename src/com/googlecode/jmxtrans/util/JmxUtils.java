@@ -498,17 +498,17 @@ public class JmxUtils {
 	 * An empty String ("") will return <code>true</code>.</p>
 	 *
 	 * <pre>
-	 * StringUtils.isNumeric(null)	 = false
-	 * StringUtils.isNumeric("")	 = true
-	 * StringUtils.isNumeric("	")	 = false
-	 * StringUtils.isNumeric("123")	= true
+	 * StringUtils.isNumeric(null)   = false
+	 * StringUtils.isNumeric("")     = true
+	 * StringUtils.isNumeric("	")   = false
+	 * StringUtils.isNumeric("123")  = true
 	 * StringUtils.isNumeric("12 3") = false
 	 * StringUtils.isNumeric("ab2c") = false
 	 * StringUtils.isNumeric("12-3") = false
 	 * StringUtils.isNumeric("12.3") = true
 	 * </pre>
 	 *
-	 * @param str	the String to check, may be null
+	 * @param str  the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
 	 */
 	public static boolean isNumeric(String str) {
@@ -516,10 +516,13 @@ public class JmxUtils {
 			return str != null; // Null = false, empty = true
 		}
 		int decimals = 0;
-		for( Character c : str.toCharArray() ) {
-			if (c == '.' && ++decimals == 1) {
+		int sz = str.length();
+		char cat;
+		for (int i = 0; i < sz; i++) {
+			cat = str.charAt(i);
+			if (cat == '.' && ++decimals == 1) {
 				continue;
-			} else if (!Character.isDigit(c)) {
+			} else if (!Character.isDigit(cat)) {
 				return false;
 			}
 		}
