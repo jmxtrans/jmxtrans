@@ -1,7 +1,11 @@
 package com.googlecode.jmxtrans.model.output;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,26 +296,26 @@ public class GangliaWriter extends BaseOutputWriter {
 	/**
 	 * Puts a string into the buffer by first writing the size of the string as
 	 * an int, followed by the bytes of the string, padded if necessary to a
-	 * multiple of 4.
-	 * If the String value exceeds the available length of the buffer, this will
-	 * trim the String to fit and add an ellipsis at the end.
+	 * multiple of 4. If the String value exceeds the available length of the
+	 * buffer, this will trim the String to fit and add an ellipsis at the end.
 	 */
 	protected void xdr_string(String s) {
 		byte[] bytes = s.getBytes();
 		int len = bytes.length;
-		// The available buffer is equal to the total buffer size, minus our current offset, minus 4 bytes
+		// The available buffer is equal to the total buffer size, minus our
+		// current offset, minus 4 bytes
 		// to write the xdr integer length value
 		int availableBuffer = BUFFER_SIZE - offset - 4;
-		if( len < availableBuffer ) {
+		if (len < availableBuffer) {
 			xdr_int(len);
 			System.arraycopy(bytes, 0, buffer, offset, len);
 			offset += len;
 		} else {
-			xdr_int( availableBuffer );
-			bytes[ availableBuffer - 1 ] = '.';
-			bytes[ availableBuffer - 2 ] = '.';
-			bytes[ availableBuffer - 3 ] = '.';
-			System.arraycopy( bytes, 0, buffer, offset, availableBuffer );
+			xdr_int(availableBuffer);
+			bytes[availableBuffer - 1] = '.';
+			bytes[availableBuffer - 2] = '.';
+			bytes[availableBuffer - 3] = '.';
+			System.arraycopy(bytes, 0, buffer, offset, availableBuffer);
 			offset += availableBuffer;
 		}
 		pad();
@@ -348,25 +354,28 @@ public class GangliaWriter extends BaseOutputWriter {
 		}
 
 		public boolean equals(Object o) {
-			if (this == o)
+			if (o == null) {
+				return false;
+			}
+			if (o == this) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+			if (o.getClass() != this.getClass()) {
 				return false;
-			MetricMetaData that = (MetricMetaData) o;
-			if (hostName != null ? !hostName.equals(that.hostName) : that.hostName != null)
+			}
+
+			if (!(o instanceof MetricMetaData)) {
 				return false;
-			if (metricName != null ? !metricName.equals(that.metricName) : that.metricName != null)
-				return false;
-			if (type != that.type)
-				return false;
-			return true;
+			}
+
+			MetricMetaData other = (MetricMetaData) o;
+
+			return new EqualsBuilder().append(this.hostName, other.hostName).append(this.metricName, other.metricName).append(this.type, other.type)
+					.isEquals();
 		}
 
 		public int hashCode() {
-			int result = hostName != null ? hostName.hashCode() : 0;
-			result = 31 * result + (metricName != null ? metricName.hashCode() : 0);
-			result = 31 * result + (type != null ? type.hashCode() : 0);
-			return result;
+			return new HashCodeBuilder(41, 97).append(hostName).append(metricName).append(type).toHashCode();
 		}
 
 		public String toString() {
