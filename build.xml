@@ -76,8 +76,8 @@
 		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpath="${lib.dir}/ant-googlecode-0.0.2.jar" name="gcupload"/>
 
 		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
-		<property name="version" value="${sRevisionVersion}" />
-		<property name="build.version" value="${sRevisionVersion}" />
+		<property name="version" value="${sVersionRevision}" />
+		<property name="build.version" value="${sVersionRevision}" />
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
 		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
@@ -251,36 +251,6 @@
 		<exec executable="/usr/bin/rpmbuild" dir="${target.dir}/jmxtrans/rpm" failonerror="true">
 			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version}' --define='RELEASE 0' --define='JMXTRANS_SOURCE jmxtrans-${version}.zip' SPECS/jmxtrans.spec"/>
 		</exec>
-	</target>
-
-	<target name="upload" depends="init">
-		<gcupload projectname="${ant.project.name}"
-				userName="${gc.username}"
-				password="${gc.password}"
-				filename="${build.dist.zip}"
-				targetfilename="${build.dist.zip}"
-				summary="${ant.project.name} distribution"
-				labels="Featured, Type-Package, OpSys-All" />
-
-		<!-- hacky, but need both path to file and filename -->
-		<path id="file.deb">
-			<fileset dir="${target.dir}" includes="*.deb" />
-		</path>
-		<property name="file.deb.path" refid="file.deb" />
-		<pathconvert property="file.deb.target" targetos="unix">
-			<path>
-				<fileset dir="${target.dir}" includes="*.deb" />
-			</path>
-			<mapper type="flatten"/>
-		</pathconvert>
-
-		<gcupload projectname="${ant.project.name}"
-				userName="${gc.username}"
-				password="${gc.password}"
-				filename="${file.deb.path}"
-				targetfilename="${file.deb.target}"
-				summary="${ant.project.name} debian distribution"
-				labels="Featured, Type-Installer, OpSys-Linux, Debian" />
 	</target>
 
 	<target name=".eclipse" description="Generate eclipse project metadata">
