@@ -233,8 +233,7 @@
 		</exec>
 		</target>
 
-		<target name="rpm" depends="dist">
-
+	<target name="rpm" depends="dist">
 		<copy todir="${target.dir}/jmxtrans/rpm" >
 			<fileset dir="rpm">
 				<include name="**"/>
