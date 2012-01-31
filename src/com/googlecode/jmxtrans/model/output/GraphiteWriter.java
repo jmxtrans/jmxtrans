@@ -8,14 +8,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.jmx.ManagedObject;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
@@ -38,18 +43,49 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	private Map<String, KeyedObjectPool> poolMap;
 	private KeyedObjectPool pool;
+	private ManagedObject mbean;
 	private InetSocketAddress address;
 
 	/**
 	 * Uses JmxUtils.getDefaultPoolMap()
 	 */
 	public GraphiteWriter() {
-		this.poolMap = JmxUtils.getDefaultPoolMap();
+		// FIX : New instance with three pool per Writer, this is already
+		// inyected,
+		// change to one pool via start() stop()
+		// this.poolMap = JmxUtils.getDefaultPoolMap();
 	}
 
 	/** */
 	public GraphiteWriter(Map<String, KeyedObjectPool> poolMap) {
 		this.poolMap = poolMap;
+	}
+
+	@Override
+	public void start() throws LifecycleException {
+		try {
+			this.pool = JmxUtils.getObjectPool(new SocketFactory());
+			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool)pool, Server.SOCKET_FACTORY_POOL);
+			JmxUtils.registerJMX(this.mbean);
+		} catch (Exception e) {
+			throw new LifecycleException(e);
+		}
+	}
+
+	@Override
+	public void stop() throws LifecycleException {
+		try {
+			if (this.mbean != null) {
+				JmxUtils.unregisterJMX(this.mbean);
+				this.mbean = null;
+			}
+			if (this.pool != null) {
+				pool.close();
+				this.pool = null;
+			}
+		} catch (Exception e) {
+			throw new LifecycleException(e);
+		}
 	}
 
 	/** */
@@ -72,7 +108,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 		}
 
 		this.address = new InetSocketAddress(host, port);
-		this.pool = poolMap.get(Server.SOCKET_FACTORY_POOL);
+		// See constructor, this overrides the created pool
+		//this.pool = poolMap.get(Server.SOCKET_FACTORY_POOL);
 	}
 
 	/** */
