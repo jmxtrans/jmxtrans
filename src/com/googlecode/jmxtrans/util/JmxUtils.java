@@ -54,7 +54,7 @@ import com.googlecode.jmxtrans.model.Server;
 
 /**
  * The worker code.
- * 
+ *
  * @author jon
  */
 public class JmxUtils {
@@ -508,12 +508,12 @@ public class JmxUtils {
 	 * Checks if the String contains only unicode digits. A decimal point is a
 	 * digit and returns true.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * <code>null</code> will return <code>false</code>. An empty String ("")
 	 * will return <code>true</code>.
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * StringUtils.isNumeric(null)   = false
 	 * StringUtils.isNumeric("")     = true
@@ -524,7 +524,7 @@ public class JmxUtils {
 	 * StringUtils.isNumeric("12-3") = false
 	 * StringUtils.isNumeric("12.3") = true
 	 * </pre>
-	 * 
+	 *
 	 * @param str
 	 *            the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
@@ -723,12 +723,12 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 * 
+	 *
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 * 
+	 *
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
-	 * 
+	 *
 	 * @param typeNames
 	 *            the type names
 	 * @param typeNameStr
@@ -754,12 +754,12 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 * 
+	 *
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 * 
+	 *
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
-	 * 
+	 *
 	 * @param query
 	 *            the query
 	 * @param typeNames
