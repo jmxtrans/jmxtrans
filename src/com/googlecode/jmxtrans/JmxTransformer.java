@@ -49,7 +49,7 @@ import com.googlecode.jmxtrans.util.WatchedCallback;
  * Main() class that takes an argument which is the directory to look in for
  * files which contain json data that defines queries to run against JMX
  * servers.
- * 
+ *
  * @author jon
  */
 public class JmxTransformer implements WatchedCallback {
@@ -122,7 +122,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Start.
-	 * 
+	 *
 	 * @throws LifecycleException
 	 *             the lifecycle exception
 	 */
@@ -153,7 +153,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Stop.
-	 * 
+	 *
 	 * @throws LifecycleException
 	 *             the lifecycle exception
 	 */
@@ -180,7 +180,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Stop services.
-	 * 
+	 *
 	 * @throws LifecycleException
 	 *             the lifecycle exception
 	 */
@@ -305,7 +305,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Override this method if you'd like to add your own object pooling.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	protected void setupObjectPooling() throws Exception {
@@ -362,7 +362,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Processes all the Servers into Job's
-	 * 
+	 *
 	 * Needs to be called after processFiles()
 	 */
 	private void processServersIntoJobs(Scheduler scheduler) throws LifecycleException {
@@ -521,7 +521,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Gets the quart properties file.
-	 * 
+	 *
 	 * @return the quart properties file
 	 */
 	public String getQuartPropertiesFile() {
@@ -530,7 +530,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Sets the quart properties file.
-	 * 
+	 *
 	 * @param quartPropertiesFile
 	 *            the quart properties file
 	 */
@@ -540,7 +540,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Gets the run period.
-	 * 
+	 *
 	 * @return the run period
 	 */
 	public int getRunPeriod() {
@@ -549,7 +549,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Sets the run period.
-	 * 
+	 *
 	 * @param runPeriod
 	 *            the run period
 	 */
@@ -559,7 +559,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Sets the json dir or file.
-	 * 
+	 *
 	 * @param jsonDirOrFile
 	 *            the json dir or file
 	 */
@@ -569,7 +569,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Gets the json dir or file.
-	 * 
+	 *
 	 * @return the json dir or file
 	 */
 	public File getJsonDirOrFile() {
@@ -579,7 +579,7 @@ public class JmxTransformer implements WatchedCallback {
 	/**
 	 * If getJsonFile() is a file, then that is all we load. Otherwise, look in
 	 * the jsonDir for files.
-	 * 
+	 *
 	 * Files must end with .json as the suffix.
 	 */
 	private List<File> getJsonFiles() {
