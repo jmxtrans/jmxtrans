@@ -70,13 +70,14 @@ public class JmxTransformer implements WatchedCallback {
 
 	private WatchDir watcher;
 
-	/** Pools. 
-	 * TODO : Move to a PoolUtils or PoolRegistry so others can use it */
+	/**
+	 * Pools. TODO : Move to a PoolUtils or PoolRegistry so others can use it
+	 */
 	private Map<String, KeyedObjectPool> poolMap;
 	private Map<String, ManagedGenericKeyedObjectPool> poolMBeans;
 
 	private List<Server> masterServersList = new ArrayList<Server>();
-	
+
 	/** The shutdown hook. */
 	private Thread shutdownHook = new ShutdownHook();
 
@@ -89,7 +90,7 @@ public class JmxTransformer implements WatchedCallback {
 		// Start the process
 		transformer.doMain(args);
 	}
-	
+
 	/**
 	 * The real main method.
 	 */
@@ -97,25 +98,25 @@ public class JmxTransformer implements WatchedCallback {
 		if (!this.parseOptions(args)) {
 			return;
 		}
-		
+
 		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this);
 		JmxUtils.registerJMX(mbean);
-		
+
 		// Start the process
 		this.start();
 
-		while(true) {
-	        // look for some terminator
-	        // attempt to read off queue
-	        // process message
+		while (true) {
+			// look for some terminator
+			// attempt to read off queue
+			// process message
 			// TODO : Make something here, maybe watch for files?
-	        try {
-	            Thread.sleep(5);
-	        } catch (Exception e) {
-	            break;
-	        }
-	    }
-		
+			try {
+				Thread.sleep(5);
+			} catch (Exception e) {
+				break;
+			}
+		}
+
 		JmxUtils.unregisterJMX(mbean);
 	}
 
@@ -162,12 +163,12 @@ public class JmxTransformer implements WatchedCallback {
 		} else {
 			try {
 				log.info("Stopping Jmxtrans");
-	
+
 				// Remove hook to not call twice
 				if (shutdownHook != null) {
 					Runtime.getRuntime().removeShutdownHook(shutdownHook);
 				}
-	
+
 				this.stopServices();
 				isRunning = false;
 			} catch (LifecycleException e) {
@@ -197,15 +198,15 @@ public class JmxTransformer implements WatchedCallback {
 				}
 				this.serverScheduler = null;
 			}
-			
+
 			// Shutdown the file watch service
 			if (this.watcher != null) {
 				this.watcher.stopService();
 				this.watcher = null;
 				log.debug("Shutdown watch service");
 			}
-			
-			for(String key : poolMap.keySet()) {
+
+			for (String key : poolMap.keySet()) {
 				JmxUtils.unregisterJMX(poolMBeans.get(key));
 			}
 			this.poolMBeans = null;
@@ -304,16 +305,17 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Override this method if you'd like to add your own object pooling.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	protected void setupObjectPooling() throws Exception {
 		if (this.poolMap == null) {
 			this.poolMap = JmxUtils.getDefaultPoolMap();
-			
+
 			this.poolMBeans = new HashMap<String, ManagedGenericKeyedObjectPool>();
-			
-			for(String key : poolMap.keySet()) {
-				ManagedGenericKeyedObjectPool mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool)poolMap.get(key));
+
+			for (String key : poolMap.keySet()) {
+				ManagedGenericKeyedObjectPool mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) poolMap.get(key));
 				mbean.setPoolName(key);
 				JmxUtils.registerJMX(mbean);
 				poolMBeans.put(key, mbean);
@@ -573,6 +575,7 @@ public class JmxTransformer implements WatchedCallback {
 	public File getJsonDirOrFile() {
 		return this.jsonDirOrFile;
 	}
+
 	/**
 	 * If getJsonFile() is a file, then that is all we load. Otherwise, look in
 	 * the jsonDir for files.
@@ -596,6 +599,7 @@ public class JmxTransformer implements WatchedCallback {
 		}
 		return result;
 	}
+
 	/**
 	 * Are we a file and a json file?
 	 */
