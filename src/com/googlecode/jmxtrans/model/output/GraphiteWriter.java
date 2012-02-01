@@ -49,12 +49,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	/**
 	 * Uses JmxUtils.getDefaultPoolMap()
 	 */
-	public GraphiteWriter() {
-		// FIX : New instance with three pool per Writer, this is already
-		// inyected,
-		// change to one pool via start() stop()
-		// this.poolMap = JmxUtils.getDefaultPoolMap();
-	}
+	public GraphiteWriter() { }
 
 	/** */
 	public GraphiteWriter(Map<String, KeyedObjectPool> poolMap) {
@@ -108,8 +103,6 @@ public class GraphiteWriter extends BaseOutputWriter {
 		}
 
 		this.address = new InetSocketAddress(host, port);
-		// See constructor, this overrides the created pool
-		//this.pool = poolMap.get(Server.SOCKET_FACTORY_POOL);
 	}
 
 	/** */
