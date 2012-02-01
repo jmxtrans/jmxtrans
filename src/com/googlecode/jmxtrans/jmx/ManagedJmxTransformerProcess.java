@@ -10,7 +10,7 @@ import com.googlecode.jmxtrans.util.LifecycleException;
 
 /**
  * The Class ManagedJmxTransformerProcess.
- * 
+ * TODO: Only start/stop working, the setters don't fire update on JmxProcess
  * @author marcos.lois
  */
 public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProcessMBean, ManagedObject {
