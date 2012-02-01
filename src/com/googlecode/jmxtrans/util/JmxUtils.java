@@ -54,7 +54,7 @@ import com.googlecode.jmxtrans.model.Server;
 
 /**
  * The worker code.
- *
+ * 
  * @author jon
  */
 public class JmxUtils {
@@ -508,12 +508,12 @@ public class JmxUtils {
 	 * Checks if the String contains only unicode digits. A decimal point is a
 	 * digit and returns true.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * <code>null</code> will return <code>false</code>. An empty String ("")
 	 * will return <code>true</code>.
 	 * </p>
-	 *
+	 * 
 	 * <pre>
 	 * StringUtils.isNumeric(null)   = false
 	 * StringUtils.isNumeric("")     = true
@@ -524,7 +524,7 @@ public class JmxUtils {
 	 * StringUtils.isNumeric("12-3") = false
 	 * StringUtils.isNumeric("12.3") = true
 	 * </pre>
-	 *
+	 * 
 	 * @param str
 	 *            the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
@@ -547,14 +547,15 @@ public class JmxUtils {
 		// a single period is not a number
 		return decimals < str.length();
 	}
-	
+
 	/**
-	 * Gets the object pool.
-	 * TODO: Add options to adjust the pools, this will be better performance on
-	 * high load
-	 *
-	 * @param <T> the generic type
-	 * @param factory the factory
+	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
+	 * better performance on high load
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param factory
+	 *            the factory
 	 * @return the object pool
 	 */
 	public static <T extends KeyedPoolableObjectFactory> GenericKeyedObjectPool getObjectPool(T factory) {
@@ -564,13 +565,13 @@ public class JmxUtils {
 		pool.setMaxIdle(-1);
 		pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
 		pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
-		
+
 		return pool;
 	}
 
 	/**
 	 * Helper method which returns a default PoolMap.
-	 *
+	 * 
 	 * TODO: allow for more configuration options?
 	 */
 	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
@@ -587,37 +588,46 @@ public class JmxUtils {
 
 		return poolMap;
 	}
-    
-    /**
-     * Register the scheduler in the local MBeanServer.
-     *
-     * @param mbean the mbean
-     * @throws Exception the exception
-     */
-    public static void registerJMX(ManagedObject mbean) throws Exception {
-    	MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    	mbs.registerMBean(mbean, mbean.getObjectName());
-    }
 
-    /**
-     * Unregister the scheduler from the local MBeanServer.
-     *
-     * @param mbean the mbean
-     * @throws Exception the exception
-     */
-    public static void unregisterJMX(ManagedObject mbean) throws Exception {
-    	MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    	mbs.unregisterMBean(mbean.getObjectName());
-    }
+	/**
+	 * Register the scheduler in the local MBeanServer.
+	 * 
+	 * @param mbean
+	 *            the mbean
+	 * @throws Exception
+	 *             the exception
+	 */
+	public static void registerJMX(ManagedObject mbean) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		mbs.registerMBean(mbean, mbean.getObjectName());
+	}
+
+	/**
+	 * Unregister the scheduler from the local MBeanServer.
+	 * 
+	 * @param mbean
+	 *            the mbean
+	 * @throws Exception
+	 *             the exception
+	 */
+	public static void unregisterJMX(ManagedObject mbean) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		mbs.unregisterMBean(mbean.getObjectName());
+	}
 
 	/**
 	 * Gets the key string.
-	 *
-	 * @param query the query
-	 * @param result the result
-	 * @param values the values
-	 * @param typeNames the type names
-	 * @param rootPrefix the root prefix
+	 * 
+	 * @param query
+	 *            the query
+	 * @param result
+	 *            the result
+	 * @param values
+	 *            the values
+	 * @param typeNames
+	 *            the type names
+	 * @param rootPrefix
+	 *            the root prefix
 	 * @return the key string
 	 */
 	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
@@ -662,6 +672,7 @@ public class JmxUtils {
 
 		return sb.toString();
 	}
+
 	public static String getKeyString2(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
 		String keyStr = null;
 		if (values.getKey().startsWith(result.getAttributeName())) {
@@ -690,94 +701,12 @@ public class JmxUtils {
 
 		return sb.toString();
 	}
-	
-	/**
-	 * Gets the key string.
-	 *
-	 * @param query the query
-	 * @param result the result
-	 * @param values the values
-	 * @param typeNames the type names
-	 * @param rootPrefix the root prefix
-	 * @return the key string
-	 */
-	public static String getKeyString3(Query query, Result result, List<String> typeNames, String rootPrefix) {
-		String alias = null;
-		if (query.getServer().getAlias() != null) {
-			alias = query.getServer().getAlias();
-		} else {
-			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
-			alias = cleanupStr(alias);
-		}
-
-		StringBuilder sb = new StringBuilder();
-		if (rootPrefix != null) {
-			sb.append(rootPrefix);
-			sb.append(".");
-		}
-		sb.append(alias);
-		sb.append(".");
-
-		// Allow people to use something other than the classname as the output.
-		if (result.getClassNameAlias() != null) {
-			sb.append(result.getClassNameAlias());
-		} else {
-			sb.append(cleanupStr(result.getClassName()));
-		}
-
-		sb.append(".");
-
-		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
-		if (typeName != null) {
-			sb.append(typeName);
-			sb.append(".");
-		}
-
-		return sb.toString();
-	}
-	
-	public static String getKeyString4(Query query, List<String> typeNames, String filePrefix) {
-		String alias = null;
-		if (query.getServer().getAlias() != null) {
-			alias = query.getServer().getAlias();
-		} else {
-			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
-			alias = cleanupStr(alias);
-		}
-
-		StringBuilder sb = new StringBuilder();
-		if (filePrefix != null) {
-			sb.append(filePrefix);
-			sb.append(".");
-		}
-		sb.append(alias);
-		sb.append(".");
-
-
-		// Allow people to use something other than the classname as the output.
-		if (query.getResultAlias() != null) {
-			sb.append(query.getResultAlias());
-		} else {
-			sb.append(cleanupStr(query.getResults().get(0).getClassName()));
-		}
-
-		sb.append(".");
-		
-		if(query.getResults() != null && query.getResults().size() > 0) {
-			String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, query.getResults().get(0).getTypeName()));
-			if (typeName != null) {
-				sb.append(typeName);
-				sb.append(".");
-			}
-		}
-
-		return sb.toString();
-	}
 
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
-	 *
-	 * @param name the name
+	 * 
+	 * @param name
+	 *            the name
 	 * @return the string
 	 */
 	public static String cleanupStr(String name) {
@@ -799,9 +728,11 @@ public class JmxUtils {
 	 * 
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
-	 *
-	 * @param typeNames the type names
-	 * @param typeNameStr the type name str
+	 * 
+	 * @param typeNames
+	 *            the type names
+	 * @param typeNameStr
+	 *            the type name str
 	 * @return the concated type name values
 	 */
 	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
@@ -828,10 +759,13 @@ public class JmxUtils {
 	 * 
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
-	 *
-	 * @param query the query
-	 * @param typeNames the type names
-	 * @param typeName the type name
+	 * 
+	 * @param query
+	 *            the query
+	 * @param typeNames
+	 *            the type names
+	 * @param typeName
+	 *            the type name
 	 * @return the concated type name values
 	 */
 	public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
@@ -866,8 +800,5 @@ public class JmxUtils {
 		}
 		return null;
 	}
-
-
-	
 
 }
