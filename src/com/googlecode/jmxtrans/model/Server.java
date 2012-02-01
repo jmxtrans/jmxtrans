@@ -199,7 +199,6 @@ public class Server {
 	 * The jmx url to connect to. If null, it builds this from host/port with a
 	 * standard configuration. Other JVM's may want to set this value.
 	 */
-//	@JsonIgnore
 	public String getUrl() {
 		if (this.url == null) {
 			if ((this.host == null) || (this.port == null)) {
