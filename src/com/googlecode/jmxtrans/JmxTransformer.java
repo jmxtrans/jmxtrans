@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,7 +19,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.pool.KeyedObjectPool;
-import org.codehaus.jackson.annotate.JsonIgnore;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -31,6 +32,8 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.jmx.ManagedJmxTransformerProcess;
 import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
@@ -38,7 +41,6 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.OptionsException;
-import com.googlecode.jmxtrans.util.SignalInterceptor;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
@@ -47,37 +49,43 @@ import com.googlecode.jmxtrans.util.WatchedCallback;
  * Main() class that takes an argument which is the directory to look in for
  * files which contain json data that defines queries to run against JMX
  * servers.
- * 
+ *
  * @author jon
  */
-public class JmxTransformer extends SignalInterceptor implements WatchedCallback {
+public class JmxTransformer implements WatchedCallback {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxTransformer.class);
 
-	private static String QUARTZ_SERVER_PROPERTIES = null;
-	private static int SECONDS_BETWEEN_SERVER_JOB_RUNS = 60;
+	/** The Quartz server properties. */
+	private String quartPropertiesFile = null;
 
+	/** The seconds between server job runs. */
+	private int runPeriod = 60;
+
+	/** Json file or dir to watch. */
 	private File jsonDirOrFile;
 
-	private boolean runEndlessly;
+	private boolean runEndlessly = false;
 	private Scheduler serverScheduler;
 
 	private WatchDir watcher;
 
+	/**
+	 * Pools. TODO : Move to a PoolUtils or PoolRegistry so others can use it
+	 */
 	private Map<String, KeyedObjectPool> poolMap;
+	private Map<String, ManagedGenericKeyedObjectPool> poolMBeans;
 
 	private List<Server> masterServersList = new ArrayList<Server>();
+
+	/** The shutdown hook. */
+	private Thread shutdownHook = new ShutdownHook();
+
+	private volatile boolean isRunning = false;
 
 	/** */
 	public static void main(String[] args) throws Exception {
 		JmxTransformer transformer = new JmxTransformer();
-
-		// Register signal handlers
-		transformer.registerQuietly("HUP");
-		transformer.registerQuietly("INT");
-		transformer.registerQuietly("ABRT");
-		transformer.registerQuietly("KILL");
-		transformer.registerQuietly("TERM");
 
 		// Start the process
 		transformer.doMain(args);
@@ -91,22 +99,147 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 			return;
 		}
 
-		try {
-			this.startupScheduler();
+		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this);
+		JmxUtils.registerJMX(mbean);
 
-			this.startupWatchdir();
+		// Start the process
+		this.start();
 
-			this.setupObjectPooling();
-
-			this.startupSystem();
-
-		} catch (Exception e) {
-			this.runEndlessly = false;
-			log.error(e.getMessage(), e.getCause());
+		while (true) {
+			// look for some terminator
+			// attempt to read off queue
+			// process message
+			// TODO : Make something here, maybe watch for files?
+			try {
+				Thread.sleep(5);
+			} catch (Exception e) {
+				break;
+			}
 		}
 
-		if (!this.runEndlessly) {
-			this.handle("TERM");
+		JmxUtils.unregisterJMX(mbean);
+	}
+
+	/**
+	 * Start.
+	 *
+	 * @throws LifecycleException
+	 *             the lifecycle exception
+	 */
+	public synchronized void start() throws LifecycleException {
+		if (isRunning) {
+			throw new LifecycleException("Process already started");
+		} else {
+			log.info("Starting Jmxtrans on : " + this.jsonDirOrFile.toString());
+			try {
+				this.startupScheduler();
+
+				this.startupWatchdir();
+
+				this.setupObjectPooling();
+
+				this.startupSystem();
+
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				throw new LifecycleException(e);
+			}
+
+			// Ensure resources are free
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
+			isRunning = true;
+		}
+	}
+
+	/**
+	 * Stop.
+	 *
+	 * @throws LifecycleException
+	 *             the lifecycle exception
+	 */
+	public synchronized void stop() throws LifecycleException {
+		if (!isRunning) {
+			throw new LifecycleException("Process already stoped");
+		} else {
+			try {
+				log.info("Stopping Jmxtrans");
+
+				// Remove hook to not call twice
+				if (shutdownHook != null) {
+					Runtime.getRuntime().removeShutdownHook(shutdownHook);
+				}
+
+				this.stopServices();
+				isRunning = false;
+			} catch (LifecycleException e) {
+				log.error(e.getMessage(), e);
+				throw new LifecycleException(e);
+			}
+		}
+	}
+
+	/**
+	 * Stop services.
+	 *
+	 * @throws LifecycleException
+	 *             the lifecycle exception
+	 */
+	private synchronized void stopServices() throws LifecycleException {
+		try {
+			// Shutdown the scheduler
+			if (this.serverScheduler != null) {
+				this.serverScheduler.shutdown(true);
+				log.debug("Shutdown server scheduler");
+				try {
+					// Quartz issue, need to sleep
+					Thread.sleep(1500);
+				} catch (InterruptedException e) {
+					log.error(e.getMessage(), e);
+				}
+				this.serverScheduler = null;
+			}
+
+			// Shutdown the file watch service
+			if (this.watcher != null) {
+				this.watcher.stopService();
+				this.watcher = null;
+				log.debug("Shutdown watch service");
+			}
+
+			for (String key : poolMap.keySet()) {
+				JmxUtils.unregisterJMX(poolMBeans.get(key));
+			}
+			this.poolMBeans = null;
+
+			// Shutdown the pools
+			for (Entry<String, KeyedObjectPool> entry : this.poolMap.entrySet()) {
+				try {
+					entry.getValue().close();
+					log.debug("Closed object pool factory: " + entry.getKey());
+				} catch (Exception ex) {
+					log.error("Error closing object pool factory: " + entry.getKey());
+				}
+			}
+			this.poolMap = null;
+
+			// Shutdown the outputwriters
+			for (Server server : this.masterServersList) {
+				for (Query query : server.getQueries()) {
+					for (OutputWriter writer : query.getOutputWriters()) {
+						try {
+							writer.stop();
+							log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
+						} catch (LifecycleException ex) {
+							log.error("Error stopping writer: " + writer.getClass().getSimpleName() + " for query: " + query);
+						}
+					}
+				}
+			}
+			this.masterServersList.clear();
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new LifecycleException(e);
 		}
 	}
 
@@ -132,11 +265,10 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	private void startupScheduler() throws Exception {
 		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
 		InputStream stream = null;
-		if (QUARTZ_SERVER_PROPERTIES == null) {
-			QUARTZ_SERVER_PROPERTIES = "/quartz.server.properties";
-			stream = JmxTransformer.class.getResourceAsStream(QUARTZ_SERVER_PROPERTIES);
+		if (quartPropertiesFile == null) {
+			stream = JmxTransformer.class.getResourceAsStream("/quartz.server.properties");
 		} else {
-			stream = new FileInputStream(QUARTZ_SERVER_PROPERTIES);
+			stream = new FileInputStream(quartPropertiesFile);
 		}
 		serverSchedFact.initialize(stream);
 		this.serverScheduler = serverSchedFact.getScheduler();
@@ -158,8 +290,6 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 		// There should be a better way, but it seems that way isn't working
 		// right now.
 		Thread.sleep(10 * 1000);
-
-		this.handle("TERM");
 	}
 
 	/**
@@ -175,22 +305,22 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 	/**
 	 * Override this method if you'd like to add your own object pooling.
+	 *
+	 * @throws Exception
 	 */
-	protected void setupObjectPooling() {
+	protected void setupObjectPooling() throws Exception {
 		if (this.poolMap == null) {
 			this.poolMap = JmxUtils.getDefaultPoolMap();
-		}
-	}
 
-	/**
-	 * Allows you to modify the object pool map.
-	 */
-	@JsonIgnore
-	public Map<String, KeyedObjectPool> getObjectPoolMap() {
-		if (this.poolMap == null) {
-			this.setupObjectPooling();
+			this.poolMBeans = new HashMap<String, ManagedGenericKeyedObjectPool>();
+
+			for (String key : poolMap.keySet()) {
+				ManagedGenericKeyedObjectPool mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) poolMap.get(key));
+				mbean.setPoolName(key);
+				JmxUtils.registerJMX(mbean);
+				poolMBeans.put(key, mbean);
+			}
 		}
-		return this.poolMap;
 	}
 
 	/** */
@@ -232,7 +362,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 	/**
 	 * Processes all the Servers into Job's
-	 * 
+	 *
 	 * Needs to be called after processFiles()
 	 */
 	private void processServersIntoJobs(Scheduler scheduler) throws LifecycleException {
@@ -275,7 +405,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 
 		JobDataMap map = new JobDataMap();
 		map.put(Server.class.getName(), server);
-		map.put(Server.JMX_CONNECTION_FACTORY_POOL, this.getObjectPoolMap().get(Server.JMX_CONNECTION_FACTORY_POOL));
+		map.put(Server.JMX_CONNECTION_FACTORY_POOL, this.poolMap.get(Server.JMX_CONNECTION_FACTORY_POOL));
 		jd.setJobDataMap(map);
 
 		Trigger trigger = null;
@@ -286,7 +416,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 			((CronTrigger) trigger).setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			((CronTrigger) trigger).setStartTime(new Date());
 		} else {
-			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(SECONDS_BETWEEN_SERVER_JOB_RUNS);
+			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			minuteTrigger.setStartTime(new Date());
 
@@ -358,13 +488,13 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 			} else if (option.getOpt().equals("e")) {
 				this.setRunEndlessly(true);
 			} else if (option.getOpt().equals("q")) {
-				QUARTZ_SERVER_PROPERTIES = option.getValue();
-				File file = new File(QUARTZ_SERVER_PROPERTIES);
+				this.setQuartPropertiesFile(option.getValue());
+				File file = new File(option.getValue());
 				if (!file.exists()) {
 					throw new OptionsException("Could not find path to the quartz properties file: " + file.getAbsolutePath());
 				}
 			} else if (option.getOpt().equals("s")) {
-				SECONDS_BETWEEN_SERVER_JOB_RUNS = Integer.valueOf(option.getValue());
+				this.setRunPeriod(Integer.valueOf(option.getValue()));
 			} else if (option.getOpt().equals("h")) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("java -jar jmxtrans-all.jar", this.getOptions());
@@ -389,12 +519,59 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 		return options;
 	}
 
-	/** */
+	/**
+	 * Gets the quart properties file.
+	 *
+	 * @return the quart properties file
+	 */
+	public String getQuartPropertiesFile() {
+		return quartPropertiesFile;
+	}
+
+	/**
+	 * Sets the quart properties file.
+	 *
+	 * @param quartPropertiesFile
+	 *            the quart properties file
+	 */
+	public void setQuartPropertiesFile(String quartPropertiesFile) {
+		this.quartPropertiesFile = quartPropertiesFile;
+	}
+
+	/**
+	 * Gets the run period.
+	 *
+	 * @return the run period
+	 */
+	public int getRunPeriod() {
+		return runPeriod;
+	}
+
+	/**
+	 * Sets the run period.
+	 *
+	 * @param runPeriod
+	 *            the run period
+	 */
+	public void setRunPeriod(int runPeriod) {
+		this.runPeriod = runPeriod;
+	}
+
+	/**
+	 * Sets the json dir or file.
+	 *
+	 * @param jsonDirOrFile
+	 *            the json dir or file
+	 */
 	public void setJsonDirOrFile(File jsonDirOrFile) {
 		this.jsonDirOrFile = jsonDirOrFile;
 	}
 
-	/** */
+	/**
+	 * Gets the json dir or file.
+	 *
+	 * @return the json dir or file
+	 */
 	public File getJsonDirOrFile() {
 		return this.jsonDirOrFile;
 	}
@@ -402,7 +579,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	/**
 	 * If getJsonFile() is a file, then that is all we load. Otherwise, look in
 	 * the jsonDir for files.
-	 * 
+	 *
 	 * Files must end with .json as the suffix.
 	 */
 	private List<File> getJsonFiles() {
@@ -424,58 +601,6 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	}
 
 	/**
-	 * Waits until the execution finishes before stopping.
-	 */
-	@Override
-	protected boolean handle(String signame) {
-		if (log.isDebugEnabled()) {
-			log.debug("Got signame: " + signame);
-		}
-		try {
-
-			// Shutdown the scheduler
-			if (this.serverScheduler != null) {
-				this.serverScheduler.shutdown(true);
-				log.debug("Shutdown server scheduler");
-			}
-
-			// Shutdown the file watch service
-			if (this.watcher != null) {
-				this.watcher.stopService();
-				log.debug("Shutdown watch service");
-			}
-
-			// Shutdown the pools
-			for (Entry<String, KeyedObjectPool> entry : this.getObjectPoolMap().entrySet()) {
-				try {
-					entry.getValue().close();
-					log.debug("Closed object pool factory: " + entry.getKey());
-				} catch (Exception ex) {
-					log.error("Error closing object pool factory: " + entry.getKey());
-				}
-			}
-
-			// Shutdown the outputwriters
-			for (Server server : this.masterServersList) {
-				for (Query query : server.getQueries()) {
-					for (OutputWriter writer : query.getOutputWriters()) {
-						try {
-							writer.stop();
-							log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
-						} catch (LifecycleException ex) {
-							log.error("Error stopping writer: " + writer.getClass().getSimpleName() + " for query: " + query);
-						}
-					}
-				}
-			}
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return true;
-	}
-
-	/**
 	 * Are we a file and a json file?
 	 */
 	private boolean isJsonFile(File file) {
@@ -486,6 +611,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	}
 
 	/** */
+	@Override
 	public void fileModified(File file) throws Exception {
 		if (this.isJsonFile(file)) {
 			Thread.sleep(1000);
@@ -498,6 +624,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	}
 
 	/** */
+	@Override
 	public void fileDeleted(File file) throws Exception {
 		if (this.isJsonFile(file)) {
 			Thread.sleep(1000);
@@ -510,6 +637,7 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 	}
 
 	/** */
+	@Override
 	public void fileAdded(File file) throws Exception {
 		if (this.isJsonFile(file)) {
 			Thread.sleep(1000);
@@ -517,6 +645,16 @@ public class JmxTransformer extends SignalInterceptor implements WatchedCallback
 				log.debug("File added: " + file);
 			}
 			this.startupSystem();
+		}
+	}
+
+	protected class ShutdownHook extends Thread {
+		public void run() {
+			try {
+				JmxTransformer.this.stopServices();
+			} catch (LifecycleException e) {
+				log.error("Error shutdown hook", e);
+			}
 		}
 	}
 }
