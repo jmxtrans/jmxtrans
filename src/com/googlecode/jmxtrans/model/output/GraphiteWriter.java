@@ -26,10 +26,10 @@ import com.googlecode.jmxtrans.util.ValidationException;
 /**
  * This output writer sends data to a host/port combination in the Graphite
  * format.
- * 
+ *
  * @see <a
  *      href="http://graphite.wikidot.com/getting-your-data-into-graphite">http://graphite.wikidot.com/getting-your-data-into-graphite</a>
- * 
+ *
  * @author jon
  */
 public class GraphiteWriter extends BaseOutputWriter {
@@ -41,7 +41,6 @@ public class GraphiteWriter extends BaseOutputWriter {
 	private Integer port;
 	private String rootPrefix = "servers";
 
-	private Map<String, KeyedObjectPool> poolMap;
 	private KeyedObjectPool pool;
 	private ManagedObject mbean;
 	private InetSocketAddress address;
@@ -50,11 +49,6 @@ public class GraphiteWriter extends BaseOutputWriter {
 	 * Uses JmxUtils.getDefaultPoolMap()
 	 */
 	public GraphiteWriter() { }
-
-	/** */
-	public GraphiteWriter(Map<String, KeyedObjectPool> poolMap) {
-		this.poolMap = poolMap;
-	}
 
 	@Override
 	public void start() throws LifecycleException {
@@ -145,13 +139,5 @@ public class GraphiteWriter extends BaseOutputWriter {
 		} finally {
 			pool.returnObject(address, socket);
 		}
-	}
-
-	/**
-	 * Allows one to set the object pool for socket connections to graphite
-	 */
-	@Override
-	public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {
-		this.poolMap = poolMap;
 	}
 }
