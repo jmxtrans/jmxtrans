@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Array;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -33,6 +35,7 @@ import javax.naming.Context;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -43,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.jmx.ManagedObject;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -545,43 +549,87 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Helper method which returns a default PoolMap.
-	 *
-	 * TODO: allow for more configuration options?
+	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
+	 * better performance on high load
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param factory
+	 *            the factory
+	 * @return the object pool
 	 */
-	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
-		Map<String, KeyedObjectPool> poolMap = new HashMap<String, KeyedObjectPool>();
-
-		GenericKeyedObjectPool pool = new GenericKeyedObjectPool(new SocketFactory());
+	public static <T extends KeyedPoolableObjectFactory> GenericKeyedObjectPool getObjectPool(T factory) {
+		GenericKeyedObjectPool pool = new GenericKeyedObjectPool(factory);
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);
 		pool.setMaxIdle(-1);
 		pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
 		pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
 
+		return pool;
+	}
+
+	/**
+	 * Helper method which returns a default PoolMap.
+	 * 
+	 * TODO: allow for more configuration options?
+	 */
+	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
+		Map<String, KeyedObjectPool> poolMap = new HashMap<String, KeyedObjectPool>();
+
+		GenericKeyedObjectPool pool = getObjectPool(new SocketFactory());
 		poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
 
-		GenericKeyedObjectPool jmxPool = new GenericKeyedObjectPool(new JmxConnectionFactory());
-		jmxPool.setTestOnBorrow(true);
-		jmxPool.setMaxActive(-1);
-		jmxPool.setMaxIdle(-1);
-		jmxPool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
-		jmxPool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
-
+		GenericKeyedObjectPool jmxPool = getObjectPool(new JmxConnectionFactory());
 		poolMap.put(Server.JMX_CONNECTION_FACTORY_POOL, jmxPool);
 
-		GenericKeyedObjectPool dsPool = new GenericKeyedObjectPool(new DatagramSocketFactory());
-		dsPool.setTestOnBorrow(true);
-		dsPool.setMaxActive(-1);
-		dsPool.setMaxIdle(-1);
-		dsPool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
-		dsPool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
-
+		GenericKeyedObjectPool dsPool = getObjectPool(new DatagramSocketFactory());
 		poolMap.put(Server.DATAGRAM_SOCKET_FACTORY_POOL, dsPool);
 
 		return poolMap;
 	}
 
+	/**
+	 * Register the scheduler in the local MBeanServer.
+	 * 
+	 * @param mbean
+	 *            the mbean
+	 * @throws Exception
+	 *             the exception
+	 */
+	public static void registerJMX(ManagedObject mbean) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		mbs.registerMBean(mbean, mbean.getObjectName());
+	}
+
+	/**
+	 * Unregister the scheduler from the local MBeanServer.
+	 * 
+	 * @param mbean
+	 *            the mbean
+	 * @throws Exception
+	 *             the exception
+	 */
+	public static void unregisterJMX(ManagedObject mbean) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		mbs.unregisterMBean(mbean.getObjectName());
+	}
+
+	/**
+	 * Gets the key string.
+	 * 
+	 * @param query
+	 *            the query
+	 * @param result
+	 *            the result
+	 * @param values
+	 *            the values
+	 * @param typeNames
+	 *            the type names
+	 * @param rootPrefix
+	 *            the root prefix
+	 * @return the key string
+	 */
 	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
 		String keyStr = null;
 		if (values.getKey().startsWith(result.getAttributeName())) {
@@ -656,6 +704,10 @@ public class JmxUtils {
 
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
+	 * 
+	 * @param name
+	 *            the name
+	 * @return the string
 	 */
 	public static String cleanupStr(String name) {
 		if (name == null) {
@@ -676,6 +728,12 @@ public class JmxUtils {
 	 *
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
+	 *
+	 * @param typeNames
+	 *            the type names
+	 * @param typeNameStr
+	 *            the type name str
+	 * @return the concated type name values
 	 */
 	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
 		if ((typeNames == null) || (typeNames.size() == 0)) {
@@ -701,6 +759,14 @@ public class JmxUtils {
 	 *
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
+	 *
+	 * @param query
+	 *            the query
+	 * @param typeNames
+	 *            the type names
+	 * @param typeName
+	 *            the type name
+	 * @return the concated type name values
 	 */
 	public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
 		Set<String> queryTypeNames = query.getTypeNames();
