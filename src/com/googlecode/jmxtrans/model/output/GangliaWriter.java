@@ -55,6 +55,21 @@ public class GangliaWriter extends BaseOutputWriter {
 				return INT;
 			if (value instanceof Long || value instanceof Float || value instanceof Double)
 				return DOUBLE;
+
+			// Convert to double or int if possible
+			try {
+				Double.parseDouble(value.toString());
+				return DOUBLE;
+			} catch (NumberFormatException e) {
+				// Not a double	
+			}
+			try {
+				Integer.parseInt(value.toString());
+				return INT;
+			} catch (NumberFormatException e) {
+				// Not an int
+			}
+
 			return STRING;
 		}
 
