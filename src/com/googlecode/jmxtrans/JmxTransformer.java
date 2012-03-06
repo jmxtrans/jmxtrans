@@ -18,6 +18,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.CronExpression;
@@ -400,7 +401,7 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void scheduleJob(Scheduler scheduler, Server server) throws ParseException, SchedulerException {
 
-		String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis();
+		String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(10);
 		JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
 
 		JobDataMap map = new JobDataMap();
