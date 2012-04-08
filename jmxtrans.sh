@@ -84,15 +84,15 @@ stop() {
 		kill -15 "$PID"
 		echo -n "Stopping jmxtrans"
 		while (true); do
-			PID=$(eval $PSCMD)
-			if [ ! -z "$PID" ]; then
+	          ps -p $PID >/dev/null 2>&1
+	          if [ $? -eq 0 ] ; then
 				echo -n "."
 				sleep 1
 			else
 				echo ""
 	        	echo "jmxtrans stopped"
 				if [ ! -z "$PIDFILE" ]; then
-					rm $PIDFILE
+					rm -f $PIDFILE
 				fi
 
 				break
