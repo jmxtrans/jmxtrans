@@ -90,6 +90,11 @@ stop() {
 				sleep 1
 			else
 				echo ""
+	        	echo "jmxtrans stopped"
+				if [ ! -z "$PIDFILE" ]; then
+					rm $PIDFILE
+				fi
+
 				break
 			fi
 		done
