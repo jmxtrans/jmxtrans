@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,18 +97,21 @@ public class GangliaWriter extends BaseOutputWriter {
 	private static final int DEFAULT_DMAX = 0;
 	private static final int DEFAULT_PORT = 8649;
 	private static final int BUFFER_SIZE = 1500; // as per libgmond.c
+	private static final int DEFAULT_SKIP_METADATA = 30;
 
 	public static final String GROUP_NAME = "groupName";
 	public static final String SLOPE = "slope";
 	public static final String UNITS = "units";
 	public static final String DMAX = "dmax";
 	public static final String TMAX = "tmax";
+	public static final String SKIP_METADATA = "skipMetadata";
 
 	protected byte[] buffer = new byte[BUFFER_SIZE];
 	protected int offset;
 
 	private Map<String, KeyedObjectPool> poolMap;
 	private KeyedObjectPool pool;
+	private Map<MetricMetaData, Integer> emittedMetadata = new HashMap<MetricMetaData, Integer>();
 	private InetSocketAddress address;
 	private String groupName;
 	private String spoofedHostname;
@@ -113,6 +119,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	private String units = DEFAULT_UNITS;
 	private int tmax = DEFAULT_TMAX;
 	private int dmax = DEFAULT_DMAX;
+	private int skipMetadata = DEFAULT_SKIP_METADATA;
 
 	/** */
 	public GangliaWriter() {
@@ -154,9 +161,10 @@ public class GangliaWriter extends BaseOutputWriter {
 		slope = Slope.fromName(getStringSetting(SLOPE, DEFAULT_SLOPE.name()));
 		tmax = getIntegerSetting(TMAX, DEFAULT_TMAX);
 		dmax = getIntegerSetting(DMAX, DEFAULT_DMAX);
+		skipMetadata = getIntegerSetting(SKIP_METADATA, DEFAULT_SKIP_METADATA);
 
 		log.debug("validated ganglia metric -- address: " + host + ":" + port + ", spoofed host: " + spoofedHostname + ", group: " + groupName
-				+ ", units: " + units + ", slope:" + slope + ", tmax: " + tmax + ", dmax: " + dmax);
+				+ ", units: " + units + ", slope:" + slope + ", tmax: " + tmax + ", dmax: " + dmax + ", skipMetadata: " + skipMetadata);
 	}
 
 	/**
@@ -246,8 +254,8 @@ public class GangliaWriter extends BaseOutputWriter {
 		// gm_protocol.x in Ganglia 3.1 and carefully examining the output of
 		// the gmetric utility with strace.
 
-		// Send the metric metadata.
-		sendMetricMetadata(socket, hostName, metricName, type);
+		// Send the metric metadata if it is time.
+		maybeSendMetricMetadata(socket, hostName, metricName, type);
 
 		// Now we send out a message with the actual value.
 		offset = 0; // reset the offset
@@ -263,15 +271,30 @@ public class GangliaWriter extends BaseOutputWriter {
 		log.debug("Emitted metric " + metricName + ", type " + type + ", value " + value + " for host: " + hostName);
 	}
 
-	private void sendMetricMetadata(DatagramSocket socket, String hostName, String metricName, DataType type) throws IOException {
+	private void maybeSendMetricMetadata(DatagramSocket socket, String hostName, String name, DataType type) throws IOException {
+		MetricMetaData metaData = new MetricMetaData(hostName, name, type);
+
+		Integer emittedSamples = emittedMetadata.get(metaData);
+		if (emittedSamples == null)
+			emittedSamples = 0;
+
+		if (emittedSamples % skipMetadata == 0) {
+			sendMetricMetadata(socket, metaData);
+			log.debug("Emmitted metric metadata: " + metaData.toString());
+		}
+
+		emittedMetadata.put(metaData, emittedSamples + 1);
+	}
+
+	private void sendMetricMetadata(DatagramSocket socket, MetricMetaData metaData) throws IOException {
 		// First we send out a metadata message
 		offset = 0;
 		xdr_int(128); // metric_id = metadata_msg
-		xdr_string(hostName); // hostname
-		xdr_string(metricName); // metric name
+		xdr_string(metaData.hostName); // hostname
+		xdr_string(metaData.metricName); // metric name
 		xdr_int(1); // spoof = True
-		xdr_string(type.getTypeName()); // metric type
-		xdr_string(metricName); // metric name
+		xdr_string(metaData.type.getTypeName()); // metric type
+		xdr_string(metaData.metricName); // metric name
 		xdr_string(units); // units
 		xdr_int(slope.ordinal()); // slope see gmetric.c
 		xdr_int(tmax); // tmax, the maximum time between metrics
@@ -338,6 +361,48 @@ public class GangliaWriter extends BaseOutputWriter {
 		buffer[offset++] = (byte) ((i >> 16) & 0xff);
 		buffer[offset++] = (byte) ((i >> 8) & 0xff);
 		buffer[offset++] = (byte) (i & 0xff);
+	}
+
+	private class MetricMetaData {
+
+		private String hostName;
+		private String metricName;
+		private DataType type;
+
+		private MetricMetaData(String hostName, String metricName, DataType type) {
+			this.hostName = hostName;
+			this.metricName = metricName;
+			this.type = type;
+		}
+
+		public boolean equals(Object o) {
+			if (o == null) {
+				return false;
+			}
+			if (o == this) {
+				return true;
+			}
+			if (o.getClass() != this.getClass()) {
+				return false;
+			}
+
+			if (!(o instanceof MetricMetaData)) {
+				return false;
+			}
+
+			MetricMetaData other = (MetricMetaData) o;
+
+			return new EqualsBuilder().append(this.hostName, other.hostName).append(this.metricName, other.metricName).append(this.type, other.type)
+					.isEquals();
+		}
+
+		public int hashCode() {
+			return new HashCodeBuilder(41, 97).append(hostName).append(metricName).append(type).toHashCode();
+		}
+
+		public String toString() {
+			return "MetricMetaData{" + "hostName='" + hostName + '\'' + ", metricName='" + metricName + '\'' + ", type=" + type + '}';
+		}
 	}
 
 }
