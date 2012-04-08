@@ -97,14 +97,14 @@ public class GangliaWriter extends BaseOutputWriter {
 	private static final int DEFAULT_DMAX = 0;
 	private static final int DEFAULT_PORT = 8649;
 	private static final int BUFFER_SIZE = 1500; // as per libgmond.c
-	private static final int DEFAULT_SKIP_METADATA = 30;
+	private static final int DEFAULT_SEND_METADATA = 30;
 
 	public static final String GROUP_NAME = "groupName";
 	public static final String SLOPE = "slope";
 	public static final String UNITS = "units";
 	public static final String DMAX = "dmax";
 	public static final String TMAX = "tmax";
-	public static final String SKIP_METADATA = "skipMetadata";
+	public static final String SEND_METADATA = "sendMetadata";
 
 	protected byte[] buffer = new byte[BUFFER_SIZE];
 	protected int offset;
@@ -119,7 +119,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	private String units = DEFAULT_UNITS;
 	private int tmax = DEFAULT_TMAX;
 	private int dmax = DEFAULT_DMAX;
-	private int skipMetadata = DEFAULT_SKIP_METADATA;
+	private int sendMetadata = DEFAULT_SEND_METADATA;
 
 	/** */
 	public GangliaWriter() {
@@ -161,10 +161,10 @@ public class GangliaWriter extends BaseOutputWriter {
 		slope = Slope.fromName(getStringSetting(SLOPE, DEFAULT_SLOPE.name()));
 		tmax = getIntegerSetting(TMAX, DEFAULT_TMAX);
 		dmax = getIntegerSetting(DMAX, DEFAULT_DMAX);
-		skipMetadata = getIntegerSetting(SKIP_METADATA, DEFAULT_SKIP_METADATA);
+		sendMetadata = getIntegerSetting(SEND_METADATA, DEFAULT_SEND_METADATA);
 
 		log.debug("validated ganglia metric -- address: " + host + ":" + port + ", spoofed host: " + spoofedHostname + ", group: " + groupName
-				+ ", units: " + units + ", slope:" + slope + ", tmax: " + tmax + ", dmax: " + dmax + ", skipMetadata: " + skipMetadata);
+				+ ", units: " + units + ", slope:" + slope + ", tmax: " + tmax + ", dmax: " + dmax + ", sendMetadata: " + sendMetadata);
 	}
 
 	/**
@@ -278,7 +278,7 @@ public class GangliaWriter extends BaseOutputWriter {
 		if (emittedSamples == null)
 			emittedSamples = 0;
 
-		if (emittedSamples % skipMetadata == 0) {
+		if (emittedSamples % sendMetadata == 0) {
 			sendMetricMetadata(socket, metaData);
 			log.debug("Emmitted metric metadata: " + metaData.toString());
 		}
