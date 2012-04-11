@@ -6,11 +6,10 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,19 +97,21 @@ public class GangliaWriter extends BaseOutputWriter {
 	private static final int DEFAULT_DMAX = 0;
 	private static final int DEFAULT_PORT = 8649;
 	private static final int BUFFER_SIZE = 1500; // as per libgmond.c
+	private static final int DEFAULT_SEND_METADATA = 30;
 
 	public static final String GROUP_NAME = "groupName";
 	public static final String SLOPE = "slope";
 	public static final String UNITS = "units";
 	public static final String DMAX = "dmax";
 	public static final String TMAX = "tmax";
+	public static final String SEND_METADATA = "sendMetadata";
 
 	protected byte[] buffer = new byte[BUFFER_SIZE];
 	protected int offset;
 
 	private Map<String, KeyedObjectPool> poolMap;
 	private KeyedObjectPool pool;
-	private Set<MetricMetaData> emittedMetadata = new HashSet<MetricMetaData>();
+	private Map<MetricMetaData, Integer> emittedMetadata = new HashMap<MetricMetaData, Integer>();
 	private InetSocketAddress address;
 	private String groupName;
 	private String spoofedHostname;
@@ -118,6 +119,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	private String units = DEFAULT_UNITS;
 	private int tmax = DEFAULT_TMAX;
 	private int dmax = DEFAULT_DMAX;
+	private int sendMetadata = DEFAULT_SEND_METADATA;
 
 	/** */
 	public GangliaWriter() {
@@ -159,9 +161,10 @@ public class GangliaWriter extends BaseOutputWriter {
 		slope = Slope.fromName(getStringSetting(SLOPE, DEFAULT_SLOPE.name()));
 		tmax = getIntegerSetting(TMAX, DEFAULT_TMAX);
 		dmax = getIntegerSetting(DMAX, DEFAULT_DMAX);
+		sendMetadata = getIntegerSetting(SEND_METADATA, DEFAULT_SEND_METADATA);
 
 		log.debug("validated ganglia metric -- address: " + host + ":" + port + ", spoofed host: " + spoofedHostname + ", group: " + groupName
-				+ ", units: " + units + ", slope:" + slope + ", tmax: " + tmax + ", dmax: " + dmax);
+				+ ", units: " + units + ", slope:" + slope + ", tmax: " + tmax + ", dmax: " + dmax + ", sendMetadata: " + sendMetadata);
 	}
 
 	/**
@@ -251,7 +254,7 @@ public class GangliaWriter extends BaseOutputWriter {
 		// gm_protocol.x in Ganglia 3.1 and carefully examining the output of
 		// the gmetric utility with strace.
 
-		// Send the metric metadata if we have not already done so
+		// Send the metric metadata if it is time.
 		maybeSendMetricMetadata(socket, hostName, metricName, type);
 
 		// Now we send out a message with the actual value.
@@ -270,13 +273,17 @@ public class GangliaWriter extends BaseOutputWriter {
 
 	private void maybeSendMetricMetadata(DatagramSocket socket, String hostName, String name, DataType type) throws IOException {
 		MetricMetaData metaData = new MetricMetaData(hostName, name, type);
-		// If we have not already emitted the metadata for this metric, do so
-		// now
-		if (!emittedMetadata.contains(metaData)) {
+
+		Integer emittedSamples = emittedMetadata.get(metaData);
+		if (emittedSamples == null)
+			emittedSamples = 0;
+
+		if (emittedSamples % sendMetadata == 0) {
 			sendMetricMetadata(socket, metaData);
-			emittedMetadata.add(metaData);
 			log.debug("Emmitted metric metadata: " + metaData.toString());
 		}
+
+		emittedMetadata.put(metaData, emittedSamples + 1);
 	}
 
 	private void sendMetricMetadata(DatagramSocket socket, MetricMetaData metaData) throws IOException {
