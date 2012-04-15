@@ -27,6 +27,11 @@ public class PropertyResolverTests {
 		s1 = "${myhost} : ${myaltport:2099}";
 		s2 = PropertyResolver.resolveProps(s1);
 		Assert.assertEquals("w2 : 2099", s2);
+		
+		s1 = "${myhost}:2099";
+		s2 = PropertyResolver.resolveProps(s1);
+		Assert.assertEquals("w2:2099", s2);
+		
 	}
 
 	@Test
