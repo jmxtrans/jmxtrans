@@ -60,6 +60,11 @@ public class PropertyResolver {
 		while (ipos < s.length()) {
 			pos = s.indexOf("${", ipos);
 
+			if (pos < 0) {
+				sb.append(s.substring(ipos));
+				break;
+			}
+			
 			if (pos != ipos)
 				sb.append(s.substring(ipos, pos));
 
