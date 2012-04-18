@@ -116,11 +116,18 @@ class HostSets(object):
         """
         return self.host_sets[set_name]
 
+def usage():
+    print "Usage: " + sys.argv[0] + " INPUT.yaml"
+
 if __name__ == '__main__':
     # query attributes to copy
     query_attributes = ["obj", "resultAlias", "attr"]
 
-    infile = open('jmxtrans.yaml', 'r')
+    if len(sys.argv) != 2:
+        usage()
+        sys.exit(1)
+    
+    infile = open(sys.argv[1], 'r')
     yf = yaml.load(infile)
     query_port = yf['query_port']
 
