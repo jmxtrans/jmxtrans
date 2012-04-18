@@ -23,15 +23,15 @@ class Queries(object):
     """
     Generate query object snippets suitable for consumption by jmxtrans
     """
-    def __init__(self, queries, query_attributes, graphite_host, graphite_port):
+    def __init__(self, queries, query_attributes, monitor_host, monitor_port):
         """
         Initialize Queries configuration with data from YAML structure, making
         named queries accessible by name
         """
         self.queries = {}
         self.query_attributes = query_attributes
-        self.graphite_host = graphite_host
-        self.graphite_port = graphite_port
+        self.monitor_host = monitor_host
+        self.monitor_port = monitor_port
 
         for query in queries:
             queryentry = {}
@@ -44,7 +44,7 @@ class Queries(object):
         Create a query snippet for the query referenced by 'query_name',
         including Graphite writer configuration
         """
-        queryentry = { 'outputWriters' : self.create_output_writers() }
+        queryentry = { 'outputWriters' : self.create_graphite_output_writer() }
         for attr in self.query_attributes:
             queryentry[attr] = self.queries[query_name][attr]
         return queryentry
@@ -73,15 +73,15 @@ class Queries(object):
             root['servers'].append(self.create_host_entry(host_name, query_names, query_port))
         return root
 
-    def create_output_writers(self):
+    def create_graphite_output_writer(self):
         """
         Graphite output writer snippet template
         """
         writer = {
             '@class' : 'com.googlecode.jmxtrans.model.output.GraphiteWriter',
             'settings' : {
-                'port' : self.graphite_port,
-                'host' : self.graphite_host,
+                'port' : self.monitor_port,
+                'host' : self.monitor_host,
                 'typeNames' : [ "name" ],
                 }
             }
