@@ -13,7 +13,7 @@ format.
 
 Usage
 ----------
-    yaml2trans.py INFILE.yaml
+    yaml2jmxtrans.py INFILE.yaml
     
 Generates JSON jmxtrans configuration files, one for each host set
 defined in _INFILE.yaml_.
