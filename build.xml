@@ -198,6 +198,12 @@
 			</fileset>
 		</copy>
 
+		<copy todir="${build.dist.dir}/tools">
+			<fileset dir="${base.dir}/tools">
+				<include name="**" />
+			</fileset>
+                </copy>
+
 		<dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
 		<basename property="build.dist.dir.basename" file="${build.dist.dir}" />
 
@@ -226,6 +232,15 @@
 				<include name="**"/>
 			</fileset>
 		</move>
+
+                <!-- inject docs directory -->
+		<copy todir="${target.dir}/jmxtrans/debian/tmp/usr/share/doc/jmxtrans">
+			<fileset dir="${basedir}/doc">
+				<include name="**"/>
+			</fileset>
+		</copy>
+
+                <copy file="bin/yaml2jmxtrans" todir="${target.dir}/jmxtrans/debian/tmp/bin" />
 		<chmod file="${target.dir}/jmxtrans/debian/rules" perm="ugo+rx"/>
 
 		<exec executable="/usr/bin/debuild" dir="${target.dir}/jmxtrans" failonerror="true">
