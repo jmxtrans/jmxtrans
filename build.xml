@@ -27,6 +27,7 @@
 
 	<tstamp>
 		<format property="NOW" pattern="yyyyMMdd-hh:mm:ss" />
+		<format property="DATE_TIME" pattern="yyyyMMdd-HHmmss" />
 		<!-- Wed, 19 Jan 2011 18:19:37 -0800 -->
 		<format property="PROPER_NOW" pattern="E, dd MMM yyyy hh:mm:ss ZZ" />
 		<format property="YEAR" pattern="yyyy" />
@@ -76,8 +77,8 @@
 		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpath="${lib.dir}/ant-googlecode-0.0.2.jar" name="gcupload"/>
 
 		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
-		<property name="version" value="${sVersionRevision}" />
-		<property name="build.version" value="${sVersionRevision}" />
+		<property name="version" value="${DATE_TIME}-${sVersionRevision}" />
+		<property name="build.version" value="${DATE_TIME}-${sVersionRevision}" />
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
 		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
@@ -198,6 +199,12 @@
 			</fileset>
 		</copy>
 
+		<copy todir="${build.dist.dir}/tools">
+			<fileset dir="${base.dir}/tools">
+				<include name="**" />
+			</fileset>
+                </copy>
+
 		<dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
 		<basename property="build.dist.dir.basename" file="${build.dist.dir}" />
 
@@ -211,9 +218,8 @@
 		<filter token="NOW" value="${NOW}" />
 		<filter token="PROPER_NOW" value="${PROPER_NOW}" />
 		<filter token="YEAR" value="${YEAR}" />
-		<filter token="FULL_VERSION" value="${sVersion}" />
-		<filter token="VERSION" value="${sVersionRevision}" />
-		<filter token="BRANCH_NAME" value="${sVersionBranchName}" />
+		<filter token="VERSION" value="${version}" />
+                <filter token="FULL_VERSION" value="${sVersion}" />
 
 		<copy todir="${target.dir}/jmxtrans/debian" filtering="true">
 			<fileset dir="debian">
@@ -222,10 +228,19 @@
 		</copy>
 		<unzip src="${build.dist.zip}" dest="${target.dir}/jmxtrans/debian/tmp/usr/share" />
 		<move todir="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans">
-			<fileset dir="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans-${sVersionRevision}">
+			<fileset dir="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans-${version}">
 				<include name="**"/>
 			</fileset>
 		</move>
+
+                <!-- inject docs directory -->
+		<copy todir="${target.dir}/jmxtrans/debian/tmp/usr/share/doc/jmxtrans">
+			<fileset dir="${basedir}/doc">
+				<include name="**"/>
+			</fileset>
+		</copy>
+
+                <copy file="bin/yaml2jmxtrans" todir="${target.dir}/jmxtrans/debian/tmp/bin" />
 		<chmod file="${target.dir}/jmxtrans/debian/rules" perm="ugo+rx"/>
 
 		<exec executable="/usr/bin/debuild" dir="${target.dir}/jmxtrans" failonerror="true">

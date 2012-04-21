@@ -10,7 +10,8 @@ clean:
 
 setup-perms:
 	chmod -f ugo+x debian/tmp/usr/share/@PACKAGE@/*.sh || true
-	
+	chmod -f ugo+x debian/tmp/usr/share/@PACKAGE@/tools/*.py || true
+
 binary: binary-indep
 binary-indep: setup-perms 
 #	dh_prep

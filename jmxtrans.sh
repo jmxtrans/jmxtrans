@@ -16,7 +16,7 @@ SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
 JPS=${JPS:-"/usr/bin/jps -l"}
 JAVA=${JAVA:-"/usr/bin/java"}
 PSCMD="$JPS | grep -i jmxtrans | awk '{ print \$1 };'"
-JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Djmxtrans.log.dir=$LOG_DIR"}
+JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"}
 NEW_SIZE=${NEW_SIZE:-"64"}
 NEW_RATIO=${NEW_RATIO:-"8"}
 HEAP_SIZE=${HEAP_SIZE:-"512"}
@@ -26,7 +26,7 @@ CPU_CORES=${CPU_CORES:-"1"}
 IO_FRACTION=${IO_FRACTION:-"85"}
 JMX_PORT=${JMX_PORT:-"2101"}
 LOG_LEVEL=${LOG_LEVEL:-"debug"}
-JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL}"
+JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log.dir=$LOG_DIR"
 
 
 MONITOR_OPTS=${MONITOR_OPTS:-"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=${JMX_PORT}"}
