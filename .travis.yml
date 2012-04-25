@@ -1,2 +1,2 @@
 language: java
-script: "ant dist"
+script: "ant debian"
