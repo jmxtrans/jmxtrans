@@ -244,7 +244,7 @@
 		<chmod file="${target.dir}/jmxtrans/debian/rules" perm="ugo+rx"/>
 
 		<exec executable="/usr/bin/debuild" dir="${target.dir}/jmxtrans" failonerror="true">
-			<arg line="-b"/>
+			<arg line="-b -i -us -uc"/>
 		</exec>
 		</target>
 
