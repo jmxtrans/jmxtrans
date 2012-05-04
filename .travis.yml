@@ -1,2 +1,6 @@
 language: java
 script: "ant dist"
+
+before_script:
+	- sudo apt-get -y update
+	- sudo apt-get -y install devscripts build-essential
