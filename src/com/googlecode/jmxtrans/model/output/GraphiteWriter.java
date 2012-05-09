@@ -39,11 +39,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	private String host;
 	private Integer port;
-	private String rootPrefix = "servers";
+	protected String rootPrefix = "servers";
 
-	private KeyedObjectPool pool;
-	private ManagedObject mbean;
-	private InetSocketAddress address;
+	protected KeyedObjectPool pool;
+	protected ManagedObject mbean;
+	protected InetSocketAddress address;
 
 	/**
 	 * Uses JmxUtils.getDefaultPoolMap()

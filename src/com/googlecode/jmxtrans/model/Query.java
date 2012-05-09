@@ -22,7 +22,7 @@ import com.googlecode.jmxtrans.util.PropertyResolver;
  * @author jon
  */
 @JsonSerialize(include = Inclusion.NON_NULL)
-@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "resultAlias", "keys", "outputWriters" })
+@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "metricsType","resultAlias", "keys", "outputWriters" })
 public class Query {
 
 	private Server server;
@@ -34,6 +34,7 @@ public class Query {
 	private List<OutputWriter> outputWriters;
 	private List<Result> results;
 	private Set<String> typeNames;
+	private String metricsType;
 
 	public Query() {
 	}
@@ -82,10 +83,26 @@ public class Query {
 		return resultAlias;
 	}
 
-	public void setTypeNames(Set<String> typeNames) {
+	
+	
+	public void setMetricsType(String metricsType) {
+		this.metricsType = metricsType;
+	}
+	
+	
+	/**
+	 * The metric's type 
+	 * For example: gauge, count, time, meter, histogram. default to gauge
+	 */
+	public String getMetricsType() {
+		return this.metricsType;
+	}
+	
+
+    public void setTypeNames(Set<String> typeNames) {
 		this.typeNames = typeNames;
 	}
-
+	
 	/**
 	 * The list of type names used in a JMX bean string when querying with a
 	 * wildcard which is used to expose the actual type name value to the key
