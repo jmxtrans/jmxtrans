@@ -41,8 +41,8 @@ public class MetricsdWriter extends GraphiteWriter {
 
 	
 	/**
-	* Using UDP DatagramSocket
-	*/
+	 * Using UDP DatagramSocket
+	 */
    	@Override
 	public void start() throws LifecycleException {
 		try {
@@ -74,15 +74,15 @@ public class MetricsdWriter extends GraphiteWriter {
 							String keyStr=JmxUtils.getStatsdKeyString(query, result, values, typeNames, rootPrefix);			
 							sb.append(keyStr).append(":");
 							sb.append(values.getValue());
-							if ("histogram".equalsIgnoreCase(metricsType) ){
+							if ("histogram".equalsIgnoreCase(metricsType)) {
 								sb.append("|h");
-							}else if ("count".equalsIgnoreCase(metricsType)){
+							} else if ("count".equalsIgnoreCase(metricsType)) {
 								sb.append("|c");
-							}else if ("time".equalsIgnoreCase(metricsType)){
+							} else if ("time".equalsIgnoreCase(metricsType)) {
 								sb.append("|ms");
-							}else if ("meter".equalsIgnoreCase(metricsType)){
+							} else if ("meter".equalsIgnoreCase(metricsType)) {
 								sb.append("|m");
-							}else{
+							} else {
 								sb.append("|g");
 							}					
 							String line = sb.toString();

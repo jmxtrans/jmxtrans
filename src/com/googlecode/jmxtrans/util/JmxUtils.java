@@ -704,21 +704,8 @@ public class JmxUtils {
 	
 	/**
 	 * Gets the key string for MetricsdWriter.This is key string will format the graphite metrics scheme name. 
-	 * It will put the resultAlias in front of the host alias.
-	 * 
-	 * @param query
-	 *            the query
-	 * @param result
-	 *            the result
-	 * @param values
-	 *            the values
-	 * @param typeNames
-	 *            the type names
-	 * @param rootPrefix
-	 *            the root prefix
-	 * @return the key string
+	 * It will put the resultAlias in front of the host alias. 
 	 */
-	// This method will create scheme like #{mbean_id}.#{confType}.#{service_name}.#{host_sname}
 	public static String getStatsdKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {		
 		String keyStr = null;
 		if (values.getKey().startsWith(result.getAttributeName())) {
