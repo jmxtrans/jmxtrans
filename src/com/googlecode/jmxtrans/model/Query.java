@@ -34,6 +34,7 @@ public class Query {
 	private List<OutputWriter> outputWriters;
 	private List<Result> results;
 	private Set<String> typeNames;
+	// The metrics type of the jmx mbean's attribute. It can be: gauge, count, meter, histogram, time. Default to gauge if not specified.
 	private String metricsType;
 
 	public Query() {

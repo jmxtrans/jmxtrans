@@ -25,7 +25,7 @@ import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
 
 /**
  * This output writer sends data to a host/port combination
- * in the Metricsd format.
+ * in the Metricsd format via udp .
  *
  * @see <a href="https://github.com/mojodna/metricsd">https://github.com/mojodna/metricsd</a>
  *
@@ -39,6 +39,10 @@ public class MetricsdWriter extends GraphiteWriter {
         super();
     }
 
+	
+	/**
+	* Using UDP DatagramSocket
+	*/
    	@Override
 	public void start() throws LifecycleException {
 		try {
@@ -51,28 +55,25 @@ public class MetricsdWriter extends GraphiteWriter {
 	}
 
     /** */
+	@Override
     public void doWrite(Query query) throws Exception {
 		String metricsType = query.getMetricsType();
 		DatagramSocket socket = (DatagramSocket) this.pool.borrowObject(address);
-        try {
-            List<String> typeNames = this.getTypeNames();
+		try {
+			List<String> typeNames = this.getTypeNames();
 
-            for (Result result : query.getResults()) {
-                if (isDebugEnabled()) {
-                    log.debug(result.toString());
-                }
-                Map<String, Object> resultValues = result.getValues();
-                if (resultValues != null) {
-                    for (Entry<String, Object> values : resultValues.entrySet()) {	                    
-                        if (isDebugEnabled()) {
-                            log.debug("Metricsd Message: metrics values:" + values.toString());
-                        }
-                        if (JmxUtils.isNumeric(values.getValue())) {
-                            StringBuilder sb = new StringBuilder();
+			for (Result result : query.getResults()) {
+				if (isDebugEnabled()) {
+					log.debug(result.toString());
+				}
+				Map<String, Object> resultValues = result.getValues();
+				if (resultValues != null) {
+					for (Entry<String, Object> values : resultValues.entrySet()) {	                    
+						if (JmxUtils.isNumeric(values.getValue())) {
+							StringBuilder sb = new StringBuilder();
 							String keyStr=JmxUtils.getStatsdKeyString(query, result, values, typeNames, rootPrefix);			
-                            sb.append(keyStr).append(":");
-                            sb.append(values.getValue());
-							
+							sb.append(keyStr).append(":");
+							sb.append(values.getValue());
 							if ("histogram".equalsIgnoreCase(metricsType) ){
 								sb.append("|h");
 							}else if ("count".equalsIgnoreCase(metricsType)){
@@ -84,26 +85,17 @@ public class MetricsdWriter extends GraphiteWriter {
 							}else{
 								sb.append("|g");
 							}					
-                            String line = sb.toString();
-
-                            if (isDebugEnabled()) {
-                                log.debug("Metricsd Message: " + line.trim());
-                            }
+							String line = sb.toString();
+							log.debug("Metricsd Message: " + line.trim());
 							byte [ ] buffer = line.getBytes();
 							DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address);
-					        socket.send(packet);
-                        }
-                    }
-                }
-            }
-        } finally {
-            this.pool.returnObject(address, socket);
-        }
-    }
-    
-   @Override
-	public boolean isDebugEnabled() {
-        return true;
-    }
-
+							socket.send(packet);
+						}
+					}
+				}
+			}
+		} finally {
+			this.pool.returnObject(address, socket);
+		}
+	}
 }
