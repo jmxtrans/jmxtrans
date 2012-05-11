@@ -22,7 +22,8 @@ import com.googlecode.jmxtrans.util.PropertyResolver;
  * @author jon
  */
 @JsonSerialize(include = Inclusion.NON_NULL)
-@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "metricsType","resultAlias", "keys", "outputWriters" })
+@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "metricsType",
+		"resultAlias", "keys", "outputWriters" })
 public class Query {
 
 	private Server server;
@@ -34,11 +35,10 @@ public class Query {
 	private List<OutputWriter> outputWriters;
 	private List<Result> results;
 	private Set<String> typeNames;
-	
+
 	/**
-	 * This is the metrics type of the jmx mbean's attribute. 
-	 * It can be: gauge, count, meter, histogram, time. 
-	 * Default to gauge if not specified.
+	 * This is the metrics type of the jmx mbean's attribute. It can be: gauge,
+	 * count, meter, histogram, time. Default to gauge if not specified.
 	 * Example: https://github.com/lookfirst/jmxtrans/wiki/Metricsdwriter
 	 */
 	private String metricsType;
@@ -90,26 +90,22 @@ public class Query {
 		return resultAlias;
 	}
 
-	
-	
 	public void setMetricsType(String metricsType) {
 		this.metricsType = metricsType;
 	}
-	
-	
+
 	/**
-	 * The metric's type 
-	 * For example: gauge, count, time, meter, histogram. default to gauge
+	 * The metric's type For example: gauge, count, time, meter, histogram.
+	 * default to gauge
 	 */
 	public String getMetricsType() {
 		return this.metricsType;
 	}
-	
 
-    public void setTypeNames(Set<String> typeNames) {
+	public void setTypeNames(Set<String> typeNames) {
 		this.typeNames = typeNames;
 	}
-	
+
 	/**
 	 * The list of type names used in a JMX bean string when querying with a
 	 * wildcard which is used to expose the actual type name value to the key
@@ -195,7 +191,8 @@ public class Query {
 
 	@Override
 	public String toString() {
-		return "Query [obj=" + obj + ", resultAlias=" + resultAlias + ", attr=" + attr + "]";
+		return "Query [obj=" + obj + ", resultAlias=" + resultAlias + ", attr="
+				+ attr + "]";
 	}
 
 	/** */
@@ -226,8 +223,11 @@ public class Query {
 			sizeR = other.getOutputWriters().size();
 		}
 
-		return new EqualsBuilder().append(this.getObj(), other.getObj()).append(this.getKeys(), other.getKeys())
-				.append(this.getAttr(), other.getAttr()).append(this.getResultAlias(), other.getResultAlias()).append(sizeL, sizeR).isEquals();
+		return new EqualsBuilder().append(this.getObj(), other.getObj())
+				.append(this.getKeys(), other.getKeys())
+				.append(this.getAttr(), other.getAttr())
+				.append(this.getResultAlias(), other.getResultAlias())
+				.append(sizeL, sizeR).isEquals();
 	}
 
 	/** */
@@ -238,7 +238,8 @@ public class Query {
 			sizeL = this.getOutputWriters().size();
 		}
 
-		return new HashCodeBuilder(41, 97).append(this.getObj()).append(this.getKeys()).append(this.getAttr()).append(this.getResultAlias())
-				.append(sizeL).toHashCode();
+		return new HashCodeBuilder(41, 97).append(this.getObj())
+				.append(this.getKeys()).append(this.getAttr())
+				.append(this.getResultAlias()).append(sizeL).toHashCode();
 	}
 }

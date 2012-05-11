@@ -54,7 +54,7 @@ import com.googlecode.jmxtrans.model.Server;
 
 /**
  * The worker code.
- *
+ * 
  * @author jon
  */
 public class JmxUtils {
@@ -65,7 +65,8 @@ public class JmxUtils {
 	 * Merges two lists of servers (and their queries). Based on the equality of
 	 * both sets of objects. Public for testing purposes.
 	 */
-	public static void mergeServerLists(List<Server> existing, List<Server> adding) {
+	public static void mergeServerLists(List<Server> existing,
+			List<Server> adding) {
 		for (Server server : adding) {
 			if (existing.contains(server)) {
 				Server found = existing.get(existing.indexOf(server));
@@ -79,7 +80,8 @@ public class JmxUtils {
 					} catch (ValidationException ex) {
 						// catching this exception because we don't want to stop
 						// processing
-						log.error("Error adding query: " + q + " to server" + server, ex);
+						log.error("Error adding query: " + q + " to server"
+								+ server, ex);
 					}
 				}
 			} else {
@@ -92,20 +94,25 @@ public class JmxUtils {
 	 * Either invokes the queries multithreaded (max threads ==
 	 * server.getMultiThreaded()) or invokes them one at a time.
 	 */
-	public static void processQueriesForServer(MBeanServerConnection mbeanServer, Server server) throws Exception {
+	public static void processQueriesForServer(
+			MBeanServerConnection mbeanServer, Server server) throws Exception {
 
 		if (server.isQueriesMultiThreaded()) {
 			ExecutorService service = null;
 			try {
-				service = Executors.newFixedThreadPool(server.getNumQueryThreads());
+				service = Executors.newFixedThreadPool(server
+						.getNumQueryThreads());
 				if (log.isDebugEnabled()) {
-					log.debug("----- Creating " + server.getQueries().size() + " query threads");
+					log.debug("----- Creating " + server.getQueries().size()
+							+ " query threads");
 				}
 
-				List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
+				List<Callable<Object>> threads = new ArrayList<Callable<Object>>(
+						server.getQueries().size());
 				for (Query query : server.getQueries()) {
 					query.setServer(server);
-					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, query);
+					ProcessQueryThread pqt = new ProcessQueryThread(
+							mbeanServer, query);
 					threads.add(Executors.callable(pqt));
 				}
 
@@ -169,7 +176,8 @@ public class JmxUtils {
 	/**
 	 * Responsible for processing individual Queries.
 	 */
-	public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
+	public static void processQuery(MBeanServerConnection mbeanServer,
+			Query query) throws Exception {
 
 		ObjectName oName = new ObjectName(query.getObj());
 
@@ -192,10 +200,15 @@ public class JmxUtils {
 			try {
 				if ((query.getAttr() != null) && (query.getAttr().size() > 0)) {
 					if (log.isDebugEnabled()) {
-						log.debug("Executing queryName: " + queryName.getCanonicalName() + " from query: " + query);
+						log.debug("Executing queryName: "
+								+ queryName.getCanonicalName()
+								+ " from query: " + query);
 					}
 
-					AttributeList al = mbeanServer.getAttributes(queryName, query.getAttr().toArray(new String[query.getAttr().size()]));
+					AttributeList al = mbeanServer.getAttributes(
+							queryName,
+							query.getAttr().toArray(
+									new String[query.getAttr().size()]));
 					for (Attribute attribute : al.asList()) {
 						getResult(resList, info, oi, attribute, query);
 					}
@@ -206,13 +219,17 @@ public class JmxUtils {
 					runOutputWritersForQuery(query);
 
 					if (log.isDebugEnabled()) {
-						log.debug("Finished running outputWriters for query: " + query);
+						log.debug("Finished running outputWriters for query: "
+								+ query);
 					}
 				}
 			} catch (UnmarshalException ue) {
-				if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
-					log.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: "
-							+ "http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
+				if ((ue.getCause() != null)
+						&& (ue.getCause() instanceof ClassNotFoundException)) {
+					log.debug(
+							"Bad unmarshall, continuing. This is probably ok and due to something like this: "
+									+ "http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52",
+							ue.getMessage());
 				}
 			}
 		}
@@ -223,7 +240,9 @@ public class JmxUtils {
 	 * Populates the Result objects. This is a recursive function. Query
 	 * contains the keys that we want to get the values of.
 	 */
-	private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, String attributeName, CompositeData cds, Query query) {
+	private static void getResult(List<Result> resList, MBeanInfo info,
+			ObjectInstance oi, String attributeName, CompositeData cds,
+			Query query) {
 		CompositeType t = cds.getCompositeType();
 
 		Result r = getNewResultObject(info, oi, attributeName, query);
@@ -233,7 +252,8 @@ public class JmxUtils {
 			Object value = cds.get(key);
 			if (value instanceof TabularDataSupport) {
 				TabularDataSupport tds = (TabularDataSupport) value;
-				processTabularDataSupport(resList, info, oi, r, attributeName + "." + key, tds, query);
+				processTabularDataSupport(resList, info, oi, r, attributeName
+						+ "." + key, tds, query);
 				r.addValue(key, value);
 			} else if (value instanceof CompositeDataSupport) {
 				// now recursively go through everything.
@@ -248,7 +268,8 @@ public class JmxUtils {
 	}
 
 	/** */
-	private static void processTabularDataSupport(List<Result> resList, MBeanInfo info, ObjectInstance oi, Result r, String attributeName,
+	private static void processTabularDataSupport(List<Result> resList,
+			MBeanInfo info, ObjectInstance oi, Result r, String attributeName,
 			TabularDataSupport tds, Query query) {
 		Set<Entry<Object, Object>> entries = tds.entrySet();
 		for (Entry<Object, Object> entry : entries) {
@@ -265,14 +286,18 @@ public class JmxUtils {
 				String attributeName2 = sb.toString();
 				Object entryValue = entry.getValue();
 				if (entryValue instanceof CompositeDataSupport) {
-					getResult(resList, info, oi, attributeName + attributeName2, (CompositeDataSupport) entryValue, query);
+					getResult(resList, info, oi,
+							attributeName + attributeName2,
+							(CompositeDataSupport) entryValue, query);
 				} else {
-					throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryValue is: "
-							+ entryValue.getClass().getCanonicalName());
+					throw new RuntimeException(
+							"!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryValue is: "
+									+ entryValue.getClass().getCanonicalName());
 				}
 			} else {
-				throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: "
-						+ entryKeys.getClass().getCanonicalName());
+				throw new RuntimeException(
+						"!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: "
+								+ entryKeys.getClass().getCanonicalName());
 			}
 		}
 	}
@@ -280,7 +305,8 @@ public class JmxUtils {
 	/**
 	 * Builds up the base Result object
 	 */
-	private static Result getNewResultObject(MBeanInfo info, ObjectInstance oi, String attributeName, Query query) {
+	private static Result getNewResultObject(MBeanInfo info, ObjectInstance oi,
+			String attributeName, Query query) {
 		Result r = new Result(attributeName);
 		r.setQuery(query);
 		r.setClassName(info.getClassName());
@@ -291,25 +317,30 @@ public class JmxUtils {
 	/**
 	 * Used when the object is effectively a java type
 	 */
-	private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, Attribute attribute, Query query) {
+	private static void getResult(List<Result> resList, MBeanInfo info,
+			ObjectInstance oi, Attribute attribute, Query query) {
 		Object value = attribute.getValue();
 		if (value != null) {
 			if (value instanceof CompositeDataSupport) {
-				getResult(resList, info, oi, attribute.getName(), (CompositeData) value, query);
+				getResult(resList, info, oi, attribute.getName(),
+						(CompositeData) value, query);
 			} else if (value instanceof CompositeData[]) {
 				for (CompositeData cd : (CompositeData[]) value) {
 					getResult(resList, info, oi, attribute.getName(), cd, query);
 				}
 			} else if (value instanceof ObjectName[]) {
-				Result r = getNewResultObject(info, oi, attribute.getName(), query);
+				Result r = getNewResultObject(info, oi, attribute.getName(),
+						query);
 				for (ObjectName obj : (ObjectName[]) value) {
-					r.addValue(obj.getCanonicalName(), obj.getKeyPropertyListString());
+					r.addValue(obj.getCanonicalName(),
+							obj.getKeyPropertyListString());
 				}
 				resList.add(r);
 			} else if (value.getClass().isArray()) {
 				// OMFG: this is nutty. some of the items in the array can be
 				// primitive! great interview question!
-				Result r = getNewResultObject(info, oi, attribute.getName(), query);
+				Result r = getNewResultObject(info, oi, attribute.getName(),
+						query);
 				for (int i = 0; i < Array.getLength(value); i++) {
 					Object val = Array.get(value, i);
 					r.addValue(attribute.getName() + "." + i, val);
@@ -317,11 +348,14 @@ public class JmxUtils {
 				resList.add(r);
 			} else if (value instanceof TabularDataSupport) {
 				TabularDataSupport tds = (TabularDataSupport) value;
-				Result r = getNewResultObject(info, oi, attribute.getName(), query);
-				processTabularDataSupport(resList, info, oi, r, attribute.getName(), tds, query);
+				Result r = getNewResultObject(info, oi, attribute.getName(),
+						query);
+				processTabularDataSupport(resList, info, oi, r,
+						attribute.getName(), tds, query);
 				resList.add(r);
 			} else {
-				Result r = getNewResultObject(info, oi, attribute.getName(), query);
+				Result r = getNewResultObject(info, oi, attribute.getName(),
+						query);
 				r.addValue(attribute.getName(), value);
 				resList.add(r);
 			}
@@ -342,11 +376,14 @@ public class JmxUtils {
 	 * Helper method for connecting to a Server. You need to close the resulting
 	 * connection.
 	 */
-	public static JMXConnector getServerConnection(Server server) throws Exception {
+	public static JMXConnector getServerConnection(Server server)
+			throws Exception {
 		JMXServiceURL url = new JMXServiceURL(server.getUrl());
 
-		if (server.getProtocolProviderPackages() != null && server.getProtocolProviderPackages().contains("weblogic"))
-			return JMXConnectorFactory.connect(url, getWebLogicEnvironment(server));
+		if (server.getProtocolProviderPackages() != null
+				&& server.getProtocolProviderPackages().contains("weblogic"))
+			return JMXConnectorFactory.connect(url,
+					getWebLogicEnvironment(server));
 		else
 			return JMXConnectorFactory.connect(url, getEnvironment(server));
 
@@ -360,7 +397,8 @@ public class JmxUtils {
 		String username = server.getUsername();
 		String password = server.getPassword();
 		if ((username != null) && (password != null)) {
-			environment.put(JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, server.getProtocolProviderPackages());
+			environment.put(JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES,
+					server.getProtocolProviderPackages());
 			environment.put(Context.SECURITY_PRINCIPAL, username);
 			environment.put(Context.SECURITY_CREDENTIALS, password);
 		}
@@ -395,7 +433,8 @@ public class JmxUtils {
 		if (process.isServersMultiThreaded()) {
 			ExecutorService service = null;
 			try {
-				service = Executors.newFixedThreadPool(process.getNumMultiThreadedServers());
+				service = Executors.newFixedThreadPool(process
+						.getNumMultiThreadedServers());
 				for (Server server : process.getServers()) {
 					JMXConnector conn = JmxUtils.getServerConnection(server);
 					conns.add(conn);
@@ -450,7 +489,8 @@ public class JmxUtils {
 	/**
 	 * Does the work for processing a Server object.
 	 */
-	public static void processServer(Server server, JMXConnector conn) throws Exception {
+	public static void processServer(Server server, JMXConnector conn)
+			throws Exception {
 		// try {
 		MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 		JmxUtils.processQueriesForServer(mbeanServer, server);
@@ -470,7 +510,8 @@ public class JmxUtils {
 	 */
 	public static void printJson(JmxProcess process) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES, false);
+		mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES,
+				false);
 		System.out.println(mapper.writeValueAsString(process));
 	}
 
@@ -480,7 +521,8 @@ public class JmxUtils {
 	 */
 	public static void prettyPrintJson(JmxProcess process) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES, false);
+		mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES,
+				false);
 		ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
 		System.out.println(writer.writeValueAsString(process));
 	}
@@ -489,7 +531,8 @@ public class JmxUtils {
 	 * Uses jackson to load json configuration from a File into a full object
 	 * tree representation of that json.
 	 */
-	public static JmxProcess getJmxProcess(File file) throws JsonParseException, JsonMappingException, IOException {
+	public static JmxProcess getJmxProcess(File file)
+			throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
 		jmx.setName(file.getName());
@@ -508,12 +551,12 @@ public class JmxUtils {
 	 * Checks if the String contains only unicode digits. A decimal point is a
 	 * digit and returns true.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * <code>null</code> will return <code>false</code>. An empty String ("")
 	 * will return <code>true</code>.
 	 * </p>
-	 *
+	 * 
 	 * <pre>
 	 * StringUtils.isNumeric(null)   = false
 	 * StringUtils.isNumeric("")     = true
@@ -524,7 +567,7 @@ public class JmxUtils {
 	 * StringUtils.isNumeric("12-3") = false
 	 * StringUtils.isNumeric("12.3") = true
 	 * </pre>
-	 *
+	 * 
 	 * @param str
 	 *            the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
@@ -558,7 +601,8 @@ public class JmxUtils {
 	 *            the factory
 	 * @return the object pool
 	 */
-	public static <T extends KeyedPoolableObjectFactory> GenericKeyedObjectPool getObjectPool(T factory) {
+	public static <T extends KeyedPoolableObjectFactory> GenericKeyedObjectPool getObjectPool(
+			T factory) {
 		GenericKeyedObjectPool pool = new GenericKeyedObjectPool(factory);
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);
@@ -630,7 +674,9 @@ public class JmxUtils {
 	 *            the root prefix
 	 * @return the key string
 	 */
-	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+	public static String getKeyString(Query query, Result result,
+			Entry<String, Object> values, List<String> typeNames,
+			String rootPrefix) {
 		String keyStr = null;
 		if (values.getKey().startsWith(result.getAttributeName())) {
 			keyStr = values.getKey();
@@ -642,7 +688,8 @@ public class JmxUtils {
 		if (query.getServer().getAlias() != null) {
 			alias = query.getServer().getAlias();
 		} else {
-			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+			alias = query.getServer().getHost() + "_"
+					+ query.getServer().getPort();
 			alias = cleanupStr(alias);
 		}
 
@@ -663,7 +710,8 @@ public class JmxUtils {
 
 		sb.append(".");
 
-		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
+		String typeName = cleanupStr(getConcatedTypeNameValues(query,
+				typeNames, result.getTypeName()));
 		if (typeName != null) {
 			sb.append(typeName);
 			sb.append(".");
@@ -673,7 +721,9 @@ public class JmxUtils {
 		return sb.toString();
 	}
 
-	public static String getKeyString2(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+	public static String getKeyString2(Query query, Result result,
+			Entry<String, Object> values, List<String> typeNames,
+			String rootPrefix) {
 		String keyStr = null;
 		if (values.getKey().startsWith(result.getAttributeName())) {
 			keyStr = values.getKey();
@@ -692,7 +742,8 @@ public class JmxUtils {
 
 		sb.append(".");
 
-		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
+		String typeName = cleanupStr(getConcatedTypeNameValues(query,
+				typeNames, result.getTypeName()));
 		if (typeName != null) {
 			sb.append(typeName);
 			sb.append(".");
@@ -701,12 +752,15 @@ public class JmxUtils {
 
 		return sb.toString();
 	}
-	
+
 	/**
-	 * Gets the key string for MetricsdWriter.This is key string will format the graphite metrics scheme name. 
-	 * It will put the resultAlias in front of the host alias. 
+	 * Gets the key string for MetricsdWriter.This is key string will format the
+	 * graphite metrics scheme name. It will put the resultAlias in front of the
+	 * host alias.
 	 */
-	public static String getStatsdKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {		
+	public static String getStatsdKeyString(Query query, Result result,
+			Entry<String, Object> values, List<String> typeNames,
+			String rootPrefix) {
 		String keyStr = null;
 		if (values.getKey().startsWith(result.getAttributeName())) {
 			keyStr = values.getKey();
@@ -719,7 +773,7 @@ public class JmxUtils {
 			sb.append(rootPrefix);
 			sb.append(".");
 		}
-		
+
 		// Allow people to use something other than the classname as the output.
 		if (result.getClassNameAlias() != null) {
 			sb.append(result.getClassNameAlias());
@@ -729,25 +783,26 @@ public class JmxUtils {
 
 		sb.append(".");
 
-		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
+		String typeName = cleanupStr(getConcatedTypeNameValues(query,
+				typeNames, result.getTypeName()));
 		if (typeName != null) {
 			sb.append(typeName);
 			sb.append(".");
 		}
 		sb.append(cleanupStr(keyStr));
 		sb.append(".");
-		//Attach the host alias
+		// Attach the host alias
 		String alias = null;
 		if (query.getServer().getAlias() != null) {
 			alias = query.getServer().getAlias();
 		} else {
-			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+			alias = query.getServer().getHost() + "_"
+					+ query.getServer().getPort();
 			alias = cleanupStr(alias);
 		}
 		sb.append(alias);
 		return sb.toString();
 	}
-	
 
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
@@ -770,19 +825,20 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 *
+	 * 
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 *
+	 * 
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
-	 *
+	 * 
 	 * @param typeNames
 	 *            the type names
 	 * @param typeNameStr
 	 *            the type name str
 	 * @return the concated type name values
 	 */
-	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
+	public static String getConcatedTypeNameValues(List<String> typeNames,
+			String typeNameStr) {
 		if ((typeNames == null) || (typeNames.size() == 0)) {
 			return null;
 		}
@@ -801,12 +857,12 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 *
+	 * 
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 *
+	 * 
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
-	 *
+	 * 
 	 * @param query
 	 *            the query
 	 * @param typeNames
@@ -815,7 +871,8 @@ public class JmxUtils {
 	 *            the type name
 	 * @return the concated type name values
 	 */
-	public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
+	public static String getConcatedTypeNameValues(Query query,
+			List<String> typeNames, String typeName) {
 		Set<String> queryTypeNames = query.getTypeNames();
 		if (queryTypeNames != null && queryTypeNames.size() > 0) {
 			List<String> allNames = new ArrayList<String>(queryTypeNames);

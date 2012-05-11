@@ -26,15 +26,16 @@ import com.googlecode.jmxtrans.util.ValidationException;
 /**
  * This output writer sends data to a host/port combination in the Graphite
  * format.
- *
+ * 
  * @see <a
  *      href="http://graphite.wikidot.com/getting-your-data-into-graphite">http://graphite.wikidot.com/getting-your-data-into-graphite</a>
- *
+ * 
  * @author jon
  */
 public class GraphiteWriter extends BaseOutputWriter {
 
-	private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(GraphiteWriter.class);
 	public static final String ROOT_PREFIX = "rootPrefix";
 
 	private String host;
@@ -48,13 +49,15 @@ public class GraphiteWriter extends BaseOutputWriter {
 	/**
 	 * Uses JmxUtils.getDefaultPoolMap()
 	 */
-	public GraphiteWriter() { }
+	public GraphiteWriter() {
+	}
 
 	@Override
 	public void start() throws LifecycleException {
 		try {
 			this.pool = JmxUtils.getObjectPool(new SocketFactory());
-			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool)pool, Server.SOCKET_FACTORY_POOL);
+			this.mbean = new ManagedGenericKeyedObjectPool(
+					(GenericKeyedObjectPool) pool, Server.SOCKET_FACTORY_POOL);
 			JmxUtils.registerJMX(this.mbean);
 		} catch (Exception e) {
 			throw new LifecycleException(e);
@@ -118,7 +121,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 						if (JmxUtils.isNumeric(values.getValue())) {
 							StringBuilder sb = new StringBuilder();
 
-							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
+							sb.append(JmxUtils.getKeyString(query, result,
+									values, typeNames, rootPrefix));
 
 							sb.append(" ");
 							sb.append(values.getValue().toString());
