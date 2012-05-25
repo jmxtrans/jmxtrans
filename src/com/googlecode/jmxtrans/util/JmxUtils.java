@@ -551,7 +551,7 @@ public class JmxUtils {
 	/**
 	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
 	 * better performance on high load
-	 * 
+	 *
 	 * @param <T>
 	 *            the generic type
 	 * @param factory
@@ -571,7 +571,7 @@ public class JmxUtils {
 
 	/**
 	 * Helper method which returns a default PoolMap.
-	 * 
+	 *
 	 * TODO: allow for more configuration options?
 	 */
 	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
@@ -591,7 +591,7 @@ public class JmxUtils {
 
 	/**
 	 * Register the scheduler in the local MBeanServer.
-	 * 
+	 *
 	 * @param mbean
 	 *            the mbean
 	 * @throws Exception
@@ -604,7 +604,7 @@ public class JmxUtils {
 
 	/**
 	 * Unregister the scheduler from the local MBeanServer.
-	 * 
+	 *
 	 * @param mbean
 	 *            the mbean
 	 * @throws Exception
@@ -617,7 +617,7 @@ public class JmxUtils {
 
 	/**
 	 * Gets the key string.
-	 * 
+	 *
 	 * @param query
 	 *            the query
 	 * @param result
@@ -664,7 +664,7 @@ public class JmxUtils {
 		sb.append(".");
 
 		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
-		if (typeName != null) {
+		if (typeName != null && typeName.length() > 0) {
 			sb.append(typeName);
 			sb.append(".");
 		}
@@ -693,7 +693,7 @@ public class JmxUtils {
 		sb.append(".");
 
 		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
-		if (typeName != null) {
+		if (typeName != null && typeName.length() > 0) {
 			sb.append(typeName);
 			sb.append(".");
 		}
@@ -704,7 +704,7 @@ public class JmxUtils {
 
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
-	 * 
+	 *
 	 * @param name
 	 *            the name
 	 * @return the string
