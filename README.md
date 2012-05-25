@@ -1,5 +1,7 @@
 # Welcome to jmxtrans
 
+![travis](https://secure.travis-ci.org/lookfirst/jmxtrans.png?branch=master)
+
 This is the source code repository for the jmxtrans project.
 
 This is effectively the missing connector between speaking to a JVM via JMX on one end and whatever logging / monitoring / graphing package that you can dream up on the other end.
