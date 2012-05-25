@@ -1,6 +1,6 @@
 # Welcome to jmxtrans
 
-![travis](https://secure.travis-ci.org/lookfirst/jmxtrans.png?branch=master)
+[![Build Status](https://secure.travis-ci.org/lookfirst/jmxtrans.png?branch=master)](http://travis-ci.org/lookfirst/jmxtrans)
 
 This is the source code repository for the jmxtrans project.
 
