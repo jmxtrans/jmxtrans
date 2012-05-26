@@ -28,7 +28,7 @@
 	<tstamp>
 		<format property="NOW" pattern="yyyyMMdd-hh:mm:ss" />
 		<format property="DATE_TIME" pattern="yyyyMMdd-HHmmss" />
-		<format property="DATE_TIME2" pattern="yyyyMMddHHmmss" />
+		<format property="DATE_TIME2" pattern="yyyyMMdd.HHmmss" />
 		<!-- Wed, 19 Jan 2011 18:19:37 -0800 -->
 		<format property="PROPER_NOW" pattern="E, dd MMM yyyy hh:mm:ss ZZ" />
 		<format property="YEAR" pattern="yyyy" />
@@ -79,7 +79,7 @@
 
 		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
 		<property name="version" value="${DATE_TIME}-${sVersionRevision}" />
-		<property name="version.rpm" value="${DATE_TIME2}-${sVersionRevision}" />
+		<property name="version.rpm" value="${DATE_TIME2}.${sVersionRevision}" />
 		<property name="build.version" value="${DATE_TIME}-${sVersionRevision}" />
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
