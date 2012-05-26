@@ -220,6 +220,9 @@
 		<zip zipfile="${build.dist.zip}" basedir="${build.dist.dir.dirname}">
 			<include name="${build.dist.dir.basename}/**" />
 		</zip>
+		<zip zipfile="${build.dist.rpm.zip}" basedir="${build.dist.dir.dirname}">
+			<include name="${build.dist.dir.basename}/**" />
+		</zip>
 	</target>
 
 	<target name="debian" depends="dist">
@@ -269,11 +272,10 @@
 		<mkdir dir="${target.dir}/jmxtrans/rpm/SRPMS" />
 		<mkdir dir="${target.dir}/jmxtrans/rpm/TEMP" />
 
-		<copy file="${build.dist.zip}" todir="${target.dir}/jmxtrans/rpm/SOURCES"/>
-		<move file="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.zip}" tofile="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.rpm.zip}" />
+		<copy file="${build.dist.rpm.zip}" todir="${target.dir}/jmxtrans/rpm/SOURCES"/>
 
 		<exec executable="/usr/bin/rpmbuild" dir="${target.dir}/jmxtrans/rpm" failonerror="true">
-			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version.rpm}' --define='RELEASE 0' --define='JMXTRANS_SOURCE ${build.dist.rpm.zip}' SPECS/jmxtrans.spec"/>
+			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version.rpm}' --define='RELEASE 0' --define='JMXTRANS_SOURCE ${ant.project.name}-${version.rpm}.zip' SPECS/jmxtrans.spec"/>
 		</exec>
 	</target>
 
