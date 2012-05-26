@@ -270,7 +270,7 @@
 		<mkdir dir="${target.dir}/jmxtrans/rpm/TEMP" />
 
 		<copy file="${build.dist.zip}" todir="${target.dir}/jmxtrans/rpm/SOURCES"/>
-		<rename src="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.zip}" dest="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.rpm.zip}" />
+		<move file="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.zip}" tofile="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.rpm.zip}" />
 
 		<exec executable="/usr/bin/rpmbuild" dir="${target.dir}/jmxtrans/rpm" failonerror="true">
 			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version.rpm}' --define='RELEASE 0' --define='JMXTRANS_SOURCE ${build.dist.rpm.zip}' SPECS/jmxtrans.spec"/>
