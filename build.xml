@@ -28,6 +28,7 @@
 	<tstamp>
 		<format property="NOW" pattern="yyyyMMdd-hh:mm:ss" />
 		<format property="DATE_TIME" pattern="yyyyMMdd-HHmmss" />
+		<format property="DATE_TIME2" pattern="yyyyMMddHHmmss" />
 		<!-- Wed, 19 Jan 2011 18:19:37 -0800 -->
 		<format property="PROPER_NOW" pattern="E, dd MMM yyyy hh:mm:ss ZZ" />
 		<format property="YEAR" pattern="yyyy" />
@@ -78,6 +79,7 @@
 
 		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
 		<property name="version" value="${DATE_TIME}-${sVersionRevision}" />
+		<property name="version.rpm" value="${DATE_TIME2}-${sVersionRevision}" />
 		<property name="build.version" value="${DATE_TIME}-${sVersionRevision}" />
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
@@ -239,7 +241,7 @@
 			</fileset>
 		</move>
 
-                <!-- inject docs directory -->
+        <!-- inject docs directory -->
 		<copy todir="${target.dir}/jmxtrans/debian/tmp/usr/share/doc/jmxtrans">
 			<fileset dir="${basedir}/doc">
 				<include name="**"/>
@@ -252,7 +254,7 @@
 		<exec executable="/usr/bin/debuild" dir="${target.dir}/jmxtrans" failonerror="true">
 			<arg line="-b -i -us -uc"/>
 		</exec>
-		</target>
+	</target>
 
 	<target name="rpm" depends="dist">
 		<copy todir="${target.dir}/jmxtrans/rpm" >
@@ -269,7 +271,7 @@
 		<copy file="${build.dist.zip}" todir="${target.dir}/jmxtrans/rpm/SOURCES"/>
 
 		<exec executable="/usr/bin/rpmbuild" dir="${target.dir}/jmxtrans/rpm" failonerror="true">
-			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version}' --define='RELEASE 0' --define='JMXTRANS_SOURCE jmxtrans-${version}.zip' SPECS/jmxtrans.spec"/>
+			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version.rpm}' --define='RELEASE 0' --define='JMXTRANS_SOURCE jmxtrans-${version}.zip' SPECS/jmxtrans.spec"/>
 		</exec>
 	</target>
 
