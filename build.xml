@@ -84,6 +84,7 @@
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
 		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
+		<property name="build.dist.rpm.zip" location="${build.dir}/${ant.project.name}-${version.rpm}.zip"/>
 	</target>
 
 	<target name="clean">
@@ -269,9 +270,10 @@
 		<mkdir dir="${target.dir}/jmxtrans/rpm/TEMP" />
 
 		<copy file="${build.dist.zip}" todir="${target.dir}/jmxtrans/rpm/SOURCES"/>
+		<rename src="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.zip}" dest="${target.dir}/jmxtrans/rpm/SOURCES/${build.dist.rpm.zip}" />
 
 		<exec executable="/usr/bin/rpmbuild" dir="${target.dir}/jmxtrans/rpm" failonerror="true">
-			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version.rpm}' --define='RELEASE 0' --define='JMXTRANS_SOURCE jmxtrans-${version}.zip' SPECS/jmxtrans.spec"/>
+			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version.rpm}' --define='RELEASE 0' --define='JMXTRANS_SOURCE ${build.dist.rpm.zip}' SPECS/jmxtrans.spec"/>
 		</exec>
 	</target>
 
