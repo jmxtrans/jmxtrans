@@ -1,2 +1,6 @@
 @PACKAGE@: new-package-should-close-itp-bug
 @PACKAGE@: maintainer-script-needs-depends-on-adduser preinst
+@PACKAGE@: helper-templates-in-copyright
+@PACKAGE@: virtual-package-depends-without-real-package-depends
+@PACKAGE@: binary-without-manpage usr/bin/yaml2jmxtrans
+@PACKAGE@: python-script-but-no-python-dep usr/share/jmxtrans/tools/yaml2jmxtrans.py
