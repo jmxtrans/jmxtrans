@@ -84,6 +84,7 @@
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
 		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
+		<property name="build.dist.rpm" location="${build.dir}/${ant.project.name}-${version.rpm}"/>
 		<property name="build.dist.rpm.zip" location="${build.dir}/${ant.project.name}-${version.rpm}.zip"/>
 	</target>
 
@@ -215,13 +216,18 @@
 		</chmod>
 
 		<dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
+                <dirname property="build.dist.dir.dirname.rpm" file="${build.dist.rpm}" />
+		<!-- properties for rpm build -->
 		<basename property="build.dist.dir.basename" file="${build.dist.dir}" />
+                <basename property="build.dist.dir.basename.rpm" file="${build.dist.rpm}" />
 
 		<zip zipfile="${build.dist.zip}" basedir="${build.dist.dir.dirname}">
 			<include name="${build.dist.dir.basename}/**" />
 		</zip>
-		<zip zipfile="${build.dist.rpm.zip}" basedir="${build.dist.dir.dirname}">
-			<include name="${build.dist.dir.basename}/**" />
+		<!-- move fixes rpm paths -->
+                <move file="${build.dist.dir}" tofile="${build.dist.rpm}" />
+		<zip zipfile="${build.dist.rpm.zip}" basedir="${build.dist.dir.dirname.rpm}">
+			<include name="${build.dist.dir.basename.rpm}/**" />
 		</zip>
 	</target>
 
