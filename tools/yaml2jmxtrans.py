@@ -91,14 +91,14 @@ class HostSets(object):
     """
     Simple access to host/query entries given in custom YAML format
     """
-    
+
     def __init__(self, host_sets):
         """
         Initialize host sets from YAML format
         """
-        
+
         self.host_sets = {}
-        
+
         for host_set in host_sets:
             set_entry = {'query_names' : host_set['query_names'],
                          'hosts' : host_set['hosts'] }
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         usage()
         sys.exit(1)
-    
+
     infile = open(sys.argv[1], 'r')
     yf = yaml.load(infile)
     query_port = yf['query_port']
