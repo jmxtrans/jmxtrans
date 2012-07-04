@@ -18,6 +18,7 @@
 #   limitations under the License.
 
 import yaml, json, sys
+from string import Template
 
 class Queries(object):
     """
@@ -63,7 +64,7 @@ class Queries(object):
         queryentry['outputWriters'] = self.create_graphite_output_writer(typeName)
         return queryentry
 
-    def create_host_entry(self, host_name, query_names, query_port, username, password):
+    def create_host_entry(self, host_name, query_names, query_port, username, password, urlTemplate):
         """
         Create a query snippet for 'host_name' with all queries given
         by 'query_names'
@@ -80,10 +81,14 @@ class Queries(object):
         if password:
             hostentry['password'] = password
 
+        if urlTemplate:
+            url = Template(urlTemplate)
+            hostentry['url'] = url.substitute(hostname=host_name, query_port=query_port)
+
         hostentry['numQueryThreads'] = len(hostentry['queries'])
         return hostentry
 
-    def create_host_set_configuration(self, host_names, query_names, query_port, username, password):
+    def create_host_set_configuration(self, host_names, query_names, query_port, username, password, urlTemplate):
         """
         Return the full jmxtrans compatible configuration for all 'host_names',
         each using all queries given by 'query_names'. 'query_port' is used to
@@ -91,7 +96,7 @@ class Queries(object):
         """
         root = {'servers' : [] }
         for host_name in host_names:
-            root['servers'].append(self.create_host_entry(host_name, query_names, query_port, username, password))
+            root['servers'].append(self.create_host_entry(host_name, query_names, query_port, username, password, urlTemplate))
         return root
 
     def create_graphite_output_writer(self, typeName):
@@ -133,6 +138,11 @@ class HostSets(object):
             else:
                 set_entry['password'] = None
 
+            if 'urlTemplate' in host_set:
+                set_entry['urlTemplate'] = host_set['urlTemplate']
+            else:
+                set_entry['urlTemplate'] = None
+
             self.host_sets[host_set['setname']] = set_entry
 
     def set_names(self):
@@ -168,6 +178,6 @@ if __name__ == '__main__':
     for set_name in h.set_names():
         outfile = open(set_name + ".json", 'w')
         s = h.get_set(set_name)
-        servers = q.create_host_set_configuration(s['hosts'],s['query_names'], query_port, s['username'], s['password'])
+        servers = q.create_host_set_configuration(s['hosts'],s['query_names'], query_port, s['username'], s['password'], s['urlTemplate'])
         json.dump(servers,outfile, indent=1)
         outfile.close()
