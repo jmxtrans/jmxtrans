@@ -36,17 +36,31 @@ class Queries(object):
         for query in queries:
             queryentry = {}
             for attribute in query_attributes:
-                queryentry[attribute] = query[attribute]
-                self.queries[query['name']] = queryentry
+                if attribute in query:
+                  queryentry[attribute] = query[attribute]
+                else:
+                  queryentry[attribute] = None
+            self.queries[query['name']] = queryentry
 
     def create_query_entry(self, query_name):
         """
         Create a query snippet for the query referenced by 'query_name',
         including Graphite writer configuration
         """
-        queryentry = { 'outputWriters' : self.create_graphite_output_writer() }
+        queryentry = {}
+
+        # This supplies the default 'typeName' of 'name' to the graphite_output_writer
+        # if an alternative is not explicitly specified in a query definition
+        if self.queries[query_name]["typeName"] == None:
+            typeName = "name"
+        else:
+            typeName = self.queries[query_name]["typeName"]
+
         for attr in self.query_attributes:
-            queryentry[attr] = self.queries[query_name][attr]
+            # Ignore typeName so it doesn't also appear in the query section
+            if attr <> "typeName":
+                queryentry[attr] = self.queries[query_name][attr]
+        queryentry['outputWriters'] = self.create_graphite_output_writer(typeName)
         return queryentry
 
     def create_host_entry(self, host_name, query_names, query_port, username, password):
@@ -80,7 +94,7 @@ class Queries(object):
             root['servers'].append(self.create_host_entry(host_name, query_names, query_port, username, password))
         return root
 
-    def create_graphite_output_writer(self):
+    def create_graphite_output_writer(self, typeName):
         """
         Graphite output writer snippet template
         """
@@ -89,7 +103,7 @@ class Queries(object):
             'settings' : {
                 'port' : self.monitor_port,
                 'host' : self.monitor_host,
-                'typeNames' : [ "name" ],
+                'typeNames' : [ typeName ],
                 }
             }
         return [ writer ]
@@ -138,7 +152,7 @@ def usage():
 
 if __name__ == '__main__':
     # query attributes to copy
-    query_attributes = ["obj", "resultAlias", "attr"]
+    query_attributes = ["obj", "resultAlias", "attr", "typeName"]
 
     if len(sys.argv) != 2:
         usage()
