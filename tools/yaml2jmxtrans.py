@@ -49,7 +49,7 @@ class Queries(object):
             queryentry[attr] = self.queries[query_name][attr]
         return queryentry
 
-    def create_host_entry(self, host_name, query_names, query_port):
+    def create_host_entry(self, host_name, query_names, query_port, username, password):
         """
         Create a query snippet for 'host_name' with all queries given
         by 'query_names'
@@ -59,10 +59,17 @@ class Queries(object):
                       'queries' : [] }
         for query_name in query_names:
             hostentry['queries'].append(self.create_query_entry(query_name))
+
+        if username:
+            hostentry['username'] = username
+
+        if password:
+            hostentry['password'] = password
+
         hostentry['numQueryThreads'] = len(hostentry['queries'])
         return hostentry
 
-    def create_host_set_configuration(self, host_names, query_names, query_port):
+    def create_host_set_configuration(self, host_names, query_names, query_port, username, password):
         """
         Return the full jmxtrans compatible configuration for all 'host_names',
         each using all queries given by 'query_names'. 'query_port' is used to
@@ -70,7 +77,7 @@ class Queries(object):
         """
         root = {'servers' : [] }
         for host_name in host_names:
-            root['servers'].append(self.create_host_entry(host_name, query_names, query_port))
+            root['servers'].append(self.create_host_entry(host_name, query_names, query_port, username, password))
         return root
 
     def create_graphite_output_writer(self):
@@ -91,17 +98,27 @@ class HostSets(object):
     """
     Simple access to host/query entries given in custom YAML format
     """
-    
+
     def __init__(self, host_sets):
         """
         Initialize host sets from YAML format
         """
-        
+
         self.host_sets = {}
-        
+
         for host_set in host_sets:
             set_entry = {'query_names' : host_set['query_names'],
                          'hosts' : host_set['hosts'] }
+            if 'username' in host_set:
+                set_entry['username'] = host_set['username']
+            else:
+                set_entry['username'] = None
+
+            if 'password' in host_set:
+                set_entry['password'] = host_set['password']
+            else:
+                set_entry['password'] = None
+
             self.host_sets[host_set['setname']] = set_entry
 
     def set_names(self):
@@ -126,7 +143,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         usage()
         sys.exit(1)
-    
+
     infile = open(sys.argv[1], 'r')
     yf = yaml.load(infile)
     query_port = yf['query_port']
@@ -137,6 +154,6 @@ if __name__ == '__main__':
     for set_name in h.set_names():
         outfile = open(set_name + ".json", 'w')
         s = h.get_set(set_name)
-        servers = q.create_host_set_configuration(s['hosts'],s['query_names'], query_port)
+        servers = q.create_host_set_configuration(s['hosts'],s['query_names'], query_port, s['username'], s['password'])
         json.dump(servers,outfile, indent=1)
         outfile.close()
