@@ -51,6 +51,7 @@
 			<sfile name="${commons-lang.jar}" scope="compile" src="${alexandria.home}/${commons-lang.src}" />
 			<sfile name="${commons-logging.jar}" scope="compile" src="${alexandria.home}/${commons-logging.src}" />
 			<sfile name="${commons-pool.jar}" scope="compile" src="${alexandria.home}/${commons-pool.src}" />
+			<sfile name="${gmetric4j.jar}" scope="compile" />
 			<sfile name="${jackson-core.jar}" scope="compile" src="${alexandria.home}/${jackson.src}" />
 			<sfile name="${jackson-mapper.jar}" scope="compile" src="${alexandria.home}/${jackson.src}" />
 			<sfile name="${jpathwatch.jar}" scope="compile" />
