@@ -1,9 +1,15 @@
+# Avoid unnecessary debug-information (native code)
+%define		debug_package %{nil}
+
+# Avoid CentOS 5/6 extras processes on contents (especially brp-java-repack-jars)
+%define __os_install_post %{nil}
+
 Name: jmxtrans
 Version: %{VERSION}
 Release: %{RELEASE}
 Summary: JMX Transformer - more than meets the eye
 Group: Applications/Communications
-URL: http://http://code.google.com/p/jmxtrans//
+URL: http://http://code.google.com/p/jmxtrans/
 Vendor: Jon Stevens
 Packager: Henri Gomez <henri.gomez@gmail.com>
 License: OpenSource Software by Jon Stevens
