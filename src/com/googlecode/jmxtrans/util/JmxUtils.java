@@ -267,11 +267,11 @@ public class JmxUtils {
 				if (entryValue instanceof CompositeDataSupport) {
 					getResult(resList, info, oi, attributeName + attributeName2, (CompositeDataSupport) entryValue, query);
 				} else {
-					throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryValue is: "
+					throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/lookfirst/jmxtrans/issues entryValue is: "
 							+ entryValue.getClass().getCanonicalName());
 				}
 			} else {
-				throw new RuntimeException("!!!!!!!!!! Please file a bug: http://code.google.com/p/jmxtrans/issues/entry entryKeys is: "
+				throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/lookfirst/jmxtrans/issues entryKeys is: "
 						+ entryKeys.getClass().getCanonicalName());
 			}
 		}
