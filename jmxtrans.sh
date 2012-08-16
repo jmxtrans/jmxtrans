@@ -8,13 +8,14 @@ if [ -e "$CONF_FILE" ]; then
 	. "$CONF_FILE"
 fi
 
+JAVA_HOME=${JAVA_HOME:-"/usr/local/java"}
 LOG_DIR=${LOG_DIR:-"."}
 JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
 JSON_DIR=${JSON_DIR:-"."}
 SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
 
-JPS=${JPS:-"/usr/bin/jps -l"}
-JAVA=${JAVA:-"/usr/bin/java"}
+JPS=${JPS:-"${JAVA_HOME}/bin/jps -l"}
+JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
 PSCMD="$JPS | grep -i jmxtrans | awk '{ print \$1 };'"
 JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"}
 NEW_SIZE=${NEW_SIZE:-"64"}
