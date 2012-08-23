@@ -45,6 +45,15 @@ public class SocketFactory extends BaseKeyedPoolableObjectFactory {
 	@Override
 	public boolean validateObject(Object key, Object obj) {
 		Socket socket = (Socket) obj;
+		try {
+			socket.setSoTimeout(100);
+			if (socket.getInputStream().read() == -1) {
+				return false;
+			}
+		} catch (java.net.SocketTimeoutException e) {
+		} catch (Exception e) {
+			return false;
+		}
 		return socket.isBound() && !socket.isClosed() && socket.isConnected() && !socket.isInputShutdown() && !socket.isOutputShutdown();
 	}
 }
