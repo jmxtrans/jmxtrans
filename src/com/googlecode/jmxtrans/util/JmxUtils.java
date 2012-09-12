@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
@@ -49,6 +51,7 @@ import com.googlecode.jmxtrans.OutputWriter;
 import com.googlecode.jmxtrans.jmx.ManagedObject;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Operation;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 
@@ -200,7 +203,35 @@ public class JmxUtils {
 						getResult(resList, info, oi, attribute, query);
 					}
 
-					query.setResults(resList);
+				}
+				
+				if ((query.getOper() != null) && (query.getOper().size() > 0)) {
+					if (log.isDebugEnabled()) {
+						log.debug("Executing Operation queryName: " + queryName.getCanonicalName() + " from query: " + query);
+					}
+					
+					for (Operation operation : query.getOper()) {
+						MBeanOperationInfo[] opers = info.getOperations();
+						MBeanParameterInfo[] signature;
+						List<String> paramTypes= new ArrayList<String>();
+						// TODO: we SHOULD be creating a MAP<String,List<String>>  ONCE instead of doing this for every operation...
+						for (MBeanOperationInfo opersInfo : opers) {
+							if ( opersInfo.getName().equals( operation.getOperation() ) ) { continue; }
+							signature = opersInfo.getSignature();
+							for (MBeanParameterInfo i:signature){  paramTypes.add(i.getType());	}
+							break;
+						}
+						String[] arr=new String[paramTypes.size()];
+						paramTypes.toArray(arr);
+						Object ol = mbeanServer.invoke(queryName, operation.getOperation(), operation.getParameters().toArray(),arr );
+						Result r = getNewResultObject(info, oi, queryName.toString(), query);
+						r.addValue(operation.getOperation(), ol);
+						resList.add(r);
+					}				
+				}
+				
+				query.setResults(resList);
+					
 
 					// Now run the OutputWriters.
 					runOutputWritersForQuery(query);
@@ -208,7 +239,6 @@ public class JmxUtils {
 					if (log.isDebugEnabled()) {
 						log.debug("Finished running outputWriters for query: " + query);
 					}
-				}
 			} catch (UnmarshalException ue) {
 				if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
 					log.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: "
