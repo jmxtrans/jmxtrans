@@ -26,6 +26,18 @@
       } ],
       "obj" : "java.lang:name=ConcurrentMarkSweep,type=GarbageCollector",
       "attr" : [ "LastGcInfo" ]
+    }, {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter",
+        "settings" : {
+        }
+      } ],
+      "obj" : "java.util.logging:type=Logging",
+      "attr" : [  ],
+      "oper" : [ {
+ 	      	"operation" : "getLoggerLevel",
+   		   	"parameters" : [ "global" ]
+      	} ]
     } ],
     "numQueryThreads" : 2
   } ]
