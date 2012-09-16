@@ -8,7 +8,7 @@ public class Operation {
 	private String operation;
 	private List<String> parameters;
 	
-	public String getOperation() {
+	public String getMethod() {
 		return operation;
 	}
 	public void setOperation(String operation) {
