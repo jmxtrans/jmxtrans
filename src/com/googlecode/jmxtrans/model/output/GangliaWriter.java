@@ -11,8 +11,13 @@ import ganglia.gmetric.GMetricType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static ganglia.gmetric.GMetric.UDPAddressingMode;
 
@@ -24,7 +29,9 @@ import static ganglia.gmetric.GMetric.UDPAddressingMode;
  */
 public class GangliaWriter extends BaseOutputWriter {
 
-    /** Logger. */
+	private static final Pattern PATTERN_HOST_IP = Pattern.compile("(.+):([^:]+)$");
+	
+	/** Logger. */
     private static final Logger log = LoggerFactory.getLogger(GangliaWriter.class);
 
     /* Settings configuration keys. */
@@ -36,6 +43,7 @@ public class GangliaWriter extends BaseOutputWriter {
     public static final String TMAX = "tmax";
     public static final String DMAX = "dmax";
     public static final String GROUP_NAME = "groupName";
+    public static final String SPOOF_NAME = "spoofedHostName";
 
     /* Settings default values. */
     public static final String DEFAULT_HOST = null;
@@ -60,6 +68,7 @@ public class GangliaWriter extends BaseOutputWriter {
     protected int tmax = DEFAULT_TMAX;
     protected int dmax = DEFAULT_DMAX;
     protected String groupName = DEFAULT_GROUP_NAME;
+    protected String spoofedHostName = null;
 
     /** Parse and validate settings. */
     @Override
@@ -104,6 +113,9 @@ public class GangliaWriter extends BaseOutputWriter {
         // Parse and validate group name setting
         groupName = getStringSetting(GROUP_NAME, DEFAULT_GROUP_NAME);
 
+    	// Determine the spoofed hostname
+        spoofedHostName = getSpoofedHostName(query.getServer().getHost(), query.getServer().getAlias());
+        
         log.debug("Validated Ganglia metric [" +
                   HOST + ": " + host + ", " +
                   PORT + ": " + port + ", " +
@@ -114,6 +126,7 @@ public class GangliaWriter extends BaseOutputWriter {
                   SLOPE + ": " + slope + ", " +
                   TMAX + ": " + tmax + ", " +
                   DMAX + ": " + dmax + ", " +
+                  SPOOF_NAME + ": " + spoofedHostName + ", " +
                   GROUP_NAME + ": '" + groupName + "']");
     }
 
@@ -133,7 +146,7 @@ public class GangliaWriter extends BaseOutputWriter {
                             ttl,
                             v31,
                             null,
-                            "muvpl018:muvpl018.eu.mscsoftware.com"
+                            spoofedHostName
                     ).announce(
                             name,
                             value,
@@ -147,6 +160,49 @@ public class GangliaWriter extends BaseOutputWriter {
                 }
             }
         }
+    }
+
+    /**
+    * Determines the spoofed host name to be used when emitting metrics to a
+    * gmond process. Spoofed host names are of the form IP:hostname.
+    *
+    * @param host
+    * the host of the gmond (ganglia monitor) to which we are
+    * connecting, not null
+    * @param alias
+    * the custom alias supplied, may be null
+    * @return the host name to use when emitting metrics, in the form of
+    * IP:hostname
+    */
+    public static String getSpoofedHostName(String host, String alias) {
+    	// Determine the host name to use as the spoofed host name, this should
+    	// be of the format IP:hostname
+    	String spoofed = host;
+    	if (StringUtils.isNotEmpty(alias)) {
+    			// If the alias was supplied in the appropriate format, use it
+    			// directly
+    			Matcher hostIpMatcher = PATTERN_HOST_IP.matcher(alias);
+    			if (hostIpMatcher.matches())
+    					return alias;
+    			// Otherwise, use the alias as the host
+    			spoofed = alias;
+    	}
+    	// Attempt to find the IP of the given host (this may be an aliased
+    	// host)
+    	try {
+    		return InetAddress.getByName(spoofed).getHostAddress() + ":" + spoofed;
+    	} catch (UnknownHostException e) {
+    		// ignore failure to resolve spoofed host
+    	}
+    	// Attempt to return the local host IP with the spoofed host name
+    	try {
+    		return InetAddress.getLocalHost().getHostAddress() + ":" + spoofed;
+    	} catch (UnknownHostException e) {
+    		// ignore failure to resolve spoofed host
+    	}
+    	// We failed to resolve the spoofed host or our local host, return "x"
+    	// for the IP
+    	return "x:" + spoofed;
     }
 
     /**
