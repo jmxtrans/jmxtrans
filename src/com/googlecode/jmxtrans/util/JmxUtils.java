@@ -228,7 +228,7 @@ public class JmxUtils {
 						String[] arr = new String[paramTypes.size()];
 						paramTypes.toArray(arr);
 						Object ol = mbeanServer.invoke(queryName, operation.getMethod(), operation.getParameters().toArray(), arr);
-						Result r = getNewResultObject(info, oi, queryName.toString(), query);
+						Result r = getNewResultObject(info, oi, operation.getMethod(), query);
 						r.addValue(operation.getMethod(), ol);
 						resList.add(r);
 					}				
