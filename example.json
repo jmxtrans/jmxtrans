@@ -35,7 +35,7 @@
       "obj" : "java.util.logging:type=Logging",
       "attr" : [  ],
       "oper" : [ {
- 	      	"operation" : "getLoggerLevel",
+ 	      	"method" : "getLoggerLevel",
    		   	"parameters" : [ "global" ]
       	} ]
     } ],

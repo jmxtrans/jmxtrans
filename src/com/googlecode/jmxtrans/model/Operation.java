@@ -5,14 +5,14 @@ import java.util.List;
 
 
 public class Operation {
-	private String operation;
+	private String method;
 	private List<String> parameters;
 	
 	public String getMethod() {
-		return operation;
+		return method;
 	}
-	public void setOperation(String operation) {
-		this.operation = operation;
+	public void setMethod(String method) {
+		this.method = method;
 	}
 	public List<String> getParameters() {
 		return parameters;
