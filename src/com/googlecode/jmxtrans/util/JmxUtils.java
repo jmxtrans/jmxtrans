@@ -216,16 +216,18 @@ public class JmxUtils {
 						List<String> paramTypes= new ArrayList<String>();
 						// TODO: we SHOULD be creating a MAP<String,List<String>>  ONCE instead of doing this for every operation...
 						for (MBeanOperationInfo opersInfo : opers) {
-							if ( opersInfo.getName().equals( operation.getMethod() ) ) { continue; }
+							if ( opersInfo.getName().equals( operation.getMethod())) { 
+								continue; 
+							}
 							signature = opersInfo.getSignature();
 							for (MBeanParameterInfo i:signature) {  
 								paramTypes.add(i.getType());	
 							}
 							break;
 						}
-						String[] arr=new String[paramTypes.size()];
+						String[] arr = new String[paramTypes.size()];
 						paramTypes.toArray(arr);
-						Object ol = mbeanServer.invoke(queryName, operation.getMethod(), operation.getParameters().toArray(),arr );
+						Object ol = mbeanServer.invoke(queryName, operation.getMethod(), operation.getParameters().toArray(), arr);
 						Result r = getNewResultObject(info, oi, queryName.toString(), query);
 						r.addValue(operation.getMethod(), ol);
 						resList.add(r);
