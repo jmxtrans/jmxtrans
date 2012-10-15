@@ -30,6 +30,8 @@ import com.googlecode.jmxtrans.util.ValidationException;
  */
 public class KeyOutWriter extends BaseOutputWriter {
 
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(KeyOutWriter.class);
+
 	protected static final String LOG_PATTERN = "%m%n";
 	protected static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
 	protected static final ConcurrentHashMap<String, Logger> loggers = new ConcurrentHashMap<String, Logger>();
@@ -47,21 +49,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 */
 	@Override
 	public void validateSetup(Query query) throws ValidationException {
-		String fileStr = (String) this.getSettings().get("outputFile");
-		if (fileStr == null) {
-			throw new ValidationException("You must specify an outputFile setting.", query);
-		}
-		// Check if we've already created a logger for this file. If so, use it.
-		if (loggers.containsKey(fileStr)) {
-			logger = loggers.get(fileStr);
-			return;
-		}
-		// need to create a logger
-		try {
-			logger = loggers.putIfAbsent(fileStr, initLogger(fileStr));
-		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query);
-		}
+		logger = getLogger(query);
 	}
 
 	/**
@@ -69,6 +57,12 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 */
 	@Override
 	public void doWrite(Query query) throws Exception {
+		if (logger == null) {
+			// am seeing this happen for multiple servers, each with an embedded
+			// query
+			log.warn("logger is uninitialized, query=" + query);
+			logger = getLogger(query);
+		}
 		List<String> typeNames = getTypeNames();
 
 		for (Result result : query.getResults()) {
@@ -100,6 +94,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * @throws IOException
 	 */
 	protected Logger initLogger(String fileStr) throws IOException {
+		log.debug("Initializing logger: " + fileStr);
 		String maxLogFileSize = (String) this.getSettings().get("maxLogFileSize");
 		Integer maxLogBackupFiles = (Integer) this.getSettings().get("maxLogBackupFiles");
 		PatternLayout pl = new PatternLayout(LOG_PATTERN);
@@ -133,4 +128,24 @@ public class KeyOutWriter extends BaseOutputWriter {
 		};
 		return loggerFactory.makeNewLoggerInstance("KeyOutWriter" + this.hashCode());
 	}
+
+	private Logger getLogger(Query query) throws ValidationException {
+		String fileStr = (String) this.getSettings().get("outputFile");
+		if (fileStr == null) {
+			throw new ValidationException("You must specify an outputFile setting.", query);
+		}
+		// Check if we've already created a logger for this file. If so, use it.
+		if (loggers.containsKey(fileStr)) {
+			logger = loggers.get(fileStr);
+			return logger;
+		}
+		// need to create a logger
+		try {
+			logger = loggers.putIfAbsent(fileStr, initLogger(fileStr));
+		} catch (IOException e) {
+			throw new ValidationException("Failed to setup log4j", query);
+		}
+		return logger;
+	}
+
 }
