@@ -8,7 +8,7 @@ if [ -e "$CONF_FILE" ]; then
 	. "$CONF_FILE"
 fi
 
-JAVA_HOME=${JAVA_HOME:-"/usr/bin"}
+JAVA_HOME=${JAVA_HOME:-"/usr"}
 LOG_DIR=${LOG_DIR:-"."}
 JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
 JSON_DIR=${JSON_DIR:-"."}
