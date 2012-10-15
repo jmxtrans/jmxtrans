@@ -96,7 +96,11 @@ class Queries(object):
         """
         root = {'servers' : [] }
         for host_name in host_names:
-            root['servers'].append(self.create_host_entry(host_name, query_names, query_port, username, password, urlTemplate))
+             ## Extract port if present
+            if present(host, sep, port) = host_name.partition(":")
+            if sep == "":
+                port = query_port
+            root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate))
         return root
 
     def create_graphite_output_writer(self, typeName):
