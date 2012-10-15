@@ -32,7 +32,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 
 	protected static final String LOG_PATTERN = "%m%n";
 	protected static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
-	protected static final ConcurrentHashMap<String, Logger> loggers = new ConcurrentHashMap<String, Logger>();
+	protected static final Map<String, Logger> loggers = new ConcurrentHashMap<String, Logger>();
 
 	private static final int MAX_LOG_BACKUP_FILES = 200;
 	private static final String MAX_LOG_FILE_SIZE = "10MB";
@@ -58,7 +58,8 @@ public class KeyOutWriter extends BaseOutputWriter {
 		}
 		// need to create a logger
 		try {
-			logger = loggers.putIfAbsent(fileStr, initLogger(fileStr));
+			logger = initLogger(fileStr);
+			loggers.put(fileStr, logger);
 		} catch (IOException e) {
 			throw new ValidationException("Failed to setup log4j", query);
 		}
@@ -133,4 +134,5 @@ public class KeyOutWriter extends BaseOutputWriter {
 		};
 		return loggerFactory.makeNewLoggerInstance("KeyOutWriter" + this.hashCode());
 	}
+
 }
