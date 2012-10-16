@@ -8,7 +8,7 @@ This is effectively the missing connector between speaking to a JVM via JMX on o
 
 jmxtrans is very powerful tool which uses easily generated JSON based configuration files and then outputs the data in whatever format you desire. It does this with a very efficient engine design that will scale to communicating with thousands of machines from a single jmxtrans instance.
 
-The core engine is very solid and there are writers for [Graphite](http://graphite.wikidot.com/) (recommended), [Ganglia](http://ganglia.sourceforge.net/), [cacti/rrdtool](http://www.cacti.net/), text files, and stdout. A writer for [OpenTSDB](http://opentsdb.net/) would be a great addition. Feel free to suggest more on the discussion group or issue tracker.
+The core engine is very solid and there are writers for [Graphite](http://graphite.wikidot.com/), [StatsD](https://github.com/etsy/statsd), [Ganglia](http://ganglia.sourceforge.net/), [cacti/rrdtool](http://www.cacti.net/), text files, and stdout. A writer for [OpenTSDB](http://opentsdb.net/) would be a great addition. Feel free to suggest more on the discussion group or issue tracker.
 
   * [Download a recent stable build](https://github.com/lookfirst/jmxtrans/downloads)
   * See the [Wiki](https://github.com/lookfirst/jmxtrans/wiki) for full documentation.
