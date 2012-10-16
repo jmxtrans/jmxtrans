@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.util;
 
 import java.net.DatagramSocket;
+import java.net.SocketAddress;
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory {
 	 */
 	@Override
 	public Object makeObject(Object key) throws Exception {
-		return new DatagramSocket();
+		return new DatagramSocket((SocketAddress)key);
 	}
 
 	/**
@@ -41,6 +42,6 @@ public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory {
 	@Override
 	public boolean validateObject(Object key, Object obj) {
 		DatagramSocket socket = (DatagramSocket) obj;
-		return !socket.isClosed();
+		return socket.isBound() && !socket.isClosed() && socket.isConnected();
 	}
 }

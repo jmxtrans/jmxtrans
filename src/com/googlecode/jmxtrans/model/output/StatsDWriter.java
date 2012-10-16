@@ -2,8 +2,8 @@ package com.googlecode.jmxtrans.model.output;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,9 +19,9 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.DatagramSocketFactory;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
@@ -37,11 +37,16 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private String host;
 	private Integer port;
+	/** bucketType defaults to c == counter */
+	private String bucketType = "c";
 	private String rootPrefix = "servers";
-	private InetAddress ipAddress;
+	private SocketAddress address;
+
+	private static final String BUCKET_TYPE = "bucketType";
 
 	private KeyedObjectPool pool;
 	private ManagedObject mbean;
+
 
 	/**
 	 * Uses JmxUtils.getDefaultPoolMap()
@@ -52,7 +57,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	@Override
 	public void start() throws LifecycleException {
 		try {
-			this.pool = JmxUtils.getObjectPool(new SocketFactory());
+			this.pool = JmxUtils.getObjectPool(new DatagramSocketFactory());
 			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, Server.SOCKET_FACTORY_POOL);
 			JmxUtils.registerJMX(this.mbean);
 		} catch (Exception e) {
@@ -95,18 +100,17 @@ public class StatsDWriter extends BaseOutputWriter {
 			rootPrefix = rootPrefixTmp;
 		}
 
-		try {
-			ipAddress = InetAddress.getByName(host);
-		} catch (UnknownHostException uhe) {
-			log.debug("Exception: " + uhe.getMessage());
-		}
+		this.address = new InetSocketAddress(host, port);
+
+		if (this.getSettings().containsKey(BUCKET_TYPE))
+			bucketType = (String) this.getSettings().get(BUCKET_TYPE);
 	}
 
 	public void doWrite(Query query) throws Exception {
 
 		List<String> typeNames = this.getTypeNames();
 
-		DatagramSocket socket = new DatagramSocket();
+		DatagramSocket socket = (DatagramSocket) pool.borrowObject(this.address);
 		try {
 			for (Result result : query.getResults()) {
 				if (isDebugEnabled()) {
@@ -124,25 +128,24 @@ public class StatsDWriter extends BaseOutputWriter {
 							sb.append(":");
 							sb.append(values.getValue().toString());
 							sb.append("|");
-							sb.append("c\n");
+							sb.append(bucketType);
+							sb.append("\n");
 
 							String line = sb.toString();
-							byte[] sendData = sb.toString().trim().getBytes();
+							byte[] sendData = line.getBytes();
 
 							if (isDebugEnabled()) {
 								log.debug("StatsD Message: " + line.trim());
 							}
 
-							DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, ipAddress, port);
+							DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length);
 							socket.send(sendPacket);
 						}
 					}
 				}
 			}
 		} finally {
-			if (socket != null && ! socket.isClosed()) {
-				socket.close();
-			}
+			pool.returnObject(address, socket);
 		}
 	}
 }
