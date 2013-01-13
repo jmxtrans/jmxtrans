@@ -216,7 +216,7 @@ public class JmxUtils {
 						List<String> paramTypes= new ArrayList<String>();
 						// TODO: we SHOULD be creating a MAP<String,List<String>>  ONCE instead of doing this for every operation...
 						for (MBeanOperationInfo opersInfo : opers) {
-							if (!opersInfo.getName().equals( operation.getMethod())) { 
+							if (!opersInfo.getName().equals(operation.getMethod())) { 
 								continue; 
 							}
 							signature = opersInfo.getSignature();
