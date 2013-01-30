@@ -118,7 +118,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 						if (JmxUtils.isNumeric(values.getValue())) {
 							StringBuilder sb = new StringBuilder();
 
-							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
+							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
 
 							sb.append(" ");
 							sb.append(values.getValue().toString());
