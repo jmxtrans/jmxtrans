@@ -19,10 +19,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
  * @author oded
  */
 public class SplunkWriter extends KeyOutWriter {
-
-	public SplunkWriter() {
-	}
-
+	
 	/**
 	 * The meat of the output.
 	 */
@@ -33,18 +30,17 @@ public class SplunkWriter extends KeyOutWriter {
 		if (results.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			Result r = results.get(0);
-			sb.append("DATETIME=\"");
-			DateFormat fdate = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			DateFormat fdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 			sb.append(fdate.format(r.getEpoch()));
-			sb.append("\" ");
+			sb.append(" jmxhost=");
+			sb.append(query.getServer().getHost());
+			sb.append(" ");
 			sb.append(r.getTypeName().replace(",", " "));
 			for (Result result : results ) {
 				Map<String, Object> resultValues = result.getValues();
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
 						if (JmxUtils.isNumeric(values.getValue())) {
-							// Agora.gaming.server.casino.games:type=venueId.roomId.gameType.gameName,
-							// venueId=79858100000000381,roomId=67979100000000101,gameType=blackJack,gameName=blackJackHighz,name=occupation
 							sb.append(" ");
 							sb.append(result.getAttributeName());
 							sb.append("=");
