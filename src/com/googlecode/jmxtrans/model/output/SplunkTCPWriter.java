@@ -132,7 +132,6 @@ public class SplunkTCPWriter extends BaseOutputWriter {
 				}
 				writer.write(s);
 				writer.flush();
-				System.out.print(s);
 			}
 		} finally {
 			pool.returnObject(address, socket);
