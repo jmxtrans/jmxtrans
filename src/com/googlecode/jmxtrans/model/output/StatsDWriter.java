@@ -43,7 +43,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	private String bucketType = "c";
 	private String rootPrefix = "servers";
 	private SocketAddress address;
-	private final DatagramChannel _channel;
+	private final DatagramChannel channel;
 
 	private static final String BUCKET_TYPE = "bucketType";
 
@@ -56,7 +56,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	 * @throws IOException
 	 */
 	public StatsDWriter() throws IOException {
-		_channel = DatagramChannel.open();
+		channel = DatagramChannel.open();
         setBufferSize((short) 1500);
 	}
 	
@@ -124,34 +124,32 @@ public class StatsDWriter extends BaseOutputWriter {
 
 		List<String> typeNames = this.getTypeNames();
 
-		try {
-			for (Result result : query.getResults()) {
-				if (isDebugEnabled()) {
-					log.debug(result.toString());
-				}
+		for (Result result : query.getResults()) {
+			if (isDebugEnabled()) {
+				log.debug(result.toString());
+			}
 
-				Map<String, Object> resultValues = result.getValues();
-				if (resultValues != null) {
-					for (Entry<String, Object> values : resultValues.entrySet()) {
-						if (JmxUtils.isNumeric(values.getValue())) {
-							StringBuilder sb = new StringBuilder();
+			Map<String, Object> resultValues = result.getValues();
+			if (resultValues != null) {
+				for (Entry<String, Object> values : resultValues.entrySet()) {
+					if (JmxUtils.isNumeric(values.getValue())) {
+						StringBuilder sb = new StringBuilder();
 
-							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
+						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
 
-							sb.append(":");
-							sb.append(values.getValue().toString());
-							sb.append("|");
-							sb.append(bucketType);
-							sb.append("\n");
+						sb.append(":");
+						sb.append(values.getValue().toString());
+						sb.append("|");
+						sb.append(bucketType);
+						sb.append("\n");
 
-							String line = sb.toString();
+						String line = sb.toString();
 
-							if (isDebugEnabled()) {
-								log.debug("StatsD Message: " + line.trim());
-							}
-
-							doSend(line.trim());
+						if (isDebugEnabled()) {
+							log.debug("StatsD Message: " + line.trim());
 						}
+
+						doSend(line.trim());
 					}
 				}
 			}
@@ -194,7 +192,7 @@ public class StatsDWriter extends BaseOutputWriter {
 
 			// send and reset the buffer
 			sendBuffer.flip();
-			final int nbSentBytes = _channel.send(sendBuffer, this.address);
+			final int nbSentBytes = channel.send(sendBuffer, this.address);
 			sendBuffer.limit(sendBuffer.capacity());
 			sendBuffer.rewind();
 
