@@ -61,6 +61,10 @@ class Queries(object):
             # Ignore typeName so it doesn't also appear in the query section
             if attr <> "typeName":
                 queryentry[attr] = self.queries[query_name][attr]
+        # If we did not specify an "attr", don't pass it to the query. JMXTrans will 
+        # poll ALL attributes in the MBEAN
+        if queryentry["attr"] == None:
+           del queryentry["attr"] 
         queryentry['outputWriters'] = self.create_graphite_output_writer(typeName)
         return queryentry
 
