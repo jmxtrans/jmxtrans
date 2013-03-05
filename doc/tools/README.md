@@ -28,6 +28,8 @@ Limitations
 * _yaml2trans.py_ only supports [Graphite][Graphite] as an output
   writer as that's what I use. Please file issues if you require
   other output writers.
+* EXPERIMENTAL: The "outputWriters:" map in the YAML configuration file supports other
+  output writers. Please file issues if there are problems.
 
 [YAML]: http://yaml.org/
 [PyYAML]: http://pyyaml.org/
