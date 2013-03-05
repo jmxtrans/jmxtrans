@@ -1,9 +1,10 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,6 +35,7 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(StatsDWriter.class);
 	public static final String ROOT_PREFIX = "rootPrefix";
+	private ByteBuffer sendBuffer;
 
 	private String host;
 	private Integer port;
@@ -41,6 +43,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	private String bucketType = "c";
 	private String rootPrefix = "servers";
 	private SocketAddress address;
+	private final DatagramChannel channel;
 
 	private static final String BUCKET_TYPE = "bucketType";
 
@@ -50,9 +53,20 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	/**
 	 * Uses JmxUtils.getDefaultPoolMap()
+	 * @throws IOException
 	 */
-	public StatsDWriter() {
+	public StatsDWriter() throws IOException {
+		channel = DatagramChannel.open();
+        setBufferSize((short) 1500);
 	}
+	
+	public synchronized void setBufferSize(short packetBufferSize) {
+        if(sendBuffer != null) {
+                flush();
+        }
+        sendBuffer = ByteBuffer.allocate(packetBufferSize);
+	}
+
 
 	@Override
 	public void start() throws LifecycleException {
@@ -110,42 +124,87 @@ public class StatsDWriter extends BaseOutputWriter {
 
 		List<String> typeNames = this.getTypeNames();
 
-		DatagramSocket socket = (DatagramSocket) pool.borrowObject(this.address);
-		try {
-			for (Result result : query.getResults()) {
-				if (isDebugEnabled()) {
-					log.debug(result.toString());
-				}
+		for (Result result : query.getResults()) {
+			if (isDebugEnabled()) {
+				log.debug(result.toString());
+			}
 
-				Map<String, Object> resultValues = result.getValues();
-				if (resultValues != null) {
-					for (Entry<String, Object> values : resultValues.entrySet()) {
-						if (JmxUtils.isNumeric(values.getValue())) {
-							StringBuilder sb = new StringBuilder();
+			Map<String, Object> resultValues = result.getValues();
+			if (resultValues != null) {
+				for (Entry<String, Object> values : resultValues.entrySet()) {
+					if (JmxUtils.isNumeric(values.getValue())) {
+						StringBuilder sb = new StringBuilder();
 
-							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
+						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
 
-							sb.append(":");
-							sb.append(values.getValue().toString());
-							sb.append("|");
-							sb.append(bucketType);
-							sb.append("\n");
+						sb.append(":");
+						sb.append(values.getValue().toString());
+						sb.append("|");
+						sb.append(bucketType);
+						sb.append("\n");
 
-							String line = sb.toString();
-							byte[] sendData = line.getBytes();
+						String line = sb.toString();
 
-							if (isDebugEnabled()) {
-								log.debug("StatsD Message: " + line.trim());
-							}
-
-							DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length);
-							socket.send(sendPacket);
+						if (isDebugEnabled()) {
+							log.debug("StatsD Message: " + line.trim());
 						}
+
+						doSend(line.trim());
 					}
 				}
 			}
-		} finally {
-			pool.returnObject(address, socket);
+		}
+	}
+
+	private synchronized boolean doSend(String stat) {
+		try {
+			final byte[] data = stat.getBytes("utf-8");
+
+			// If we're going to go past the threshold of the buffer then flush.
+			// the +1 is for the potential '\n' in multi_metrics below
+			if (sendBuffer.remaining() < (data.length + 1)) {
+				flush();
+			}
+
+			if (sendBuffer.position() > 0) { // multiple metrics are separated
+												// by '\n'
+				sendBuffer.put((byte) '\n');
+			}
+
+			sendBuffer.put(data); // append the data
+
+			flush();
+			return true;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public synchronized boolean flush() {
+		try {
+			final int sizeOfBuffer = sendBuffer.position();
+
+			if (sizeOfBuffer <= 0) {
+				return false;
+			} // empty buffer
+
+			// send and reset the buffer
+			sendBuffer.flip();
+			final int nbSentBytes = channel.send(sendBuffer, this.address);
+			sendBuffer.limit(sendBuffer.capacity());
+			sendBuffer.rewind();
+
+			if (sizeOfBuffer == nbSentBytes) {
+				return true;
+			} else {
+				return false;
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 }

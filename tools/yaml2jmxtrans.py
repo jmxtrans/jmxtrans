@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- coding: latin-1 -*-
 # vim:ai:expandtab:ts=4 sw=4
 
@@ -38,9 +38,9 @@ class Queries(object):
             queryentry = {}
             for attribute in query_attributes:
                 if attribute in query:
-                  queryentry[attribute] = query[attribute]
+                    queryentry[attribute] = query[attribute]
                 else:
-                  queryentry[attribute] = None
+                    queryentry[attribute] = None
             self.queries[query['name']] = queryentry
 
     def create_query_entry(self, query_name):
@@ -100,8 +100,8 @@ class Queries(object):
         """
         root = {'servers' : [] }
         for host_name in host_names:
-             ## Extract port if present
-            if present(host, sep, port) = host_name.partition(":")
+        ## Extract port if present
+            (host, sep, port) = host_name.partition(":")
             if sep == "":
                 port = query_port
             root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate))
@@ -118,7 +118,7 @@ class Queries(object):
                 'host' : self.monitor_host,
                 'typeNames' : [ typeName ],
                 }
-            }
+        }
         return [ writer ]
 
 class HostSets(object):
