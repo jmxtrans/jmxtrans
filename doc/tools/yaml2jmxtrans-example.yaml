@@ -1,6 +1,14 @@
 # Host/Port Grahpite listens on
+# Deprecated in favor of "outputWriters:" configuration below
 graphite_host: "graphite.yourdomain.com"
 graphite_port: 2003
+
+# Configure your outputWriters here:
+outputWriters:
+    - "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter"
+      settings:
+          host: "localhost"
+          port: 2003
 
 # Global port to query JMX on
 query_port: 5400
