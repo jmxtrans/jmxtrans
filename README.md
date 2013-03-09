@@ -1,4 +1,4 @@
-# Welcome to jmxtrans
+![jmxtranslogo](http://www.jmxtrans.org/images/jmxtrans-logo.gif)
 
 [![Build Status](https://secure.travis-ci.org/lookfirst/jmxtrans.png?branch=master)](http://travis-ci.org/lookfirst/jmxtrans)
 
