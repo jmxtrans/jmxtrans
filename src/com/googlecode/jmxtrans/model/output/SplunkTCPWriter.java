@@ -133,7 +133,11 @@ public class SplunkTCPWriter extends BaseOutputWriter {
 				writer.write(s);
 				writer.flush();
 			}
-		} finally {
+		}
+		catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		finally {
 			pool.returnObject(address, socket);
 		}
 	}
