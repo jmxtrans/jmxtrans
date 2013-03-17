@@ -397,9 +397,13 @@ public class JmxUtils {
 			try {
 				service = Executors.newFixedThreadPool(process.getNumMultiThreadedServers());
 				for (Server server : process.getServers()) {
-					JMXConnector conn = JmxUtils.getServerConnection(server);
-					conns.add(conn);
-					service.execute(new ProcessServerThread(server, conn));
+                    if (server.getLocalMBeanServer() != null) {
+                        service.execute(new ProcessServerThread(server, null));
+                    } else {
+                        JMXConnector conn = JmxUtils.getServerConnection(server);
+                        conns.add(conn);
+                        service.execute(new ProcessServerThread(server, conn));
+                    }
 				}
 				service.shutdown();
 			} finally {
@@ -411,9 +415,13 @@ public class JmxUtils {
 			}
 		} else {
 			for (Server server : process.getServers()) {
-				JMXConnector conn = JmxUtils.getServerConnection(server);
-				conns.add(conn);
-				processServer(server, conn);
+                if (server.getLocalMBeanServer() != null) {
+                    processServer(server, null);
+                } else {
+                    JMXConnector conn = JmxUtils.getServerConnection(server);
+                    conns.add(conn);
+                    processServer(server, conn);
+                }
 			}
 		}
 
