@@ -1,0 +1,15 @@
+# Systemd unit file for jmxtrans
+#
+[Unit]
+Description=JMX Transformer - more than meets the eye
+After=syslog.target network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/jmxtrans.pid
+EnvironmentFile=/etc/sysconfig/jmxtrans
+ExecStart=/etc/init.d/jmxtrans start
+ExecStop=/etc/init.d/jmxtrans stop
+
+[Install]
+WantedBy=multi-user.target

@@ -8,15 +8,27 @@
 # Provides: jmxtrans
 # Required-Start: $local_fs $remote_fs $network $named
 # Required-Stop: $local_fs $remote_fs $network
+# Default-Start: 3 5
+# Default-Stop:  0 1 2 6
 # Short-Description: run jmxtrans daemon
-# Description: jmxtrans jmxtrans is very powerful tool which reads json
+# Description: jmxtrans is very powerful tool which reads json
 #              configuration files of servers/ports and jmx domains - attributes - types
 #              and then outputs the data in whatever format you want via special 'Writer' objects which you can code up yourself.
 #              It does this with a very efficient engine design that will scale to querying thousands of machines.
 ### END INIT INFO
 
+#
+# init.d / servicectl compatibility (openSUSE)
+#
+if [ -f /etc/rc.status ]; then
+    . /etc/rc.status
+    rc_reset
+fi
+
 # Source function library.
-. /etc/rc.d/init.d/functions
+if [ -r /etc/init.d/functions ]; then
+    . /etc/init.d/functions
+fi
 
 if [ -f /etc/sysconfig/jmxtrans ]; then
     . /etc/sysconfig/jmxtrans
@@ -26,16 +38,29 @@ RETVAL=0
 prog="jmxtrans"
 user="jmxtrans"
 exec="/usr/share/jmxtrans/jmxtrans.sh"
-lockfile=/var/lock/subsys/jmxtrans
+lockdir=/var/lock/subsys
+lockfile=$lockdir/jmxtrans
 config=/etc/sysconfig/jmxtrans
 
 start() {
     echo -n $"Starting $prog: "
-    daemon --user=$user $exec start
+    touch /var/run/jmxtrans.pid
+    chown $user /var/run/jmxtrans.pid
+
+    # start_daemon on Suse, daemon on RH
+    if [ -x /sbin/startproc ]; then
+      HOME=/usr/share/jmxtrans startproc -s -e -l /var/log/jmxtrans.log -u $user $exec start
+      sleep 1
+      RETVAL=$?
+    else
+      daemon --user=$user $exec start
+      RETVAL=$?
+    fi
+
     #$exec start
     RETVAL=$?
     echo
-    [ $RETVAL -eq 0 ] && touch $lockfile
+    [ $RETVAL -eq 0 ] && [ -d $lockdir ] && touch $lockfile
 }
 
 stop() {
@@ -43,7 +68,7 @@ stop() {
     $exec stop
     RETVAL=$?
     echo
-    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    [ $RETVAL -eq 0 ] && [ -d $lockdir ] && rm -f $lockfile
 }
 
 status() {

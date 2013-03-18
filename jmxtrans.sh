@@ -2,6 +2,13 @@
 
 FILENAME=$2
 
+# If CONF_FILE not defined but /etc/sysconfig/jmxtrans found, use it (servicectl/initd)
+if [ -z "$CONF_FILE" ]; then
+    if [ -f /etc/sysconfig/jmxtrans ]; then
+       CONF_FILE=/etc/sysconfig/jmxtrans
+    fi
+fi
+
 # Specify the commonly used configuration options below in a config file.
 CONF_FILE=${CONF_FILE:-"jmxtrans.conf"}
 if [ -e "$CONF_FILE" ]; then
