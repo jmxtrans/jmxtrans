@@ -294,7 +294,7 @@ public class JmxUtils {
 	private static void getResult(List<Result> resList, MBeanInfo info, ObjectInstance oi, Attribute attribute, Query query) {
 		Object value = attribute.getValue();
 		if (value != null) {
-			if (value instanceof CompositeDataSupport) {
+			if (value instanceof CompositeData) {
 				getResult(resList, info, oi, attribute.getName(), (CompositeData) value, query);
 			} else if (value instanceof CompositeData[]) {
 				for (CompositeData cd : (CompositeData[]) value) {
