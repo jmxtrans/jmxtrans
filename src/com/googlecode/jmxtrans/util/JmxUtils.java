@@ -397,7 +397,7 @@ public class JmxUtils {
 			try {
 				service = Executors.newFixedThreadPool(process.getNumMultiThreadedServers());
 				for (Server server : process.getServers()) {
-                    if (server.getLocalMBeanServer() != null) {
+                    if (server.isLocal() && server.getLocalMBeanServer() != null) {
                         service.execute(new ProcessServerThread(server, null));
                     } else {
                         JMXConnector conn = JmxUtils.getServerConnection(server);
@@ -459,17 +459,15 @@ public class JmxUtils {
 	 * Does the work for processing a Server object.
 	 */
 	public static void processServer(Server server, JMXConnector conn) throws Exception {
-		// try {
-		MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
+
+		MBeanServerConnection mbeanServer;
+
+		if (server.isLocal())
+			mbeanServer = server.getLocalMBeanServer();
+		else
+			mbeanServer = conn.getMBeanServerConnection();
+		
 		JmxUtils.processQueriesForServer(mbeanServer, server);
-		// } catch (IOException e) {
-		// log.error("Problem processing queries for server: " +
-		// server.getHost() + ":" + server.getPort(), e);
-		// } finally {
-		// if (conn != null) {
-		// conn.close();
-		// }
-		// }
 	}
 
 	/**
