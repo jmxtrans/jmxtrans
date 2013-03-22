@@ -24,13 +24,15 @@ class Queries(object):
     """
     Generate query object snippets suitable for consumption by jmxtrans
     """
-    def __init__(self, queries, query_attributes, monitor_host, monitor_port):
+    def __init__(self, queries, query_attributes, outputWriters, outputWriters_attributes, monitor_host, monitor_port):
         """
         Initialize Queries configuration with data from YAML structure, making
         named queries accessible by name
         """
         self.queries = {}
         self.query_attributes = query_attributes
+        self.outputWriters = []
+        self.outputWriters_attributes = outputWriters_attributes
         self.monitor_host = monitor_host
         self.monitor_port = monitor_port
 
@@ -42,6 +44,18 @@ class Queries(object):
                 else:
                     queryentry[attribute] = None
             self.queries[query['name']] = queryentry
+        
+        # outputWriters could be None if the YAML only has deprecated graphite_* configured 
+        # (no outputWriters explicitly configured)
+        if outputWriters != None:
+            for outputWriter in outputWriters:
+                outputWriterEntry = {}
+                for attribute in outputWriters_attributes:
+                    if attribute in outputWriter:
+                      outputWriterEntry[attribute] = outputWriter[attribute]
+                    else:
+                      outputWriterEntry[attribute] = None
+                self.outputWriters.append(outputWriterEntry)
 
     def create_query_entry(self, query_name):
         """
@@ -65,7 +79,7 @@ class Queries(object):
         # poll ALL attributes in the MBEAN
         if queryentry["attr"] == None:
            del queryentry["attr"] 
-        queryentry['outputWriters'] = self.create_graphite_output_writer(typeName)
+        queryentry['outputWriters'] = self.create_output_writer_configuration(typeName)
         return queryentry
 
     def create_host_entry(self, host_name, query_names, query_port, username, password, urlTemplate):
@@ -107,19 +121,25 @@ class Queries(object):
             root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate))
         return root
 
-    def create_graphite_output_writer(self, typeName):
+    def create_output_writer_configuration(self, typeName):
         """
-        Graphite output writer snippet template
-        """
-        writer = {
+        Generic output writer snippet template
+        """	
+        #For compatibility, if no outputWriters were configured, use the deprecated Graphite-specific config: 
+        if len(self.outputWriters) == 0:
+            return [ {
             '@class' : 'com.googlecode.jmxtrans.model.output.GraphiteWriter',
             'settings' : {
                 'port' : self.monitor_port,
                 'host' : self.monitor_host,
                 'typeNames' : [ typeName ],
                 }
-        }
-        return [ writer ]
+            } ]
+        
+        for iter in range(len(self.outputWriters)):
+            self.outputWriters[iter]['settings']['typeNames'] = [ typeName ]
+        writer = self.outputWriters
+        return writer
 
 class HostSets(object):
     """
@@ -171,7 +191,8 @@ def usage():
 if __name__ == '__main__':
     # query attributes to copy
     query_attributes = ["obj", "resultAlias", "attr", "typeName"]
-
+    outputWriters_attributes = ["settings", "@class"]
+    
     if len(sys.argv) != 2:
         usage()
         sys.exit(1)
@@ -179,8 +200,13 @@ if __name__ == '__main__':
     infile = open(sys.argv[1], 'r')
     yf = yaml.load(infile)
     query_port = yf['query_port']
+    # Deprecate graphite_* configuration attributes in favor of configurable outputWriters.
+    # Set outputWriters as per input file if it exists. Else, None. This is for backwards compatibilty (when only graphite_* was required)
+    outputWriters = yf['outputWriters'] if ('outputWriters' in yf) else None
+    graphite_host = yf['graphite_host'] if ('graphite_host' in yf) else None
+    graphite_port = yf['graphite_port'] if ('graphite_port' in yf) else None
 
-    q = Queries(yf['queries'], query_attributes, yf['graphite_host'], yf['graphite_port'])
+    q = Queries(yf['queries'], query_attributes, outputWriters, outputWriters_attributes, graphite_host, graphite_port)
     h = HostSets(yf['sets'])
 
     for set_name in h.set_names():
