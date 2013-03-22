@@ -7,7 +7,7 @@ graphite_port: 2003
 outputWriters:
     - "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter"
       settings:
-          host: "localhost"
+          host: "graphite.yourdomain.com"
           port: 2003
 
 # Global port to query JMX on
@@ -61,6 +61,8 @@ queries:
 # query_names and hosts is a list
 sets:
       - setname: set1
+        username: jmxlogin
+        password: jmxpassword
         query_names:
                 - mempool
                 - gc
