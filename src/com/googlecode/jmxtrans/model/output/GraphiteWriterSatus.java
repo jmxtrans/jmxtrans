@@ -1,6 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
-public enum GraphiteWriterSatus {
+public enum GraphiteWriterStatus {
 
 	STARTING,
 	STARTED,

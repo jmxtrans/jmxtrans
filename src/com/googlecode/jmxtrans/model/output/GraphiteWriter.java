@@ -55,7 +55,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	private Lock statusLock = new ReentrantLock();
 	private Condition statusConditionStarted = statusLock.newCondition();	
 	private Condition statusConditionStopped = statusLock.newCondition();
-	private GraphiteWriterSatus status = GraphiteWriterSatus.STOPPED;
+	private GraphiteWriterStatus status = GraphiteWriterStatus.STOPPED;
 	
 	private ManagedObject mbean;
 	private InetSocketAddress address;
@@ -73,7 +73,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	public void start() throws LifecycleException {
 		statusLock.lock();
 		try {
-			if (status != GraphiteWriterSatus.STOPPED) {
+			if (status != GraphiteWriterStatus.STOPPED) {
 				throw new LifecycleException("GraphiteWriter instance should be stopped");
 			}
 		
@@ -84,7 +84,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				startPool();
 			}
 		
-			status = GraphiteWriterSatus.STARTED;
+			status = GraphiteWriterStatus.STARTED;
 			statusConditionStarted.signal();
 		} finally {
 			statusLock.unlock();
@@ -95,7 +95,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	public void stop() throws LifecycleException {
 		statusLock.lock();
 		try {
-			if (status != GraphiteWriterSatus.STARTED) {
+			if (status != GraphiteWriterStatus.STARTED) {
 				throw new LifecycleException("GraphiteWriter instance shold be started");
 			}
 		
@@ -104,7 +104,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				stopPool();
 			}
 		
-			status = GraphiteWriterSatus.STOPPED;
+			status = GraphiteWriterStatus.STOPPED;
 			statusConditionStopped.signal();
 		} finally {
 			statusLock.unlock();
@@ -138,10 +138,10 @@ public class GraphiteWriter extends BaseOutputWriter {
 		Socket socket = null;
 		statusLock.lock();
 		try {
-			while(status == GraphiteWriterSatus.STARTING) {
+			while(status == GraphiteWriterStatus.STARTING) {
 				statusConditionStarted.await();
 			}
-			if (status != GraphiteWriterSatus.STARTED) {
+			if (status != GraphiteWriterStatus.STARTED) {
 				throw new LifecycleException("GraphiteWriter instance shold be started");
 			}
 			socket = (Socket) pool.borrowObject(address);
