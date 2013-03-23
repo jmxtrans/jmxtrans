@@ -47,6 +47,7 @@ It does this with a very efficient engine design that will scale to querying tho
 %install
 # Prep the install location.
 rm -rf   %{buildroot}
+mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{xappdir}
 mkdir -p %{buildroot}%{xlibdir}
 mkdir -p %{buildroot}%{xlogdir}
@@ -58,6 +59,13 @@ mkdir -p %{buildroot}%{_systemdir}
 rm -rf src/com
 cp -rf * %{buildroot}%{xappdir}
 cp  %{SOURCE1} %{buildroot}%{_initrddir}/jmxtrans
+
+# copy yaml2jmxtrans.py to bin
+cp tools/yaml2jmxtrans.py %{buildroot}%{_bindir}
+chmod 755 %{buildroot}%{_bindir}/yaml2jmxtrans.py
+
+# copy docs
+cp -rf docs %{buildroot}%{xappdir}
 
 # Setup Systemd
 cp %{SOURCE2} %{buildroot}%{_systemdir}/jmxtrans.service
@@ -128,6 +136,7 @@ fi
 
 %files
 %defattr(-,root,root)
+%{_bindir}
 %attr(0755, root,root)  %{_initrddir}/jmxtrans
 %attr(0644,root,root)   %{_systemdir}/jmxtrans.service
 #%config(noreplace)     %{_sysconfdir}/sysconfig/jmxtrans
@@ -135,8 +144,18 @@ fi
 %attr(0755,%{xuser}, %{xuser}) %{xlogdir}
 %{xappdir}/*
 %doc %{xappdir}/README.html
+%doc %{xappdir}/doc
 
 
 %changelog
+* Sat Mar 23 2013 Henri Gomez <henri.gomez@gmail.com> - 242-1
+- jmxtrans v242 introduce a Graphite pool to keep connections low
+
+* Thu Mar 21 2013 Henri Gomez <henri.gomez@gmail.com> - 241-2
+- Added yaml2jmxtrans.py and docs
+
+* Thu Mar 21 2013 Henri Gomez <henri.gomez@gmail.com> - 241-1
+- Fixed LocalMBean Server issue.
+
 * Wed Jul 19 2011 Henri Gomez <henri.gomez@gmail.com> - 223-1
 - Initial RPM package to be used and build with ci systems.
