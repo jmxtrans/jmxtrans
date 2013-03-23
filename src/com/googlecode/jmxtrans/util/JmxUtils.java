@@ -707,6 +707,51 @@ public class JmxUtils {
 
 		return sb.toString();
 	}
+	
+	// This method will create scheme like #{mbean_id}.#{confType}.#{service_name}.#{host_sname}
+	public static String getStatsdKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+		
+		String keyStr = null;
+		if (values.getKey().startsWith(result.getAttributeName())) {
+			keyStr = values.getKey();
+		} else {
+			keyStr = result.getAttributeName() + "." + values.getKey();
+		}
+
+		StringBuilder sb = new StringBuilder();
+		if (rootPrefix != null) {
+			sb.append(rootPrefix);
+			sb.append(".");
+		}
+		
+		// Allow people to use something other than the classname as the output.
+		if (result.getClassNameAlias() != null) {
+			sb.append(result.getClassNameAlias());
+		} else {
+			sb.append(cleanupStr(result.getClassName()));
+		}
+
+		sb.append(".");
+
+		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
+		if (typeName != null) {
+			sb.append(typeName);
+			sb.append(".");
+		}
+		sb.append(cleanupStr(keyStr));
+		sb.append(".");
+		//Attach the host alias
+		String alias = null;
+		if (query.getServer().getAlias() != null) {
+			alias = query.getServer().getAlias();
+		} else {
+			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+			alias = cleanupStr(alias);
+		}
+		sb.append(alias);
+		return sb.toString();
+	}
+	
 
 	/**
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
