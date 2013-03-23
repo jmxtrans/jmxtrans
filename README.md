@@ -1,6 +1,7 @@
 ![jmxtranslogo](http://www.jmxtrans.org/images/jmxtrans-logo.gif)
 
 [![Build Status](https://secure.travis-ci.org/lookfirst/jmxtrans.png?branch=master)](http://travis-ci.org/lookfirst/jmxtrans)
+[![Build Status](https://buildhive.cloudbees.com/job/jmxtrans/job/jmxtrans/badge/icon)](https://buildhive.cloudbees.com/job/jmxtrans/job/jmxtrans/)
 
 This is the source code repository for the jmxtrans project.
 
