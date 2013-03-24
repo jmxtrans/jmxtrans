@@ -22,13 +22,14 @@ import com.googlecode.jmxtrans.util.PropertyResolver;
  * @author jon
  */
 @JsonSerialize(include = Inclusion.NON_NULL)
-@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "resultAlias", "keys", "outputWriters" })
+@JsonPropertyOrder(value = { "obj", "attr", "oper", "typeNames", "resultAlias", "keys", "outputWriters" })
 public class Query {
 
 	private Server server;
 
 	private String obj;
 	private List<String> attr;
+	private List<Operation> oper;
 	private String resultAlias;
 	private List<String> keys;
 	private List<OutputWriter> outputWriters;
@@ -114,6 +115,21 @@ public class Query {
 			this.attr = new ArrayList<String>();
 		}
 		this.attr.add(attr);
+	}
+
+	public List<Operation> getOper() {
+		return oper;
+	}
+
+	public void setOper(List<Operation> oper) {
+		this.oper = oper;
+	}
+	
+	public void addOper(Operation oper) {
+		if (this.oper == null) {
+			this.oper= new ArrayList<Operation>();
+		}
+		this.oper.add(oper);
 	}
 
 	public void setKeys(List<String> keys) {
