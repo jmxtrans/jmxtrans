@@ -64,8 +64,8 @@ cp  %{SOURCE1} %{buildroot}%{_initrddir}/jmxtrans
 cp tools/yaml2jmxtrans.py %{buildroot}%{_bindir}
 chmod 755 %{buildroot}%{_bindir}/yaml2jmxtrans.py
 
-# copy docs
-cp -rf docs %{buildroot}%{xappdir}
+# copy doc (if existing)
+cp -rf doc %{buildroot}%{xappdir}
 
 # Setup Systemd
 cp %{SOURCE2} %{buildroot}%{_systemdir}/jmxtrans.service
