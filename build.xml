@@ -177,6 +177,10 @@
 			</fileset>
 
 			<fileset dir="${base.dir}">
+				<include name="doc/**" />
+			</fileset>
+
+			<fileset dir="${base.dir}">
 				<include name="*.xml" />
 				<include name="*.json" />
 				<include name="*.sh" />
