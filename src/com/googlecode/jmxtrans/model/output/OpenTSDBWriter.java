@@ -4,6 +4,8 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -19,6 +21,8 @@ import java.util.Map;
  * Time: 6:00 PM
  */
 public class OpenTSDBWriter extends BaseOutputWriter {
+
+    private static final Logger log = LoggerFactory.getLogger(OpenTSDBWriter.class);
 
     private String host;
     private Integer port;
@@ -59,15 +63,13 @@ public class OpenTSDBWriter extends BaseOutputWriter {
     @Override
     public void doWrite(Query query) throws Exception {
         Socket socket = new Socket(host, port);
-
         DataOutputStream out = new DataOutputStream(
                 socket.getOutputStream());
 
-        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        List<String> resultStrings = new LinkedList<String>();
         for (Result result : query.getResults()) {
             for(String resultString: resultParser(result)) {
-                System.out.println(resultString);
+                if (isDebugEnabled())
+                    log.debug(resultString);
                 out.writeBytes(resultString + "\n");
             }
         }
