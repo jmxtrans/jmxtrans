@@ -5,10 +5,10 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.ValidationException;
 
-import java.io.*;
-import java.net.HttpURLConnection;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,38 @@ public class OpenTSDBWriter extends BaseOutputWriter {
     private Integer port;
     private Map<String, String> tags;
 
+    String addTags(String resultString) {
+        String tagFormat = " %s=%s";
+        for (Map.Entry<String, String> tagEntry : tags.entrySet()) {
+            resultString += String.format(tagFormat, tagEntry.getKey(), tagEntry.getValue());
+        }
+        return resultString;
+    }
+
+    List<String> resultParser(Result result) {
+        List<String> resultStrings = new LinkedList<String>();
+        Map<String, Object> values = result.getValues();
+        if (values == null)
+            return resultStrings;
+        String resultStringFormat = "put %s %s %d %s";
+        String taggedResultStringFormat = "put %s %s %d %s type=%s";
+
+        String attributeName = result.getAttributeName();
+        String className = result.getClassNameAlias() == null ? result.getClassName() : result.getClassNameAlias();
+        if (values.containsKey(attributeName) && values.size() == 1) {
+            String resultString = String.format(resultStringFormat, className, attributeName, (long)(result.getEpoch()/1000L), values.get(attributeName));
+            resultString = addTags(resultString);
+            resultStrings.add(resultString);
+        } else {
+            for (Map.Entry<String, Object> valueEntry: values.entrySet() ) {
+                String resultString = String.format(taggedResultStringFormat, className, attributeName, (long)(result.getEpoch()/1000L), valueEntry.getValue(), valueEntry.getKey());
+                resultString = addTags(resultString);
+                resultStrings.add(resultString);
+            }
+        }
+        return resultStrings;
+    }
+
     @Override
     public void doWrite(Query query) throws Exception {
         System.out.println(host);
@@ -33,30 +65,10 @@ public class OpenTSDBWriter extends BaseOutputWriter {
         DataOutputStream out = new DataOutputStream(
                 socket.getOutputStream());
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        for (Result r : query.getResults()) {
-            String attributeName = r.getAttributeName();
-            Map<String, Object> values = r.getValues();
-            if (values != null) {
-                String className = r.getClassNameAlias() == null ? r.getClassName() : r.getClassNameAlias();
-                if (r.getValues().containsKey(attributeName) && r.getValues().size() == 1) {
-                    String m = "put " + className + "." + r.getAttributeName() + " " + (long)(r.getEpoch()/1000L) + " " + r.getValues().get(attributeName);
-                    for (Map.Entry<String, String> e: tags.entrySet()) {
-                        m += " " + e.getKey() + "=" + e.getValue();
-                    }
-                    out.writeBytes(m + "\n");
-                    System.out.println(m);
-                } else {
-                    System.out.println(r.getValues().size());
-                    for (Map.Entry<String, Object> e : r.getValues().entrySet()) {
-                        String m = "put " + className + "." + r.getAttributeName() + " " + (long)(r.getEpoch()/1000L) + " " + e.getValue() + " type=" + e.getKey();
-                        for (Map.Entry<String, String> f: tags.entrySet()) {
-                            m += " " + f.getKey() + "=" + f.getValue();
-                        }
-                        out.writeBytes(m + "\n");
-                        System.out.println(m);
-                    }
-                }
-                System.out.println(r);
+        List<String> resultStrings = new LinkedList<String>();
+        for (Result result : query.getResults()) {
+            for(String resultString: resultParser(result)) {
+                out.writeBytes(resultString + "\n");
             }
         }
         socket.close();
