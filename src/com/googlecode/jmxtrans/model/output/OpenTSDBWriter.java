@@ -37,8 +37,8 @@ public class OpenTSDBWriter extends BaseOutputWriter {
         Map<String, Object> values = result.getValues();
         if (values == null)
             return resultStrings;
-        String resultStringFormat = "put %s %s %d %s";
-        String taggedResultStringFormat = "put %s %s %d %s type=%s";
+        String resultStringFormat = "put %s.%s %d %s";
+        String taggedResultStringFormat = "put %s.%s %d %s type=%s";
 
         String attributeName = result.getAttributeName();
         String className = result.getClassNameAlias() == null ? result.getClassName() : result.getClassNameAlias();
@@ -58,19 +58,20 @@ public class OpenTSDBWriter extends BaseOutputWriter {
 
     @Override
     public void doWrite(Query query) throws Exception {
-        System.out.println(host);
-        System.out.println(port);
-        System.out.println(tags);
         Socket socket = new Socket(host, port);
+
         DataOutputStream out = new DataOutputStream(
                 socket.getOutputStream());
+
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         List<String> resultStrings = new LinkedList<String>();
         for (Result result : query.getResults()) {
             for(String resultString: resultParser(result)) {
+                System.out.println(resultString);
                 out.writeBytes(resultString + "\n");
             }
         }
+
         socket.close();
     }
 
