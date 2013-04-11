@@ -29,6 +29,7 @@ public class OpenTSDBWriter extends BaseOutputWriter {
     private String host;
     private Integer port;
     private Map<String, String> tags;
+    private String tagName;
 
     String addTags(String resultString) throws UnknownHostException {
         resultString = addTag(resultString, "host", java.net.InetAddress.getLocalHost().getHostName());
@@ -72,7 +73,7 @@ public class OpenTSDBWriter extends BaseOutputWriter {
             resultStrings.add(resultString);
         } else {
             for (Map.Entry<String, Object> valueEntry: values.entrySet() ) {
-                String resultString = getResultString(className, attributeName, (long)(result.getEpoch()/1000L), valueEntry.getValue(), "subType", valueEntry.getKey());
+                String resultString = getResultString(className, attributeName, (long)(result.getEpoch()/1000L), valueEntry.getValue(), tagName, valueEntry.getKey());
                 resultString = addTags(resultString);
                 if (getTypeNames().size() > 0) {
                     resultString = addTag(resultString, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
@@ -105,6 +106,6 @@ public class OpenTSDBWriter extends BaseOutputWriter {
         host = (String) this.getSettings().get(HOST);
         port = (Integer) this.getSettings().get(PORT);
         tags = (Map<String, String>) this.getSettings().get("tags");
-
+        tagName = this.getStringSetting("tagName", "type");
     }
 }
