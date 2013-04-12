@@ -82,7 +82,7 @@ class Queries(object):
         queryentry['outputWriters'] = self.create_output_writer_configuration(typeName)
         return queryentry
 
-    def create_host_entry(self, host_name, query_names, query_port, username, password, urlTemplate):
+    def create_host_entry(self, host_name, query_names, query_port, username, password, urlTemplate, aliasTemplate, set_name):
         """
         Create a query snippet for 'host_name' with all queries given
         by 'query_names'
@@ -98,15 +98,21 @@ class Queries(object):
 
         if password:
             hostentry['password'] = password
+            
+        (hostShortName, sep, rest) = host_name.partition(".")
+            
+        if aliasTemplate:
+        	alias = Template(aliasTemplate)
+        	hostentry['alias'] = alias.substitute(hostname=host_name, query_port=query_port, setname=set_name, hostshortname=hostShortName)
 
         if urlTemplate:
             url = Template(urlTemplate)
-            hostentry['url'] = url.substitute(hostname=host_name, query_port=query_port)
+            hostentry['url'] = url.substitute(hostname=host_name, query_port=query_port, setname=set_name, hostshortname=hostShortName)
 
         hostentry['numQueryThreads'] = len(hostentry['queries'])
         return hostentry
 
-    def create_host_set_configuration(self, host_names, query_names, query_port, username, password, urlTemplate):
+    def create_host_set_configuration(self, host_names, query_names, query_port, username, password, urlTemplate, set_name, global_host_alias):
         """
         Return the full jmxtrans compatible configuration for all 'host_names',
         each using all queries given by 'query_names'. 'query_port' is used to
@@ -115,10 +121,13 @@ class Queries(object):
         root = {'servers' : [] }
         for host_name in host_names:
         ## Extract port if present
+        	(host, aliasSep, alias) = host_name.partition(";")
+        	if aliasSep == "":
+        		alias = global_host_alias
             (host, sep, port) = host_name.partition(":")
             if sep == "":
                 port = query_port
-            root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate))
+            root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate, alias, set_name))
         return root
 
     def create_output_writer_configuration(self, typeName):
@@ -200,6 +209,7 @@ if __name__ == '__main__':
     infile = open(sys.argv[1], 'r')
     yf = yaml.load(infile)
     query_port = yf['query_port']
+    global_host_alias = yf['global_host_alias']
     # Deprecate graphite_* configuration attributes in favor of configurable outputWriters.
     # Set outputWriters as per input file if it exists. Else, None. This is for backwards compatibilty (when only graphite_* was required)
     outputWriters = yf['outputWriters'] if ('outputWriters' in yf) else None
@@ -212,6 +222,6 @@ if __name__ == '__main__':
     for set_name in h.set_names():
         outfile = open(set_name + ".json", 'w')
         s = h.get_set(set_name)
-        servers = q.create_host_set_configuration(s['hosts'],s['query_names'], query_port, s['username'], s['password'], s['urlTemplate'])
+        servers = q.create_host_set_configuration(s['hosts'],s['query_names'], query_port, s['username'], s['password'], s['urlTemplate'], set_name, global_host_alias)
         json.dump(servers,outfile, indent=1)
         outfile.close()
