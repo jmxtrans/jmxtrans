@@ -133,7 +133,14 @@ class Queries(object):
     def create_output_writer_configuration(self, typeName):
         """
         Generic output writer snippet template
-        """	
+        """
+        
+        if isinstance(typeName, basestring):
+        	typeNames = [ typeName ]
+        else:
+        	typeNames = typeName
+        	
+        
         #For compatibility, if no outputWriters were configured, use the deprecated Graphite-specific config: 
         if len(self.outputWriters) == 0:
             return [ {
@@ -141,12 +148,12 @@ class Queries(object):
             'settings' : {
                 'port' : self.monitor_port,
                 'host' : self.monitor_host,
-                'typeNames' : [ typeName ],
+                'typeNames' : typeNames,
                 }
             } ]
         
         for iter in range(len(self.outputWriters)):
-            self.outputWriters[iter]['settings']['typeNames'] = [ typeName ]
+            self.outputWriters[iter]['settings']['typeNames'] = typeNames
         writer = self.outputWriters
         return writer
 
