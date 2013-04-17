@@ -17,7 +17,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import yaml, json, sys
+import yaml, json, sys, copy
 from string import Template
 
 class Queries(object):
@@ -92,6 +92,7 @@ class Queries(object):
                       'queries' : [] }
         for query_name in query_names:
             hostentry['queries'].append(self.create_query_entry(query_name))
+            
 
         if username:
             hostentry['username'] = username
@@ -140,7 +141,6 @@ class Queries(object):
         else:
         	typeNames = typeName
         	
-        
         #For compatibility, if no outputWriters were configured, use the deprecated Graphite-specific config: 
         if len(self.outputWriters) == 0:
             return [ {
@@ -152,9 +152,9 @@ class Queries(object):
                 }
             } ]
         
+        writer = copy.deepcopy(self.outputWriters)
         for iter in range(len(self.outputWriters)):
-            self.outputWriters[iter]['settings']['typeNames'] = typeNames
-        writer = self.outputWriters
+            writer[iter]['settings']['typeNames'] = typeNames
         return writer
 
 class HostSets(object):
