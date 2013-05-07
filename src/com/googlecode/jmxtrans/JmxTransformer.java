@@ -355,7 +355,8 @@ public class JmxTransformer implements WatchedCallback {
 				}
 				JmxUtils.mergeServerLists(this.masterServersList, process.getServers());
 			} catch (Exception ex) {
-				throw new LifecycleException("Error parsing json: " + jsonFile, ex);
+				// error parsing one file should not prevent the startup of JMXTrans
+				log.error("Error parsing json: " + jsonFile, ex);
 			}
 		}
 
