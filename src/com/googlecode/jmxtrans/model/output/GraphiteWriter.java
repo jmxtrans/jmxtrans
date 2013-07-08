@@ -132,7 +132,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 		Socket socket = null;
 		statusLock.lock();
 		try {
-			while(status == GraphiteWriterStatus.STARTING) {
+			while (status == GraphiteWriterStatus.STARTING) {
 				statusConditionStarted.await();
 			}
 			if (status != GraphiteWriterStatus.STARTED) {
@@ -155,8 +155,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 				Map<String, Object> resultValues = result.getValues();
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
-                        Object value = values.getValue();
-                        if (JmxUtils.isNumeric(value)) {
+						Object value = values.getValue();
+						if (JmxUtils.isNumeric(value)) {
 							StringBuilder sb = new StringBuilder();
 
 							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
@@ -174,10 +174,10 @@ public class GraphiteWriter extends BaseOutputWriter {
 							writer.write(line);
 							writer.flush();
 						} else {
-                            if (log.isWarnEnabled()) {
-                                log.warn("Unable to submit non-numeric value to Graphite: \"" + value + "\" from result " + result);
-                            }
-                        }
+							if (log.isWarnEnabled()) {
+								log.warn("Unable to submit non-numeric value to Graphite: \"" + value + "\" from result " + result);
+							}
+						}
 					}
 				}
 			}
