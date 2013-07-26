@@ -162,7 +162,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 		} else {
 			// no instance ID, the metrics will be sent as "bare" custom metrics and not associated with an instance
 			instanceId = null;
-			logger.info("No source instance ID passed, and not set to detect, sending metrics without and instance ID");
+			logger.info("No source instance ID passed, and not set to detect, sending metrics without an instance ID");
 		}
 	}
 	
