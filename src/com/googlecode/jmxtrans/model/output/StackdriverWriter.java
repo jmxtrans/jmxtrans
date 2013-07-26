@@ -209,11 +209,35 @@ public class StackdriverWriter extends BaseOutputWriter {
 						// we have a numeric value, write a value into the message
 						valueCount++;
 						g.writeStartObject();
+						
+						StringBuilder nameBuilder = new StringBuilder();
+						
+						// put the prefix if set
 						if (this.prefix != null) {
-							g.writeStringField("name", prefix + "." + metric.getClassName() + "." + metric.getAttributeName() + "." + entry.getKey());
-						} else {
-							g.writeStringField("name", metric.getClassName() + "." + metric.getAttributeName() + "." + entry.getKey());
+							nameBuilder.append(prefix);
+							nameBuilder.append(".");
 						}
+						
+						// put the class name or its alias if available
+						if (!metric.getClassNameAlias().isEmpty()) {
+							nameBuilder.append(metric.getClassNameAlias());
+							
+						} else {
+							nameBuilder.append(metric.getClassName());	
+						}
+						
+						// add the attribute name
+						nameBuilder.append(".");
+						nameBuilder.append(metric.getAttributeName());
+						
+						// put the value name if it differs from the attribute name
+						if (!entry.getKey().equals(metric.getAttributeName())) {
+							nameBuilder.append(".");
+							nameBuilder.append(entry.getKey());
+						}
+						
+						g.writeStringField("name", nameBuilder.toString());
+						
 						g.writeNumberField("value", Double.valueOf(entry.getValue().toString()));
 						
 						// if the metric is attached to an instance, include that in the message
