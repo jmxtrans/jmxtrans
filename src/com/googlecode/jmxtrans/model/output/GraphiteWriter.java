@@ -1,5 +1,18 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.jmx.ManagedObject;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.*;
+import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
@@ -11,25 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.apache.commons.pool.KeyedObjectPool;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.jmx.ManagedObject;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.SocketFactory;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This low latency and thread save output writer sends data to a host/port combination
@@ -138,11 +132,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 		Socket socket = null;
 		statusLock.lock();
 		try {
-			while(status == GraphiteWriterStatus.STARTING) {
+			while (status == GraphiteWriterStatus.STARTING) {
 				statusConditionStarted.await();
 			}
 			if (status != GraphiteWriterStatus.STARTED) {
-				throw new LifecycleException("GraphiteWriter instance shold be started");
+				throw new LifecycleException("GraphiteWriter instance should be started");
 			}
 			socket = (Socket) pool.borrowObject(address);
 		} finally {
@@ -156,18 +150,19 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 			for (Result result : query.getResults()) {
 				if (isDebugEnabled()) {
-					log.debug(result.toString());
+					log.debug("Query result: " + result.toString());
 				}
 				Map<String, Object> resultValues = result.getValues();
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
-						if (JmxUtils.isNumeric(values.getValue())) {
+						Object value = values.getValue();
+						if (JmxUtils.isNumeric(value)) {
 							StringBuilder sb = new StringBuilder();
 
 							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
 
 							sb.append(" ");
-							sb.append(values.getValue().toString());
+							sb.append(value.toString());
 							sb.append(" ");
 							sb.append(result.getEpoch() / 1000);
 							sb.append("\n");
@@ -178,6 +173,10 @@ public class GraphiteWriter extends BaseOutputWriter {
 							}
 							writer.write(line);
 							writer.flush();
+						} else {
+							if (log.isWarnEnabled()) {
+								log.warn("Unable to submit non-numeric value to Graphite: \"" + value + "\" from result " + result);
+							}
 						}
 					}
 				}

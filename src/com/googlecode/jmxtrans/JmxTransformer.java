@@ -67,6 +67,9 @@ public class JmxTransformer implements WatchedCallback {
 	private File jsonDirOrFile;
 
 	private boolean runEndlessly = false;
+	
+	private boolean continueOnJsonError = false;
+	
 	private Scheduler serverScheduler;
 
 	private WatchDir watcher;
@@ -355,7 +358,12 @@ public class JmxTransformer implements WatchedCallback {
 				}
 				JmxUtils.mergeServerLists(this.masterServersList, process.getServers());
 			} catch (Exception ex) {
-				throw new LifecycleException("Error parsing json: " + jsonFile, ex);
+				if (isContinueOnJsonError()) {
+					throw new LifecycleException("Error parsing json: " + jsonFile, ex);
+				} else {
+					// error parsing one file should not prevent the startup of JMXTrans
+					log.error("Error parsing json: " + jsonFile, ex);
+				}
 			}
 		}
 
@@ -464,6 +472,19 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	/**
+	 * If it is false, then JmxTrans will stop when one of the JSON
+	 * configuration file is invalid. Otherwise, it will just print an error
+	 * and continue processing.
+	 */
+	private void setContinueOnJsonError(boolean continueOnJsonError) {
+		this.continueOnJsonError = continueOnJsonError;
+	}
+	
+	private boolean isContinueOnJsonError() {
+		return continueOnJsonError;
+	}
+
+	/**
 	 * Parse the options given on the command line.
 	 */
 	private boolean parseOptions(String[] args) throws OptionsException, org.apache.commons.cli.ParseException {
@@ -474,7 +495,9 @@ public class JmxTransformer implements WatchedCallback {
 		boolean result = true;
 
 		for (Option option : options) {
-			if (option.getOpt().equals("j")) {
+			if (option.getOpt().equals("c")) {
+				this.setContinueOnJsonError(Boolean.parseBoolean(option.getValue()));
+			} else if (option.getOpt().equals("j")) {
 				File tmp = new File(option.getValue());
 				if (!tmp.exists() && !tmp.isDirectory()) {
 					throw new OptionsException("Path to json directory is invalid: " + tmp);
@@ -511,6 +534,7 @@ public class JmxTransformer implements WatchedCallback {
 	/** */
 	public Options getOptions() {
 		Options options = new Options();
+		options.addOption("c", true, "Continue processing even if one of the JSON configuration file is invalid.");
 		options.addOption("j", true, "Directory where json configuration is stored. Default is .");
 		options.addOption("f", true, "A single json file to execute.");
 		options.addOption("e", false, "Run endlessly. Default false.");
