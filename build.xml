@@ -1,0 +1,326 @@
+<?xml version="1.0"?>
+
+<!--
+		Build file for jmxtrans.
+-->
+<project name="jmxtrans" default="jar" basedir=".">
+
+	<property name="name" value="${ant.project.name}" />
+	<property name="base.dir" location="." />
+
+	<property file="user.properties" />
+	<property file="${user.home}/build.properties" />
+	<property file="jar.properties"/>
+	<property name="alexandria.home" value="${base.dir}" />
+	<property file="${alexandria.home}/jar.properties" />
+	<property file="build.credentials.properties" />
+
+	<property name="target.dir" location="target" />
+	<property name="build.dir" location="${target.dir}" />
+	<property name="build.classes.dir" location="${build.dir}/classes" />
+	<property name="build.javadoc.dir" location="${build.dir}/javadoc" />
+	<property name="build.jar.file" location="${build.dir}/${name}.jar" />
+
+	<property name="javadoc.dir" value="javadoc" />
+	<property name="lib.dir" location="lib" />
+	<property name="src.dir" location="src" />
+
+	<tstamp>
+		<format property="NOW" pattern="yyyyMMdd-hh:mm:ss" />
+		<format property="DATE_TIME" pattern="yyyyMMdd-HHmmss" />
+		<format property="DATE_TIME2" pattern="yyyyMMdd.HHmmss" />
+		<!-- Wed, 19 Jan 2011 18:19:37 -0800 -->
+		<format property="PROPER_NOW" pattern="E, dd MMM yyyy hh:mm:ss ZZ" />
+		<format property="YEAR" pattern="yyyy" />
+	</tstamp>
+
+	<typedef resource="com/googlecode/sweetened/sweetened.xml" classpath="${alexandria.home}/${sweetened.jar}:${alexandria.home}/${jgit.jar}" />
+	<sweetenedVersion />
+
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${alexandria.home}/${ant-contrib.jar}"/>
+		</classpath>
+	</taskdef>
+
+	<spath id="sweetened.classpath">
+		<sfilelist dir="${alexandria.home}">
+			<sfile name="${commons-cli.jar}" scope="compile" src="${alexandria.home}/${commons-cli.src}" />
+			<sfile name="${commons-codec.jar}" scope="compile" src="${alexandria.home}/${commons-codec.src}" />
+			<sfile name="${commons-io.jar}" scope="compile" src="${alexandria.home}/${commons-io.src}" />
+			<sfile name="${commons-lang.jar}" scope="compile" src="${alexandria.home}/${commons-lang.src}" />
+			<sfile name="${commons-logging.jar}" scope="compile" src="${alexandria.home}/${commons-logging.src}" />
+			<sfile name="${commons-pool.jar}" scope="compile" src="${alexandria.home}/${commons-pool.src}" />
+			<sfile name="${gmetric4j.jar}" scope="compile" />
+			<sfile name="${jackson-core.jar}" scope="compile" src="${alexandria.home}/${jackson.src}" />
+			<sfile name="${jackson-mapper.jar}" scope="compile" src="${alexandria.home}/${jackson.src}" />
+			<sfile name="${jpathwatch.jar}" scope="compile" />
+			<sfile name="${jrobin.jar}" scope="compile" src="${alexandria.home}/${jrobin.src}" />
+			<sfile name="${junit.jar}" scope="unit" src="${alexandria.home}/${junit.src}" />
+			<sfile name="${log4j.jar}" scope="compile" src="${alexandria.home}/${log4j.src}" />
+			<sfile name="${quartz.jar}" scope="compile" src="${alexandria.home}/${quartz.src}" />
+			<sfile name="${slf4j-api.jar}" scope="compile" src="${alexandria.home}/${slf4j-api.src}" />
+			<sfile name="${slf4j-log4j.jar}" scope="runtime" src="${alexandria.home}/${slf4j-log4j.src}" />
+			<sfile name="${velocity.jar}" scope="compile" src="${alexandria.home}/${velocity.src}" />
+		</sfilelist>
+	</spath>
+
+	<spath id="javac.classpath" scope="compile" parent="sweetened.classpath" />
+	<spath id="javadoc.classpath" scope="all" parent="sweetened.classpath" />
+	<spath id="unit.classpath" scope="all" parent="sweetened.classpath" />
+	<spath id="all.classpath" scope="all" parent="sweetened.classpath" />
+
+	<path id="run.classpath">
+		<pathelement location="${build.classes.dir}" />
+		<path refid="master.classpath" />
+	</path>
+
+	<target name="init">
+		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpath="${lib.dir}/ant-googlecode-0.0.2.jar" name="gcupload"/>
+
+		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
+		<property name="version" value="${DATE_TIME}-${sVersionRevision}" />
+		<property name="version.rpm" value="${DATE_TIME2}.${sVersionRevision}" />
+		<property name="build.version" value="${DATE_TIME}-${sVersionRevision}" />
+
+		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
+		<property name="build.dist.zip" location="${build.dir}/${ant.project.name}-${version}.zip"/>
+		<property name="build.dist.rpm" location="${build.dir}/${ant.project.name}-${version.rpm}"/>
+		<property name="build.dist.rpm.zip" location="${build.dir}/${ant.project.name}-${version.rpm}.zip"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="classes" depends="init">
+		<mkdir dir="${build.classes.dir}" />
+
+		<javac srcdir="${src.dir}"
+				destdir="${build.classes.dir}"
+				optimize="off"
+				deprecation="off"
+				debug="on"
+				debuglevel="lines,vars,source"
+				source="1.5"
+				target="1.5"
+				encoding="UTF-8"
+				verbose="off"
+				fork="false"
+				includeantruntime="false">
+			<classpath path="${toString:javac.classpath}"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="classes">
+		<sync todir="${build.classes.dir}">
+			<preserveintarget>
+				<include name="**/*.class"/>
+			</preserveintarget>
+			<fileset dir="src" defaultexcludes="yes">
+				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
+			</fileset>
+		</sync>
+		<jar destfile="${build.jar.file}" basedir="${build.classes.dir}">
+			<manifest>
+				<attribute name="Specification-Version" value="${version}" />
+				<attribute name="Implementation-Version" value="${TODAY}" />
+				<attribute name="Main-Class" value="com.googlecode.jmxtrans.JmxTransformer" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="jar-all" depends="jar">
+		<zip destfile="${build.dir}/jmxtrans-all.jar">
+			<zipgroupfileset dir="lib">
+				<include name="*.jar" />
+				<exclude name="ant*.jar" />
+				<exclude name="*sources*.jar" />
+				<exclude name="*junit*.jar" />
+				<exclude name="*org.eclipse.git*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${build.dir}" includes="jmxtrans.jar"/>
+		</zip>
+	</target>
+
+	<target name="javadoc" depends="classes">
+		<javadoc
+			destdir="${build.javadoc.dir}"
+			packagenames="*"
+			author="true"
+			version="true"
+			Windowtitle="jmxlogger javadoc">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.xml" />
+				<exclude name="**/*.properties" />
+			</fileset>
+			<doctitle>
+				<![CDATA[<h1>jmxtrans</h1>]]></doctitle>
+			<bottom>
+			<![CDATA[<i>Copyright &#169; ${YEAR} Jon Stevens and a gang of pencils. All Rights Reserved. Build version: ${build.version}</i>]]></bottom>
+			<classpath path="${toString:javadoc.classpath}" />
+		</javadoc>
+
+		<sync todir="${javadoc.dir}" includeEmptyDirs="true">
+			<fileset dir="${build.javadoc.dir}" />
+			<preserveintarget>
+				<include name="**/.git**"/>
+			</preserveintarget>
+		</sync>
+	</target>
+
+	<target name="dist" depends="clean, jar, jar-all, javadoc">
+		<copy todir="${build.dist.dir}">
+			<fileset dir="${build.dir}">
+				<include name="javadoc/**" />
+			</fileset>
+
+			<fileset dir="${base.dir}">
+				<include name="doc/**" />
+			</fileset>
+
+			<fileset dir="${base.dir}">
+				<include name="*.xml" />
+				<include name="*.json" />
+				<include name="*.sh" />
+				<include name="README.html" />
+				<exclude name="test-*.json" />
+				<exclude name="*.log" />
+				<exclude name="build.credentials.properties" />
+			</fileset>
+
+			<fileset dir="${build.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="${build.dist.dir}/lib">
+			<fileset dir="lib">
+				<include name="*.jar" />
+				<exclude name="*-sources.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="${build.dist.dir}/src">
+			<fileset dir="${base.dir}/src">
+				<include name="**" />
+			</fileset>
+		</copy>
+
+		<copy todir="${build.dist.dir}/tools">
+			<fileset dir="${base.dir}/tools">
+				<include name="**" />
+			</fileset>
+        </copy>
+		<chmod perm="ugo+rx">
+			<fileset dir="${build.dist.dir}/tools">
+				<include name="*.sh" />
+				<include name="*.py" />
+			</fileset>
+		</chmod>
+
+		<dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
+                <dirname property="build.dist.dir.dirname.rpm" file="${build.dist.rpm}" />
+		<!-- properties for rpm build -->
+		<basename property="build.dist.dir.basename" file="${build.dist.dir}" />
+                <basename property="build.dist.dir.basename.rpm" file="${build.dist.rpm}" />
+
+		<zip zipfile="${build.dist.zip}" basedir="${build.dist.dir.dirname}">
+			<include name="${build.dist.dir.basename}/**" />
+		</zip>
+		<!-- move fixes rpm paths -->
+                <move file="${build.dist.dir}" tofile="${build.dist.rpm}" />
+		<zip zipfile="${build.dist.rpm.zip}" basedir="${build.dist.dir.dirname.rpm}">
+			<include name="${build.dist.dir.basename.rpm}/**" />
+		</zip>
+	</target>
+
+	<target name="debian" depends="dist">
+		<filter token="PACKAGE" value="jmxtrans" />
+		<filter token="NOW" value="${NOW}" />
+		<filter token="PROPER_NOW" value="${PROPER_NOW}" />
+		<filter token="YEAR" value="${YEAR}" />
+		<filter token="VERSION" value="${version}" />
+                <filter token="FULL_VERSION" value="${sVersion}" />
+
+		<copy todir="${target.dir}/jmxtrans/debian" filtering="true">
+			<fileset dir="debian">
+				<include name="**"/>
+			</fileset>
+		</copy>
+		<unzip src="${build.dist.zip}" dest="${target.dir}/jmxtrans/debian/tmp/usr/share" />
+		<move todir="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans">
+			<fileset dir="${target.dir}/jmxtrans/debian/tmp/usr/share/jmxtrans-${version}">
+				<include name="**"/>
+			</fileset>
+		</move>
+
+        <!-- inject docs directory -->
+		<copy todir="${target.dir}/jmxtrans/debian/tmp/usr/share/doc/jmxtrans">
+			<fileset dir="${basedir}/doc">
+				<include name="**"/>
+			</fileset>
+		</copy>
+
+		<copy file="bin/yaml2jmxtrans" todir="${target.dir}/jmxtrans/debian/tmp/bin" />
+		<chmod file="${target.dir}/jmxtrans/debian/rules" perm="ugo+rx"/>
+
+		<exec executable="/usr/bin/debuild" dir="${target.dir}/jmxtrans" failonerror="true">
+			<arg line="-b -i -us -uc"/>
+		</exec>
+	</target>
+
+	<target name="rpm" depends="dist">
+		<copy todir="${target.dir}/jmxtrans/rpm" >
+			<fileset dir="rpm">
+				<include name="**"/>
+			</fileset>
+		</copy>
+
+		<mkdir dir="${target.dir}/jmxtrans/rpm/BUILD" />
+		<mkdir dir="${target.dir}/jmxtrans/rpm/RPMS" />
+		<mkdir dir="${target.dir}/jmxtrans/rpm/SRPMS" />
+		<mkdir dir="${target.dir}/jmxtrans/rpm/TEMP" />
+
+		<copy file="${build.dist.rpm.zip}" todir="${target.dir}/jmxtrans/rpm/SOURCES"/>
+
+		<exec executable="/usr/bin/rpmbuild" dir="${target.dir}/jmxtrans/rpm" failonerror="true">
+			<arg line="-ba --define='_topdir ${target.dir}/jmxtrans/rpm' --define='_tmppath ${target.dir}/jmxtrans/rpm/TEMP' --define='VERSION ${version.rpm}' --define='RELEASE 0' --define='JMXTRANS_SOURCE ${ant.project.name}-${version.rpm}.zip' SPECS/jmxtrans.spec"/>
+		</exec>
+	</target>
+
+	<target name=".eclipse" description="Generate eclipse project metadata">
+		<sweetenedClasspath file=".classpath">
+			<sweetenedBits refid="unit.classpath" />
+			<data>
+				<classpath>
+					<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+					<sweetenedEntries />
+					<classpathentry kind="src" path="src"/>
+					<classpathentry kind="src" path="test"/>
+					<classpathentry kind="output" path="_eclipse"/>
+				</classpath>
+			</data>
+		</sweetenedClasspath>
+		<echoxml file=".project">
+			<projectDescription>
+				<name>${name}-${sVersionBranchName}</name>
+				<comment>
+				</comment>
+				<projects>
+				</projects>
+				<buildSpec>
+					<buildCommand>
+						<name>org.eclipse.jdt.core.javabuilder</name>
+						<arguments>
+						</arguments>
+					</buildCommand>
+				</buildSpec>
+				<natures>
+					<nature>org.eclipse.jdt.core.javanature</nature>
+				</natures>
+			</projectDescription>
+		</echoxml>
+	</target>
+</project>
