@@ -5,21 +5,22 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
-import ganglia.gmetric.GMetric;
-import ganglia.gmetric.GMetricSlope;
-import ganglia.gmetric.GMetricType;
+import info.ganglia.gmetric4j.gmetric.GMetric;
+import info.ganglia.gmetric4j.gmetric.GMetricSlope;
+import info.ganglia.gmetric4j.gmetric.GMetricType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ganglia.gmetric.GMetric.UDPAddressingMode;
+import static info.ganglia.gmetric4j.gmetric.GMetric.UDPAddressingMode;
 
 /**
  * {@link com.googlecode.jmxtrans.OutputWriter} for <a href="http://ganglia.sourceforge.net">Ganglia</a>.
@@ -88,6 +89,8 @@ public class GangliaWriter extends BaseOutputWriter {
             try {
                 addressingMode = UDPAddressingMode.getModeForAddress(host);
             } catch (UnknownHostException uhe) {
+                addressingMode = DEFAULT_ADDRESSING_MODE;
+            } catch (IOException ioe) {
                 addressingMode = DEFAULT_ADDRESSING_MODE;
             }
         }
