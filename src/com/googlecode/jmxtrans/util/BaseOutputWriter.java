@@ -127,6 +127,30 @@ public abstract class BaseOutputWriter implements OutputWriter {
 		final Object value = this.getSettings().get(key);
 		return value != null ? value.toString() : defaultVal;
 	}
+	
+	/**
+     * Gets an int value for the setting, returning the default value if not
+     * specified.
+     * 
+     * @param key 
+     * 			the key to get the int value for
+     * @param defaultVal 
+     * 			default value if the setting was not specified
+     * @return the int value for the setting  
+     * @throws IllegalArgumentException if setting does not contain an int
+     */
+    protected int getIntSetting(String key, int defaultVal) throws IllegalArgumentException {
+        if (settings.containsKey(key)) {
+            final String value = settings.get(key).toString();
+            try {
+                return Integer.parseInt(value);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Setting '" + key + "=" + value + "' is not an integer on " + this.toString());
+            }
+        } else {
+            return defaultVal;
+        }
+    }
 
 	/** */
 	@JsonIgnore
