@@ -129,7 +129,6 @@
 
   <build>
    <sourceDirectory>src</sourceDirectory>
-   <testSourceDirectory>test</testSourceDirectory>
 
     <plugins>
         <plugin>
@@ -166,15 +165,5 @@
             </executions>
         </plugin>
     </plugins>
-
-    <resources>
-      <resource>
-          <directory>src</directory>
-          <includes>
-              <include>log4j.xml</include>
-              <include>quartz.server.properties</include>
-          </includes>
-      </resource>
-    </resources>
   </build>
 </project>
