@@ -21,6 +21,7 @@
 		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
 		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
+        <tag>HEAD</tag>
 	</scm>
 
 	<properties>
