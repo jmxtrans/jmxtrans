@@ -21,7 +21,6 @@
 		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
 		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
-		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
@@ -57,6 +56,7 @@
 	<build>
 
 		<sourceDirectory>src</sourceDirectory>
+                <testSourceDirectory>test</testSourceDirectory> 
 
 		<plugins>
 
@@ -105,6 +105,26 @@
 
 -->
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>all</shadedClassifierName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+
+<!--
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
@@ -116,20 +136,35 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+                                        <finalName>jmxtrans-all-${project.version}</finalName>
+                                        <appendAssemblyId>true</appendAssemblyId>
+
 				</configuration>
 
 				<executions>
 					<execution>
-						<id>make-assembly</id> <!-- this is used for inheritance merges -->
-						<phase>package</phase> <!-- bind to the packaging phase -->
+						<id>make-assembly</id>
+						<phase>package</phase> 
 						<goals>
 							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
+-->
 
 		</plugins>
+
+
+    <resources>
+      <resource>
+          <directory>src</directory>
+          <includes>
+              <include>log4j.xml</include>
+              <include>quartz.server.properties</include>
+          </includes>
+      </resource>
+    </resources> 
 
 	</build>
 
