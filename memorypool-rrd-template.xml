@@ -1,0 +1,97 @@
+<rrd_def>
+     <path>${database}</path>
+     <!-- not mandatory
+     <start>1000123456</start> -->
+     <!-- not mandatory -->
+     <step>60</step>
+     <!-- at least one datasource must be supplied -->
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:CollectionUsage:committed --><name>CollectionUsaged02c</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:CollectionUsage:init --><name>CollectionUsagec604</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:CollectionUsage:max --><name>CollectionUsage931e</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:CollectionUsage:used --><name>CollectionUsage3df7</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:CollectionUsageThreshold:CollectionUsageThreshold --><name>CUT4bd66414855b43c8</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:CollectionUsageThresholdCount:CollectionUsageThresholdCount --><name>CUTC3b039314a8beebf</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:PeakUsage:committed --><name>PeakUsage920c252712</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:PeakUsage:init --><name>PeakUsagea4197049c1</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:PeakUsage:max --><name>PeakUsage735ab702e0</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:PeakUsage:used --><name>PeakUsage7c6a275788</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:Usage:committed --><name>Usage9349e5f80c2508</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:Usage:init --><name>Usage69df28620fb86e</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:Usage:max --><name>Usagede3fe58b1c2ed9</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:Usage:used --><name>Usage9b128e59b34ad3</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:UsageThreshold:UsageThreshold --><name>UsageThreshold60d76</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Old Gen,type=MemoryPool:UsageThresholdCount:UsageThresholdCount --><name>UTC18d0996b6500b625</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:CollectionUsage:committed --><name>CollectionUsagead98</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:CollectionUsage:init --><name>CollectionUsage532d</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:CollectionUsage:max --><name>CollectionUsage4f08</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:CollectionUsage:used --><name>CollectionUsageb2f0</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:CollectionUsageThreshold:CollectionUsageThreshold --><name>CUT43a518e86df9fcd1</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:CollectionUsageThresholdCount:CollectionUsageThresholdCount --><name>CUTC9c39100c477cb13</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:PeakUsage:committed --><name>PeakUsage93baa54fae</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:PeakUsage:init --><name>PeakUsage2ee7361c86</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:PeakUsage:max --><name>PeakUsagea29740c785</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:PeakUsage:used --><name>PeakUsageac150cc3ad</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:Usage:committed --><name>Usagec9fcfa591b6257</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:Usage:init --><name>Usage451239715f1363</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:Usage:max --><name>Usagee0ef7a2515c9b3</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Eden Space,type=MemoryPool:Usage:used --><name>Usage39f593a4047b00</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:PeakUsage:committed --><name>PeakUsagef1894e01ae</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:PeakUsage:init --><name>PeakUsaged65d309948</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:PeakUsage:max --><name>PeakUsage38e204417a</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:PeakUsage:used --><name>PeakUsagee8af803a14</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:Usage:committed --><name>Usagef2b678daf91d15</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:Usage:init --><name>Usagea78563b02889df</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:Usage:max --><name>Usagecbb98c845726da</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:Usage:used --><name>Usageafe339e4c7241a</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:UsageThreshold:UsageThreshold --><name>UsageThreshold2b6f2</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Code Cache,type=MemoryPool:UsageThresholdCount:UsageThresholdCount --><name>UTCcc1e304c8f5792a5</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:CollectionUsage:committed --><name>CollectionUsagefdb6</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:CollectionUsage:init --><name>CollectionUsaged19e</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:CollectionUsage:max --><name>CollectionUsaged713</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:CollectionUsage:used --><name>CollectionUsage9a99</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:CollectionUsageThreshold:CollectionUsageThreshold --><name>CUTdd0429953c12e910</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:CollectionUsageThresholdCount:CollectionUsageThresholdCount --><name>CUTCf37afee9b5595ed</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:PeakUsage:committed --><name>PeakUsage14f2b835a6</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:PeakUsage:init --><name>PeakUsage276d05f59f</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:PeakUsage:max --><name>PeakUsage02ec0f9b5d</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:PeakUsage:used --><name>PeakUsageda7c37b498</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:Usage:committed --><name>Usage70e7e9e9b9de03</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:Usage:init --><name>Usage96c47c6c18bf09</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:Usage:max --><name>Usage3c97d1ed282a30</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:Usage:used --><name>Usage23821138306d3e</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:UsageThreshold:UsageThreshold --><name>UsageThreshold4d2bc</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=CMS Perm Gen,type=MemoryPool:UsageThresholdCount:UsageThresholdCount --><name>UTCb6cc9121850cfc5c</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:CollectionUsage:committed --><name>CollectionUsage7d32</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:CollectionUsage:init --><name>CollectionUsage9819</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:CollectionUsage:max --><name>CollectionUsage59a4</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:CollectionUsage:used --><name>CollectionUsagefd74</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:CollectionUsageThreshold:CollectionUsageThreshold --><name>CUT6a42e1a0707a7474</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:CollectionUsageThresholdCount:CollectionUsageThresholdCount --><name>CUTC1fa2df45748f1e0</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:PeakUsage:committed --><name>PeakUsagee6ba5b5567</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:PeakUsage:init --><name>PeakUsageb9e1e5bd17</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:PeakUsage:max --><name>PeakUsage712ccf1cc9</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:PeakUsage:used --><name>PeakUsage0492c3149e</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:Usage:committed --><name>Usagec9236d3090c32c</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:Usage:init --><name>Usagec7f10ee4d1f014</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:Usage:max --><name>Usagee21c7f096ce77b</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- name=Par Survivor Space,type=MemoryPool:Usage:used --><name>Usage6040a5019cf300</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+     <!-- at least one archive must be supplied -->
+     <archive>
+         <cf>AVERAGE</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+     <archive>
+         <cf>MIN</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+     <archive>
+         <cf>MAX</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+ </rrd_def>

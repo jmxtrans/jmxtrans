@@ -1,0 +1,35 @@
+<rrd_def>
+     <path>${database}</path>
+     <!-- not mandatory -->
+     <start>1000123456</start>
+     <!-- not mandatory -->
+     <step>300</step>
+     <!-- at least one datasource must be supplied -->
+     <datasource>
+         <name>input</name>
+         <type>COUNTER</type>
+         <heartbeat>300</heartbeat>
+         <min>0</min>
+         <max>U</max>
+     </datasource>
+     <datasource>
+         <name>temperature</name>
+         <type>GAUGE</type>
+         <heartbeat>400</heartbeat>
+         <min>U</min>
+         <max>1000</max>
+     </datasource>
+     <!-- at least one archive must be supplied -->
+     <archive>
+         <cf>AVERAGE</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>600</rows>
+     </archive>
+     <archive>
+         <cf>MAX</cf>
+         <xff>0.6</xff>
+         <steps>6</steps>
+         <rows>7000</rows>
+     </archive>
+ </rrd_def>

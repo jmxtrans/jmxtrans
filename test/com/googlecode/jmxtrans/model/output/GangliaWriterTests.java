@@ -2,8 +2,8 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.util.ValidationException;
-import info.ganglia.gmetric4j.gmetric.GMetric;
-import info.ganglia.gmetric4j.gmetric.GMetricSlope;
+import ganglia.gmetric.GMetric;
+import ganglia.gmetric.GMetricSlope;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;

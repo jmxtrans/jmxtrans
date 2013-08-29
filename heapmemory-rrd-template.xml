@@ -1,0 +1,35 @@
+<rrd_def>
+     <path>${database}</path>
+     <!-- not mandatory
+     <start>1000123456</start> -->
+     <!-- not mandatory -->
+     <step>60</step>
+     <!-- at least one datasource must be supplied -->
+<datasource><!-- type=Memory:HeapMemoryUsage:committed --><name>HeapMemoryUsagefd71</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- type=Memory:HeapMemoryUsage:init --><name>HeapMemoryUsage25f7</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- type=Memory:HeapMemoryUsage:max --><name>HeapMemoryUsageffe4</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- type=Memory:HeapMemoryUsage:used --><name>HeapMemoryUsaged3bb</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- type=Memory:NonHeapMemoryUsage:committed --><name>NHMUb93cabbe11008a2</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- type=Memory:NonHeapMemoryUsage:init --><name>NHMU0a2a437bb561de8</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- type=Memory:NonHeapMemoryUsage:max --><name>NHMU925cc6ce551095e</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+<datasource><!-- type=Memory:NonHeapMemoryUsage:used --><name>NHMU42f37e7c3e62970</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>
+     <!-- at least one archive must be supplied -->
+     <archive>
+         <cf>AVERAGE</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+     <archive>
+         <cf>MIN</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+     <archive>
+         <cf>MAX</cf>
+         <xff>0.5</xff>
+         <steps>1</steps>
+         <rows>7000</rows>
+     </archive>
+ </rrd_def>
