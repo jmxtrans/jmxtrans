@@ -81,7 +81,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12</version>
 				<configuration>
-					<includes>
+					<includes>   mvn clean
 						<include>**/Test*.java</include>
 						<include>**/*Test.java</include>
 						<include>**/*TestCase.java</include>
@@ -109,6 +109,11 @@
 						<configuration>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>all</shadedClassifierName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.googlecode.jmxtrans.JmxTransformer</mainClass>
+                                </transformer>
+                            </transformers>
 						</configuration>
 					</execution>
 				</executions>
