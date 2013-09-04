@@ -23,6 +23,7 @@ SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
 
 JPS=${JPS:-"${JAVA_HOME}/bin/jps -l"}
 JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
+PSJAVA=${PSJAVA:-"ps aux | grep [j]ava"} 
 PSCMD="$JPS | grep -i jmxtrans | awk '{ print \$1 };'"
 JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"}
 NEW_SIZE=${NEW_SIZE:-"64"}
@@ -43,8 +44,8 @@ GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}M -Xmx${HEAP_SIZE}M -XX:+UseConcMarkSweepGC 
 
 JPS_RUNNABLE=`$JPS 2>&1`
 if [ $? != 0 ]; then
-	echo "Cannot execute $JPS!"
-	exit 1
+	echo "Cannot execute $JPS!, switching to stock ps"
+	PSCMD="$PSJAVA | grep -i jmxtrans | awk '{ print \$2 };'"
 fi
 
 JAVA_VERSION=`$JAVA -version 2>&1`
