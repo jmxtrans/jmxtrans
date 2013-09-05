@@ -274,7 +274,7 @@
 			<scope>test</scope>
 		</dependency>
 
-        <!-- JBOSS7 JMX-Remoting protocol -->
+        <!-- JSR160 (JMX Remoting) protocol -->
         <dependency>
             <groupId>org.jboss.remoting3</groupId>
             <artifactId>remoting-jmx</artifactId>
