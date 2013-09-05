@@ -125,9 +125,11 @@ class Queries(object):
         	(host, aliasSep, alias) = host_name.partition(";")
         	if aliasSep == "":
         		alias = global_host_alias
-            (host, sep, port) = host_name.partition(":")
+            (host, sep, port) = host.partition(":")
             if sep == "":
                 port = query_port
+            host = host.strip()
+            alias = alias.strip()
             root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate, alias, set_name))
         return root
 
