@@ -21,7 +21,7 @@
 		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
 		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
-        <tag>HEAD</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
@@ -109,11 +109,11 @@
 						<configuration>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>all</shadedClassifierName>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.googlecode.jmxtrans.JmxTransformer</mainClass>
-                                </transformer>
-                            </transformers>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.googlecode.jmxtrans.JmxTransformer</mainClass>
+								</transformer>
+							</transformers>
 						</configuration>
 					</execution>
 				</executions>
@@ -272,6 +272,18 @@
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- JSR160 (JMX Remoting) protocol -->
+		<dependency>
+			<groupId>org.jboss.remoting3</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<version>1.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.remotingjmx</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<version>1.1.1.CR2</version>
 		</dependency>
 
 	</dependencies>
