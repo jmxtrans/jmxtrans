@@ -62,6 +62,16 @@
 			<sfile name="${slf4j-api.jar}" scope="compile" src="${alexandria.home}/${slf4j-api.src}" />
 			<sfile name="${slf4j-log4j.jar}" scope="runtime" src="${alexandria.home}/${slf4j-log4j.src}" />
 			<sfile name="${velocity.jar}" scope="compile" src="${alexandria.home}/${velocity.src}" />
+			<sfile name="${remoting3-remoting-jmx.jar}" scope="compile" src="${alexandria.home}/${remoting3-remoting-jmx.src}" />
+			<sfile name="${remotingjmx-remoting-jmx.jar}" scope="compile" src="${alexandria.home}/${remotingjmx-remoting-jmx.src}" />
+			<sfile name="${jboss-loging.jar}" scope="compile" />
+			<sfile name="${jboss-logging-processor.jar}" scope="compile" />
+			<sfile name="${jboss-marshalling.jar}" scope="compile" />
+			<sfile name="${jboss-marshalling-river.jar}" scope="compile" />
+			<sfile name="${jboss-sasl.jar}" scope="compile" />
+			<sfile name="${jbossjdeparser.jar}" scope="compile" />
+			<sfile name="${jboss-xnio-api.jar}" scope="compile" />
+			<sfile name="${jboss-xnio-nio.jar}" scope="compile" />
 		</sfilelist>
 	</spath>
 
@@ -212,7 +222,7 @@
 			<fileset dir="${base.dir}/tools">
 				<include name="**" />
 			</fileset>
-        </copy>
+		</copy>
 		<chmod perm="ugo+rx">
 			<fileset dir="${build.dist.dir}/tools">
 				<include name="*.sh" />
@@ -221,16 +231,16 @@
 		</chmod>
 
 		<dirname property="build.dist.dir.dirname" file="${build.dist.dir}" />
-                <dirname property="build.dist.dir.dirname.rpm" file="${build.dist.rpm}" />
+		<dirname property="build.dist.dir.dirname.rpm" file="${build.dist.rpm}" />
 		<!-- properties for rpm build -->
 		<basename property="build.dist.dir.basename" file="${build.dist.dir}" />
-                <basename property="build.dist.dir.basename.rpm" file="${build.dist.rpm}" />
+		<basename property="build.dist.dir.basename.rpm" file="${build.dist.rpm}" />
 
 		<zip zipfile="${build.dist.zip}" basedir="${build.dist.dir.dirname}">
 			<include name="${build.dist.dir.basename}/**" />
 		</zip>
 		<!-- move fixes rpm paths -->
-                <move file="${build.dist.dir}" tofile="${build.dist.rpm}" />
+		<move file="${build.dist.dir}" tofile="${build.dist.rpm}" />
 		<zip zipfile="${build.dist.rpm.zip}" basedir="${build.dist.dir.dirname.rpm}">
 			<include name="${build.dist.dir.basename.rpm}/**" />
 		</zip>
@@ -242,7 +252,7 @@
 		<filter token="PROPER_NOW" value="${PROPER_NOW}" />
 		<filter token="YEAR" value="${YEAR}" />
 		<filter token="VERSION" value="${version}" />
-                <filter token="FULL_VERSION" value="${sVersion}" />
+		<filter token="FULL_VERSION" value="${sVersion}" />
 
 		<copy todir="${target.dir}/jmxtrans/debian" filtering="true">
 			<fileset dir="debian">
@@ -256,7 +266,7 @@
 			</fileset>
 		</move>
 
-        <!-- inject docs directory -->
+		<!-- inject docs directory -->
 		<copy todir="${target.dir}/jmxtrans/debian/tmp/usr/share/doc/jmxtrans">
 			<fileset dir="${basedir}/doc">
 				<include name="**"/>
