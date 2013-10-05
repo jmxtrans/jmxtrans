@@ -24,7 +24,7 @@ import javax.management.MBeanServer;
 /**
  * Represents a jmx server that we want to connect to. This also stores the
  * queries that we want to execute against the server.
- * 
+ *
  * @author jon
  */
 @JsonSerialize(include = Inclusion.NON_NULL)
@@ -124,6 +124,12 @@ public class Server {
 
 	/** */
 	public String getHost() {
+		if (this.host == null) {
+			if (this.url == null) {
+				throw new RuntimeException("host is null and url is null.  Cannot construct host dynamically.");
+			}
+			this.host = this.url.substring(this.url.lastIndexOf("//") + 2, this.url.lastIndexOf(":"));
+		}
 		return this.host;
 	}
 
@@ -134,6 +140,15 @@ public class Server {
 
 	/** */
 	public String getPort() {
+		if (this.port == null) {
+			if (this.url == null) {
+				throw new RuntimeException("port is null and url is null.  Cannot construct port dynamically.");
+			}
+			this.port = this.url.substring(this.url.lastIndexOf(":") + 1);
+			if (this.port.contains("/")) {
+				this.port = this.port.substring(0, this.port.indexOf("/"));
+			}
+		}
 		return this.port;
 	}
 
@@ -216,7 +231,7 @@ public class Server {
 	/**
 	 * If there are queries and results that have been executed, this is just a
 	 * shortcut to get all the Results.
-	 * 
+	 *
 	 * @return null if there are no queries or empty list if there are no
 	 *         results.
 	 */
@@ -317,10 +332,10 @@ public class Server {
 
 	/**
 	 * This is some obtuse shit for enabling weblogic support.
-	 * 
+	 *
 	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
 	 * html
-	 * 
+	 *
 	 * You'd set this to: weblogic.management.remote
 	 */
 	public String getProtocolProviderPackages() {
@@ -329,10 +344,10 @@ public class Server {
 
 	/**
 	 * This is some obtuse shit for enabling weblogic support.
-	 * 
+	 *
 	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
 	 * html
-	 * 
+	 *
 	 * You'd set this to: weblogic.management.remote
 	 */
 	public void setProtocolProviderPackages(String protocolProviderPackages) {

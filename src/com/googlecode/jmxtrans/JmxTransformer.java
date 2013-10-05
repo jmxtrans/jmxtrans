@@ -67,9 +67,9 @@ public class JmxTransformer implements WatchedCallback {
 	private File jsonDirOrFile;
 
 	private boolean runEndlessly = false;
-	
+
 	private boolean continueOnJsonError = false;
-	
+
 	private Scheduler serverScheduler;
 
 	private WatchDir watcher;
@@ -409,7 +409,7 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void scheduleJob(Scheduler scheduler, Server server) throws ParseException, SchedulerException {
 
-		String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(10);
+		String name = server.getUrl() + "-" + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(10);
 		JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
 
 		JobDataMap map = new JobDataMap();
@@ -422,11 +422,11 @@ public class JmxTransformer implements WatchedCallback {
 		if ((server.getCronExpression() != null) && CronExpression.isValidExpression(server.getCronExpression())) {
 			trigger = new CronTrigger();
 			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
-			((CronTrigger) trigger).setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			((CronTrigger) trigger).setName(server.getUrl() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			((CronTrigger) trigger).setStartTime(new Date());
 		} else {
 			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
-			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			minuteTrigger.setName(server.getUrl() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			minuteTrigger.setStartTime(new Date());
 
 			trigger = minuteTrigger;
@@ -479,7 +479,7 @@ public class JmxTransformer implements WatchedCallback {
 	private void setContinueOnJsonError(boolean continueOnJsonError) {
 		this.continueOnJsonError = continueOnJsonError;
 	}
-	
+
 	private boolean isContinueOnJsonError() {
 		return continueOnJsonError;
 	}
