@@ -4,18 +4,18 @@ import java.util.List;
 import java.util.Map;
 
 /***
- * 
+ *
  * Property Resolver
- * 
+ *
  * @author henri
- * 
+ *
  */
 public class PropertyResolver {
 
 	/**
 	 * Resolve a property from System Properties (aka ${key}) key:defval is
 	 * supported and if key not found on SysProps, defval will be returned
-	 * 
+	 *
 	 * @param s
 	 * @return resolved string or null if not found in System Properties and no
 	 *         defval
@@ -41,9 +41,9 @@ public class PropertyResolver {
 	/**
 	 * Parse a String and replace vars a la ant (${key} from System Properties
 	 * Support complex Strings like :
-	 * 
+	 *
 	 * "${myhost}" "${myhost:w2}" "${mybean:defbean}.${mybean2:defbean2}"
-	 * 
+	 *
 	 * @param s
 	 * @return resolved String
 	 */
@@ -64,7 +64,7 @@ public class PropertyResolver {
 				sb.append(s.substring(ipos));
 				break;
 			}
-			
+
 			if (pos != ipos)
 				sb.append(s.substring(ipos, pos));
 
@@ -95,11 +95,9 @@ public class PropertyResolver {
 	 */
 	public static void resolveMap(Map<String, Object> map) {
 
-		for (String key : map.keySet()) {
-			Object val = map.get(key);
-
-			if (val instanceof String)
-				map.put(key, resolveProps((String) val));
+		for (Map.Entry<String, Object> entry : map.entrySet()) {
+			if (entry.getValue() instanceof String)
+				map.put(entry.getKey(), resolveProps((String) entry.getValue()));
 		}
 	}
 

@@ -45,6 +45,7 @@ public class MergingTests {
 		Server s1 = new Server();
 		s1.setAlias("alias");
 		s1.setHost("host");
+		s1.setPort("8004");
 		s1.setCronExpression("cron");
 		s1.setNumQueryThreads(Integer.valueOf(123));
 		s1.setPassword("pass");
@@ -56,6 +57,7 @@ public class MergingTests {
 		Server s2 = new Server();
 		s2.setAlias("alias");
 		s2.setHost("host");
+		s2.setPort("8004");
 		s2.setCronExpression("cron");
 		s2.setNumQueryThreads(Integer.valueOf(123));
 		s2.setPassword("pass");
@@ -66,6 +68,7 @@ public class MergingTests {
 		Server s3 = new Server();
 		s3.setAlias("alias");
 		s3.setHost("host3");
+		s3.setPort("8004");
 		s3.setCronExpression("cron");
 		s3.setNumQueryThreads(Integer.valueOf(123));
 		s3.setPassword("pass");

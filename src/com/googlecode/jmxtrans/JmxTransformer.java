@@ -67,9 +67,9 @@ public class JmxTransformer implements WatchedCallback {
 	private File jsonDirOrFile;
 
 	private boolean runEndlessly = false;
-	
+
 	private boolean continueOnJsonError = false;
-	
+
 	private Scheduler serverScheduler;
 
 	private WatchDir watcher;
@@ -479,7 +479,7 @@ public class JmxTransformer implements WatchedCallback {
 	private void setContinueOnJsonError(boolean continueOnJsonError) {
 		this.continueOnJsonError = continueOnJsonError;
 	}
-	
+
 	private boolean isContinueOnJsonError() {
 		return continueOnJsonError;
 	}

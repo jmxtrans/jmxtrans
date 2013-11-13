@@ -16,7 +16,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 /**
  * This is a quartz job that is responsible for executing a Server object on a
  * cron schedule that is defined within the Server object.
- * 
+ *
  * @author jon
  */
 public class ServerJob implements Job {
@@ -33,12 +33,12 @@ public class ServerJob implements Job {
 
 		JMXConnector conn = null;
 		try {
-            if (! server.isLocal()) {
-                conn = (JMXConnector) pool.borrowObject(server);
-            }
+			if (! server.isLocal()) {
+				conn = (JMXConnector) pool.borrowObject(server);
+			}
 			JmxUtils.processServer(server, conn);
 		} catch (Exception e) {
-			log.error("Error", e);
+			log.error("Error in job for server: " + server, e);
 			throw new JobExecutionException(e);
 		} finally {
 			try {

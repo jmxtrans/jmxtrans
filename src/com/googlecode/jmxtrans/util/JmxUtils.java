@@ -160,7 +160,7 @@ public class JmxUtils {
 			try {
 				processQuery(this.mbeanServer, this.query);
 			} catch (Exception e) {
-				log.error("Error executing query", e);
+				log.error("Error executing query: " + query, e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -267,11 +267,11 @@ public class JmxUtils {
 				if (entryValue instanceof CompositeDataSupport) {
 					getResult(resList, info, oi, attributeName + attributeName2, (CompositeDataSupport) entryValue, query);
 				} else {
-					throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/lookfirst/jmxtrans/issues entryValue is: "
+					throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/jmxtrans/jmxtrans/issues entryValue is: "
 							+ entryValue.getClass().getCanonicalName());
 				}
 			} else {
-				throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/lookfirst/jmxtrans/issues entryKeys is: "
+				throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/jmxtrans/jmxtrans/issues entryKeys is: "
 						+ entryKeys.getClass().getCanonicalName());
 			}
 		}
@@ -466,7 +466,7 @@ public class JmxUtils {
 			mbeanServer = server.getLocalMBeanServer();
 		else
 			mbeanServer = conn.getMBeanServerConnection();
-		
+
 		JmxUtils.processQueriesForServer(mbeanServer, server);
 	}
 
