@@ -207,8 +207,6 @@ public class StackdriverWriter extends BaseOutputWriter {
 				for (Entry<String, Object> entry : values.entrySet()) {
 					if (JmxUtils.isNumeric(entry.getValue())) {
 						// we have a numeric value, write a value into the message
-						valueCount++;
-						g.writeStartObject();
 						
 						StringBuilder nameBuilder = new StringBuilder();
 						
@@ -235,6 +233,20 @@ public class StackdriverWriter extends BaseOutputWriter {
 							nameBuilder.append(".");
 							nameBuilder.append(entry.getKey());
 						}
+						
+						// check for Float/Double NaN since these will cause the message validation to fail 
+						if (entry.getValue() instanceof Float && ((Float) entry.getValue()).isNaN()) {
+							logger.info("Metric value for " + nameBuilder.toString() + " is NaN, skipping");
+							continue;
+						}
+						
+						if (entry.getValue() instanceof Double && ((Double) entry.getValue()).isNaN()) {
+							logger.info("Metric value for " + nameBuilder.toString() + " is NaN, skipping");
+							continue;
+						}
+						
+						valueCount++;
+						g.writeStartObject();
 						
 						g.writeStringField("name", nameBuilder.toString());
 						
