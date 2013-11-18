@@ -12,7 +12,7 @@ fi
 # Specify the commonly used configuration options below in a config file.
 CONF_FILE=${CONF_FILE:-"jmxtrans.conf"}
 if [ -e "$CONF_FILE" ]; then
-	. "$CONF_FILE"
+    . "$CONF_FILE"
 fi
 
 JAVA_HOME=${JAVA_HOME:-"/usr"}
@@ -20,6 +20,7 @@ LOG_DIR=${LOG_DIR:-"."}
 JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
 JSON_DIR=${JSON_DIR:-"."}
 SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
+HARDKILL_THRESHOLD=${HARDKILL_THRESHOLD:-60}
 
 JPS=${JPS:-"${JAVA_HOME}/bin/jps -l"}
 JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
@@ -44,113 +45,121 @@ GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}M -Xmx${HEAP_SIZE}M -XX:+UseConcMarkSweepGC 
 
 JPS_RUNNABLE=`$JPS 2>&1`
 if [ $? != 0 ]; then
-	echo "Cannot execute $JPS!, switching to stock ps"
-	PSCMD="$PSJAVA | grep -i jmxtrans | awk '{ print \$2 };'"
+    echo "Cannot execute $JPS!, switching to stock ps"
+    PSCMD="$PSJAVA | grep -i jmxtrans | awk '{ print \$2 };'"
 fi
 
 JAVA_VERSION=`$JAVA -version 2>&1`
 if [ $? != 0 ]; then
-	echo "Cannot execute $JAVA!"
-	exit 1
+    echo "Cannot execute $JAVA!"
+    exit 1
 fi
 
 start() {
-	if [ ! -z "$PIDFILE" ]; then
-		if [ -r "$PIDFILE" ]; then
-			PID=$(cat $PIDFILE)
-		fi
-	else
-		PID=$(eval $PSCMD)
-	fi
+    if [ ! -z "$PIDFILE" ]; then
+        if [ -r "$PIDFILE" ]; then
+            PID=$(cat $PIDFILE)
+        fi
+    else
+        PID=$(eval $PSCMD)
+    fi
 
-	if [ ! -z "$PID" ]; then
-		echo "jmxtrans appears to already be running @ pid: $PID"
-		exit 1
-	fi
+    if [ ! -z "$PID" ]; then
+        echo "jmxtrans appears to already be running @ pid: $PID"
+        exit 1
+    fi
 
-	if [ -z "$FILENAME" ]; then
-		EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
-	else
-		EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
-	fi
+    if [ -z "$FILENAME" ]; then
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
+    else
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
+    fi
 
-	$JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS $EXEC 2>&1 &
+    $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS $EXEC 2>&1 &
 
-	if [ ! -z "$PIDFILE" ]; then
-		echo $! > "$PIDFILE"
-	fi
+    if [ ! -z "$PIDFILE" ]; then
+        echo $! > "$PIDFILE"
+    fi
 
 }
 
 stop() {
-	if [ ! -z "$PIDFILE" ]; then
-		if [ -r "$PIDFILE" ]; then
-			PID=$(cat $PIDFILE)
-		fi
-	else
-		PID=$(eval $PSCMD)
-	fi
-	if [ ! -z "$PID" ]; then
-		kill -15 "$PID"
-		echo -n "Stopping jmxtrans"
-		while (true); do
-	          ps -p $PID >/dev/null 2>&1
-	          if [ $? -eq 0 ] ; then
-				echo -n "."
-				sleep 1
-			else
-				echo ""
-	        	echo "jmxtrans stopped"
-				if [ ! -z "$PIDFILE" ]; then
-					rm -f $PIDFILE
-				fi
+    if [ ! -z "$PIDFILE" ]; then
+        if [ -r "$PIDFILE" ]; then
+            PID=$(cat $PIDFILE)
+        fi
+    else
+        PID=$(eval $PSCMD)
+    fi
+    if [ ! -z "$PID" ]; then
+        kill -15 "$PID"
+        cnt=0
+        echo -n "Stopping jmxtrans"
+        while (true); do
+            ps -p $PID >/dev/null 2>&1
+            if [ $? -eq 0 ] ; then
+                cnt=$((cnt+=1))
 
-				break
-			fi
-		done
-	else
-		echo "jmxtrans was not running"
-	fi
+                if [ $cnt -lt $HARDKILL_THRESHOLD ]; then
+                  echo -n "."
+                  sleep 1
+                else
+                  echo "Reached HARDKILL_THRESHOLD(=${HARDKILL_THRESHOLD}). Sending SIGKILL to process ${PID}"
+                  kill -9 "$PID"
+                fi
+            else
+                echo ""
+                echo "jmxtrans stopped"
+                if [ ! -z "$PIDFILE" ]; then
+                    rm -f $PIDFILE
+                fi
+
+                break
+            fi
+        done
+    else
+        echo "jmxtrans was not running"
+    fi
 }
 
 restart() {
-	stop
-	start
+    stop
+    start
 }
 
 status() {
-	if [ ! -z "$PIDFILE" ]; then
-		if [ -r "$PIDFILE" ]; then
-			PID=$(cat $PIDFILE)
-		fi
-	else
-		PID=$(eval $PSCMD)
-	fi
-	if [ ! -z "$PID" ]; then
-		echo "jmxtrans appears to be running at pid: $PID"
-		exit 0
-	else
-		echo "jmxtrans is not running."
-		exit 3
-	fi
+    if [ ! -z "$PIDFILE" ]; then
+        if [ -r "$PIDFILE" ]; then
+            PID=$(cat $PIDFILE)
+        fi
+    else
+        PID=$(eval $PSCMD)
+    fi
+    if [ ! -z "$PID" ]; then
+        echo "jmxtrans appears to be running at pid: $PID"
+        exit 0
+    else
+        echo "jmxtrans is not running."
+        exit 3
+    fi
 }
 
 case $1 in
-	start)
-		start
-	;;
-	stop)
-		stop
-	;;
-	restart)
-		restart
-	;;
-	status)
-		status
-	;;
-	*)
-		echo $"Usage: $0 {start|stop|restart|status} [filename.json]"
-	;;
+    start)
+        start
+    ;;
+    stop)
+        stop
+    ;;
+    restart)
+        restart
+    ;;
+    status)
+        status
+    ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|status} [filename.json]"
+    ;;
 esac
 
 exit 0
