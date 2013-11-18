@@ -20,6 +20,7 @@ LOG_DIR=${LOG_DIR:-"."}
 JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
 JSON_DIR=${JSON_DIR:-"."}
 SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
+HARDKILL_THRESHOLD=${HARDKILL_THRESHOLD:-60}
 
 JPS=${JPS:-"${JAVA_HOME}/bin/jps -l"}
 JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
@@ -92,12 +93,20 @@ stop() {
     fi
     if [ ! -z "$PID" ]; then
         kill -15 "$PID"
+        cnt=0
         echo -n "Stopping jmxtrans"
         while (true); do
-              ps -p $PID >/dev/null 2>&1
-              if [ $? -eq 0 ] ; then
-                echo -n "."
-                sleep 1
+            ps -p $PID >/dev/null 2>&1
+            if [ $? -eq 0 ] ; then
+                cnt=$((cnt+=1))
+
+                if [ $cnt -lt $HARDKILL_THRESHOLD ]; then
+                  echo -n "."
+                  sleep 1
+                else
+                  echo "Reached HARDKILL_THRESHOLD(=${HARDKILL_THRESHOLD}). Sending SIGKILL to process ${PID}"
+                  kill -9 "$PID"
+                fi
             else
                 echo ""
                 echo "jmxtrans stopped"
