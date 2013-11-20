@@ -57,7 +57,7 @@ class Queries(object):
                       outputWriterEntry[attribute] = None
                 self.outputWriters.append(outputWriterEntry)
 
-    def create_query_entry(self, query_name):
+    def create_query_entry(self, query_name, rootPrefix):
         """
         Create a query snippet for the query referenced by 'query_name',
         including Graphite writer configuration
@@ -79,10 +79,10 @@ class Queries(object):
         # poll ALL attributes in the MBEAN
         if queryentry["attr"] == None:
            del queryentry["attr"] 
-        queryentry['outputWriters'] = self.create_output_writer_configuration(typeName)
+        queryentry['outputWriters'] = self.create_output_writer_configuration(typeName, rootPrefix)
         return queryentry
 
-    def create_host_entry(self, host_name, query_names, query_port, username, password, urlTemplate, aliasTemplate, set_name):
+    def create_host_entry(self, host_name, query_names, query_port, username, password, urlTemplate, aliasTemplate, set_name, rootPrefix):
         """
         Create a query snippet for 'host_name' with all queries given
         by 'query_names'
@@ -91,7 +91,7 @@ class Queries(object):
                       'port' : query_port,
                       'queries' : [] }
         for query_name in query_names:
-            hostentry['queries'].append(self.create_query_entry(query_name))
+            hostentry['queries'].append(self.create_query_entry(query_name, rootPrefix))
             
 
         if username:
@@ -99,7 +99,7 @@ class Queries(object):
 
         if password:
             hostentry['password'] = password
-            
+
         (hostShortName, sep, rest) = host_name.partition(".")
             
         if aliasTemplate:
@@ -122,18 +122,24 @@ class Queries(object):
         root = {'servers' : [] }
         for host_name in host_names:
         ## Extract port if present
-        	(host, aliasSep, alias) = host_name.partition(";")
-        	if aliasSep == "":
-        		alias = global_host_alias
+            (host, aliasSep, alias) = host_name.partition(";")
+            if aliasSep == "":
+                alias = global_host_alias
+            
+            (alias, aliasSep, rootPrefix) = alias.partition("/")
+            if aliasSep == "":
+                rootPrefix = "servers"
+
             (host, sep, port) = host.partition(":")
             if sep == "":
                 port = query_port
             host = host.strip()
             alias = alias.strip()
-            root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate, alias, set_name))
+            rootPrefix = rootPrefix.strip()
+            root['servers'].append(self.create_host_entry(host, query_names, port, username, password, urlTemplate, alias, set_name, rootPrefix))
         return root
 
-    def create_output_writer_configuration(self, typeName):
+    def create_output_writer_configuration(self, typeName, rootPrefix):
         """
         Generic output writer snippet template
         """
@@ -150,6 +156,7 @@ class Queries(object):
             'settings' : {
                 'port' : self.monitor_port,
                 'host' : self.monitor_host,
+                'rootPrefix' : rootPrefix,
                 'typeNames' : typeNames,
                 }
             } ]
@@ -219,6 +226,7 @@ if __name__ == '__main__':
     yf = yaml.load(infile)
     query_port = yf['query_port']
     global_host_alias = yf['global_host_alias']
+
     # Deprecate graphite_* configuration attributes in favor of configurable outputWriters.
     # Set outputWriters as per input file if it exists. Else, None. This is for backwards compatibilty (when only graphite_* was required)
     outputWriters = yf['outputWriters'] if ('outputWriters' in yf) else None
