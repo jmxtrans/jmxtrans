@@ -49,7 +49,9 @@ if [ $? != 0 ]; then
     PSCMD="$PSJAVA | grep -i jmxtrans | awk '{ print \$2 };'"
 fi
 
-JAVA_VERSION=`$JAVA -version 2>&1`
+# NOTE: even for "-version" we specify a heap size as Java might 
+# "guess" wrong inside LXC containers with memory limit
+JAVA_VERSION=`$JAVA -Xmx${HEAP_SIZE}M -version 2>&1`
 if [ $? != 0 ]; then
     echo "Cannot execute $JAVA!"
     exit 1
