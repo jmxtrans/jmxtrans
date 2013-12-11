@@ -92,6 +92,8 @@
 					</excludes>
 					<systemPropertyVariables>
 						<jmxtrans.log.dir>${project.build.directory}</jmxtrans.log.dir>
+						<myhost>w2</myhost>
+						<myport>1099</myport>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
