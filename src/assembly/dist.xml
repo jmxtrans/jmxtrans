@@ -5,20 +5,18 @@
         <format>tar.gz</format>
     </formats>
 
-    <dependencySets>
-        <dependencySet>
+    <files>
+        <file>
+            <source>target/jmxtrans-${project.version}-all.jar</source>
             <outputDirectory>/lib</outputDirectory>
-            <useProjectArtifact>false</useProjectArtifact>
-            <useTransitiveDependencies>true</useTransitiveDependencies>
-            <useTransitiveFiltering>true</useTransitiveFiltering>
-            <directoryMode>755</directoryMode>
+            <destName>jmxtrans-all.jar</destName>
             <fileMode>644</fileMode>
-        </dependencySet>
-    </dependencySets>
+        </file>
+    </files>
 
     <fileSets>
         <fileSet>
-            <directory>.</directory>
+            <directory>${basedir}</directory>
             <outputDirectory>/bin</outputDirectory>
             <directoryMode>755</directoryMode>
             <fileMode>775</fileMode>
@@ -27,14 +25,29 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>doc</directory>
+            <directory>${basedir}/doc</directory>
             <outputDirectory>/doc</outputDirectory>
             <directoryMode>755</directoryMode>
             <fileMode>644</fileMode>
             <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
-            <directory>tools</directory>
+            <directory>${basedir}</directory>
+            <outputDirectory>/doc/examples</outputDirectory>
+            <directoryMode>755</directoryMode>
+            <fileMode>644</fileMode>
+            <lineEnding>unix</lineEnding>
+            <includes>
+                <include>*json</include>
+                <include>*xml</include>
+            </includes>
+            <excludes>
+                <exclude>pom.xml</exclude>
+                <exclude>build.xml</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/tools</directory>
             <outputDirectory>/tools</outputDirectory>
             <directoryMode>755</directoryMode>
             <fileMode>755</fileMode>
