@@ -1,0 +1,45 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+    <id>dist</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <directoryMode>755</directoryMode>
+            <fileMode>644</fileMode>
+        </dependencySet>
+    </dependencySets>
+
+    <fileSets>
+        <fileSet>
+            <directory>.</directory>
+            <outputDirectory>/bin</outputDirectory>
+            <directoryMode>755</directoryMode>
+            <fileMode>775</fileMode>
+            <includes>
+                <include>*sh</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>doc</directory>
+            <outputDirectory>/doc</outputDirectory>
+            <directoryMode>755</directoryMode>
+            <fileMode>644</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <directory>tools</directory>
+            <outputDirectory>/tools</outputDirectory>
+            <directoryMode>755</directoryMode>
+            <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+    </fileSets>
+
+</assembly>
