@@ -21,47 +21,53 @@ RUNCMD="if [ -f /etc/default/@PACKAGE@ ]; then source /etc/default/@PACKAGE@ ; f
           cd /usr/share/@PACKAGE@ ; \
           ./jmxtrans.sh"
 
+RETVAL=0
 
 do_start() {
     start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
         --chuid jmxtrans:jmxtrans -u jmxtrans -g jmxtrans -v \
         --exec /bin/bash -- -c "$RUNCMD start"
+    RETVAL=$?
 }
 
 do_stop() {
     su - jmxtrans -c "$RUNCMD stop"
+    RETVAL=$?
 }
 
 do_status() {
     su - jmxtrans -c "$RUNCMD status"
+    RETVAL=$?
 }
 
 case "$1" in
   start)
     log_daemon_msg "Starting @PACKAGE@" "@PACKAGE@"
     do_start
-    log_end_msg 0
+    log_end_msg $RETVAL
     ;;
   stop)
     log_daemon_msg "Stopping @PACKAGE@" "@PACKAGE@"
     do_stop
-    log_end_msg 0
+    log_end_msg $RETVAL
     ;;
 
   restart|reload|force-reload|try-restart)
     log_daemon_msg "Restarting @PACKAGE@" "@PACKAGE@"
     do_stop
     do_start
-    log_end_msg 0
+    log_end_msg $RETVAL
     ;;
 
   status)
     log_daemon_msg "Status @PACKAGE@" "@PACKAGE@"
     do_status
-    log_end_msg 0
+    log_end_msg $RETVAL
     ;;
 
   *)
     log_action_msg "Usage: /etc/init.d/@PACKAGE@ {start|stop|reload|force-reload|restart|try-restart|status}"
     exit 1
 esac
+
+exit $RETVAL
