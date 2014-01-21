@@ -23,7 +23,9 @@ SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
 HARDKILL_THRESHOLD=${HARDKILL_THRESHOLD:-60}
 
 JPS=${JPS:-"${JAVA_HOME}/bin/jps -l"}
+USE_JPS=${USE_JPS:-"true"}
 JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
+CHECK_JAVA=${CHECK_JAVA:-"true"}
 PSJAVA=${PSJAVA:-"ps aux | grep [j]ava"} 
 PSCMD="$JPS | grep -i jmxtrans | awk '{ print \$1 };'"
 JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"}
@@ -43,16 +45,22 @@ JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log.d
 MONITOR_OPTS=${MONITOR_OPTS:-"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=${JMX_PORT}"}
 GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}M -Xmx${HEAP_SIZE}M -XX:+UseConcMarkSweepGC -XX:NewRatio=${NEW_RATIO} -XX:NewSize=${NEW_SIZE}m -XX:MaxNewSize=${NEW_SIZE}m -XX:MaxTenuringThreshold=16 -XX:GCTimeRatio=9 -XX:PermSize=${PERM_SIZE}m -XX:MaxPermSize=${MAX_PERM_SIZE}m -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=${IO_FRACTION} -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=${CPU_CORES} -Dsun.rmi.dgc.server.gcInterval=28800000 -Dsun.rmi.dgc.client.gcInterval=28800000"}
 
-JPS_RUNNABLE=`$JPS 2>&1`
-if [ $? != 0 ]; then
+if [ "$USE_JPS" == "true" ]; then
+  JPS_RUNNABLE=`$JPS 2>&1`
+  if [ $? != 0 ]; then
     echo "Cannot execute $JPS!, switching to stock ps"
     PSCMD="$PSJAVA | grep -i jmxtrans | awk '{ print \$2 };'"
+  fi
+else
+  PSCMD="$PSJAVA | grep -i jmxtrans | awk '{ print \$2 };'"
 fi
 
-JAVA_VERSION=`$JAVA -version 2>&1`
-if [ $? != 0 ]; then
-    echo "Cannot execute $JAVA!"
-    exit 1
+if [ "$CHECK_JAVA" == "true" ]; then
+    JAVA_VERSION=`$JAVA -version 2>&1`
+    if [ $? != 0 ]; then
+        echo "Cannot execute $JAVA!"
+        exit 1
+    fi
 fi
 
 start() {
