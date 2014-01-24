@@ -12,21 +12,21 @@
 . /lib/lsb/init-functions
 
 if [ -f /etc/default/@PACKAGE@ ]; then
+    set -a
     source /etc/default/@PACKAGE@
+    set +a
 fi
 
 PIDFILE="/var/run/@PACKAGE@.pid"
 
-RUNCMD="if [ -f /etc/default/@PACKAGE@ ]; then source /etc/default/@PACKAGE@ ; fi ; \
-          cd /usr/share/@PACKAGE@ ; \
-          ./jmxtrans.sh"
+RUNCMD="/usr/share/jmxtrans/jmxtrans.sh"
 
 RETVAL=0
 
 do_start() {
     start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
         --chuid jmxtrans:jmxtrans -u jmxtrans -g jmxtrans -v \
-        --exec /bin/bash -- -c "$RUNCMD start"
+        --exec $RUNCMD -- start
     RETVAL=$?
 }
 
