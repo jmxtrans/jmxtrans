@@ -201,6 +201,8 @@ public class StackdriverWriter extends BaseOutputWriter {
 		g.writeNumberField("proto_version", STACKDRIVER_PROTOCOL_VERSION);
 		g.writeArrayFieldStart("data");
 
+		List<String> typeNames = this.getTypeNames();
+		
 		for (Result metric : results) {
 			Map<String, Object> values = metric.getValues();
 			if (values != null) {
@@ -222,6 +224,13 @@ public class StackdriverWriter extends BaseOutputWriter {
 							
 						} else {
 							nameBuilder.append(metric.getClassName());	
+						}
+						
+						// Wildcard "typeNames" substitution
+						String typeName = JmxUtils.cleanupStr(JmxUtils.getConcatedTypeNameValues(typeNames, metric.getTypeName()));
+						if (typeName != null && typeName.length() > 0) {
+							nameBuilder.append(".");
+							nameBuilder.append(typeName);
 						}
 						
 						// add the attribute name
