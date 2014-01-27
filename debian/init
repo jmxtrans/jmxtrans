@@ -26,7 +26,7 @@ RETVAL=0
 do_start() {
     start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
         --chuid jmxtrans:jmxtrans -u jmxtrans -g jmxtrans -v \
-        --exec $RUNCMD -- start
+        -d /usr/share/@PACKAGE@ --exec $RUNCMD -- start
     RETVAL=$?
 }
 
