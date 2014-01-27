@@ -19,7 +19,7 @@ fi
 
 PIDFILE="/var/run/@PACKAGE@.pid"
 
-RUNCMD="/usr/share/jmxtrans/jmxtrans.sh"
+RUNCMD="/usr/share/@PACKAGE@/jmxtrans.sh"
 
 RETVAL=0
 
