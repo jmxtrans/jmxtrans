@@ -8,6 +8,7 @@ Architecture: all
 Section: admin
 Priority: optional
 Depends: ${misc:Depends}
+Suggests: java2-runtime
 Recommends: python-yaml
 Description: @FULL_VERSION@ - @PACKAGE@
  dependency package, installs @PACKAGE@
