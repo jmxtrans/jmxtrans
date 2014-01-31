@@ -11,21 +11,27 @@
 
 . /lib/lsb/init-functions
 
+PIDFILE="/var/run/@PACKAGE@.pid"
+
+# Run @PACKAGE@ as this user ID and group ID
+JMXTRANS_USER=@PACKAGE@
+JMXTRANS_GROUP=@PACKAGE@
+
+RUNCMD="/usr/share/@PACKAGE@/jmxtrans.sh"
+
+# overwrite settings from default file
 if [ -f /etc/default/@PACKAGE@ ]; then
     set -a
     source /etc/default/@PACKAGE@
     set +a
 fi
 
-PIDFILE="/var/run/@PACKAGE@.pid"
-
-RUNCMD="/usr/share/@PACKAGE@/jmxtrans.sh"
-
 RETVAL=0
 
 do_start() {
+    /usr/bin/touch "$PIDFILE" && /bin/chown "$JMXTRANS_USER":"$JMXTRANS_USER" "$PIDFILE"
     start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
-        --chuid jmxtrans:jmxtrans -u jmxtrans -g jmxtrans -v \
+        --chuid $JMXTRANS_USER:$JMXTRANS_GROUP -u $JMXTRANS_USER -g $JMXTRANS_GROUP -v \
         -d /usr/share/@PACKAGE@ --exec $RUNCMD -- start
     RETVAL=$?
 }
