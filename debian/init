@@ -31,12 +31,12 @@ do_start() {
 }
 
 do_stop() {
-    su - jmxtrans -c "$RUNCMD stop"
+    su -m jmxtrans -c "$RUNCMD stop"
     RETVAL=$?
 }
 
 do_status() {
-    su - jmxtrans -c "$RUNCMD status"
+    su -m jmxtrans -c "$RUNCMD status"
     RETVAL=$?
 }
 
