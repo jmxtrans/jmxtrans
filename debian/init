@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#
+# /etc/init.d/@PACKAGE -- startup script for @PACKAGE
+#
 ### BEGIN INIT INFO
 # Provides:     @PACKAGE@
 # Required-Start:  $time $network $remote_fs $syslog
