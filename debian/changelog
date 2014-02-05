@@ -1,4 +1,4 @@
-@PACKAGE@ (@VERSION@-1) stable; urgency=low
+@PACKAGE@ (@VERSION@-@DEB_VERSION@) stable; urgency=low
 
   * See http://jmxtrans.googlecode.com/ for more details.
 
