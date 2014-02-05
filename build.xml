@@ -91,6 +91,7 @@
 		<!--  A hack because svnant does not respect Ant's properties can't be overwritten rule. -->
 		<property name="version" value="${DATE_TIME}-${sVersionRevision}" />
 		<property name="version.rpm" value="${DATE_TIME2}.${sVersionRevision}" />
+		<property name="deb.version" value="1" />
 		<property name="build.version" value="${DATE_TIME}-${sVersionRevision}" />
 
 		<property name="build.dist.dir" location="${build.dir}/${ant.project.name}-${version}"/>
@@ -253,6 +254,7 @@
 		<filter token="YEAR" value="${YEAR}" />
 		<filter token="VERSION" value="${version}" />
 		<filter token="FULL_VERSION" value="${sVersion}" />
+		<filter token="DEB_VERSION" value="${deb.version}" />
 
 		<copy todir="${target.dir}/jmxtrans/debian" filtering="true">
 			<fileset dir="debian">
