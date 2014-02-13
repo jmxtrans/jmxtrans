@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -153,11 +154,25 @@ public class StackdriverWriter extends BaseOutputWriter {
 		} else if (getStringSetting(SETTING_DETECT_INSTANCE, null) != null && "AWS".equalsIgnoreCase(getStringSetting(SETTING_DETECT_INSTANCE, null))) {
 			// if setting is to detect, look on the local machine URL
 			logger.info("Detect instance set to AWS, trying to determine AWS instance ID");
-			instanceId = getLocalAwsInstanceId();
+			instanceId = getLocalInstanceId("AWS", "http://169.254.169.254/latest/meta-data/instance-id", null);
 			if (instanceId != null) {
 				logger.info("Detected instance ID as {}", instanceId);
 			} else {
 				logger.info("Unable to detect AWS instance ID for this machine, sending metrics without an instance ID");
+			}
+		} else if (getStringSetting(SETTING_DETECT_INSTANCE, null) != null && "GCE".equalsIgnoreCase(getStringSetting(SETTING_DETECT_INSTANCE, null))) {
+			// if setting is to detect, look on the local machine URL
+			logger.info("Detect instance set to GCE, trying to determine GCE instance ID");
+			
+			// GCE requires a header on its metadata requests
+			Map<String,String> headers = new HashMap<String,String>();
+			headers.put("X-Google-Metadata-Request", "True");
+			
+			instanceId = getLocalInstanceId("GCE", "http://metadata/computeMetadata/v1/instance/id", headers);
+			if (instanceId != null) {
+				logger.info("Detected instance ID as {}", instanceId);
+			} else {
+				logger.info("Unable to detect GCE instance ID for this machine, sending metrics without an instance ID");
 			}
 		} else {
 			// no instance ID, the metrics will be sent as "bare" custom metrics and not associated with an instance
@@ -334,24 +349,31 @@ public class StackdriverWriter extends BaseOutputWriter {
 	}
 	
 	/**
-	 * Use the EC2 Metadata URL to determine the instance ID that this code is running on. Useful if you don't want to
-	 * configure the instance ID manually. Pass detectInstance = "AWS" to have this run in your configuration.
+	 * Use a Cloud provider local metadata endpoint to determine the instance ID that this code is running on. 
+	 * Useful if you don't want to configure the instance ID manually. 
+	 * Pass detectInstance param with a cloud provider ID (AWS|GCE) to have this run in your configuration.
 	 * 
-	 * @return String containing an AWS instance id, or null if none is found
+	 * @return String containing an instance id, or null if none is found
 	 */
-	private String getLocalAwsInstanceId() {
+	private String getLocalInstanceId(final String cloudProvider, final String metadataEndpoint, final Map<String,String> headers) {
 		String detectedInstanceId = null;
 		try {
 			String inputLine = null;
-			final URL metadataUrl = new URL("http://169.254.169.254/latest/meta-data/instance-id");
+			final URL metadataUrl = new URL(metadataEndpoint);
 			URLConnection metadataConnection = metadataUrl.openConnection();
+			// add any additional headers passed in
+			if (headers != null) {
+				for (String headerKey: headers.keySet()) {
+					metadataConnection.setRequestProperty(headerKey, headers.get(headerKey));
+				}
+			}
 			BufferedReader in = new BufferedReader(new InputStreamReader(metadataConnection.getInputStream(), "UTF-8"));
 			while ((inputLine = in.readLine()) != null) {
 				detectedInstanceId = inputLine;
 			}
 			in.close();
 		} catch (Exception e) {
-			logger.warn("unable to determine AWS instance ID", e);
+			logger.warn("unable to determine " + cloudProvider + " instance ID", e);
 		}
 		return detectedInstanceId;
 	}
