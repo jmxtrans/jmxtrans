@@ -3,8 +3,9 @@ package com.googlecode.jmxtrans.model.output;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.ValidationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,21 @@ import java.io.IOException;
  *
  * Created from sources originally written by Balazs Kossovics <bko@witbe.net>
  */
+
 public class OpenTSDBWriter extends OpenTSDBGenericWriter {
     private static final Logger log = LoggerFactory.getLogger(OpenTSDBWriter.class);
 
     protected Socket            socket;
     protected DataOutputStream  out;
+
+    /**
+     * Add the hostname tag "host" with the name of the host by default since OpenTSDB otherwise does not have this
+     * information.
+     */
+    @Override
+    protected boolean   getAddHostnameTagDefault() {
+        return  true;
+    }
 
     /**
      * Prepare for sending metrics.
