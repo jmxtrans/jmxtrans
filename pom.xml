@@ -334,6 +334,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- JSR160 (JMX Remoting) protocol -->
 		<dependency>
 			<groupId>org.jboss.remoting3</groupId>
