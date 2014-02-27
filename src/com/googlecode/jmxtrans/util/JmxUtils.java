@@ -745,16 +745,48 @@ public class JmxUtils {
 		if ((typeNames == null) || (typeNames.size() == 0)) {
 			return null;
 		}
-		String[] tokens = typeNameStr.split(",");
+		Map<String, String> typeNameValueMap = getTypeNameValueMap(typeNameStr);
 		StringBuilder sb = new StringBuilder();
 		for (String key : typeNames) {
-			String result = getTypeNameValue(key, tokens);
+			String result = typeNameValueMap.get(key);
 			if (result != null) {
 				sb.append(result);
 				sb.append("_");
 			}
 		}
 		return StringUtils.chomp(sb.toString(), "_");
+	}
+
+	/**
+	 * Given a typeName string, create a Map with every key and value in the typeName.
+	 * For example:
+	 *
+	 * typeName=name=PS Eden Space,type=MemoryPool
+	 *
+	 * Returns a Map with the following key/value pairs (excluding the quotes):
+	 *
+	 *  "name"  =>  "PS Eden Space"
+	 *  "type"  =>  "MemoryPool"
+	 *
+	 * @param typeNameStr
+	 *            the type name str
+	 * @return Map<String, String> of type-name-key / value pairs.
+	 */
+	public static Map<String, String>   getTypeNameValueMap (String typeNameStr) {
+		if ( typeNameStr == null ) {
+			return  java.util.Collections.EMPTY_MAP;
+		}
+
+		HashMap result = new HashMap();
+		String[] tokens = typeNameStr.split(",");
+
+		for (String oneToken : tokens) {
+			if ( oneToken.length() > 0 ) {
+				String[] keyValue = splitTypeNameValue(oneToken);
+				result.put(keyValue[0], keyValue[1]);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -789,22 +821,28 @@ public class JmxUtils {
 		}
 	}
 
-	/** */
-	private static String getTypeNameValue(String typeName, String[] tokens) {
-		boolean foundIt = false;
-		for (String token : tokens) {
-			String[] keys = token.split("=");
-			for (String key : keys) {
-				// we want the next item in the array.
-				if (foundIt) {
-					return key;
-				}
-				if (typeName.equals(key)) {
-					foundIt = true;
-				}
-			}
+	/**
+	 * Given a single type-name-key and value from a typename strig (e.g. "type=MemoryPool"), extract the key and
+	 * the value and return both.
+	 *
+	 * @param   typeNameToken - the string containing the pair.
+	 * @return  String[2] where String[0] = the key and String[1] = the value.  If the given string is not in the
+	 *          format "key=value" then String[0] = the original string and String[1] = "".
+	 */
+	private static String[] splitTypeNameValue (String typeNameToken) {
+		String[]	result;
+		String[]	keys = typeNameToken.split("=", 2);
+
+		if ( keys.length == 2 ) {
+			result = keys;
 		}
-		return null;
+		else {
+			result = new String[2];
+			result[0] = keys[0];
+			result[1] = "";
+		}
+
+		return  result;
 	}
 
 }

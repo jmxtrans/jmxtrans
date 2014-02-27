@@ -3,8 +3,9 @@ package com.googlecode.jmxtrans.model.output;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.ValidationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,16 @@ import java.io.IOException;
  * Time: 6:00 PM
  */
 public class OpenTSDBWriter extends BaseOutputWriter {
+    public static final boolean DEFAULT_MERGE_TYPE_NAMES_TAGS = true;
+
     private static final Logger log = LoggerFactory.getLogger(OpenTSDBWriter.class);
+
     private String host;
     private Integer port;
     private Map<String, String> tags;
     private String tagName;
     private Socket socket;
+    private boolean mergeTypeNamesTags = DEFAULT_MERGE_TYPE_NAMES_TAGS;
 
     String addTags(String resultString) throws UnknownHostException {
         resultString = addTag(resultString, "host", java.net.InetAddress.getLocalHost().getHostName());
@@ -69,7 +74,7 @@ public class OpenTSDBWriter extends BaseOutputWriter {
             String resultString = getResultString(className, attributeName, (long)(result.getEpoch()/1000L), values.get(attributeName));
             resultString = addTags(resultString);
             if (getTypeNames().size() > 0) {
-                resultString = addTag(resultString, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
+                resultString = this.addTypeNamesTags(result, resultString);
             }
             resultStrings.add(resultString);
         } else {
@@ -77,12 +82,34 @@ public class OpenTSDBWriter extends BaseOutputWriter {
                 String resultString = getResultString(className, attributeName, (long)(result.getEpoch()/1000L), valueEntry.getValue(), tagName, valueEntry.getKey());
                 resultString = addTags(resultString);
                 if (getTypeNames().size() > 0) {
-                    resultString = addTag(resultString, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
+                    resultString = this.addTypeNamesTags(result, resultString);
                 }
                 resultStrings.add(resultString);
             }
         }
         return resultStrings;
+    }
+
+    /**
+     * Add the tags for the TypeNames setting to the given result string.
+     */
+    protected String    addTypeNamesTags (Result result, String resultString) {
+        String  retVal = resultString;
+        if ( mergeTypeNamesTags ) {
+            // Produce a single tag with all the TypeName keys concatenated and all the values joined with '_'.
+            retVal = addTag(retVal, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
+        }
+        else {
+            Map<String, String> typeNameMap = JmxUtils.getTypeNameValueMap(result.getTypeName());
+            for ( String oneTypeName : getTypeNames() ) {
+                String value = typeNameMap.get(oneTypeName);
+                if ( value == null )
+                    value = "";
+                retVal = addTag(retVal, oneTypeName, value);
+            }
+        }
+
+        return  retVal;
     }
 
     @Override
@@ -131,6 +158,8 @@ public class OpenTSDBWriter extends BaseOutputWriter {
         port = (Integer) this.getSettings().get(PORT);
         tags = (Map<String, String>) this.getSettings().get("tags");
         tagName = this.getStringSetting("tagName", "type");
+        mergeTypeNamesTags = this.getBooleanSetting("mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS);
+
         try {
             socket = new Socket(host, port);
         } catch(UnknownHostException e) {
