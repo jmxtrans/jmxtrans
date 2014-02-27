@@ -709,7 +709,7 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Replaces all . with _ and removes all spaces and double/single quotes.
+	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
 	 *
 	 * @param name
 	 *            the name
@@ -723,6 +723,7 @@ public class JmxUtils {
 		clean = clean.replace(" ", "");
 		clean = clean.replace("\"", "");
 		clean = clean.replace("'", "");
+		clean = clean.replace("/", "_");
 		return clean;
 	}
 
