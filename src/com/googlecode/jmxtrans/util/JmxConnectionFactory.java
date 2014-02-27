@@ -49,6 +49,7 @@ public class JmxConnectionFactory extends BaseKeyedPoolableObjectFactory {
 		boolean result = false;
 		try {
 			conn.getConnectionId();
+            conn.getMBeanServerConnection().getMBeanCount();
 			result = true;
 		} catch (IOException ex) {
 			// ignored
