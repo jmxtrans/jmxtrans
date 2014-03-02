@@ -33,6 +33,15 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
     protected DataOutputStream  out;
 
     /**
+     * Add the hostname tag "host" with the name of the host by default since OpenTSDB otherwise does not have this
+     * information.
+     */
+    @Override
+    protected boolean   getAddHostnameTagDefault() {
+        return  true;
+    }
+
+    /**
      * Prepare for sending metrics.
      */
     @Override
