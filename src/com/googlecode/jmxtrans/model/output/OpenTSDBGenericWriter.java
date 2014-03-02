@@ -1,11 +1,15 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
+import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
+import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,32 +28,49 @@ import java.io.IOException;
  * Originally written by Balazs Kossovics <bko@witbe.net>.  Common base class for OpenTSDBWriter and TCollectorWriter.
  * Date: 4/4/13
  * Time: 6:00 PM
+ *
+ * Updates by Arthur Naseef
  */
 public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
+    public static final boolean DEFAULT_MERGE_TYPE_NAMES_TAGS = true;
+
     private static final Logger log = LoggerFactory.getLogger(OpenTSDBGenericWriter.class);
 
     protected String host;
     protected Integer port;
     protected Map<String, String> tags;
     protected String tagName;
+    protected NamingStrategy metricNameStrategy;
+
+    protected boolean mergeTypeNamesTags = DEFAULT_MERGE_TYPE_NAMES_TAGS;
+    protected boolean addHostnameTag     = getAddHostnameTagDefault();
 
     /**
-     * Prepare for sending metrics.
+     * Prepare for sending metrics, if needed.  For use by subclasses.
      */
-    protected abstract void prepareSender() throws LifecycleException;
+    protected void  prepareSender() throws LifecycleException {
+    }
 
     /**
-     * Shutdown the sender.
+     * Shutdown the sender, if needed.  For use by subclasses.
      */
-    protected abstract void shutdownSender() throws LifecycleException;
+    protected void  shutdownSender() throws LifecycleException {
+    }
 
     /**
-     * Subcall responsibility: called at the start of a set of results to send.
+     * Prepare a batch of results output, if needed.  For use by subclasses.
      */
-    protected abstract void startOutput() throws IOException;
+    protected void  startOutput() throws IOException {
+    }
 
     /**
-     * Subcall responsibility: method to perform the actual output for the given metric line.
+     * Subclass responsibility: specify the default value for the "addHostnameTag" setting.
+     */
+    protected abstract boolean  getAddHostnameTagDefault();
+
+    /**
+     * Subcall responsibility: method to perform the actual output for the given metric line.  Every subclass
+     * <b>must</b> implement this method.
      *
      * @param   metricLine - the line containing the metric name, value, and tags for a single metric; excludes the
      *          "put" keyword expected by OpenTSDB and the trailing newline character.
@@ -57,10 +78,10 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
     protected abstract void sendOutput(String metricLine) throws IOException;
 
     /**
-     * Subcall responsibility: called at the start of a set of results to send.
+     * Complete a batch of results output, if needed.  For use by subclasses.
      */
-    protected abstract void finishOutput() throws IOException;
-
+    protected void  finishOutput() throws IOException {
+    }
 
     /**
      * Add tags to the given result string, including a "host" tag with the name of the server and all of the tags
@@ -69,11 +90,17 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      * @param   resultString - the string containing the metric name, timestamp, value, and possibly other content.
      */
     String addTags(String resultString) throws UnknownHostException {
-        resultString = addTag(resultString, "host", java.net.InetAddress.getLocalHost().getHostName());
-        if (tags != null)
+        if ( addHostnameTag ) {
+            resultString = addTag(resultString, "host", java.net.InetAddress.getLocalHost().getHostName());
+        }
+
+        if (tags != null) {
+            // Add the constant tag names and values.
             for (Map.Entry<String, String> tagEntry : tags.entrySet()) {
                 resultString = addTag(resultString, tagEntry.getKey(), tagEntry.getValue());
             }
+        }
+
         return resultString;
     }
 
@@ -86,7 +113,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
     String addTag(String resultString, String tagName, String tagValue) {
 
         String tagFormat = " %s=%s";
-        resultString += String.format(tagFormat, JmxUtils.cleanupStr(tagName), JmxUtils.cleanupStr(tagValue));
+        resultString += String.format(tagFormat, sanitizeString(tagName), sanitizeString(tagValue));
         return resultString;
     }
 
@@ -101,27 +128,9 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      * @param   value - value of the attribute to use as the metric value.
      * @return  String - the formatted result string.
      */
-    String getResultString(String className, String attributeName, long epoch, Object value) {
-        String resultStringFormat = "%s.%s %d %s";
-        return String.format(resultStringFormat, className, attributeName, epoch, value);
-    }
-
-    /**
-     * Format the result string given the class name and attribute name of the source value, the timestamp, the value,
-     * a tagname, and a tag value.
-     *
-     * @param   className - the name of the class of the MBean from which the value was sourced.
-     * @param   attributeName - the name of the attribute of the MBean from which the value was sourced.  For complex
-     *                          types (such as CompositeData), the attribute name may describe a hierarchy.
-     * @param   epoch - the timestamp of the metric.
-     * @param   value - value of the attribute to use as the metric value.
-     * @param   tagName - name of the tag to include.
-     * @param   tagValue - value of the tag to include.
-     * @return  String - the formatted result string.
-     */
-    String getResultString(String className, String attributeName, long epoch, Object value, String tagName, String tagValue) {
-        String taggedResultStringFormat = "%s.%s %d %s %s=%s";
-        return String.format(taggedResultStringFormat, className, attributeName, epoch, value, tagName, tagValue);
+    String getResultString(String metricName, long epoch, Object value) {
+        String resultStringFormat = "%s %d %s";
+        return String.format(resultStringFormat, sanitizeString(metricName), epoch, sanitizeString(value.toString()));
     }
 
     /**
@@ -141,10 +150,11 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
         String className = result.getClassNameAlias() == null ? result.getClassName() : result.getClassNameAlias();
         if (values.containsKey(attributeName) && values.size() == 1) {
             if ( JmxUtils.isNumeric(values.get(attributeName)) ) {
-                String resultString = getResultString(className, attributeName, (long)(result.getEpoch()/1000L), values.get(attributeName));
+                String metricName = this.metricNameStrategy.formatName(result);
+                String resultString = getResultString(metricName, (long)(result.getEpoch()/1000L), values.get(attributeName));
                 resultString = addTags(resultString);
                 if (getTypeNames().size() > 0) {
-                    resultString = addTag(resultString, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
+                    resultString = this.addTypeNamesTags(result, resultString);
                 }
                 resultStrings.add(resultString);
             }
@@ -155,10 +165,13 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
         } else {
             for (Map.Entry<String, Object> valueEntry: values.entrySet() ) {
                 if ( JmxUtils.isNumeric(valueEntry.getValue()) ) {
-                    String resultString = getResultString(className, attributeName, (long)(result.getEpoch()/1000L), valueEntry.getValue(), tagName, valueEntry.getKey());
+                    String metricName = this.metricNameStrategy.formatName(result);
+                    String resultString = getResultString(metricName, (long)(result.getEpoch()/1000L), valueEntry.getValue());
+                    resultString = addTag(resultString, tagName, valueEntry.getKey());
                     resultString = addTags(resultString);
+
                     if (getTypeNames().size() > 0) {
-                        resultString = addTag(resultString, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
+                        resultString = this.addTypeNamesTags(result, resultString);
                     }
                     resultStrings.add(resultString);
                 }
@@ -169,6 +182,32 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
             }
         }
         return resultStrings;
+    }
+
+    /**
+     * Add the tag(s) for typeNames.
+     *
+     * @param	result - the result of the JMX query.
+     * @param	resultString - current form of the metric string.
+     * @return	String - the updated metric string with the necessary tag(s) added.
+     */
+    protected String    addTypeNamesTags (Result result, String resultString) {
+        String  retVal = resultString;
+        if ( mergeTypeNamesTags ) {
+            // Produce a single tag with all the TypeName keys concatenated and all the values joined with '_'.
+            retVal = addTag(retVal, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
+        }
+        else {
+            Map<String, String> typeNameMap = JmxUtils.getTypeNameValueMap(result.getTypeName());
+            for ( String oneTypeName : getTypeNames() ) {
+                String value = typeNameMap.get(oneTypeName);
+                if ( value == null )
+                    value = "";
+                retVal = addTag(retVal, oneTypeName, value);
+            }
+        }
+
+        return  retVal;
     }
 
     /**
@@ -206,13 +245,57 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
         host = (String) this.getSettings().get(HOST);
         port = (Integer) this.getSettings().get(PORT);
         tags = (Map<String, String>) this.getSettings().get("tags");
-        tagName = this.getStringSetting("tagName", "type");
 
+        tagName            = this.getStringSetting("tagName", "type");
+        mergeTypeNamesTags = this.getBooleanSetting("mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS);
+        addHostnameTag     = this.getBooleanSetting("addHostnameTag", this.getAddHostnameTagDefault());
+
+        this.setupNamingStrategies();
         this.prepareSender();
     }
 
     @Override
     public void stop() throws LifecycleException {
         this.shutdownSender();
+    }
+
+    /**
+     * Set the naming strategies based on the configuration.
+     */
+    protected void  setupNamingStrategies () throws LifecycleException {
+        try {
+            String jexlExpr = this.getStringSetting("metricNamingExpression", null);
+            if ( jexlExpr != null ) {
+                this.metricNameStrategy = new JexlNamingStrategy(jexlExpr);
+            }
+            else {
+                this.metricNameStrategy = new ClassAttributeNamingStrategy();
+            }
+        }
+        catch ( JexlException jexlExc ) {
+            throw   new LifecycleException("failed to setup naming strategy", jexlExc);
+        }
+
+    }
+
+    /**
+     * VALID CHARACTERS:
+     *      METRIC, TAGNAME, AND TAG-VALUE:
+     *          [-_./a-zA-Z0-9]+
+     *
+     *
+     * SANITIZATION:
+     *      - Discard Quotes.
+     *      - Replace all other invalid characters with '_'.
+     */
+    protected String    sanitizeString (String unsanitized) {
+        String  sanitized;
+
+        sanitized =
+            unsanitized.
+                    replaceAll("[\"']", "").
+                    replaceAll("[^-_./a-zA-Z0-9]", "_");
+
+        return  sanitized;
     }
 }

@@ -173,6 +173,7 @@ public class OpenTSDBWriterTests {
 	}
 
 	protected void	validateMergedTypeNameValues (List<String> result, boolean mergedInd) {
+		LOG.info("result string = {}", result.get(0));
 		if ( mergedInd ) {
 			assertEquals(1, result.size());
 			assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
