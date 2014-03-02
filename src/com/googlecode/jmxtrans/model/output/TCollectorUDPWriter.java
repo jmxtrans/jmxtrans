@@ -35,7 +35,6 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 
     protected SocketAddress     address;
     protected DatagramSocket    dgSocket;
-    protected ByteBuffer        sendBuffer;
 
     /**
      * Do not add the hostname tag "host" with the name of the host by default since tcollector normally adds the

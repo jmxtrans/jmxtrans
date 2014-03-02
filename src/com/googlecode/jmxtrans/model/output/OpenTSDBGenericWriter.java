@@ -14,10 +14,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,19 +85,17 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      *
      * @param   resultString - the string containing the metric name, timestamp, value, and possibly other content.
      */
-    String addTags(String resultString) throws UnknownHostException {
+    void   addTags(StringBuilder resultString) throws UnknownHostException {
         if ( addHostnameTag ) {
-            resultString = addTag(resultString, "host", java.net.InetAddress.getLocalHost().getHostName());
+            addTag(resultString, "host", java.net.InetAddress.getLocalHost().getHostName());
         }
 
         if (tags != null) {
             // Add the constant tag names and values.
             for (Map.Entry<String, String> tagEntry : tags.entrySet()) {
-                resultString = addTag(resultString, tagEntry.getKey(), tagEntry.getValue());
+                addTag(resultString, tagEntry.getKey(), tagEntry.getValue());
             }
         }
-
-        return resultString;
     }
 
     /**
@@ -110,11 +104,11 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      * @param   resultString - the string containing the metric name, timestamp, value, and possibly other content.
      * @return  String - the new result string with the tag appended.
      */
-    String addTag(String resultString, String tagName, String tagValue) {
-
-        String tagFormat = " %s=%s";
-        resultString += String.format(tagFormat, sanitizeString(tagName), sanitizeString(tagValue));
-        return resultString;
+    void    addTag(StringBuilder resultString, String tagName, String tagValue) {
+        resultString.append(" ");
+        resultString.append(sanitizeString(tagName));
+        resultString.append("=");
+        resultString.append(sanitizeString(tagValue));
     }
 
     /**
@@ -128,9 +122,12 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      * @param   value - value of the attribute to use as the metric value.
      * @return  String - the formatted result string.
      */
-    String getResultString(String metricName, long epoch, Object value) {
-        String resultStringFormat = "%s %d %s";
-        return String.format(resultStringFormat, sanitizeString(metricName), epoch, sanitizeString(value.toString()));
+    void    formatResultString(StringBuilder resultString, String metricName, long epoch, Object value) {
+        resultString.append(sanitizeString(metricName));
+        resultString.append(" ");
+        resultString.append(Long.toString(epoch));
+        resultString.append(" ");
+        resultString.append(sanitizeString(value.toString()));
     }
 
     /**
@@ -147,41 +144,48 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
             return resultStrings;
 
         String attributeName = result.getAttributeName();
-        String className = result.getClassNameAlias() == null ? result.getClassName() : result.getClassNameAlias();
+
         if (values.containsKey(attributeName) && values.size() == 1) {
-            if ( JmxUtils.isNumeric(values.get(attributeName)) ) {
-                String metricName = this.metricNameStrategy.formatName(result);
-                String resultString = getResultString(metricName, (long)(result.getEpoch()/1000L), values.get(attributeName));
-                resultString = addTags(resultString);
-                if (getTypeNames().size() > 0) {
-                    resultString = this.addTypeNamesTags(result, resultString);
-                }
-                resultStrings.add(resultString);
-            }
-            else {
-                log.debug("discarding non-numeric value for attribute {}; value={}", attributeName,
-                          values.get(attributeName));
-            }
+            processOneMetric(resultStrings, result, values.get(attributeName), null, null);
         } else {
             for (Map.Entry<String, Object> valueEntry: values.entrySet() ) {
-                if ( JmxUtils.isNumeric(valueEntry.getValue()) ) {
-                    String metricName = this.metricNameStrategy.formatName(result);
-                    String resultString = getResultString(metricName, (long)(result.getEpoch()/1000L), valueEntry.getValue());
-                    resultString = addTag(resultString, tagName, valueEntry.getKey());
-                    resultString = addTags(resultString);
-
-                    if (getTypeNames().size() > 0) {
-                        resultString = this.addTypeNamesTags(result, resultString);
-                    }
-                    resultStrings.add(resultString);
-                }
-                else {
-                    log.debug("discarding non-numeric value for attribute {}; value={}", attributeName,
-                              valueEntry.getValue());
-                }
+                processOneMetric(resultStrings, result, valueEntry.getValue(), tagName, valueEntry.getKey());
             }
         }
         return resultStrings;
+    }
+
+    /**
+     * Process a single metric from the given JMX query result with the specified value.
+     */
+    protected void  processOneMetric (List<String> resultStrings, Result result, Object value, String addTagName,
+                                      String addTagValue)
+    throws UnknownHostException
+    {
+        String metricName = this.metricNameStrategy.formatName(result);
+
+        //
+        // Skip any non-numeric values since OpenTSDB only supports numeric metrics.
+        //
+        if ( JmxUtils.isNumeric(value) ) {
+            StringBuilder resultString = new StringBuilder();
+
+            formatResultString(resultString, metricName, (long)(result.getEpoch()/1000L), value);
+            addTags(resultString);
+
+            if ( addTagName != null ) {
+                addTag(resultString, addTagName, addTagValue);
+            }
+
+            if (getTypeNames().size() > 0) {
+                this.addTypeNamesTags(resultString, result);
+            }
+
+            resultStrings.add(resultString.toString());
+        }
+        else {
+            log.debug("Skipping non-numeric value for metric {}; value={}", metricName, value);
+        }
     }
 
     /**
@@ -191,11 +195,10 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      * @param	resultString - current form of the metric string.
      * @return	String - the updated metric string with the necessary tag(s) added.
      */
-    protected String    addTypeNamesTags (Result result, String resultString) {
-        String  retVal = resultString;
+    protected void  addTypeNamesTags (StringBuilder resultString, Result result) {
         if ( mergeTypeNamesTags ) {
             // Produce a single tag with all the TypeName keys concatenated and all the values joined with '_'.
-            retVal = addTag(retVal, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
+            addTag(resultString, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
         }
         else {
             Map<String, String> typeNameMap = JmxUtils.getTypeNameValueMap(result.getTypeName());
@@ -203,11 +206,9 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
                 String value = typeNameMap.get(oneTypeName);
                 if ( value == null )
                     value = "";
-                retVal = addTag(retVal, oneTypeName, value);
+                addTag(resultString, oneTypeName, value);
             }
         }
-
-        return  retVal;
     }
 
     /**
