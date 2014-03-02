@@ -341,6 +341,14 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- JEXL support for configurable naming strategy expressions -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-jexl</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+
+
 		<!-- JSR160 (JMX Remoting) protocol -->
 		<dependency>
 			<groupId>org.jboss.remoting3</groupId>
