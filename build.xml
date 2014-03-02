@@ -72,6 +72,7 @@
 			<sfile name="${jbossjdeparser.jar}" scope="compile" />
 			<sfile name="${jboss-xnio-api.jar}" scope="compile" />
 			<sfile name="${jboss-xnio-nio.jar}" scope="compile" />
+			<sfile name="${jexl.jar}" scope="compile" src="${alexandria.home}/${jexl.jar.src}" />
 		</sfilelist>
 	</spath>
 
