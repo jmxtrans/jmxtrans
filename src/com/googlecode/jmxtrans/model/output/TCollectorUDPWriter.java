@@ -63,8 +63,6 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
         byte[]          data;
         String          formattedLine;
 
-        formattedLine = metricLine + "\n";
-
         data = formattedLine.getBytes("UTF-8");
         packet = new DatagramPacket(data, 0, data.length, this.address);
 
