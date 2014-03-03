@@ -1,23 +1,13 @@
 package com.googlecode.jmxtrans.model.output;
+import com.googlecode.jmxtrans.util.LifecycleException;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.io.IOException;
-
-import com.googlecode.jmxtrans.util.LifecycleException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +52,7 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
     }
 
     /**
-     * Send a single metric to the server.
+     * Send a single metric to TCollector.
      *
      * @param   metricLine - the line containing the metric name, value, and tags for a single metric; excludes the
      *          "put" keyword expected by OpenTSDB and the trailing newline character.
