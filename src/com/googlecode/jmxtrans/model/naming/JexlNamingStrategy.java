@@ -37,7 +37,6 @@ public class JexlNamingStrategy implements NamingStrategy{
     public static final String  VAR__CLASSNAME_ALIAS = "alias";
     public static final String  VAR__EFFECTIVE_CLASSNAME = "class";
     public static final String  VAR__TYPENAME = "typename";
-    public static final String  VAR__TYPENAMEMAP = "typenamemap";
     public static final String  VAR__RESULT = "result";
 
     protected JexlEngine    jexl;
@@ -98,10 +97,9 @@ public class JexlNamingStrategy implements NamingStrategy{
         context.set(VAR__CLASSNAME, result.getClassName());
         context.set(VAR__ATTRIBUTE_NAME, result.getAttributeName());
         context.set(VAR__CLASSNAME_ALIAS, result.getClassNameAlias());
-        context.set(VAR__TYPENAME, result.getTypeName());
 
         Map<String, String> typeNameMap = JmxUtils.getTypeNameValueMap(result.getTypeName());
-        context.set(VAR__TYPENAMEMAP, typeNameMap);
+        context.set(VAR__TYPENAME, typeNameMap);
 
         String effectiveClassname = result.getClassNameAlias();
         if ( effectiveClassname == null ) {
