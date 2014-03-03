@@ -61,9 +61,8 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
     protected void  sendOutput (String metricLine) throws IOException {
         DatagramPacket  packet;
         byte[]          data;
-        String          formattedLine;
 
-        data = formattedLine.getBytes("UTF-8");
+        data = metricLine.getBytes("UTF-8");
         packet = new DatagramPacket(data, 0, data.length, this.address);
 
         this.dgSocket.send(packet);
