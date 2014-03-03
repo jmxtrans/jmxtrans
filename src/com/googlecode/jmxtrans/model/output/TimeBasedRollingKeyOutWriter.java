@@ -15,7 +15,8 @@ import org.slf4j.Logger;
 /**
  * Extension of KeyOutWriter to use Logback for its logging.  This version supports outputting with a time and size
  * based rollover policy but with no file rename taking place.  The filename remains constant for the output file from
- * its creation to the roll over to a new file.
+ * its creation to the roll over to a new file.  Then the old file remains with its old name and the new file is used
+ * for further logging.
  * 
  * We found this to be useful when dealing with forwarding logs on Windows as our other support applications were not
  * able to handle the rename correctly on Windows and DailyKeyOutWriter caused the original file to be renamed.  
@@ -24,9 +25,9 @@ import org.slf4j.Logger;
  * 
  * The basic operation is to set the date time to rollover in the outputFile setting.  For example:
  *      "outputFile": "testing-here.log%d{yyyy-MM-dd}.%i",
- * In this case we have set the logging to roll over every day but there is also a default max size as per the
- * KeyOutWriter and this causes the .%i to be an incrementing integer.  See the Logstash documentation for more
- * information.
+ * In this case we have set the logging to roll over every day.  There is also a default max size as per the
+ * KeyOutWriter.  If the file exceeds the default max the .%i integer is increments.  See the Logstash documentation
+ * for more information.
  */
 public class TimeBasedRollingKeyOutWriter extends KeyOutWriter {
     
