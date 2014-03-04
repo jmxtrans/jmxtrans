@@ -15,6 +15,7 @@ import java.util.Map;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 import org.junit.*;
 import org.slf4j.Logger;
@@ -69,7 +70,8 @@ public class OpenTSDBGenericWriterTests {
 		when(this.mockResult.getValues()).thenReturn(createValueMap("x-att1-x", "120021"));
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
-		when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
+		when(this.mockResult.getTypeName()).
+			thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
 
 		when(this.mockQuery.getResults()).thenReturn(Arrays.asList(new Result[] { this.mockResult }));
 
@@ -89,7 +91,8 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
 
-		validateMergedTypeNameValues(tvMetricLinesSent, true);
+		assertEquals(1, tvMetricLinesSent.size());
+		validateMergedTypeNameValues(tvMetricLinesSent.get(0), true);
 	}
 
 	@Test
@@ -100,7 +103,8 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
 
-		validateMergedTypeNameValues(tvMetricLinesSent, true);
+		assertEquals(1, tvMetricLinesSent.size());
+		validateMergedTypeNameValues(tvMetricLinesSent.get(0), true);
 	}
 
 	@Test
@@ -112,11 +116,12 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
 
-		validateMergedTypeNameValues(tvMetricLinesSent, false);
+		assertEquals(1, tvMetricLinesSent.size());
+		validateMergedTypeNameValues(tvMetricLinesSent.get(0), false);
 	}
 
 	@Test
-	public void	testTagSetting () throws Exception {
+	public void	testEmptyTagSetting () throws Exception {
 		Map<String, String>	tagMap;
 
 		when(this.mockResult.getValues()).thenReturn(createValueMap("X-ATT-X", "120021"));
@@ -130,9 +135,13 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
 
-		assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
+		assertTrue(
+			this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
+	}
 
-		this.tvMetricLinesSent.clear();
+	@Test
+	public void	testTagSetting () throws Exception {
+		Map<String, String>	tagMap;
 
 		// Verify tag map with multiple values.
 		tagMap = new HashMap<String, String>();
@@ -146,10 +155,33 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.stop();
 
 		assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-		assertTrue(this.tvMetricLinesSent.get(0).matches(".*host=.*"));
+		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
 		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag1-x=x-tag1val-x\\b.*"));
 		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag2-x=x-tag2val-x\\b.*"));
 		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag3-x=x-tag3val-x\\b.*"));
+	}
+
+	@Test
+	public void	testAddHostnameTag () throws Exception {
+		this.writer.addSetting("mergeTypeNamesTags", Boolean.TRUE);
+
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+
+		assertEquals(1, tvMetricLinesSent.size());
+		validateMergedTypeNameValues(tvMetricLinesSent.get(0), true);
+		assertTrue(this.tvMetricLinesSent.get(0).matches(".*host=.*"));
+	}
+
+	@Test
+	public void	testDontAddHostnameTag () throws Exception {
+		this.writer.addSetting("addHostnameTag", false);
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+
+		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
 	}
 
 	@Test
@@ -163,22 +195,189 @@ public class OpenTSDBGenericWriterTests {
 		assertEquals(0, this.tvMetricLinesSent.size());
 	}
 
+	@Test
+	public void	testOneValueMatchingAttribute () throws Exception {
+		when(this.mockResult.getValues()).thenReturn(createValueMap("X-ATT-X", "120021"));
+
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+
+		assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
+		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\btype=.*"));
+	}
+
+	@Test
+	public void	testMultipleValuesWithMatchingAttribute () throws Exception {
+		String	xLine;
+		String	xxLine;
+
+		when(this.mockResult.getValues()).
+			thenReturn(createValueMap("X-ATT-X", "120021", "XX-ATT-XX", "210012"));
+
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+		assertEquals(2, this.tvMetricLinesSent.size());
+
+		if ( this.tvMetricLinesSent.get(0).contains("XX-ATT-XX") ) {
+			xxLine = this.tvMetricLinesSent.get(0);
+			xLine = this.tvMetricLinesSent.get(1);
+		} else {
+			xLine = this.tvMetricLinesSent.get(0);
+			xxLine = this.tvMetricLinesSent.get(1);
+		}
+
+		assertTrue(xLine.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+		assertTrue(xLine.matches(".*\\btype=X-ATT-X\\b.*"));
+
+		assertTrue(xxLine.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 210012.*"));
+		assertTrue(xxLine.matches(".*\\btype=XX-ATT-XX\\b.*"));
+	}
+
+	@Test
+	public void	testNonNumericValue () throws Exception {
+		String	xLine;
+		String	xxLine;
+
+		when(this.mockResult.getValues()).thenReturn(createValueMap("X-ATT-X", "THIS-IS-NOT-A-NUMBER"));
+
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+
+		assertEquals(0, this.tvMetricLinesSent.size());
+	}
+
+	@Test
+	public void	testJexlNaming () throws Exception {
+		this.writer.addSetting("metricNamingExpression", "'xx-jexl-constant-name-xx'");
+
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+
+		assertTrue(this.tvMetricLinesSent.get(0).matches("^xx-jexl-constant-name-xx 0 120021.*"));
+	}
+
+	@Test(expected = LifecycleException.class)
+	public void	testInvalidJexlNaming () throws Exception {
+		this.writer.addSetting("metricNamingExpression", "invalid expression here");
+
+		this.writer.start();
+	}
+
+	@Test
+	public void	testDebugOuptutResultString () throws Exception {
+		String	xLine;
+		String	xxLine;
+
+		this.writer.addSetting("debug", true);
+
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+	}
+
+	@Test(expected = ValidationException.class)
+	public void	testValidateNullHost () throws Exception {
+		String	xLine;
+		String	xxLine;
+
+		this.writer.addSetting("host", null);
+		this.writer.addSetting("port", 4242);
+
+		this.writer.start();
+		this.writer.validateSetup(this.mockQuery);
+	}
+
+	@Test(expected = ValidationException.class)
+	public void	testValidateNullPort () throws Exception {
+		String	xLine;
+		String	xxLine;
+
+		this.writer.addSetting("host", "localhost");
+		this.writer.addSetting("port", null);
+
+		this.writer.start();
+		this.writer.validateSetup(this.mockQuery);
+	}
+
+	@Test
+	public void	testValidateValidHostPort () throws Exception {
+		String	xLine;
+		String	xxLine;
+
+		this.writer.addSetting("host", "localhost");
+		this.writer.addSetting("port", 4242);
+
+		this.writer.start();
+		this.writer.validateSetup(this.mockQuery);
+	}
+
+	@Test
+	public void	testDefaultHookMethods () throws Exception {
+		this.writer = createMinimalWriter();
+
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+		this.writer.stop();
+	}
+
+	@Test
+	public void	testHooksCalled () throws Exception {
+		this.writer.start();
+		assertTrue(prepareSenderCalled);
+		assertFalse(shutdownSenderCalled);
+		assertFalse(startOutputCalled);
+		assertFalse(finishOutputCalled);
+
+		this.writer.doWrite(this.mockQuery);
+		assertTrue(prepareSenderCalled);
+		assertFalse(shutdownSenderCalled);
+		assertTrue(startOutputCalled);
+		assertTrue(finishOutputCalled);
+
+		this.writer.stop();
+		assertTrue(prepareSenderCalled);
+		assertTrue(shutdownSenderCalled);
+		assertTrue(startOutputCalled);
+		assertTrue(finishOutputCalled);
+
+	}
+
 	protected OpenTSDBGenericWriter	createWriter () {
 		OpenTSDBGenericWriter	result;
 
 		result = new OpenTSDBGenericWriter () {
 			protected void	prepareSender() throws LifecycleException {
-				prepareSenderCalled = true;
+				OpenTSDBGenericWriterTests.this.prepareSenderCalled = true;
 			}
 			protected void	shutdownSender() throws LifecycleException {
-				shutdownSenderCalled = true;
+				OpenTSDBGenericWriterTests.this.shutdownSenderCalled = true;
 			}
 			protected void	startOutput() throws IOException {
-				startOutputCalled = true;
+				OpenTSDBGenericWriterTests.this.startOutputCalled = true;
 			}
 			protected void	finishOutput() throws IOException {
-				finishOutputCalled = true;
+				OpenTSDBGenericWriterTests.this.finishOutputCalled = true;
 			}
+			protected boolean	getAddHostnameTagDefault () {
+				return	tvAddHostnameTagDefault;
+			}
+			protected void	sendOutput (String metricLine) {
+				OpenTSDBGenericWriterTests.this.tvMetricLinesSent.add(metricLine);
+			}
+		} ;
+
+		return	result;
+	}
+
+	protected OpenTSDBGenericWriter	createMinimalWriter () {
+		OpenTSDBGenericWriter	result;
+
+		result = new OpenTSDBGenericWriter () {
 			protected boolean	getAddHostnameTagDefault () {
 				return	tvAddHostnameTagDefault;
 			}
@@ -190,22 +389,19 @@ public class OpenTSDBGenericWriterTests {
 		return	result;
 	}
 
-	protected void	validateMergedTypeNameValues (List<String> result, boolean mergedInd) {
-		LOG.info("result string = {}", result.get(0));
+	protected void	validateMergedTypeNameValues (String resultString, boolean mergedInd) {
 		if ( mergedInd ) {
-			assertEquals(1, result.size());
-			assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-			assertTrue(result.get(0).matches(".*\\btype=x-att1-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
+			assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+			assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
+			assertTrue(resultString.matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
 		}
 		else {
-			assertEquals(1, result.size());
-			assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-			assertTrue(result.get(0).matches(".*\\btype=x-att1-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bType=x-type-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bGroup=x-group-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bName=x-name-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bMissing=(\\s.*|$)"));
+			assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+			assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
+			assertTrue(resultString.matches(".*\\bType=x-type-x\\b.*"));
+			assertTrue(resultString.matches(".*\\bGroup=x-group-x\\b.*"));
+			assertTrue(resultString.matches(".*\\bName=x-name-x\\b.*"));
+			assertTrue(resultString.matches(".*\\bMissing=(\\s.*|$)"));
 		}
 	}
 
