@@ -1,12 +1,11 @@
 package com.googlecode.jmxtrans.model.output;
 
+import static com.googlecode.jmxtrans.model.output.KeyOutWriter.LOG_PATTERN;
 import java.io.IOException;
+import org.apache.log4j.Appender;
 
 import org.apache.log4j.DailyRollingFileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.apache.log4j.spi.LoggerFactory;
 
 /**
  * This class is derived from KeyOutWriter. It uses DailyRollingFileAppender
@@ -33,37 +32,26 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 	public DailyKeyOutWriter() {
 		super();
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.googlecode.jmxtrans.model.output.KeyOutWriter#initLogger(java.lang
-	 * .String)
-	 */
-	@Override
-	protected Logger initLogger(String fileStr) throws IOException {
-		String datePattern = (String) this.getSettings().get("datePattern");
+    
+    /**
+     * The maxLogFileSize and maxLogBackupFiles are ignored as per the existing behaviour of DailyKeyOutWriter.
+     */
+    @Override
+    protected Appender buildLog4jAppender(String fileStr, String maxLogFileSize, Integer maxLogBackupFiles)
+            throws IOException {
+        String datePattern = (String) this.getSettings().get("datePattern");
 		if (datePattern == null) {
 			datePattern = DATE_PATTERN;
 		}
 		PatternLayout pl = new PatternLayout(LOG_PATTERN);
-
-		final DailyRollingFileAppender appender = new DailyRollingFileAppender(pl, fileStr, datePattern);
-		appender.setImmediateFlush(true);
-		appender.setBufferedIO(false);
-		appender.setBufferSize(LOG_IO_BUFFER_SIZE_BYTES);
-
-		LoggerFactory loggerFactory = new LoggerFactory() {
-			@Override
-			public Logger makeNewLoggerInstance(String name) {
-				Logger logger = Logger.getLogger(name);
-				logger.addAppender(appender);
-				logger.setLevel(Level.INFO);
-				logger.setAdditivity(false);
-				return logger;
-			}
-		};
-		return loggerFactory.makeNewLoggerInstance("DailyKeyOutWriter" + this.hashCode());
-	}
+        DailyRollingFileAppender appender = new DailyRollingFileAppender(pl, fileStr, datePattern);
+        
+        return appender;
+    }
+    
+    @Override
+    protected String buildLoggerName() {
+        return "DailyKeyOutWriter" + this.hashCode();
+    }
+    
 }
