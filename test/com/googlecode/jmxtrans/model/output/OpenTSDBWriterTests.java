@@ -117,7 +117,7 @@ public class OpenTSDBWriterTests {
 		result = this.writer.resultParser(this.mockResult);
 		this.writer.stop();
 
-		assertTrue(result.get(0).matches("^put X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
+		assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
 
 
 		// Verify tag map with multiple values.
@@ -131,7 +131,7 @@ public class OpenTSDBWriterTests {
 		result = this.writer.resultParser(this.mockResult);
 		this.writer.stop();
 
-		assertTrue(result.get(0).matches("^put X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+		assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
 		assertTrue(result.get(0).matches(".*host=.*"));
 		assertTrue(result.get(0).matches(".*\\bx-tag1-x=x-tag1val-x\\b.*"));
 		assertTrue(result.get(0).matches(".*\\bx-tag2-x=x-tag2val-x\\b.*"));
@@ -173,15 +173,16 @@ public class OpenTSDBWriterTests {
 	}
 
 	protected void	validateMergedTypeNameValues (List<String> result, boolean mergedInd) {
+		LOG.info("result string = {}", result.get(0));
 		if ( mergedInd ) {
 			assertEquals(1, result.size());
-			assertTrue(result.get(0).matches("^put X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+			assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
 			assertTrue(result.get(0).matches(".*\\btype=x-att1-x\\b.*"));
 			assertTrue(result.get(0).matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
 		}
 		else {
 			assertEquals(1, result.size());
-			assertTrue(result.get(0).matches("^put X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+			assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
 			assertTrue(result.get(0).matches(".*\\btype=x-att1-x\\b.*"));
 			assertTrue(result.get(0).matches(".*\\bType=x-type-x\\b.*"));
 			assertTrue(result.get(0).matches(".*\\bGroup=x-group-x\\b.*"));
