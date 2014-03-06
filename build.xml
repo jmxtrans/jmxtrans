@@ -60,7 +60,7 @@
 			<sfile name="${log4j.jar}" scope="compile" src="${alexandria.home}/${log4j.src}" />
 			<sfile name="${quartz.jar}" scope="compile" src="${alexandria.home}/${quartz.src}" />
 			<sfile name="${slf4j-api.jar}" scope="compile" src="${alexandria.home}/${slf4j-api.src}" />
-			<sfile name="${slf4j-log4j.jar}" scope="runtime" src="${alexandria.home}/${slf4j-log4j.src}" />
+			<sfile name="${slf4j-log4j.jar}" scope="compile" src="${alexandria.home}/${slf4j-log4j.src}" />
 			<sfile name="${velocity.jar}" scope="compile" src="${alexandria.home}/${velocity.src}" />
 			<sfile name="${remoting3-remoting-jmx.jar}" scope="compile" src="${alexandria.home}/${remoting3-remoting-jmx.src}" />
 			<sfile name="${remotingjmx-remoting-jmx.jar}" scope="compile" src="${alexandria.home}/${remotingjmx-remoting-jmx.src}" />
@@ -72,6 +72,8 @@
 			<sfile name="${jbossjdeparser.jar}" scope="compile" />
 			<sfile name="${jboss-xnio-api.jar}" scope="compile" />
 			<sfile name="${jboss-xnio-nio.jar}" scope="compile" />
+			<sfile name="${logback-classic.jar}" scope="compile"/>
+			<sfile name="${logback-core.jar}" scope="compile" />
 		</sfilelist>
 	</spath>
 
