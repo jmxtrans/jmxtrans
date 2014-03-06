@@ -230,11 +230,11 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
         this.finishOutput();
     }
 
+    /**
+     * Validation per query, after the writer has been start()ed
+     */
     @Override
     public void validateSetup(Query query) throws ValidationException {
-        if (host == null || port == null) {
-            throw new ValidationException("Host and port can't be null", query);
-        }
     }
 
     /** 
@@ -244,7 +244,14 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
     @Override
     public void start() throws LifecycleException {
         host = (String) this.getSettings().get(HOST);
-        port = (Integer) this.getSettings().get(PORT);
+
+        Object portObj = this.getSettings().get(PORT);
+        if (portObj instanceof String) {
+            port = Integer.parseInt((String) portObj);
+        } else if (portObj instanceof Integer) {
+            port = (Integer) portObj;
+        }
+
         tags = (Map<String, String>) this.getSettings().get("tags");
 
         tagName            = this.getStringSetting("tagName", "type");

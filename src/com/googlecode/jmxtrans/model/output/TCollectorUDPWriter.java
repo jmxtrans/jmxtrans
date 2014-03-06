@@ -39,14 +39,17 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
      * Setup at start of the writer.
      */
     @Override
-    public void start() throws LifecycleException {
-        super.start();
+    public void prepareSender() throws LifecycleException {
+
+        if (host == null || port == null) {
+            throw new LifecycleException("Host and port for " + this.getClass().getSimpleName() + " output can't be null");
+        }
 
         try {
             this.dgSocket = new DatagramSocket();
-            this.address = new InetSocketAddress(this.host, this.port);
+            this.address  = new InetSocketAddress(host, port);
         } catch ( SocketException sockExc ) {
-            log.error("failed to create a datagram socket", sockExc);
+            log.error("Failed to create a datagram socket", sockExc);
             throw   new LifecycleException(sockExc);
         }
     }
