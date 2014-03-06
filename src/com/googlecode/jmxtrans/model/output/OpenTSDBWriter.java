@@ -65,7 +65,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
         try {
             socket.close();
         } catch (IOException e) {
-            log.error("error closing socket to OpenTSDB");
+            log.error("error closing socket to OpenTSDB", e);
             throw new LifecycleException(e);
         }
     }
@@ -107,7 +107,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
         try {
             this.out.flush();
         } catch (IOException e) {
-            log.error("flush failed");
+            log.error("flush failed", e);
             throw e;
         }
 

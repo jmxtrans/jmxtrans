@@ -238,9 +238,6 @@ public class OpenTSDBGenericWriterTests {
 
 	@Test
 	public void	testNonNumericValue () throws Exception {
-		String	xLine;
-		String	xxLine;
-
 		when(this.mockResult.getValues()).thenReturn(createValueMap("X-ATT-X", "THIS-IS-NOT-A-NUMBER"));
 
 		this.writer.start();
@@ -270,11 +267,6 @@ public class OpenTSDBGenericWriterTests {
 
 	@Test
 	public void	testDebugOuptutResultString () throws Exception {
-		String	xLine;
-		String	xxLine;
-
-		this.writer.addSetting("debug", true);
-
 		this.writer.start();
 		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
@@ -282,9 +274,6 @@ public class OpenTSDBGenericWriterTests {
 
 	@Test(expected = ValidationException.class)
 	public void	testValidateNullHost () throws Exception {
-		String	xLine;
-		String	xxLine;
-
 		this.writer.addSetting("host", null);
 		this.writer.addSetting("port", 4242);
 
@@ -294,9 +283,6 @@ public class OpenTSDBGenericWriterTests {
 
 	@Test(expected = ValidationException.class)
 	public void	testValidateNullPort () throws Exception {
-		String	xLine;
-		String	xxLine;
-
 		this.writer.addSetting("host", "localhost");
 		this.writer.addSetting("port", null);
 
@@ -306,9 +292,6 @@ public class OpenTSDBGenericWriterTests {
 
 	@Test
 	public void	testValidateValidHostPort () throws Exception {
-		String	xLine;
-		String	xxLine;
-
 		this.writer.addSetting("host", "localhost");
 		this.writer.addSetting("port", 4242);
 
