@@ -149,4 +149,20 @@ public class TCollectorUDPWriterTests {
 			verify(this.mockLog).error(contains("create a datagram socket"), eq(sockExc));
 		}
 	}
+
+	@Test(expected = LifecycleException.class)
+	public void	testValidateNullHost () throws Exception {
+		this.writer.addSetting("host", null);
+		this.writer.addSetting("port", 8923);
+
+		this.writer.start();
+	}
+
+	@Test(expected = LifecycleException.class)
+	public void	testValidateNullPort () throws Exception {
+		this.writer.addSetting("host", "localhost");
+		this.writer.addSetting("port", null);
+
+		this.writer.start();
+	}
 }

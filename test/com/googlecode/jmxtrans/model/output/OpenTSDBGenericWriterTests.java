@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,7 +18,12 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 import org.junit.*;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +31,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Tests for {@link OpenTSDBGenericWriter}.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ OpenTSDBGenericWriter.class, java.net.InetAddress.class })
 public class OpenTSDBGenericWriterTests {
 	private static final Logger	LOG = LoggerFactory.getLogger(OpenTSDBGenericWriterTests.class);
 
@@ -272,28 +280,19 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.stop();
 	}
 
-	@Test(expected = ValidationException.class)
-	public void	testValidateNullHost () throws Exception {
-		this.writer.addSetting("host", null);
-		this.writer.addSetting("port", 4242);
-
-		this.writer.start();
-		this.writer.validateSetup(this.mockQuery);
-	}
-
-	@Test(expected = ValidationException.class)
-	public void	testValidateNullPort () throws Exception {
+	@Test
+	public void	testValidateValidHostPort () throws Exception {
 		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", null);
+		this.writer.addSetting("port", 4242);
 
 		this.writer.start();
 		this.writer.validateSetup(this.mockQuery);
 	}
 
 	@Test
-	public void	testValidateValidHostPort () throws Exception {
+	public void	testPortNumberAsString () throws Exception {
 		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", 4242);
+		this.writer.addSetting("port", "4242");
 
 		this.writer.start();
 		this.writer.validateSetup(this.mockQuery);
@@ -328,6 +327,79 @@ public class OpenTSDBGenericWriterTests {
 		assertTrue(startOutputCalled);
 		assertTrue(finishOutputCalled);
 
+	}
+
+	@Test
+	public void	testDebugEanbled () throws Exception {
+		this.writer.addSetting("host", "localhost");
+		this.writer.addSetting("port", 4242);
+		this.writer.addSetting("debug", true);
+
+		this.writer.start();
+		this.writer.validateSetup(this.mockQuery);
+		this.writer.doWrite(this.mockQuery);
+
+		// TBD: some way to validate System.out
+	}
+
+	@Test
+	public void	testLocalhostUnknownHostException () throws Exception {
+			//
+			// Prepare.
+			//
+
+		UnknownHostException	uhExc = new UnknownHostException("X-TEST-UHE-X");
+		PowerMockito.mockStatic(java.net.InetAddress.class);
+		PowerMockito.when(java.net.InetAddress.getLocalHost()).thenThrow(uhExc);
+
+		try {
+				//
+				// Execute.
+				//
+
+			this.writer.start();
+
+			fail("LifecycleException missing");
+		} catch ( LifecycleException lcExc ) {
+				//
+				// Verify.
+				//
+
+			assertSame(uhExc, lcExc.getCause());
+		}
+	}
+
+	/**
+	 * Confirm operation when the host tag is enabled, but the local hostname is not known.
+	 */
+	@Test
+	public void	testNullHostTagname () throws Exception {
+		java.net.InetAddress	mockInetAddress;
+
+			//
+			// Prepare.
+			//
+
+		mockInetAddress = mock(java.net.InetAddress.class);
+		PowerMockito.mockStatic(java.net.InetAddress.class);
+		PowerMockito.when(java.net.InetAddress.getLocalHost()).thenReturn(mockInetAddress);
+		when(mockInetAddress.getHostName()).thenReturn(null);
+
+
+			//
+			// Execute.
+			//
+
+		this.writer.addSetting("addHostnameTag", true);		// Ensure it's enabled
+		this.writer.start();
+		this.writer.doWrite(this.mockQuery);
+
+
+			//
+			// Validate.
+			//
+
+		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));	// Ensure host tag is excluded
 	}
 
 	protected OpenTSDBGenericWriter	createWriter () {
