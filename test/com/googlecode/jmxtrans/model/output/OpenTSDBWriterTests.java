@@ -1,11 +1,15 @@
 package com.googlecode.jmxtrans.model.output;
 
 import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.*;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,200 +18,365 @@ import java.util.Map;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.util.LifecycleException;
+
+import org.hamcrest.Matchers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import org.junit.*;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
  * Tests for {@link OpenTSDBWriter}.
- *
- * TODO:
- *	- Stop using a real socket for testing purposes.  Some machines may not allow for the socket creation.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ OpenTSDBWriter.class })
 public class OpenTSDBWriterTests {
-	private static final Logger	LOG = LoggerFactory.getLogger(OpenTSDBWriterTests.class);
-
 	protected OpenTSDBWriter	writer;
 	protected Query			mockQuery;
 	protected Result		mockResult;
-	protected ServerSocket		loopbackSocket;
+	protected Socket		mockSocket;
+	protected DataOutputStream	mockOut;
+	protected InputStreamReader	mockInStreamRdr;
+	protected BufferedReader	mockBufRdr;
+	protected Logger		mockLog;
+	protected Map<String, Object>	testValues;
 
+	/**
+	 * Prepare the test with standard mocks and mock interactions.  Also perform the base configuration of the
+	 * object under test.
+	 */
 	@Before
-	public void	setupTest () {
-		this.mockQuery = mock(Query.class);
-		this.mockResult = mock(Result.class);
+	public void	setupTest () throws Exception {
+			//
+			// Prepare Mock Objects
+			//
 
-		this.writer = new OpenTSDBWriter();
+		this.mockQuery       = mock(Query.class);
+		this.mockResult      = mock(Result.class);
+		this.mockSocket      = mock(Socket.class);
+		this.mockInStreamRdr = mock(InputStreamReader.class);
+		this.mockBufRdr      = mock(BufferedReader.class);
+		this.mockLog         = mock(Logger.class);
 
-		this.startLoopbackSocket();
+			// PowerMockito mocks for those final/static classes and methods:
+		this.mockOut    = PowerMockito.mock(DataOutputStream.class);
+
 
 			//
 			// Setup common mock interactions.
 			//
 
-		when(this.mockResult.getValues()).thenReturn(createValueMap("x-att1-x", "120021"));
+		PowerMockito.whenNew(Socket.class).withParameterTypes(String.class, int.class).
+			withArguments("localhost", 4242).thenReturn(this.mockSocket);
+		PowerMockito.whenNew(DataOutputStream.class).withAnyArguments().thenReturn(this.mockOut);
+		PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(this.mockInStreamRdr);
+		PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(this.mockBufRdr);
+
+
+			// When results are needed.
+
+		when(this.mockQuery.getResults()).thenReturn(Arrays.asList(this.mockResult));
+		testValues = new HashMap<String, Object>();
+		testValues.put("x-att1-x", "120021");
+		when(this.mockResult.getValues()).thenReturn(testValues);
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
-		when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
+		when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");
+		when(this.mockInStreamRdr.ready()).thenReturn(false);
 
-		this.writer.addSetting("typeNames", Arrays.asList(new String[] { "Type", "Group", "Name", "Missing" }));
+
+			//
+			// Prepare the object under test and test data.
+			//
+
+		this.writer = new OpenTSDBWriter();
 		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", Integer.valueOf(4242));
+		this.writer.addSetting("port", 4242);
+
+
+			// Inject the mock logger
+
+		Whitebox.setInternalState(OpenTSDBWriter.class, Logger.class, this.mockLog);
 	}
 
 	@After
 	public void	cleanupTest () {
-		this.stopLoopbackSocket();
 	}
 
+	/**
+	 * Test a successful send without any response from OpenTSDB.
+	 */
 	@Test
-	public void	testMergedTypeNameValues1 () throws Exception {
-		List<String>	result;
+	public void	testSuccessfulSendNoOpenTSDBResponse () throws Exception {
+		ArgumentCaptor<String>	lineCapture = ArgumentCaptor.forClass(String.class);
 
-		// Verify the default is the same as the TRUE path.
+			//
+			// Execute.
+			//
+
 		this.writer.start();
-		result = this.writer.resultParser(this.mockResult);
+		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
 
-		validateMergedTypeNameValues(result, true);
+
+			//
+			// Verify.
+			//
+
+		verify(this.mockOut).writeBytes(lineCapture.capture());
+
+		assertThat(lineCapture.getValue(), Matchers.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
+		assertThat(lineCapture.getValue(), Matchers.containsString(" host="));
 	}
 
+	/**
+	 * Verify a successful send with a response from OpenTSDB with the second ready() on the InputStream returning
+	 * false.
+	 */
 	@Test
-	public void	testMergedTypeNameValues2 () throws Exception {
-		List<String>	result;
+	public void	testSuccessfulSendOpenTSDBResponse1 () throws Exception {
+			//
+			// Prepare.
+			//
 
-		this.writer.addSetting("mergeTypeNamesTags", Boolean.TRUE);
+		when(this.mockInStreamRdr.ready()).thenReturn(true).thenReturn(false);
+		when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X");
+
+			//
+			// Execute.
+			//
 
 		this.writer.start();
-		result = this.writer.resultParser(this.mockResult);
+		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
 
-		validateMergedTypeNameValues(result, true);
+
+			//
+			// Verify.
+			//
+
+		verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
+		verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
 	}
 
+	/**
+	 * Verify a successful send with a response from OpenTSDB with the second readLine returning null.
+	 */
 	@Test
-	public void	testMergedTypeNameValues3 () throws Exception {
-		List<String>	result;
+	public void	testSuccessfulSendOpenTSDBResponse2 () throws Exception {
+			//
+			// Prepare.
+			//
 
-		// Verify the FALSE path.
-		this.writer.addSetting("mergeTypeNamesTags", Boolean.FALSE);
+		when(this.mockInStreamRdr.ready()).thenReturn(true);
+		when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X").thenReturn(null);
+
+
+			//
+			// Execute.
+			//
 
 		this.writer.start();
-		result = this.writer.resultParser(this.mockResult);
+		this.writer.doWrite(this.mockQuery);
 		this.writer.stop();
 
-		validateMergedTypeNameValues(result, false);
+
+			//
+			// Verify.
+			//
+
+		verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
+		verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
 	}
 
+	/**
+	 * Test throwing of UnknownHostException when creating the socket.
+	 */
 	@Test
-	public void	testTagSetting () throws Exception {
-		List<String>		result;
-		Map<String, String>	tagMap;
+	public void	testUnknownHostException () throws Exception {
+			//
+			// Prepare.
+			//
 
-		when(this.mockResult.getValues()).thenReturn(createValueMap("X-ATT-X", "120021"));
+		UnknownHostException	uhExc = new UnknownHostException("X-TEST-UHE-X");
+		PowerMockito.whenNew(Socket.class).withParameterTypes(String.class, int.class).
+			withArguments("localhost", 4242).thenThrow(uhExc);
 
-		// Verify empty tag map.
-		tagMap = new HashMap<String, String>();
-		this.writer.addSetting("tags", tagMap);
-		this.writer.setTypeNames(new LinkedList());
-
-		this.writer.start();
-		result = this.writer.resultParser(this.mockResult);
-		this.writer.stop();
-
-		assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
-
-
-		// Verify tag map with multiple values.
-		tagMap = new HashMap<String, String>();
-		tagMap.put("x-tag1-x", "x-tag1val-x");
-		tagMap.put("x-tag2-x", "x-tag2val-x");
-		tagMap.put("x-tag3-x", "x-tag3val-x");
-		this.writer.addSetting("tags", tagMap);
-
-		this.writer.start();
-		result = this.writer.resultParser(this.mockResult);
-		this.writer.stop();
-
-		assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-		assertTrue(result.get(0).matches(".*host=.*"));
-		assertTrue(result.get(0).matches(".*\\bx-tag1-x=x-tag1val-x\\b.*"));
-		assertTrue(result.get(0).matches(".*\\bx-tag2-x=x-tag2val-x\\b.*"));
-		assertTrue(result.get(0).matches(".*\\bx-tag3-x=x-tag3val-x\\b.*"));
-	}
-
-	@Test
-	public void	testEmptyResultValues () throws Exception {
-		List<String>		result;
-
-		when(this.mockResult.getValues()).thenReturn(null);
-
-		this.writer.start();
-		result = this.writer.resultParser(this.mockResult);
-		this.writer.stop();
-
-		assertEquals(0, result.size());
-	}
-
-	protected void	startLoopbackSocket() {
 		try {
-			this.loopbackSocket = new ServerSocket(4242);
-		}
-		catch ( IOException io_exc ) {
-			LOG.warn("Failed to setup test server socket on port 4242", io_exc);
+				//
+				// Execute.
+				//
+
+			this.writer.start();
+
+			fail("LifecycleException missing");
+		} catch ( LifecycleException lcExc ) {
+				//
+				// Verify.
+				//
+
+			assertSame(uhExc, lcExc.getCause());
+			verify(this.mockLog).error(contains("opening socket"), eq(uhExc));
 		}
 	}
 
-	protected void	stopLoopbackSocket() {
+	/**
+	 * Test throwing of IOException when creating the socket.
+	 */
+	@Test
+	public void	testSocketCreationIOException () throws Exception {
+			//
+			// Prepare.
+			//
+
+		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
+		PowerMockito.whenNew(Socket.class).withParameterTypes(String.class, int.class).
+			withArguments("localhost", 4242).thenThrow(ioExc);
+
 		try {
-			if ( this.loopbackSocket != null ) {
-				this.loopbackSocket.close();
-				this.loopbackSocket = null;
-			}
-		}
-		catch ( IOException io_exc ) {
-			LOG.warn("Failed to close test server socket on port 4242", io_exc);
+				//
+				// Execute.
+				//
+
+			this.writer.start();
+			fail("LifecycleException missing");
+		} catch ( LifecycleException lcExc ) {
+				//
+				// Verify.
+				//
+
+			assertSame(ioExc, lcExc.getCause());
+			verify(this.mockLog).error(contains("opening socket"), eq(ioExc));
 		}
 	}
 
-	protected void	validateMergedTypeNameValues (List<String> result, boolean mergedInd) {
-		LOG.info("result string = {}", result.get(0));
-		if ( mergedInd ) {
-			assertEquals(1, result.size());
-			assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-			assertTrue(result.get(0).matches(".*\\btype=x-att1-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
-		}
-		else {
-			assertEquals(1, result.size());
-			assertTrue(result.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-			assertTrue(result.get(0).matches(".*\\btype=x-att1-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bType=x-type-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bGroup=x-group-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bName=x-name-x\\b.*"));
-			assertTrue(result.get(0).matches(".*\\bMissing=(\\s.*|$)"));
+	/**
+	 * Test throwing of IOException when closing the socket.
+	 */
+	@Test
+	public void	testSocketCloseIOException () throws Exception {
+			//
+			// Prepare.
+			//
+
+		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
+		doThrow(ioExc).when(this.mockSocket).close();
+
+
+			//
+			// Execute.
+			//
+
+		this.writer.start();
+		try {
+			this.writer.stop();
+			fail("LifecycleException missing");
+		} catch ( LifecycleException lcExc ) {
+				//
+				// Verify.
+				//
+
+			assertSame(ioExc, lcExc.getCause());
+			verify(this.mockLog).error(contains("closing socket"), eq(ioExc));
 		}
 	}
 
-	protected Map<String, Object>	createValueMap (Object... keysAndValues) {
-		Map<String, Object>	result;
-		int			iter;
+	/**
+	 * Test throwing of IOException when starting output.
+	 */
+	@Test
+	public void	testStartOutputIOException () throws Exception {
+			//
+			// Prepare.
+			//
 
-		result = new HashMap<String, Object>();
-		iter = 0;
-		while ( iter < keysAndValues.length ) {
-			if ( iter < ( keysAndValues.length - 1 ) ) {
-				result.put(keysAndValues[iter].toString(), keysAndValues[iter + 1]);
-				iter += 2;
-			}
-			else {
-				result.put(keysAndValues[iter].toString(), null);
-				iter++;
-			}
+		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
+		when(this.mockSocket.getOutputStream()).thenThrow(ioExc);
+
+			//
+			// Execute.
+			//
+
+		this.writer.start();
+		try {
+			this.writer.doWrite(this.mockQuery);
+			fail("IOException missing");
+		} catch ( IOException ioCaught ) {
+				//
+				// Verify.
+				//
+
+			assertSame(ioExc, ioCaught);
+			verify(this.mockLog).error(contains("output stream"), eq(ioExc));
 		}
+	}
 
-		return	result;
+	/**
+	 * Test IOException thrown on SendOutput.
+	 */
+	@Test
+	public void	testSendOutputIOException () throws Exception {
+			//
+			// Prepare.
+			//
+
+		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
+		doThrow(ioExc).when(this.mockOut).writeBytes(anyString());
+
+
+			//
+			// Execute.
+			//
+
+		this.writer.start();
+		try {
+			this.writer.doWrite(this.mockQuery);
+			fail("IOException missing");
+		} catch ( IOException ioCaught ) {
+				//
+				// Verify.
+				//
+
+			assertSame(ioExc, ioCaught);
+			verify(this.mockLog).error(contains("writing result"), eq(ioExc));
+		}
+	}
+
+	@Test
+	public void	testFinishOutputIOException () throws Exception {
+			//
+			// Prepare.
+			//
+
+		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
+		doThrow(ioExc).when(this.mockOut).flush();
+
+
+			//
+			// Execute.
+			//
+
+		this.writer.start();
+		try {
+			this.writer.doWrite(this.mockQuery);
+			fail("exception on flush was not thrown");
+		} catch ( IOException ioCaught ) {
+				//
+				// Verify.
+				//
+
+			assertSame(ioExc, ioCaught);
+			verify(this.mockLog).error(contains("flush failed"), eq(ioExc));
+		}
 	}
 }
