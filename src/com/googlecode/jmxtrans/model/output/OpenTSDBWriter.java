@@ -46,6 +46,11 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
      */
     @Override
     protected void  prepareSender() throws LifecycleException {
+
+        if (host == null || port == null) {
+            throw new LifecycleException("Host and port for " + this.getClass().getSimpleName() + " output can't be null");
+        }
+
         try {
             socket = new Socket(host, port);
         } catch(UnknownHostException e) {

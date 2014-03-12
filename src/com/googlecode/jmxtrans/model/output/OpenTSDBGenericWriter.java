@@ -40,6 +40,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 
     protected boolean mergeTypeNamesTags = DEFAULT_MERGE_TYPE_NAMES_TAGS;
     protected boolean addHostnameTag     = getAddHostnameTagDefault();
+    protected String hostnameTag;
 
     /**
      * Prepare for sending metrics, if needed.  For use by subclasses.
@@ -85,9 +86,9 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      *
      * @param   resultString - the string containing the metric name, timestamp, value, and possibly other content.
      */
-    void   addTags(StringBuilder resultString) throws UnknownHostException {
-        if ( addHostnameTag ) {
-            addTag(resultString, "host", java.net.InetAddress.getLocalHost().getHostName());
+    void   addTags(StringBuilder resultString) {
+        if ( addHostnameTag && hostnameTag != null ) {
+            addTag(resultString, "host", hostnameTag);
         }
 
         if (tags != null) {
@@ -137,7 +138,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      * @param   result - one results from the Query.
      * @return  List<String> - the list of strings containing metric details ready for sending to OpenTSDB.
      */
-    List<String> resultParser(Result result) throws UnknownHostException {
+    List<String> resultParser(Result result) {
         List<String> resultStrings = new LinkedList<String>();
         Map<String, Object> values = result.getValues();
         if (values == null)
@@ -160,7 +161,6 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
      */
     protected void  processOneMetric (List<String> resultStrings, Result result, Object value, String addTagName,
                                       String addTagValue)
-    throws UnknownHostException
     {
         String metricName = this.metricNameStrategy.formatName(result);
 
@@ -230,11 +230,11 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
         this.finishOutput();
     }
 
+    /**
+     * Validation per query, after the writer has been start()ed
+     */
     @Override
     public void validateSetup(Query query) throws ValidationException {
-        if (host == null || port == null) {
-            throw new ValidationException("Host and port can't be null", query);
-        }
     }
 
     /** 
@@ -244,12 +244,27 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
     @Override
     public void start() throws LifecycleException {
         host = (String) this.getSettings().get(HOST);
-        port = (Integer) this.getSettings().get(PORT);
+
+        Object portObj = this.getSettings().get(PORT);
+        if (portObj instanceof String) {
+            port = Integer.parseInt((String) portObj);
+        } else if (portObj instanceof Integer) {
+            port = (Integer) portObj;
+        }
+
         tags = (Map<String, String>) this.getSettings().get("tags");
 
         tagName            = this.getStringSetting("tagName", "type");
         mergeTypeNamesTags = this.getBooleanSetting("mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS);
+
         addHostnameTag     = this.getBooleanSetting("addHostnameTag", this.getAddHostnameTagDefault());
+        if (addHostnameTag) {
+            try {
+                hostnameTag = java.net.InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                throw new LifecycleException("Cannot resolve local hostname for host= tag", e);
+            }
+        }
 
         this.setupNamingStrategies();
         this.prepareSender();
