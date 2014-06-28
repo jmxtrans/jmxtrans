@@ -26,6 +26,26 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This writer is a port of the LibratoWriter from the embedded-jmxtrans project.
+ *
+ * <a href="https://metrics.librato.com//">Librato Metrics</a>
+ * <p/>
+ * This implementation uses <a href="http://dev.librato.com/v1/post/metrics">
+ * POST {@code /v1/metrics}</a> HTTP API.
+ * <p/>
+ * Settings:
+ * <ul>
+ * <li>"{@code url}": Librato server URL.
+ * Optional, default value: {@value #DEFAULT_LIBRATO_API_URL}.</li>
+ * <li>"{@code user}": Librato user. Mandatory</li>
+ * <li>"{@code token}": Librato token. Mandatory</li>
+ * <li>"{@code libratoApiTimeoutInMillis}": read timeout of the calls to Librato HTTP API.
+ * Optional, default value: {@value #DEFAULT_LIBRATO_API_TIMEOUT_IN_MILLIS}.</li>
+ * </ul>
+ *
+ * @author <a href="mailto:cleclerc@cloudbees.com">Cyrille Le Clerc</a>
+ */
 public class LibratoWriter extends BaseOutputWriter {
 
     public final static String SETTING_URL = "url";
