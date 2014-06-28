@@ -208,14 +208,11 @@ public class LibratoWriter extends BaseOutputWriter {
     }
 
     private String getSource(Query query) {
-        String source = null;
         if (query.getServer().getAlias() != null) {
-            source = query.getServer().getAlias();
+            return query.getServer().getAlias();
         } else {
-            source = query.getServer().getHost();
-            source = cleanupStr(source);
+            return cleanupStr(query.getServer().getHost());
         }
-        return source;
     }
 
     private String getStringSetting(String setting) throws ValidationException {
