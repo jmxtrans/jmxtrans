@@ -112,11 +112,6 @@ public class LibratoWriter extends BaseOutputWriter {
     }
 
     private void serialize(Query query, OutputStream outputStream) throws IOException {
-        System.out.println(query);
-        for (Result r : query.getResults()) {
-            System.out.println(r);
-        }
-
         JsonGenerator g = jsonFactory.createJsonGenerator(outputStream, JsonEncoding.UTF8);
         g.writeStartObject();
         g.writeArrayFieldStart("counters");
