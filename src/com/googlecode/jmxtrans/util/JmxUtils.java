@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -59,9 +60,12 @@ import com.googlecode.jmxtrans.model.Server;
  */
 public class JmxUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
 
-	/**
+    private static final Pattern UNDERSCORE_PAT = Pattern.compile("[./]");
+    private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
+
+    /**
 	 * Merges two lists of servers (and their queries). Based on the equality of
 	 * both sets of objects. Public for testing purposes.
 	 */
@@ -708,24 +712,21 @@ public class JmxUtils {
 		return sb.toString();
 	}
 
-	/**
-	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
-	 *
-	 * @param name
-	 *            the name
-	 * @return the string
-	 */
-	public static String cleanupStr(String name) {
-		if (name == null) {
-			return null;
-		}
-		String clean = name.replace(".", "_");
-		clean = clean.replace(" ", "");
-		clean = clean.replace("\"", "");
-		clean = clean.replace("'", "");
-		clean = clean.replace("/", "_");
-		return clean;
-	}
+    /**
+     * Replaces all . and / with _ and removes all spaces and double/single quotes.
+     *
+     * @param name
+     *            the name
+     * @return the string
+     */
+    public static String cleanupStr(String name) {
+        if (name == null) {
+            return null;
+        }
+        String clean = UNDERSCORE_PAT.matcher(name).replaceAll("_");
+        clean = SPACE_PAT.matcher(clean).replaceAll("");
+        return clean;
+    }
 
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
