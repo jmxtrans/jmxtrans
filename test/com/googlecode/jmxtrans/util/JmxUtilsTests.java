@@ -45,6 +45,21 @@ public class JmxUtilsTests {
         assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/ab cd_abcd"));
     }
 
+    @Test
+    public void testCleanupStrDottedKeysKept() {
+        JmxUtils.allowDottedKeys();
+        assertEquals("addfber1241qdw!èé$", JmxUtils.cleanupStr("addfber1241qdw!èé$"));
+        assertEquals("abcd.abcd", JmxUtils.cleanupStr("abcd.abcd"));
+        assertEquals("abcd.abcd.", JmxUtils.cleanupStr("abcd.abcd."));
+        assertEquals(".abcd_abcd", JmxUtils.cleanupStr(".abcd_abcd"));
+        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd/abcd"));
+        assertEquals("abcd_abcd_", JmxUtils.cleanupStr("abcd/abcd/"));
+        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd_abcd"));
+        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd'_abcd'"));
+        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd\"_abcd\""));
+        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/ab cd_abcd"));
+        JmxUtils.disallowDottedKeys();
+    }
 
 	@Test
 	public void testGetTypeNameValueMap () {

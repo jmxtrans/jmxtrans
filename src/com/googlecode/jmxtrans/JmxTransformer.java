@@ -519,6 +519,9 @@ public class JmxTransformer implements WatchedCallback {
 				}
 			} else if (option.getOpt().equals("s")) {
 				this.setRunPeriod(Integer.valueOf(option.getValue()));
+				if (Boolean.valueOf(option.getValue())) {
+				    JmxUtils.allowDottedKeys();
+				}
 			} else if (option.getOpt().equals("h")) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("java -jar jmxtrans-all.jar", this.getOptions());
@@ -540,6 +543,7 @@ public class JmxTransformer implements WatchedCallback {
 		options.addOption("e", false, "Run endlessly. Default false.");
 		options.addOption("q", true, "Path to quartz configuration file.");
 		options.addOption("s", true, "Seconds between server job runs (not defined with cron). Default: 60");
+		options.addOption("d", false, "Dotted keys: do not squash dots (.) in JMX keys.");
 		options.addOption("h", false, "Help");
 		return options;
 	}

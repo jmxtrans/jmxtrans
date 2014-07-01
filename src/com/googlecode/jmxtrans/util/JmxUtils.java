@@ -62,9 +62,29 @@ public class JmxUtils {
 
     private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
 
-    private static final Pattern UNDERSCORE_PAT = Pattern.compile("[./]");
+    private static final Pattern DOT_SLASH_UNDERSCORE_PAT = Pattern.compile("[./]");
+    private static final Pattern SLASH_UNDERSCORE_PAT = Pattern.compile("/", Pattern.LITERAL);
+    private static Pattern underscore_pat = DOT_SLASH_UNDERSCORE_PAT;
     private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
     private static final Pattern IS_NUMERIC_PAT = Pattern.compile("\\d*(?:[.]\\d+)?");
+
+    /**
+     *  Switch to permissive mode:
+     *  Keep the dots in keys retrieved from the server(s) intact.
+     *
+     *  [Having this configuration is pushing the definition of a static helper a bit, we know.
+     *  This is all for the sake of simplicity, and not changing too many things.]
+     */
+    public static void allowDottedKeys() {
+        underscore_pat = SLASH_UNDERSCORE_PAT;
+    }
+    /**
+     *  Switch to strict mode:
+     *  Squash the dots in keys retrieved from the server(s) and convert them to '_'.
+     */
+    public static void disallowDottedKeys() {
+        underscore_pat = DOT_SLASH_UNDERSCORE_PAT;
+    }
 
     /**
 	 * Merges two lists of servers (and their queries). Based on the equality of
@@ -712,7 +732,7 @@ public class JmxUtils {
         if (name == null) {
             return null;
         }
-        String clean = UNDERSCORE_PAT.matcher(name).replaceAll("_");
+        String clean = underscore_pat.matcher(name).replaceAll("_");
         clean = SPACE_PAT.matcher(clean).replaceAll("");
         return clean;
     }
