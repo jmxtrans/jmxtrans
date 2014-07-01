@@ -27,7 +27,8 @@ public class JmxUtilsTests {
 		assertTrue(JmxUtils.isNumeric("12.3"));
 		assertFalse(JmxUtils.isNumeric("12.3.3.3"));
 		assertTrue(JmxUtils.isNumeric(".2"));
-		assertFalse(JmxUtils.isNumeric("."));
+        assertFalse(JmxUtils.isNumeric("."));
+        assertFalse(JmxUtils.isNumeric("3."));
 	}
 
     @Test

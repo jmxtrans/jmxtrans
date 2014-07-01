@@ -64,6 +64,7 @@ public class JmxUtils {
 
     private static final Pattern UNDERSCORE_PAT = Pattern.compile("[./]");
     private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
+    private static final Pattern IS_NUMERIC_PAT = Pattern.compile("\\d*(?:[.]\\d+)?");
 
     /**
 	 * Merges two lists of servers (and their queries). Based on the equality of
@@ -539,24 +540,12 @@ public class JmxUtils {
 	 *            the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
 	 */
-	public static boolean isNumeric(String str) {
-		if (StringUtils.isEmpty(str)) {
-			return str != null; // Null = false, empty = true
-		}
-		int decimals = 0;
-		int sz = str.length();
-		char cat;
-		for (int i = 0; i < sz; i++) {
-			cat = str.charAt(i);
-			if (cat == '.' && ++decimals == 1) {
-				continue;
-			} else if (Character.isDigit(cat) == false) {
-				return false;
-			}
-		}
-		// a single period is not a number
-		return decimals < str.length();
-	}
+    public static boolean isNumeric(String str) {
+        if (StringUtils.isEmpty(str)) {
+            return str != null; // Null = false, empty = true
+        }
+        return IS_NUMERIC_PAT.matcher(str).matches();
+    }
 
 	/**
 	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
