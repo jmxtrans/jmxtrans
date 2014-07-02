@@ -25,6 +25,21 @@
             <param name="ConversionPattern" value="[%d{dd MMM yyyy HH:mm:ss}] [%t] %-6r %-5p (%C:%L) - %m\n"/>
         </layout>
     </appender>
+    
+    <appender name="Log4JWriterAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="${jmxtrans.log.dir}/log4jwriter.log"/>
+        <param name="Append" value="true"/>
+        <param name="DatePattern" value="'.'yyyyMMdd"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{dd MMM yyyy HH:mm:ss}] server:%X{server} metric:%X{metric} value:%X{value} %m\n"/>
+        </layout>
+    </appender>
+ 
+    <appender name="Log4JWriterSocketAppender" class="org.apache.log4j.net.SocketAppender">
+        <param name="RemoteHost" value="${jmxtrans.log.socket.host}"/>
+        <param name="Port" value="${jmxtrans.log.socket.port}"/>
+        <param name="ReconnectionDelay" value="${jmxtrans.log.socket.reconnectionDelay}"/>
+    </appender>    
 
     <logger name="com.googlecode.jmxtrans">
         <level value="${jmxtrans.log.level}"/>
