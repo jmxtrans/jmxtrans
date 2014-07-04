@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -59,9 +60,33 @@ import com.googlecode.jmxtrans.model.Server;
  */
 public class JmxUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
 
-	/**
+    private static final Pattern DOT_SLASH_UNDERSCORE_PAT = Pattern.compile("[./]");
+    private static final Pattern SLASH_UNDERSCORE_PAT = Pattern.compile("/", Pattern.LITERAL);
+    private static Pattern underscore_pat = DOT_SLASH_UNDERSCORE_PAT;
+    private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
+    private static final Pattern IS_NUMERIC_PAT = Pattern.compile("\\d*(?:[.]\\d+)?");
+
+    /**
+     *  Switch to permissive mode:
+     *  Keep the dots in keys retrieved from the server(s) intact.
+     *
+     *  [Having this configuration is pushing the definition of a static helper a bit, we know.
+     *  This is all for the sake of simplicity, and not changing too many things.]
+     */
+    public static void allowDottedKeys() {
+        underscore_pat = SLASH_UNDERSCORE_PAT;
+    }
+    /**
+     *  Switch to strict mode:
+     *  Squash the dots in keys retrieved from the server(s) and convert them to '_'.
+     */
+    public static void disallowDottedKeys() {
+        underscore_pat = DOT_SLASH_UNDERSCORE_PAT;
+    }
+
+    /**
 	 * Merges two lists of servers (and their queries). Based on the equality of
 	 * both sets of objects. Public for testing purposes.
 	 */
@@ -535,24 +560,12 @@ public class JmxUtils {
 	 *            the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
 	 */
-	public static boolean isNumeric(String str) {
-		if (StringUtils.isEmpty(str)) {
-			return str != null; // Null = false, empty = true
-		}
-		int decimals = 0;
-		int sz = str.length();
-		char cat;
-		for (int i = 0; i < sz; i++) {
-			cat = str.charAt(i);
-			if (cat == '.' && ++decimals == 1) {
-				continue;
-			} else if (Character.isDigit(cat) == false) {
-				return false;
-			}
-		}
-		// a single period is not a number
-		return decimals < str.length();
-	}
+    public static boolean isNumeric(String str) {
+        if (StringUtils.isEmpty(str)) {
+            return str != null; // Null = false, empty = true
+        }
+        return IS_NUMERIC_PAT.matcher(str).matches();
+    }
 
 	/**
 	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
@@ -708,24 +721,21 @@ public class JmxUtils {
 		return sb.toString();
 	}
 
-	/**
-	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
-	 *
-	 * @param name
-	 *            the name
-	 * @return the string
-	 */
-	public static String cleanupStr(String name) {
-		if (name == null) {
-			return null;
-		}
-		String clean = name.replace(".", "_");
-		clean = clean.replace(" ", "");
-		clean = clean.replace("\"", "");
-		clean = clean.replace("'", "");
-		clean = clean.replace("/", "_");
-		return clean;
-	}
+    /**
+     * Replaces all . and / with _ and removes all spaces and double/single quotes.
+     *
+     * @param name
+     *            the name
+     * @return the string
+     */
+    public static String cleanupStr(String name) {
+        if (name == null) {
+            return null;
+        }
+        String clean = underscore_pat.matcher(name).replaceAll("_");
+        clean = SPACE_PAT.matcher(clean).replaceAll("");
+        return clean;
+    }
 
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
