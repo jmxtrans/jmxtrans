@@ -22,7 +22,7 @@ import com.googlecode.jmxtrans.util.PropertyResolver;
  * @author jon
  */
 @JsonSerialize(include = Inclusion.NON_NULL)
-@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "resultAlias", "keys", "outputWriters" })
+@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "outputWriters" })
 public class Query {
 
 	private Server server;
@@ -31,6 +31,7 @@ public class Query {
 	private List<String> attr;
 	private String resultAlias;
 	private List<String> keys;
+	private boolean allowDottedKeys;
 	private List<OutputWriter> outputWriters;
 	private List<Result> results;
 	private Set<String> typeNames;
@@ -130,6 +131,14 @@ public class Query {
 			this.keys = new ArrayList<String>();
 		}
 		this.keys.add(key);
+	}
+
+	public boolean isAllowDottedKeys() {
+		return allowDottedKeys;
+	}
+
+	public void setAllowDottedKeys(boolean allowDottedKeys) {
+		this.allowDottedKeys = allowDottedKeys;
 	}
 
 	public void setResults(List<Result> results) {

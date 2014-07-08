@@ -27,10 +27,39 @@ public class JmxUtilsTests {
 		assertTrue(JmxUtils.isNumeric("12.3"));
 		assertFalse(JmxUtils.isNumeric("12.3.3.3"));
 		assertTrue(JmxUtils.isNumeric(".2"));
-		assertFalse(JmxUtils.isNumeric("."));
+        assertFalse(JmxUtils.isNumeric("."));
+        assertFalse(JmxUtils.isNumeric("3."));
 	}
 
-	@Test
+    @Test
+    public void testCleanupStr() {
+        assertEquals("addfber1241qdw!èé$", JmxUtils.cleanupStr("addfber1241qdw!èé$"));
+        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd.abcd"));
+        assertEquals("abcd_abcd_", JmxUtils.cleanupStr("abcd.abcd."));
+        assertEquals("_abcd_abcd", JmxUtils.cleanupStr(".abcd_abcd"));
+        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd/abcd"));
+        assertEquals("abcd_abcd_", JmxUtils.cleanupStr("abcd/abcd/"));
+        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd_abcd"));
+        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd'_abcd'"));
+        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd\"_abcd\""));
+        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/ab cd_abcd"));
+    }
+
+    @Test
+    public void testCleanupStrDottedKeysKept() {
+		assertEquals("addfber1241qdw!èé$", JmxUtils.cleanupStr("addfber1241qdw!èé$", true));
+		assertEquals("abcd.abcd", JmxUtils.cleanupStr("abcd.abcd", true));
+		assertEquals("abcd.abcd.", JmxUtils.cleanupStr("abcd.abcd.", true));
+		assertEquals(".abcd_abcd", JmxUtils.cleanupStr(".abcd_abcd", true));
+		assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd/abcd", true));
+		assertEquals("abcd_abcd_", JmxUtils.cleanupStr("abcd/abcd/", true));
+		assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd_abcd", true));
+		assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd'_abcd'", true));
+		assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd\"_abcd\"", true));
+		assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/ab cd_abcd", true));
+    }
+
+    @Test
 	public void testGetTypeNameValueMap () {
 		assertEquals(java.util.Collections.EMPTY_MAP, JmxUtils.getTypeNameValueMap(null));
 		assertEquals(java.util.Collections.EMPTY_MAP, JmxUtils.getTypeNameValueMap(""));

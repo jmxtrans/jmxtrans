@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -60,6 +61,12 @@ import com.googlecode.jmxtrans.model.Server;
 public class JmxUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
+
+    private static final Pattern DOT_SLASH_UNDERSCORE_PAT = Pattern.compile("[./]");
+    private static final Pattern SLASH_UNDERSCORE_PAT = Pattern.compile("/", Pattern.LITERAL);
+    private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
+    private static final Pattern IS_NUMERIC_PAT = Pattern.compile("\\d*(?:[.]\\d+)?");
+
 
 	/**
 	 * Merges two lists of servers (and their queries). Based on the equality of
@@ -539,19 +546,7 @@ public class JmxUtils {
 		if (StringUtils.isEmpty(str)) {
 			return str != null; // Null = false, empty = true
 		}
-		int decimals = 0;
-		int sz = str.length();
-		char cat;
-		for (int i = 0; i < sz; i++) {
-			cat = str.charAt(i);
-			if (cat == '.' && ++decimals == 1) {
-				continue;
-			} else if (Character.isDigit(cat) == false) {
-				return false;
-			}
-		}
-		// a single period is not a number
-		return decimals < str.length();
+		return IS_NUMERIC_PAT.matcher(str).matches();
 	}
 
 	/**
@@ -637,75 +632,82 @@ public class JmxUtils {
 	 * @return the key string
 	 */
 	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
-		String keyStr = null;
-		if (values.getKey().startsWith(result.getAttributeName())) {
-			keyStr = values.getKey();
-		} else {
-			keyStr = result.getAttributeName() + "." + values.getKey();
-		}
+		StringBuilder sb = new StringBuilder();
+		addRootPrefix(rootPrefix, sb);
+		addAlias(query, sb);
+		sb.append(".");
+		// Allow people to use something other than the classname as the output.
+		addClassName(result, sb);
+		sb.append(".");
+		addTypeName(query, result, typeNames, sb);
+		addKeyString(result, values, sb);
+		return sb.toString();
+	}
 
-		String alias = null;
+	/**
+	 * Gets the key string, special edition for GangliaWriter
+	 *
+	 * @param query
+	 *			the query
+	 * @param result
+	 *			the result
+	 * @param values
+	 *			the values
+	 * @param typeNames
+	 *			the type names
+	 * @return the key string
+	 */
+	public static String getKeyStringGanglia(Query query, Result result, Entry<String, Object> values, List<String> typeNames) {
+		StringBuilder sb = new StringBuilder();
+		addClassName(result, sb);
+		sb.append(".");
+		addTypeName(query, result, typeNames, sb);
+		addKeyString(result, values, sb);
+		return sb.toString();
+	}
+
+	private static void addRootPrefix(String rootPrefix, StringBuilder sb) {
+		if (rootPrefix != null) {
+			sb.append(rootPrefix);
+			sb.append(".");
+		}
+	}
+
+	private static void addAlias(Query query, StringBuilder sb) {
+		String alias;
 		if (query.getServer().getAlias() != null) {
 			alias = query.getServer().getAlias();
 		} else {
 			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
 			alias = cleanupStr(alias);
 		}
-
-		StringBuilder sb = new StringBuilder();
-		if (rootPrefix != null) {
-			sb.append(rootPrefix);
-			sb.append(".");
-		}
 		sb.append(alias);
-		sb.append(".");
+	}
 
+	private static void addClassName(Result result, StringBuilder sb) {
 		// Allow people to use something other than the classname as the output.
 		if (result.getClassNameAlias() != null) {
 			sb.append(result.getClassNameAlias());
 		} else {
 			sb.append(cleanupStr(result.getClassName()));
 		}
-
-		sb.append(".");
-
-		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
-		if (typeName != null && typeName.length() > 0) {
-			sb.append(typeName);
-			sb.append(".");
-		}
-		sb.append(cleanupStr(keyStr));
-
-		return sb.toString();
 	}
 
-	public static String getKeyString2(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
-		String keyStr = null;
+	private static void addTypeName(Query query, Result result, List<String> typeNames, StringBuilder sb) {
+		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()), query.isAllowDottedKeys());
+		if (typeName != null && typeName.length() > 0) {
+			sb.append(typeName);sb.append(".");
+		}
+	}
+
+	private static void addKeyString(Result result, Entry<String, Object> values, StringBuilder sb) {
+		String keyStr;
 		if (values.getKey().startsWith(result.getAttributeName())) {
 			keyStr = values.getKey();
 		} else {
 			keyStr = result.getAttributeName() + "." + values.getKey();
 		}
-
-		StringBuilder sb = new StringBuilder();
-
-		// Allow people to use something other than the classname as the output.
-		if (result.getClassNameAlias() != null) {
-			sb.append(result.getClassNameAlias());
-		} else {
-			sb.append(cleanupStr(result.getClassName()));
-		}
-
-		sb.append(".");
-
-		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()));
-		if (typeName != null && typeName.length() > 0) {
-			sb.append(typeName);
-			sb.append(".");
-		}
 		sb.append(cleanupStr(keyStr));
-
-		return sb.toString();
 	}
 
 	/**
@@ -716,14 +718,30 @@ public class JmxUtils {
 	 * @return the string
 	 */
 	public static String cleanupStr(String name) {
+		return cleanupStr(name, false);
+	}
+
+	/**
+	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
+	 *
+	 * @param name
+	 *			the name
+	 * @param allowDottedKeys
+	 *			whether we remove the dots or not.
+	 * @return
+	 */
+	public static String cleanupStr(String name, boolean allowDottedKeys) {
 		if (name == null) {
 			return null;
 		}
-		String clean = name.replace(".", "_");
-		clean = clean.replace(" ", "");
-		clean = clean.replace("\"", "");
-		clean = clean.replace("'", "");
-		clean = clean.replace("/", "_");
+		Pattern pattern;
+		if (!allowDottedKeys) {
+			pattern = DOT_SLASH_UNDERSCORE_PAT;
+		} else {
+			pattern = SLASH_UNDERSCORE_PAT;
+		}
+		String clean = pattern.matcher(name).replaceAll("_");
+		clean = SPACE_PAT.matcher(clean).replaceAll("");
 		return clean;
 	}
 
