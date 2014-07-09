@@ -525,7 +525,7 @@ public class JmxTransformer implements WatchedCallback {
 				result = false;
 			}
 		}
-		if ((result == true) && (this.getJsonDirOrFile() == null)) {
+		if ((result) && (this.getJsonDirOrFile() == null)) {
 			throw new OptionsException("Please specify either the -f or -j option.");
 		}
 		return result;
@@ -673,7 +673,7 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	protected class ShutdownHook extends Thread {
+    protected class ShutdownHook extends Thread {
 		public void run() {
 			try {
 				JmxTransformer.this.stopServices();
