@@ -65,6 +65,11 @@ if [ "$CHECK_JAVA" == "true" ]; then
     fi
 fi
 
+if [ ! -f $JAR_FILE ]; then
+  echo "File not found - $JAR_FILE"
+  exit 1
+fi
+
 start() {
     if [ ! -z "$PIDFILE" ]; then
         if [ -r "$PIDFILE" ]; then
