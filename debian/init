@@ -18,8 +18,9 @@ PIDFILE="/var/run/@PACKAGE@.pid"
 # Run @PACKAGE@ as this user ID and group ID
 JMXTRANS_USER=@PACKAGE@
 JMXTRANS_GROUP=@PACKAGE@
+PACKAGE_DIR=/usr/share/@PACKAGE@
 
-RUNCMD="/usr/share/@PACKAGE@/jmxtrans.sh"
+RUNCMD="./jmxtrans.sh"
 
 # overwrite settings from default file
 if [ -f /etc/default/@PACKAGE@ ]; then
@@ -34,16 +35,18 @@ do_start() {
     /usr/bin/touch "$PIDFILE" && /bin/chown "$JMXTRANS_USER":"$JMXTRANS_USER" "$PIDFILE"
     start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
         --chuid $JMXTRANS_USER:$JMXTRANS_GROUP -u $JMXTRANS_USER -g $JMXTRANS_GROUP -v \
-        -d /usr/share/@PACKAGE@ --exec $RUNCMD -- start
+        -d $PACKAGE_DIR --exec $RUNCMD -- start
     RETVAL=$?
 }
 
 do_stop() {
+    cd $PACKAGE_DIR
     su -m jmxtrans -c "$RUNCMD stop"
     RETVAL=$?
 }
 
 do_status() {
+    cd $PACKAGE_DIR
     su -m jmxtrans -c "$RUNCMD status"
     RETVAL=$?
 }
