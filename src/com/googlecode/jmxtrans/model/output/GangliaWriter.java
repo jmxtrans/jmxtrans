@@ -139,7 +139,7 @@ public class GangliaWriter extends BaseOutputWriter {
         for (final Result result : query.getResults()) {
             if (result.getValues() != null) {
                 for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {
-                    final String name = JmxUtils.getKeyStringGanglia(query, result, resultValue, getTypeNames());
+                    final String name = JmxUtils.getKeyString(query, result, resultValue, getTypeNames());
                     final String value = resultValue.getValue().toString();
                     GMetricType dataType = getType(resultValue.getValue());
                     log.debug("Sending Ganglia metric {}={} [type={}]", new Object[]{name, value, dataType});

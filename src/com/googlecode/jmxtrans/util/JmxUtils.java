@@ -645,7 +645,7 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Gets the key string, special edition for GangliaWriter
+	 * Gets the key string, without rootPrefix nor Alias
 	 *
 	 * @param query
 	 *			the query
@@ -657,12 +657,34 @@ public class JmxUtils {
 	 *			the type names
 	 * @return the key string
 	 */
-	public static String getKeyStringGanglia(Query query, Result result, Entry<String, Object> values, List<String> typeNames) {
+	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
 		addClassName(result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Gets the key string, with dot allowed
+	 *
+	 * @param query
+	 *			the query
+	 * @param result
+	 *			the result
+	 * @param values
+	 *			the values
+	 * @param typeNames
+	 *			the type names
+	 * @return the key string
+	 */
+	public static String getKeyStringWithDottedKeys(Query query, Result result, Entry<String, Object> values, List<String> typeNames) {
+		StringBuilder sb = new StringBuilder();
+		addClassName(result, sb);
+		sb.append(".");
+		addTypeName(query, result, typeNames, sb);
+		addKeyStringDotted(result, values, query.isAllowDottedKeys(), sb);
 		return sb.toString();
 	}
 
@@ -701,13 +723,23 @@ public class JmxUtils {
 	}
 
 	private static void addKeyString(Result result, Entry<String, Object> values, StringBuilder sb) {
+		String keyStr = computeKey(result, values);
+		sb.append(cleanupStr(keyStr));
+	}
+
+	private static void addKeyStringDotted(Result result, Entry<String, Object> values, boolean isAllowDottedKeys, StringBuilder sb) {
+		String keyStr = computeKey(result, values);
+		sb.append(cleanupStr(keyStr, isAllowDottedKeys));
+	}
+
+	private static String computeKey(Result result, Entry<String, Object> values) {
 		String keyStr;
 		if (values.getKey().startsWith(result.getAttributeName())) {
 			keyStr = values.getKey();
 		} else {
 			keyStr = result.getAttributeName() + "." + values.getKey();
 		}
-		sb.append(cleanupStr(keyStr));
+		return keyStr;
 	}
 
 	/**
