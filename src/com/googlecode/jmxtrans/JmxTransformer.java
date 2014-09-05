@@ -227,6 +227,19 @@ public class JmxTransformer implements WatchedCallback {
 			this.poolMap = null;
 
 			// Shutdown the outputwriters
+			this.stopWriterAndClearMasterServerList();
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new LifecycleException(e);
+		}
+	}
+
+	/**
+	 * Shut down the output writers and clear the master server list
+	 * Used both during shutdown and when re-reading config files
+	 */
+	private void stopWriterAndClearMasterServerList() throws Exception {
 			for (Server server : this.masterServersList) {
 				for (Query query : server.getQueries()) {
 					for (OutputWriter writer : query.getOutputWriters()) {
@@ -240,11 +253,6 @@ public class JmxTransformer implements WatchedCallback {
 				}
 			}
 			this.masterServersList.clear();
-
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw new LifecycleException(e);
-		}
 	}
 
 	/**
@@ -348,6 +356,14 @@ public class JmxTransformer implements WatchedCallback {
 	 * Processes all the json files and manages the dedup process
 	 */
 	private void processFilesIntoServers(List<File> jsonFiles) throws LifecycleException {
+		// Shutdown the outputwriters and clear the current server list - this gives us a clean
+		// start when re-reading the json config files
+		try {
+			this.stopWriterAndClearMasterServerList();
+		} catch (Exception e) {
+			log.error("Error while clearing master server list: " + e.getMessage(), e);
+			throw new LifecycleException(e);
+		}
 
 		for (File jsonFile : jsonFiles) {
 			JmxProcess process;
@@ -632,6 +648,7 @@ public class JmxTransformer implements WatchedCallback {
 		if (this.getJsonDirOrFile().isFile()) {
 			return file.equals(this.getJsonDirOrFile());
 		}
+
 		return file.isFile() && file.getName().endsWith(".json");
 	}
 
@@ -640,9 +657,7 @@ public class JmxTransformer implements WatchedCallback {
 	public void fileModified(File file) throws Exception {
 		if (this.isJsonFile(file)) {
 			Thread.sleep(1000);
-			if (log.isDebugEnabled()) {
-				log.debug("File modified: " + file);
-			}
+			log.info("Configuration file modified: " + file);
 			this.deleteAllJobs(this.serverScheduler);
 			this.startupSystem();
 		}
@@ -651,14 +666,10 @@ public class JmxTransformer implements WatchedCallback {
 	/** */
 	@Override
 	public void fileDeleted(File file) throws Exception {
-		if (this.isJsonFile(file)) {
-			Thread.sleep(1000);
-			if (log.isDebugEnabled()) {
-				log.debug("File deleted: " + file);
-			}
-			this.deleteAllJobs(this.serverScheduler);
-			this.startupSystem();
-		}
+		log.info("Configuration file deleted: " + file);
+		Thread.sleep(1000);
+		this.deleteAllJobs(this.serverScheduler);
+		this.startupSystem();
 	}
 
 	/** */
@@ -666,9 +677,8 @@ public class JmxTransformer implements WatchedCallback {
 	public void fileAdded(File file) throws Exception {
 		if (this.isJsonFile(file)) {
 			Thread.sleep(1000);
-			if (log.isDebugEnabled()) {
-				log.debug("File added: " + file);
-			}
+			log.info("Configuration file added: " + file);
+			this.deleteAllJobs(this.serverScheduler);
 			this.startupSystem();
 		}
 	}
