@@ -1,11 +1,11 @@
 package com.googlecode.jmxtrans.util;
 
-import java.net.DatagramSocket;
-import java.net.SocketAddress;
-
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.DatagramSocket;
+import java.net.SocketAddress;
 
 /**
  * Allows us to pool socket connections.
@@ -24,7 +24,9 @@ public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory {
 	 */
 	@Override
 	public Object makeObject(Object key) throws Exception {
-		return new DatagramSocket((SocketAddress)key);
+		DatagramSocket socket =  new DatagramSocket((SocketAddress)key);
+        socket.connect((SocketAddress)key);
+        return socket;
 	}
 
 	/**
