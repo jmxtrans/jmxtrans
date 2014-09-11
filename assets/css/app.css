@@ -1,0 +1,55 @@
+/* nav */
+.navbar {
+	font-weight: 800;
+	font-size: 14px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+.navbar-inverse .navbar-nav>li>a{
+	border-bottom:4px solid #222;
+}
+.navbar-inverse .navbar-nav>li>a:hover{
+	border-bottom:4px solid #ff6600;
+}
+.navbar-inverse .navbar-brand {
+	color: #fff;
+	font-weight: bolder;
+	font-size: 22px;
+	letter-spacing: 1px;
+}
+
+.navbar-inverse .navbar-brand i {
+	color: #ff7878;
+	font-size: 22px;
+	letter-spacing: 1px;
+}
+.jmx-name{color: #ff6600;}
+
+/* row colors */
+.g{background-color: #f2f2f2; margin-top:-30px;}
+
+/* wrapper */
+
+.wrapper{ min-height: 400px; background-image: url(../img/gplaypattern.png) ;}
+.jumbotron h1{margin-top: 120px; font-size: 40px;}
+#jmx-wrapper-image{ max-height: 200px; margin-top: 120px; margin-left: auto; margin-right: auto;}
+
+/* buttons */
+.btn-group-vertical{min-width: 200px; }
+.btn-default a{text-decoration: none; color: #222;}
+.btn-default{background-color: #e6e6e6}
+.btn-default:hover{background-color: #ff6600; border-color: #ff4411;color: #eee;}
+
+/* alert */
+.alert{ color: #ff6600; font-size: 20px; margin-top: -30px; min-height: 80px; }
+.alert-success{ background-color: #333;}
+.alert p {margin-top: 10px;}
+
+/* glyphicon */
+.ico{margin-top: 40px; min-height: 60px;}
+.g .glyphicon {font-size: 40px;}
+
+footer{background-color: #333; color: #eee;}
+footer p{margin-top: 20px;}
+footer a{text-decoration: none; color: #eee; border-bottom: 1px solid #ff6600}
+footer a:hover{ text-decoration: none; color: #ff6600; border-bottom: none;}
