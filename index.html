@@ -1,88 +1,143 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset='utf-8'>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JMXTRANS | communicate with thousands of machienes via a singel jmx instance</title>
 
-  <title>lookfirst/jmxtrans @ GitHub</title>
+    <!-- Bootstrap -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/app.css" rel="stylesheet">
+    <!-- Fontello icon -->
+    <link href="assets/vendor/fontello/css/settings.css" rel="stylesheet">
+    <!-- favicon -->
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <header>
+     <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"><span class="jmx-name">JMX</span>TRANS</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="https://github.com/lookfirst/jmxtrans/zipball/master">Downlaod</a></li>
+            <li><a href="https://github.com/jmxtrans/jmxtrans/wiki">Docs</a></li>
+            <li><a class="glyphicon glyphicon-envelope" href="mailto:latchkey@gmail.com "></a></li>
+            <li><a data-toggle="modal" data-target="#myModal" href="#myModal"><i class="fa fa-envelope-o"></i></a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+      </div>
+    </header>
 
-  <style type="text/css">
-    body {
-      margin-top: 1.0em;
-      background-color: #39949f;
-      font-family: Helvetica, Arial, FreeSans, san-serif;
-      color: #ffffff;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-    h1 { font-size: 3.8em; color: #c66b60; margin-bottom: 3px; }
-    h1 .small { font-size: 0.4em; }
-    h1 a { text-decoration: none }
-    h2 { font-size: 1.5em; color: #c66b60; }
-    h3 { text-align: center; color: #c66b60; }
-    a { color: #c66b60; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-    pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-  </style>
-</head>
+    <div class="jumbotron wrapper ">
+      
+      <div class="container ">
+          <div class="row  text-center">
+            <div class="col-md-6">
+              <h1>The missing connector between speaking to a JVM via JMX</h1>
+              <div class="btn-group">
+               
 
-<body>
-  <a href="https://github.com/lookfirst/jmxtrans"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+                <a> <button type="button" class="btn btn-default">View on GitHub<span class=" icon-github-squared"></span></button></a>
 
-  <div id="container">
+                <a href="https://github.com/lookfirst/jmxtrans/zipball/master"><button type="button" class="btn btn-default">Download .zip <span class="icon-download"></span></button></a>
+                
 
-    <div class="download">
-      <a href="https://github.com/lookfirst/jmxtrans/zipball/master">
-        <img border="0" width="90" src="https://github.com/images/modules/download/zip.png"></a>
-      <a href="https://github.com/lookfirst/jmxtrans/tarball/master">
-        <img border="0" width="90" src="https://github.com/images/modules/download/tar.png"></a>
+                <a><button type="button" class="btn btn-default">Download .tar <span class="icon-download"></span></button></a>
+            </div>
+            </div>
+
+            <div class="col-md-6">
+              <img class="img-responsive" id="jmx-wrapper-image" src="assets/img/jmx-visual.png">
+            </div>
+          </div>
+      </div>
+      </div>
+      <div class="alert alert-success text-center"  role="alert">
+        <p>Clone the project with Git: <code>$ git clone git://github.com/lookfirst/jmxtrans</code></p>
+      </div>
+    <div class="g">
+      <div class="container ">
+          <div class="row  text-center">
+            <div class="col-md-4">
+              <p class="ico"><i class="glyphicon glyphicon-resize-small"></i></p>
+              <h2>Connected</h2>
+              <p>Connect to any number of Java Virtual Machines (JVM's) and query them for their attributes without writing a single line of Java code.</p>
+
+            </div>
+
+            <div class="col-md-4">
+              <p class="ico center-block"><i class="glyphicon glyphicon-random"></i></p>
+              <h2>Multithreaded</h2>
+              <p>The JmxTransformer engine is fully multithreaded right out of the box. By default, up to 10 servers are queried at the same time.</p>
+            </div>
+
+            <div class="col-md-4">
+              <p class="ico"><i class="glyphicon glyphicon-tasks"></i></p>
+              <h2>Multiple Modes</h2>
+              <p>There are two primary modes for using jmxtrans. The first is to use the JmxTransformer engine included with the distribution or use the API mode.</p>
+            </div>
+
+
+               <div class="col-md-4">
+              <p class="ico"><i class="glyphicon glyphicon-book"></i></p>
+              <h2>Logging</h2>
+              <p>Create cron-like schedules by allowing the jmxtrans engine to read and process .json files</p>
+
+            </div>
+
+            <div class="col-md-4">
+              <p class="ico center-block"><i class="glyphicon glyphicon-eye-open"></i></p>
+              <h2>Monitoring</h2>
+              <p>Use JSON to help quickly monitor metrics in Sun/Oracle Hotspot heap, memory-pools, and threads or Apache Tomcat 6, 7, and JBoss App servers AJP/HTTP Pools and Data Sources</p>
+            </div>
+
+            <div class="col-md-4">
+              <p class="ico"><i class="glyphicon glyphicon-th"></i></p>
+              <h2>Graphing</h2>
+              <p>Among other Writers, you can configure jmxtrans to use the GraphiteWriter to generate visual data in the forma of a graph quickly.</p>
+            </div>
+
+
+
+          </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12"><img class="img-responsive center-block" src="assets/img/jmxtrans-logo.gif"></div>
+      </div>
     </div>
 
-    <h1><a href="https://github.com/lookfirst/jmxtrans">jmxtrans</a>
-      <span class="small">by <a href="https://github.com/lookfirst">lookfirst</a></span></h1>
+          <footer>
+            <div class="container">
+              <div class="row text-center">
+                <div class="col-md-12">
+                  
+                    <p>&copy; 2010-2014 <span class="jmx-name">JMX</span>TRANS by <a href="https://github.com/lookfirst">lookfirst</a>; The project is MIT Licenced</p>
+                  
+                </div>
+              </div>
+            </div>
+          </footer>
 
-    <div class="description">
-      jmxtrans
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-      <h2>Authors</h2>
-      <p>hgomez (henri.gomez@gmail.com)<br/>lookfirst (latchkey@gmail.com)<br/>      </p>
-    
-
-    
-      <h2>Contact</h2>
-      <p>Jon Stevens (latchkey@gmail.com)<br/>      </p>
-    
-
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="https://github.com/lookfirst/jmxtrans/zipball/master">zip</a> or
-      <a href="https://github.com/lookfirst/jmxtrans/tarball/master">tar formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/lookfirst/jmxtrans</pre>
-    </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="https://github.com/lookfirst/jmxtrans">lookfirst/jmxtrans</a>
-    </div>
-
-  </div>
-
-</body>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="assets/js/jquery-1.11.1.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="assets/js/bootstrap.min.js"></script>
+  </body>
 </html>
