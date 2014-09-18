@@ -188,21 +188,24 @@ public class JmxUtils {
 			MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
 			ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
 
+			List<String> attributes;
 			List<String> queryAttributes = query.getAttr();
 			if ((queryAttributes == null) || (queryAttributes.size() == 0)) {
-				MBeanAttributeInfo[] attrs = info.getAttributes();
-				for (MBeanAttributeInfo attrInfo : attrs) {
-					query.addAttr(attrInfo.getName());
+				attributes = new ArrayList<String>();
+				for (MBeanAttributeInfo attrInfo : info.getAttributes()) {
+					attributes.add(attrInfo.getName());
 				}
+			} else {
+				attributes = queryAttributes;
 			}
 
 			try {
-				if ((query.getAttr() != null) && (query.getAttr().size() > 0)) {
+				if (attributes.size() > 0) {
 					if (log.isDebugEnabled()) {
 						log.debug("Executing queryName: " + queryName.getCanonicalName() + " from query: " + query);
 					}
 
-					AttributeList al = mbeanServer.getAttributes(queryName, query.getAttr().toArray(new String[query.getAttr().size()]));
+					AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
 					for (Attribute attribute : al.asList()) {
 						getResult(resList, info, oi, attribute, query);
 					}
