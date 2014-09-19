@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 public class WatchDir extends Thread {
 	private static final Logger log = LoggerFactory.getLogger(WatchDir.class);
 
-	private WatchService watchService = null;
-	private WatchedCallback watched = null;
+	private final WatchService watchService;
+	private final WatchedCallback watched;
 	private final Map<WatchKey,Path> keys;
 
 	/**
@@ -92,10 +92,8 @@ public class WatchDir extends Thread {
 	}
 
 	/** */
-	public void stopService() throws Exception {
-		if (watchService != null) {
-			watchService.close();
-		}
+	public void stopService() throws IOException {
+		watchService.close();
 	}
 
 }
