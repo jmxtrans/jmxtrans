@@ -14,6 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+
 public class WatchDirTest {
 
     @Rule
@@ -35,7 +38,7 @@ public class WatchDirTest {
     public void createdFileIsDetected() throws Exception {
         File toCreate = watchedDir.newFile("created");
         Thread.sleep(1);
-        Mockito.verify(callback).fileAdded(toCreate);
+        verify(callback).fileAdded(toCreate);
     }
 
     @Test
@@ -43,26 +46,45 @@ public class WatchDirTest {
         File toDelete = watchedDir.newFile("toDelete");
         toDelete.delete();
         Thread.sleep(1);
-        Mockito.verify(callback).fileAdded(toDelete);
-        Mockito.verify(callback).fileDeleted(toDelete);
+        verify(callback).fileAdded(toDelete);
+        verify(callback).fileDeleted(toDelete);
     }
 
     @Test
     public void modifiedFileIsDetected() throws Exception {
         File toModify = watchedDir.newFile("toModify");
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(toModify);
-            out.write(1);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
+		modifyFile(toModify);
         Thread.sleep(1);
-        Mockito.verify(callback).fileAdded(toModify);
-        Mockito.verify(callback, Mockito.atLeastOnce()).fileModified(toModify);
+        verify(callback).fileAdded(toModify);
+        verify(callback, atLeastOnce()).fileModified(toModify);
     }
+
+	@Test
+	public void watchingFileAlsoWorks() throws Exception {
+		File toModify = watchedDir.newFile("toModify");
+
+		WatchDir watchFile = new WatchDir(watchedDir.getRoot(), callback);
+		try {
+			watchFile.start();
+			modifyFile(toModify);
+			Thread.sleep(1);
+			verify(callback, atLeastOnce()).fileModified(toModify);
+		} finally {
+			watchFile.stopService();
+		}
+	}
+
+	private void modifyFile(File toModify) throws IOException {
+		OutputStream out = null;
+		try {
+			out = new FileOutputStream(toModify);
+			out.write(1);
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+		}
+	}
 
     @After
     public void destroyWatchedDir() throws IOException {
