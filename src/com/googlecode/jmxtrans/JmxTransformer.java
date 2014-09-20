@@ -1,44 +1,28 @@
 package com.googlecode.jmxtrans;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.googlecode.jmxtrans.cli.CliArgumentParser;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.pool.KeyedObjectPool;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.quartz.CronExpression;
-import org.quartz.CronTrigger;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerUtils;
-import org.quartz.impl.StdSchedulerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.jmx.ManagedJmxTransformerProcess;
 import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.ValidationException;
-import com.googlecode.jmxtrans.util.WatchDir;
-import com.googlecode.jmxtrans.util.WatchedCallback;
+import com.googlecode.jmxtrans.util.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.text.ParseException;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Main() class that takes an argument which is the directory to look in for
@@ -55,7 +39,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	private WatchDir watcher;
 
-    private JmxTransConfiguration configuration;
+	private JmxTransConfiguration configuration;
 
 	/**
 	 * Pools. TODO : Move to a PoolUtils or PoolRegistry so others can use it
@@ -65,7 +49,9 @@ public class JmxTransformer implements WatchedCallback {
 
 	private List<Server> masterServersList = new ArrayList<Server>();
 
-	/** The shutdown hook. */
+	/**
+	 * The shutdown hook.
+	 */
 	private Thread shutdownHook = new ShutdownHook();
 
 	private volatile boolean isRunning = false;
@@ -82,11 +68,11 @@ public class JmxTransformer implements WatchedCallback {
 	 * The real main method.
 	 */
 	private void doMain(String[] args) throws Exception {
-        this.configuration = new CliArgumentParser().parseOptions(args);
+		this.configuration = new CliArgumentParser().parseOptions(args);
 
-        if (configuration.isHelp()) {
-            return;
-        }
+		if (configuration.isHelp()) {
+			return;
+		}
 
 		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this, configuration);
 		JmxUtils.registerJMX(mbean);
@@ -112,8 +98,7 @@ public class JmxTransformer implements WatchedCallback {
 	/**
 	 * Start.
 	 *
-	 * @throws LifecycleException
-	 *             the lifecycle exception
+	 * @throws LifecycleException the lifecycle exception
 	 */
 	public synchronized void start() throws LifecycleException {
 		if (isRunning) {
@@ -143,8 +128,7 @@ public class JmxTransformer implements WatchedCallback {
 	/**
 	 * Stop.
 	 *
-	 * @throws LifecycleException
-	 *             the lifecycle exception
+	 * @throws LifecycleException the lifecycle exception
 	 */
 	public synchronized void stop() throws LifecycleException {
 		if (!isRunning) {
@@ -170,8 +154,7 @@ public class JmxTransformer implements WatchedCallback {
 	/**
 	 * Stop services.
 	 *
-	 * @throws LifecycleException
-	 *             the lifecycle exception
+	 * @throws LifecycleException the lifecycle exception
 	 */
 	private synchronized void stopServices() throws LifecycleException {
 		try {
@@ -225,19 +208,19 @@ public class JmxTransformer implements WatchedCallback {
 	 * Used both during shutdown and when re-reading config files
 	 */
 	private void stopWriterAndClearMasterServerList() throws Exception {
-			for (Server server : this.masterServersList) {
-				for (Query query : server.getQueries()) {
-					for (OutputWriter writer : query.getOutputWriters()) {
-						try {
-							writer.stop();
-							log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
-						} catch (LifecycleException ex) {
-							log.error("Error stopping writer: " + writer.getClass().getSimpleName() + " for query: " + query);
-						}
+		for (Server server : this.masterServersList) {
+			for (Query query : server.getQueries()) {
+				for (OutputWriter writer : query.getOutputWriters()) {
+					try {
+						writer.stop();
+						log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
+					} catch (LifecycleException ex) {
+						log.error("Error stopping writer: " + writer.getClass().getSimpleName() + " for query: " + query);
 					}
 				}
 			}
-			this.masterServersList.clear();
+		}
+		this.masterServersList.clear();
 	}
 
 	/**
@@ -372,7 +355,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	/**
 	 * Processes all the Servers into Job's
-	 *
+	 * <p/>
 	 * Needs to be called after processFiles()
 	 */
 	private void processServersIntoJobs(Scheduler scheduler) throws LifecycleException {
@@ -460,10 +443,10 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-    /**
+	/**
 	 * If getJsonFile() is a file, then that is all we load. Otherwise, look in
 	 * the jsonDir for files.
-	 *
+	 * <p/>
 	 * Files must end with .json as the suffix.
 	 */
 	private List<File> getJsonFiles() {
@@ -526,7 +509,7 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-    protected class ShutdownHook extends Thread {
+	protected class ShutdownHook extends Thread {
 		public void run() {
 			try {
 				JmxTransformer.this.stopServices();

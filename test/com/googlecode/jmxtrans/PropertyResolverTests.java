@@ -1,23 +1,22 @@
 package com.googlecode.jmxtrans;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
-
+import com.googlecode.jmxtrans.util.PropertyResolver;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.googlecode.jmxtrans.util.PropertyResolver;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 public class PropertyResolverTests {
 
-    @Before
-    public void setSomeProperties() {
-        System.setProperty("myhost", "w2");
-        System.setProperty("myport", "1099");
-    }
+	@Before
+	public void setSomeProperties() {
+		System.setProperty("myhost", "w2");
+		System.setProperty("myport", "1099");
+	}
 
 	@Test
 	public void testProps() {
@@ -32,11 +31,11 @@ public class PropertyResolverTests {
 		s1 = "${myhost} : ${myaltport:2099}";
 		s2 = PropertyResolver.resolveProps(s1);
 		Assert.assertEquals("w2 : 2099", s2);
-		
+
 		s1 = "${myhost}:2099";
 		s2 = PropertyResolver.resolveProps(s1);
 		Assert.assertEquals("w2:2099", s2);
-		
+
 	}
 
 	@Test
@@ -65,10 +64,10 @@ public class PropertyResolverTests {
 		Assert.assertEquals("count", list.get(2));
 	}
 
-    @After
-    public void removeSystemProperties() {
-        System.clearProperty("myhost");
-        System.clearProperty("myport");
-    }
+	@After
+	public void removeSystemProperties() {
+		System.clearProperty("myhost");
+		System.clearProperty("myport");
+	}
 
 }
