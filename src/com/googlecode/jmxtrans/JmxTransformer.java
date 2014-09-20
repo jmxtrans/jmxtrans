@@ -11,12 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import com.googlecode.jmxtrans.cli.CliArgumentParser;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
@@ -41,7 +36,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.OptionsException;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
@@ -57,22 +51,11 @@ public class JmxTransformer implements WatchedCallback {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxTransformer.class);
 
-	/** The Quartz server properties. */
-	private String quartPropertiesFile = null;
-
-	/** The seconds between server job runs. */
-	private int runPeriod = 60;
-
-	/** Json file or dir to watch. */
-	private File jsonDirOrFile;
-
-	private boolean runEndlessly = false;
-
-	private boolean continueOnJsonError = false;
-
 	private Scheduler serverScheduler;
 
 	private WatchDir watcher;
+
+    private JmxTransConfiguration configuration;
 
 	/**
 	 * Pools. TODO : Move to a PoolUtils or PoolRegistry so others can use it
@@ -99,11 +82,13 @@ public class JmxTransformer implements WatchedCallback {
 	 * The real main method.
 	 */
 	private void doMain(String[] args) throws Exception {
-		if (!this.parseOptions(args)) {
-			return;
-		}
+        this.configuration = new CliArgumentParser().parseOptions(args);
 
-		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this);
+        if (configuration.isHelp()) {
+            return;
+        }
+
+		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this, configuration);
 		JmxUtils.registerJMX(mbean);
 
 		// Start the process
@@ -134,7 +119,7 @@ public class JmxTransformer implements WatchedCallback {
 		if (isRunning) {
 			throw new LifecycleException("Process already started");
 		} else {
-			log.info("Starting Jmxtrans on : " + this.jsonDirOrFile.toString());
+			log.info("Starting Jmxtrans on : " + this.configuration.getJsonDirOrFile().toString());
 			try {
 				this.startupScheduler();
 
@@ -260,10 +245,10 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void startupWatchdir() throws Exception {
 		File dirToWatch = null;
-		if (this.getJsonDirOrFile().isFile()) {
-			dirToWatch = new File(FilenameUtils.getFullPath(this.getJsonDirOrFile().getAbsolutePath()));
+		if (this.configuration.getJsonDirOrFile().isFile()) {
+			dirToWatch = new File(FilenameUtils.getFullPath(this.configuration.getJsonDirOrFile().getAbsolutePath()));
 		} else {
-			dirToWatch = this.getJsonDirOrFile();
+			dirToWatch = this.configuration.getJsonDirOrFile();
 		}
 
 		// start the watcher
@@ -277,10 +262,10 @@ public class JmxTransformer implements WatchedCallback {
 	private void startupScheduler() throws Exception {
 		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
 		InputStream stream = null;
-		if (quartPropertiesFile == null) {
+		if (configuration.getQuartPropertiesFile() == null) {
 			stream = JmxTransformer.class.getResourceAsStream("/quartz.server.properties");
 		} else {
-			stream = new FileInputStream(quartPropertiesFile);
+			stream = new FileInputStream(configuration.getQuartPropertiesFile());
 		}
 		serverSchedFact.initialize(stream);
 		this.serverScheduler = serverSchedFact.getScheduler();
@@ -374,7 +359,7 @@ public class JmxTransformer implements WatchedCallback {
 				}
 				JmxUtils.mergeServerLists(this.masterServersList, process.getServers());
 			} catch (Exception ex) {
-				if (isContinueOnJsonError()) {
+				if (configuration.isContinueOnJsonError()) {
 					throw new LifecycleException("Error parsing json: " + jsonFile, ex);
 				} else {
 					// error parsing one file should not prevent the startup of JMXTrans
@@ -441,7 +426,7 @@ public class JmxTransformer implements WatchedCallback {
 			((CronTrigger) trigger).setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			((CronTrigger) trigger).setStartTime(new Date());
 		} else {
-			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
+			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(configuration.getRunPeriod());
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			minuteTrigger.setStartTime(new Date());
 
@@ -475,149 +460,7 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	/**
-	 * If this is true, then this class will execute the main() loop and then
-	 * wait 60 seconds until running again.
-	 */
-	public void setRunEndlessly(boolean runEndlessly) {
-		this.runEndlessly = runEndlessly;
-	}
-
-	public boolean isRunEndlessly() {
-		return this.runEndlessly;
-	}
-
-	/**
-	 * If it is false, then JmxTrans will stop when one of the JSON
-	 * configuration file is invalid. Otherwise, it will just print an error
-	 * and continue processing.
-	 */
-	private void setContinueOnJsonError(boolean continueOnJsonError) {
-		this.continueOnJsonError = continueOnJsonError;
-	}
-
-	private boolean isContinueOnJsonError() {
-		return continueOnJsonError;
-	}
-
-	/**
-	 * Parse the options given on the command line.
-	 */
-	private boolean parseOptions(String[] args) throws OptionsException, org.apache.commons.cli.ParseException {
-		CommandLineParser parser = new GnuParser();
-		CommandLine cl = parser.parse(this.getOptions(), args);
-		Option[] options = cl.getOptions();
-
-		boolean result = true;
-
-		for (Option option : options) {
-			if (option.getOpt().equals("c")) {
-				this.setContinueOnJsonError(Boolean.parseBoolean(option.getValue()));
-			} else if (option.getOpt().equals("j")) {
-				File tmp = new File(option.getValue());
-				if (!tmp.exists() && !tmp.isDirectory()) {
-					throw new OptionsException("Path to json directory is invalid: " + tmp);
-				}
-				this.setJsonDirOrFile(tmp);
-			} else if (option.getOpt().equals("f")) {
-				File tmp = new File(option.getValue());
-				if (!tmp.exists() && !tmp.isFile()) {
-					throw new OptionsException("Path to json file is invalid: " + tmp);
-				}
-				this.setJsonDirOrFile(tmp);
-			} else if (option.getOpt().equals("e")) {
-				this.setRunEndlessly(true);
-			} else if (option.getOpt().equals("q")) {
-				this.setQuartPropertiesFile(option.getValue());
-				File file = new File(option.getValue());
-				if (!file.exists()) {
-					throw new OptionsException("Could not find path to the quartz properties file: " + file.getAbsolutePath());
-				}
-			} else if (option.getOpt().equals("s")) {
-				this.setRunPeriod(Integer.valueOf(option.getValue()));
-			} else if (option.getOpt().equals("h")) {
-				HelpFormatter formatter = new HelpFormatter();
-				formatter.printHelp("java -jar jmxtrans-all.jar", this.getOptions());
-				result = false;
-			}
-		}
-		if ((result) && (this.getJsonDirOrFile() == null)) {
-			throw new OptionsException("Please specify either the -f or -j option.");
-		}
-		return result;
-	}
-
-	/** */
-	public Options getOptions() {
-		Options options = new Options();
-		options.addOption("c", true, "Continue processing even if one of the JSON configuration file is invalid.");
-		options.addOption("j", true, "Directory where json configuration is stored. Default is .");
-		options.addOption("f", true, "A single json file to execute.");
-		options.addOption("e", false, "Run endlessly. Default false.");
-		options.addOption("q", true, "Path to quartz configuration file.");
-		options.addOption("s", true, "Seconds between server job runs (not defined with cron). Default: 60");
-		options.addOption("h", false, "Help");
-		return options;
-	}
-
-	/**
-	 * Gets the quart properties file.
-	 *
-	 * @return the quart properties file
-	 */
-	public String getQuartPropertiesFile() {
-		return quartPropertiesFile;
-	}
-
-	/**
-	 * Sets the quart properties file.
-	 *
-	 * @param quartPropertiesFile
-	 *            the quart properties file
-	 */
-	public void setQuartPropertiesFile(String quartPropertiesFile) {
-		this.quartPropertiesFile = quartPropertiesFile;
-	}
-
-	/**
-	 * Gets the run period.
-	 *
-	 * @return the run period
-	 */
-	public int getRunPeriod() {
-		return runPeriod;
-	}
-
-	/**
-	 * Sets the run period.
-	 *
-	 * @param runPeriod
-	 *            the run period
-	 */
-	public void setRunPeriod(int runPeriod) {
-		this.runPeriod = runPeriod;
-	}
-
-	/**
-	 * Sets the json dir or file.
-	 *
-	 * @param jsonDirOrFile
-	 *            the json dir or file
-	 */
-	public void setJsonDirOrFile(File jsonDirOrFile) {
-		this.jsonDirOrFile = jsonDirOrFile;
-	}
-
-	/**
-	 * Gets the json dir or file.
-	 *
-	 * @return the json dir or file
-	 */
-	public File getJsonDirOrFile() {
-		return this.jsonDirOrFile;
-	}
-
-	/**
+    /**
 	 * If getJsonFile() is a file, then that is all we load. Otherwise, look in
 	 * the jsonDir for files.
 	 *
@@ -625,11 +468,11 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private List<File> getJsonFiles() {
 		File[] files = null;
-		if ((this.getJsonDirOrFile() != null) && this.getJsonDirOrFile().isFile()) {
+		if ((this.configuration.getJsonDirOrFile() != null) && this.configuration.getJsonDirOrFile().isFile()) {
 			files = new File[1];
-			files[0] = this.getJsonDirOrFile();
+			files[0] = this.configuration.getJsonDirOrFile();
 		} else {
-			files = this.getJsonDirOrFile().listFiles();
+			files = this.configuration.getJsonDirOrFile().listFiles();
 		}
 
 		List<File> result = new ArrayList<File>();
@@ -645,8 +488,8 @@ public class JmxTransformer implements WatchedCallback {
 	 * Are we a file and a json file?
 	 */
 	private boolean isJsonFile(File file) {
-		if (this.getJsonDirOrFile().isFile()) {
-			return file.equals(this.getJsonDirOrFile());
+		if (this.configuration.getJsonDirOrFile().isFile()) {
+			return file.equals(this.configuration.getJsonDirOrFile());
 		}
 
 		return file.isFile() && file.getName().endsWith(".json");

@@ -9,6 +9,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 public class JmxUtilsTest {
 
     @Test
@@ -21,9 +24,9 @@ public class JmxUtilsTest {
 
         JmxUtils.mergeServerLists(existingServers, newServers);
 
-        MatcherAssert.assertThat(existingServers.size(), Matchers.is(1));
+        assertThat(existingServers.size(), is(1));
         Server mergedServer = existingServers.get(0);
-        MatcherAssert.assertThat(mergedServer.getQueries().size(), Matchers.is(1));
+        assertThat(mergedServer.getQueries().size(), is(1));
     }
 
     @Test
@@ -36,9 +39,9 @@ public class JmxUtilsTest {
 
         JmxUtils.mergeServerLists(existingServers, newServers);
 
-        MatcherAssert.assertThat(existingServers.size(), Matchers.is(1));
+        assertThat(existingServers.size(), is(1));
         Server mergedServer = existingServers.get(0);
-        MatcherAssert.assertThat(mergedServer.getQueries().size(), Matchers.is(2));
+        assertThat(mergedServer.getQueries().size(), is(2));
     }
 
 

@@ -5,6 +5,7 @@ import java.io.File;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import com.googlecode.jmxtrans.JmxTransConfiguration;
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.util.LifecycleException;
 
@@ -21,14 +22,18 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	/** The proc. */
 	private JmxTransformer proc;
 
+    private final JmxTransConfiguration configuration;
+
 	/**
 	 * The Constructor.
 	 *
-	 * @param proc the proc
-	 */
-	public ManagedJmxTransformerProcess(JmxTransformer proc) {
+     * @param proc the proc
+     * @param configuration
+     */
+	public ManagedJmxTransformerProcess(JmxTransformer proc, JmxTransConfiguration configuration) {
 		this.proc = proc;
-	}
+        this.configuration = configuration;
+    }
 
 	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.jmx.ManagedJmxTransformerProcessMBean#start()
@@ -51,7 +56,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public String getQuartPropertiesFile() {
-		return proc.getQuartPropertiesFile();
+		return configuration.getQuartPropertiesFile();
 	}
 
 	/* (non-Javadoc)
@@ -59,7 +64,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setQuartPropertiesFile(String quartPropertiesFile) {
-		proc.setQuartPropertiesFile(quartPropertiesFile);
+		configuration.setQuartPropertiesFile(quartPropertiesFile);
 	}
 
 	/* (non-Javadoc)
@@ -67,7 +72,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public int getRunPeriod() {
-		return proc.getRunPeriod();
+		return configuration.getRunPeriod();
 	}
 
 	/* (non-Javadoc)
@@ -75,7 +80,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setRunPeriod(int runPeriod) {
-		proc.setRunPeriod(runPeriod);
+		configuration.setRunPeriod(runPeriod);
 	}
 
 	/* (non-Javadoc)
@@ -83,7 +88,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setJsonDirOrFile(File jsonDirOrFile) {
-		proc.setJsonDirOrFile(jsonDirOrFile);
+		configuration.setJsonDirOrFile(jsonDirOrFile);
 	}
 
 	/* (non-Javadoc)
@@ -91,7 +96,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public File getJsonDirOrFile() {
-		return proc.getJsonDirOrFile();
+		return configuration.getJsonDirOrFile();
 	}
 
 	/* (non-Javadoc)

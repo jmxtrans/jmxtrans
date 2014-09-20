@@ -540,11 +540,15 @@ public class JmxUtils {
 	 * StringUtils.isNumeric("12-3") = false
 	 * StringUtils.isNumeric("12.3") = true
 	 * </pre>
-	 *
+     *
+	 * @deprecated There is already a dependency in this project on Apache
+     * common-lang, so you should probably use {@see org.apache.commons.lang.math.NumberUtils}.
+     *
 	 * @param str
 	 *            the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
 	 */
+    @Deprecated
 	public static boolean isNumeric(String str) {
 		if (StringUtils.isEmpty(str)) {
 			return str != null; // Null = false, empty = true
