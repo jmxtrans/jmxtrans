@@ -4,6 +4,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
@@ -59,7 +60,7 @@ public class Log4JWriter extends BaseOutputWriter
 			{
 				for (final Entry<String, Object> values : resultValues.entrySet())
 				{
-					if (JmxUtils.isNumeric(values.getValue()))
+					if (NumberUtils.isNumeric(values.getValue()))
 					{
 						String alias = null;
 						if (query.getServer().getAlias() != null)

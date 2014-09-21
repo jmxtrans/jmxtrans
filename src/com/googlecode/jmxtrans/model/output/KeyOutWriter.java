@@ -1,24 +1,24 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 import org.apache.log4j.Appender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.spi.LoggerFactory;
+import org.slf4j.Logger;
 import org.slf4j.impl.Log4jLoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Writes out data in the same format as the GraphiteWriter, except to a file
@@ -85,7 +85,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					if (JmxUtils.isNumeric(values.getValue())) {
+					if (NumberUtils.isNumeric(values.getValue())) {
 						StringBuilder sb = new StringBuilder();
 
 						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, null));

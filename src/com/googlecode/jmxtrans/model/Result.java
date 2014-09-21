@@ -1,11 +1,11 @@
 package com.googlecode.jmxtrans.model;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Represents the result of a query.

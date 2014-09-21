@@ -5,20 +5,17 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.ValidationException;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.*;
 import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.io.IOException;
 
 /**
  * Originally written by Balazs Kossovics <bko@witbe.net>.  Common base class for OpenTSDBWriter and TCollectorWriter.
@@ -167,7 +164,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
         //
         // Skip any non-numeric values since OpenTSDB only supports numeric metrics.
         //
-        if ( JmxUtils.isNumeric(value) ) {
+        if ( NumberUtils.isNumeric(value) ) {
             StringBuilder resultString = new StringBuilder();
 
             formatResultString(resultString, metricName, (long)(result.getEpoch()/1000L), value);

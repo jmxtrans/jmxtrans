@@ -6,7 +6,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.JsonUtils;
 
 /**
  * This example shows how to query an ActiveMQ server for some information.
@@ -142,7 +142,7 @@ public class ActiveMQ {
 		server.addQuery(q9);
 
 		JmxProcess process = new JmxProcess(server);
-		JmxUtils.prettyPrintJson(process);
+		JsonUtils.prettyPrintJson(process, System.out);
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);
 

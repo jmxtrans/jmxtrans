@@ -336,7 +336,7 @@ public class JmxTransformer implements WatchedCallback {
 		for (File jsonFile : jsonFiles) {
 			JmxProcess process;
 			try {
-				process = JmxUtils.getJmxProcess(jsonFile);
+				process = JsonUtils.getJmxProcess(jsonFile);
 				if (log.isDebugEnabled()) {
 					log.debug("Loaded file: " + jsonFile.getAbsolutePath());
 				}

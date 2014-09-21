@@ -1,33 +1,23 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
+import java.io.*;
+import java.net.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * <a href="https://www.stackdriver.com//">Stackdriver</a> implementation of the
@@ -222,7 +212,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			Map<String, Object> values = metric.getValues();
 			if (values != null) {
 				for (Entry<String, Object> entry : values.entrySet()) {
-					if (JmxUtils.isNumeric(entry.getValue())) {
+					if (NumberUtils.isNumeric(entry.getValue())) {
 						// we have a numeric value, write a value into the message
 						
 						StringBuilder nameBuilder = new StringBuilder();
@@ -242,7 +232,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 						}
 						
 						// Wildcard "typeNames" substitution
-						String typeName = JmxUtils.cleanupStr(JmxUtils.getConcatedTypeNameValues(typeNames, metric.getTypeName()));
+						String typeName = com.googlecode.jmxtrans.util.StringUtils.cleanupStr(JmxUtils.getConcatedTypeNameValues(typeNames, metric.getTypeName()));
 						if (typeName != null && typeName.length() > 0) {
 							nameBuilder.append(".");
 							nameBuilder.append(typeName);

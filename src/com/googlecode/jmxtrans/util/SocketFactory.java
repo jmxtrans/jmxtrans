@@ -1,11 +1,11 @@
 package com.googlecode.jmxtrans.util;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 /**
  * Allows us to pool socket connections.

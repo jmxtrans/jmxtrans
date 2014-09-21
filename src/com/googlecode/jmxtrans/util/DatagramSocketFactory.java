@@ -1,11 +1,11 @@
 package com.googlecode.jmxtrans.util;
 
-import java.net.DatagramSocket;
-import java.net.SocketAddress;
-
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.DatagramSocket;
+import java.net.SocketAddress;
 
 /**
  * Allows us to pool socket connections.

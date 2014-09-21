@@ -1,5 +1,16 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.jmx.ManagedObject;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.*;
+import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -8,22 +19,6 @@ import java.nio.channels.DatagramChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.pool.KeyedObjectPool;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.jmx.ManagedObject;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.DatagramSocketFactory;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This output writer sends data to a host/port combination in the StatsD
@@ -132,7 +127,7 @@ public class StatsDWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					if (JmxUtils.isNumeric(values.getValue())) {
+					if (NumberUtils.isNumeric(values.getValue())) {
 						StringBuilder sb = new StringBuilder();
 
 						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));

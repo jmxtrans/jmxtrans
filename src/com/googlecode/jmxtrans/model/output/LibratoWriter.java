@@ -4,20 +4,8 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.Proxy;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.codehaus.jackson.Base64Variants;
@@ -25,6 +13,15 @@ import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.*;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This writer is a port of the LibratoWriter from the embedded-jmxtrans
@@ -125,7 +122,7 @@ public class LibratoWriter extends BaseOutputWriter {
             Map<String, Object> resultValues = result.getValues();
             if (resultValues != null) {
                 for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-                    if (JmxUtils.isNumeric(values.getValue())) {
+                    if (NumberUtils.isNumeric(values.getValue())) {
                         g.writeStartObject();
                         g.writeStringField("name", JmxUtils.getKeyStringWithDottedKeys(query, result, values, typeNames));
                         if (source != null && !source.isEmpty()) {

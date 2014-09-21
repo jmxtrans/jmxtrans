@@ -4,17 +4,19 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+import org.codehaus.jackson.JsonEncoding;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.slf4j.LoggerFactory;
 
 /**
  * <a href="http://sensuapp.org/docs/0.12/events">Sensu Event Data</a>
@@ -75,7 +77,7 @@ public class SensuWriter extends BaseOutputWriter {
             Map<String, Object> resultValues = result.getValues();
             if (resultValues != null) {
                 for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-                    if (JmxUtils.isNumeric(values.getValue())) {
+                    if (NumberUtils.isNumeric(values.getValue())) {
                         Object value = values.getValue();
                         jsonoutput = jsonoutput + JmxUtils.getKeyString(query, result, values, typeNames, null) + " " +  value + " " + TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS) + System.getProperty("line.separator");
                     }

@@ -1,9 +1,6 @@
 package com.googlecode.jmxtrans.model;
 
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.googlecode.jmxtrans.util.*;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -13,13 +10,10 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.jmxtrans.util.DatagramSocketFactory;
-import com.googlecode.jmxtrans.util.JmxConnectionFactory;
-import com.googlecode.jmxtrans.util.PropertyResolver;
-import com.googlecode.jmxtrans.util.SocketFactory;
-import com.googlecode.jmxtrans.util.ValidationException;
-
 import javax.management.MBeanServer;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the

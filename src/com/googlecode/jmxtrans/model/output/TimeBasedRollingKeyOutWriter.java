@@ -9,8 +9,9 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.RollingPolicy;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-import java.io.IOException;
 import org.slf4j.Logger;
+
+import java.io.IOException;
 
 /**
  * Extension of KeyOutWriter to use Logback for its logging.  This version supports outputting with a time and size

@@ -156,7 +156,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
 						Object value = values.getValue();
-						if (JmxUtils.isNumeric(value)) {
+						if (NumberUtils.isNumeric(value)) {
 							StringBuilder sb = new StringBuilder();
 
 							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
