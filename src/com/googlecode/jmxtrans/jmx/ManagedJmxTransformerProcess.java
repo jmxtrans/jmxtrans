@@ -1,33 +1,42 @@
 package com.googlecode.jmxtrans.jmx;
 
-import java.io.File;
+import com.googlecode.jmxtrans.JmxTransConfiguration;
+import com.googlecode.jmxtrans.JmxTransformer;
+import com.googlecode.jmxtrans.util.LifecycleException;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
-import com.googlecode.jmxtrans.JmxTransformer;
-import com.googlecode.jmxtrans.util.LifecycleException;
+import java.io.File;
 
 /**
  * The Class ManagedJmxTransformerProcess.
  * TODO: Only start/stop working, the setters don't fire update on JmxProcess
+ *
  * @author marcos.lois
  */
 public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProcessMBean, ManagedObject {
-    
-    /** The object name. */
-    private ObjectName objectName;
-	
-	/** The proc. */
+
+	/**
+	 * The object name.
+	 */
+	private ObjectName objectName;
+
+	/**
+	 * The proc.
+	 */
 	private JmxTransformer proc;
+
+	private final JmxTransConfiguration configuration;
 
 	/**
 	 * The Constructor.
 	 *
-	 * @param proc the proc
+	 * @param proc          the proc
+	 * @param configuration
 	 */
-	public ManagedJmxTransformerProcess(JmxTransformer proc) {
+	public ManagedJmxTransformerProcess(JmxTransformer proc, JmxTransConfiguration configuration) {
 		this.proc = proc;
+		this.configuration = configuration;
 	}
 
 	/* (non-Javadoc)
@@ -45,13 +54,13 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	public void stop() throws LifecycleException {
 		this.proc.stop();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.jmx.ManagedJmxTransformerProcessMBean#getQuartPropertiesFile()
 	 */
 	@Override
 	public String getQuartPropertiesFile() {
-		return proc.getQuartPropertiesFile();
+		return configuration.getQuartPropertiesFile();
 	}
 
 	/* (non-Javadoc)
@@ -59,7 +68,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setQuartPropertiesFile(String quartPropertiesFile) {
-		proc.setQuartPropertiesFile(quartPropertiesFile);
+		configuration.setQuartPropertiesFile(quartPropertiesFile);
 	}
 
 	/* (non-Javadoc)
@@ -67,7 +76,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public int getRunPeriod() {
-		return proc.getRunPeriod();
+		return configuration.getRunPeriod();
 	}
 
 	/* (non-Javadoc)
@@ -75,7 +84,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setRunPeriod(int runPeriod) {
-		proc.setRunPeriod(runPeriod);
+		configuration.setRunPeriod(runPeriod);
 	}
 
 	/* (non-Javadoc)
@@ -83,7 +92,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setJsonDirOrFile(File jsonDirOrFile) {
-		proc.setJsonDirOrFile(jsonDirOrFile);
+		configuration.setJsonDirOrFile(jsonDirOrFile);
 	}
 
 	/* (non-Javadoc)
@@ -91,7 +100,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public File getJsonDirOrFile() {
-		return proc.getJsonDirOrFile();
+		return configuration.getJsonDirOrFile();
 	}
 
 	/* (non-Javadoc)
@@ -99,26 +108,26 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public ObjectName getObjectName() throws MalformedObjectNameException {
-        if (objectName == null) {
-            objectName = new ObjectName("com.googlecode.jmxtrans:Type=JmxTransformerProcess,Name=JmxTransformerProcess");
-        }
-        return objectName;
-    }
+		if (objectName == null) {
+			objectName = new ObjectName("com.googlecode.jmxtrans:Type=JmxTransformerProcess,Name=JmxTransformerProcess");
+		}
+		return objectName;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.jmx.ManagedObject#setObjectName(javax.management.ObjectName)
 	 */
 	@Override
-    public void setObjectName(ObjectName objectName) throws MalformedObjectNameException {
-        this.objectName = objectName;
-    }
+	public void setObjectName(ObjectName objectName) throws MalformedObjectNameException {
+		this.objectName = objectName;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.jmx.ManagedObject#setObjectName(java.lang.String)
 	 */
 	@Override
-    public void setObjectName(String objectName) throws MalformedObjectNameException {
-        this.objectName = ObjectName.getInstance(objectName);
-    }
+	public void setObjectName(String objectName) throws MalformedObjectNameException {
+		this.objectName = ObjectName.getInstance(objectName);
+	}
 
 }

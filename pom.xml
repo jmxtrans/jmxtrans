@@ -26,6 +26,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<checkstyle.max.allowed.violations>868</checkstyle.max.allowed.violations>
 	</properties>
 
 	<developers>
@@ -147,6 +148,48 @@
 				<version>3.3</version>
 			</plugin>
 
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <mutators>
+                        <mutator>DEFAULTS</mutator>
+                        <mutator>REMOVE_CONDITIONALS</mutator>
+                        <mutator>INLINE_CONSTS</mutator>
+                        <mutator>NON_VOID_METHOD_CALLS</mutator>
+                        <mutator>CONSTRUCTOR_CALLS</mutator>
+                    </mutators>
+                    <mutationThreshold>0</mutationThreshold>
+                    <coverageThreshold>0</coverageThreshold>
+                    <targetClasses>
+                        <param>com.googlecode.jmxtrans.*</param>
+                    </targetClasses>
+                    <excludedClasses>
+                        <param>com.googlecode.jmxtrans.model.output.GangliaWriterTests</param>
+                    </excludedClasses>
+                </configuration>
+            </plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.12.1</version>
+				<configuration>
+					<configLocation>src/etc/checkstyle.xml</configLocation>
+					<maxAllowedViolations>${checkstyle.max.allowed.violations}</maxAllowedViolations>
+				</configuration>
+				<executions>
+					<execution>
+						<id>checkstyle-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 
 		<resources>
@@ -208,6 +251,14 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<version>2.5.4</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.12.1</version>
+				<configuration>
+					<configLocation>src/etc/checkstyle.xml</configLocation>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -402,5 +453,28 @@
 		</dependency>
 
 	</dependencies>
+
+    <profiles>
+        <profile>
+            <id>withMutationTests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>pitest</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

@@ -1,39 +1,11 @@
 package com.googlecode.jmxtrans.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Array;
-import java.rmi.UnmarshalException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
-import javax.naming.Context;
-
+import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.jmx.ManagedObject;
+import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
@@ -46,12 +18,27 @@ import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.jmxtrans.OutputWriter;
-import com.googlecode.jmxtrans.jmx.ManagedObject;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
+import javax.management.*;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+import javax.naming.Context;
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Array;
+import java.rmi.UnmarshalException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * The worker code.
@@ -62,10 +49,10 @@ public class JmxUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
 
-    private static final Pattern DOT_SLASH_UNDERSCORE_PAT = Pattern.compile("[./]");
-    private static final Pattern SLASH_UNDERSCORE_PAT = Pattern.compile("/", Pattern.LITERAL);
-    private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
-    private static final Pattern IS_NUMERIC_PAT = Pattern.compile("\\d*(?:[.]\\d+)?");
+	private static final Pattern DOT_SLASH_UNDERSCORE_PAT = Pattern.compile("[./]");
+	private static final Pattern SLASH_UNDERSCORE_PAT = Pattern.compile("/", Pattern.LITERAL);
+	private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
+	private static final Pattern IS_NUMERIC_PAT = Pattern.compile("\\d*(?:[.]\\d+)?");
 
 
 	/**
@@ -259,7 +246,7 @@ public class JmxUtils {
 
 	/** */
 	private static void processTabularDataSupport(List<Result> resList, MBeanInfo info, ObjectInstance oi, Result r, String attributeName,
-			TabularDataSupport tds, Query query) {
+												  TabularDataSupport tds, Query query) {
 		Set<Entry<Object, Object>> entries = tds.entrySet();
 		for (Entry<Object, Object> entry : entries) {
 			Object entryKeys = entry.getKey();
@@ -407,13 +394,13 @@ public class JmxUtils {
 			try {
 				service = Executors.newFixedThreadPool(process.getNumMultiThreadedServers());
 				for (Server server : process.getServers()) {
-                    if (server.isLocal() && server.getLocalMBeanServer() != null) {
-                        service.execute(new ProcessServerThread(server, null));
-                    } else {
-                        JMXConnector conn = JmxUtils.getServerConnection(server);
-                        conns.add(conn);
-                        service.execute(new ProcessServerThread(server, conn));
-                    }
+					if (server.isLocal() && server.getLocalMBeanServer() != null) {
+						service.execute(new ProcessServerThread(server, null));
+					} else {
+						JMXConnector conn = JmxUtils.getServerConnection(server);
+						conns.add(conn);
+						service.execute(new ProcessServerThread(server, conn));
+					}
 				}
 				service.shutdown();
 			} finally {
@@ -425,13 +412,13 @@ public class JmxUtils {
 			}
 		} else {
 			for (Server server : process.getServers()) {
-                if (server.getLocalMBeanServer() != null) {
-                    processServer(server, null);
-                } else {
-                    JMXConnector conn = JmxUtils.getServerConnection(server);
-                    conns.add(conn);
-                    processServer(server, conn);
-                }
+				if (server.getLocalMBeanServer() != null) {
+					processServer(server, null);
+				} else {
+					JMXConnector conn = JmxUtils.getServerConnection(server);
+					conns.add(conn);
+					processServer(server, conn);
+				}
 			}
 		}
 
@@ -524,12 +511,12 @@ public class JmxUtils {
 	 * Checks if the String contains only unicode digits. A decimal point is a
 	 * digit and returns true.
 	 * </p>
-	 *
+	 * <p/>
 	 * <p>
 	 * <code>null</code> will return <code>false</code>. An empty String ("")
 	 * will return <code>true</code>.
 	 * </p>
-	 *
+	 * <p/>
 	 * <pre>
 	 * StringUtils.isNumeric(null)   = false
 	 * StringUtils.isNumeric("")     = true
@@ -541,10 +528,12 @@ public class JmxUtils {
 	 * StringUtils.isNumeric("12.3") = true
 	 * </pre>
 	 *
-	 * @param str
-	 *            the String to check, may be null
+	 * @param str the String to check, may be null
 	 * @return <code>true</code> if only contains digits, and is non-null
+	 * @deprecated There is already a dependency in this project on Apache
+	 * common-lang, so you should probably use {@see org.apache.commons.lang.math.NumberUtils}.
 	 */
+	@Deprecated
 	public static boolean isNumeric(String str) {
 		if (StringUtils.isEmpty(str)) {
 			return str != null; // Null = false, empty = true
@@ -556,10 +545,8 @@ public class JmxUtils {
 	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
 	 * better performance on high load
 	 *
-	 * @param <T>
-	 *            the generic type
-	 * @param factory
-	 *            the factory
+	 * @param <T>     the generic type
+	 * @param factory the factory
 	 * @return the object pool
 	 */
 	public static <T extends KeyedPoolableObjectFactory> GenericKeyedObjectPool getObjectPool(T factory) {
@@ -575,7 +562,7 @@ public class JmxUtils {
 
 	/**
 	 * Helper method which returns a default PoolMap.
-	 *
+	 * <p/>
 	 * TODO: allow for more configuration options?
 	 */
 	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
@@ -596,10 +583,8 @@ public class JmxUtils {
 	/**
 	 * Register the scheduler in the local MBeanServer.
 	 *
-	 * @param mbean
-	 *            the mbean
-	 * @throws Exception
-	 *             the exception
+	 * @param mbean the mbean
+	 * @throws Exception the exception
 	 */
 	public static void registerJMX(ManagedObject mbean) throws Exception {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -609,10 +594,8 @@ public class JmxUtils {
 	/**
 	 * Unregister the scheduler from the local MBeanServer.
 	 *
-	 * @param mbean
-	 *            the mbean
-	 * @throws Exception
-	 *             the exception
+	 * @param mbean the mbean
+	 * @throws Exception the exception
 	 */
 	public static void unregisterJMX(ManagedObject mbean) throws Exception {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -622,16 +605,11 @@ public class JmxUtils {
 	/**
 	 * Gets the key string.
 	 *
-	 * @param query
-	 *            the query
-	 * @param result
-	 *            the result
-	 * @param values
-	 *            the values
-	 * @param typeNames
-	 *            the type names
-	 * @param rootPrefix
-	 *            the root prefix
+	 * @param query      the query
+	 * @param result     the result
+	 * @param values     the values
+	 * @param typeNames  the type names
+	 * @param rootPrefix the root prefix
 	 * @return the key string
 	 */
 	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
@@ -650,14 +628,10 @@ public class JmxUtils {
 	/**
 	 * Gets the key string, without rootPrefix nor Alias
 	 *
-	 * @param query
-	 *			the query
-	 * @param result
-	 *			the result
-	 * @param values
-	 *			the values
-	 * @param typeNames
-	 *			the type names
+	 * @param query     the query
+	 * @param result    the result
+	 * @param values    the values
+	 * @param typeNames the type names
 	 * @return the key string
 	 */
 	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames) {
@@ -672,14 +646,10 @@ public class JmxUtils {
 	/**
 	 * Gets the key string, with dot allowed
 	 *
-	 * @param query
-	 *			the query
-	 * @param result
-	 *			the result
-	 * @param values
-	 *			the values
-	 * @param typeNames
-	 *			the type names
+	 * @param query     the query
+	 * @param result    the result
+	 * @param values    the values
+	 * @param typeNames the type names
 	 * @return the key string
 	 */
 	public static String getKeyStringWithDottedKeys(Query query, Result result, Entry<String, Object> values, List<String> typeNames) {
@@ -721,7 +691,8 @@ public class JmxUtils {
 	private static void addTypeName(Query query, Result result, List<String> typeNames, StringBuilder sb) {
 		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()), query.isAllowDottedKeys());
 		if (typeName != null && typeName.length() > 0) {
-			sb.append(typeName);sb.append(".");
+			sb.append(typeName);
+			sb.append(".");
 		}
 	}
 
@@ -748,8 +719,7 @@ public class JmxUtils {
 	/**
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
 	 *
-	 * @param name
-	 *            the name
+	 * @param name the name
 	 * @return the string
 	 */
 	public static String cleanupStr(String name) {
@@ -759,10 +729,8 @@ public class JmxUtils {
 	/**
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
 	 *
-	 * @param name
-	 *			the name
-	 * @param allowDottedKeys
-	 *			whether we remove the dots or not.
+	 * @param name            the name
+	 * @param allowDottedKeys whether we remove the dots or not.
 	 * @return
 	 */
 	public static String cleanupStr(String name, boolean allowDottedKeys) {
@@ -783,16 +751,14 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 *
+	 * <p/>
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 *
+	 * <p/>
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
 	 *
-	 * @param typeNames
-	 *            the type names
-	 * @param typeNameStr
-	 *            the type name str
+	 * @param typeNames   the type names
+	 * @param typeNameStr the type name str
 	 * @return the concated type name values
 	 */
 	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
@@ -814,28 +780,27 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, create a Map with every key and value in the typeName.
 	 * For example:
-	 *
+	 * <p/>
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 *
+	 * <p/>
 	 * Returns a Map with the following key/value pairs (excluding the quotes):
+	 * <p/>
+	 * "name"  =>  "PS Eden Space"
+	 * "type"  =>  "MemoryPool"
 	 *
-	 *  "name"  =>  "PS Eden Space"
-	 *  "type"  =>  "MemoryPool"
-	 *
-	 * @param typeNameStr
-	 *            the type name str
+	 * @param typeNameStr the type name str
 	 * @return Map<String, String> of type-name-key / value pairs.
 	 */
-	public static Map<String, String>   getTypeNameValueMap (String typeNameStr) {
-		if ( typeNameStr == null ) {
-			return  java.util.Collections.EMPTY_MAP;
+	public static Map<String, String> getTypeNameValueMap(String typeNameStr) {
+		if (typeNameStr == null) {
+			return java.util.Collections.EMPTY_MAP;
 		}
 
 		HashMap result = new HashMap();
 		String[] tokens = typeNameStr.split(",");
 
 		for (String oneToken : tokens) {
-			if ( oneToken.length() > 0 ) {
+			if (oneToken.length() > 0) {
 				String[] keyValue = splitTypeNameValue(oneToken);
 				result.put(keyValue[0], keyValue[1]);
 			}
@@ -846,18 +811,15 @@ public class JmxUtils {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 *
+	 * <p/>
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 *
+	 * <p/>
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
 	 *
-	 * @param query
-	 *            the query
-	 * @param typeNames
-	 *            the type names
-	 * @param typeName
-	 *            the type name
+	 * @param query     the query
+	 * @param typeNames the type names
+	 * @param typeName  the type name
 	 * @return the concated type name values
 	 */
 	public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
@@ -879,24 +841,23 @@ public class JmxUtils {
 	 * Given a single type-name-key and value from a typename strig (e.g. "type=MemoryPool"), extract the key and
 	 * the value and return both.
 	 *
-	 * @param   typeNameToken - the string containing the pair.
-	 * @return  String[2] where String[0] = the key and String[1] = the value.  If the given string is not in the
-	 *          format "key=value" then String[0] = the original string and String[1] = "".
+	 * @param typeNameToken - the string containing the pair.
+	 * @return String[2] where String[0] = the key and String[1] = the value.  If the given string is not in the
+	 * format "key=value" then String[0] = the original string and String[1] = "".
 	 */
-	private static String[] splitTypeNameValue (String typeNameToken) {
-		String[]	result;
-		String[]	keys = typeNameToken.split("=", 2);
+	private static String[] splitTypeNameValue(String typeNameToken) {
+		String[] result;
+		String[] keys = typeNameToken.split("=", 2);
 
-		if ( keys.length == 2 ) {
+		if (keys.length == 2) {
 			result = keys;
-		}
-		else {
+		} else {
 			result = new String[2];
 			result[0] = keys[0];
 			result[1] = "";
 		}
 
-		return  result;
+		return result;
 	}
 
 }
