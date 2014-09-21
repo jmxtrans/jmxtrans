@@ -1,10 +1,15 @@
 package com.googlecode.jmxtrans.util;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
 
 import static com.googlecode.jmxtrans.util.JmxUtils.getConcatedTypeNameValues;
 import static com.googlecode.jmxtrans.util.JmxUtils.getTypeNameValueMap;

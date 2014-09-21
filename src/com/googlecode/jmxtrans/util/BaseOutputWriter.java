@@ -1,6 +1,5 @@
 package com.googlecode.jmxtrans.util;
 
-import com.googlecode.jmxtrans.OutputWriter;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -8,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.googlecode.jmxtrans.OutputWriter;
 
 /**
  * Implements the common code for output filters.

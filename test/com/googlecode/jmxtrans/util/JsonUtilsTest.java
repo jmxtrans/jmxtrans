@@ -1,9 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
 import com.google.common.io.Closer;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -13,6 +10,10 @@ import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

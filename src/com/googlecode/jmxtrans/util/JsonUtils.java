@@ -1,12 +1,13 @@
 package com.googlecode.jmxtrans.util;
 
-import com.googlecode.jmxtrans.model.JmxProcess;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+
+import com.googlecode.jmxtrans.model.JmxProcess;
 
 import static org.codehaus.jackson.map.SerializationConfig.Feature.WRITE_NULL_MAP_VALUES;
 

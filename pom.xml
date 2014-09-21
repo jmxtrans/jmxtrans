@@ -26,7 +26,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<checkstyle.max.allowed.violations>868</checkstyle.max.allowed.violations>
+		<checkstyle.max.allowed.violations>856</checkstyle.max.allowed.violations>
 	</properties>
 
 	<developers>
