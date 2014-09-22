@@ -1,18 +1,18 @@
 package com.googlecode.jmxtrans.util;
 
+import org.apache.commons.pool.KeyedObjectPool;
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.pool.KeyedObjectPool;
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 import com.googlecode.jmxtrans.OutputWriter;
 
 /**
  * Implements the common code for output filters.
- * 
+ *
  * @author jon
  */
 public abstract class BaseOutputWriter implements OutputWriter {
@@ -51,9 +51,8 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 * Returns a boolean value for the key, defaults to false if not specified.
 	 * This is equivalent to calling {@link #getBooleanSetting(String, Boolean)
 	 * getBooleanSetting(key,false)}.
-	 * 
-	 * @param key
-	 *            the key value to get the boolean setting for
+	 *
+	 * @param key the key value to get the boolean setting for
 	 * @return the value set for the key, defaults to false
 	 */
 	public Boolean getBooleanSetting(String key) {
@@ -63,12 +62,10 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	/**
 	 * Gets a Boolean value for the key, returning the default value given if
 	 * not specified or not a valid boolean value.
-	 * 
-	 * @param key
-	 *            the key to get the boolean setting for
-	 * @param defaultVal
-	 *            the default value to return if the setting was not specified
-	 *            or was not coercible to a Boolean value
+	 *
+	 * @param key        the key to get the boolean setting for
+	 * @param defaultVal the default value to return if the setting was not specified
+	 *                   or was not coercible to a Boolean value
 	 * @return the Boolean value for the setting
 	 */
 	public Boolean getBooleanSetting(String key, Boolean defaultVal) {
@@ -87,12 +84,10 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	/**
 	 * Gets an Integer value for the key, returning the default value given if
 	 * not specified or not a valid numeric value.
-	 * 
-	 * @param key
-	 *            the key to get the Integer setting for
-	 * @param defaultVal
-	 *            the default value to return if the setting was not specified
-	 *            or was not coercible to an Integer value
+	 *
+	 * @param key        the key to get the Integer setting for
+	 * @param defaultVal the default value to return if the setting was not specified
+	 *                   or was not coercible to an Integer value
 	 * @return the Integer value for the setting
 	 */
 	public Integer getIntegerSetting(String key, Integer defaultVal) {
@@ -116,51 +111,42 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	/**
 	 * Gets a String value for the setting, returning the default value if not
 	 * specified.
-	 * 
-	 * @param key
-	 *            the key to get the String setting for
-	 * @param defaultVal
-	 *            the default value to return if the setting was not specified
+	 *
+	 * @param key        the key to get the String setting for
+	 * @param defaultVal the default value to return if the setting was not specified
 	 * @return the String value for the setting
 	 */
 	public String getStringSetting(String key, String defaultVal) {
 		final Object value = this.getSettings().get(key);
 		return value != null ? value.toString() : defaultVal;
 	}
-	
+
 	/**
-     * Gets an int value for the setting, returning the default value if not
-     * specified.
-     * 
-     * @param key 
-     * 			the key to get the int value for
-     * @param defaultVal 
-     * 			default value if the setting was not specified
-     * @return the int value for the setting  
-     * @throws IllegalArgumentException if setting does not contain an int
-     */
-    protected int getIntSetting(String key, int defaultVal) throws IllegalArgumentException {
-        if (settings.containsKey(key)) {
-            final String value = settings.get(key).toString();
-            try {
-                return Integer.parseInt(value);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Setting '" + key + "=" + value + "' is not an integer on " + this.toString());
-            }
-        } else {
-            return defaultVal;
-        }
-    }
+	 * Gets an int value for the setting, returning the default value if not
+	 * specified.
+	 *
+	 * @param key        the key to get the int value for
+	 * @param defaultVal default value if the setting was not specified
+	 * @return the int value for the setting
+	 * @throws IllegalArgumentException if setting does not contain an int
+	 */
+	protected int getIntSetting(String key, int defaultVal) throws IllegalArgumentException {
+		if (settings.containsKey(key)) {
+			final String value = settings.get(key).toString();
+			try {
+				return Integer.parseInt(value);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Setting '" + key + "=" + value + "' is not an integer on " + this.toString());
+			}
+		} else {
+			return defaultVal;
+		}
+	}
 
 	/** */
 	@JsonIgnore
 	public boolean isDebugEnabled() {
 		return debugEnabled != null ? debugEnabled : getBooleanSetting(DEBUG);
-	}
-
-	/** */
-	public void setTypeNames(List<String> typeNames) {
-		this.getSettings().put(TYPE_NAMES, typeNames);
 	}
 
 	/** */
@@ -175,6 +161,11 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	}
 
 	/** */
+	public void setTypeNames(List<String> typeNames) {
+		this.getSettings().put(TYPE_NAMES, typeNames);
+	}
+
+	/** */
 	public void addTypeName(String str) {
 		this.getTypeNames().add(str);
 	}
@@ -182,9 +173,9 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
-	 * 
+	 * <p/>
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 * 
+	 * <p/>
 	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
 	 * string
 	 */
@@ -196,7 +187,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 * Replaces all . with _ and removes all spaces and double/single quotes.
 	 */
 	protected String cleanupStr(String name) {
-		return JmxUtils.cleanupStr(name);
+		return StringUtils.cleanupStr(name);
 	}
 
 	/**

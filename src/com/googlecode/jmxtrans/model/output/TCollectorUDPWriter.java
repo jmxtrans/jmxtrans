@@ -1,16 +1,16 @@
 package com.googlecode.jmxtrans.model.output;
-import com.googlecode.jmxtrans.util.LifecycleException;
-
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
+
+import com.googlecode.jmxtrans.util.LifecycleException;
 
 
 /**

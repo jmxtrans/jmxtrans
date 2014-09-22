@@ -1,19 +1,18 @@
 package com.googlecode.jmxtrans.model.naming;
 
-import com.googlecode.jmxtrans.model.NamingStrategy;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.JmxUtils;
-
-import java.util.Map;
-
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.jexl2.MapContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+
+import com.googlecode.jmxtrans.model.NamingStrategy;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * Naming strategy which uses an JEXL expression to format the name from the result, its class name, attribute name,

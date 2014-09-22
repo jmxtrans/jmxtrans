@@ -1,10 +1,10 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+
+import java.util.List;
 
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;

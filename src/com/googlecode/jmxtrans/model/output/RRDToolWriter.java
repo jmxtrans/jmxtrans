@@ -1,15 +1,10 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -22,11 +17,15 @@ import org.jrobin.core.RrdDefTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it
@@ -105,7 +104,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 			if (values != null) {
 				for (Entry<String, Object> entry : values.entrySet()) {
 					String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
-					boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
+					boolean isNumeric = NumberUtils.isNumeric(entry.getValue());
 
 					if (isDebugEnabled() && isNumeric) {
 						log.debug("Generated DataSource name:value: " + key + " : " + entry.getValue());
@@ -136,7 +135,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 				Map<String, Object> values = res.getValues();
 				if (values != null) {
 					for (Entry<String, Object> entry : values.entrySet()) {
-						boolean isNumeric = JmxUtils.isNumeric(entry.getValue());
+						boolean isNumeric = NumberUtils.isNumeric(entry.getValue());
 						if (isNumeric) {
 							String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
 							if (keys.contains(key)) {

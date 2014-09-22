@@ -1,121 +1,114 @@
 package com.googlecode.jmxtrans.util;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
+
+import static com.googlecode.jmxtrans.util.JmxUtils.getConcatedTypeNameValues;
+import static com.googlecode.jmxtrans.util.JmxUtils.getTypeNameValueMap;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Zack Radick Date: 1/20/12
  * @author Arthur Naseef Date: 02/23/2014
  */
 public class JmxUtilsTests {
+
 	@Test
-	public void testIsNumeric() {
-		assertFalse(JmxUtils.isNumeric(null));
-		assertTrue(JmxUtils.isNumeric("")); // this is "true" for historical
-											// reasons
-		assertFalse(JmxUtils.isNumeric("  "));
-		assertTrue(JmxUtils.isNumeric("123"));
-		assertFalse(JmxUtils.isNumeric("12 3"));
-		assertFalse(JmxUtils.isNumeric("ab2c"));
-		assertFalse(JmxUtils.isNumeric("12-3"));
-		assertTrue(JmxUtils.isNumeric("12.3"));
-		assertFalse(JmxUtils.isNumeric("12.3.3.3"));
-		assertTrue(JmxUtils.isNumeric(".2"));
-        assertFalse(JmxUtils.isNumeric("."));
-        assertFalse(JmxUtils.isNumeric("3."));
-	}
+	public void testGetTypeNameValueMap() {
+		assertThat(getTypeNameValueMap(null)).isEmpty();
+		assertThat(getTypeNameValueMap("")).isEmpty();
+		assertThat(getTypeNameValueMap("x-key1-x")).isEqualTo(makeMap("x-key1-x", ""));
+		assertThat(getTypeNameValueMap("x-key1-x,x-key2-x")).isEqualTo(makeMap("x-key1-x", "", "x-key2-x", ""));
+		assertThat(getTypeNameValueMap("x-key1-x=x-value1-x")).isEqualTo(makeMap("x-key1-x", "x-value1-x"));
 
-    @Test
-    public void testCleanupStr() {
-        assertEquals("addfber1241qdw!èé$", JmxUtils.cleanupStr("addfber1241qdw!èé$"));
-        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd.abcd"));
-        assertEquals("abcd_abcd_", JmxUtils.cleanupStr("abcd.abcd."));
-        assertEquals("_abcd_abcd", JmxUtils.cleanupStr(".abcd_abcd"));
-        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd/abcd"));
-        assertEquals("abcd_abcd_", JmxUtils.cleanupStr("abcd/abcd/"));
-        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd_abcd"));
-        assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd'_abcd'"));
-        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd\"_abcd\""));
-        assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/ab cd_abcd"));
-    }
-
-    @Test
-    public void testCleanupStrDottedKeysKept() {
-		assertEquals("addfber1241qdw!èé$", JmxUtils.cleanupStr("addfber1241qdw!èé$", true));
-		assertEquals("abcd.abcd", JmxUtils.cleanupStr("abcd.abcd", true));
-		assertEquals("abcd.abcd.", JmxUtils.cleanupStr("abcd.abcd.", true));
-		assertEquals(".abcd_abcd", JmxUtils.cleanupStr(".abcd_abcd", true));
-		assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd/abcd", true));
-		assertEquals("abcd_abcd_", JmxUtils.cleanupStr("abcd/abcd/", true));
-		assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd_abcd", true));
-		assertEquals("abcd_abcd", JmxUtils.cleanupStr("abcd'_abcd'", true));
-		assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/abcd\"_abcd\"", true));
-		assertEquals("_abcd_abcd", JmxUtils.cleanupStr("/ab cd_abcd", true));
-    }
-
-    @Test
-	public void testGetTypeNameValueMap () {
-		assertEquals(java.util.Collections.EMPTY_MAP, JmxUtils.getTypeNameValueMap(null));
-		assertEquals(java.util.Collections.EMPTY_MAP, JmxUtils.getTypeNameValueMap(""));
-		assertEquals(makeMap("x-key1-x", ""), JmxUtils.getTypeNameValueMap("x-key1-x"));
-		assertEquals(makeMap("x-key1-x", "", "x-key2-x", ""),
-		             JmxUtils.getTypeNameValueMap("x-key1-x,x-key2-x"));
-		assertEquals(makeMap("x-key1-x", "x-value1-x"),
-		             JmxUtils.getTypeNameValueMap("x-key1-x=x-value1-x"));
-		assertEquals(makeMap("x-key1-x", "x-value1-x", "y-key2-y", "y-value2-y"),
-		             JmxUtils.getTypeNameValueMap("x-key1-x=x-value1-x,y-key2-y=y-value2-y"));
-		assertEquals(
-			makeMap("x-key1-x", "x-value1-x", "y-key2-y", "y-value2-y", "z-key3-z", "z-value3-z"),
-			JmxUtils.getTypeNameValueMap("x-key1-x=x-value1-x,y-key2-y=y-value2-y,z-key3-z=z-value3-z"));
-		assertEquals(
-			makeMap("x-key1-x", "x-value1-x", "y-key2-y", "", "yy-key2.5-yy", "a=1",
-			        "z-key3-z", "z-value3-z"),
-			JmxUtils.getTypeNameValueMap(
-				"x-key1-x=x-value1-x,y-key2-y,yy-key2.5-yy=a=1,z-key3-z=z-value3-z"));
+		assertThat(getTypeNameValueMap("x-key1-x=x-value1-x,y-key2-y=y-value2-y"))
+				.isEqualTo(makeMap("x-key1-x", "x-value1-x", "y-key2-y", "y-value2-y"));
+		assertThat(getTypeNameValueMap("x-key1-x=x-value1-x,y-key2-y=y-value2-y,z-key3-z=z-value3-z"))
+				.isEqualTo(makeMap("x-key1-x", "x-value1-x", "y-key2-y", "y-value2-y", "z-key3-z", "z-value3-z"));
+		assertThat(getTypeNameValueMap("x-key1-x=x-value1-x,y-key2-y,yy-key2.5-yy=a=1,z-key3-z=z-value3-z"))
+				.isEqualTo(makeMap("x-key1-x", "x-value1-x", "y-key2-y", "", "yy-key2.5-yy", "a=1", "z-key3-z", "z-value3-z"));
 	}
 
 
 	@Test
-	public void testGetConcatenatedTypeNameValues () {
-		assertNull(JmxUtils.getConcatedTypeNameValues(null, "a=1"));
-		assertNull(JmxUtils.getConcatedTypeNameValues(Collections.EMPTY_LIST, "a=1"));
-		assertEquals("", JmxUtils.getConcatedTypeNameValues(Arrays.asList("x-key1-x"), ""));
-		assertEquals("", JmxUtils.getConcatedTypeNameValues(Arrays.asList("x-key1-x", "y-key2-y"), ""));
-		assertEquals("x-value1-x",
-		             JmxUtils.getConcatedTypeNameValues(Arrays.asList("x-key1-x"), "x-key1-x=x-value1-x"));
-		assertEquals("", JmxUtils.getConcatedTypeNameValues(Arrays.asList("x-key1-x"), "y-key2-y=y-value2-y"));
-		assertEquals("x-value1-x_y-value2-y",
-		             JmxUtils.getConcatedTypeNameValues(Arrays.asList("x-key1-x", "y-key2-y"),
-		                                                "x-key1-x=x-value1-x,y-key2-y=y-value2-y"));
+	public void testGetConcatenatedTypeNameValues() {
+		assertThat(getConcatedTypeNameValues(null, "a=1")).isNull();
+		assertThat(getConcatedTypeNameValues(Collections.<String>emptyList(), "a=1")).isNull();
+		assertThat(getConcatedTypeNameValues(asList("x-key1-x"), "")).isEmpty();
+		assertThat(getConcatedTypeNameValues(asList("x-key1-x", "y-key2-y"), "")).isEmpty();
+		assertThat(getConcatedTypeNameValues(asList("x-key1-x"), "x-key1-x=x-value1-x")).isEqualTo("x-value1-x");
+		assertThat(getConcatedTypeNameValues(asList("x-key1-x"), "y-key2-y=y-value2-y")).isEmpty();
+		assertThat(getConcatedTypeNameValues(asList("x-key1-x", "y-key2-y"), "x-key1-x=x-value1-x,y-key2-y=y-value2-y"))
+				.isEqualTo("x-value1-x_y-value2-y");
+	}
+
+
+	@Test
+	public void mergeAlreadyExistingServerDoesNotModifyList() throws ValidationException {
+		List<Server> existingServers = new ArrayList<Server>();
+		existingServers.add(createServerWithOneQuery("example.net", "123", "toto"));
+
+		List<Server> newServers = new ArrayList<Server>();
+		newServers.add(createServerWithOneQuery("example.net", "123", "toto"));
+
+		JmxUtils.mergeServerLists(existingServers, newServers);
+
+		assertThat(existingServers).hasSize(1);
+
+		Server mergedServer = existingServers.get(0);
+		assertThat(mergedServer.getQueries()).hasSize(1);
+	}
+
+	@Test
+	public void sameServerWithTwoDifferentQueriesMergesQueries() throws ValidationException {
+		List<Server> existingServers = new ArrayList<Server>();
+		existingServers.add(createServerWithOneQuery("example.net", "123", "toto"));
+
+		List<Server> newServers = new ArrayList<Server>();
+		newServers.add(createServerWithOneQuery("example.net", "123", "tutu"));
+
+		JmxUtils.mergeServerLists(existingServers, newServers);
+
+		assertThat(existingServers).hasSize(1);
+		Server mergedServer = existingServers.get(0);
+		assertThat(mergedServer.getQueries()).hasSize(2);
+	}
+
+	private Server createServerWithOneQuery(String host, String port, String queryObject) throws ValidationException {
+		Server server = new Server(host, port);
+		server.addQuery(new Query(queryObject));
+		return server;
 	}
 
 	/**
 	 * Convenience method for creating a Map for comparison.
 	 */
-	protected Map<String, String>   makeMap (String... keysAndValues) {
+	protected Map<String, String> makeMap(String... keysAndValues) {
 		Map<String, String> result;
-		int                 cur;
+		int cur;
 
 		result = new HashMap<String, String>();
 
 		cur = 0;
-		while ( cur < keysAndValues.length ) {
-			if ( cur < keysAndValues.length - 1 ) {
+		while (cur < keysAndValues.length) {
+			if (cur < keysAndValues.length - 1) {
 				result.put(keysAndValues[cur], keysAndValues[cur + 1]);
 				cur += 2;
-			}
-			else {
+			} else {
 				result.put(keysAndValues[cur], "");
 				cur++;
 			}
 		}
 
-		return	result;
+		return result;
 	}
 }

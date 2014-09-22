@@ -4,7 +4,7 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.JsonUtils;
 
 /**
  * This class hits a Graphite server running on port 2003 and sends the memory
@@ -31,7 +31,7 @@ public class Graphite {
 		server.addQuery(q);
 
 		JmxProcess process = new JmxProcess(server);
-		JmxUtils.prettyPrintJson(process);
+		JsonUtils.prettyPrintJson(process, System.out);
 		// JmxTransformer transformer = new JmxTransformer();
 		// transformer.executeStandalone(process);
 

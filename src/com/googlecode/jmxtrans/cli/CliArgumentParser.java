@@ -1,10 +1,16 @@
 package com.googlecode.jmxtrans.cli;
 
-import com.googlecode.jmxtrans.JmxTransConfiguration;
-import com.googlecode.jmxtrans.util.OptionsException;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.io.File;
+
+import com.googlecode.jmxtrans.JmxTransConfiguration;
+import com.googlecode.jmxtrans.util.OptionsException;
 
 public class CliArgumentParser {
 	/**

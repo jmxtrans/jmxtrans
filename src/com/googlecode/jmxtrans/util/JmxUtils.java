@@ -1,24 +1,20 @@
 package com.googlecode.jmxtrans.util;
 
-import com.googlecode.jmxtrans.OutputWriter;
-import com.googlecode.jmxtrans.jmx.ManagedObject;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.*;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -27,18 +23,26 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.naming.Context;
-import java.io.File;
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Array;
 import java.rmi.UnmarshalException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
+
+import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.jmx.ManagedObject;
+import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
 /**
  * The worker code.
@@ -48,11 +52,6 @@ import java.util.regex.Pattern;
 public class JmxUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxUtils.class);
-
-	private static final Pattern DOT_SLASH_UNDERSCORE_PAT = Pattern.compile("[./]");
-	private static final Pattern SLASH_UNDERSCORE_PAT = Pattern.compile("/", Pattern.LITERAL);
-	private static final Pattern SPACE_PAT = Pattern.compile("[ \"']+");
-	private static final Pattern IS_NUMERIC_PAT = Pattern.compile("\\d*(?:[.]\\d+)?");
 
 
 	/**
@@ -468,80 +467,6 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Utility function good for testing things. Prints out the json tree of the
-	 * JmxProcess.
-	 */
-	public static void printJson(JmxProcess process) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES, false);
-		System.out.println(mapper.writeValueAsString(process));
-	}
-
-	/**
-	 * Utility function good for testing things. Prints out the json tree of the
-	 * JmxProcess.
-	 */
-	public static void prettyPrintJson(JmxProcess process) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.getSerializationConfig().set(Feature.WRITE_NULL_MAP_VALUES, false);
-		ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
-		System.out.println(writer.writeValueAsString(process));
-	}
-
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(File file) throws JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
-	}
-
-	/**
-	 * Useful for figuring out if an Object is a number.
-	 */
-	public static boolean isNumeric(Object value) {
-		return ((value instanceof Number) || ((value instanceof String) && isNumeric((String) value)));
-	}
-
-	/**
-	 * <p>
-	 * Checks if the String contains only unicode digits. A decimal point is a
-	 * digit and returns true.
-	 * </p>
-	 * <p/>
-	 * <p>
-	 * <code>null</code> will return <code>false</code>. An empty String ("")
-	 * will return <code>true</code>.
-	 * </p>
-	 * <p/>
-	 * <pre>
-	 * StringUtils.isNumeric(null)   = false
-	 * StringUtils.isNumeric("")     = true
-	 * StringUtils.isNumeric("  ")   = false
-	 * StringUtils.isNumeric("123")  = true
-	 * StringUtils.isNumeric("12 3") = false
-	 * StringUtils.isNumeric("ab2c") = false
-	 * StringUtils.isNumeric("12-3") = false
-	 * StringUtils.isNumeric("12.3") = true
-	 * </pre>
-	 *
-	 * @param str the String to check, may be null
-	 * @return <code>true</code> if only contains digits, and is non-null
-	 * @deprecated There is already a dependency in this project on Apache
-	 * common-lang, so you should probably use {@see org.apache.commons.lang.math.NumberUtils}.
-	 */
-	@Deprecated
-	public static boolean isNumeric(String str) {
-		if (StringUtils.isEmpty(str)) {
-			return str != null; // Null = false, empty = true
-		}
-		return IS_NUMERIC_PAT.matcher(str).matches();
-	}
-
-	/**
 	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
 	 * better performance on high load
 	 *
@@ -674,7 +599,7 @@ public class JmxUtils {
 			alias = query.getServer().getAlias();
 		} else {
 			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
-			alias = cleanupStr(alias);
+			alias = com.googlecode.jmxtrans.util.StringUtils.cleanupStr(alias);
 		}
 		sb.append(alias);
 	}
@@ -684,12 +609,12 @@ public class JmxUtils {
 		if (result.getClassNameAlias() != null) {
 			sb.append(result.getClassNameAlias());
 		} else {
-			sb.append(cleanupStr(result.getClassName()));
+			sb.append(com.googlecode.jmxtrans.util.StringUtils.cleanupStr(result.getClassName()));
 		}
 	}
 
 	private static void addTypeName(Query query, Result result, List<String> typeNames, StringBuilder sb) {
-		String typeName = cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()), query.isAllowDottedKeys());
+		String typeName = com.googlecode.jmxtrans.util.StringUtils.cleanupStr(getConcatedTypeNameValues(query, typeNames, result.getTypeName()), query.isAllowDottedKeys());
 		if (typeName != null && typeName.length() > 0) {
 			sb.append(typeName);
 			sb.append(".");
@@ -698,12 +623,12 @@ public class JmxUtils {
 
 	private static void addKeyString(Result result, Entry<String, Object> values, StringBuilder sb) {
 		String keyStr = computeKey(result, values);
-		sb.append(cleanupStr(keyStr));
+		sb.append(com.googlecode.jmxtrans.util.StringUtils.cleanupStr(keyStr));
 	}
 
 	private static void addKeyStringDotted(Result result, Entry<String, Object> values, boolean isAllowDottedKeys, StringBuilder sb) {
 		String keyStr = computeKey(result, values);
-		sb.append(cleanupStr(keyStr, isAllowDottedKeys));
+		sb.append(com.googlecode.jmxtrans.util.StringUtils.cleanupStr(keyStr, isAllowDottedKeys));
 	}
 
 	private static String computeKey(Result result, Entry<String, Object> values) {
@@ -714,38 +639,6 @@ public class JmxUtils {
 			keyStr = result.getAttributeName() + "." + values.getKey();
 		}
 		return keyStr;
-	}
-
-	/**
-	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
-	 *
-	 * @param name the name
-	 * @return the string
-	 */
-	public static String cleanupStr(String name) {
-		return cleanupStr(name, false);
-	}
-
-	/**
-	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
-	 *
-	 * @param name            the name
-	 * @param allowDottedKeys whether we remove the dots or not.
-	 * @return
-	 */
-	public static String cleanupStr(String name, boolean allowDottedKeys) {
-		if (name == null) {
-			return null;
-		}
-		Pattern pattern;
-		if (!allowDottedKeys) {
-			pattern = DOT_SLASH_UNDERSCORE_PAT;
-		} else {
-			pattern = SLASH_UNDERSCORE_PAT;
-		}
-		String clean = pattern.matcher(name).replaceAll("_");
-		clean = SPACE_PAT.matcher(clean).replaceAll("");
-		return clean;
 	}
 
 	/**

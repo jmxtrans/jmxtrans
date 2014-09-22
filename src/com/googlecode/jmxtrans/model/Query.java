@@ -1,9 +1,7 @@
 package com.googlecode.jmxtrans.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.util.PropertyResolver;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -11,8 +9,9 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
-import com.googlecode.jmxtrans.OutputWriter;
-import com.googlecode.jmxtrans.util.PropertyResolver;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a JMX Query to ask for obj, attr and one or more keys.

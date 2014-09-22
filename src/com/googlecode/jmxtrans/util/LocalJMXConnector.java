@@ -17,15 +17,14 @@
  */
 package com.googlecode.jmxtrans.util;
 
-import java.io.IOException;
-import java.util.Map;
-
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.remote.JMXConnector;
 import javax.security.auth.Subject;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Represents a connection to a local {@link MBeanServerConnection}

@@ -26,7 +26,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<checkstyle.max.allowed.violations>868</checkstyle.max.allowed.violations>
+		<checkstyle.max.allowed.violations>856</checkstyle.max.allowed.violations>
 	</properties>
 
 	<developers>
@@ -202,6 +202,15 @@
 			</resource>
 		</resources>
 
+		<testResources>
+			<testResource>
+				<directory>test</directory>
+				<includes>
+					<include>example.json</include>
+				</includes>
+			</testResource>
+		</testResources>
+
 	</build>
 
 	<reporting>
@@ -304,6 +313,12 @@
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
 			<version>1.5.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>18.0</version>
 		</dependency>
 
 		<dependency>
@@ -425,6 +440,14 @@
 			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>1.6.1</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>

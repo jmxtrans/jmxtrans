@@ -1,24 +1,16 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.ValidationException;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.io.IOException;
+
+import com.googlecode.jmxtrans.util.LifecycleException;
 
 /**
  * OpenTSDBWriter which directly sends

@@ -1,12 +1,11 @@
 package com.googlecode.jmxtrans.util;
 
-import java.io.IOException;
-
-import javax.management.remote.JMXConnector;
-
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
 import com.googlecode.jmxtrans.model.Server;
 

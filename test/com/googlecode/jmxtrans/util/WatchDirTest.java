@@ -6,7 +6,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
@@ -19,45 +18,54 @@ import static org.mockito.Mockito.verify;
 
 public class WatchDirTest {
 
-    @Rule
-    public TemporaryFolder watchedDir = new TemporaryFolder();
+	/**
+	 * Sleep time before assertions.
+	 *
+	 * Watch events can take some time to propagate, we need to wait a bit not to have false negatives. We could
+	 * probably implement a signal / wait in the callbacks to reduce waiting to the minimum, but the readability would
+	 * suffer.
+	 **/
+	private static final int SLEEP_DURATION = 10;
 
-    private WatchDir watchDir;
+	@Rule
+	public TemporaryFolder watchedDir = new TemporaryFolder();
 
-    @Mock
-    private WatchedCallback callback;
+	private WatchDir watchDir;
 
-    @Before
-    public void createWatchedDir() throws IOException {
-        MockitoAnnotations.initMocks(this);
-        watchDir = new WatchDir(watchedDir.getRoot(), callback);
-        watchDir.start();
-    }
+	@Mock
+	private WatchedCallback callback;
 
-    @Test
-    public void createdFileIsDetected() throws Exception {
-        File toCreate = watchedDir.newFile("created");
-        Thread.sleep(1);
-        verify(callback).fileAdded(toCreate);
-    }
+	@Before
+	public void createWatchedDir() throws IOException {
+		MockitoAnnotations.initMocks(this);
+		watchDir = new WatchDir(watchedDir.getRoot(), callback);
+		watchDir.start();
+	}
 
-    @Test
-    public void deletedFileIsDetected() throws Exception {
-        File toDelete = watchedDir.newFile("toDelete");
-        toDelete.delete();
-        Thread.sleep(1);
-        verify(callback).fileAdded(toDelete);
-        verify(callback).fileDeleted(toDelete);
-    }
+	@Test
+	public void createdFileIsDetected() throws Exception {
+		File toCreate = watchedDir.newFile("created");
+		Thread.sleep(SLEEP_DURATION);
+		verify(callback).fileAdded(toCreate);
+	}
 
-    @Test
-    public void modifiedFileIsDetected() throws Exception {
-        File toModify = watchedDir.newFile("toModify");
+	@Test
+	public void deletedFileIsDetected() throws Exception {
+		File toDelete = watchedDir.newFile("toDelete");
+		toDelete.delete();
+		Thread.sleep(SLEEP_DURATION);
+		verify(callback).fileAdded(toDelete);
+		verify(callback).fileDeleted(toDelete);
+	}
+
+	@Test
+	public void modifiedFileIsDetected() throws Exception {
+		File toModify = watchedDir.newFile("toModify");
 		modifyFile(toModify);
-        Thread.sleep(1);
-        verify(callback).fileAdded(toModify);
-        verify(callback, atLeastOnce()).fileModified(toModify);
-    }
+		Thread.sleep(SLEEP_DURATION);
+		verify(callback).fileAdded(toModify);
+		verify(callback, atLeastOnce()).fileModified(toModify);
+	}
 
 	@Test
 	public void watchingFileAlsoWorks() throws Exception {
@@ -67,7 +75,7 @@ public class WatchDirTest {
 		try {
 			watchFile.start();
 			modifyFile(toModify);
-			Thread.sleep(1);
+			Thread.sleep(SLEEP_DURATION);
 			verify(callback, atLeastOnce()).fileModified(toModify);
 		} finally {
 			watchFile.stopService();
@@ -78,7 +86,7 @@ public class WatchDirTest {
 		OutputStream out = null;
 		try {
 			out = new FileOutputStream(toModify);
-			out.write(1);
+			out.write(SLEEP_DURATION);
 		} finally {
 			if (out != null) {
 				out.close();
@@ -86,9 +94,9 @@ public class WatchDirTest {
 		}
 	}
 
-    @After
-    public void destroyWatchedDir() throws IOException {
-        watchDir.stopService();
-    }
+	@After
+	public void destroyWatchedDir() throws IOException {
+		watchDir.stopService();
+	}
 
 }

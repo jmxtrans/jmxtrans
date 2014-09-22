@@ -1,11 +1,10 @@
 package com.googlecode.jmxtrans.model.output;
 
-import static com.googlecode.jmxtrans.model.output.KeyOutWriter.LOG_PATTERN;
-import java.io.IOException;
 import org.apache.log4j.Appender;
-
 import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.PatternLayout;
+
+import java.io.IOException;
 
 /**
  * This class is derived from KeyOutWriter. It uses DailyRollingFileAppender

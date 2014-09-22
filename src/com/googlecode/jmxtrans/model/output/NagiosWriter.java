@@ -1,25 +1,25 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.io.IOException;
-import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.spi.LoggerFactory;
-
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.spi.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -139,7 +139,7 @@ public class NagiosWriter extends BaseOutputWriter {
             if (resultValues != null) {
                 for (Entry<String, Object> values : resultValues.entrySet()) {
                     String[] str_array = JmxUtils.getKeyString(query, result, values, typeNames, null).split("\\.");
-                    if (JmxUtils.isNumeric(values.getValue()) && filters.contains(str_array[2])) {
+                    if (NumberUtils.isNumeric(values.getValue()) && filters.contains(str_array[2])) {
                         int threshold_pos = filters.indexOf(str_array[2]);
                         StringBuilder sb = new StringBuilder();
 

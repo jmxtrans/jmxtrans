@@ -5,7 +5,7 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.JsonUtils;
 
 /**
  * This class produces the json that is in example.json.
@@ -38,7 +38,7 @@ public class Tester {
 		server.addQuery(q3);
 
 		JmxProcess process = new JmxProcess(server);
-		JmxUtils.prettyPrintJson(process);
+		JsonUtils.prettyPrintJson(process, System.out);
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);
 	}

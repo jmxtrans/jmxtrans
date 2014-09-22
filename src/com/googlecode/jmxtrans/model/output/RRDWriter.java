@@ -1,22 +1,21 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 import org.apache.commons.io.FileUtils;
 import org.jrobin.core.RrdDb;
 import org.jrobin.core.RrdDef;
 import org.jrobin.core.RrdDefTemplate;
 import org.jrobin.core.Sample;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it
@@ -62,7 +61,7 @@ public class RRDWriter extends BaseOutputWriter {
 				Map<String, Object> values = res.getValues();
 				if (values != null) {
 					for (Entry<String, Object> entry : values.entrySet()) {
-						if (dsNames.contains(entry.getKey()) && JmxUtils.isNumeric(entry.getValue())) {
+						if (dsNames.contains(entry.getKey()) && NumberUtils.isNumeric(entry.getValue())) {
 							sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
 						}
 					}
