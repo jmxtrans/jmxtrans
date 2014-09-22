@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -29,6 +30,8 @@ import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import static com.google.common.base.Charsets.ISO_8859_1;
 
 /**
  * <a href="https://www.stackdriver.com//">Stackdriver</a> implementation of the
@@ -322,7 +325,12 @@ public class StackdriverWriter extends BaseOutputWriter {
 			urlConnection.setRequestProperty("content-type", "application/json; charset=utf-8");
 			urlConnection.setRequestProperty("x-stackdriver-apikey", apiKey);
 
-			urlConnection.getOutputStream().write(gatewayMessage.getBytes());
+			// Stackdriver's own implementation does not specify char encoding
+			// to use. Let's take the simplest approach and at lest ensure that
+			// if we have problems they can be reproduced in consistant ways.
+			// See https://github.com/Stackdriver/stackdriver-custommetrics-java/blob/master/src/main/java/com/stackdriver/api/custommetrics/CustomMetricsPoster.java#L262
+			// for details.
+			urlConnection.getOutputStream().write(gatewayMessage.getBytes(ISO_8859_1));
 			
 			int responseCode = urlConnection.getResponseCode();
 			if (responseCode != 200 && responseCode != 201) {
@@ -364,8 +372,8 @@ public class StackdriverWriter extends BaseOutputWriter {
 			URLConnection metadataConnection = metadataUrl.openConnection();
 			// add any additional headers passed in
 			if (headers != null) {
-				for (String headerKey: headers.keySet()) {
-					metadataConnection.setRequestProperty(headerKey, headers.get(headerKey));
+				for (Map.Entry<String, String> header : headers.entrySet()) {
+					metadataConnection.setRequestProperty(header.getKey(), header.getValue());
 				}
 			}
 			BufferedReader in = new BufferedReader(new InputStreamReader(metadataConnection.getInputStream(), "UTF-8"));

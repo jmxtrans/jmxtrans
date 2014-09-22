@@ -116,7 +116,13 @@ public class StatsDWriter extends BaseOutputWriter {
 			rootPrefix = rootPrefixTmp;
 		}
 
-		this.address = new InetSocketAddress(host, port);
+		// Read access to 'address' are synchronized. I'm not yet completely
+		// clear on the threading model used by JmxTrans, we might be able to
+		// reduce the number of locks. Still this synchronized block will not
+		// be expensive and at least ensure correctness of code.
+		synchronized (this) {
+			this.address = new InetSocketAddress(host, port);
+		}
 
 		if (this.getSettings().containsKey(BUCKET_TYPE))
 			bucketType = (String) this.getSettings().get(BUCKET_TYPE);

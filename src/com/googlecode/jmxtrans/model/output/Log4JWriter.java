@@ -26,7 +26,7 @@ import java.util.Map.Entry;
  */
 public class Log4JWriter extends BaseOutputWriter
 {
-	private static Logger LOG;
+	private Logger log;
 
 	/** */
 	public Log4JWriter() { }
@@ -43,7 +43,7 @@ public class Log4JWriter extends BaseOutputWriter
 			loggerName = "Log4JWriter";
 		}
 
-		LOG = Logger.getLogger("Log4JWriter." + loggerName);
+		log = Logger.getLogger("Log4JWriter." + loggerName);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class Log4JWriter extends BaseOutputWriter
 						MDC.put("attributeName", result.getAttributeName());
 						MDC.put("key", values.getKey());
 						MDC.put("Epoch", String.valueOf(result.getEpoch()));
-						LOG.info("");
+						log.info("");
 					}
 				}
 			}
