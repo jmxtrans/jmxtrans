@@ -1,5 +1,7 @@
 package com.googlecode.jmxtrans;
 
+import com.google.common.io.Closer;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
@@ -22,10 +24,10 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.googlecode.jmxtrans.cli.CliArgumentParser;
 import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
@@ -62,7 +64,7 @@ public class JmxTransformer implements WatchedCallback {
 	 * Pools. TODO : Move to a PoolUtils or PoolRegistry so others can use it
 	 */
 	private Map<String, KeyedObjectPool> poolMap;
-	private Map<String, ManagedGenericKeyedObjectPool> poolMBeans;
+	private final Map<String, ManagedGenericKeyedObjectPool> poolMBeans = new ConcurrentHashMap<String, ManagedGenericKeyedObjectPool>();
 
 	private List<Server> masterServersList = new ArrayList<Server>();
 
@@ -173,6 +175,10 @@ public class JmxTransformer implements WatchedCallback {
 	 *
 	 * @throws LifecycleException the lifecycle exception
 	 */
+	// There is a sleep to work around a Quartz issue. The issue is marked to be
+	// fixed, but will require further analysis. This should not be reported by
+	// Findbugs, but as a more complex issue.
+	@SuppressFBWarnings(value = "SWL_SLEEP_WITH_LOCK_HELD", justification = "Workaround for Quartz issue")
 	private synchronized void stopServices() throws LifecycleException {
 		try {
 			// Shutdown the scheduler
@@ -180,7 +186,7 @@ public class JmxTransformer implements WatchedCallback {
 				this.serverScheduler.shutdown(true);
 				log.debug("Shutdown server scheduler");
 				try {
-					// Quartz issue, need to sleep
+					// FIXME: Quartz issue, need to sleep
 					Thread.sleep(1500);
 				} catch (InterruptedException e) {
 					log.error(e.getMessage(), e);
@@ -198,7 +204,7 @@ public class JmxTransformer implements WatchedCallback {
 			for (String key : poolMap.keySet()) {
 				JmxUtils.unregisterJMX(poolMBeans.get(key));
 			}
-			this.poolMBeans = null;
+			this.poolMBeans.clear();
 
 			// Shutdown the pools
 			for (Entry<String, KeyedObjectPool> entry : this.poolMap.entrySet()) {
@@ -261,13 +267,20 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void startupScheduler() throws Exception {
 		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
-		InputStream stream = null;
-		if (configuration.getQuartPropertiesFile() == null) {
-			stream = JmxTransformer.class.getResourceAsStream("/quartz.server.properties");
-		} else {
-			stream = new FileInputStream(configuration.getQuartPropertiesFile());
+		Closer closer = Closer.create();
+		try {
+			InputStream stream = null;
+			if (configuration.getQuartPropertiesFile() == null) {
+				stream = closer.register(JmxTransformer.class.getResourceAsStream("/quartz.server.properties"));
+			} else {
+				stream = closer.register(new FileInputStream(configuration.getQuartPropertiesFile()));
+			}
+			serverSchedFact.initialize(stream);
+		} catch (Throwable t) {
+			throw closer.rethrow(t);
+		} finally {
+			closer.close();
 		}
-		serverSchedFact.initialize(stream);
 		this.serverScheduler = serverSchedFact.getScheduler();
 		this.serverScheduler.start();
 	}
@@ -309,13 +322,13 @@ public class JmxTransformer implements WatchedCallback {
 		if (this.poolMap == null) {
 			this.poolMap = JmxUtils.getDefaultPoolMap();
 
-			this.poolMBeans = new HashMap<String, ManagedGenericKeyedObjectPool>();
+			this.poolMBeans.clear();
 
-			for (String key : poolMap.keySet()) {
-				ManagedGenericKeyedObjectPool mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) poolMap.get(key));
-				mbean.setPoolName(key);
+			for (Map.Entry<String, KeyedObjectPool> poolEntry : poolMap.entrySet()) {
+				ManagedGenericKeyedObjectPool mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) poolEntry.getValue());
+				mbean.setPoolName(poolEntry.getKey());
 				JmxUtils.registerJMX(mbean);
-				poolMBeans.put(key, mbean);
+				poolMBeans.put(poolEntry.getKey(), mbean);
 			}
 		}
 	}

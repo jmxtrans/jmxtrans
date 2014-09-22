@@ -105,7 +105,9 @@ public class JmxUtils {
 				service.invokeAll(threads);
 
 			} finally {
-				shutdownAndAwaitTermination(service);
+				if (service != null) {
+					shutdownAndAwaitTermination(service);
+				}
 			}
 		} else {
 			for (Query query : server.getQueries()) {
@@ -405,7 +407,9 @@ public class JmxUtils {
 				service.shutdown();
 			} finally {
 				try {
-					service.awaitTermination(1000 * 60, TimeUnit.SECONDS);
+					if (service != null) {
+						service.awaitTermination(1000 * 60, TimeUnit.SECONDS);
+					}
 				} catch (InterruptedException ex) {
 					log.error("Error shutting down execution.", ex);
 				}

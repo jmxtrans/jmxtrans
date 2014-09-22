@@ -54,8 +54,8 @@ public class SensuWriter extends BaseOutputWriter {
 	}
 
 	public void validateSetup(Query query) throws ValidationException {
-		sensuhost = new String(getStringSetting(SETTING_HOST, DEFAULT_SENSU_HOST));
-		sensuhandler = new String(getStringSetting(SETTING_HANDLER, DEFAULT_SENSU_HANDLER));
+		sensuhost = getStringSetting(SETTING_HOST, DEFAULT_SENSU_HOST);
+		sensuhandler = getStringSetting(SETTING_HANDLER, DEFAULT_SENSU_HANDLER);
 		logger.info("Start Sensu writer connected to '{}' with handler {}", sensuhost, sensuhandler);
 	}
 
@@ -72,7 +72,7 @@ public class SensuWriter extends BaseOutputWriter {
 		g.writeStringField("type", "metric");
 		g.writeStringField("handler", sensuhandler);
 
-		String jsonoutput = "";
+		StringBuffer jsonoutput = new StringBuffer();
 		List<String> typeNames = getTypeNames();
 		for (Result result : query.getResults()) {
 			Map<String, Object> resultValues = result.getValues();
@@ -80,12 +80,15 @@ public class SensuWriter extends BaseOutputWriter {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 						Object value = values.getValue();
-						jsonoutput = jsonoutput + JmxUtils.getKeyString(query, result, values, typeNames, null) + " " + value + " " + TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS) + System.getProperty("line.separator");
+						jsonoutput.append(JmxUtils.getKeyString(query, result, values, typeNames, null)).append(" ")
+								.append(value).append(" ")
+								.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
+								.append(System.getProperty("line.separator"));
 					}
 				}
 			}
 		}
-		g.writeStringField("output", jsonoutput);
+		g.writeStringField("output", jsonoutput.toString());
 		g.writeEndObject();
 		g.flush();
 		g.close();

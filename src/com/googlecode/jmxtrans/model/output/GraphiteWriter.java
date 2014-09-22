@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
@@ -30,6 +32,8 @@ import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import static com.google.common.base.Charsets.UTF_8;
 
 /**
  * This low latency and thread save output writer sends data to a host/port combination
@@ -150,7 +154,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 		}
 
 		try {
-			PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+			PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
 
 			List<String> typeNames = this.getTypeNames();
 

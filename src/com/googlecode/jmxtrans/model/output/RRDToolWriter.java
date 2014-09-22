@@ -5,6 +5,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import com.google.common.io.Closer;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -21,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -220,16 +223,26 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 * Check to see if there was an error processing an rrdtool command
 	 */
 	private void checkErrorStream(Process process) throws Exception {
-		InputStream is = process.getErrorStream();
-		InputStreamReader isr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(isr);
-		StringBuilder sb = new StringBuilder();
-		String line = null;
-		while ((line = br.readLine()) != null) {
-			sb.append(line);
-		}
-		if (sb.length() > 0) {
-			throw new RuntimeException(sb.toString());
+		Closer closer = Closer.create();
+		try {
+			InputStream is = closer.register(process.getErrorStream());
+			// rrdtool should use platform encoding (unless you did something
+			// very strange with your installation of rrdtool). So let's be
+			// explicit and use the presumed correct encoding to read errors.
+			InputStreamReader isr = closer.register(new InputStreamReader(is, Charset.defaultCharset()));
+			BufferedReader br = closer.register(new BufferedReader(isr));
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+			}
+			if (sb.length() > 0) {
+				throw new RuntimeException(sb.toString());
+			}
+		} catch (Throwable t) {
+			throw closer.rethrow(t);
+		} finally {
+			closer.close();
 		}
 	}
 

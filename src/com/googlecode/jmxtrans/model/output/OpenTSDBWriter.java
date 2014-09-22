@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.base.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import com.googlecode.jmxtrans.util.LifecycleException;
+
+import static com.google.common.base.Charsets.UTF_8;
 
 /**
  * OpenTSDBWriter which directly sends
@@ -110,7 +113,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 
 		// Read and log the response from the server for diagnostic purposes.
 
-		InputStreamReader socketInputStream = new InputStreamReader(socket.getInputStream());
+		InputStreamReader socketInputStream = new InputStreamReader(socket.getInputStream(), UTF_8);
 		BufferedReader bufferedSocketInputStream = new BufferedReader(socketInputStream);
 		String line;
 		while (socketInputStream.ready() && (line = bufferedSocketInputStream.readLine()) != null) {

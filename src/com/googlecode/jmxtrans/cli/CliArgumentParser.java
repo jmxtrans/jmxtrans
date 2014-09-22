@@ -54,7 +54,7 @@ public class CliArgumentParser {
 				}
 			} else if (option.getOpt().equals("s")) {
 				try {
-					configuration.setRunPeriod(Integer.valueOf(option.getValue()));
+					configuration.setRunPeriod(Integer.parseInt(option.getValue()));
 				} catch (NumberFormatException nfe) {
 					throw new OptionsException("Seconds between server job runs must be an integer");
 				}
