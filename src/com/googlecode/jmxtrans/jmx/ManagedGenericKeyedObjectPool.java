@@ -1,26 +1,26 @@
 package com.googlecode.jmxtrans.jmx;
 
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-
 /**
  * The Class ManagedGenericKeyedObjectPool.
- * 
+ *
  * @author marcos.lois
  */
 public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectPoolMBean, ManagedObject {
-    
-    /** The object name. */
-    private ObjectName objectName;
-    
-    /** The default pool name. */
-    private String poolName = "Noname";
-    
-    /** The pool. */
-    private GenericKeyedObjectPool pool;
-    
+
+	/** The object name. */
+	private ObjectName objectName;
+
+	/** The default pool name. */
+	private String poolName = "Noname";
+
+	/** The pool. */
+	private GenericKeyedObjectPool pool;
+
 	/**
 	 * The Constructor.
 	 *
@@ -30,15 +30,15 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 		this.pool = pool;
 	}
 
-    /**
-     * The Constructor.
-     *
-     * @param pool the pool
-     * @param poolName the pool name
-     */
-    public ManagedGenericKeyedObjectPool(GenericKeyedObjectPool pool, String poolName) {
-    	if(poolName != null)
-    		this.poolName = poolName;
+	/**
+	 * The Constructor.
+	 *
+	 * @param pool     the pool
+	 * @param poolName the pool name
+	 */
+	public ManagedGenericKeyedObjectPool(GenericKeyedObjectPool pool, String poolName) {
+		if (poolName != null)
+			this.poolName = poolName;
 		this.pool = pool;
 	}
 
@@ -65,27 +65,27 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	 */
 	@Override
 	public ObjectName getObjectName() throws MalformedObjectNameException {
-        if (objectName == null) {
-            objectName = new ObjectName("com.googlecode.jmxtrans:Type=GenericKeyedObjectPool,PoolName=" + this.poolName + ",Name=" + this.getClass().getSimpleName() + "@" + this.hashCode());
-        }
-        return objectName;
-    }
+		if (objectName == null) {
+			objectName = new ObjectName("com.googlecode.jmxtrans:Type=GenericKeyedObjectPool,PoolName=" + this.poolName + ",Name=" + this.getClass().getSimpleName() + "@" + this.hashCode());
+		}
+		return objectName;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.jmx.ManagedObject#setObjectName(javax.management.ObjectName)
 	 */
 	@Override
-    public void setObjectName(ObjectName objectName) throws MalformedObjectNameException {
-        this.objectName = objectName;
-    }
+	public void setObjectName(ObjectName objectName) throws MalformedObjectNameException {
+		this.objectName = objectName;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.jmx.ManagedObject#setObjectName(java.lang.String)
 	 */
 	@Override
-    public void setObjectName(String objectName) throws MalformedObjectNameException {
-        this.objectName = ObjectName.getInstance(objectName);
-    }
+	public void setObjectName(String objectName) throws MalformedObjectNameException {
+		this.objectName = ObjectName.getInstance(objectName);
+	}
 
 	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPoolMBean#getMaxActive()
