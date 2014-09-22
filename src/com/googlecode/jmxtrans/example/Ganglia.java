@@ -5,7 +5,7 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GangliaWriter;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.JsonPrinter;
 
 /**
  * This class hits a Graphite server running on port 2003 and sends the memory
@@ -14,6 +14,8 @@ import com.googlecode.jmxtrans.util.JsonUtils;
  * @author jon
  */
 public class Ganglia {
+
+	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
 	/** */
 	public static void main(String[] args) throws Exception {
@@ -32,7 +34,7 @@ public class Ganglia {
 		server.addQuery(q);
 
 		JmxProcess process = new JmxProcess(server);
-		JsonUtils.prettyPrintJson(process, System.out);
+		printer.prettyPrint(process);
 
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);

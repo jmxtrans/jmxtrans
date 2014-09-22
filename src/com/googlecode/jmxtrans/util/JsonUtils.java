@@ -16,27 +16,6 @@ public final class JsonUtils {
 	private JsonUtils() {}
 
 	/**
-	 * Utility function good for testing things. Prints out the json tree of the
-	 * JmxProcess.
-	 */
-	public static void printJson(JmxProcess process, PrintStream out) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.getSerializationConfig().set(WRITE_NULL_MAP_VALUES, false);
-		out.println(mapper.writeValueAsString(process));
-	}
-
-	/**
-	 * Utility function good for testing things. Prints out the json tree of the
-	 * JmxProcess.
-	 */
-	public static void prettyPrintJson(JmxProcess process, PrintStream out) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.getSerializationConfig().set(WRITE_NULL_MAP_VALUES, false);
-		ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
-		out.println(writer.writeValueAsString(process));
-	}
-
-	/**
 	 * Uses jackson to load json configuration from a File into a full object
 	 * tree representation of that json.
 	 */
