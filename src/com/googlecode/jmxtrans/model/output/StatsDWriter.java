@@ -54,18 +54,19 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	/**
 	 * Uses JmxUtils.getDefaultPoolMap()
+	 *
 	 * @throws IOException
 	 */
 	public StatsDWriter() throws IOException {
 		channel = DatagramChannel.open();
-        setBufferSize((short) 1500);
+		setBufferSize((short) 1500);
 	}
-	
+
 	public synchronized void setBufferSize(short packetBufferSize) {
-        if(sendBuffer != null) {
-                flush();
-        }
-        sendBuffer = ByteBuffer.allocate(packetBufferSize);
+		if (sendBuffer != null) {
+			flush();
+		}
+		sendBuffer = ByteBuffer.allocate(packetBufferSize);
 	}
 
 
@@ -168,7 +169,7 @@ public class StatsDWriter extends BaseOutputWriter {
 			}
 
 			if (sendBuffer.position() > 0) { // multiple metrics are separated
-												// by '\n'
+				// by '\n'
 				sendBuffer.put((byte) '\n');
 			}
 

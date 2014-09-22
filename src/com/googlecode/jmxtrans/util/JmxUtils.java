@@ -244,8 +244,9 @@ public class JmxUtils {
 	}
 
 	/** */
-	private static void processTabularDataSupport(List<Result> resList, MBeanInfo info, ObjectInstance oi, Result r, String attributeName,
-												  TabularDataSupport tds, Query query) {
+	private static void processTabularDataSupport(
+			List<Result> resList, MBeanInfo info, ObjectInstance oi, Result r, String attributeName,
+			TabularDataSupport tds, Query query) {
 		Set<Entry<Object, Object>> entries = tds.entrySet();
 		for (Entry<Object, Object> entry : entries) {
 			Object entryKeys = entry.getKey();

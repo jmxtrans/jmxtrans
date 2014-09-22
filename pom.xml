@@ -26,7 +26,13 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<checkstyle.max.allowed.violations>856</checkstyle.max.allowed.violations>
+		<!--
+			Maximum number of checkstyle violations allowed. Build will fail
+			if there are more than this number of violations. Feel free to
+			increase this number if you have a reason. The goal is not to be
+			dogmatic, but to provide consistency in the code.
+		-->
+		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 	</properties>
 
 	<developers>

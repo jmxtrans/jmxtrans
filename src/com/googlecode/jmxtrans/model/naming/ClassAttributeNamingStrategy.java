@@ -7,29 +7,29 @@ import com.googlecode.jmxtrans.model.Result;
  * Strategy for naming metrics, tags, and the like given a result.
  */
 public class ClassAttributeNamingStrategy implements NamingStrategy {
-    protected String    delimiter = ".";
+	protected String delimiter = ".";
 
-    public void setDelimiter (String delim) {
-        this.delimiter = delim;
-    }
+	public void setDelimiter(String delim) {
+		this.delimiter = delim;
+	}
 
-    public String   getDelimiter () {
-        return  this.delimiter;
-    }
+	public String getDelimiter() {
+		return this.delimiter;
+	}
 
-    @Override
-    public String   formatName (Result result) {
-        StringBuilder   formatted = new StringBuilder();
-        String          attName   = result.getAttributeName();
-        String          className = result.getClassNameAlias();
+	@Override
+	public String formatName(Result result) {
+		StringBuilder formatted = new StringBuilder();
+		String attName = result.getAttributeName();
+		String className = result.getClassNameAlias();
 
-        if ( className == null )
-            className = result.getClassName();
+		if (className == null)
+			className = result.getClassName();
 
-        formatted.append(className);
-        formatted.append(delimiter);
-        formatted.append(attName);
+		formatted.append(className);
+		formatted.append(delimiter);
+		formatted.append(attName);
 
-        return  formatted.toString();
-    }
+		return formatted.toString();
+	}
 }

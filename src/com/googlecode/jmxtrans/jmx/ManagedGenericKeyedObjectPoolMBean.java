@@ -5,28 +5,28 @@ package com.googlecode.jmxtrans.jmx;
  */
 public interface ManagedGenericKeyedObjectPoolMBean {
 
-    /**
-     * Gets the max active.
-     *
-     * @return the max active
-     */
-    int getMaxActive();
+	/**
+	 * Gets the max active.
+	 *
+	 * @return the max active
+	 */
+	int getMaxActive();
 
-    int getMaxIdle();
+	int getMaxIdle();
 
-    long getMaxWait();
+	long getMaxWait();
 
-    int getMinIdle();
+	int getMinIdle();
 
-    int getNumActive();
+	int getNumActive();
 
-    int getNumIdle();
+	int getNumIdle();
 
-    void setMaxActive(int maxActive);
+	void setMaxActive(int maxActive);
 
-    void setMaxIdle(int maxIdle);
+	void setMaxIdle(int maxIdle);
 
-    void setMinIdle(int maxIdle);
+	void setMinIdle(int maxIdle);
 
-    void setMaxWait(long maxWait);
+	void setMaxWait(long maxWait);
 }
