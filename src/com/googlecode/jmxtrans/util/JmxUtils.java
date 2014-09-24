@@ -188,10 +188,10 @@ public class JmxUtils {
 
 					AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
 
-					query.setResults(new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults());
+					List<Result> results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults();
 
 					// Now run the OutputWriters.
-					runOutputWritersForQuery(query);
+					runOutputWritersForQuery(query, results);
 
 					if (log.isDebugEnabled()) {
 						log.debug("Finished running outputWriters for query: " + query);
@@ -208,11 +208,11 @@ public class JmxUtils {
 	}
 
 	/** */
-	private static void runOutputWritersForQuery(Query query) throws Exception {
+	private static void runOutputWritersForQuery(Query query, List<Result> results) throws Exception {
 		List<OutputWriter> writers = query.getOutputWriters();
 		if (writers != null) {
 			for (OutputWriter writer : writers) {
-				writer.doWrite(query);
+				writer.doWrite(query, results);
 			}
 		}
 	}

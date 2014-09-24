@@ -1,11 +1,9 @@
 package com.googlecode.jmxtrans.model.output;
 
 import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,8 +14,8 @@ import java.util.Map;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.ValidationException;
 
+import com.google.common.collect.ImmutableMap;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -81,8 +79,6 @@ public class OpenTSDBGenericWriterTests {
 		when(this.mockResult.getTypeName()).
 			thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
 
-		when(this.mockQuery.getResults()).thenReturn(Arrays.asList(new Result[] { this.mockResult }));
-
 		this.writer.addSetting("typeNames", Arrays.asList(new String[] { "Type", "Group", "Name", "Missing" }));
 		this.writer.addSetting("host", "localhost");
 		this.writer.addSetting("port", Integer.valueOf(4242));
@@ -96,7 +92,7 @@ public class OpenTSDBGenericWriterTests {
 	public void	testMergedTypeNameValues1 () throws Exception {
 		// Verify the default is the same as the TRUE path.
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertEquals(1, tvMetricLinesSent.size());
@@ -108,7 +104,7 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.addSetting("mergeTypeNamesTags", Boolean.TRUE);
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertEquals(1, tvMetricLinesSent.size());
@@ -121,7 +117,7 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.addSetting("mergeTypeNamesTags", Boolean.FALSE);
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertEquals(1, tvMetricLinesSent.size());
@@ -140,7 +136,7 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.setTypeNames(new LinkedList());
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertTrue(
@@ -159,7 +155,7 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.addSetting("tags", tagMap);
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
@@ -174,7 +170,7 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.addSetting("mergeTypeNamesTags", Boolean.TRUE);
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertEquals(1, tvMetricLinesSent.size());
@@ -186,7 +182,7 @@ public class OpenTSDBGenericWriterTests {
 	public void	testDontAddHostnameTag () throws Exception {
 		this.writer.addSetting("addHostnameTag", false);
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
@@ -197,7 +193,7 @@ public class OpenTSDBGenericWriterTests {
 		when(this.mockResult.getValues()).thenReturn(null);
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertEquals(0, this.tvMetricLinesSent.size());
@@ -208,7 +204,7 @@ public class OpenTSDBGenericWriterTests {
 		when(this.mockResult.getValues()).thenReturn(createValueMap("X-ATT-X", "120021"));
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
@@ -225,7 +221,7 @@ public class OpenTSDBGenericWriterTests {
 			thenReturn(createValueMap("X-ATT-X", "120021", "XX-ATT-XX", "210012"));
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 		assertEquals(2, this.tvMetricLinesSent.size());
 
@@ -249,7 +245,7 @@ public class OpenTSDBGenericWriterTests {
 		when(this.mockResult.getValues()).thenReturn(createValueMap("X-ATT-X", "THIS-IS-NOT-A-NUMBER"));
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertEquals(0, this.tvMetricLinesSent.size());
@@ -260,7 +256,7 @@ public class OpenTSDBGenericWriterTests {
 		this.writer.addSetting("metricNamingExpression", "'xx-jexl-constant-name-xx'");
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 		assertTrue(this.tvMetricLinesSent.get(0).matches("^xx-jexl-constant-name-xx 0 120021.*"));
@@ -276,7 +272,7 @@ public class OpenTSDBGenericWriterTests {
 	@Test
 	public void	testDebugOuptutResultString () throws Exception {
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 	}
 
@@ -303,7 +299,7 @@ public class OpenTSDBGenericWriterTests {
 		this.writer = createMinimalWriter();
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 	}
 
@@ -315,7 +311,7 @@ public class OpenTSDBGenericWriterTests {
 		assertFalse(startOutputCalled);
 		assertFalse(finishOutputCalled);
 
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		assertTrue(prepareSenderCalled);
 		assertFalse(shutdownSenderCalled);
 		assertTrue(startOutputCalled);
@@ -337,7 +333,7 @@ public class OpenTSDBGenericWriterTests {
 
 		this.writer.start();
 		this.writer.validateSetup(this.mockQuery);
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 
 		// TBD: some way to validate System.out
 	}
@@ -392,7 +388,7 @@ public class OpenTSDBGenericWriterTests {
 
 		this.writer.addSetting("addHostnameTag", true);		// Ensure it's enabled
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 
 
 			//
@@ -460,23 +456,18 @@ public class OpenTSDBGenericWriterTests {
 		}
 	}
 
-	protected Map<String, Object>	createValueMap (Object... keysAndValues) {
-		Map<String, Object>	result;
-		int			iter;
-
-		result = new HashMap<String, Object>();
-		iter = 0;
+	protected ImmutableMap<String, Object> createValueMap (Object... keysAndValues) {
+		ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
+		int iter = 0;
 		while ( iter < keysAndValues.length ) {
 			if ( iter < ( keysAndValues.length - 1 ) ) {
 				result.put(keysAndValues[iter].toString(), keysAndValues[iter + 1]);
 				iter += 2;
-			}
-			else {
+			} else {
 				result.put(keysAndValues[iter].toString(), null);
 				iter++;
 			}
 		}
-
-		return	result;
+		return result.build();
 	}
 }

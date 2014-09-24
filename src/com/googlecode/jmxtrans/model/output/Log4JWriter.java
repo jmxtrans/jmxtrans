@@ -49,11 +49,11 @@ public class Log4JWriter extends BaseOutputWriter
 	/**
 	 * Set the log context and log
 	 */
-	public void doWrite(final Query query) throws Exception
+	public void doWrite(final Query query, List<Result> results) throws Exception
 	{
 		final List<String> typeNames = getTypeNames();
 
-		for (final Result result : query.getResults())
+		for (final Result result : results)
 		{
 			final Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null)

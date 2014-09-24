@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -21,7 +22,7 @@ public class VelocityWriter extends BaseOutputWriter {
 	public VelocityWriter() {
 	}
 
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		// TODO Auto-generated method stub
 
 	}

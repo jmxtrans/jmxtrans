@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.pool.KeyedObjectPool;
@@ -8,6 +9,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -30,7 +32,7 @@ public interface OutputWriter {
 
 	public void stop() throws LifecycleException;
 
-	public void doWrite(Query query) throws Exception;
+	public void doWrite(Query query, List<Result> results) throws Exception;
 
 	/**
 	 * Settings allow you to configure your Writers with whatever they might

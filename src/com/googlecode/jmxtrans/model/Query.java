@@ -32,7 +32,6 @@ public class Query {
 	private List<String> keys;
 	private boolean allowDottedKeys;
 	private List<OutputWriter> outputWriters;
-	private List<Result> results;
 	private Set<String> typeNames;
 
 	public Query() {
@@ -138,18 +137,6 @@ public class Query {
 
 	public void setAllowDottedKeys(boolean allowDottedKeys) {
 		this.allowDottedKeys = allowDottedKeys;
-	}
-
-	public void setResults(List<Result> results) {
-		this.results = results;
-	}
-
-	/**
-	 * We don't want Jackson to serialize the results if they exist.
-	 */
-	@JsonIgnore
-	public List<Result> getResults() {
-		return results;
 	}
 
 	public void setOutputWriters(List<OutputWriter> outputWriters) {

@@ -78,10 +78,10 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * The meat of the output. Very similar to GraphiteWriter.
 	 */
 	@Override
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		List<String> typeNames = getTypeNames();
 
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {

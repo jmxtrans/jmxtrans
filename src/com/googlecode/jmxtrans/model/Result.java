@@ -1,9 +1,12 @@
 package com.googlecode.jmxtrans.model;
 
+import com.google.common.collect.ImmutableMap;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,33 +17,25 @@ import java.util.TreeMap;
  */
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class Result {
-	private String attributeName;
-	private String className;
-	private String typeName;
-	private Map<String, Object> values;
-	private long epoch;
-	private Query query;
+	private final String attributeName;
+	private final String className;
+	private final String typeName;
+	private final ImmutableMap<String, Object> values;
+	private final long epoch;
+	private final Query query;
 
-	public Result() {
-		epoch = System.currentTimeMillis();
-	}
-
-	public Result(String attributeName) {
-		this();
-		this.setAttributeName(attributeName);
-	}
-
-	public void setQuery(Query query) {
+	public Result(String attributeName, String className, String typeName, Map<String, Object> values, Query query) {
+		this.className = className;
+		this.typeName = typeName;
+		this.values = ImmutableMap.copyOf(values);
 		this.query = query;
+		this.epoch = System.currentTimeMillis();
+		this.attributeName = attributeName;
 	}
 
 	@JsonIgnore
 	public Query getQuery() {
 		return query;
-	}
-
-	public void setClassName(String className) {
-		this.className = className;
 	}
 
 	public String getClassName() {
@@ -54,41 +49,16 @@ public class Result {
 		return query.getResultAlias();
 	}
 
-	public void setTypeName(String typeName) {
-		this.typeName = typeName;
-	}
-
 	public String getTypeName() {
 		return typeName;
 	}
 
-	public void setValues(Map<String, Object> values) {
-		this.values = values;
-	}
-
-	public Map<String, Object> getValues() {
+	public ImmutableMap<String, Object> getValues() {
 		return values;
-	}
-
-	public void addValue(String key, Object value) {
-		if (this.values == null) {
-			values = new TreeMap<String, Object>();
-		}
-		if (query.getKeys() == null || query.getKeys().contains(key)) {
-			values.put(key, value);
-		}
-	}
-
-	public void setAttributeName(String attributeName) {
-		this.attributeName = attributeName;
 	}
 
 	public String getAttributeName() {
 		return attributeName;
-	}
-
-	public void setEpoch(long epoch) {
-		this.epoch = epoch;
 	}
 
 	public long getEpoch() {

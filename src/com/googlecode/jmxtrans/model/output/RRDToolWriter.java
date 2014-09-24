@@ -91,11 +91,10 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		RrdDef def = getDatabaseTemplateSpec();
 
 		List<String> dsNames = getDsNames(def.getDsDefs());
-		List<Result> results = query.getResults();
 
 		Map<String, String> dataMap = new TreeMap<String, String>();
 

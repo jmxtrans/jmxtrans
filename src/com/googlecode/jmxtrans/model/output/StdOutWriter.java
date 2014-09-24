@@ -1,5 +1,7 @@
 package com.googlecode.jmxtrans.model.output;
 
+import java.util.List;
+
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
@@ -22,8 +24,8 @@ public class StdOutWriter extends BaseOutputWriter {
 	public void validateSetup(Query query) throws ValidationException {
 	}
 
-	public void doWrite(Query query) throws Exception {
-		for (Result r : query.getResults()) {
+	public void doWrite(Query query, List<Result> results) throws Exception {
+		for (Result r : results) {
 			System.out.println(r);
 		}
 	}

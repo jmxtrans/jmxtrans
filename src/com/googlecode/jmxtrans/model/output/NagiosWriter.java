@@ -125,7 +125,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	 * The meat of the output. Nagios format..
 	 */
 	@Override
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		checkFile(query);
 		List<String> typeNames = getTypeNames();
 		String hostNagios = (String) this.getSettings().get(NAGIOS_HOST);
@@ -135,7 +135,7 @@ public class NagiosWriter extends BaseOutputWriter {
 		List<String> filters = (List<String>) this.getSettings().get(FILTERS);
 		List<String> thresholds = (List<String>) this.getSettings().get(THRESHOLDS);
 
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {

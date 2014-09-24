@@ -214,11 +214,12 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * Write the results of the query.
 	 *
 	 * @param query - the query and its results.
+	 * @param results
 	 */
 	@Override
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		this.startOutput();
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			for (String resultString : resultParser(result)) {
 				if (isDebugEnabled())
 					System.out.println(resultString);

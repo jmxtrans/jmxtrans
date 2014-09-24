@@ -128,11 +128,11 @@ public class StatsDWriter extends BaseOutputWriter {
 			bucketType = (String) this.getSettings().get(BUCKET_TYPE);
 	}
 
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 
 		List<String> typeNames = this.getTypeNames();
 
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			if (isDebugEnabled()) {
 				log.debug(result.toString());
 			}

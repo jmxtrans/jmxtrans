@@ -1,6 +1,5 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.base.Charsets;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -138,7 +137,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		Socket socket = null;
 		statusLock.lock();
 		try {
@@ -158,7 +157,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 			List<String> typeNames = this.getTypeNames();
 
-			for (Result result : query.getResults()) {
+			for (Result result : results) {
 				if (isDebugEnabled()) {
 					log.debug("Query result: " + result.toString());
 				}

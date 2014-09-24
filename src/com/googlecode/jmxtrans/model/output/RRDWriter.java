@@ -47,13 +47,12 @@ public class RRDWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		RrdDb db = null;
 		try {
 			db = createOrOpenDatabase();
 			Sample sample = db.createSample();
 			List<String> dsNames = Arrays.asList(db.getDsNames());
-			List<Result> results = query.getResults();
 
 			// go over all the results and look for datasource names that map to
 			// keys from the result values

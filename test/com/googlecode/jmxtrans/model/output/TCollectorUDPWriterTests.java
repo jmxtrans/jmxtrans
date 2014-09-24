@@ -15,6 +15,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.LifecycleException;
 
+import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
 import org.mockito.ArgumentCaptor;
 import org.powermock.api.mockito.PowerMockito;
@@ -25,7 +26,6 @@ import org.powermock.reflect.Whitebox;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -39,7 +39,7 @@ public class TCollectorUDPWriterTests {
 	protected Result		mockResult;
 	protected DatagramSocket	mockDgSocket;
 	protected Logger		mockLog;
-	protected Map<String, Object>	testValues;
+	protected ImmutableMap<String, Object>	testValues;
 
 	@Before
 	public void	setupTest () throws Exception {
@@ -58,9 +58,7 @@ public class TCollectorUDPWriterTests {
 
 			// When results are needed.
 
-		when(this.mockQuery.getResults()).thenReturn(Arrays.asList(this.mockResult));
-		testValues = new HashMap<String, Object>();
-		testValues.put("x-att1-x", "120021");
+		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
 		when(this.mockResult.getValues()).thenReturn(testValues);
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
@@ -101,7 +99,7 @@ public class TCollectorUDPWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(this.mockQuery, Arrays.asList(this.mockResult));
 		this.writer.stop();
 
 

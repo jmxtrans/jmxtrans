@@ -1,6 +1,5 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.base.Charsets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -193,8 +192,8 @@ public class StackdriverWriter extends BaseOutputWriter {
 	 * Second posts the message to the Stackdriver gateway via HTTP
 	 */
 	@Override
-	public void doWrite(Query query) throws Exception {
-		String gatewayMessage = getGatewayMessage(query.getResults());
+	public void doWrite(Query query, List<Result> results) throws Exception {
+		String gatewayMessage = getGatewayMessage(results);
 		
 		// message won't be returned if there are no numeric values in the query results
 		if (gatewayMessage != null) {

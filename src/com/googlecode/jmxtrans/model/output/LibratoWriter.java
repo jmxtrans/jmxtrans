@@ -108,12 +108,12 @@ public class LibratoWriter extends BaseOutputWriter {
 		}
 	}
 
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		logger.debug("Export to '{}', proxy {} metrics {}", url, proxy, query);
-		writeToLibrato(query);
+		writeToLibrato(query, results);
 	}
 
-	private void serialize(Query query, OutputStream outputStream) throws IOException {
+	private void serialize(Query query, List<Result> results, OutputStream outputStream) throws IOException {
 		JsonGenerator g = jsonFactory.createJsonGenerator(outputStream, JsonEncoding.UTF8);
 		g.writeStartObject();
 		g.writeArrayFieldStart("counters");
@@ -123,7 +123,7 @@ public class LibratoWriter extends BaseOutputWriter {
 
 		g.writeArrayFieldStart("gauges");
 		List<String> typeNames = getTypeNames();
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
@@ -156,7 +156,7 @@ public class LibratoWriter extends BaseOutputWriter {
 
 	}
 
-	private void writeToLibrato(Query query) {
+	private void writeToLibrato(Query query, List<Result> results) {
 		HttpURLConnection urlConnection = null;
 		try {
 			if (proxy == null) {
@@ -171,7 +171,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			urlConnection.setRequestProperty("content-type", "application/json; charset=utf-8");
 			urlConnection.setRequestProperty("Authorization", "Basic " + basicAuthentication);
 
-			serialize(query, urlConnection.getOutputStream());
+			serialize(query, results, urlConnection.getOutputStream());
 			int responseCode = urlConnection.getResponseCode();
 			if (responseCode != 200) {
 				logger.warn("Failure {}:'{}' to send result to Librato server '{}' with proxy {}, user {}", responseCode, urlConnection.getResponseMessage(), url, proxy, user);

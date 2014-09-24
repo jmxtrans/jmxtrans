@@ -59,12 +59,12 @@ public class SensuWriter extends BaseOutputWriter {
 		logger.info("Start Sensu writer connected to '{}' with handler {}", sensuhost, sensuhandler);
 	}
 
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Query query, List<Result> results) throws Exception {
 		logger.debug("Export to '{}', metrics {}", sensuhost, query);
-		writeToSensu(query);
+		writeToSensu(query, results);
 	}
 
-	private void serialize(Query query, OutputStream outputStream) throws IOException {
+	private void serialize(Query query, List<Result> results, OutputStream outputStream) throws IOException {
 		JsonGenerator g = jsonFactory.createJsonGenerator(outputStream, JsonEncoding.UTF8);
 		g.useDefaultPrettyPrinter();
 		g.writeStartObject();
@@ -74,7 +74,7 @@ public class SensuWriter extends BaseOutputWriter {
 
 		StringBuffer jsonoutput = new StringBuffer();
 		List<String> typeNames = getTypeNames();
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
@@ -94,11 +94,11 @@ public class SensuWriter extends BaseOutputWriter {
 		g.close();
 	}
 
-	private void writeToSensu(Query query) {
+	private void writeToSensu(Query query, List<Result> results) {
 		Socket socketConnection = null;
 		try {
 			socketConnection = new Socket(sensuhost, 3030);
-			serialize(query, socketConnection.getOutputStream());
+			serialize(query, results, socketConnection.getOutputStream());
 		} catch (Exception e) {
 			logger.warn("Failure to send result to Sensu server '{}'", sensuhost, e);
 		} finally {

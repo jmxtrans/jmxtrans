@@ -1,9 +1,12 @@
 package com.googlecode.jmxtrans.util;
 
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -98,7 +101,7 @@ public class BaseOutputWriterTests {
 
 	private class TestBaseOuputWriter extends BaseOutputWriter {
 		@Override
-		public void doWrite(Query query) throws Exception {
+		public void doWrite(Query query, List<Result> results) throws Exception {
 			throw new UnsupportedOperationException("doWrite() not implemented for TestBaseOutputWriter.");
 		}
 

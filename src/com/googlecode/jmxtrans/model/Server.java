@@ -227,29 +227,6 @@ public class Server {
 		this.url = PropertyResolver.resolveProps(url);
 	}
 
-	/**
-	 * If there are queries and results that have been executed, this is just a
-	 * shortcut to get all the Results.
-	 *
-	 * @return null if there are no queries or empty list if there are no
-	 *         results.
-	 */
-	@JsonIgnore
-	public List<Result> getResults() {
-		List<Query> queries = this.getQueries();
-		List<Result> results = null;
-		if (queries != null) {
-			results = new ArrayList<Result>();
-			for (Query q : queries) {
-				List<Result> tmp = q.getResults();
-				if (tmp != null) {
-					results.addAll(tmp);
-				}
-			}
-		}
-		return results;
-	}
-
 	/** */
 	@JsonIgnore
 	public boolean isQueriesMultiThreaded() {

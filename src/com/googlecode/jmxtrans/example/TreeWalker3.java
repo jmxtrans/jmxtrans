@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.example;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,13 +15,19 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
+import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.googlecode.jmxtrans.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.ValidationException;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * Walks a JMX tree and prints out all of the unique typenames and their
@@ -69,6 +76,8 @@ public class TreeWalker3 {
 
 			Query query = new Query();
 			query.setObj(name.getCanonicalName());
+			ResultCapture resultCapture = new ResultCapture();
+			query.addOutputWriter(resultCapture);
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
 				query.addAttr(attrInfo.getName());
@@ -80,8 +89,7 @@ public class TreeWalker3 {
 				log.error("Error", anfe);
 			}
 
-			List<Result> results = query.getResults();
-			for (Result result : results) {
+			for (Result result : resultCapture.results) {
 				output.put(result.getTypeName(), query.getAttr().toString());
 			}
 		}
@@ -91,5 +99,35 @@ public class TreeWalker3 {
 			log.debug(entry.getValue());
 			log.debug("-----------------------------------------");
 		}
+	}
+
+	private static final class ResultCapture implements OutputWriter {
+
+		private List<Result> results;
+
+		@Override
+		public void start() throws LifecycleException {}
+
+		@Override
+		public void stop() throws LifecycleException {}
+
+		@Override
+		public void doWrite(Query query, List<Result> results) throws Exception {
+			this.results = results;
+		}
+
+		@Override
+		public Map<String, Object> getSettings() {
+			return emptyMap();
+		}
+
+		@Override
+		public void setSettings(Map<String, Object> settings) {}
+
+		@Override
+		public void validateSetup(Query query) throws ValidationException {}
+
+		@Override
+		public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {}
 	}
 }
