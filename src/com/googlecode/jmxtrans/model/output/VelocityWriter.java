@@ -10,6 +10,7 @@ import java.util.List;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -23,12 +24,12 @@ public class VelocityWriter extends BaseOutputWriter {
 	public VelocityWriter() {
 	}
 
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
 
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		// TODO
 	}
 

@@ -116,7 +116,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	}
 		
 	/** */
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		host = (String) this.getSettings().get(HOST);
 		Object portObj = this.getSettings().get(PORT);
 		if (portObj instanceof String) {
@@ -138,7 +138,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
 		statusLock.lock();
 		try {
@@ -169,7 +169,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 						if (NumberUtils.isNumeric(value)) {
 							StringBuilder sb = new StringBuilder();
 
-							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
+							sb.append(JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
 
 							sb.append(" ");
 							sb.append(value.toString());

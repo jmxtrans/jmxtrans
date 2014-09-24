@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
@@ -101,12 +102,12 @@ public class BaseOutputWriterTests {
 
 	private class TestBaseOuputWriter extends BaseOutputWriter {
 		@Override
-		public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+		public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 			throw new UnsupportedOperationException("doWrite() not implemented for TestBaseOutputWriter.");
 		}
 
 		@Override
-		public void validateSetup(Query query) throws ValidationException {
+		public void validateSetup(Server server, Query query) throws ValidationException {
 			throw new UnsupportedOperationException("validateSetup() not implemented for TestBaseOutputWriter.");
 		}
 	}

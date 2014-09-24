@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
@@ -56,7 +57,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	public RRDToolWriter() {
 	}
 
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
 		templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
 		binaryPath = new File((String) this.getSettings().get(BINARY_PATH));
@@ -92,7 +93,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDef def = getDatabaseTemplateSpec();
 
 		List<String> dsNames = getDsNames(def.getDsDefs());

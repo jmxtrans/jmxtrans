@@ -69,7 +69,7 @@ public class TreeWalker2 {
 			}
 
 			try {
-				JmxUtils.processQuery(connection, query);
+				JmxUtils.processQuery(connection, null, query);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}

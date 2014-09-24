@@ -19,7 +19,8 @@ public class GangliaWriterTests {
     /** Test validation when no parameter is set. */
     @Test(expected = ValidationException.class)
     public void testValidationWithoutSettings() throws ValidationException {
-        new GangliaWriter().validateSetup(new Query("test"));
+		Query test = new Query("test");
+		new GangliaWriter().validateSetup(null, test);
     }
 
     /** Test validation when only required parameters are set. */
@@ -27,7 +28,8 @@ public class GangliaWriterTests {
     public void testValidationMinimalSettings() throws ValidationException {
         final GangliaWriter writer = new GangliaWriter();
         writer.addSetting(GangliaWriter.HOST, "192.168.1.144");
-        writer.validateSetup(new Query("test"));
+		final Query test = new Query("test");
+		writer.validateSetup(null, test);
         assertEquals("192.168.1.144", writer.host);
         assertEquals(GangliaWriter.DEFAULT_PORT, writer.port);
         assertEquals(GangliaWriter.DEFAULT_ADDRESSING_MODE, writer.addressingMode);
@@ -54,7 +56,8 @@ public class GangliaWriterTests {
         writer.addSetting(GangliaWriter.TMAX, "354");
         writer.addSetting(GangliaWriter.DMAX, "24");
         writer.addSetting(GangliaWriter.GROUP_NAME, "dummy");
-        writer.validateSetup(new Query("test"));
+		final Query test = new Query("test");
+		writer.validateSetup(null, test);
         assertEquals("192.168.1.144", writer.host);
         assertEquals(25654, writer.port);
         assertEquals(GMetric.UDPAddressingMode.MULTICAST, writer.addressingMode);

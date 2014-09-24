@@ -125,7 +125,7 @@ public class OpenTSDBWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery, ImmutableList.of(this.mockResult));
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
@@ -157,7 +157,7 @@ public class OpenTSDBWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery, ImmutableList.of(this.mockResult));
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
@@ -187,7 +187,7 @@ public class OpenTSDBWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery, ImmutableList.of(this.mockResult));
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
@@ -309,7 +309,7 @@ public class OpenTSDBWriterTests {
 
 		this.writer.start();
 		try {
-			this.writer.doWrite(this.mockQuery, ImmutableList.of(this.mockResult));
+			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("IOException missing");
 		} catch ( IOException ioCaught ) {
 				//
@@ -340,7 +340,7 @@ public class OpenTSDBWriterTests {
 
 		this.writer.start();
 		try {
-			this.writer.doWrite(this.mockQuery, ImmutableList.of(this.mockResult));
+			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("IOException missing");
 		} catch ( IOException ioCaught ) {
 				//
@@ -368,7 +368,7 @@ public class OpenTSDBWriterTests {
 
 		this.writer.start();
 		try {
-			this.writer.doWrite(this.mockQuery, ImmutableList.of(this.mockResult));
+			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("exception on flush was not thrown");
 		} catch ( IOException ioCaught ) {
 				//

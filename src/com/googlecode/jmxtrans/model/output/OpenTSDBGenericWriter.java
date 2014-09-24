@@ -15,6 +15,7 @@ import java.util.Map;
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
@@ -214,11 +215,12 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	/**
 	 * Write the results of the query.
 	 *
+	 * @param server
 	 * @param query - the query and its results.
 	 * @param results
 	 */
 	@Override
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		this.startOutput();
 		for (Result result : results) {
 			for (String resultString : resultParser(result)) {
@@ -235,7 +237,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * Validation per query, after the writer has been start()ed
 	 */
 	@Override
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
 	/**

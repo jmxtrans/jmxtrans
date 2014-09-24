@@ -24,8 +24,6 @@ import java.util.Set;
 @JsonPropertyOrder(value = { "obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "outputWriters" })
 public class Query {
 
-	private Server server;
-
 	private String obj;
 	private List<String> attr;
 	private String resultAlias;
@@ -152,16 +150,6 @@ public class Query {
 			this.outputWriters = new ArrayList<OutputWriter>();
 		}
 		this.outputWriters.add(writer);
-	}
-
-	@JsonIgnore
-	public void setServer(Server server) {
-		this.server = server;
-	}
-
-	@JsonIgnore
-	public Server getServer() {
-		return server;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
@@ -36,7 +37,7 @@ public class Log4JWriter extends BaseOutputWriter
 	/**
 	 * Get the logger
 	 */
-	public void validateSetup(final Query query) throws ValidationException
+	public void validateSetup(Server server, final Query query) throws ValidationException
 	{
 		String loggerName = (String) this.getSettings().get("logger");
 
@@ -51,7 +52,7 @@ public class Log4JWriter extends BaseOutputWriter
 	/**
 	 * Set the log context and log
 	 */
-	public void doWrite(final Query query, ImmutableList<Result> results) throws Exception
+	public void doWrite(Server server, final Query query, ImmutableList<Result> results) throws Exception
 	{
 		final List<String> typeNames = getTypeNames();
 
@@ -65,18 +66,18 @@ public class Log4JWriter extends BaseOutputWriter
 					if (NumberUtils.isNumeric(values.getValue()))
 					{
 						String alias = null;
-						if (query.getServer().getAlias() != null)
+						if (server.getAlias() != null)
 						{
-							alias = query.getServer().getAlias();
+							alias = server.getAlias();
 						}
 						else
 						{
-							alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+							alias = server.getHost() + "_" + server.getPort();
 							alias = cleanupStr(alias);
 						}
 
 						MDC.put("server", alias);
-						MDC.put("metric", JmxUtils.getKeyString(query, result, values, typeNames, null));
+						MDC.put("metric", JmxUtils.getKeyString(server, query, result, values, typeNames, null));
 						MDC.put("value", values.getValue());
 						if (result.getClassNameAlias() != null)
 						{

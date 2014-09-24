@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
@@ -50,7 +51,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	 * Initial log setup.
 	 */
 	@Override
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		List<String> filters = (List<String>) this.getSettings().get(FILTERS);
 		List<String> thresholds = (List<String>) this.getSettings().get(THRESHOLDS);
 		String hostNagios = (String) this.getSettings().get(NAGIOS_HOST);
@@ -126,7 +127,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	 * The meat of the output. Nagios format..
 	 */
 	@Override
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		checkFile(query);
 		List<String> typeNames = getTypeNames();
 		String hostNagios = (String) this.getSettings().get(NAGIOS_HOST);
@@ -140,7 +141,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					String[] str_array = JmxUtils.getKeyString(query, result, values, typeNames, null).split("\\.");
+					String[] str_array = JmxUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
 					if (NumberUtils.isNumeric(values.getValue()) && filters.contains(str_array[2])) {
 						int threshold_pos = filters.indexOf(str_array[2]);
 						StringBuilder sb = new StringBuilder();

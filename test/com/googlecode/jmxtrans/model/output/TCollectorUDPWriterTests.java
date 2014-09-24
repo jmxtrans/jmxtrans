@@ -105,7 +105,7 @@ public class TCollectorUDPWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery, ImmutableList.of(this.mockResult));
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 

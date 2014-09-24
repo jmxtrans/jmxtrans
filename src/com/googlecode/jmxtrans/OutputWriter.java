@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -32,7 +33,7 @@ public interface OutputWriter {
 
 	public void stop() throws LifecycleException;
 
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception;
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
 
 	/**
 	 * Settings allow you to configure your Writers with whatever they might
@@ -50,7 +51,7 @@ public interface OutputWriter {
 	 * This is run when the object is instantiated. You want to get the settings
 	 * and validate them.
 	 */
-	public void validateSetup(Query query) throws ValidationException;
+	public void validateSetup(Server server, Query query) throws ValidationException;
 
 	/**
 	 * Some writers, like GraphiteWriter will use this for object pooling.

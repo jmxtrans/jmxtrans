@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
@@ -89,7 +90,7 @@ public class LibratoWriter extends BaseOutputWriter {
 
 	}
 
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		try {
 			url = new URL(getStringSetting(SETTING_URL, DEFAULT_LIBRATO_API_URL));
 
@@ -109,18 +110,18 @@ public class LibratoWriter extends BaseOutputWriter {
 		}
 	}
 
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', proxy {} metrics {}", url, proxy, query);
-		writeToLibrato(query, results);
+		writeToLibrato(server, query, results);
 	}
 
-	private void serialize(Query query, List<Result> results, OutputStream outputStream) throws IOException {
+	private void serialize(Server server, Query query, List<Result> results, OutputStream outputStream) throws IOException {
 		JsonGenerator g = jsonFactory.createJsonGenerator(outputStream, JsonEncoding.UTF8);
 		g.writeStartObject();
 		g.writeArrayFieldStart("counters");
 		g.writeEndArray();
 
-		String source = getSource(query);
+		String source = getSource(server);
 
 		g.writeArrayFieldStart("gauges");
 		List<String> typeNames = getTypeNames();
@@ -157,7 +158,7 @@ public class LibratoWriter extends BaseOutputWriter {
 
 	}
 
-	private void writeToLibrato(Query query, List<Result> results) {
+	private void writeToLibrato(Server server, Query query, List<Result> results) {
 		HttpURLConnection urlConnection = null;
 		try {
 			if (proxy == null) {
@@ -172,7 +173,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			urlConnection.setRequestProperty("content-type", "application/json; charset=utf-8");
 			urlConnection.setRequestProperty("Authorization", "Basic " + basicAuthentication);
 
-			serialize(query, results, urlConnection.getOutputStream());
+			serialize(server, query, results, urlConnection.getOutputStream());
 			int responseCode = urlConnection.getResponseCode();
 			if (responseCode != 200) {
 				logger.warn("Failure {}:'{}' to send result to Librato server '{}' with proxy {}, user {}", responseCode, urlConnection.getResponseMessage(), url, proxy, user);
@@ -201,11 +202,11 @@ public class LibratoWriter extends BaseOutputWriter {
 		}
 	}
 
-	private String getSource(Query query) {
-		if (query.getServer().getAlias() != null) {
-			return query.getServer().getAlias();
+	private String getSource(Server server) {
+		if (server.getAlias() != null) {
+			return server.getAlias();
 		} else {
-			return cleanupStr(query.getServer().getHost());
+			return cleanupStr(server.getHost());
 		}
 	}
 

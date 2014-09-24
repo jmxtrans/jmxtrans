@@ -83,7 +83,7 @@ public class TreeWalker3 {
 			}
 
 			try {
-				JmxUtils.processQuery(connection, query);
+				JmxUtils.processQuery(connection, null, query);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}
@@ -111,7 +111,7 @@ public class TreeWalker3 {
 		public void stop() throws LifecycleException {}
 
 		@Override
-		public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+		public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 			this.results = results;
 		}
 
@@ -124,7 +124,7 @@ public class TreeWalker3 {
 		public void setSettings(Map<String, Object> settings) {}
 
 		@Override
-		public void validateSetup(Query query) throws ValidationException {}
+		public void validateSetup(Server server, Query query) throws ValidationException {}
 
 		@Override
 		public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {}

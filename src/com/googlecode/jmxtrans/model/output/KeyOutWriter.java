@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
@@ -56,7 +57,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * Creates the logging
 	 */
 	@Override
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		String fileStr = (String) this.getSettings().get("outputFile");
 		delimiter = getDelimiter();
 		if (fileStr == null) {
@@ -80,7 +81,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * The meat of the output. Very similar to GraphiteWriter.
 	 */
 	@Override
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		List<String> typeNames = getTypeNames();
 
 		for (Result result : results) {
@@ -90,7 +91,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 					if (NumberUtils.isNumeric(values.getValue())) {
 						StringBuilder sb = new StringBuilder();
 
-						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, null));
+						sb.append(JmxUtils.getKeyString(server, query, result, values, typeNames, null));
 						sb.append(delimiter);
 						sb.append(values.getValue().toString());
 						sb.append(delimiter);

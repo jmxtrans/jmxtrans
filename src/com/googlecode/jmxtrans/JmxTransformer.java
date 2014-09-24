@@ -334,18 +334,18 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	/** */
-	private void validateSetup(List<Query> queries) throws ValidationException {
+	private void validateSetup(Server server, List<Query> queries) throws ValidationException {
 		for (Query q : queries) {
-			this.validateSetup(q);
+			this.validateSetup(server, q);
 		}
 	}
 
 	/** */
-	private void validateSetup(Query query) throws ValidationException {
+	private void validateSetup(Server server, Query query) throws ValidationException {
 		List<OutputWriter> writers = query.getOutputWriters();
 		if (writers != null) {
 			for (OutputWriter w : writers) {
-				w.validateSetup(query);
+				w.validateSetup(server, query);
 			}
 		}
 	}
@@ -394,8 +394,6 @@ public class JmxTransformer implements WatchedCallback {
 
 				// need to inject the poolMap
 				for (Query query : server.getQueries()) {
-					query.setServer(server);
-
 					for (OutputWriter writer : query.getOutputWriters()) {
 						writer.setObjectPoolMap(this.poolMap);
 						writer.start();
@@ -404,7 +402,7 @@ public class JmxTransformer implements WatchedCallback {
 
 				// Now validate the setup of each of the OutputWriter's per
 				// query.
-				this.validateSetup(server.getQueries());
+				this.validateSetup(server, server.getQueries());
 
 				// Now schedule the jobs for execution.
 				this.scheduleJob(scheduler, server);

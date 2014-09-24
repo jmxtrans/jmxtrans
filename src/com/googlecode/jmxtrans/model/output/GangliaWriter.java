@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
@@ -74,7 +75,7 @@ public class GangliaWriter extends BaseOutputWriter {
 
 	/** Parse and validate settings. */
 	@Override
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 
 		// Parse and validate host setting
 		host = getStringSetting(HOST, DEFAULT_HOST);
@@ -118,7 +119,7 @@ public class GangliaWriter extends BaseOutputWriter {
 		groupName = getStringSetting(GROUP_NAME, DEFAULT_GROUP_NAME);
 
 		// Determine the spoofed hostname
-		spoofedHostName = getSpoofedHostName(query.getServer().getHost(), query.getServer().getAlias());
+		spoofedHostName = getSpoofedHostName(server.getHost(), server.getAlias());
 
 		log.debug("Validated Ganglia metric [" +
 				HOST + ": " + host + ", " +
@@ -136,7 +137,7 @@ public class GangliaWriter extends BaseOutputWriter {
 
 	/** Send query result values to Ganglia. */
 	@Override
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (final Result result : results) {
 			if (result.getValues() != null) {
 				for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {

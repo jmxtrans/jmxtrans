@@ -20,8 +20,10 @@ import java.util.List;
 import com.googlecode.jmxtrans.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -49,9 +51,9 @@ public class JmxProcessingTests {
 		query.addAttr("DummyValue");
 		query.addOutputWriter(outputWriter);
 
-		JmxUtils.processQuery(server, query);
+		JmxUtils.processQuery(server, null, query);
 
-		verify(outputWriter).doWrite(queryCaptor.capture(), resultsCaptor.capture());
+		verify(outputWriter).doWrite(any(Server.class), queryCaptor.capture(), resultsCaptor.capture());
 
 		assertThat(queryCaptor.getValue()).isEqualTo(query);
 

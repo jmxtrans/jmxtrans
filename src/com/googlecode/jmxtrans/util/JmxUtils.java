@@ -93,8 +93,7 @@ public class JmxUtils {
 
 				List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
 				for (Query query : server.getQueries()) {
-					query.setServer(server);
-					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, query);
+					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, server, query);
 					threads.add(Executors.callable(pqt));
 				}
 
@@ -107,8 +106,7 @@ public class JmxUtils {
 			}
 		} else {
 			for (Query query : server.getQueries()) {
-				query.setServer(server);
-				processQuery(mbeanServer, query);
+				processQuery(mbeanServer, server, query);
 			}
 		}
 	}
@@ -139,17 +137,19 @@ public class JmxUtils {
 	 * Executes either a getAttribute or getAttributes query.
 	 */
 	public static class ProcessQueryThread implements Runnable {
-		private MBeanServerConnection mbeanServer;
-		private Query query;
+		private final MBeanServerConnection mbeanServer;
+		private final Server server;
+		private final Query query;
 
-		public ProcessQueryThread(MBeanServerConnection mbeanServer, Query query) {
+		public ProcessQueryThread(MBeanServerConnection mbeanServer, Server server, Query query) {
 			this.mbeanServer = mbeanServer;
+			this.server = server;
 			this.query = query;
 		}
 
 		public void run() {
 			try {
-				processQuery(this.mbeanServer, this.query);
+				processQuery(this.mbeanServer, this.server, this.query);
 			} catch (Exception e) {
 				log.error("Error executing query: " + query, e);
 				throw new RuntimeException(e);
@@ -160,7 +160,7 @@ public class JmxUtils {
 	/**
 	 * Responsible for processing individual Queries.
 	 */
-	public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
+	public static void processQuery(MBeanServerConnection mbeanServer, Server server, Query query) throws Exception {
 
 		ObjectName oName = new ObjectName(query.getObj());
 
@@ -193,7 +193,7 @@ public class JmxUtils {
 					ImmutableList<Result> results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults();
 
 					// Now run the OutputWriters.
-					runOutputWritersForQuery(query, results);
+					runOutputWritersForQuery(server, query, results);
 
 					if (log.isDebugEnabled()) {
 						log.debug("Finished running outputWriters for query: " + query);
@@ -210,11 +210,11 @@ public class JmxUtils {
 	}
 
 	/** */
-	private static void runOutputWritersForQuery(Query query, ImmutableList<Result> results) throws Exception {
+	private static void runOutputWritersForQuery(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		List<OutputWriter> writers = query.getOutputWriters();
 		if (writers != null) {
 			for (OutputWriter writer : writers) {
-				writer.doWrite(query, results);
+				writer.doWrite(server, query, results);
 			}
 		}
 	}
@@ -417,6 +417,8 @@ public class JmxUtils {
 	/**
 	 * Gets the key string.
 	 *
+	 *
+	 * @param server
 	 * @param query      the query
 	 * @param result     the result
 	 * @param values     the values
@@ -424,10 +426,10 @@ public class JmxUtils {
 	 * @param rootPrefix the root prefix
 	 * @return the key string
 	 */
-	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+	public static String getKeyString(Server server, Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
 		StringBuilder sb = new StringBuilder();
 		addRootPrefix(rootPrefix, sb);
-		addAlias(query, sb);
+		addAlias(server, sb);
 		sb.append(".");
 		// Allow people to use something other than the classname as the output.
 		addClassName(result, sb);
@@ -480,12 +482,12 @@ public class JmxUtils {
 		}
 	}
 
-	private static void addAlias(Query query, StringBuilder sb) {
+	private static void addAlias(Server server, StringBuilder sb) {
 		String alias;
-		if (query.getServer().getAlias() != null) {
-			alias = query.getServer().getAlias();
+		if (server.getAlias() != null) {
+			alias = server.getAlias();
 		} else {
-			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+			alias = server.getHost() + "_" + server.getPort();
 			alias = com.googlecode.jmxtrans.util.StringUtils.cleanupStr(alias);
 		}
 		sb.append(alias);

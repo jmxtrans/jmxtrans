@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
@@ -125,7 +126,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	 * Minimally a Stackdriver API key must be provided using the token setting
 	 */
 	@Override
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		try {
 			gatewayUrl = new URL(getStringSetting(SETTING_STACKDRIVER_API_URL, DEFAULT_STACKDRIVER_API_URL));
 		} catch (MalformedURLException e) {
@@ -193,7 +194,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	 * Second posts the message to the Stackdriver gateway via HTTP
 	 */
 	@Override
-	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		String gatewayMessage = getGatewayMessage(results);
 		
 		// message won't be returned if there are no numeric values in the query results
