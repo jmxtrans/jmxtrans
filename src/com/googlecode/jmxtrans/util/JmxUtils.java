@@ -35,6 +35,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.naming.Context;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -492,7 +493,11 @@ public class JmxUtils {
 		else
 			mbeanServer = conn.getMBeanServerConnection();
 
+		final StopWatch stopwatch = new StopWatch();
+		stopwatch.start();
 		JmxUtils.processQueriesForServer(mbeanServer, server);
+		stopwatch.stop();
+		log.debug(String.format("Query execution for server %s took %d millis", server.getAlias(), stopwatch.getTime()));
 	}
 
 	/**
