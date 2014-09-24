@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -59,7 +60,7 @@ public class SensuWriter extends BaseOutputWriter {
 		logger.info("Start Sensu writer connected to '{}' with handler {}", sensuhost, sensuhandler);
 	}
 
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', metrics {}", sensuhost, query);
 		writeToSensu(query, results);
 	}

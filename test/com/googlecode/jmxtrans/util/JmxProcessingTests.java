@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +15,6 @@ import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-
 import java.util.List;
 
 import com.googlecode.jmxtrans.OutputWriter;
@@ -34,7 +34,7 @@ public class JmxProcessingTests {
 	@Captor
 	private ArgumentCaptor<Query> queryCaptor;
 	@Captor
-	private ArgumentCaptor<List<Result>> resultsCaptor;
+	private ArgumentCaptor<ImmutableList<Result>> resultsCaptor;
 
 	@Before
 	public void startMBeanServer() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {

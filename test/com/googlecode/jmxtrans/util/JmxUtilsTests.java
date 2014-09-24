@@ -4,13 +4,13 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static com.googlecode.jmxtrans.util.JmxUtils.getConcatedTypeNameValues;
 import static com.googlecode.jmxtrans.util.JmxUtils.getTypeNameValueMap;
 import static java.util.Arrays.asList;
@@ -96,7 +96,7 @@ public class JmxUtilsTests {
 		Map<String, String> result;
 		int cur;
 
-		result = new HashMap<String, String>();
+		result = newHashMap();
 
 		cur = 0;
 		while (cur < keysAndValues.length) {

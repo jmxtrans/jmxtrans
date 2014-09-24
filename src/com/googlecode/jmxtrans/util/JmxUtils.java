@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
@@ -21,7 +22,6 @@ import javax.naming.Context;
 import java.lang.management.ManagementFactory;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,6 +38,8 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * The worker code.
@@ -188,7 +190,7 @@ public class JmxUtils {
 
 					AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
 
-					List<Result> results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults();
+					ImmutableList<Result> results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults();
 
 					// Now run the OutputWriters.
 					runOutputWritersForQuery(query, results);
@@ -208,7 +210,7 @@ public class JmxUtils {
 	}
 
 	/** */
-	private static void runOutputWritersForQuery(Query query, List<Result> results) throws Exception {
+	private static void runOutputWritersForQuery(Query query, ImmutableList<Result> results) throws Exception {
 		List<OutputWriter> writers = query.getOutputWriters();
 		if (writers != null) {
 			for (OutputWriter writer : writers) {
@@ -235,7 +237,7 @@ public class JmxUtils {
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	public static Map<String, String> getWebLogicEnvironment(Server server) {
-		Map<String, String> environment = new HashMap<String, String>();
+		Map<String, String> environment = newHashMap();
 		String username = server.getUsername();
 		String password = server.getPassword();
 		if ((username != null) && (password != null)) {
@@ -250,7 +252,7 @@ public class JmxUtils {
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	public static Map<String, String[]> getEnvironment(Server server) {
-		Map<String, String[]> environment = new HashMap<String, String[]>();
+		Map<String, String[]> environment = newHashMap();
 		String username = server.getUsername();
 		String password = server.getPassword();
 		if ((username != null) && (password != null)) {
@@ -376,7 +378,7 @@ public class JmxUtils {
 	 * TODO: allow for more configuration options?
 	 */
 	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
-		Map<String, KeyedObjectPool> poolMap = new HashMap<String, KeyedObjectPool>();
+		Map<String, KeyedObjectPool> poolMap = newHashMap();
 
 		GenericKeyedObjectPool pool = getObjectPool(new SocketFactory());
 		poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
@@ -574,7 +576,7 @@ public class JmxUtils {
 			return java.util.Collections.EMPTY_MAP;
 		}
 
-		HashMap result = new HashMap();
+		Map<String, String> result = newHashMap();
 		String[] tokens = typeNameStr.split(",");
 
 		for (String oneToken : tokens) {

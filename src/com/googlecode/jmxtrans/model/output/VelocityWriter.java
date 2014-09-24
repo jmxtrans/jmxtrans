@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -22,7 +23,7 @@ public class VelocityWriter extends BaseOutputWriter {
 	public VelocityWriter() {
 	}
 
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		// TODO Auto-generated method stub
 
 	}

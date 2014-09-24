@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -217,7 +218,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * @param results
 	 */
 	@Override
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		this.startOutput();
 		for (Result result : results) {
 			for (String resultString : resultParser(result)) {

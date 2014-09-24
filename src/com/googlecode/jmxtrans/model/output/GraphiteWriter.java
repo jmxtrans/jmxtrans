@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -137,7 +138,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
 		statusLock.lock();
 		try {

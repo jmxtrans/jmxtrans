@@ -6,11 +6,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -58,7 +58,7 @@ public class PropertyResolverTests {
 
 	@Test
 	public void testResolveMap() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = newHashMap();
 		assertEquals("w2", System.getProperty("myhost"));
 		assertEquals(null, System.getProperty("mihost"));
 		map.put("a", "${myhost}");

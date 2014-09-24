@@ -6,6 +6,8 @@ import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Appender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PatternLayout;
@@ -78,7 +80,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * The meat of the output. Very similar to GraphiteWriter.
 	 */
 	@Override
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		List<String> typeNames = getTypeNames();
 
 		for (Result result : results) {

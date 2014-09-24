@@ -2,8 +2,6 @@ package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.collect.ImmutableList;
 
-import javax.annotation.concurrent.Immutable;
-import javax.annotation.concurrent.ThreadSafe;
 import javax.management.Attribute;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -13,7 +11,6 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.TabularDataSupport;
 import java.lang.reflect.Array;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +19,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 
 import static com.google.common.collect.ImmutableList.Builder;
+import static com.google.common.collect.Maps.newHashMap;
 
 public class JmxResultProcessor {
 
@@ -61,7 +59,7 @@ public class JmxResultProcessor {
 				getResult(accumulator, attribute.getName(), cd);
 			}
 		} else if (value instanceof ObjectName[]) {
-			Map<String, Object> values = new HashMap<String, Object>();
+			Map<String, Object> values = newHashMap();
 			for (ObjectName obj : (ObjectName[]) value) {
 				values.put(obj.getCanonicalName(), obj.getKeyPropertyListString());
 			}
@@ -70,7 +68,7 @@ public class JmxResultProcessor {
 		} else if (value.getClass().isArray()) {
 			// OMFG: this is nutty. some of the items in the array can be
 			// primitive! great interview question!
-			Map<String, Object> values = new HashMap<String, Object>();
+			Map<String, Object> values = newHashMap();
 			for (int i = 0; i < Array.getLength(value); i++) {
 				Object val = Array.get(value, i);
 				values.put(attribute.getName() + "." + i, val);
@@ -83,7 +81,7 @@ public class JmxResultProcessor {
 			processTabularDataSupport(accumulator, attribute.getName(), tds);
 			accumulator.add(r);
 		} else {
-			Map<String, Object> values = new HashMap<String, Object>();
+			Map<String, Object> values = newHashMap();
 			values.put(attribute.getName(), value);
 			Result r = getNewResultObject(attribute.getName(), values);
 			accumulator.add(r);
@@ -97,7 +95,7 @@ public class JmxResultProcessor {
 	private void getResult(Builder<Result> accumulator, String attributeName, CompositeData cds) {
 		CompositeType t = cds.getCompositeType();
 
-		Map<String, Object> values = new HashMap<String, Object>();
+		Map<String, Object> values = newHashMap();
 
 		Set<String> keys = t.keySet();
 		for (String key : keys) {

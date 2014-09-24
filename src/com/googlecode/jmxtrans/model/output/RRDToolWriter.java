@@ -6,6 +6,7 @@ import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -91,7 +92,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		RrdDef def = getDatabaseTemplateSpec();
 
 		List<String> dsNames = getDsNames(def.getDsDefs());

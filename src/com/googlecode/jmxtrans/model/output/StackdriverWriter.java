@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -18,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +31,7 @@ import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 import static com.google.common.base.Charsets.ISO_8859_1;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * <a href="https://www.stackdriver.com//">Stackdriver</a> implementation of the
@@ -168,7 +169,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			logger.info("Detect instance set to GCE, trying to determine GCE instance ID");
 			
 			// GCE requires a header on its metadata requests
-			Map<String,String> headers = new HashMap<String,String>();
+			Map<String,String> headers = newHashMap();
 			headers.put("X-Google-Metadata-Request", "True");
 			
 			instanceId = getLocalInstanceId("GCE", "http://metadata/computeMetadata/v1/instance/id", headers);
@@ -192,7 +193,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	 * Second posts the message to the Stackdriver gateway via HTTP
 	 */
 	@Override
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		String gatewayMessage = getGatewayMessage(results);
 		
 		// message won't be returned if there are no numeric values in the query results

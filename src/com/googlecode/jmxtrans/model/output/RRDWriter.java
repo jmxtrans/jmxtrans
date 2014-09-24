@@ -5,6 +5,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.jrobin.core.RrdDb;
 import org.jrobin.core.RrdDef;
@@ -47,7 +49,7 @@ public class RRDWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		RrdDb db = null;
 		try {
 			db = createOrOpenDatabase();

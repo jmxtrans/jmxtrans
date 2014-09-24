@@ -6,6 +6,8 @@ import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 
@@ -49,7 +51,7 @@ public class Log4JWriter extends BaseOutputWriter
 	/**
 	 * Set the log context and log
 	 */
-	public void doWrite(final Query query, List<Result> results) throws Exception
+	public void doWrite(final Query query, ImmutableList<Result> results) throws Exception
 	{
 		final List<String> typeNames = getTypeNames();
 

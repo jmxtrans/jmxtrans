@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -125,7 +126,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	 * The meat of the output. Nagios format..
 	 */
 	@Override
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		checkFile(query);
 		List<String> typeNames = getTypeNames();
 		String hostNagios = (String) this.getSettings().get(NAGIOS_HOST);

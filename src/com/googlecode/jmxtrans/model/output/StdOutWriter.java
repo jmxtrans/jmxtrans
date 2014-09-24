@@ -1,6 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -24,7 +24,7 @@ public class StdOutWriter extends BaseOutputWriter {
 	public void validateSetup(Query query) throws ValidationException {
 	}
 
-	public void doWrite(Query query, List<Result> results) throws Exception {
+	public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 		for (Result r : results) {
 			System.out.println(r);
 		}

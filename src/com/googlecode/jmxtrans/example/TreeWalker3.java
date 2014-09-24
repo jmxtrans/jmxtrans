@@ -1,12 +1,9 @@
 package com.googlecode.jmxtrans.example;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.pool.KeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -14,10 +11,11 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
-
-import org.apache.commons.pool.KeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.googlecode.jmxtrans.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
@@ -27,6 +25,7 @@ import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyMap;
 
 /**
@@ -68,7 +67,7 @@ public class TreeWalker3 {
 		// key here is null, null returns everything!
 		Set<ObjectName> mbeans = connection.queryNames(null, null);
 
-		Map<String, String> output = new HashMap<String, String>();
+		Map<String, String> output = newHashMap();
 
 		for (ObjectName name : mbeans) {
 			MBeanInfo info = connection.getMBeanInfo(name);
@@ -112,7 +111,7 @@ public class TreeWalker3 {
 		public void stop() throws LifecycleException {}
 
 		@Override
-		public void doWrite(Query query, List<Result> results) throws Exception {
+		public void doWrite(Query query, ImmutableList<Result> results) throws Exception {
 			this.results = results;
 		}
 
