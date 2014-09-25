@@ -43,7 +43,7 @@ public class TreeWalker3 {
 
 	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("w2", "1105");
+		Server server = Server.builder().setHost("w2").setPort("1105").build();
 
 		JMXConnector conn = null;
 		try {

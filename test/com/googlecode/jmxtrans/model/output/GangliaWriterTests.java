@@ -35,7 +35,7 @@ public class GangliaWriterTests {
 		Query test = Query.builder()
 				.setObj("test")
 				.build();
-		Server server = new Server("localhost", "123");
+		Server server = Server.builder().setHost("localhost").setPort("123").build();
 		writer.validateSetup(server, test);
         assertEquals("192.168.1.144", writer.host);
         assertEquals(GangliaWriter.DEFAULT_PORT, writer.port);
@@ -66,7 +66,7 @@ public class GangliaWriterTests {
 		Query test = Query.builder()
 				.setObj("test")
 				.build();
-		Server server = new Server("localhost", "123");
+		Server server = Server.builder().setHost("localhost").setPort("123").build();
 		writer.validateSetup(server, test);
         assertEquals("192.168.1.144", writer.host);
         assertEquals(25654, writer.port);

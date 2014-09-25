@@ -24,7 +24,7 @@ public class JmxProcess {
 	}
 
 	public JmxProcess(Server server) {
-		this.addServer(server);
+		this.servers.add(server);
 	}
 
 	public JmxProcess(List<Server> servers) {
@@ -33,18 +33,10 @@ public class JmxProcess {
 
 	public void setServers(List<Server> servers) {
 		this.servers = servers;
-		for (Server server : this.servers) {
-			server.setJmxProcess(this);
-		}
 	}
 
 	public List<Server> getServers() {
 		return servers;
-	}
-
-	public void addServer(Server server) {
-		server.setJmxProcess(this);
-		this.servers.add(server);
 	}
 
 	@JsonIgnore

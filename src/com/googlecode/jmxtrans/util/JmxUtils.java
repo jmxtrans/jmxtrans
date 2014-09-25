@@ -8,6 +8,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckReturnValue;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -53,22 +54,33 @@ public class JmxUtils {
 	/**
 	 * Merges two lists of servers (and their queries). Based on the equality of
 	 * both sets of objects. Public for testing purposes.
+	 * @param secondList
+	 * @param firstList
 	 */
-	public static void mergeServerLists(List<Server> existing, List<Server> adding) {
-		for (Server server : adding) {
-			if (existing.contains(server)) {
-				Server found = existing.get(existing.indexOf(server));
-
-				List<Query> queries = server.getQueries();
-				for (Query q : queries) {
-					// no need to check for existing since this method
-					// already does that
-					found.addQuery(q);
-				}
+	// FIXME: the params for this method should be Set<Server> as there are multiple assumptions that they are unique
+	@CheckReturnValue
+	public static List<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
+		ImmutableList.Builder<Server> results = ImmutableList.builder();
+		List<Server> toProcess = new ArrayList<Server>(secondList);
+		for (Server firstServer : firstList) {
+			if (toProcess.contains(firstServer)) {
+				Server found = toProcess.get(secondList.indexOf(firstServer));
+				results.add(merge(firstServer, found));
+				// remove server as it is already merged
+				toProcess.remove(found);
 			} else {
-				existing.add(server);
+				results.add(firstServer);
 			}
 		}
+		// add servers from the second list that are not in the first one
+		results.addAll(toProcess);
+		return results.build();
+	}
+
+	private static Server merge(Server firstServer, Server secondServer) {
+		return Server.builder(firstServer)
+				.addQueries(secondServer.getQueries())
+				.build();
 	}
 
 	/**

@@ -2,13 +2,8 @@ package com.googlecode.jmxtrans.util;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.googlecode.jmxtrans.util.JmxUtils.getConcatedTypeNameValues;
@@ -51,49 +46,7 @@ public class JmxUtilsTests {
 				.isEqualTo("x-value1-x_y-value2-y");
 	}
 
-
-	@Test
-	public void mergeAlreadyExistingServerDoesNotModifyList() throws ValidationException {
-		List<Server> existingServers = new ArrayList<Server>();
-		existingServers.add(createServerWithOneQuery("example.net", "123", "toto"));
-
-		List<Server> newServers = new ArrayList<Server>();
-		newServers.add(createServerWithOneQuery("example.net", "123", "toto"));
-
-		JmxUtils.mergeServerLists(existingServers, newServers);
-
-		assertThat(existingServers).hasSize(1);
-
-		Server mergedServer = existingServers.get(0);
-		assertThat(mergedServer.getQueries()).hasSize(1);
-	}
-
-	@Test
-	public void sameServerWithTwoDifferentQueriesMergesQueries() throws ValidationException {
-		List<Server> existingServers = new ArrayList<Server>();
-		existingServers.add(createServerWithOneQuery("example.net", "123", "toto"));
-
-		List<Server> newServers = new ArrayList<Server>();
-		newServers.add(createServerWithOneQuery("example.net", "123", "tutu"));
-
-		JmxUtils.mergeServerLists(existingServers, newServers);
-
-		assertThat(existingServers).hasSize(1);
-		Server mergedServer = existingServers.get(0);
-		assertThat(mergedServer.getQueries()).hasSize(2);
-	}
-
-	private Server createServerWithOneQuery(String host, String port, String queryObject) throws ValidationException {
-		Server server = new Server(host, port);
-		server.addQuery(Query.builder()
-				.setObj(queryObject)
-				.build());
-		return server;
-	}
-
-	/**
-	 * Convenience method for creating a Map for comparison.
-	 */
+	/** Convenience method for creating a Map for comparison. */
 	protected Map<String, String> makeMap(String... keysAndValues) {
 		Map<String, String> result;
 		int cur;

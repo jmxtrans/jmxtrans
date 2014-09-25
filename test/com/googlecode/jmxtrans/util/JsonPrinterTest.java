@@ -54,14 +54,14 @@ public class JsonPrinterTest {
 
 	private JmxProcess standardProcess() throws ValidationException {
 		List<Server> servers = new ArrayList<Server>();
-		Server server = new Server();
-		server.setAlias("alias");
-		server.setHost("example.org");
-		server.setPort("123");
-		Query query = Query.builder()
-				.setObj("obj")
+		Server server = Server.builder()
+				.setAlias("alias")
+				.setHost("example.org")
+				.setPort("123")
+				.addQuery(Query.builder()
+					.setObj("obj")
+					.build())
 				.build();
-		server.addQuery(query);
 		servers.add(server);
 		return new JmxProcess(servers);
 	}

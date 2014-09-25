@@ -21,8 +21,10 @@ public class Ehcache {
 	/** */
 	public static void main(String[] args) throws Exception {
 
-		Server server = new Server("w2", "1099");
-		server.setAlias("w2_ehcache_1099");
+		Server.Builder serverBuilder = Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.setAlias("w2_ehcache_1099");
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(BaseOutputWriter.HOST, GW_HOST);
 		gw.addSetting(BaseOutputWriter.PORT, 2003);
@@ -43,9 +45,9 @@ public class Ehcache {
 				.addAttr("DiskStoreObjectCount")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q);
+		serverBuilder.addQuery(q);
 
-		JmxProcess process = new JmxProcess(server);
+		JmxProcess process = new JmxProcess(serverBuilder.build());
 		printer.prettyPrint(process);
 
 		JmxTransformer transformer = new JmxTransformer();

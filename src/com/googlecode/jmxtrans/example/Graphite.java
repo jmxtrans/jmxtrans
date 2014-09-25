@@ -16,9 +16,7 @@ public class Graphite {
 
 	private static JsonPrinter printer = new JsonPrinter(System.out);
 
-	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("w2", "1099");
 
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
@@ -30,7 +28,12 @@ public class Graphite {
 				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q);
+
+		Server server = Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.addQuery(q)
+				.build();
 
 		JmxProcess process = new JmxProcess(server);
 		printer.prettyPrint(process);

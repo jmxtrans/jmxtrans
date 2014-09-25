@@ -19,8 +19,10 @@ public class Ganglia {
 
 	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("w2", "1099");
-		server.setAlias("fooalias");
+		Server.Builder serverBuilder = Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.setAlias("fooalias");
 
 		GangliaWriter gw = new GangliaWriter();
 		gw.addSetting(GangliaWriter.HOST, "10.0.3.16");
@@ -32,18 +34,13 @@ public class Ganglia {
 				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q);
+		serverBuilder.addQuery(q);
 
-		JmxProcess process = new JmxProcess(server);
+		JmxProcess process = new JmxProcess(serverBuilder.build());
 		printer.prettyPrint(process);
 
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.execute(jmx);
-		// Thread.sleep(1000);
-		// }
 	}
 
 }

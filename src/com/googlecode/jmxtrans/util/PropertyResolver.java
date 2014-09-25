@@ -56,7 +56,10 @@ public class PropertyResolver {
 	 * @param s
 	 * @return resolved String
 	 */
-	public static String resolveProps(String s) {
+	public static String resolveProps(@Nullable String s) {
+		if (s == null) {
+			return null;
+		}
 
 		int ipos = 0;
 		int pos = s.indexOf("${", ipos);

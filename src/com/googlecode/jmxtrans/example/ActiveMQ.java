@@ -25,8 +25,10 @@ public class ActiveMQ {
 	/** */
 	public static void main(String[] args) throws Exception {
 
-		Server server = new Server("w2", "1105");
-		server.setAlias("w2_activemq_1105");
+		Server.Builder serverBuilder = Server.builder()
+				.setHost("w2")
+				.setPort("1105")
+				.setAlias("w2_activemq_1105");
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(BaseOutputWriter.HOST, GW_HOST);
 		// gw.addSetting(GraphiteWriter.HOST, "localhost");
@@ -47,7 +49,7 @@ public class ActiveMQ {
 				.addAttr("DispachedCounter")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q);
+		serverBuilder.addQuery(q);
 
 		Query q2 = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Destination=ActiveMQ.Advisory.Consumer.Queue.*,Type=Topic")
@@ -64,7 +66,7 @@ public class ActiveMQ {
 				.addAttr("Subscriptions")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q2);
+		serverBuilder.addQuery(q2);
 
 		Query q3 = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Queue")
@@ -81,7 +83,7 @@ public class ActiveMQ {
 				.addAttr("Subscriptions")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q3);
+		serverBuilder.addQuery(q3);
 
 		Query q4 = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Topic")
@@ -98,13 +100,13 @@ public class ActiveMQ {
 				.addAttr("Subscriptions")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q4);
+		serverBuilder.addQuery(q4);
 
 		Query q5 = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q5);
+		serverBuilder.addQuery(q5);
 
 		Query q6 = Query.builder()
 				.setObj("java.lang:type=Memory")
@@ -112,7 +114,7 @@ public class ActiveMQ {
 				.addAttr("NonHeapMemoryUsage")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q6);
+		serverBuilder.addQuery(q6);
 
 		Query q7 = Query.builder()
 				.setObj("java.lang:type=Threading")
@@ -124,7 +126,7 @@ public class ActiveMQ {
 				.addAttr("TotalStartedThreadCount")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q7);
+		serverBuilder.addQuery(q7);
 
 		Query q8 = Query.builder()
 				.setObj("java.lang:name=*,type=GarbageCollector")
@@ -137,7 +139,7 @@ public class ActiveMQ {
 				.addKey("CollectionTime")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q8);
+		serverBuilder.addQuery(q8);
 
 		GraphiteWriter gw2 = new GraphiteWriter();
 		gw2.addSetting(BaseOutputWriter.HOST, GW_HOST);
@@ -150,9 +152,9 @@ public class ActiveMQ {
 				.setObj("java.lang:type=MemoryPool,name=*")
 				.addOutputWriter(gw2)
 				.build();
-		server.addQuery(q9);
+		serverBuilder.addQuery(q9);
 
-		JmxProcess process = new JmxProcess(server);
+		JmxProcess process = new JmxProcess(serverBuilder.build());
 		printer.prettyPrint(process);
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);

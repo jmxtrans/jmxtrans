@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Closer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
@@ -42,6 +43,8 @@ import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
+
+import static com.googlecode.jmxtrans.util.JmxUtils.mergeServerLists;
 
 /**
  * Main() class that takes an argument which is the directory to look in for
@@ -334,7 +337,7 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	/** */
-	private void validateSetup(Server server, List<Query> queries) throws ValidationException {
+	private void validateSetup(Server server, ImmutableSet<Query> queries) throws ValidationException {
 		for (Query q : queries) {
 			this.validateSetup(server, q);
 		}
@@ -370,7 +373,7 @@ public class JmxTransformer implements WatchedCallback {
 				if (log.isDebugEnabled()) {
 					log.debug("Loaded file: " + jsonFile.getAbsolutePath());
 				}
-				JmxUtils.mergeServerLists(this.masterServersList, process.getServers());
+				this.masterServersList = mergeServerLists(this.masterServersList, process.getServers());
 			} catch (Exception ex) {
 				if (configuration.isContinueOnJsonError()) {
 					throw new LifecycleException("Error parsing json: " + jsonFile, ex);

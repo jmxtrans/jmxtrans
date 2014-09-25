@@ -1,20 +1,54 @@
 package com.googlecode.jmxtrans;
 
-import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.googlecode.jmxtrans.fixtures.ServerFixtures;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
+
+import static com.googlecode.jmxtrans.util.JmxUtils.mergeServerLists;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MergingTests {
 
 	@Test
-	public void testMerge() throws Exception {
+	public void mergeAlreadyExistingServerDoesNotModifyList() throws ValidationException {
+		List<Server> existingServers = new ArrayList<Server>();
+		existingServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto"));
 
+		List<Server> newServers = new ArrayList<Server>();
+		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto"));
+
+		List<Server> merged = mergeServerLists(existingServers, newServers);
+
+		assertThat(merged).hasSize(1);
+
+		Server mergedServer = merged.get(0);
+		assertThat(mergedServer.getQueries()).hasSize(1);
+	}
+
+	@Test
+	public void sameServerWithTwoDifferentQueriesMergesQueries() throws ValidationException {
+		List<Server> existingServers = new ArrayList<Server>();
+		existingServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto"));
+
+		List<Server> newServers = new ArrayList<Server>();
+		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "tutu"));
+
+		List<Server> merged = mergeServerLists(existingServers, newServers);
+
+		assertThat(merged).hasSize(1);
+		Server mergedServer = merged.get(0);
+		assertThat(mergedServer.getQueries()).hasSize(2);
+	}
+
+
+	@Test
+	public void testMerge() throws Exception {
 		Query q1 = Query.builder()
 				.setObj("obj")
 				.addAttr("foo")
@@ -44,40 +78,43 @@ public class MergingTests {
 				.setResultAlias("alias")
 				.build();
 
-		Server s1 = new Server();
-		s1.setAlias("alias");
-		s1.setHost("host");
-		s1.setPort("8004");
-		s1.setCronExpression("cron");
-		s1.setNumQueryThreads(Integer.valueOf(123));
-		s1.setPassword("pass");
-		s1.setUsername("user");
-		s1.addQuery(q1);
-		s1.addQuery(q2);
+		Server s1 = Server.builder()
+				.setAlias("alias")
+				.setHost("host")
+				.setPort("8004")
+				.setCronExpression("cron")
+				.setNumQueryThreads(Integer.valueOf(123))
+				.setPassword("pass")
+				.setUsername("user")
+				.addQuery(q1)
+				.addQuery(q2)
+				.build();
 
 		// same as s1
-		Server s2 = new Server();
-		s2.setAlias("alias");
-		s2.setHost("host");
-		s2.setPort("8004");
-		s2.setCronExpression("cron");
-		s2.setNumQueryThreads(Integer.valueOf(123));
-		s2.setPassword("pass");
-		s2.setUsername("user");
-		s2.addQuery(q1);
-		s2.addQuery(q2);
+		Server s2 = Server.builder()
+				.setAlias("alias")
+				.setHost("host")
+				.setPort("8004")
+				.setCronExpression("cron")
+				.setNumQueryThreads(Integer.valueOf(123))
+				.setPassword("pass")
+				.setUsername("user")
+				.addQuery(q1)
+				.addQuery(q2)
+				.build();
 
-		Server s3 = new Server();
-		s3.setAlias("alias");
-		s3.setHost("host3");
-		s3.setPort("8004");
-		s3.setCronExpression("cron");
-		s3.setNumQueryThreads(Integer.valueOf(123));
-		s3.setPassword("pass");
-		s3.setUsername("user");
-		s3.addQuery(q1);
-		s3.addQuery(q2);
-		s3.addQuery(q3);
+		Server s3 = Server.builder()
+				.setAlias("alias")
+				.setHost("host3")
+				.setPort("8004")
+				.setCronExpression("cron")
+				.setNumQueryThreads(Integer.valueOf(123))
+				.setPassword("pass")
+				.setUsername("user")
+				.addQuery(q1)
+				.addQuery(q2)
+				.addQuery(q3)
+				.build();
 
 		List<Server> existing = new ArrayList<Server>();
 		existing.add(s1);
@@ -85,47 +122,18 @@ public class MergingTests {
 		List<Server> adding = new ArrayList<Server>();
 
 		adding.add(s2);
-		JmxUtils.mergeServerLists(existing, adding);
+		existing = mergeServerLists(existing, adding);
 
 		// should only have one server with 1 query since we just added the same
 		// server and same query.
-		Assert.assertTrue(existing.size() == 1);
-		Assert.assertTrue(existing.get(0).getQueries().size() == 1);
-
-		for (Server server : existing) {
-			System.out.println(server);
-		}
+		assertThat(existing).hasSize(1);
+		assertThat(existing.get(0).getQueries()).hasSize(1);
 
 		adding.add(s3);
-		JmxUtils.mergeServerLists(existing, adding);
+		existing = mergeServerLists(existing, adding);
 
-		Assert.assertTrue(existing.size() == 2);
-		Assert.assertTrue(existing.get(0).getQueries().size() == 1); // q1 and
-																		// q2
-																		// are
-																		// equal
-		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and
-																		// q2
-																		// are
-																		// equal,
-																		// q3 is
-																		// different
-
-		s2.addQuery(q3);
-		JmxUtils.mergeServerLists(existing, adding);
-
-		Assert.assertTrue(existing.size() == 2);
-		Assert.assertTrue(existing.get(0).getQueries().size() == 2); // q1 and
-																		// q2
-																		// are
-																		// equal,
-																		// q3 is
-																		// different
-		Assert.assertTrue(existing.get(1).getQueries().size() == 2); // q1 and
-																		// q2
-																		// are
-																		// equal,
-																		// q3 is
-																		// different
+		assertThat(existing).hasSize(2);
+		assertThat(existing.get(0).getQueries()).hasSize(1);
+		assertThat(existing.get(1).getQueries()).hasSize(2);
 	}
 }

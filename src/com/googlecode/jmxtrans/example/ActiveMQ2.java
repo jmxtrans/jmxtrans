@@ -24,8 +24,11 @@ public class ActiveMQ2 {
 	/** */
 	public static void main(String[] args) throws Exception {
 
-		Server server = new Server("w2", "1105");
-		server.setAlias("w2_activemq_1105");
+		Server.Builder serverBuilder = Server.builder()
+				.setHost("w2")
+				.setPort("1105")
+				.setAlias("w2_activemq_1105");
+
 		RRDToolWriter gw = new RRDToolWriter();
 		gw.addSetting(BaseOutputWriter.TEMPLATE_FILE, "memorypool-rrd-template.xml");
 		gw.addSetting(BaseOutputWriter.OUTPUT_FILE, "target/w2-TEST.rrd");
@@ -50,7 +53,7 @@ public class ActiveMQ2 {
 				.addAttr("EnqueueCount")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q);
+		serverBuilder.addQuery(q);
 
 		Query q2 = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*")
@@ -66,9 +69,9 @@ public class ActiveMQ2 {
 				.addAttr("EnqueueCount")
 				.addOutputWriter(gw)
 				.build();
-		server.addQuery(q2);
+		serverBuilder.addQuery(q2);
 
-		JmxProcess process = new JmxProcess(server);
+		JmxProcess process = new JmxProcess(serverBuilder.build());
 		jsonPrinter.prettyPrint(process);
 
 		JmxTransformer transformer = new JmxTransformer();
