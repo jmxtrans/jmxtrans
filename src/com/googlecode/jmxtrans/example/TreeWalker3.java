@@ -73,14 +73,16 @@ public class TreeWalker3 {
 			MBeanInfo info = connection.getMBeanInfo(name);
 			MBeanAttributeInfo[] attrs = info.getAttributes();
 
-			Query query = new Query();
-			query.setObj(name.getCanonicalName());
+			Query.Builder queryBuilder = Query.builder()
+					.setObj(name.getCanonicalName());
 			ResultCapture resultCapture = new ResultCapture();
-			query.addOutputWriter(resultCapture);
+			queryBuilder.addOutputWriter(resultCapture);
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
-				query.addAttr(attrInfo.getName());
+				queryBuilder.addAttr(attrInfo.getName());
 			}
+
+			Query query = queryBuilder.build();
 
 			try {
 				JmxUtils.processQuery(connection, null, query);

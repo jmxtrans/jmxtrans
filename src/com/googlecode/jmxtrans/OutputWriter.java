@@ -1,10 +1,9 @@
 package com.googlecode.jmxtrans;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.pool.KeyedObjectPool;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import java.util.Map;
 
@@ -13,6 +12,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
 /**
  * Interface which defines a writer for taking jmx data and writing it out in
@@ -25,7 +26,7 @@ import com.googlecode.jmxtrans.util.ValidationException;
  * 
  * @author jon
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = NON_NULL)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public interface OutputWriter {
 

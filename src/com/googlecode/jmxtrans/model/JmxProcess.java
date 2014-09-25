@@ -1,18 +1,19 @@
 package com.googlecode.jmxtrans.model;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
 /**
  * This is the container for a list of Servers.
  * 
  * @author jon
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = NON_NULL)
 public class JmxProcess {
 
 	private String name;

@@ -21,22 +21,25 @@ public class Tester {
 		Server server = new Server("w2", "1099");
 		server.setNumQueryThreads(2);
 
-		Query q = new Query();
-		q.setObj("java.lang:type=Memory");
-		q.addAttr("HeapMemoryUsage");
-		q.addAttr("NonHeapMemoryUsage");
-		q.addOutputWriter(new StdOutWriter());
+		Query q = Query.builder()
+				.setObj("java.lang:type=Memory")
+				.addAttr("HeapMemoryUsage", "NonHeapMemoryUsage")
+				.addOutputWriter(new StdOutWriter())
+				.build();
 		server.addQuery(q);
 
-		Query q2 = new Query("java.lang:name=CMS Old Gen,type=MemoryPool");
-		q2.addAttr("Usage");
-		q2.addOutputWriter(new StdOutWriter());
+		Query q2 = Query.builder()
+				.setObj("java.lang:name=CMS Old Gen,type=MemoryPool")
+				.addAttr("Usage")
+				.addOutputWriter(new StdOutWriter())
+				.build();
 		server.addQuery(q2);
 
-		Query q3 = new Query();
-		q3.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector");
-		q3.addAttr("LastGcInfo");
-		q3.addOutputWriter(new StdOutWriter());
+		Query q3 = Query.builder()
+				.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector")
+				.addAttr("LastGcInfo")
+				.addOutputWriter(new StdOutWriter())
+				.build();
 		server.addQuery(q3);
 
 		JmxProcess process = new JmxProcess(server);

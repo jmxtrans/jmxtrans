@@ -20,16 +20,16 @@ public class Graphite {
 	public static void main(String[] args) throws Exception {
 		Server server = new Server("w2", "1099");
 
-		Query q = new Query();
-		q.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep");
-		// q.addAttr("HeapMemoryUsage");
-		// q.addAttr("NonHeapMemoryUsage");
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
 		gw.addSetting(GraphiteWriter.PORT, 2003);
 		gw.addSetting(GraphiteWriter.DEBUG, true);
 		gw.addSetting(GraphiteWriter.ROOT_PREFIX, "jon.foo.bar");
-		q.addOutputWriter(gw);
+
+		Query q = Query.builder()
+				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q);
 
 		JmxProcess process = new JmxProcess(server);

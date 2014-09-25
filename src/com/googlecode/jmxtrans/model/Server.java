@@ -1,11 +1,10 @@
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +19,15 @@ import com.googlecode.jmxtrans.util.PropertyResolver;
 import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
 
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+
 /**
  * Represents a jmx server that we want to connect to. This also stores the
  * queries that we want to execute against the server.
  *
  * @author jon
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = NON_NULL)
 @JsonPropertyOrder(value = { "alias", "local", "host", "port", "username", "password", "cronExpression", "numQueryThreads",
 		"protocolProviderPackages" })
 public class Server {
@@ -201,7 +202,7 @@ public class Server {
 	/**
 	 * Adds a query. Won't add the same query (determined by equals()) 2x.
 	 */
-	public void addQuery(Query q) throws ValidationException {
+	public void addQuery(Query q) {
 		if (!this.queries.contains(q)) {
 			this.queries.add(q);
 		} else {

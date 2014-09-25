@@ -1,7 +1,14 @@
 package com.googlecode.jmxtrans.util;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.common.collect.FluentIterable.from;
 
 /***
  *
@@ -11,6 +18,8 @@ import java.util.Map;
  *
  */
 public class PropertyResolver {
+
+	private static PropertyResolverFunc RESOLVE_PROPERTIES = new PropertyResolverFunc();
 
 	/**
 	 * Resolve a property from System Properties (aka ${key}) key:defval is
@@ -93,8 +102,8 @@ public class PropertyResolver {
 	/**
 	 * Parse Map and resolve Strings value with resolveProps
 	 */
+	@CheckReturnValue
 	public static void resolveMap(Map<String, Object> map) {
-
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 			if (entry.getValue() instanceof String)
 				map.put(entry.getKey(), resolveProps((String) entry.getValue()));
@@ -104,11 +113,18 @@ public class PropertyResolver {
 	/**
 	 * Parse List and resolve Strings value with resolveProps
 	 */
-	public static void resolveList(List<String> list) {
+	@CheckReturnValue
+	public static ImmutableList<String> resolveList(List<String> list) {
+		return from(list)
+				.transform(RESOLVE_PROPERTIES)
+				.toList();
+	}
 
-		for (int i = 0; i < list.size(); i++) {
-			String val = list.get(i);
-			list.set(i, resolveProps(val));
+	private static class PropertyResolverFunc implements Function<String, String> {
+		@Nullable
+		@Override
+		public String apply(@Nullable String input) {
+			return resolveProps(input);
 		}
 	}
 }

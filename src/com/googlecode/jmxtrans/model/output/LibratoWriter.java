@@ -1,12 +1,12 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.core.Base64Variants;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.codehaus.jackson.Base64Variants;
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;

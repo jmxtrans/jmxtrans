@@ -1,7 +1,7 @@
 package com.googlecode.jmxtrans.example;
 
-import java.io.IOException;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -9,9 +9,8 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.Set;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
@@ -60,16 +59,16 @@ public class TreeWalker2 {
 			MBeanInfo info = connection.getMBeanInfo(name);
 			MBeanAttributeInfo[] attrs = info.getAttributes();
 
-			Query query = new Query();
-			query.setObj(name.getCanonicalName());
-			query.addOutputWriter(new StdOutWriter());
+			Query.Builder query = Query.builder()
+					.setObj(name.getCanonicalName())
+					.addOutputWriter(new StdOutWriter());
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
 				query.addAttr(attrInfo.getName());
 			}
 
 			try {
-				JmxUtils.processQuery(connection, null, query);
+				JmxUtils.processQuery(connection, null, query.build());
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}

@@ -37,97 +37,106 @@ public class ActiveMQ {
 		gw.addTypeName("Destination");
 		gw.addSetting(BaseOutputWriter.DEBUG, true);
 
-		Query q = new Query();
-		q.setObj("org.apache.activemq:BrokerName=localhost,Type=Subscription,clientId=*,consumerId=*,destinationName=*,destinationType=Queue,persistentMode=Non-Durable");
-		q.addAttr("PendingQueueSize");
-		q.addAttr("DispatchedQueueSize");
-		q.addAttr("EnqueueCounter");
-		q.addAttr("DequeueCounter");
-		q.addAttr("MessageCountAwaitingAcknowledge");
-		q.addAttr("DispachedCounter");
-		q.addOutputWriter(gw);
+		Query q = Query.builder()
+				.setObj("org.apache.activemq:BrokerName=localhost,Type=Subscription,clientId=*,consumerId=*,destinationName=*,destinationType=Queue,persistentMode=Non-Durable")
+				.addAttr("PendingQueueSize")
+				.addAttr("DispatchedQueueSize")
+				.addAttr("EnqueueCounter")
+				.addAttr("DequeueCounter")
+				.addAttr("MessageCountAwaitingAcknowledge")
+				.addAttr("DispachedCounter")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q);
 
-		Query q2 = new Query();
-		q2.setObj("org.apache.activemq:BrokerName=localhost,Destination=ActiveMQ.Advisory.Consumer.Queue.*,Type=Topic");
-		q2.addAttr("QueueSize");
-		q2.addAttr("MaxEnqueueTime");
-		q2.addAttr("MinEnqueueTime");
-		q2.addAttr("AverageEnqueueTime");
-		q2.addAttr("InFlightCount");
-		q2.addAttr("ConsumerCount");
-		q2.addAttr("ProducerCount");
-		q2.addAttr("DispatchCount");
-		q2.addAttr("DequeueCount");
-		q2.addAttr("EnqueueCount");
-		q2.addAttr("Subscriptions");
-		q2.addOutputWriter(gw);
+		Query q2 = Query.builder()
+				.setObj("org.apache.activemq:BrokerName=localhost,Destination=ActiveMQ.Advisory.Consumer.Queue.*,Type=Topic")
+				.addAttr("QueueSize")
+				.addAttr("MaxEnqueueTime")
+				.addAttr("MinEnqueueTime")
+				.addAttr("AverageEnqueueTime")
+				.addAttr("InFlightCount")
+				.addAttr("ConsumerCount")
+				.addAttr("ProducerCount")
+				.addAttr("DispatchCount")
+				.addAttr("DequeueCount")
+				.addAttr("EnqueueCount")
+				.addAttr("Subscriptions")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q2);
 
-		Query q3 = new Query();
-		q3.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Queue");
-		q3.addAttr("QueueSize");
-		q3.addAttr("MaxEnqueueTime");
-		q3.addAttr("MinEnqueueTime");
-		q3.addAttr("AverageEnqueueTime");
-		q3.addAttr("InFlightCount");
-		q3.addAttr("ConsumerCount");
-		q3.addAttr("ProducerCount");
-		q3.addAttr("DispatchCount");
-		q3.addAttr("DequeueCount");
-		q3.addAttr("EnqueueCount");
-		q3.addAttr("Subscriptions");
-		q3.addOutputWriter(gw);
+		Query q3 = Query.builder()
+				.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Queue")
+				.addAttr("QueueSize")
+				.addAttr("MaxEnqueueTime")
+				.addAttr("MinEnqueueTime")
+				.addAttr("AverageEnqueueTime")
+				.addAttr("InFlightCount")
+				.addAttr("ConsumerCount")
+				.addAttr("ProducerCount")
+				.addAttr("DispatchCount")
+				.addAttr("DequeueCount")
+				.addAttr("EnqueueCount")
+				.addAttr("Subscriptions")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q3);
 
-		Query q4 = new Query();
-		q4.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Topic");
-		q4.addAttr("QueueSize");
-		q4.addAttr("MaxEnqueueTime");
-		q4.addAttr("MinEnqueueTime");
-		q4.addAttr("AverageEnqueueTime");
-		q4.addAttr("InFlightCount");
-		q4.addAttr("ConsumerCount");
-		q4.addAttr("ProducerCount");
-		q4.addAttr("DispatchCount");
-		q4.addAttr("DequeueCount");
-		q4.addAttr("EnqueueCount");
-		q4.addAttr("Subscriptions");
-		q4.addOutputWriter(gw);
+		Query q4 = Query.builder()
+				.setObj("org.apache.activemq:BrokerName=localhost,Destination=*,Type=Topic")
+				.addAttr("QueueSize")
+				.addAttr("MaxEnqueueTime")
+				.addAttr("MinEnqueueTime")
+				.addAttr("AverageEnqueueTime")
+				.addAttr("InFlightCount")
+				.addAttr("ConsumerCount")
+				.addAttr("ProducerCount")
+				.addAttr("DispatchCount")
+				.addAttr("DequeueCount")
+				.addAttr("EnqueueCount")
+				.addAttr("Subscriptions")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q4);
 
-		Query q5 = new Query();
-		q5.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker");
-		q5.addOutputWriter(gw);
+		Query q5 = Query.builder()
+				.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q5);
 
-		Query q6 = new Query();
-		q6.setObj("java.lang:type=Memory");
-		q6.addAttr("HeapMemoryUsage");
-		q6.addAttr("NonHeapMemoryUsage");
-		q6.addOutputWriter(gw);
+		Query q6 = Query.builder()
+				.setObj("java.lang:type=Memory")
+				.addAttr("HeapMemoryUsage")
+				.addAttr("NonHeapMemoryUsage")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q6);
 
-		Query q7 = new Query("java.lang:type=Threading");
-		q7.addAttr("DaemonThreadCount");
-		q7.addAttr("PeakThreadCount");
-		q7.addAttr("ThreadCount");
-		q7.addAttr("CurrentThreadCpuTime");
-		q7.addAttr("CurrentThreadUserTime");
-		q7.addAttr("TotalStartedThreadCount");
-		q7.addOutputWriter(gw);
+		Query q7 = Query.builder()
+				.setObj("java.lang:type=Threading")
+				.addAttr("DaemonThreadCount")
+				.addAttr("PeakThreadCount")
+				.addAttr("ThreadCount")
+				.addAttr("CurrentThreadCpuTime")
+				.addAttr("CurrentThreadUserTime")
+				.addAttr("TotalStartedThreadCount")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q7);
 
-		Query q8 = new Query();
-		q8.setObj("java.lang:name=*,type=GarbageCollector");
-		q8.addKey("committed");
-		q8.addKey("init");
-		q8.addKey("max");
-		q8.addKey("used");
-		q8.addKey("duration");
-		q8.addKey("CollectionCount");
-		q8.addKey("CollectionTime");
-		q8.addOutputWriter(gw);
+		Query q8 = Query.builder()
+				.setObj("java.lang:name=*,type=GarbageCollector")
+				.addKey("committed")
+				.addKey("init")
+				.addKey("max")
+				.addKey("used")
+				.addKey("duration")
+				.addKey("CollectionCount")
+				.addKey("CollectionTime")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q8);
 
 		GraphiteWriter gw2 = new GraphiteWriter();
@@ -137,9 +146,10 @@ public class ActiveMQ {
 		gw2.addTypeName("name");
 		gw2.addSetting(BaseOutputWriter.DEBUG, true);
 
-		Query q9 = new Query();
-		q9.setObj("java.lang:type=MemoryPool,name=*");
-		q9.addOutputWriter(gw2);
+		Query q9 = Query.builder()
+				.setObj("java.lang:type=MemoryPool,name=*")
+				.addOutputWriter(gw2)
+				.build();
 		server.addQuery(q9);
 
 		JmxProcess process = new JmxProcess(server);

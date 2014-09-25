@@ -61,15 +61,9 @@ public class JmxUtils {
 
 				List<Query> queries = server.getQueries();
 				for (Query q : queries) {
-					try {
-						// no need to check for existing since this method
-						// already does that
-						found.addQuery(q);
-					} catch (ValidationException ex) {
-						// catching this exception because we don't want to stop
-						// processing
-						log.error("Error adding query: " + q + " to server" + server, ex);
-					}
+					// no need to check for existing since this method
+					// already does that
+					found.addQuery(q);
 				}
 			} else {
 				existing.add(server);

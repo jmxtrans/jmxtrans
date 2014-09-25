@@ -1,13 +1,12 @@
 package com.googlecode.jmxtrans.util;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.PrintStream;
 
 import com.googlecode.jmxtrans.model.JmxProcess;
-
-import static org.codehaus.jackson.map.SerializationConfig.Feature.WRITE_NULL_MAP_VALUES;
 
 public class JsonPrinter {
 
@@ -18,8 +17,9 @@ public class JsonPrinter {
 	public JsonPrinter(PrintStream out) {
 		this.out = out;
 		mapper = new ObjectMapper();
-		mapper.getSerializationConfig().set(WRITE_NULL_MAP_VALUES, false);
-		prettyPrintingWriter = mapper.defaultPrettyPrintingWriter();
+		mapper.getSerializationConfig().without(SerializationFeature.WRITE_NULL_MAP_VALUES);
+		//mapper.getSerializationConfig().set(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+		prettyPrintingWriter = mapper.writerWithDefaultPrettyPrinter();
 	}
 
 	/**

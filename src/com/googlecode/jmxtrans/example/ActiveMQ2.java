@@ -36,34 +36,36 @@ public class ActiveMQ2 {
 		// use this to add data to GW path
 		gw.addTypeName("Destination");
 
-		Query q = new Query();
-		q.setObj("org.apache.activemq:BrokerName=localhost,Type=Queue,Destination=*");
-		q.addAttr("QueueSize");
-		q.addAttr("MaxEnqueueTime");
-		q.addAttr("MinEnqueueTime");
-		q.addAttr("AverageEnqueueTime");
-		q.addAttr("InFlightCount");
-		q.addAttr("ConsumerCount");
-		q.addAttr("ProducerCount");
-		q.addAttr("DispatchCount");
-		q.addAttr("DequeueCount");
-		q.addAttr("EnqueueCount");
-		q.addOutputWriter(gw);
+		Query q = Query.builder()
+				.setObj("org.apache.activemq:BrokerName=localhost,Type=Queue,Destination=*")
+				.addAttr("QueueSize")
+				.addAttr("MaxEnqueueTime")
+				.addAttr("MinEnqueueTime")
+				.addAttr("AverageEnqueueTime")
+				.addAttr("InFlightCount")
+				.addAttr("ConsumerCount")
+				.addAttr("ProducerCount")
+				.addAttr("DispatchCount")
+				.addAttr("DequeueCount")
+				.addAttr("EnqueueCount")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q);
 
-		Query q2 = new Query();
-		q2.setObj("org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*");
-		q2.addAttr("QueueSize");
-		q2.addAttr("MaxEnqueueTime");
-		q2.addAttr("MinEnqueueTime");
-		q2.addAttr("AverageEnqueueTime");
-		q2.addAttr("InFlightCount");
-		q2.addAttr("ConsumerCount");
-		q2.addAttr("ProducerCount");
-		q2.addAttr("DispatchCount");
-		q2.addAttr("DequeueCount");
-		q2.addAttr("EnqueueCount");
-		q2.addOutputWriter(gw);
+		Query q2 = Query.builder()
+				.setObj("org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*")
+				.addAttr("QueueSize")
+				.addAttr("MaxEnqueueTime")
+				.addAttr("MinEnqueueTime")
+				.addAttr("AverageEnqueueTime")
+				.addAttr("InFlightCount")
+				.addAttr("ConsumerCount")
+				.addAttr("ProducerCount")
+				.addAttr("DispatchCount")
+				.addAttr("DequeueCount")
+				.addAttr("EnqueueCount")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q2);
 
 		JmxProcess process = new JmxProcess(server);

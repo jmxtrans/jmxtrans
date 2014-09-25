@@ -47,9 +47,11 @@ public class JmxProcessingTests {
 	@Test
 	public void querySimpleAttribute() throws Exception {
 		OutputWriter outputWriter = mock(OutputWriter.class);
-		Query query = new Query(MBEAN_NAME);
-		query.addAttr("DummyValue");
-		query.addOutputWriter(outputWriter);
+		Query query = Query.builder()
+				.setObj(MBEAN_NAME)
+				.addAttr("DummyValue")
+				.addOutputWriter(outputWriter)
+				.build();
 
 		JmxUtils.processQuery(server, null, query);
 

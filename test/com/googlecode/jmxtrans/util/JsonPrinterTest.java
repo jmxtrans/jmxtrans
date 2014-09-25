@@ -58,7 +58,9 @@ public class JsonPrinterTest {
 		server.setAlias("alias");
 		server.setHost("example.org");
 		server.setPort("123");
-		Query query = new Query("obj");
+		Query query = Query.builder()
+				.setObj("obj")
+				.build();
 		server.addQuery(query);
 		servers.add(server);
 		return new JmxProcess(servers);

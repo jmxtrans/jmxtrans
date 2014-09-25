@@ -151,6 +151,6 @@ public class JmxResultProcessor {
 	 * Builds up the base Result object
 	 */
 	private Result getNewResultObject(String attributeName, Map<String, Object> values) {
-		return new Result(attributeName, className, objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values, query);
+		return new Result(attributeName, className, query.getResultAlias(), objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values);
 	}
 }

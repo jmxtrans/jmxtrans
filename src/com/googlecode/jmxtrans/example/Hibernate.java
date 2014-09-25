@@ -32,37 +32,37 @@ public class Hibernate {
 
 		gw.addSetting(BaseOutputWriter.DEBUG, true);
 
-		Query q = new Query();
-		q.setObj("org.hibernate.jmx:name=*,type=StatisticsService");
-		q.addAttr("EntityDeleteCount");
-		q.addAttr("EntityInsertCount");
-		q.addAttr("EntityLoadCount");
-		q.addAttr("EntityFetchCount");
-		q.addAttr("EntityUpdateCount");
-		q.addAttr("QueryExecutionCount");
-		q.addAttr("QueryCacheHitCount");
-		q.addAttr("QueryExecutionMaxTime");
-		q.addAttr("QueryCacheMissCount");
-		q.addAttr("QueryCachePutCount");
-		q.addAttr("FlushCount");
-		q.addAttr("ConnectCount");
-		q.addAttr("SecondLevelCacheHitCount");
-		q.addAttr("SecondLevelCacheMissCount");
-		q.addAttr("SecondLevelCachePutCount");
-		q.addAttr("SessionCloseCount");
-		q.addAttr("SessionOpenCount");
-		q.addAttr("CollectionLoadCount");
-		q.addAttr("CollectionFetchCount");
-		q.addAttr("CollectionUpdateCount");
-		q.addAttr("CollectionRemoveCount");
-		q.addAttr("CollectionRecreateCount");
-		q.addAttr("SuccessfulTransactionCount");
-		q.addAttr("TransactionCount");
-		q.addAttr("CloseStatementCount");
-		q.addAttr("PrepareStatementCount");
-		q.addAttr("OptimisticFailureCount");
-		// q.addOutputWriter(new StdOutWriter());
-		q.addOutputWriter(gw);
+		Query q = Query.builder()
+				.setObj("org.hibernate.jmx:name=*,type=StatisticsService")
+				.addAttr("EntityDeleteCount")
+				.addAttr("EntityInsertCount")
+				.addAttr("EntityLoadCount")
+				.addAttr("EntityFetchCount")
+				.addAttr("EntityUpdateCount")
+				.addAttr("QueryExecutionCount")
+				.addAttr("QueryCacheHitCount")
+				.addAttr("QueryExecutionMaxTime")
+				.addAttr("QueryCacheMissCount")
+				.addAttr("QueryCachePutCount")
+				.addAttr("FlushCount")
+				.addAttr("ConnectCount")
+				.addAttr("SecondLevelCacheHitCount")
+				.addAttr("SecondLevelCacheMissCount")
+				.addAttr("SecondLevelCachePutCount")
+				.addAttr("SessionCloseCount")
+				.addAttr("SessionOpenCount")
+				.addAttr("CollectionLoadCount")
+				.addAttr("CollectionFetchCount")
+				.addAttr("CollectionUpdateCount")
+				.addAttr("CollectionRemoveCount")
+				.addAttr("CollectionRecreateCount")
+				.addAttr("SuccessfulTransactionCount")
+				.addAttr("TransactionCount")
+				.addAttr("CloseStatementCount")
+				.addAttr("PrepareStatementCount")
+				.addAttr("OptimisticFailureCount")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q);
 
 		JmxProcess process = new JmxProcess(server);

@@ -32,17 +32,17 @@ public class Ehcache {
 
 		gw.addSetting(BaseOutputWriter.DEBUG, true);
 
-		Query q = new Query();
-		q.setObj("net.sf.ehcache:CacheManager=net.sf.ehcache.CacheManager@*,name=*,type=CacheStatistics");
-		q.addAttr("CacheHits");
-		q.addAttr("InMemoryHits");
-		q.addAttr("OnDiskHits");
-		q.addAttr("CacheMisses");
-		q.addAttr("ObjectCount");
-		q.addAttr("MemoryStoreObjectCount");
-		q.addAttr("DiskStoreObjectCount");
-		// q.addOutputWriter(new StdOutWriter());
-		q.addOutputWriter(gw);
+		Query q = Query.builder()
+				.setObj("net.sf.ehcache:CacheManager=net.sf.ehcache.CacheManager@*,name=*,type=CacheStatistics")
+				.addAttr("CacheHits")
+				.addAttr("InMemoryHits")
+				.addAttr("OnDiskHits")
+				.addAttr("CacheMisses")
+				.addAttr("ObjectCount")
+				.addAttr("MemoryStoreObjectCount")
+				.addAttr("DiskStoreObjectCount")
+				.addOutputWriter(gw)
+				.build();
 		server.addQuery(q);
 
 		JmxProcess process = new JmxProcess(server);

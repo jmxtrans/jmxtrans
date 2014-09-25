@@ -1,38 +1,37 @@
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
+
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
 /**
  * Represents the result of a query.
  * 
  * @author jon
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = NON_NULL)
+@ThreadSafe
+@Immutable
 public class Result {
 	private final String attributeName;
 	private final String className;
 	private final String typeName;
 	private final ImmutableMap<String, Object> values;
 	private final long epoch;
-	private final Query query;
+	private final String classNameAlias;
 
-	public Result(String attributeName, String className, String typeName, Map<String, Object> values, Query query) {
+	public Result(String attributeName, String className, String classNameAlias, String typeName, Map<String, Object> values) {
 		this.className = className;
 		this.typeName = typeName;
 		this.values = ImmutableMap.copyOf(values);
-		this.query = query;
 		this.epoch = System.currentTimeMillis();
 		this.attributeName = attributeName;
-	}
-
-	@JsonIgnore
-	public Query getQuery() {
-		return query;
+		this.classNameAlias = classNameAlias;
 	}
 
 	public String getClassName() {
@@ -43,7 +42,7 @@ public class Result {
 	 * Specified as part of the query.
 	 */
 	public String getClassNameAlias() {
-		return query.getResultAlias();
+		return classNameAlias;
 	}
 
 	public String getTypeName() {

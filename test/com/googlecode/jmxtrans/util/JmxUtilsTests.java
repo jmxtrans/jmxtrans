@@ -85,7 +85,9 @@ public class JmxUtilsTests {
 
 	private Server createServerWithOneQuery(String host, String port, String queryObject) throws ValidationException {
 		Server server = new Server(host, port);
-		server.addQuery(new Query(queryObject));
+		server.addQuery(Query.builder()
+				.setObj(queryObject)
+				.build());
 		return server;
 	}
 

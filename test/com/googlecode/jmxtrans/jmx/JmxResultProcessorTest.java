@@ -2,25 +2,21 @@ package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
-import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.lang.management.ManagementFactory;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +40,9 @@ public class JmxResultProcessorTest {
 
 	@Before
 	public void initConfiguration() {
-		query = new Query();
-		query.setResultAlias("resultAlias");
+		query = Query.builder()
+				.setResultAlias("resultAlias")
+				.build();
 	}
 
 	@Test
@@ -64,7 +61,6 @@ public class JmxResultProcessorTest {
 		assertThat(integerResult.getAttributeName()).isEqualTo("StartTime");
 		assertThat(integerResult.getClassName()).isEqualTo("sun.management.RuntimeImpl");
 		assertThat(integerResult.getClassNameAlias()).isEqualTo("resultAlias");
-		assertThat(integerResult.getQuery()).isEqualTo(query);
 		assertThat(integerResult.getTypeName()).isEqualTo("type=Runtime");
 		assertThat(integerResult.getValues()).hasSize(1);
 	}

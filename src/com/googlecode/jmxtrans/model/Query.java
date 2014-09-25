@@ -1,59 +1,66 @@
 package com.googlecode.jmxtrans.model;
 
-import com.googlecode.jmxtrans.OutputWriter;
-import com.googlecode.jmxtrans.util.PropertyResolver;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
-import java.util.ArrayList;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.googlecode.jmxtrans.OutputWriter;
+
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.googlecode.jmxtrans.util.PropertyResolver.resolveList;
+import static java.util.Arrays.asList;
+
 /**
  * Represents a JMX Query to ask for obj, attr and one or more keys.
- * 
- * Once the query has been executed, it'll have a list of results.
- * 
+ *
  * @author jon
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
-@JsonPropertyOrder(value = { "obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "outputWriters" })
+@JsonSerialize(include = NON_NULL)
+@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "outputWriters"})
+@ThreadSafe
+@Immutable // Note that outputWriters is neither thread safe nor immutable (yet)
 public class Query {
 
-	private String obj;
-	private List<String> attr;
-	private String resultAlias;
-	private List<String> keys;
-	private boolean allowDottedKeys;
-	private List<OutputWriter> outputWriters;
-	private Set<String> typeNames;
+	private final String obj;
+	private final ImmutableList<String> keys;
+	private final ImmutableList<String> attr;
+	private final ImmutableSet<String> typeNames;
+	private final String resultAlias;
+	private final boolean allowDottedKeys;
+	private final ImmutableList<OutputWriter> outputWriters;
 
-	public Query() {
-	}
-
-	public Query(String obj) {
+	@JsonCreator
+	public Query(
+			@JsonProperty("obj") String obj,
+			@JsonProperty("keys") List<String> keys,
+			@JsonProperty("attr") List<String> attr,
+			@JsonProperty("typeNames") Set<String> typeNames,
+			@JsonProperty("resultAlias") String resultAlias,
+			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
+			@JsonProperty("outputWriters") List<OutputWriter> outputWriters
+	) {
 		this.obj = obj;
-	}
-
-	public Query(String obj, String attr) {
-		this.obj = obj;
-		addAttr(attr);
-	}
-
-	public Query(String obj, List<String> attr) {
-		this.obj = obj;
-		this.attr = attr;
-	}
-
-	/**
-	 * The JMX object representation: java.lang:type=Memory
-	 */
-	public void setObj(String obj) {
-		this.obj = PropertyResolver.resolveProps(obj);
+		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
+		this.resultAlias = resultAlias;
+		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
+		this.allowDottedKeys = allowDottedKeys;
+		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, Collections.<OutputWriter>emptyList()));
+		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 	}
 
 	/**
@@ -67,89 +74,38 @@ public class Query {
 	 * The alias allows you to specify what you would like the results of the
 	 * query to go into.
 	 */
-	public void setResultAlias(String resultAlias) {
-		this.resultAlias = resultAlias;
-	}
-
-	/**
-	 * The alias allows you to specify what you would like the results of the
-	 * query to go into.
-	 */
 	public String getResultAlias() {
 		return resultAlias;
-	}
-
-	public void setTypeNames(Set<String> typeNames) {
-		this.typeNames = typeNames;
 	}
 
 	/**
 	 * The list of type names used in a JMX bean string when querying with a
 	 * wildcard which is used to expose the actual type name value to the key
 	 * string. e.g. for this JMX name
-	 * 
+	 * <p/>
 	 * typeName=name=PS Eden Space,type=MemoryPool
-	 * 
+	 * <p/>
 	 * If you add a typeName("name"), then it'll retrieve 'PS Eden Space' from
 	 * the string
 	 */
-	public Set<String> getTypeNames() {
+	public ImmutableSet<String> getTypeNames() {
 		return typeNames;
 	}
 
-	public void setAttr(List<String> attr) {
-		this.attr = attr;
-		PropertyResolver.resolveList(this.attr);
-	}
-
-	public List<String> getAttr() {
+	public ImmutableList<String> getAttr() {
 		return attr;
 	}
 
-	public void addAttr(String attr) {
-		if (this.attr == null) {
-			this.attr = new ArrayList<String>();
-		}
-		this.attr.add(attr);
-	}
-
-	public void setKeys(List<String> keys) {
-		this.keys = keys;
-		PropertyResolver.resolveList(this.keys);
-	}
-
-	public List<String> getKeys() {
+	public ImmutableList<String> getKeys() {
 		return keys;
-	}
-
-	public void addKey(String key) {
-		if (this.keys == null) {
-			this.keys = new ArrayList<String>();
-		}
-		this.keys.add(key);
 	}
 
 	public boolean isAllowDottedKeys() {
 		return allowDottedKeys;
 	}
 
-	public void setAllowDottedKeys(boolean allowDottedKeys) {
-		this.allowDottedKeys = allowDottedKeys;
-	}
-
-	public void setOutputWriters(List<OutputWriter> outputWriters) {
-		this.outputWriters = outputWriters;
-	}
-
-	public List<OutputWriter> getOutputWriters() {
+	public ImmutableList<OutputWriter> getOutputWriters() {
 		return outputWriters;
-	}
-
-	public void addOutputWriter(OutputWriter writer) {
-		if (this.outputWriters == null) {
-			this.outputWriters = new ArrayList<OutputWriter>();
-		}
-		this.outputWriters.add(writer);
 	}
 
 	@Override
@@ -157,7 +113,6 @@ public class Query {
 		return "Query [obj=" + obj + ", resultAlias=" + resultAlias + ", attr=" + attr + "]";
 	}
 
-	/** */
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) {
@@ -176,28 +131,104 @@ public class Query {
 
 		Query other = (Query) o;
 
-		int sizeL = 0;
-		int sizeR = 0;
-		if (this.getOutputWriters() != null) {
-			sizeL = this.getOutputWriters().size();
-		}
-		if (other.getOutputWriters() != null) {
-			sizeR = other.getOutputWriters().size();
-		}
-
-		return new EqualsBuilder().append(this.getObj(), other.getObj()).append(this.getKeys(), other.getKeys())
-				.append(this.getAttr(), other.getAttr()).append(this.getResultAlias(), other.getResultAlias()).append(sizeL, sizeR).isEquals();
+		return new EqualsBuilder()
+				.append(this.getObj(), other.getObj())
+				.append(this.getKeys(), other.getKeys())
+				.append(this.getAttr(), other.getAttr())
+				.append(this.getResultAlias(), other.getResultAlias())
+				.append(sizeOf(this.getOutputWriters()), sizeOf(other.getOutputWriters()))
+				.isEquals();
 	}
 
-	/** */
 	@Override
 	public int hashCode() {
-		int sizeL = 0;
-		if (this.getOutputWriters() != null) {
-			sizeL = this.getOutputWriters().size();
+		return new HashCodeBuilder(41, 97)
+				.append(this.getObj())
+				.append(this.getKeys())
+				.append(this.getAttr())
+				.append(this.getResultAlias())
+				.append(sizeOf(this.getOutputWriters()))
+				.toHashCode();
+	}
+
+	private static int sizeOf(List<OutputWriter> writers) {
+		if (writers == null) {
+			return 0;
+		}
+		return writers.size();
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	@NotThreadSafe
+	public static final class Builder {
+
+		private String obj;
+		private final List<String> attr = Lists.newArrayList();
+		private String resultAlias;
+		private final List<String> keys = Lists.newArrayList();
+		private boolean allowDottedKeys;
+		private final List<OutputWriter> outputWriters = Lists.newArrayList();
+		private final Set<String> typeNames = Sets.newHashSet();
+
+		private Builder() {}
+
+		public Builder setObj(String obj) {
+			this.obj = obj;
+			return this;
 		}
 
-		return new HashCodeBuilder(41, 97).append(this.getObj()).append(this.getKeys()).append(this.getAttr()).append(this.getResultAlias())
-				.append(sizeL).toHashCode();
+		public Builder addAttr(String... attr) {
+			this.attr.addAll(asList(attr));
+			return this;
+		}
+
+		public Builder setResultAlias(String resultAlias) {
+			this.resultAlias = resultAlias;
+			return this;
+		}
+
+		public Builder addKey(String keys) {
+			return addKeys(keys);
+		}
+
+		public Builder addKeys(String... keys) {
+			this.keys.addAll(asList(keys));
+			return this;
+		}
+
+		public Builder setAllowDottedKeys(boolean allowDottedKeys) {
+			this.allowDottedKeys = allowDottedKeys;
+			return this;
+		}
+
+		public Builder addOutputWriter(OutputWriter outputWriter) {
+			return addOutputWriters(outputWriter);
+		}
+
+		public Builder addOutputWriters(OutputWriter... outputWriters) {
+			this.outputWriters.addAll(asList(outputWriters));
+			return this;
+		}
+
+		public Builder setTypeNames(Set<String> typeNames) {
+			this.typeNames.addAll(typeNames);
+			return this;
+		}
+
+		public Query build() {
+			return new Query(
+					this.obj,
+					this.keys,
+					this.attr,
+					this.typeNames,
+					this.resultAlias,
+					this.allowDottedKeys,
+					this.outputWriters
+			);
+		}
+
 	}
 }
