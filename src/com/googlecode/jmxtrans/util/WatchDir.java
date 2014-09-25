@@ -13,9 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * Watch a directory (or tree) for changes to files.
@@ -32,7 +33,7 @@ public class WatchDir extends Thread {
      */
 	public WatchDir(File dir, WatchedCallback watched) throws IOException {
 		this.watched = watched;
-		this.keys = new HashMap<WatchKey,Path>();
+		this.keys = newHashMap();
 		watchService = FileSystems.getDefault().newWatchService();
 		Path watchedPath = Paths.get(dir.getAbsolutePath());
 		WatchKey signalledKey = watchedPath.register(watchService, StandardWatchEventKind.ENTRY_CREATE, StandardWatchEventKind.ENTRY_DELETE, StandardWatchEventKind.ENTRY_MODIFY);

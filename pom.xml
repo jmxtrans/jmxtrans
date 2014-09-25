@@ -33,6 +33,8 @@
 			dogmatic, but to provide consistency in the code.
 		-->
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
+		<!-- some versions used by multiple dependencies -->
+		<jackson.version>2.4.2</jackson.version>
 	</properties>
 
 	<developers>
@@ -106,9 +108,6 @@
 						<include>**/*TestCase.java</include>
 						<include>**/*Tests.java</include>
 					</includes>
-					<excludes>
-						<exclude>**/GangliaWriterTests.java</exclude>
-					</excludes>
 					<systemPropertyVariables>
 						<jmxtrans.log.dir>${project.build.directory}</jmxtrans.log.dir>
 						<myhost>w2</myhost>
@@ -175,9 +174,6 @@
 					<targetClasses>
 						<param>com.googlecode.jmxtrans.*</param>
 					</targetClasses>
-					<excludedClasses>
-						<param>com.googlecode.jmxtrans.model.output.GangliaWriterTests</param>
-					</excludedClasses>
 				</configuration>
 			</plugin>
 
@@ -332,10 +328,10 @@
 				<configuration>
 					<links>
 						<link>http://commons.apache.org/pool/api-1.6</link>
-						<link>http://fasterxml.github.com/jackson-core/javadoc/2.0.4</link>
-						<link>http://fasterxml.github.com/jackson-databind/javadoc/2.0.4</link>
-						<link>http://docs.guava-libraries.googlecode.com/git/javadoc</link>
-						<link>http://static.springsource.org/spring/docs/3.1.x/javadoc-api/</link>
+						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.4</link>
+						<link>http://fasterxml.github.io/jackson-core/javadoc/2.4</link>
+						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.4</link>
+						<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc</link>
 					</links>
 				</configuration>
 			</plugin>
@@ -428,15 +424,27 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>1.6.3</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.6.3</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-guava</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 
 		<dependency>

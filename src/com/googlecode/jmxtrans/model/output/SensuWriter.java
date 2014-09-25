@@ -1,8 +1,9 @@
 package com.googlecode.jmxtrans.model.output;
 
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.ImmutableList;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
@@ -53,18 +55,18 @@ public class SensuWriter extends BaseOutputWriter {
 
 	}
 
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		sensuhost = getStringSetting(SETTING_HOST, DEFAULT_SENSU_HOST);
 		sensuhandler = getStringSetting(SETTING_HANDLER, DEFAULT_SENSU_HANDLER);
 		logger.info("Start Sensu writer connected to '{}' with handler {}", sensuhost, sensuhandler);
 	}
 
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', metrics {}", sensuhost, query);
-		writeToSensu(query);
+		writeToSensu(server, query, results);
 	}
 
-	private void serialize(Query query, OutputStream outputStream) throws IOException {
+	private void serialize(Server server, Query query, List<Result> results, OutputStream outputStream) throws IOException {
 		JsonGenerator g = jsonFactory.createJsonGenerator(outputStream, JsonEncoding.UTF8);
 		g.useDefaultPrettyPrinter();
 		g.writeStartObject();
@@ -74,13 +76,13 @@ public class SensuWriter extends BaseOutputWriter {
 
 		StringBuffer jsonoutput = new StringBuffer();
 		List<String> typeNames = getTypeNames();
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 						Object value = values.getValue();
-						jsonoutput.append(JmxUtils.getKeyString(query, result, values, typeNames, null)).append(" ")
+						jsonoutput.append(JmxUtils.getKeyString(server, query, result, values, typeNames, null)).append(" ")
 								.append(value).append(" ")
 								.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
 								.append(System.getProperty("line.separator"));
@@ -94,11 +96,11 @@ public class SensuWriter extends BaseOutputWriter {
 		g.close();
 	}
 
-	private void writeToSensu(Query query) {
+	private void writeToSensu(Server server, Query query, List<Result> results) {
 		Socket socketConnection = null;
 		try {
 			socketConnection = new Socket(sensuhost, 3030);
-			serialize(query, socketConnection.getOutputStream());
+			serialize(server, query, results, socketConnection.getOutputStream());
 		} catch (Exception e) {
 			logger.warn("Failure to send result to Sensu server '{}'", sensuhost, e);
 		} finally {

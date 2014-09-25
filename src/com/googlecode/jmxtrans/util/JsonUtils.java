@@ -1,15 +1,12 @@
 package com.googlecode.jmxtrans.util;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import com.googlecode.jmxtrans.model.JmxProcess;
-
-import static org.codehaus.jackson.map.SerializationConfig.Feature.WRITE_NULL_MAP_VALUES;
 
 public final class JsonUtils {
 
@@ -21,6 +18,7 @@ public final class JsonUtils {
 	 */
 	public static JmxProcess getJmxProcess(File file) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new GuavaModule());
 		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
 		jmx.setName(file.getName());
 		return jmx;

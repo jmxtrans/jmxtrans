@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -98,7 +99,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		host = (String) this.getSettings().get(HOST);
 		Object portObj = this.getSettings().get(PORT);
 		if (portObj instanceof String) {
@@ -128,11 +129,11 @@ public class StatsDWriter extends BaseOutputWriter {
 			bucketType = (String) this.getSettings().get(BUCKET_TYPE);
 	}
 
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 
 		List<String> typeNames = this.getTypeNames();
 
-		for (Result result : query.getResults()) {
+		for (Result result : results) {
 			if (isDebugEnabled()) {
 				log.debug(result.toString());
 			}
@@ -143,7 +144,7 @@ public class StatsDWriter extends BaseOutputWriter {
 					if (NumberUtils.isNumeric(values.getValue())) {
 						StringBuilder sb = new StringBuilder();
 
-						sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix));
+						sb.append(JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix));
 
 						sb.append(":");
 						sb.append(values.getValue().toString());

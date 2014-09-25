@@ -1,24 +1,31 @@
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.googlecode.jmxtrans.util.DatagramSocketFactory;
 import com.googlecode.jmxtrans.util.JmxConnectionFactory;
-import com.googlecode.jmxtrans.util.PropertyResolver;
 import com.googlecode.jmxtrans.util.SocketFactory;
-import com.googlecode.jmxtrans.util.ValidationException;
+
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.googlecode.jmxtrans.util.PropertyResolver.resolveProps;
+import static java.util.Arrays.asList;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the
@@ -26,12 +33,21 @@ import com.googlecode.jmxtrans.util.ValidationException;
  *
  * @author jon
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
-@JsonPropertyOrder(value = { "alias", "local", "host", "port", "username", "password", "cronExpression", "numQueryThreads",
-		"protocolProviderPackages" })
+@JsonSerialize(include = NON_NULL)
+@JsonPropertyOrder(value = {
+		"alias",
+		"local",
+		"host",
+		"port",
+		"username",
+		"password",
+		"cronExpression",
+		"numQueryThreads",
+		"protocolProviderPackages"
+})
+@Immutable
+@ThreadSafe
 public class Server {
-
-	private static final Logger log = LoggerFactory.getLogger(Server.class);
 
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
@@ -39,73 +55,51 @@ public class Server {
 	public static final String JMX_CONNECTION_FACTORY_POOL = JmxConnectionFactory.class.getSimpleName();
 	public static final String DATAGRAM_SOCKET_FACTORY_POOL = DatagramSocketFactory.class.getSimpleName();
 
-	private JmxProcess jmxProcess;
-
-	private String alias;
-	private String host;
-	private String port;
-	private String username;
-	private String password;
-	private String protocolProviderPackages;
-	private String url;
-	private String cronExpression;
-	private Integer numQueryThreads;
+	private final String alias;
+	private final String host;
+	private final String port;
+	private final String username;
+	private final String password;
+	private final String protocolProviderPackages;
+	private final String url;
+	private final String cronExpression;
+	private final Integer numQueryThreads;
 
 	// if using local JMX to embed JmxTrans to query the local MBeanServer
-	private boolean local;
-	private MBeanServer localMBeanServer;
+	private final boolean local;
 
-	private List<Query> queries = new ArrayList<Query>();
+	private final ImmutableSet<Query> queries;
 
-	public Server() {
-	}
-
-	/** */
-	public Server(String host, String port) {
-		this.host = host;
+	@JsonCreator
+	public Server(
+			@JsonProperty("alias") String alias,
+			@JsonProperty("host") String host,
+			@JsonProperty("port") String port,
+			@JsonProperty("username") String username,
+			@JsonProperty("password") String password,
+			@JsonProperty("protocolProviderPackages") String protocolProviderPackages,
+			@JsonProperty("url") String url,
+			@JsonProperty("cronExpression") String cronExpression,
+			@JsonProperty("numQueryThreads") Integer numQueryThreads,
+			@JsonProperty("local") boolean local,
+			@JsonProperty("queries") List<Query> queries) {
+		this.alias = resolveProps(alias);
+		this.host = resolveProps(host);
 		this.port = port;
-	}
-
-	/** */
-	public Server(String host, String port, Query query) throws ValidationException {
-		this.host = host;
-		this.port = port;
-		this.addQuery(query);
-	}
-
-	/**
-	 * The parent container in json
-	 */
-	public void setJmxProcess(JmxProcess jmxProcess) {
-		this.jmxProcess = jmxProcess;
-	}
-
-	/**
-	 * The parent container in json
-	 */
-	@JsonIgnore
-	public JmxProcess getJmxProcess() {
-		return this.jmxProcess;
+		this.username = resolveProps(username);
+		this.password = resolveProps(password);
+		this.protocolProviderPackages = protocolProviderPackages;
+		this.url = resolveProps(url);
+		this.cronExpression = cronExpression;
+		this.numQueryThreads = numQueryThreads;
+		this.local = local;
+		this.queries = copyOf(queries);
 	}
 
 	@JsonIgnore
 	public MBeanServer getLocalMBeanServer() {
-		if (localMBeanServer == null) {
-			localMBeanServer = ManagementFactory.getPlatformMBeanServer();
-		}
-		return localMBeanServer;
-	}
-
-	public void setLocalMBeanServer(MBeanServer localMBeanServer) {
-		this.localMBeanServer = localMBeanServer;
-	}
-
-	/**
-	 * Some writers (GraphiteWriter) use the alias in generation of the unique
-	 * key which references this server.
-	 */
-	public void setAlias(String alias) {
-		this.alias = PropertyResolver.resolveProps(alias);
+		// Getting the platform MBean server is cheap (expect for th first call) no need to cache it.
+		return ManagementFactory.getPlatformMBeanServer();
 	}
 
 	/**
@@ -116,57 +110,47 @@ public class Server {
 		return this.alias;
 	}
 
-	/** */
-	public void setHost(String host) {
-		this.host = PropertyResolver.resolveProps(host);
-	}
-
-	/** */
 	public String getHost() {
-		if (this.host == null) {
-			if (this.url == null) {
-				throw new RuntimeException("host is null and url is null.  Cannot construct host dynamically.");
-			}
-			this.host = this.url.substring(this.url.lastIndexOf("//") + 2, this.url.lastIndexOf(":"));
+		if (host == null && url == null) {
+			// TODO: shouldn't we just return a null in this case ?
+			throw new IllegalStateException("host is null and url is null. Cannot construct host dynamically.");
 		}
-		return this.host;
+
+		if (host != null) {
+			return host;
+		}
+
+		// removed the caching of the extracted host as it is a very minor
+		// optimization we should probably pre compute it in the builder and
+		// throw exception at construction if both url and host are set
+		// we might also be able to use java.net.URI to parse the URL, but I'm
+		// not familiar enough with JMX URLs to think of the test cases ...
+		return url.substring(url.lastIndexOf("//") + 2, url.lastIndexOf(":"));
 	}
 
-	/** */
-	public void setPort(String port) {
-		this.port = PropertyResolver.resolveProps(port);
-	}
-
-	/** */
 	public String getPort() {
-		if (this.port == null) {
-			if (this.url == null) {
-				throw new RuntimeException("port is null and url is null.  Cannot construct port dynamically.");
-			}
-			this.port = this.url.substring(this.url.lastIndexOf(":") + 1);
-			if (this.port.contains("/")) {
-				this.port = this.port.substring(0, this.port.indexOf("/"));
-			}
+		if (port == null && url == null) {
+			throw new IllegalStateException("port is null and url is null.  Cannot construct port dynamically.");
 		}
-		return this.port;
+		if (this.port != null) {
+			return port;
+		}
+
+		return extractPortFromUrl(url);
 	}
 
-	/** */
-	public void setUsername(String username) {
-		this.username = PropertyResolver.resolveProps(username);
+	private static String extractPortFromUrl(String url) {
+		String computedPort = url.substring(url.lastIndexOf(":") + 1);
+		if (computedPort.contains("/")) {
+			computedPort = computedPort.substring(0, computedPort.indexOf("/"));
+		}
+		return computedPort;
 	}
 
-	/** */
 	public String getUsername() {
 		return this.username;
 	}
 
-	/** */
-	public void setPassword(String password) {
-		this.password = PropertyResolver.resolveProps(password);
-	}
-
-	/** */
 	public String getPassword() {
 		return this.password;
 	}
@@ -180,33 +164,8 @@ public class Server {
 		return local;
 	}
 
-	public void setLocal(boolean local) {
-		this.local = local;
-	}
-
-	/**
-	 * Won't add the same query (determined by equals()) 2x.
-	 */
-	public void setQueries(List<Query> queries) throws ValidationException {
-		for (Query q : queries) {
-			this.addQuery(q);
-		}
-	}
-
-	/** */
-	public List<Query> getQueries() {
+	public ImmutableSet<Query> getQueries() {
 		return this.queries;
-	}
-
-	/**
-	 * Adds a query. Won't add the same query (determined by equals()) 2x.
-	 */
-	public void addQuery(Query q) throws ValidationException {
-		if (!this.queries.contains(q)) {
-			this.queries.add(q);
-		} else {
-			log.debug("Skipped duplicate query: " + q + " for server: " + this);
-		}
 	}
 
 	/**
@@ -218,49 +177,14 @@ public class Server {
 			if ((this.host == null) || (this.port == null)) {
 				throw new RuntimeException("url is null and host or port is null. cannot construct url dynamically.");
 			}
-			this.url = FRONT + this.host + ":" + this.port + BACK;
+			return FRONT + this.host + ":" + this.port + BACK;
 		}
 		return this.url;
 	}
 
-	public void setUrl(String url) {
-		this.url = PropertyResolver.resolveProps(url);
-	}
-
-	/**
-	 * If there are queries and results that have been executed, this is just a
-	 * shortcut to get all the Results.
-	 *
-	 * @return null if there are no queries or empty list if there are no
-	 *         results.
-	 */
-	@JsonIgnore
-	public List<Result> getResults() {
-		List<Query> queries = this.getQueries();
-		List<Result> results = null;
-		if (queries != null) {
-			results = new ArrayList<Result>();
-			for (Query q : queries) {
-				List<Result> tmp = q.getResults();
-				if (tmp != null) {
-					results.addAll(tmp);
-				}
-			}
-		}
-		return results;
-	}
-
-	/** */
 	@JsonIgnore
 	public boolean isQueriesMultiThreaded() {
 		return (this.numQueryThreads != null) && (this.numQueryThreads > 0);
-	}
-
-	/**
-	 * The number of query threads for this server.
-	 */
-	public void setNumQueryThreads(Integer numQueryThreads) {
-		this.numQueryThreads = numQueryThreads;
 	}
 
 	/**
@@ -276,28 +200,16 @@ public class Server {
 	 * Otherwise, it is added to the scheduler for immediate execution and run
 	 * according to the cronExpression.
 	 */
-	public void setCronExpression(String cronExpression) {
-		this.cronExpression = cronExpression;
-	}
-
-	/**
-	 * Each server can set a cronExpression for the scheduler. If the
-	 * cronExpression is null, then the job is run immediately and once.
-	 * Otherwise, it is added to the scheduler for immediate execution and run
-	 * according to the cronExpression.
-	 */
 	public String getCronExpression() {
 		return this.cronExpression;
 	}
 
-	/** */
 	@Override
 	public String toString() {
 		return "Server [host=" + this.host + ", port=" + this.port + ", url=" + this.url + ", cronExpression=" + this.cronExpression
 				+ ", numQueryThreads=" + this.numQueryThreads + "]";
 	}
 
-	/** */
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) {
@@ -316,40 +228,158 @@ public class Server {
 
 		Server other = (Server) o;
 
-		return new EqualsBuilder().append(this.getHost(), other.getHost()).append(this.getPort(), other.getPort())
-				.append(this.getNumQueryThreads(), other.getNumQueryThreads()).append(this.getCronExpression(), other.getCronExpression())
-				.append(this.getAlias(), other.getAlias()).append(this.getUsername(), other.getUsername())
-				.append(this.getPassword(), other.getPassword()).isEquals();
+		return new EqualsBuilder()
+				.append(this.getHost(), other.getHost())
+				.append(this.getPort(), other.getPort())
+				.append(this.getNumQueryThreads(), other.getNumQueryThreads())
+				.append(this.getCronExpression(), other.getCronExpression())
+				.append(this.getAlias(), other.getAlias())
+				.append(this.getUsername(), other.getUsername())
+				.append(this.getPassword(), other.getPassword())
+				.isEquals();
 	}
 
-	/** */
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(13, 21).append(this.getHost()).append(this.getPort()).append(this.getNumQueryThreads())
-				.append(this.getCronExpression()).append(this.getAlias()).append(this.getUsername()).append(this.getPassword()).toHashCode();
+		return new HashCodeBuilder(13, 21)
+				.append(this.getHost())
+				.append(this.getPort())
+				.append(this.getNumQueryThreads())
+				.append(this.getCronExpression())
+				.append(this.getAlias())
+				.append(this.getUsername())
+				.append(this.getPassword())
+				.toHashCode();
 	}
 
 	/**
 	 * This is some obtuse shit for enabling weblogic support.
-	 *
+	 * <p/>
 	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
 	 * html
-	 *
+	 * <p/>
 	 * You'd set this to: weblogic.management.remote
 	 */
 	public String getProtocolProviderPackages() {
 		return protocolProviderPackages;
 	}
 
-	/**
-	 * This is some obtuse shit for enabling weblogic support.
-	 *
-	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
-	 * html
-	 *
-	 * You'd set this to: weblogic.management.remote
-	 */
-	public void setProtocolProviderPackages(String protocolProviderPackages) {
-		this.protocolProviderPackages = protocolProviderPackages;
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static Builder builder(Server server) {
+		return new Builder(server);
+	}
+
+	@NotThreadSafe
+	public static final class Builder {
+		private String alias;
+		private String host;
+		private String port;
+		private String username;
+		private String password;
+		private String protocolProviderPackages;
+		private String url;
+		private String cronExpression;
+		private Integer numQueryThreads;
+		private boolean local;
+		private final List<Query> queries = new ArrayList<Query>();
+
+		private Builder() {}
+
+		private Builder(Server server) {
+			this.alias = server.alias;
+			this.host = server.host;
+			this.port = server.port;
+			this.username = server.username;
+			this.password = server.password;
+			this.protocolProviderPackages = server.protocolProviderPackages;
+			this.url = server.url;
+			this.cronExpression = server.cronExpression;
+			this.numQueryThreads = server.numQueryThreads;
+			this.local = server.local;
+			this.queries.addAll(server.queries);
+		}
+
+		public Builder setAlias(String alias) {
+			this.alias = alias;
+			return this;
+		}
+
+		public Builder setHost(String host) {
+			this.host = host;
+			return this;
+		}
+
+		public Builder setPort(String port) {
+			this.port = port;
+			return this;
+		}
+
+		public Builder setUsername(String username) {
+			this.username = username;
+			return this;
+		}
+
+		public Builder setPassword(String password) {
+			this.password = password;
+			return this;
+		}
+
+		public Builder setProtocolProviderPackages(String protocolProviderPackages) {
+			this.protocolProviderPackages = protocolProviderPackages;
+			return this;
+		}
+
+		public Builder setUrl(String url) {
+			this.url = url;
+			return this;
+		}
+
+		public Builder setCronExpression(String cronExpression) {
+			this.cronExpression = cronExpression;
+			return this;
+		}
+
+		public Builder setNumQueryThreads(Integer numQueryThreads) {
+			this.numQueryThreads = numQueryThreads;
+			return this;
+		}
+
+		public Builder setLocal(boolean local) {
+			this.local = local;
+			return this;
+		}
+
+		public Builder addQuery(Query query) {
+			this.queries.add(query);
+			return this;
+		}
+
+		public Builder addQueries(Query... queries) {
+			this.queries.addAll(asList(queries));
+			return this;
+		}
+
+		public Builder addQueries(Set<Query> queries) {
+			this.queries.addAll(queries);
+			return this;
+		}
+
+		public Server build() {
+			return new Server(
+					alias,
+					host,
+					port,
+					username,
+					password,
+					protocolProviderPackages,
+					url,
+					cronExpression,
+					numQueryThreads,
+					local,
+					queries);
+		}
 	}
 }

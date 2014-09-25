@@ -21,8 +21,10 @@ public class Ehcache {
 	/** */
 	public static void main(String[] args) throws Exception {
 
-		Server server = new Server("w2", "1099");
-		server.setAlias("w2_ehcache_1099");
+		Server.Builder serverBuilder = Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.setAlias("w2_ehcache_1099");
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(BaseOutputWriter.HOST, GW_HOST);
 		gw.addSetting(BaseOutputWriter.PORT, 2003);
@@ -32,20 +34,20 @@ public class Ehcache {
 
 		gw.addSetting(BaseOutputWriter.DEBUG, true);
 
-		Query q = new Query();
-		q.setObj("net.sf.ehcache:CacheManager=net.sf.ehcache.CacheManager@*,name=*,type=CacheStatistics");
-		q.addAttr("CacheHits");
-		q.addAttr("InMemoryHits");
-		q.addAttr("OnDiskHits");
-		q.addAttr("CacheMisses");
-		q.addAttr("ObjectCount");
-		q.addAttr("MemoryStoreObjectCount");
-		q.addAttr("DiskStoreObjectCount");
-		// q.addOutputWriter(new StdOutWriter());
-		q.addOutputWriter(gw);
-		server.addQuery(q);
+		Query q = Query.builder()
+				.setObj("net.sf.ehcache:CacheManager=net.sf.ehcache.CacheManager@*,name=*,type=CacheStatistics")
+				.addAttr("CacheHits")
+				.addAttr("InMemoryHits")
+				.addAttr("OnDiskHits")
+				.addAttr("CacheMisses")
+				.addAttr("ObjectCount")
+				.addAttr("MemoryStoreObjectCount")
+				.addAttr("DiskStoreObjectCount")
+				.addOutputWriter(gw)
+				.build();
+		serverBuilder.addQuery(q);
 
-		JmxProcess process = new JmxProcess(server);
+		JmxProcess process = new JmxProcess(serverBuilder.build());
 		printer.prettyPrint(process);
 
 		JmxTransformer transformer = new JmxTransformer();

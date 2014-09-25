@@ -17,10 +17,11 @@ public class InterestingInfo {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
-	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("w2", "1099");
-		server.setNumQueryThreads(2);
+		Server.Builder serverBuilder = Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.setNumQueryThreads(2);
 
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
@@ -28,37 +29,38 @@ public class InterestingInfo {
 
 		StdOutWriter sw = new StdOutWriter();
 
-		Query q = new Query();
-		q.setObj("java.lang:type=Memory");
-		q.addAttr("HeapMemoryUsage");
-		q.addAttr("NonHeapMemoryUsage");
-		q.addOutputWriter(gw);
-		q.addOutputWriter(sw);
-		server.addQuery(q);
+		Query q = Query.builder()
+				.setObj("java.lang:type=Memory")
+				.addAttr("HeapMemoryUsage")
+				.addAttr("NonHeapMemoryUsage")
+				.addOutputWriters(gw, sw)
+				.build();
+		serverBuilder.addQuery(q);
 
-		Query q2 = new Query("java.lang:type=Threading");
-		q2.addAttr("DaemonThreadCount");
-		q2.addAttr("PeakThreadCount");
-		q2.addAttr("ThreadCount");
-		q2.addOutputWriter(gw);
-		q2.addOutputWriter(sw);
-		server.addQuery(q2);
+		Query q2 = Query.builder()
+				.setObj("java.lang:type=Threading")
+				.addAttr("DaemonThreadCount")
+				.addAttr("PeakThreadCount")
+				.addAttr("ThreadCount")
+				.addOutputWriters(gw, sw)
+				.build();
+		serverBuilder.addQuery(q2);
 
-		Query q3 = new Query();
-		q3.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector");
-		q3.addAttr("LastGcInfo");
-		q3.addOutputWriter(gw);
-		q3.addOutputWriter(sw);
-		server.addQuery(q3);
+		Query q3 = Query.builder()
+				.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector")
+				.addAttr("LastGcInfo")
+				.addOutputWriters(gw, sw)
+				.build();
+		serverBuilder.addQuery(q3);
 
-		Query q4 = new Query();
-		q4.setObj("java.lang:name=ParNew,type=GarbageCollector");
-		q4.addAttr("LastGcInfo");
-		q4.addOutputWriter(gw);
-		q4.addOutputWriter(sw);
-		server.addQuery(q4);
+		Query q4 = Query.builder()
+				.setObj("java.lang:name=ParNew,type=GarbageCollector")
+				.addAttr("LastGcInfo")
+				.addOutputWriters(gw, sw)
+				.build();
+		serverBuilder.addQuery(q4);
 
-		JmxProcess process = new JmxProcess(server);
+		JmxProcess process = new JmxProcess(serverBuilder.build());
 		printer.prettyPrint(process);
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);

@@ -1,7 +1,7 @@
 package com.googlecode.jmxtrans.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.pool.KeyedObjectPool;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;

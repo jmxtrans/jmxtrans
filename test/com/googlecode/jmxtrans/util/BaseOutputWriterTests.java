@@ -1,11 +1,15 @@
 package com.googlecode.jmxtrans.util;
 
-import com.googlecode.jmxtrans.model.Query;
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+
+import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -16,7 +20,7 @@ public class BaseOutputWriterTests {
 	@Test
 	public void testBaseOutputWriterSettingsBoolean() {
 		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		Map<String, Object> settingsMap = new HashMap<String, Object>();
+		Map<String, Object> settingsMap = newHashMap();
 		outputWriter.setSettings(settingsMap);
 		// Test the unset case
 		assertEquals(Boolean.FALSE, outputWriter.getBooleanSetting("bool", false));
@@ -49,7 +53,7 @@ public class BaseOutputWriterTests {
 	@Test
 	public void testBaseOutputWriterSettingsInteger() {
 		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		Map<String, Object> settingsMap = new HashMap<String, Object>();
+		Map<String, Object> settingsMap = newHashMap();
 		outputWriter.setSettings(settingsMap);
 		// Test the unset case
 		assertEquals(1, outputWriter.getIntegerSetting("int", 1).intValue());
@@ -80,7 +84,7 @@ public class BaseOutputWriterTests {
 	@Test
 	public void testBaseOutputWriterSettingsString() {
 		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		Map<String, Object> settingsMap = new HashMap<String, Object>();
+		Map<String, Object> settingsMap = newHashMap();
 		outputWriter.setSettings(settingsMap);
 		// Test the unset case
 		assertEquals("NOT_SET", outputWriter.getStringSetting("str", "NOT_SET"));
@@ -98,12 +102,12 @@ public class BaseOutputWriterTests {
 
 	private class TestBaseOuputWriter extends BaseOutputWriter {
 		@Override
-		public void doWrite(Query query) throws Exception {
+		public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 			throw new UnsupportedOperationException("doWrite() not implemented for TestBaseOutputWriter.");
 		}
 
 		@Override
-		public void validateSetup(Query query) throws ValidationException {
+		public void validateSetup(Server server, Query query) throws ValidationException {
 			throw new UnsupportedOperationException("validateSetup() not implemented for TestBaseOutputWriter.");
 		}
 	}

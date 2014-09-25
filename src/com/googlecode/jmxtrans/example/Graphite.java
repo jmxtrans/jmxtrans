@@ -16,21 +16,24 @@ public class Graphite {
 
 	private static JsonPrinter printer = new JsonPrinter(System.out);
 
-	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("w2", "1099");
 
-		Query q = new Query();
-		q.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep");
-		// q.addAttr("HeapMemoryUsage");
-		// q.addAttr("NonHeapMemoryUsage");
 		GraphiteWriter gw = new GraphiteWriter();
 		gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
 		gw.addSetting(GraphiteWriter.PORT, 2003);
 		gw.addSetting(GraphiteWriter.DEBUG, true);
 		gw.addSetting(GraphiteWriter.ROOT_PREFIX, "jon.foo.bar");
-		q.addOutputWriter(gw);
-		server.addQuery(q);
+
+		Query q = Query.builder()
+				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
+				.addOutputWriter(gw)
+				.build();
+
+		Server server = Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.addQuery(q)
+				.build();
 
 		JmxProcess process = new JmxProcess(server);
 		printer.prettyPrint(process);

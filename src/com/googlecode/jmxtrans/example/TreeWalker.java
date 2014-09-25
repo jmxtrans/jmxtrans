@@ -1,9 +1,7 @@
 package com.googlecode.jmxtrans.example;
 
-import java.io.IOException;
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -13,9 +11,10 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.remote.JMXConnector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Set;
 
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
@@ -38,7 +37,7 @@ public class TreeWalker {
 
 	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("localhost", "1099");
+		Server server = Server.builder().setHost("localhost").setPort("1099").build();
 
 		JMXConnector conn = null;
 		try {

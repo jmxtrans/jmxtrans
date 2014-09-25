@@ -1,31 +1,37 @@
 package com.googlecode.jmxtrans.model.output;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.LifecycleException;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
-
-import org.junit.*;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.util.LifecycleException;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -39,7 +45,7 @@ public class TCollectorUDPWriterTests {
 	protected Result		mockResult;
 	protected DatagramSocket	mockDgSocket;
 	protected Logger		mockLog;
-	protected Map<String, Object>	testValues;
+	protected ImmutableMap<String, Object>	testValues;
 
 	@Before
 	public void	setupTest () throws Exception {
@@ -58,9 +64,7 @@ public class TCollectorUDPWriterTests {
 
 			// When results are needed.
 
-		when(this.mockQuery.getResults()).thenReturn(Arrays.asList(this.mockResult));
-		testValues = new HashMap<String, Object>();
-		testValues.put("x-att1-x", "120021");
+		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
 		when(this.mockResult.getValues()).thenReturn(testValues);
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
@@ -101,7 +105,7 @@ public class TCollectorUDPWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 

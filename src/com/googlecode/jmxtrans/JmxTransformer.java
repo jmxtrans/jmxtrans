@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Closer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
@@ -42,6 +43,8 @@ import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
+
+import static com.googlecode.jmxtrans.util.JmxUtils.mergeServerLists;
 
 /**
  * Main() class that takes an argument which is the directory to look in for
@@ -334,18 +337,18 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	/** */
-	private void validateSetup(List<Query> queries) throws ValidationException {
+	private void validateSetup(Server server, ImmutableSet<Query> queries) throws ValidationException {
 		for (Query q : queries) {
-			this.validateSetup(q);
+			this.validateSetup(server, q);
 		}
 	}
 
 	/** */
-	private void validateSetup(Query query) throws ValidationException {
+	private void validateSetup(Server server, Query query) throws ValidationException {
 		List<OutputWriter> writers = query.getOutputWriters();
 		if (writers != null) {
 			for (OutputWriter w : writers) {
-				w.validateSetup(query);
+				w.validateSetup(server, query);
 			}
 		}
 	}
@@ -370,7 +373,7 @@ public class JmxTransformer implements WatchedCallback {
 				if (log.isDebugEnabled()) {
 					log.debug("Loaded file: " + jsonFile.getAbsolutePath());
 				}
-				JmxUtils.mergeServerLists(this.masterServersList, process.getServers());
+				this.masterServersList = mergeServerLists(this.masterServersList, process.getServers());
 			} catch (Exception ex) {
 				if (configuration.isContinueOnJsonError()) {
 					throw new LifecycleException("Error parsing json: " + jsonFile, ex);
@@ -394,8 +397,6 @@ public class JmxTransformer implements WatchedCallback {
 
 				// need to inject the poolMap
 				for (Query query : server.getQueries()) {
-					query.setServer(server);
-
 					for (OutputWriter writer : query.getOutputWriters()) {
 						writer.setObjectPoolMap(this.poolMap);
 						writer.start();
@@ -404,7 +405,7 @@ public class JmxTransformer implements WatchedCallback {
 
 				// Now validate the setup of each of the OutputWriter's per
 				// query.
-				this.validateSetup(server.getQueries());
+				this.validateSetup(server, server.getQueries());
 
 				// Now schedule the jobs for execution.
 				this.scheduleJob(scheduler, server);

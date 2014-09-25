@@ -1,5 +1,7 @@
 package com.googlecode.jmxtrans.jmx;
 
+import com.google.common.collect.ImmutableList;
+
 import javax.management.Attribute;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -8,13 +10,16 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.TabularDataSupport;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+
+import static com.google.common.collect.ImmutableList.Builder;
+import static com.google.common.collect.Maps.newHashMap;
 
 public class JmxResultProcessor {
 
@@ -30,18 +35,18 @@ public class JmxResultProcessor {
 		this.attributes = attributes;
 	}
 
-	public List<Result> getResults() {
-		List<Result> accumulator = new ArrayList<Result>();
+	public ImmutableList<Result> getResults() {
+		Builder<Result> accumulator = ImmutableList.builder();
 		for (Attribute attribute : attributes) {
 			getResult(accumulator, attribute);
 		}
-		return accumulator;
+		return accumulator.build();
 	}
 
 	/**
 	 * Used when the object is effectively a java type
 	 */
-	private void getResult(List<Result> accumulator, Attribute attribute) {
+	private void getResult(Builder<Result> accumulator, Attribute attribute) {
 		Object value = attribute.getValue();
 		if (value == null) {
 			return;
@@ -54,28 +59,31 @@ public class JmxResultProcessor {
 				getResult(accumulator, attribute.getName(), cd);
 			}
 		} else if (value instanceof ObjectName[]) {
-			Result r = getNewResultObject(attribute.getName());
+			Map<String, Object> values = newHashMap();
 			for (ObjectName obj : (ObjectName[]) value) {
-				r.addValue(obj.getCanonicalName(), obj.getKeyPropertyListString());
+				values.put(obj.getCanonicalName(), obj.getKeyPropertyListString());
 			}
+			Result r = getNewResultObject(attribute.getName(), values);
 			accumulator.add(r);
 		} else if (value.getClass().isArray()) {
 			// OMFG: this is nutty. some of the items in the array can be
 			// primitive! great interview question!
-			Result r = getNewResultObject(attribute.getName());
+			Map<String, Object> values = newHashMap();
 			for (int i = 0; i < Array.getLength(value); i++) {
 				Object val = Array.get(value, i);
-				r.addValue(attribute.getName() + "." + i, val);
+				values.put(attribute.getName() + "." + i, val);
 			}
-			accumulator.add(r);
+			accumulator.add(getNewResultObject(attribute.getName(), values));
 		} else if (value instanceof TabularDataSupport) {
 			TabularDataSupport tds = (TabularDataSupport) value;
-			Result r = getNewResultObject(attribute.getName());
+			Map<String, Object> values = Collections.emptyMap();
+			Result r = getNewResultObject(attribute.getName(), values);
 			processTabularDataSupport(accumulator, attribute.getName(), tds);
 			accumulator.add(r);
 		} else {
-			Result r = getNewResultObject(attribute.getName());
-			r.addValue(attribute.getName(), value);
+			Map<String, Object> values = newHashMap();
+			values.put(attribute.getName(), value);
+			Result r = getNewResultObject(attribute.getName(), values);
 			accumulator.add(r);
 		}
 	}
@@ -84,10 +92,10 @@ public class JmxResultProcessor {
 	 * Populates the Result objects. This is a recursive function. Query
 	 * contains the keys that we want to get the values of.
 	 */
-	private void getResult(List<Result> accumulator, String attributeName, CompositeData cds) {
+	private void getResult(Builder<Result> accumulator, String attributeName, CompositeData cds) {
 		CompositeType t = cds.getCompositeType();
 
-		Result r = getNewResultObject(attributeName);
+		Map<String, Object> values = newHashMap();
 
 		Set<String> keys = t.keySet();
 		for (String key : keys) {
@@ -95,21 +103,22 @@ public class JmxResultProcessor {
 			if (value instanceof TabularDataSupport) {
 				TabularDataSupport tds = (TabularDataSupport) value;
 				processTabularDataSupport(accumulator, attributeName + "." + key, tds);
-				r.addValue(key, value);
+				values.put(key, value);
 			} else if (value instanceof CompositeDataSupport) {
 				// now recursively go through everything.
 				CompositeDataSupport cds2 = (CompositeDataSupport) value;
 				getResult(accumulator, attributeName, cds2);
 				return; // because we don't want to add to the list yet.
 			} else {
-				r.addValue(key, value);
+				values.put(key, value);
 			}
 		}
+		Result r = getNewResultObject(attributeName, values);
 		accumulator.add(r);
 	}
 
 	private void processTabularDataSupport(
-			List<Result> accumulator, String attributeName,
+			Builder<Result> accumulator, String attributeName,
 			TabularDataSupport tds) {
 		Set<Map.Entry<Object, Object>> entries = tds.entrySet();
 		for (Map.Entry<Object, Object> entry : entries) {
@@ -141,11 +150,7 @@ public class JmxResultProcessor {
 	/**
 	 * Builds up the base Result object
 	 */
-	private Result getNewResultObject(String attributeName) {
-		Result r = new Result(attributeName);
-		r.setQuery(this.query);
-		r.setClassName(className);
-		r.setTypeName(objectInstance.getObjectName().getCanonicalKeyPropertyListString());
-		return r;
+	private Result getNewResultObject(String attributeName, Map<String, Object> values) {
+		return new Result(attributeName, className, query.getResultAlias(), objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values);
 	}
 }

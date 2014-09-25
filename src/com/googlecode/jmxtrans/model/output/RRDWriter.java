@@ -2,9 +2,12 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.jrobin.core.RrdDb;
 import org.jrobin.core.RrdDef;
@@ -37,7 +40,7 @@ public class RRDWriter extends BaseOutputWriter {
 	public RRDWriter() {
 	}
 
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
 		templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
 
@@ -47,13 +50,12 @@ public class RRDWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDb db = null;
 		try {
 			db = createOrOpenDatabase();
 			Sample sample = db.createSample();
 			List<String> dsNames = Arrays.asList(db.getDsNames());
-			List<Result> results = query.getResults();
 
 			// go over all the results and look for datasource names that map to
 			// keys from the result values

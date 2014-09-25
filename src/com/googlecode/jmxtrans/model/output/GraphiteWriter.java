@@ -1,6 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -116,7 +116,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	}
 		
 	/** */
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 		host = (String) this.getSettings().get(HOST);
 		Object portObj = this.getSettings().get(PORT);
 		if (portObj instanceof String) {
@@ -138,7 +138,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	}
 
 	/** */
-	public void doWrite(Query query) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
 		statusLock.lock();
 		try {
@@ -158,7 +158,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 			List<String> typeNames = this.getTypeNames();
 
-			for (Result result : query.getResults()) {
+			for (Result result : results) {
 				if (isDebugEnabled()) {
 					log.debug("Query result: " + result.toString());
 				}
@@ -169,7 +169,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 						if (NumberUtils.isNumeric(value)) {
 							StringBuilder sb = new StringBuilder();
 
-							sb.append(JmxUtils.getKeyString(query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
+							sb.append(JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
 
 							sb.append(" ");
 							sb.append(value.toString());

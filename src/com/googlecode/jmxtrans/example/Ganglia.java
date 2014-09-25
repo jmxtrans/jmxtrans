@@ -19,30 +19,28 @@ public class Ganglia {
 
 	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("w2", "1099");
-		server.setAlias("fooalias");
-
-		Query q = new Query();
-		q.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep");
+		Server.Builder serverBuilder = Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.setAlias("fooalias");
 
 		GangliaWriter gw = new GangliaWriter();
 		gw.addSetting(GangliaWriter.HOST, "10.0.3.16");
 		gw.addSetting(GangliaWriter.PORT, 8649);
 		gw.addSetting(GangliaWriter.DEBUG, true);
 		gw.addSetting(GangliaWriter.GROUP_NAME, "memory");
-		q.addOutputWriter(gw);
-		server.addQuery(q);
 
-		JmxProcess process = new JmxProcess(server);
+		Query q = Query.builder()
+				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
+				.addOutputWriter(gw)
+				.build();
+		serverBuilder.addQuery(q);
+
+		JmxProcess process = new JmxProcess(serverBuilder.build());
 		printer.prettyPrint(process);
 
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.execute(jmx);
-		// Thread.sleep(1000);
-		// }
 	}
 
 }

@@ -1,15 +1,19 @@
 package com.googlecode.jmxtrans;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.pool.KeyedObjectPool;
+
 import java.util.Map;
 
-import org.apache.commons.pool.KeyedObjectPool;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
+
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
 /**
  * Interface which defines a writer for taking jmx data and writing it out in
@@ -22,7 +26,7 @@ import com.googlecode.jmxtrans.util.ValidationException;
  * 
  * @author jon
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = NON_NULL)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public interface OutputWriter {
 
@@ -30,7 +34,7 @@ public interface OutputWriter {
 
 	public void stop() throws LifecycleException;
 
-	public void doWrite(Query query) throws Exception;
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
 
 	/**
 	 * Settings allow you to configure your Writers with whatever they might
@@ -48,7 +52,7 @@ public interface OutputWriter {
 	 * This is run when the object is instantiated. You want to get the settings
 	 * and validate them.
 	 */
-	public void validateSetup(Query query) throws ValidationException;
+	public void validateSetup(Server server, Query query) throws ValidationException;
 
 	/**
 	 * Some writers, like GraphiteWriter will use this for object pooling.

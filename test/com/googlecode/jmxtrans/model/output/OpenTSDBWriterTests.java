@@ -1,38 +1,41 @@
 package com.googlecode.jmxtrans.model.output;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.hamcrest.Matchers;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.util.LifecycleException;
 
-import org.hamcrest.Matchers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
-
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -49,7 +52,7 @@ public class OpenTSDBWriterTests {
 	protected InputStreamReader	mockInStreamRdr;
 	protected BufferedReader	mockBufRdr;
 	protected Logger		mockLog;
-	protected Map<String, Object>	testValues;
+	protected ImmutableMap<String, Object>	testValues;
 
 	/**
 	 * Prepare the test with standard mocks and mock interactions.  Also perform the base configuration of the
@@ -84,10 +87,7 @@ public class OpenTSDBWriterTests {
 
 
 			// When results are needed.
-
-		when(this.mockQuery.getResults()).thenReturn(Arrays.asList(this.mockResult));
-		testValues = new HashMap<String, Object>();
-		testValues.put("x-att1-x", "120021");
+		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
 		when(this.mockResult.getValues()).thenReturn(testValues);
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
@@ -125,7 +125,7 @@ public class OpenTSDBWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
@@ -157,7 +157,7 @@ public class OpenTSDBWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
@@ -187,7 +187,7 @@ public class OpenTSDBWriterTests {
 			//
 
 		this.writer.start();
-		this.writer.doWrite(this.mockQuery);
+		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
@@ -309,7 +309,7 @@ public class OpenTSDBWriterTests {
 
 		this.writer.start();
 		try {
-			this.writer.doWrite(this.mockQuery);
+			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("IOException missing");
 		} catch ( IOException ioCaught ) {
 				//
@@ -340,7 +340,7 @@ public class OpenTSDBWriterTests {
 
 		this.writer.start();
 		try {
-			this.writer.doWrite(this.mockQuery);
+			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("IOException missing");
 		} catch ( IOException ioCaught ) {
 				//
@@ -368,7 +368,7 @@ public class OpenTSDBWriterTests {
 
 		this.writer.start();
 		try {
-			this.writer.doWrite(this.mockQuery);
+			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("exception on flush was not thrown");
 		} catch ( IOException ioCaught ) {
 				//

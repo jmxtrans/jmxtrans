@@ -1,7 +1,10 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
+
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -19,11 +22,11 @@ public class StdOutWriter extends BaseOutputWriter {
 	/**
 	 * nothing to validate
 	 */
-	public void validateSetup(Query query) throws ValidationException {
+	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
-	public void doWrite(Query query) throws Exception {
-		for (Result r : query.getResults()) {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+		for (Result r : results) {
 			System.out.println(r);
 		}
 	}

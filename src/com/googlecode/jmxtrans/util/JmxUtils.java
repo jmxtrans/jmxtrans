@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
@@ -7,6 +8,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckReturnValue;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -21,7 +23,6 @@ import javax.naming.Context;
 import java.lang.management.ManagementFactory;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +40,8 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 
+import static com.google.common.collect.Maps.newHashMap;
+
 /**
  * The worker code.
  *
@@ -51,28 +54,33 @@ public class JmxUtils {
 	/**
 	 * Merges two lists of servers (and their queries). Based on the equality of
 	 * both sets of objects. Public for testing purposes.
+	 * @param secondList
+	 * @param firstList
 	 */
-	public static void mergeServerLists(List<Server> existing, List<Server> adding) {
-		for (Server server : adding) {
-			if (existing.contains(server)) {
-				Server found = existing.get(existing.indexOf(server));
-
-				List<Query> queries = server.getQueries();
-				for (Query q : queries) {
-					try {
-						// no need to check for existing since this method
-						// already does that
-						found.addQuery(q);
-					} catch (ValidationException ex) {
-						// catching this exception because we don't want to stop
-						// processing
-						log.error("Error adding query: " + q + " to server" + server, ex);
-					}
-				}
+	// FIXME: the params for this method should be Set<Server> as there are multiple assumptions that they are unique
+	@CheckReturnValue
+	public static List<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
+		ImmutableList.Builder<Server> results = ImmutableList.builder();
+		List<Server> toProcess = new ArrayList<Server>(secondList);
+		for (Server firstServer : firstList) {
+			if (toProcess.contains(firstServer)) {
+				Server found = toProcess.get(secondList.indexOf(firstServer));
+				results.add(merge(firstServer, found));
+				// remove server as it is already merged
+				toProcess.remove(found);
 			} else {
-				existing.add(server);
+				results.add(firstServer);
 			}
 		}
+		// add servers from the second list that are not in the first one
+		results.addAll(toProcess);
+		return results.build();
+	}
+
+	private static Server merge(Server firstServer, Server secondServer) {
+		return Server.builder(firstServer)
+				.addQueries(secondServer.getQueries())
+				.build();
 	}
 
 	/**
@@ -91,8 +99,7 @@ public class JmxUtils {
 
 				List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
 				for (Query query : server.getQueries()) {
-					query.setServer(server);
-					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, query);
+					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, server, query);
 					threads.add(Executors.callable(pqt));
 				}
 
@@ -105,8 +112,7 @@ public class JmxUtils {
 			}
 		} else {
 			for (Query query : server.getQueries()) {
-				query.setServer(server);
-				processQuery(mbeanServer, query);
+				processQuery(mbeanServer, server, query);
 			}
 		}
 	}
@@ -137,17 +143,19 @@ public class JmxUtils {
 	 * Executes either a getAttribute or getAttributes query.
 	 */
 	public static class ProcessQueryThread implements Runnable {
-		private MBeanServerConnection mbeanServer;
-		private Query query;
+		private final MBeanServerConnection mbeanServer;
+		private final Server server;
+		private final Query query;
 
-		public ProcessQueryThread(MBeanServerConnection mbeanServer, Query query) {
+		public ProcessQueryThread(MBeanServerConnection mbeanServer, Server server, Query query) {
 			this.mbeanServer = mbeanServer;
+			this.server = server;
 			this.query = query;
 		}
 
 		public void run() {
 			try {
-				processQuery(this.mbeanServer, this.query);
+				processQuery(this.mbeanServer, this.server, this.query);
 			} catch (Exception e) {
 				log.error("Error executing query: " + query, e);
 				throw new RuntimeException(e);
@@ -158,7 +166,7 @@ public class JmxUtils {
 	/**
 	 * Responsible for processing individual Queries.
 	 */
-	public static void processQuery(MBeanServerConnection mbeanServer, Query query) throws Exception {
+	public static void processQuery(MBeanServerConnection mbeanServer, Server server, Query query) throws Exception {
 
 		ObjectName oName = new ObjectName(query.getObj());
 
@@ -188,10 +196,10 @@ public class JmxUtils {
 
 					AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
 
-					query.setResults(new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults());
+					ImmutableList<Result> results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults();
 
 					// Now run the OutputWriters.
-					runOutputWritersForQuery(query);
+					runOutputWritersForQuery(server, query, results);
 
 					if (log.isDebugEnabled()) {
 						log.debug("Finished running outputWriters for query: " + query);
@@ -208,11 +216,11 @@ public class JmxUtils {
 	}
 
 	/** */
-	private static void runOutputWritersForQuery(Query query) throws Exception {
+	private static void runOutputWritersForQuery(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		List<OutputWriter> writers = query.getOutputWriters();
 		if (writers != null) {
 			for (OutputWriter writer : writers) {
-				writer.doWrite(query);
+				writer.doWrite(server, query, results);
 			}
 		}
 	}
@@ -235,7 +243,7 @@ public class JmxUtils {
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	public static Map<String, String> getWebLogicEnvironment(Server server) {
-		Map<String, String> environment = new HashMap<String, String>();
+		Map<String, String> environment = newHashMap();
 		String username = server.getUsername();
 		String password = server.getPassword();
 		if ((username != null) && (password != null)) {
@@ -250,7 +258,7 @@ public class JmxUtils {
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	public static Map<String, String[]> getEnvironment(Server server) {
-		Map<String, String[]> environment = new HashMap<String, String[]>();
+		Map<String, String[]> environment = newHashMap();
 		String username = server.getUsername();
 		String password = server.getPassword();
 		if ((username != null) && (password != null)) {
@@ -376,7 +384,7 @@ public class JmxUtils {
 	 * TODO: allow for more configuration options?
 	 */
 	public static Map<String, KeyedObjectPool> getDefaultPoolMap() {
-		Map<String, KeyedObjectPool> poolMap = new HashMap<String, KeyedObjectPool>();
+		Map<String, KeyedObjectPool> poolMap = newHashMap();
 
 		GenericKeyedObjectPool pool = getObjectPool(new SocketFactory());
 		poolMap.put(Server.SOCKET_FACTORY_POOL, pool);
@@ -415,6 +423,8 @@ public class JmxUtils {
 	/**
 	 * Gets the key string.
 	 *
+	 *
+	 * @param server
 	 * @param query      the query
 	 * @param result     the result
 	 * @param values     the values
@@ -422,10 +432,10 @@ public class JmxUtils {
 	 * @param rootPrefix the root prefix
 	 * @return the key string
 	 */
-	public static String getKeyString(Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+	public static String getKeyString(Server server, Query query, Result result, Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
 		StringBuilder sb = new StringBuilder();
 		addRootPrefix(rootPrefix, sb);
-		addAlias(query, sb);
+		addAlias(server, sb);
 		sb.append(".");
 		// Allow people to use something other than the classname as the output.
 		addClassName(result, sb);
@@ -478,12 +488,12 @@ public class JmxUtils {
 		}
 	}
 
-	private static void addAlias(Query query, StringBuilder sb) {
+	private static void addAlias(Server server, StringBuilder sb) {
 		String alias;
-		if (query.getServer().getAlias() != null) {
-			alias = query.getServer().getAlias();
+		if (server.getAlias() != null) {
+			alias = server.getAlias();
 		} else {
-			alias = query.getServer().getHost() + "_" + query.getServer().getPort();
+			alias = server.getHost() + "_" + server.getPort();
 			alias = com.googlecode.jmxtrans.util.StringUtils.cleanupStr(alias);
 		}
 		sb.append(alias);
@@ -574,7 +584,7 @@ public class JmxUtils {
 			return java.util.Collections.EMPTY_MAP;
 		}
 
-		HashMap result = new HashMap();
+		Map<String, String> result = newHashMap();
 		String[] tokens = typeNameStr.split(",");
 
 		for (String oneToken : tokens) {

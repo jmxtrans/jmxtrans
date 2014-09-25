@@ -1,11 +1,9 @@
 package com.googlecode.jmxtrans.example;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.pool.KeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -13,14 +11,22 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.googlecode.jmxtrans.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.ValidationException;
+
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Collections.emptyMap;
 
 /**
  * Walks a JMX tree and prints out all of the unique typenames and their
@@ -37,7 +43,7 @@ public class TreeWalker3 {
 
 	/** */
 	public static void main(String[] args) throws Exception {
-		Server server = new Server("w2", "1105");
+		Server server = Server.builder().setHost("w2").setPort("1105").build();
 
 		JMXConnector conn = null;
 		try {
@@ -61,27 +67,30 @@ public class TreeWalker3 {
 		// key here is null, null returns everything!
 		Set<ObjectName> mbeans = connection.queryNames(null, null);
 
-		Map<String, String> output = new HashMap<String, String>();
+		Map<String, String> output = newHashMap();
 
 		for (ObjectName name : mbeans) {
 			MBeanInfo info = connection.getMBeanInfo(name);
 			MBeanAttributeInfo[] attrs = info.getAttributes();
 
-			Query query = new Query();
-			query.setObj(name.getCanonicalName());
+			Query.Builder queryBuilder = Query.builder()
+					.setObj(name.getCanonicalName());
+			ResultCapture resultCapture = new ResultCapture();
+			queryBuilder.addOutputWriter(resultCapture);
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
-				query.addAttr(attrInfo.getName());
+				queryBuilder.addAttr(attrInfo.getName());
 			}
 
+			Query query = queryBuilder.build();
+
 			try {
-				JmxUtils.processQuery(connection, query);
+				JmxUtils.processQuery(connection, null, query);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}
 
-			List<Result> results = query.getResults();
-			for (Result result : results) {
+			for (Result result : resultCapture.results) {
 				output.put(result.getTypeName(), query.getAttr().toString());
 			}
 		}
@@ -91,5 +100,35 @@ public class TreeWalker3 {
 			log.debug(entry.getValue());
 			log.debug("-----------------------------------------");
 		}
+	}
+
+	private static final class ResultCapture implements OutputWriter {
+
+		private List<Result> results;
+
+		@Override
+		public void start() throws LifecycleException {}
+
+		@Override
+		public void stop() throws LifecycleException {}
+
+		@Override
+		public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+			this.results = results;
+		}
+
+		@Override
+		public Map<String, Object> getSettings() {
+			return emptyMap();
+		}
+
+		@Override
+		public void setSettings(Map<String, Object> settings) {}
+
+		@Override
+		public void validateSetup(Server server, Query query) throws ValidationException {}
+
+		@Override
+		public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {}
 	}
 }
