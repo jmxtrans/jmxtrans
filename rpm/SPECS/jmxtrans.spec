@@ -136,7 +136,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%{_bindir}
+%{_bindir}/*
 %attr(0755, root,root)  %{_initrddir}/jmxtrans
 %attr(0644,root,root)   %{_systemdir}/jmxtrans.service
 #%config(noreplace)     %{_sysconfdir}/sysconfig/jmxtrans
