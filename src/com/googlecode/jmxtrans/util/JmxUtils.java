@@ -23,6 +23,7 @@ import javax.naming.Context;
 import java.lang.management.ManagementFactory;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -581,7 +582,7 @@ public class JmxUtils {
 	 */
 	public static Map<String, String> getTypeNameValueMap(String typeNameStr) {
 		if (typeNameStr == null) {
-			return java.util.Collections.EMPTY_MAP;
+			return Collections.emptyMap();
 		}
 
 		Map<String, String> result = newHashMap();

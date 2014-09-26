@@ -51,7 +51,7 @@ public class ServerTests {
 				.setHost("host")
 				.setPort("8008")
 				.setCronExpression("cron")
-				.setNumQueryThreads(Integer.valueOf(123))
+				.setNumQueryThreads(123)
 				.setPassword("pass")
 				.setUsername("user")
 				.build();
@@ -61,7 +61,7 @@ public class ServerTests {
 				.setHost("host")
 				.setPort("8008")
 				.setCronExpression("cron")
-				.setNumQueryThreads(Integer.valueOf(123))
+				.setNumQueryThreads(123)
 				.setPassword("pass")
 				.setUsername("user")
 				.build();
@@ -71,7 +71,7 @@ public class ServerTests {
 				.setHost("host3")
 				.setPort("8008")
 				.setCronExpression("cron")
-				.setNumQueryThreads(Integer.valueOf(123))
+				.setNumQueryThreads(123)
 				.setPassword("pass")
 				.setUsername("user")
 				.build();

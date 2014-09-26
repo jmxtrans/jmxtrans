@@ -1,12 +1,5 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,6 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it
@@ -62,7 +62,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 		templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
 		binaryPath = new File((String) this.getSettings().get(BINARY_PATH));
 
-		if (outputFile == null || templateFile == null || binaryPath == null) {
+		if (!outputFile.exists() || !templateFile.exists() || !binaryPath.exists()) {
 			throw new ValidationException("output, template and binary path file can't be null", query);
 		}
 	}
@@ -73,7 +73,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 */
 	public String getDataSourceName(String typeName, String attributeName, String entry) {
 
-		String result = null;
+		String result;
 		if (typeName != null) {
 			result = typeName + attributeName + entry;
 		} else {
@@ -148,8 +148,10 @@ public class RRDToolWriter extends BaseOutputWriter {
 							}
 							keys.add(key);
 
-							sb.append("<datasource><!-- " + res.getTypeName() + ":" + res.getAttributeName() + ":" + entry.getKey() + " --><name>"
-									+ key + "</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+							sb.append("<datasource><!-- ").append(res.getTypeName()).append(":")
+									.append(res.getAttributeName()).append(":").append(entry.getKey())
+									.append(" --><name>").append(key)
+									.append("</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
 						}
 					}
 				}
@@ -233,7 +235,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 			InputStreamReader isr = closer.register(new InputStreamReader(is, Charset.defaultCharset()));
 			BufferedReader br = closer.register(new BufferedReader(isr));
 			StringBuilder sb = new StringBuilder();
-			String line = null;
+			String line;
 			while ((line = br.readLine()) != null) {
 				sb.append(line);
 			}

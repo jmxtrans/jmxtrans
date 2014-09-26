@@ -43,9 +43,8 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 			datePattern = DATE_PATTERN;
 		}
 		PatternLayout pl = new PatternLayout(LOG_PATTERN);
-		DailyRollingFileAppender appender = new DailyRollingFileAppender(pl, fileStr, datePattern);
-		
-		return appender;
+
+		return new DailyRollingFileAppender(pl, fileStr, datePattern);
 	}
 	
 	@Override

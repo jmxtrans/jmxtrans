@@ -75,27 +75,20 @@ public class LibratoWriter extends BaseOutputWriter {
 	 * Librato HTTP API authentication username
 	 */
 	private String user;
-	/**
-	 * Librato HTTP API authentication token
-	 */
-	private String token;
 	private String basicAuthentication;
 	/**
 	 * Optional proxy for the http API calls
 	 */
 	private Proxy proxy;
 
-	@Override
-	public void start() {
-
-	}
-
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		try {
 			url = new URL(getStringSetting(SETTING_URL, DEFAULT_LIBRATO_API_URL));
 
 			user = getStringSetting(SETTING_USERNAME);
-			token = getStringSetting(SETTING_TOKEN);
+
+			// Librato HTTP API authentication token
+			String token = getStringSetting(SETTING_TOKEN);
 			basicAuthentication = Base64Variants.getDefaultVariant().encode((user + ":" + token).getBytes(Charset.forName("US-ASCII")));
 
 			if (getStringSetting(SETTING_PROXY_HOST, null) != null && !getStringSetting(SETTING_PROXY_HOST, "").isEmpty()) {

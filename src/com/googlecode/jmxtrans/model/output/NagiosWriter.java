@@ -249,49 +249,26 @@ public class NagiosWriter extends BaseOutputWriter {
 		}
 
 		if (simpleRange.endsWith(":")) {
-			if (value < Double.parseDouble(simpleRange.replace(":", ""))) {
-				return true;
-			} else {
-				return false;
-			}
+			return value < Double.parseDouble(simpleRange.replace(":", ""));
 
 		}
 
 		if (simpleRange.startsWith("~:")) {
-			if (value > Double.parseDouble(simpleRange.replace("~:", ""))) {
-				return true;
-			} else {
-				return false;
-			}
+			return value > Double.parseDouble(simpleRange.replace("~:", ""));
 
 		}
 
 		if (simpleRange.startsWith("@")) {
 			String[] values = simpleRange.replace("@", "").split(":");
-			if (value >= Double.parseDouble(values[0]) && value <= Double.parseDouble(values[1])) {
-				return true;
-			} else {
-				return false;
-			}
+			return value >= Double.parseDouble(values[0]) && value <= Double.parseDouble(values[1]);
 		}
 
 		if (simpleRange.matches("^-{0,1}[0-9]+:-{0,1}[0-9]+$")) {
 			String[] values = simpleRange.split(":");
-			if (value < Double.parseDouble(values[0]) || value > Double.parseDouble(values[1])) {
-				return true;
-
-			} else {
-				return false;
-			}
+			return value < Double.parseDouble(values[0]) || value > Double.parseDouble(values[1]);
 		}
 
-		if (simpleRange.matches("^-{0,1}[0-9]+$") && (0 > value || value > Double.parseDouble(simpleRange))) {
-			return true;
-
-		}
-
-		return false;
-
+		return simpleRange.matches("^-{0,1}[0-9]+$") && (0 > value || value > Double.parseDouble(simpleRange));
 	}
 
 }

@@ -1,13 +1,5 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
-
 import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
@@ -15,6 +7,14 @@ import org.apache.log4j.MDC;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 
 /**
@@ -65,7 +65,7 @@ public class Log4JWriter extends BaseOutputWriter
 				{
 					if (NumberUtils.isNumeric(values.getValue()))
 					{
-						String alias = null;
+						String alias;
 						if (server.getAlias() != null)
 						{
 							alias = server.getAlias();

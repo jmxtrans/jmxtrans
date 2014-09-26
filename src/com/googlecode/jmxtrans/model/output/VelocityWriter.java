@@ -36,7 +36,7 @@ public class VelocityWriter extends BaseOutputWriter {
 	/**
 	 * Uses velocity to generate output for a List of JmxProcess.
 	 */
-	protected void genVelocityOutput(List<JmxProcess> processes) throws Exception {
+	protected void genVelocityOutput(List<JmxProcess> processes) {
 
 		// Generate settings XML using Velocity
 
@@ -56,7 +56,7 @@ public class VelocityWriter extends BaseOutputWriter {
 	/**
 	 * Sets velocity up to load resources from a list of paths.
 	 */
-	protected VelocityEngine getVelocityEngine(List<String> paths) throws Exception {
+	protected VelocityEngine getVelocityEngine(List<String> paths) {
 		VelocityEngine ve = new VelocityEngine();
 		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
 		ve.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");

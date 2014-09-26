@@ -20,9 +20,7 @@ import com.googlecode.jmxtrans.util.JsonPrinter;
 public class ActiveMQ {
 
 	private static final String GW_HOST = "192.168.192.133";
-	private static JsonPrinter printer = new JsonPrinter(System.out);
 
-	/** */
 	public static void main(String[] args) throws Exception {
 
 		Server.Builder serverBuilder = Server.builder()
@@ -155,7 +153,7 @@ public class ActiveMQ {
 		serverBuilder.addQuery(q9);
 
 		JmxProcess process = new JmxProcess(serverBuilder.build());
-		printer.prettyPrint(process);
+		new JsonPrinter(System.out).prettyPrint(process);
 		JmxTransformer transformer = new JmxTransformer();
 		transformer.executeStandalone(process);
 

@@ -52,7 +52,7 @@ public class JsonPrinterTest {
 		}
 	}
 
-	private JmxProcess standardProcess() throws ValidationException {
+	private JmxProcess standardProcess() {
 		List<Server> servers = new ArrayList<Server>();
 		Server server = Server.builder()
 				.setAlias("alias")

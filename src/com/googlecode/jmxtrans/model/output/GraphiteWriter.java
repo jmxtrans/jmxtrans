@@ -48,9 +48,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
 	public static final String ROOT_PREFIX = "rootPrefix";
-	
-	private String host;
-	private Integer port;
+
 	private String rootPrefix = "servers";
 
 	private static KeyedObjectPool pool = null;
@@ -117,8 +115,9 @@ public class GraphiteWriter extends BaseOutputWriter {
 		
 	/** */
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		host = (String) this.getSettings().get(HOST);
+		String host = (String) this.getSettings().get(HOST);
 		Object portObj = this.getSettings().get(PORT);
+		Integer port = null;
 		if (portObj instanceof String) {
 			port = Integer.parseInt((String) portObj);
 		} else if (portObj instanceof Integer) {
@@ -167,17 +166,10 @@ public class GraphiteWriter extends BaseOutputWriter {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
 						Object value = values.getValue();
 						if (NumberUtils.isNumeric(value)) {
-							StringBuilder sb = new StringBuilder();
 
-							sb.append(JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix).replaceAll("[()]", "_"));
-
-							sb.append(" ");
-							sb.append(value.toString());
-							sb.append(" ");
-							sb.append(result.getEpoch() / 1000);
-							sb.append("\n");
-
-							String line = sb.toString();
+							String line = JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+									.replaceAll("[()]", "_") + " " + value.toString() + " "
+									+ result.getEpoch() / 1000 + "\n";
 							if (isDebugEnabled()) {
 								log.debug("Graphite Message: " + line.trim());
 							}

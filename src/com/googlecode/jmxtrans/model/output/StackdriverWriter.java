@@ -368,7 +368,6 @@ public class StackdriverWriter extends BaseOutputWriter {
 	private String getLocalInstanceId(final String cloudProvider, final String metadataEndpoint, final Map<String,String> headers) {
 		String detectedInstanceId = null;
 		try {
-			String inputLine = null;
 			final URL metadataUrl = new URL(metadataEndpoint);
 			URLConnection metadataConnection = metadataUrl.openConnection();
 			// add any additional headers passed in
@@ -378,6 +377,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 				}
 			}
 			BufferedReader in = new BufferedReader(new InputStreamReader(metadataConnection.getInputStream(), "UTF-8"));
+			String inputLine;
 			while ((inputLine = in.readLine()) != null) {
 				detectedInstanceId = inputLine;
 			}

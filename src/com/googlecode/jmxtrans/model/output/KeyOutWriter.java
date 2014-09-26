@@ -1,13 +1,5 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
-
 import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Appender;
 import org.apache.log4j.LogManager;
@@ -22,6 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * Writes out data in the same format as the GraphiteWriter, except to a file
@@ -89,15 +89,9 @@ public class KeyOutWriter extends BaseOutputWriter {
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
-						StringBuilder sb = new StringBuilder();
 
-						sb.append(JmxUtils.getKeyString(server, query, result, values, typeNames, null));
-						sb.append(delimiter);
-						sb.append(values.getValue().toString());
-						sb.append(delimiter);
-						sb.append(result.getEpoch());
-
-						logger.info(sb.toString());
+						logger.info(JmxUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
+								+ values.getValue().toString() + delimiter + result.getEpoch());
 					}
 				}
 			}
@@ -124,9 +118,8 @@ public class KeyOutWriter extends BaseOutputWriter {
 		
 		// Create the logger and add to the map of loggers using our factory
 		LogManager.getLogger(loggerKey, loggerFactory);
-		Logger loggerToReturn = log4jLoggerFactory.getLogger(loggerKey);
-		
-		return loggerToReturn;
+
+		return log4jLoggerFactory.getLogger(loggerKey);
 	}
 	
 	protected String buildLoggerName() {
@@ -148,7 +141,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	}
 	
 	protected LoggerFactory buildLog4jLoggerFactory(final Appender appender) {
-		LoggerFactory loggerFactory = new LoggerFactory() {
+		return new LoggerFactory() {
 			@Override
 			public org.apache.log4j.Logger makeNewLoggerInstance(String name) {
 				org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
@@ -158,8 +151,6 @@ public class KeyOutWriter extends BaseOutputWriter {
 				return logger;
 			}
 		};
-			
-		return loggerFactory;
 	}
 	
 	protected String getSettingMaxFileSize() {

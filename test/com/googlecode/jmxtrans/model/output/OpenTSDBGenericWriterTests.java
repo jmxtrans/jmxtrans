@@ -2,7 +2,6 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,13 +85,9 @@ public class OpenTSDBGenericWriterTests {
 		when(this.mockResult.getTypeName()).
 			thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
 
-		this.writer.addSetting("typeNames", Arrays.asList(new String[] { "Type", "Group", "Name", "Missing" }));
+		this.writer.addSetting("typeNames", Arrays.asList("Type", "Group", "Name", "Missing"));
 		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", Integer.valueOf(4242));
-	}
-
-	@After
-	public void	cleanupTest () {
+		this.writer.addSetting("port", 4242);
 	}
 
 	@Test

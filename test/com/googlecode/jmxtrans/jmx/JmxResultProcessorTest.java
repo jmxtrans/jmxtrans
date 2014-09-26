@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -184,7 +184,10 @@ public class JmxResultProcessorTest {
 		}
 
 		@Override
-		public boolean apply(@Nonnull Result result) {
+		public boolean apply(@Nullable Result result) {
+			if (result == null) {
+				return false;
+			}
 			return attributeName.equals(result.getAttributeName());
 		}
 	}
