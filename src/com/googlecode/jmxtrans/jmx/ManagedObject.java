@@ -18,7 +18,7 @@ public interface ManagedObject {
 	 * @return the object name
 	 * @throws MalformedObjectNameException if the object name is not valid
 	 */
-	public ObjectName getObjectName() throws MalformedObjectNameException;
+	ObjectName getObjectName() throws MalformedObjectNameException;
 
 	/**
 	 * Sets the object name.
@@ -26,7 +26,7 @@ public interface ManagedObject {
 	 * @param objectName the object name
 	 * @throws MalformedObjectNameException if the object name is not valid
 	 */
-	public void setObjectName(ObjectName objectName) throws MalformedObjectNameException;
+	void setObjectName(ObjectName objectName) throws MalformedObjectNameException;
 
 	/**
 	 * Sets the object name.
@@ -34,5 +34,5 @@ public interface ManagedObject {
 	 * @param objectName the object name
 	 * @throws MalformedObjectNameException if the object name is not valid
 	 */
-	public void setObjectName(String objectName) throws MalformedObjectNameException;
+	void setObjectName(String objectName) throws MalformedObjectNameException;
 }

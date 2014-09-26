@@ -94,7 +94,7 @@ public class PropertyResolver {
 			if (val != null)
 				sb.append(val);
 			else
-				sb.append("${" + key + "}");
+				sb.append("${").append(key).append("}");
 
 			ipos = end + 1;
 		}

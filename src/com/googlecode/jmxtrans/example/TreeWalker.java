@@ -103,7 +103,7 @@ public class TreeWalker {
 			f.setGroupingUsed(false);
 			return f.format(value);
 		} else if ((value instanceof Object[])) {
-			return Integer.toString(Arrays.asList((Object[]) (Object[]) value).size());
+			return Integer.toString(Arrays.asList((Object[]) value).size());
 		}
 		return value.toString();
 	}

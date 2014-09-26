@@ -1,6 +1,5 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.base.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

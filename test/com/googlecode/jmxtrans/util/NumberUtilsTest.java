@@ -24,7 +24,7 @@ public class NumberUtilsTest {
 		assertFalse(isNumeric("."));
 		assertFalse(isNumeric("3."));
 		assertTrue(isNumeric(1L));
-		assertTrue(isNumeric(Integer.valueOf(2)));
+		assertTrue(isNumeric(2));
 		assertTrue(isNumeric((Object) "3.2"));
 		assertFalse(isNumeric((Object) "abc"));
 		assertFalse(isNumeric(FALSE));

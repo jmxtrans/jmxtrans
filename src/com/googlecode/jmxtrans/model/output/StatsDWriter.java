@@ -39,8 +39,6 @@ public class StatsDWriter extends BaseOutputWriter {
 	public static final String ROOT_PREFIX = "rootPrefix";
 	private ByteBuffer sendBuffer;
 
-	private String host;
-	private Integer port;
 	/** bucketType defaults to c == counter */
 	private String bucketType = "c";
 	private String rootPrefix = "servers";
@@ -100,8 +98,9 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	/** */
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		host = (String) this.getSettings().get(HOST);
+		String host = (String) this.getSettings().get(HOST);
 		Object portObj = this.getSettings().get(PORT);
+		Integer port = null;
 		if (portObj instanceof String) {
 			port = Integer.parseInt((String) portObj);
 		} else if (portObj instanceof Integer) {
@@ -142,17 +141,9 @@ public class StatsDWriter extends BaseOutputWriter {
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
-						StringBuilder sb = new StringBuilder();
 
-						sb.append(JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix));
-
-						sb.append(":");
-						sb.append(values.getValue().toString());
-						sb.append("|");
-						sb.append(bucketType);
-						sb.append("\n");
-
-						String line = sb.toString();
+						String line = JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+								+ ":" + values.getValue().toString() + "|" + bucketType + "\n";
 
 						if (isDebugEnabled()) {
 							log.debug("StatsD Message: " + line.trim());
@@ -205,11 +196,7 @@ public class StatsDWriter extends BaseOutputWriter {
 			sendBuffer.limit(sendBuffer.capacity());
 			sendBuffer.rewind();
 
-			if (sizeOfBuffer == nbSentBytes) {
-				return true;
-			} else {
-				return false;
-			}
+			return sizeOfBuffer == nbSentBytes;
 
 		} catch (IOException e) {
 			e.printStackTrace();

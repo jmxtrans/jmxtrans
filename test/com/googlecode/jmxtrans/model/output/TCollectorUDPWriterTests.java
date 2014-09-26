@@ -3,7 +3,6 @@ package com.googlecode.jmxtrans.model.output;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,15 +84,8 @@ public class TCollectorUDPWriterTests {
 		Whitebox.setInternalState(TCollectorUDPWriter.class, Logger.class, this.mockLog);
 	}
 
-	@After
-	public void	cleanupTest () {
-	}
-
-	/**
-	 * Test a successful send to tcollector.
-	 */
 	@Test
-	public void	testSuccessfulSend() throws Exception {
+	public void	successfullySendMessageToTCollector() throws Exception {
 			//
 			// Prepare
 			//

@@ -1,7 +1,6 @@
 package com.googlecode.jmxtrans.example;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +127,5 @@ public class TreeWalker3 {
 		@Override
 		public void validateSetup(Server server, Query query) throws ValidationException {}
 
-		@Override
-		public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {}
 	}
 }

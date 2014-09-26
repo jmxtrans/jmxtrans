@@ -173,7 +173,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 		if (NumberUtils.isNumeric(value)) {
 			StringBuilder resultString = new StringBuilder();
 
-			formatResultString(resultString, metricName, (long) (result.getEpoch() / 1000L), value);
+			formatResultString(resultString, metricName, result.getEpoch() / 1000L, value);
 			addTags(resultString);
 
 			if (addTagName != null) {

@@ -48,12 +48,12 @@ public class PropertyResolverTests {
 		TreeMap<String, Object> map = new TreeMap<String, Object>();
 		map.put("host", "${myhost}");
 		map.put("port", "${myport}");
-		map.put("count", new Integer(10));
+		map.put("count", 10);
 
 		PropertyResolver.resolveMap(map);
 		Assert.assertEquals("w2", map.get("host"));
 		Assert.assertEquals("1099", map.get("port"));
-		Assert.assertEquals(new Integer(10), map.get("count"));
+		Assert.assertEquals(10, map.get("count"));
 	}
 
 	@Test

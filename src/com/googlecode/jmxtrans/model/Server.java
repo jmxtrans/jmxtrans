@@ -125,7 +125,7 @@ public class Server {
 		// throw exception at construction if both url and host are set
 		// we might also be able to use java.net.URI to parse the URL, but I'm
 		// not familiar enough with JMX URLs to think of the test cases ...
-		return url.substring(url.lastIndexOf("//") + 2, url.lastIndexOf(":"));
+		return url.substring(url.lastIndexOf("//") + 2, url.lastIndexOf(':'));
 	}
 
 	public String getPort() {
@@ -140,9 +140,9 @@ public class Server {
 	}
 
 	private static String extractPortFromUrl(String url) {
-		String computedPort = url.substring(url.lastIndexOf(":") + 1);
+		String computedPort = url.substring(url.lastIndexOf(':') + 1);
 		if (computedPort.contains("/")) {
-			computedPort = computedPort.substring(0, computedPort.indexOf("/"));
+			computedPort = computedPort.substring(0, computedPort.indexOf('/'));
 		}
 		return computedPort;
 	}

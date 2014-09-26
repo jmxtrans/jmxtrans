@@ -3,7 +3,6 @@ package com.googlecode.jmxtrans.model.output;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -107,10 +106,6 @@ public class OpenTSDBWriterTests {
 			// Inject the mock logger
 
 		Whitebox.setInternalState(OpenTSDBWriter.class, Logger.class, this.mockLog);
-	}
-
-	@After
-	public void	cleanupTest () {
 	}
 
 	/**

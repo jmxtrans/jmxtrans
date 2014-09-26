@@ -50,11 +50,6 @@ public class SensuWriter extends BaseOutputWriter {
 	private String sensuhost;
 	private String sensuhandler;
 
-	@Override
-	public void start() {
-
-	}
-
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		sensuhost = getStringSetting(SETTING_HOST, DEFAULT_SENSU_HOST);
 		sensuhandler = getStringSetting(SETTING_HANDLER, DEFAULT_SENSU_HANDLER);
@@ -74,7 +69,7 @@ public class SensuWriter extends BaseOutputWriter {
 		g.writeStringField("type", "metric");
 		g.writeStringField("handler", sensuhandler);
 
-		StringBuffer jsonoutput = new StringBuffer();
+		StringBuilder jsonoutput = new StringBuilder();
 		List<String> typeNames = getTypeNames();
 		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();

@@ -3,7 +3,6 @@ package com.googlecode.jmxtrans;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.pool.KeyedObjectPool;
 
 import java.util.Map;
 
@@ -30,37 +29,28 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public interface OutputWriter {
 
-	public void start() throws LifecycleException;
+	void start() throws LifecycleException;
 
-	public void stop() throws LifecycleException;
+	void stop() throws LifecycleException;
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
-
-	/**
-	 * Settings allow you to configure your Writers with whatever they might
-	 * need.
-	 */
-	public Map<String, Object> getSettings();
+	void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
 
 	/**
 	 * Settings allow you to configure your Writers with whatever they might
 	 * need.
 	 */
-	public void setSettings(Map<String, Object> settings);
+	Map<String, Object> getSettings();
+
+	/**
+	 * Settings allow you to configure your Writers with whatever they might
+	 * need.
+	 */
+	void setSettings(Map<String, Object> settings);
 
 	/**
 	 * This is run when the object is instantiated. You want to get the settings
 	 * and validate them.
 	 */
-	public void validateSetup(Server server, Query query) throws ValidationException;
+	void validateSetup(Server server, Query query) throws ValidationException;
 
-	/**
-	 * Some writers, like GraphiteWriter will use this for object pooling.
-	 * Things like Socket connections to remote servers that we are writing to
-	 * are ripe for pooling.
-	 * 
-	 * This is super extensible as a map because we could have multiple object
-	 * pools.
-	 */
-	public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap);
 }

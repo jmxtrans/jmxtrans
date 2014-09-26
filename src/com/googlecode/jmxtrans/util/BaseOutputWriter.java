@@ -1,7 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.commons.pool.KeyedObjectPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -188,14 +187,6 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 */
 	protected String cleanupStr(String name) {
 		return StringUtils.cleanupStr(name);
-	}
-
-	/**
-	 * A do nothing method.
-	 */
-	@Override
-	public void setObjectPoolMap(Map<String, KeyedObjectPool> poolMap) {
-		// Do nothing.
 	}
 
 	/**

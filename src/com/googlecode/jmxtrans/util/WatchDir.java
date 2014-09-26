@@ -72,15 +72,15 @@ public class WatchDir extends Thread {
 				for (WatchEvent<?> e : list) {
 					if (e.kind() == StandardWatchEventKind.ENTRY_CREATE) {
 						Path context = (Path) e.context();
-						Path fullPath = (Path) dir.resolve(context);
+						Path fullPath = dir.resolve(context);
 						watched.fileAdded(new File(fullPath.toString()));
 					} else if (e.kind() == StandardWatchEventKind.ENTRY_DELETE) {
 						Path context = (Path) e.context();
-						Path fullPath = (Path) dir.resolve(context);
+						Path fullPath = dir.resolve(context);
 						watched.fileDeleted(new File(fullPath.toString()));
 					} else if (e.kind() == StandardWatchEventKind.ENTRY_MODIFY) {
 						Path context = (Path) e.context();
-						Path fullPath = (Path) dir.resolve(context);
+						Path fullPath = dir.resolve(context);
 						watched.fileModified(new File(fullPath.toString()));
 					}
 				}

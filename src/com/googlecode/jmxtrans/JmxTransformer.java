@@ -233,7 +233,7 @@ public class JmxTransformer implements WatchedCallback {
 	 * Shut down the output writers and clear the master server list
 	 * Used both during shutdown and when re-reading config files
 	 */
-	private void stopWriterAndClearMasterServerList() throws Exception {
+	private void stopWriterAndClearMasterServerList() {
 		for (Server server : this.masterServersList) {
 			for (Query query : server.getQueries()) {
 				for (OutputWriter writer : query.getOutputWriters()) {
@@ -253,7 +253,7 @@ public class JmxTransformer implements WatchedCallback {
 	 * Startup the watchdir service.
 	 */
 	private void startupWatchdir() throws Exception {
-		File dirToWatch = null;
+		File dirToWatch;
 		if (this.configuration.getJsonDirOrFile().isFile()) {
 			dirToWatch = new File(FilenameUtils.getFullPath(this.configuration.getJsonDirOrFile().getAbsolutePath()));
 		} else {
@@ -272,7 +272,7 @@ public class JmxTransformer implements WatchedCallback {
 		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
 		Closer closer = Closer.create();
 		try {
-			InputStream stream = null;
+			InputStream stream;
 			if (configuration.getQuartPropertiesFile() == null) {
 				stream = closer.register(JmxTransformer.class.getResourceAsStream("/quartz.server.properties"));
 			} else {
@@ -398,7 +398,6 @@ public class JmxTransformer implements WatchedCallback {
 				// need to inject the poolMap
 				for (Query query : server.getQueries()) {
 					for (OutputWriter writer : query.getOutputWriters()) {
-						writer.setObjectPoolMap(this.poolMap);
 						writer.start();
 					}
 				}
@@ -432,13 +431,13 @@ public class JmxTransformer implements WatchedCallback {
 		map.put(Server.JMX_CONNECTION_FACTORY_POOL, this.poolMap.get(Server.JMX_CONNECTION_FACTORY_POOL));
 		jd.setJobDataMap(map);
 
-		Trigger trigger = null;
+		Trigger trigger;
 
 		if ((server.getCronExpression() != null) && CronExpression.isValidExpression(server.getCronExpression())) {
 			trigger = new CronTrigger();
 			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
-			((CronTrigger) trigger).setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
-			((CronTrigger) trigger).setStartTime(new Date());
+			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			trigger.setStartTime(new Date());
 		} else {
 			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(configuration.getRunPeriod());
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
@@ -481,7 +480,8 @@ public class JmxTransformer implements WatchedCallback {
 	 * Files must end with .json as the suffix.
 	 */
 	private List<File> getJsonFiles() {
-		File[] files = null;
+		// TODO : should use a FileVisitor (Once we update to Java 7)
+		File[] files;
 		if ((this.configuration.getJsonDirOrFile() != null) && this.configuration.getJsonDirOrFile().isFile()) {
 			files = new File[1];
 			files[0] = this.configuration.getJsonDirOrFile();

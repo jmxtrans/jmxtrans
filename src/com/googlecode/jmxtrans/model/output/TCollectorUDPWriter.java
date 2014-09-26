@@ -71,10 +71,4 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 		this.dgSocket.send(packet);
 	}
 
-	/**
-	 * Finish the output for a single Query, flushing all data to the server and logging the server's response.
-	 */
-	@Override
-	protected void finishOutput() throws IOException {
-	}
 }

@@ -1,12 +1,5 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
-
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.jrobin.core.RrdDb;
@@ -19,6 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.BaseOutputWriter;
+import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it
@@ -44,7 +44,7 @@ public class RRDWriter extends BaseOutputWriter {
 		outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
 		templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
 
-		if (outputFile == null || templateFile == null) {
+		if (!outputFile.exists() || !templateFile.exists()) {
 			throw new ValidationException("output file and template file can't be null", query);
 		}
 	}
@@ -82,7 +82,7 @@ public class RRDWriter extends BaseOutputWriter {
 	 * be returned in r/w mode.
 	 */
 	protected RrdDb createOrOpenDatabase() throws Exception {
-		RrdDb result = null;
+		RrdDb result;
 		if (!this.outputFile.exists()) {
 			FileUtils.forceMkdir(this.outputFile.getParentFile());
 			RrdDefTemplate t = new RrdDefTemplate(this.templateFile);
