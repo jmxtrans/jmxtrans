@@ -73,7 +73,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	public void start() throws LifecycleException {
 		try {
 			this.pool = JmxUtils.getObjectPool(new DatagramSocketFactory());
-			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, Server.SOCKET_FACTORY_POOL);
+			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, Server.DATAGRAM_SOCKET_FACTORY_POOL);
 			JmxUtils.registerJMX(this.mbean);
 		} catch (Exception e) {
 			throw new LifecycleException(e);

@@ -24,7 +24,9 @@ public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory {
 	 */
 	@Override
 	public Object makeObject(Object key) throws Exception {
-		return new DatagramSocket((SocketAddress)key);
+		DatagramSocket socket = new DatagramSocket();
+		socket.connect((SocketAddress)key);
+		return socket;
 	}
 
 	/**
