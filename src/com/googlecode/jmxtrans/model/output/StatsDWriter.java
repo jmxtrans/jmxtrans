@@ -1,7 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import javax.management.MBeanServer;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -18,16 +18,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
-import com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.pool.PoolUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * This output writer sends data to a host/port combination in the StatsD
@@ -49,7 +47,7 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private static final String BUCKET_TYPE = "bucketType";
 
-	private KeyedObjectPool pool;
+	private GenericKeyedObjectPool<SocketAddress, DatagramSocket> pool;
 	private ManagedObject mbean;
 
 
@@ -74,8 +72,14 @@ public class StatsDWriter extends BaseOutputWriter {
 	@Override
 	public void start() throws LifecycleException {
 		try {
-			this.pool = PoolUtils.getObjectPool(new DatagramSocketFactory());
-			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, PoolUtils.SOCKET_FACTORY_POOL);
+			pool = new GenericKeyedObjectPool<SocketAddress, DatagramSocket>(new DatagramSocketFactory());
+			pool.setTestOnBorrow(true);
+			pool.setMaxActive(-1);
+			pool.setMaxIdle(-1);
+			pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
+			pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+
+			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, "StatsdConnectionPool");
 			ManagementFactory.getPlatformMBeanServer()
 					.registerMBean(this.mbean, this.mbean.getObjectName());
 		} catch (Exception e) {

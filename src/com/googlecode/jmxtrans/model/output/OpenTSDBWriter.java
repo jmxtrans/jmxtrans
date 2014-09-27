@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 import static com.google.common.base.Charsets.UTF_8;
 

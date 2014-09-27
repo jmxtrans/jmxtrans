@@ -108,22 +108,21 @@
 						<version>1.0.5</version>
 					</dependency>
 				</dependencies>
-				<!-- TODO: need to re-enable as soon as cycles are broken
-<executions>
-	<execution>
-		<id>enforce-no-package-cycles</id>
-		<goals>
-			<goal>enforce</goal>
-		</goals>
-		<phase>test-compile</phase>
-		<configuration>
-			<rules>
-				<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
+				<executions>
+					<execution>
+						<id>enforce-no-package-cycles</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<phase>test-compile</phase>
+						<configuration>
+							<rules>
+								<NoPackageCyclesRule
+										implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"/>
 							</rules>
 						</configuration>
 					</execution>
 				</executions>
-				-->
 			</plugin>
 
 			<plugin>
@@ -457,7 +456,7 @@
 		<dependency>
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
-			<version>1.5.6</version>
+			<version>1.6</version>
 		</dependency>
 
 		<dependency>

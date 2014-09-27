@@ -4,11 +4,13 @@ import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 
+import javax.management.remote.JMXConnector;
 import java.util.Map;
 
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
 import com.googlecode.jmxtrans.connections.JmxConnectionFactory;
 import com.googlecode.jmxtrans.connections.SocketFactory;
+import com.googlecode.jmxtrans.model.Server;
 
 import static com.google.common.collect.Maps.newHashMap;
 
@@ -23,12 +25,11 @@ public final class PoolUtils {
 	 * Gets the object pool. TODO: Add options to adjust the pools, this will be
 	 * better performance on high load
 	 *
-	 * @param <T>     the generic type
 	 * @param factory the factory
 	 * @return the object pool
 	 */
-	public static <T extends KeyedPoolableObjectFactory> GenericKeyedObjectPool getObjectPool(T factory) {
-		GenericKeyedObjectPool pool = new GenericKeyedObjectPool(factory);
+	public static <K, V> GenericKeyedObjectPool getObjectPool(KeyedPoolableObjectFactory<K, V> factory) {
+		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<K, V>(factory);
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);
 		pool.setMaxIdle(-1);
@@ -49,7 +50,9 @@ public final class PoolUtils {
 		GenericKeyedObjectPool pool = getObjectPool(new SocketFactory());
 		poolMap.put(SOCKET_FACTORY_POOL, pool);
 
-		GenericKeyedObjectPool jmxPool = getObjectPool(new JmxConnectionFactory());
+
+
+		GenericKeyedObjectPool<Server, JMXConnector> jmxPool = getObjectPool(new JmxConnectionFactory());
 		poolMap.put(JMX_CONNECTION_FACTORY_POOL, jmxPool);
 
 		GenericKeyedObjectPool dsPool = getObjectPool(new DatagramSocketFactory());

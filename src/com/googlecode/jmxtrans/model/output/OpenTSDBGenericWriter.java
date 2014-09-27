@@ -12,16 +12,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * Originally written by Balazs Kossovics <bko@witbe.net>.  Common base class for OpenTSDBWriter and TCollectorWriter.

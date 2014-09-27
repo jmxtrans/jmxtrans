@@ -1,11 +1,10 @@
-package com.googlecode.jmxtrans.scheduling;
+package com.googlecode.jmxtrans.jmx;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServerConnection;
 
-import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 

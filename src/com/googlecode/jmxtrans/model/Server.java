@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -19,15 +20,14 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.googlecode.jmxtrans.util.PropertyResolver.resolveProps;
+import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static java.util.Arrays.asList;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
@@ -103,30 +103,27 @@ public class Server {
 	 * Generates the proper username/password environment for JMX connections.
 	 */
 	@JsonIgnore
-	public Map<String, String[]> getEnvironment() {
-		Map<String, String[]> environment = newHashMap();
-		if ((username != null) && (password != null)) {
-			String[] credentials = new String[2];
-			credentials[0] = username;
-			credentials[1] = password;
+	public ImmutableMap<String, ?> getEnvironment() {
+		if (getProtocolProviderPackages() != null && getProtocolProviderPackages().contains("weblogic")) {
+			ImmutableMap.Builder<String, String> environment = ImmutableMap.builder();
+			if ((username != null) && (password != null)) {
+				environment.put(PROTOCOL_PROVIDER_PACKAGES, getProtocolProviderPackages());
+				environment.put(SECURITY_PRINCIPAL, username);
+				environment.put(SECURITY_CREDENTIALS, password);
+			}
+			return environment.build();
+		}
 
+		ImmutableMap.Builder<String, String[]> environment = ImmutableMap.builder();
+		if ((username != null) && (password != null)) {
+			String[] credentials = new String[] {
+					username,
+					password
+			};
 			environment.put(JMXConnector.CREDENTIALS, credentials);
 		}
-		return environment;
-	}
 
-	/**
-	 * Generates the proper username/password environment for JMX connections.
-	 */
-	@JsonIgnore
-	public Map<String, String> getWebLogicEnvironment() {
-		Map<String, String> environment = newHashMap();
-		if ((username != null) && (password != null)) {
-			environment.put(PROTOCOL_PROVIDER_PACKAGES, getProtocolProviderPackages());
-			environment.put(SECURITY_PRINCIPAL, username);
-			environment.put(SECURITY_CREDENTIALS, password);
-		}
-		return environment;
+		return environment.build();
 	}
 
 	/**
@@ -136,11 +133,7 @@ public class Server {
 	@JsonIgnore
 	public JMXConnector getServerConnection() throws Exception {
 		JMXServiceURL url = new JMXServiceURL(getUrl());
-
-		if (getProtocolProviderPackages() != null && getProtocolProviderPackages().contains("weblogic"))
-			return JMXConnectorFactory.connect(url, this.getWebLogicEnvironment());
-		else
-			return JMXConnectorFactory.connect(url, this.getEnvironment());
+		return JMXConnectorFactory.connect(url, this.getEnvironment());
 	}
 
 	@JsonIgnore
@@ -227,6 +220,11 @@ public class Server {
 			return FRONT + this.host + ":" + this.port + BACK;
 		}
 		return this.url;
+	}
+
+	@JsonIgnore
+	public JMXServiceURL getJmxServiceURL() throws MalformedURLException {
+		return new JMXServiceURL(url);
 	}
 
 	@JsonIgnore

@@ -9,9 +9,6 @@ import org.apache.commons.cli.Options;
 
 import java.io.File;
 
-import com.googlecode.jmxtrans.JmxTransConfiguration;
-import com.googlecode.jmxtrans.util.OptionsException;
-
 public class CliArgumentParser {
 	/**
 	 * Parse the options given on the command line.

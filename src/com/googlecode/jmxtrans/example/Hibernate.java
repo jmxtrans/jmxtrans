@@ -18,7 +18,6 @@ public class Hibernate {
 	private static final String GW_HOST = "192.168.192.133";
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
-	/** */
 	public static void main(String[] args) throws Exception {
 
 		Server.Builder serverBuilder = Server.builder()

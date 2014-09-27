@@ -16,9 +16,8 @@ import java.util.concurrent.TimeUnit;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * <a href="http://sensuapp.org/docs/0.12/events">Sensu Event Data</a>

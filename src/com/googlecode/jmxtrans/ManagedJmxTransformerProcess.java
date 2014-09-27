@@ -4,9 +4,10 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.io.File;
 
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
-import com.googlecode.jmxtrans.util.LifecycleException;
 
 /**
  * The Class ManagedJmxTransformerProcess.

@@ -1,8 +1,6 @@
 package com.googlecode.jmxtrans.connections;
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -10,22 +8,14 @@ import java.net.Socket;
 /**
  * Allows us to pool socket connections.
  */
-public class SocketFactory extends BaseKeyedPoolableObjectFactory {
-
-	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(SocketFactory.class);
-
-	/** constructor */
-	public SocketFactory() {
-	}
+public class SocketFactory extends BaseKeyedPoolableObjectFactory<InetSocketAddress, Socket> {
 
 	/**
 	 * Creates the socket and the writer to go with it.
 	 */
 	@Override
-	public Object makeObject(Object key) throws Exception {
-		InetSocketAddress details = (InetSocketAddress) key;
-		Socket socket = new Socket(details.getHostName(), details.getPort());
+	public Socket makeObject(InetSocketAddress address) throws Exception {
+		Socket socket = new Socket(address.getHostName(), address.getPort());
 		socket.setKeepAlive(true);
 		return socket;
 	}
@@ -34,8 +24,7 @@ public class SocketFactory extends BaseKeyedPoolableObjectFactory {
 	 * Closes the socket.
 	 */
 	@Override
-	public void destroyObject(Object key, Object obj) throws Exception {
-		Socket socket = (Socket) obj;
+	public void destroyObject(InetSocketAddress address, Socket socket) throws Exception {
 		socket.close();
 	}
 
@@ -43,8 +32,7 @@ public class SocketFactory extends BaseKeyedPoolableObjectFactory {
 	 * Validates that the socket is good.
 	 */
 	@Override
-	public boolean validateObject(Object key, Object obj) {
-		Socket socket = (Socket) obj;
+	public boolean validateObject(InetSocketAddress address, Socket socket) {
 		try {
 			socket.setSoTimeout(100);
 			if (socket.getInputStream().read() == -1) {

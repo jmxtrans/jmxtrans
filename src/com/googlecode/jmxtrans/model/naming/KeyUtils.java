@@ -9,7 +9,6 @@ import java.util.Set;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.StringUtils;
 
 import static com.google.common.collect.Maps.newHashMap;
 

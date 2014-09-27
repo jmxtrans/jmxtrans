@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.pool;
+package com.googlecode.jmxtrans.monitoring;
 
 /**
  * Managed attributes and operations of a {@link BasicDataSource}.

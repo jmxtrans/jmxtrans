@@ -1,9 +1,8 @@
-package com.googlecode.jmxtrans.scheduling;
+package com.googlecode.jmxtrans.jmx;
 
 import javax.management.remote.JMXConnector;
 
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * Executes either a getAttribute or getAttributes query.

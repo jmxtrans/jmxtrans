@@ -33,15 +33,17 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.googlecode.jmxtrans.cli.CliArgumentParser;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.pool.PoolUtils;
 import com.googlecode.jmxtrans.util.JsonUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
 

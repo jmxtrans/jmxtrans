@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model;
 
 import org.junit.After;
 import org.junit.Assert;

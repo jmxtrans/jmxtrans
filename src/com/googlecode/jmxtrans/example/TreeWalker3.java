@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.model.ValidationException;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyMap;

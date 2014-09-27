@@ -18,9 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 /**
  * Writes out data in the same format as the GraphiteWriter, except to a file

@@ -5,9 +5,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.googlecode.jmxtrans.fixtures.ServerFixtures;
-import com.googlecode.jmxtrans.util.ValidationException;
-
 import static com.googlecode.jmxtrans.model.Server.mergeServerLists;
 import static org.assertj.core.api.Assertions.assertThat;
 

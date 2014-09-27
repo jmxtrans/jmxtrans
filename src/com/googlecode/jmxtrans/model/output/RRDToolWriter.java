@@ -28,8 +28,7 @@ import java.util.TreeMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.model.ValidationException;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it

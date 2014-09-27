@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output;
 
 import org.apache.commons.lang.StringUtils;
 

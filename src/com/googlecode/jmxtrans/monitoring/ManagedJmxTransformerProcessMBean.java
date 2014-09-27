@@ -2,7 +2,7 @@ package com.googlecode.jmxtrans.monitoring;
 
 import java.io.File;
 
-import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 /**
  * The Interface ManagedJmxTransformerProcessMBean.

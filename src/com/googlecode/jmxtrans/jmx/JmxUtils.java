@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.jmx;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +12,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.scheduling.ProcessQueryThread;
-import com.googlecode.jmxtrans.scheduling.ProcessServerThread;
 
 /**
  * The worker code.

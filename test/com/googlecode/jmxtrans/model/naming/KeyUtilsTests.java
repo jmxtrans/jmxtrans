@@ -1,11 +1,9 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.naming;
 
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Map;
-
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.googlecode.jmxtrans.model.naming.KeyUtils.getTypeNameValueMap;

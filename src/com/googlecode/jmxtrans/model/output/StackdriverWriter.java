@@ -26,16 +26,15 @@ import java.util.Map.Entry;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * <a href="https://www.stackdriver.com//">Stackdriver</a> implementation of the
- * {@linkplain com.googlecode.jmxtrans.OutputWriter}.
+ * {@linkplain com.googlecode.jmxtrans.model.OutputWriter}.
  * <p/>
  * This implementation uses <a href="https://custom-gateway.stackdriver.com/v1/custom"> POST {@code /v1/metrics}</a>
  * HTTP API.
@@ -246,7 +245,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 						}
 						
 						// Wildcard "typeNames" substitution
-						String typeName = com.googlecode.jmxtrans.util.StringUtils.cleanupStr(KeyUtils.getConcatedTypeNameValues(typeNames, metric.getTypeName()));
+						String typeName = com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr(KeyUtils.getConcatedTypeNameValues(typeNames, metric.getTypeName()));
 						if (typeName != null && typeName.length() > 0) {
 							nameBuilder.append(".");
 							nameBuilder.append(typeName);

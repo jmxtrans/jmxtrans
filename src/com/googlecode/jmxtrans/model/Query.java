@@ -19,11 +19,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.googlecode.jmxtrans.OutputWriter;
-
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.googlecode.jmxtrans.util.PropertyResolver.resolveList;
+import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
 import static java.util.Arrays.asList;
 
 /**

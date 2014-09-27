@@ -18,13 +18,13 @@ import java.util.regex.Pattern;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
 
 import static info.ganglia.gmetric4j.gmetric.GMetric.UDPAddressingMode;
 
 /**
- * {@link com.googlecode.jmxtrans.OutputWriter} for <a href="http://ganglia.sourceforge.net">Ganglia</a>.
+ * {@link com.googlecode.jmxtrans.model.OutputWriter} for <a href="http://ganglia.sourceforge.net">Ganglia</a>.
  *
  * @author Julien Nicoulaud <http://github.com/nicoulaj>
  * @author jon

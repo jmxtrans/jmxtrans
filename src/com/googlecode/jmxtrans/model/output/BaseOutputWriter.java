@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.PropertyResolver;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.PropertyResolver;
-import com.googlecode.jmxtrans.util.StringUtils;
+import com.googlecode.jmxtrans.model.naming.StringUtils;
 
 /**
  * Implements the common code for output filters.

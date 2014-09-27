@@ -1,11 +1,9 @@
-package com.googlecode.jmxtrans.pool;
+package com.googlecode.jmxtrans.monitoring;
 
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
-import com.googlecode.jmxtrans.monitoring.ManagedObject;
 
 /**
  * The Class ManagedGenericKeyedObjectPool.
@@ -90,7 +88,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#getMaxActive()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#getMaxActive()
 	 */
 	@Override
 	public int getMaxActive() {
@@ -98,7 +96,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#getMaxIdle()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#getMaxIdle()
 	 */
 	@Override
 	public int getMaxIdle() {
@@ -106,7 +104,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#getMaxWait()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#getMaxWait()
 	 */
 	@Override
 	public long getMaxWait() {
@@ -114,7 +112,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#getMinIdle()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#getMinIdle()
 	 */
 	@Override
 	public int getMinIdle() {
@@ -122,7 +120,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#getNumActive()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#getNumActive()
 	 */
 	@Override
 	public int getNumActive() {
@@ -130,7 +128,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#getNumIdle()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#getNumIdle()
 	 */
 	@Override
 	public int getNumIdle() {
@@ -138,7 +136,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#setMaxActive(int)
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#setMaxActive(int)
 	 */
 	@Override
 	public void setMaxActive(int maxActive) {
@@ -146,7 +144,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#setMaxIdle(int)
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#setMaxIdle(int)
 	 */
 	@Override
 	public void setMaxIdle(int maxIdle) {
@@ -154,7 +152,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#setMinIdle(int)
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#setMinIdle(int)
 	 */
 	@Override
 	public void setMinIdle(int maxIdle) {
@@ -162,7 +160,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPoolMBean#setMaxWait(long)
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPoolMBean#setMaxWait(long)
 	 */
 	@Override
 	public void setMaxWait(long maxWait) {

@@ -18,7 +18,7 @@ import java.rmi.UnmarshalException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
