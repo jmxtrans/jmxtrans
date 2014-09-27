@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
@@ -92,10 +93,12 @@ public class Query {
 		return typeNames;
 	}
 
+	@Nonnull
 	public ImmutableList<String> getAttr() {
 		return attr;
 	}
 
+	@Nonnull
 	public ImmutableList<String> getKeys() {
 		return keys;
 	}
@@ -104,6 +107,7 @@ public class Query {
 		return allowDottedKeys;
 	}
 
+	@Nonnull
 	public ImmutableList<OutputWriter> getOutputWriters() {
 		return outputWriters;
 	}

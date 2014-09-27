@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Set;
 
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * Walks a JMX tree and prints out all of the attribute values.
@@ -41,7 +40,7 @@ public class TreeWalker {
 
 		JMXConnector conn = null;
 		try {
-			conn = JmxUtils.getServerConnection(server);
+			conn = server.getServerConnection();
 			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
 			TreeWalker tw = new TreeWalker();

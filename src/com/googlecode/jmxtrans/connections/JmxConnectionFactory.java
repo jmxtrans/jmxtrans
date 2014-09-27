@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.connections;
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
@@ -22,7 +22,7 @@ public class JmxConnectionFactory extends BaseKeyedPoolableObjectFactory {
 	@Override
 	public Object makeObject(Object key) throws Exception {
 		Server server = (Server) key;
-		return JmxUtils.getServerConnection(server);
+		return server.getServerConnection();
 	}
 
 	/**

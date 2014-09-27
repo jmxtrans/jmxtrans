@@ -19,9 +19,11 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,20 +33,19 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.googlecode.jmxtrans.cli.CliArgumentParser;
-import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.jmx.ManagedJmxTransformerProcess;
 import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.pool.PoolUtils;
 import com.googlecode.jmxtrans.util.JsonUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
 
-import static com.googlecode.jmxtrans.util.JmxUtils.mergeServerLists;
+import static com.googlecode.jmxtrans.model.Server.mergeServerLists;
 
 /**
  * Main() class that takes an argument which is the directory to look in for
@@ -97,7 +98,8 @@ public class JmxTransformer implements WatchedCallback {
 		}
 
 		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this, configuration);
-		JmxUtils.registerJMX(mbean);
+		ManagementFactory.getPlatformMBeanServer()
+				.registerMBean(mbean, mbean.getObjectName());
 
 		// Start the process
 		this.start();
@@ -114,7 +116,8 @@ public class JmxTransformer implements WatchedCallback {
 			}
 		}
 
-		JmxUtils.unregisterJMX(mbean);
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		mbs.unregisterMBean(mbean.getObjectName());
 	}
 
 	/**
@@ -205,7 +208,8 @@ public class JmxTransformer implements WatchedCallback {
 			}
 
 			for (String key : poolMap.keySet()) {
-				JmxUtils.unregisterJMX(poolMBeans.get(key));
+				MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+				mbs.unregisterMBean(poolMBeans.get(key).getObjectName());
 			}
 			this.poolMBeans.clear();
 
@@ -323,27 +327,26 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	protected void setupObjectPooling() throws Exception {
 		if (this.poolMap == null) {
-			this.poolMap = JmxUtils.getDefaultPoolMap();
+			this.poolMap = PoolUtils.getDefaultPoolMap();
 
 			this.poolMBeans.clear();
 
 			for (Map.Entry<String, KeyedObjectPool> poolEntry : poolMap.entrySet()) {
 				ManagedGenericKeyedObjectPool mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) poolEntry.getValue());
 				mbean.setPoolName(poolEntry.getKey());
-				JmxUtils.registerJMX(mbean);
+				ManagementFactory.getPlatformMBeanServer()
+						.registerMBean(mbean, mbean.getObjectName());
 				poolMBeans.put(poolEntry.getKey(), mbean);
 			}
 		}
 	}
 
-	/** */
 	private void validateSetup(Server server, ImmutableSet<Query> queries) throws ValidationException {
 		for (Query q : queries) {
 			this.validateSetup(server, q);
 		}
 	}
 
-	/** */
 	private void validateSetup(Server server, Query query) throws ValidationException {
 		List<OutputWriter> writers = query.getOutputWriters();
 		if (writers != null) {
@@ -428,7 +431,7 @@ public class JmxTransformer implements WatchedCallback {
 
 		JobDataMap map = new JobDataMap();
 		map.put(Server.class.getName(), server);
-		map.put(Server.JMX_CONNECTION_FACTORY_POOL, this.poolMap.get(Server.JMX_CONNECTION_FACTORY_POOL));
+		map.put(PoolUtils.JMX_CONNECTION_FACTORY_POOL, this.poolMap.get(PoolUtils.JMX_CONNECTION_FACTORY_POOL));
 		jd.setJobDataMap(map);
 
 		Trigger trigger;

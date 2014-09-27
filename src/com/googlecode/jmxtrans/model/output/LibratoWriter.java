@@ -25,8 +25,7 @@ import java.util.concurrent.TimeUnit;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -124,7 +123,7 @@ public class LibratoWriter extends BaseOutputWriter {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 						g.writeStartObject();
-						g.writeStringField("name", JmxUtils.getKeyStringWithDottedKeys(query, result, values, typeNames));
+						g.writeStringField("name", KeyUtils.getKeyStringWithDottedKeys(query, result, values, typeNames));
 						if (source != null && !source.isEmpty()) {
 							g.writeStringField("source", source);
 						}

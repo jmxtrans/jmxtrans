@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.util.PropertyResolver;
+import com.googlecode.jmxtrans.util.StringUtils;
 
 /**
  * Implements the common code for output filters.
@@ -179,7 +183,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 * string
 	 */
 	protected String getConcatedTypeNameValues(String typeNameStr) {
-		return JmxUtils.getConcatedTypeNameValues(this.getTypeNames(), typeNameStr);
+		return KeyUtils.getConcatedTypeNameValues(this.getTypeNames(), typeNameStr);
 	}
 
 	/**

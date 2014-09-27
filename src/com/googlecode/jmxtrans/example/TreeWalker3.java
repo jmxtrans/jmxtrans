@@ -17,10 +17,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -46,7 +46,7 @@ public class TreeWalker3 {
 
 		JMXConnector conn = null;
 		try {
-			conn = JmxUtils.getServerConnection(server);
+			conn = server.getServerConnection();
 			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
 			TreeWalker3 tw = new TreeWalker3();
@@ -84,7 +84,7 @@ public class TreeWalker3 {
 			Query query = queryBuilder.build();
 
 			try {
-				JmxUtils.processQuery(connection, null, query);
+				new JmxQueryProcessor().processQuery(connection, null, query);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}

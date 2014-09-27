@@ -6,7 +6,9 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServer;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -15,14 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.jmx.ManagedObject;
+import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.DatagramSocketFactory;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.monitoring.ManagedObject;
+import com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.pool.PoolUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
@@ -72,9 +74,10 @@ public class StatsDWriter extends BaseOutputWriter {
 	@Override
 	public void start() throws LifecycleException {
 		try {
-			this.pool = JmxUtils.getObjectPool(new DatagramSocketFactory());
-			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, Server.SOCKET_FACTORY_POOL);
-			JmxUtils.registerJMX(this.mbean);
+			this.pool = PoolUtils.getObjectPool(new DatagramSocketFactory());
+			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, PoolUtils.SOCKET_FACTORY_POOL);
+			ManagementFactory.getPlatformMBeanServer()
+					.registerMBean(this.mbean, this.mbean.getObjectName());
 		} catch (Exception e) {
 			throw new LifecycleException(e);
 		}
@@ -84,7 +87,8 @@ public class StatsDWriter extends BaseOutputWriter {
 	public void stop() throws LifecycleException {
 		try {
 			if (this.mbean != null) {
-				JmxUtils.unregisterJMX(this.mbean);
+				MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+				mbs.unregisterMBean(this.mbean.getObjectName());
 				this.mbean = null;
 			}
 			if (this.pool != null) {
@@ -142,7 +146,7 @@ public class StatsDWriter extends BaseOutputWriter {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 
-						String line = JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 								+ ":" + values.getValue().toString() + "|" + bucketType + "\n";
 
 						if (isDebugEnabled()) {

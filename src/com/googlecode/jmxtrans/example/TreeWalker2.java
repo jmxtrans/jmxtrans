@@ -12,10 +12,10 @@ import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.util.Set;
 
+import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * Walks a JMX tree and prints out all of the attribute values actually using
@@ -36,7 +36,7 @@ public class TreeWalker2 {
 
 		JMXConnector conn = null;
 		try {
-			conn = JmxUtils.getServerConnection(server);
+			conn = server.getServerConnection();
 			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
 			TreeWalker2 tw = new TreeWalker2();
@@ -68,7 +68,7 @@ public class TreeWalker2 {
 			}
 
 			try {
-				JmxUtils.processQuery(connection, null, query.build());
+				new JmxQueryProcessor().processQuery(connection, null, query.build());
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}

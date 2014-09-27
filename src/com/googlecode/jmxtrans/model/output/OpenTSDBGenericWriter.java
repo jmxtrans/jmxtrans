@@ -18,8 +18,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
@@ -202,7 +201,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 			// Produce a single tag with all the TypeName keys concatenated and all the values joined with '_'.
 			addTag(resultString, StringUtils.join(getTypeNames(), ""), getConcatedTypeNameValues(result.getTypeName()));
 		} else {
-			Map<String, String> typeNameMap = JmxUtils.getTypeNameValueMap(result.getTypeName());
+			Map<String, String> typeNameMap = KeyUtils.getTypeNameValueMap(result.getTypeName());
 			for (String oneTypeName : getTypeNames()) {
 				String value = typeNameMap.get(oneTypeName);
 				if (value == null)

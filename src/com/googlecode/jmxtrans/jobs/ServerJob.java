@@ -1,7 +1,5 @@
 package com.googlecode.jmxtrans.jobs;
 
-import javax.management.remote.JMXConnector;
-
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -10,7 +8,10 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.remote.JMXConnector;
+
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.pool.PoolUtils;
 import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
@@ -25,15 +26,13 @@ public class ServerJob implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobDataMap map = context.getMergedJobDataMap();
 		Server server = (Server) map.get(Server.class.getName());
-		GenericKeyedObjectPool pool = (GenericKeyedObjectPool) map.get(Server.JMX_CONNECTION_FACTORY_POOL);
+		GenericKeyedObjectPool pool = (GenericKeyedObjectPool) map.get(PoolUtils.JMX_CONNECTION_FACTORY_POOL);
 
-		if (log.isDebugEnabled()) {
-			log.debug("+++++ Started server job: " + server);
-		}
+		log.debug("+++++ Started server job: {}", server);
 
 		JMXConnector conn = null;
 		try {
-			if (! server.isLocal()) {
+			if (!server.isLocal()) {
 				conn = (JMXConnector) pool.borrowObject(server);
 			}
 			JmxUtils.processServer(server, conn);
@@ -48,8 +47,6 @@ public class ServerJob implements Job {
 			}
 		}
 
-		if (log.isDebugEnabled()) {
-			log.debug("+++++ Finished server job: " + server);
-		}
+		log.debug("+++++ Finished server job: {}", server);
 	}
 }

@@ -18,6 +18,7 @@ import javax.management.ObjectName;
 import java.util.List;
 
 import com.googlecode.jmxtrans.OutputWriter;
+import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -53,7 +54,7 @@ public class JmxProcessingTests {
 				.addOutputWriter(outputWriter)
 				.build();
 
-		JmxUtils.processQuery(server, null, query);
+		new JmxQueryProcessor().processQuery(server, null, query);
 
 		verify(outputWriter).doWrite(any(Server.class), queryCaptor.capture(), resultsCaptor.capture());
 

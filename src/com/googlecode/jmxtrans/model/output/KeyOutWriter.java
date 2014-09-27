@@ -18,8 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 
@@ -90,7 +89,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 
-						logger.info(JmxUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
+						logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
 								+ values.getValue().toString() + delimiter + result.getEpoch());
 					}
 				}

@@ -21,16 +21,16 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.jmx.ManagedObject;
+import com.googlecode.jmxtrans.connections.SocketFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.monitoring.ManagedObject;
+import com.googlecode.jmxtrans.pool.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.pool.PoolUtils;
 import com.googlecode.jmxtrans.util.LifecycleException;
 import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.SocketFactory;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -167,7 +167,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 						Object value = values.getValue();
 						if (NumberUtils.isNumeric(value)) {
 
-							String line = JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 									.replaceAll("[()]", "_") + " " + value.toString() + " "
 									+ result.getEpoch() / 1000 + "\n";
 							if (isDebugEnabled()) {
@@ -194,16 +194,17 @@ public class GraphiteWriter extends BaseOutputWriter {
 	 * @throws LifecycleException
 	 */
 	private void startPool() throws LifecycleException {
-		pool = JmxUtils.getObjectPool(new SocketFactory());
+		pool = PoolUtils.getObjectPool(new SocketFactory());
 		
 		try {
 			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 			ObjectName objectName = new ObjectName("com.googlecode.jmxtrans:Type=GenericKeyedObjectPool,PoolName=SocketFactory,Name=GWManagedGenericKeyedObjectPool");
 
 			if (!mbs.isRegistered(objectName) ) {
-				this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool)pool, Server.SOCKET_FACTORY_POOL);
+				this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool)pool, PoolUtils.SOCKET_FACTORY_POOL);
 				this.mbean.setObjectName(objectName);
-				JmxUtils.registerJMX(this.mbean);
+				ManagementFactory.getPlatformMBeanServer()
+						.registerMBean(this.mbean, this.mbean.getObjectName());
 			}
 			log.debug("GraptiteWriter connection pool is started");
 		} catch (Exception e) {
@@ -219,7 +220,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	private void stopPool() throws LifecycleException {
 		try {
 			if (this.mbean != null) {
-				JmxUtils.unregisterJMX(this.mbean);
+				ManagementFactory.getPlatformMBeanServer().unregisterMBean(this.mbean.getObjectName());
 				this.mbean = null;
 			}
 			if (pool != null) {

@@ -18,8 +18,7 @@ import java.util.regex.Pattern;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.ValidationException;
 
 import static info.ganglia.gmetric4j.gmetric.GMetric.UDPAddressingMode;
@@ -141,7 +140,7 @@ public class GangliaWriter extends BaseOutputWriter {
 		for (final Result result : results) {
 			if (result.getValues() != null) {
 				for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {
-					final String name = JmxUtils.getKeyString(query, result, resultValue, getTypeNames());
+					final String name = KeyUtils.getKeyString(query, result, resultValue, getTypeNames());
 					final String value = resultValue.getValue().toString();
 					GMetricType dataType = getType(resultValue.getValue());
 					log.debug("Sending Ganglia metric {}={} [type={}]", name, value, dataType);
