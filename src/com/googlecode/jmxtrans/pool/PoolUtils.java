@@ -28,7 +28,7 @@ public final class PoolUtils {
 	 * @param factory the factory
 	 * @return the object pool
 	 */
-	public static <K, V> GenericKeyedObjectPool getObjectPool(KeyedPoolableObjectFactory<K, V> factory) {
+	private static <K, V> GenericKeyedObjectPool getObjectPool(KeyedPoolableObjectFactory<K, V> factory) {
 		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<K, V>(factory);
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);

@@ -1,7 +1,7 @@
 package com.googlecode.jmxtrans.monitoring;
 
 /**
- * Managed attributes and operations of a {@link BasicDataSource}.
+ * Managed attributes and operations of a {@link org.apache.commons.pool.impl.GenericKeyedObjectPool}.
  */
 public interface ManagedGenericKeyedObjectPoolMBean {
 

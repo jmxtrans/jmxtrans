@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,19 @@ import com.googlecode.jmxtrans.model.naming.StringUtils;
 /**
  * Implements the common code for output filters.
  *
+ * Note that the use of a non threadsafe @link{Map} makes this class non threadsafe.
+ *
  * @author jon
  */
+// FIXME settings parsing is very tolerant. It will try its best to return
+// default values, silently ignoring parsing errors. Except in the case of
+// primitive int settings, where is raises an IllegalArgumentException. We
+// should resolve this incoherence, probably by always raising an exception
+// when the setting cannot be parsed.
+// FIXME resolution of settings (via PropertyResolver.resolveMap()) is not
+// consistent. Settings added by other means than setSettings() are never
+// resolved.
+@NotThreadSafe
 public abstract class BaseOutputWriter implements OutputWriter {
 
 	public static final String HOST = "host";
@@ -31,12 +43,10 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	private Boolean debugEnabled = null;
 	private Map<String, Object> settings;
 
-	/** */
 	public void addSetting(String key, Object value) {
 		getSettings().put(key, value);
 	}
 
-	/** */
 	public Map<String, Object> getSettings() {
 		if (this.settings == null) {
 			this.settings = new TreeMap<String, Object>();
@@ -44,7 +54,6 @@ public abstract class BaseOutputWriter implements OutputWriter {
 		return this.settings;
 	}
 
-	/** */
 	public void setSettings(Map<String, Object> settings) {
 		this.settings = settings;
 		PropertyResolver.resolveMap(this.settings);
@@ -72,16 +81,18 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 * @return the Boolean value for the setting
 	 */
 	public Boolean getBooleanSetting(String key, Boolean defaultVal) {
-		Boolean result = null;
 		final Object value = this.getSettings().get(key);
-		if (value != null) {
-			if (value instanceof Boolean) {
-				result = (Boolean) value;
-			} else if (value instanceof String) {
-				result = Boolean.valueOf((String) value);
-			}
+
+		if (value == null) {
+			return defaultVal;
 		}
-		return result != null ? result : defaultVal;
+		if (value instanceof Boolean) {
+			return (Boolean) value;
+		}
+		if (value instanceof String) {
+			return Boolean.valueOf((String) value);
+		}
+		return defaultVal;
 	}
 
 	/**
@@ -94,21 +105,22 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 * @return the Integer value for the setting
 	 */
 	public Integer getIntegerSetting(String key, Integer defaultVal) {
-		Integer result = null;
 		final Object value = this.getSettings().get(key);
-		if (value != null) {
-			if (value instanceof Number) {
-				result = ((Number) value).intValue();
-			} else if (value instanceof String) {
-				try {
-					result = Integer.parseInt((String) value);
-				} catch (NumberFormatException e) {
-					// An Integer value could not be coerced from the String, we
-					// will return the default
-				}
+		if (value == null) {
+			return defaultVal;
+		}
+
+		if (value instanceof Number) {
+			return ((Number) value).intValue();
+		}
+		if (value instanceof String) {
+			try {
+				return Integer.parseInt((String) value);
+			} catch (NumberFormatException e) {
+				return defaultVal;
 			}
 		}
-		return result != null ? result : defaultVal;
+		return defaultVal;
 	}
 
 	/**
@@ -135,7 +147,11 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 */
 	protected int getIntSetting(String key, int defaultVal) throws IllegalArgumentException {
 		if (settings.containsKey(key)) {
-			final String value = settings.get(key).toString();
+			final Object objectValue = settings.get(key);
+			if (objectValue == null) {
+				throw new IllegalArgumentException("Setting '" + key + " null on " + this.toString());
+			}
+			final String value = objectValue.toString();
 			try {
 				return Integer.parseInt(value);
 			} catch (Exception e) {
@@ -146,13 +162,11 @@ public abstract class BaseOutputWriter implements OutputWriter {
 		}
 	}
 
-	/** */
 	@JsonIgnore
 	public boolean isDebugEnabled() {
 		return debugEnabled != null ? debugEnabled : getBooleanSetting(DEBUG);
 	}
 
-	/** */
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
 	public List<String> getTypeNames() {
@@ -163,12 +177,10 @@ public abstract class BaseOutputWriter implements OutputWriter {
 		return (List<String>) this.getSettings().get(TYPE_NAMES);
 	}
 
-	/** */
 	public void setTypeNames(List<String> typeNames) {
 		this.getSettings().put(TYPE_NAMES, typeNames);
 	}
 
-	/** */
 	public void addTypeName(String str) {
 		this.getTypeNames().add(str);
 	}
