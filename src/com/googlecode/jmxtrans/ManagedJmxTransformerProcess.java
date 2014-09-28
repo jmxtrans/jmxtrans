@@ -6,7 +6,7 @@ import java.io.File;
 
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean;
+import com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
 
 /**
@@ -15,7 +15,7 @@ import com.googlecode.jmxtrans.monitoring.ManagedObject;
  *
  * @author marcos.lois
  */
-public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProcessMBean, ManagedObject {
+public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProcessMXBean, ManagedObject {
 
 	/**
 	 * The object name.
@@ -41,7 +41,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#start()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#start()
 	 */
 	@Override
 	public void start() throws LifecycleException {
@@ -49,7 +49,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#stop()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#stop()
 	 */
 	@Override
 	public void stop() throws LifecycleException {
@@ -57,7 +57,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#getQuartPropertiesFile()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#getQuartPropertiesFile()
 	 */
 	@Override
 	public String getQuartPropertiesFile() {
@@ -65,7 +65,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#setQuartPropertiesFile(java.lang.String)
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#setQuartPropertiesFile(java.lang.String)
 	 */
 	@Override
 	public void setQuartPropertiesFile(String quartPropertiesFile) {
@@ -73,7 +73,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#getRunPeriod()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#getRunPeriod()
 	 */
 	@Override
 	public int getRunPeriod() {
@@ -81,7 +81,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#setRunPeriod(int)
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#setRunPeriod(int)
 	 */
 	@Override
 	public void setRunPeriod(int runPeriod) {
@@ -89,19 +89,19 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#setJsonDirOrFile(java.io.File)
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#setJsonDirOrFile(java.io.File)
 	 */
 	@Override
-	public void setJsonDirOrFile(File jsonDirOrFile) {
-		configuration.setJsonDirOrFile(jsonDirOrFile);
+	public void setJsonDirOrFile(String jsonDirOrFile) {
+		configuration.setJsonDirOrFile(new File(jsonDirOrFile));
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMBean#getJsonDirOrFile()
+	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#getJsonDirOrFile()
 	 */
 	@Override
-	public File getJsonDirOrFile() {
-		return configuration.getJsonDirOrFile();
+	public String getJsonDirOrFile() {
+		return configuration.getJsonDirOrFile().getAbsolutePath();
 	}
 
 	/* (non-Javadoc)

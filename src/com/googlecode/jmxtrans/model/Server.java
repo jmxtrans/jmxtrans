@@ -224,7 +224,7 @@ public class Server {
 
 	@JsonIgnore
 	public JMXServiceURL getJmxServiceURL() throws MalformedURLException {
-		return new JMXServiceURL(url);
+		return new JMXServiceURL(getUrl());
 	}
 
 	@JsonIgnore
