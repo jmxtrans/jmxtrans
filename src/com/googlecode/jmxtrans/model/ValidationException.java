@@ -2,7 +2,7 @@ package com.googlecode.jmxtrans.model;
 
 public class ValidationException extends Exception {
 
-	private Query query;
+	private final Query query;
 
 	public ValidationException(String msg, Query query) {
 		super(msg);

@@ -7,10 +7,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import javax.management.remote.JMXServiceURL;
 
 /*
- * FIXME
- * This class has been extracted as a simple holder to break the dependency
- * between the JMXConnectionFactory and the Server. There is probably a cleaner
- * way to do this, but this will come later.
+ * TODO This class has been extracted as a simple holder to break the
+ * dependency between the JMXConnectionFactory and the Server. There is
+ * probably a cleaner way to do this, but this will come later.
  */
 public class JMXConnectionParams {
 	private final JMXServiceURL url;

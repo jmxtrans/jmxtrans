@@ -334,8 +334,10 @@ public class JmxTransformer implements WatchedCallback {
 			this.poolMBeans.clear();
 
 			for (Map.Entry<String, KeyedObjectPool> poolEntry : poolMap.entrySet()) {
-				ManagedGenericKeyedObjectPool mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) poolEntry.getValue());
-				mbean.setPoolName(poolEntry.getKey());
+				ManagedGenericKeyedObjectPool mbean =
+						new ManagedGenericKeyedObjectPool(
+								(GenericKeyedObjectPool) poolEntry.getValue(),
+								poolEntry.getKey());
 				ManagementFactory.getPlatformMBeanServer()
 						.registerMBean(mbean, mbean.getObjectName());
 				poolMBeans.put(poolEntry.getKey(), mbean);

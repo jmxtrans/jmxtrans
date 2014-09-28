@@ -1,8 +1,6 @@
 package com.googlecode.jmxtrans.connections;
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
@@ -11,13 +9,6 @@ import java.net.SocketAddress;
  * Allows us to pool socket connections.
  */
 public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory<SocketAddress, DatagramSocket> {
-
-	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(DatagramSocketFactory.class);
-
-	/** constructor */
-	public DatagramSocketFactory() {
-	}
 
 	/**
 	 * Creates the socket and the writer to go with it.

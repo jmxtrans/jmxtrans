@@ -5,6 +5,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.io.OutputStreamWriter;
@@ -33,14 +34,14 @@ import com.googlecode.jmxtrans.monitoring.ManagedObject;
 import static com.google.common.base.Charsets.UTF_8;
 
 /**
- * This low latency and thread save output writer sends data to a host/port combination
+ * This low latency and thread safe output writer sends data to a host/port combination
  * in the Graphite format.
  *
- * @see <a
- *      href="http://graphite.wikidot.com/getting-your-data-into-graphite">http://graphite.wikidot.com/getting-your-data-into-graphite</a>
+ * @see <a href="http://graphite.wikidot.com/getting-your-data-into-graphite">Getting your data into Graphite</a>
  *
  * @author jon
  */
+@NotThreadSafe
 public class GraphiteWriter extends BaseOutputWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
@@ -110,7 +111,6 @@ public class GraphiteWriter extends BaseOutputWriter {
 		}
 	}
 		
-	/** */
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		String host = (String) this.getSettings().get(HOST);
 		Object portObj = this.getSettings().get(PORT);
@@ -133,7 +133,6 @@ public class GraphiteWriter extends BaseOutputWriter {
 		this.address = new InetSocketAddress(host, port);
 	}
 
-	/** */
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
 		statusLock.lock();
@@ -155,9 +154,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 			List<String> typeNames = this.getTypeNames();
 
 			for (Result result : results) {
-				if (isDebugEnabled()) {
-					log.debug("Query result: " + result.toString());
-				}
+				log.debug("Query result: {}", result);
 				Map<String, Object> resultValues = result.getValues();
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
@@ -167,15 +164,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 									.replaceAll("[()]", "_") + " " + value.toString() + " "
 									+ result.getEpoch() / 1000 + "\n";
-							if (isDebugEnabled()) {
-								log.debug("Graphite Message: " + line.trim());
-							}
+							log.debug("Graphite Message: {}", line);
 							writer.write(line);
 							writer.flush();
 						} else {
-							if (log.isWarnEnabled()) {
-								log.warn("Unable to submit non-numeric value to Graphite: \"" + value + "\" from result " + result);
-							}
+							log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 						}
 					}
 				}
@@ -208,7 +201,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				ManagementFactory.getPlatformMBeanServer()
 						.registerMBean(this.mbean, this.mbean.getObjectName());
 			}
-			log.debug("GraptiteWriter connection pool is started");
+			log.debug("GraphiteWriter connection pool is started");
 		} catch (Exception e) {
 			throw new LifecycleException(e);
 		}
@@ -229,7 +222,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				pool.close();
 				pool = null;
 			}
-			log.debug("GraptiteWriter connection pool is stopped");
+			log.debug("GraphiteWriter connection pool is stopped");
 		} catch (Exception e) {
 			throw new LifecycleException(e);
 		}
