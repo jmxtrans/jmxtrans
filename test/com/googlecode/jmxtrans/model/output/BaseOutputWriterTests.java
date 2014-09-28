@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.Test;
@@ -8,6 +8,7 @@ import java.util.Map;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;

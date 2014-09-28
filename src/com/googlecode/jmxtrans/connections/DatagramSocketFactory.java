@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.connections;
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.slf4j.Logger;
@@ -10,7 +10,7 @@ import java.net.SocketAddress;
 /**
  * Allows us to pool socket connections.
  */
-public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory {
+public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory<SocketAddress, DatagramSocket> {
 
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(DatagramSocketFactory.class);
@@ -23,16 +23,15 @@ public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory {
 	 * Creates the socket and the writer to go with it.
 	 */
 	@Override
-	public Object makeObject(Object key) throws Exception {
-		return new DatagramSocket((SocketAddress)key);
+	public DatagramSocket makeObject(SocketAddress socketAddress) throws Exception {
+		return new DatagramSocket(socketAddress);
 	}
 
 	/**
 	 * Closes the socket.
 	 */
 	@Override
-	public void destroyObject(Object key, Object obj) throws Exception {
-		DatagramSocket socket = (DatagramSocket) obj;
+	public void destroyObject(SocketAddress key, DatagramSocket socket) throws Exception {
 		socket.close();
 	}
 
@@ -40,8 +39,7 @@ public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory {
 	 * Validates that the socket is good.
 	 */
 	@Override
-	public boolean validateObject(Object key, Object obj) {
-		DatagramSocket socket = (DatagramSocket) obj;
+	public boolean validateObject(SocketAddress key, DatagramSocket socket) {
 		return socket.isBound() && !socket.isClosed() && socket.isConnected();
 	}
 }

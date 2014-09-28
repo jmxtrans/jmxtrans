@@ -1,16 +1,11 @@
-package com.googlecode.jmxtrans;
+package com.googlecode.jmxtrans.model;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.googlecode.jmxtrans.fixtures.ServerFixtures;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.ValidationException;
-
-import static com.googlecode.jmxtrans.util.JmxUtils.mergeServerLists;
+import static com.googlecode.jmxtrans.model.Server.mergeServerLists;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MergingTests {

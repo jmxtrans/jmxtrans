@@ -4,8 +4,8 @@ import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
 import com.googlecode.jmxtrans.util.JsonPrinter;
 
 /**
@@ -18,7 +18,6 @@ public class Hibernate {
 	private static final String GW_HOST = "192.168.192.133";
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
-	/** */
 	public static void main(String[] args) throws Exception {
 
 		Server.Builder serverBuilder = Server.builder()

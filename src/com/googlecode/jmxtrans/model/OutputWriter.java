@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans;
+package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -6,11 +6,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.Map;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 

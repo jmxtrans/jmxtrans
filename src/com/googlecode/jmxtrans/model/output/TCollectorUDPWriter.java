@@ -10,11 +10,11 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
-import com.googlecode.jmxtrans.util.LifecycleException;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 
 /**
- * {@link com.googlecode.jmxtrans.OutputWriter} for the <a href="https://github.com/OpenTSDB/tcollector/blob/master/collectors/0/udp_bridge.py">TCollector udp_bridge</a>.
+ * {@link com.googlecode.jmxtrans.model.OutputWriter} for the <a href="https://github.com/OpenTSDB/tcollector/blob/master/collectors/0/udp_bridge.py">TCollector udp_bridge</a>.
  * Largely based on StatsDWriter and OpenTSDBWriter
  *
  * @author Kieren Hynd

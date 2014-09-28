@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.cli;
 
 public class OptionsException extends Exception {
 

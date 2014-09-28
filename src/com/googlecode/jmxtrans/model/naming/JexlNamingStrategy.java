@@ -12,7 +12,6 @@ import java.util.Map;
 
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * Naming strategy which uses an JEXL expression to format the name from the result, its class name, attribute name,
@@ -104,7 +103,7 @@ public class JexlNamingStrategy implements NamingStrategy {
 		context.set(VAR__ATTRIBUTE_NAME, result.getAttributeName());
 		context.set(VAR__CLASSNAME_ALIAS, result.getClassNameAlias());
 
-		Map<String, String> typeNameMap = JmxUtils.getTypeNameValueMap(result.getTypeName());
+		Map<String, String> typeNameMap = KeyUtils.getTypeNameValueMap(result.getTypeName());
 		context.set(VAR__TYPENAME, typeNameMap);
 
 		String effectiveClassname = result.getClassNameAlias();

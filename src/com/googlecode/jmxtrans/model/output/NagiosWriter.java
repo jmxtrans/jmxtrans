@@ -19,10 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 
 /**
@@ -141,7 +139,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					String[] str_array = JmxUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
+					String[] str_array = KeyUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
 					if (NumberUtils.isNumeric(values.getValue()) && filters.contains(str_array[2])) {
 						int threshold_pos = filters.indexOf(str_array[2]);
 						StringBuilder sb = new StringBuilder();

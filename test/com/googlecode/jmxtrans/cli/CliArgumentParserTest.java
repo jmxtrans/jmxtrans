@@ -1,7 +1,5 @@
 package com.googlecode.jmxtrans.cli;
 
-import com.googlecode.jmxtrans.JmxTransConfiguration;
-import com.googlecode.jmxtrans.util.OptionsException;
 import org.apache.commons.cli.ParseException;
 import org.junit.Before;
 import org.junit.Ignore;

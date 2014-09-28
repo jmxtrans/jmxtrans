@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans;
+package com.googlecode.jmxtrans.cli;
 
 import java.io.File;
 

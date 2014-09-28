@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
@@ -18,11 +19,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.googlecode.jmxtrans.OutputWriter;
-
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.googlecode.jmxtrans.util.PropertyResolver.resolveList;
+import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
 import static java.util.Arrays.asList;
 
 /**
@@ -92,10 +91,12 @@ public class Query {
 		return typeNames;
 	}
 
+	@Nonnull
 	public ImmutableList<String> getAttr() {
 		return attr;
 	}
 
+	@Nonnull
 	public ImmutableList<String> getKeys() {
 		return keys;
 	}
@@ -104,6 +105,7 @@ public class Query {
 		return allowDottedKeys;
 	}
 
+	@Nonnull
 	public ImmutableList<OutputWriter> getOutputWriters() {
 		return outputWriters;
 	}

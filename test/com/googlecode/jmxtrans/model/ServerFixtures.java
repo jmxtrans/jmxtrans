@@ -1,7 +1,4 @@
-package com.googlecode.jmxtrans.fixtures;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
+package com.googlecode.jmxtrans.model;
 
 public final class ServerFixtures {
 	private ServerFixtures() {}

@@ -5,27 +5,33 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.MBeanServer;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.googlecode.jmxtrans.util.DatagramSocketFactory;
-import com.googlecode.jmxtrans.util.JmxConnectionFactory;
-import com.googlecode.jmxtrans.util.SocketFactory;
-
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.googlecode.jmxtrans.util.PropertyResolver.resolveProps;
+import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static java.util.Arrays.asList;
+import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
+import static javax.naming.Context.SECURITY_CREDENTIALS;
+import static javax.naming.Context.SECURITY_PRINCIPAL;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the
@@ -51,9 +57,6 @@ public class Server {
 
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
-	public static final String SOCKET_FACTORY_POOL = SocketFactory.class.getSimpleName();
-	public static final String JMX_CONNECTION_FACTORY_POOL = JmxConnectionFactory.class.getSimpleName();
-	public static final String DATAGRAM_SOCKET_FACTORY_POOL = DatagramSocketFactory.class.getSimpleName();
 
 	private final String alias;
 	private final String host;
@@ -94,6 +97,43 @@ public class Server {
 		this.numQueryThreads = numQueryThreads;
 		this.local = local;
 		this.queries = copyOf(queries);
+	}
+
+	/**
+	 * Generates the proper username/password environment for JMX connections.
+	 */
+	@JsonIgnore
+	public ImmutableMap<String, ?> getEnvironment() {
+		if (getProtocolProviderPackages() != null && getProtocolProviderPackages().contains("weblogic")) {
+			ImmutableMap.Builder<String, String> environment = ImmutableMap.builder();
+			if ((username != null) && (password != null)) {
+				environment.put(PROTOCOL_PROVIDER_PACKAGES, getProtocolProviderPackages());
+				environment.put(SECURITY_PRINCIPAL, username);
+				environment.put(SECURITY_CREDENTIALS, password);
+			}
+			return environment.build();
+		}
+
+		ImmutableMap.Builder<String, String[]> environment = ImmutableMap.builder();
+		if ((username != null) && (password != null)) {
+			String[] credentials = new String[] {
+					username,
+					password
+			};
+			environment.put(JMXConnector.CREDENTIALS, credentials);
+		}
+
+		return environment.build();
+	}
+
+	/**
+	 * Helper method for connecting to a Server. You need to close the resulting
+	 * connection.
+	 */
+	@JsonIgnore
+	public JMXConnector getServerConnection() throws Exception {
+		JMXServiceURL url = new JMXServiceURL(getUrl());
+		return JMXConnectorFactory.connect(url, this.getEnvironment());
 	}
 
 	@JsonIgnore
@@ -180,6 +220,11 @@ public class Server {
 			return FRONT + this.host + ":" + this.port + BACK;
 		}
 		return this.url;
+	}
+
+	@JsonIgnore
+	public JMXServiceURL getJmxServiceURL() throws MalformedURLException {
+		return new JMXServiceURL(url);
 	}
 
 	@JsonIgnore
@@ -381,5 +426,37 @@ public class Server {
 					local,
 					queries);
 		}
+	}
+
+	/**
+	 * Merges two lists of servers (and their queries). Based on the equality of
+	 * both sets of objects. Public for testing purposes.
+	 * @param secondList
+	 * @param firstList
+	 */
+	// FIXME: the params for this method should be Set<Server> as there are multiple assumptions that they are unique
+	@CheckReturnValue
+	public static List<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
+		ImmutableList.Builder<Server> results = ImmutableList.builder();
+		List<Server> toProcess = new ArrayList<Server>(secondList);
+		for (Server firstServer : firstList) {
+			if (toProcess.contains(firstServer)) {
+				Server found = toProcess.get(secondList.indexOf(firstServer));
+				results.add(merge(firstServer, found));
+				// remove server as it is already merged
+				toProcess.remove(found);
+			} else {
+				results.add(firstServer);
+			}
+		}
+		// add servers from the second list that are not in the first one
+		results.addAll(toProcess);
+		return results.build();
+	}
+
+	private static Server merge(Server firstServer, Server secondServer) {
+		return builder(firstServer)
+				.addQueries(secondServer.getQueries())
+				.build();
 	}
 }

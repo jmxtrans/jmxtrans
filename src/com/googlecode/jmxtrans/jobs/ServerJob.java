@@ -1,7 +1,5 @@
 package com.googlecode.jmxtrans.jobs;
 
-import javax.management.remote.JMXConnector;
-
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -10,8 +8,12 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.remote.JMXConnector;
+
+import com.googlecode.jmxtrans.connections.JMXConnectionParams;
+import com.googlecode.jmxtrans.jmx.JmxUtils;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
+import com.googlecode.jmxtrans.pool.PoolUtils;
 
 /**
  * This is a quartz job that is responsible for executing a Server object on a
@@ -25,16 +27,16 @@ public class ServerJob implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobDataMap map = context.getMergedJobDataMap();
 		Server server = (Server) map.get(Server.class.getName());
-		GenericKeyedObjectPool pool = (GenericKeyedObjectPool) map.get(Server.JMX_CONNECTION_FACTORY_POOL);
+		GenericKeyedObjectPool<JMXConnectionParams, JMXConnector> pool = (GenericKeyedObjectPool<JMXConnectionParams, JMXConnector>) map.get(PoolUtils.JMX_CONNECTION_FACTORY_POOL);
 
-		if (log.isDebugEnabled()) {
-			log.debug("+++++ Started server job: " + server);
-		}
+		log.debug("+++++ Started server job: {}", server);
 
 		JMXConnector conn = null;
+		JMXConnectionParams connectionParams = null;
 		try {
-			if (! server.isLocal()) {
-				conn = (JMXConnector) pool.borrowObject(server);
+			connectionParams = new JMXConnectionParams(server.getJmxServiceURL(), server.getEnvironment());
+			if (!server.isLocal()) {
+				conn = pool.borrowObject(connectionParams);
 			}
 			JmxUtils.processServer(server, conn);
 		} catch (Exception e) {
@@ -42,14 +44,12 @@ public class ServerJob implements Job {
 			throw new JobExecutionException(e);
 		} finally {
 			try {
-				pool.returnObject(server, conn);
+				pool.returnObject(connectionParams, conn);
 			} catch (Exception ex) {
 				log.error("Error returning object to pool for server: " + server);
 			}
 		}
 
-		if (log.isDebugEnabled()) {
-			log.debug("+++++ Finished server job: " + server);
-		}
+		log.debug("+++++ Finished server job: {}", server);
 	}
 }

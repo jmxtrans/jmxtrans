@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;

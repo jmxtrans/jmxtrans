@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.exceptions;
 
 public class LifecycleException extends Exception {
 

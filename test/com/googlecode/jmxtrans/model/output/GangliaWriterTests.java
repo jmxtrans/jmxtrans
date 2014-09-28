@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.model.ValidationException;
 
 import static junit.framework.Assert.assertEquals;
 

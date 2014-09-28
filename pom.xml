@@ -100,6 +100,33 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>de.andrena.tools.nopackagecycles</groupId>
+						<artifactId>no-package-cycles-enforcer-rule</artifactId>
+						<version>1.0.5</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>enforce-no-package-cycles</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<phase>test-compile</phase>
+						<configuration>
+							<rules>
+								<NoPackageCyclesRule
+										implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"/>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<includes>
@@ -429,7 +456,7 @@
 		<dependency>
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
-			<version>1.5.6</version>
+			<version>1.6</version>
 		</dependency>
 
 		<dependency>

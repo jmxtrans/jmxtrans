@@ -1,7 +1,6 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,17 +20,15 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.googlecode.jmxtrans.jmx.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.jmx.ManagedObject;
+import com.googlecode.jmxtrans.connections.SocketFactory;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.BaseOutputWriter;
-import com.googlecode.jmxtrans.util.JmxUtils;
-import com.googlecode.jmxtrans.util.LifecycleException;
-import com.googlecode.jmxtrans.util.NumberUtils;
-import com.googlecode.jmxtrans.util.SocketFactory;
-import com.googlecode.jmxtrans.util.ValidationException;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.monitoring.ManagedObject;
 
 import static com.google.common.base.Charsets.UTF_8;
 
@@ -51,7 +48,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	private String rootPrefix = "servers";
 
-	private static KeyedObjectPool pool = null;
+	private static GenericKeyedObjectPool<InetSocketAddress, Socket> pool = null;
 	private static AtomicInteger activeServers = new AtomicInteger(0);
 
 	private Lock statusLock = new ReentrantLock();
@@ -147,7 +144,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 			if (status != GraphiteWriterStatus.STARTED) {
 				throw new LifecycleException("GraphiteWriter instance should be started");
 			}
-			socket = (Socket) pool.borrowObject(address);
+			socket = pool.borrowObject(address);
 		} finally {
 			statusLock.unlock();
 		}
@@ -167,7 +164,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 						Object value = values.getValue();
 						if (NumberUtils.isNumeric(value)) {
 
-							String line = JmxUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 									.replaceAll("[()]", "_") + " " + value.toString() + " "
 									+ result.getEpoch() / 1000 + "\n";
 							if (isDebugEnabled()) {
@@ -194,16 +191,22 @@ public class GraphiteWriter extends BaseOutputWriter {
 	 * @throws LifecycleException
 	 */
 	private void startPool() throws LifecycleException {
-		pool = JmxUtils.getObjectPool(new SocketFactory());
-		
+		pool = new GenericKeyedObjectPool<InetSocketAddress, Socket>(new SocketFactory());
+		pool.setTestOnBorrow(true);
+		pool.setMaxActive(-1);
+		pool.setMaxIdle(-1);
+		pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
+		pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+
 		try {
 			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 			ObjectName objectName = new ObjectName("com.googlecode.jmxtrans:Type=GenericKeyedObjectPool,PoolName=SocketFactory,Name=GWManagedGenericKeyedObjectPool");
 
 			if (!mbs.isRegistered(objectName) ) {
-				this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool)pool, Server.SOCKET_FACTORY_POOL);
+				this.mbean = new ManagedGenericKeyedObjectPool(pool, "GraphiteConnectionsPool");
 				this.mbean.setObjectName(objectName);
-				JmxUtils.registerJMX(this.mbean);
+				ManagementFactory.getPlatformMBeanServer()
+						.registerMBean(this.mbean, this.mbean.getObjectName());
 			}
 			log.debug("GraptiteWriter connection pool is started");
 		} catch (Exception e) {
@@ -219,7 +222,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	private void stopPool() throws LifecycleException {
 		try {
 			if (this.mbean != null) {
-				JmxUtils.unregisterJMX(this.mbean);
+				ManagementFactory.getPlatformMBeanServer().unregisterMBean(this.mbean.getObjectName());
 				this.mbean = null;
 			}
 			if (pool != null) {

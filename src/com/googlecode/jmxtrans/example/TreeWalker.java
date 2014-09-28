@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Set;
 
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JmxUtils;
 
 /**
  * Walks a JMX tree and prints out all of the attribute values.
@@ -35,13 +34,12 @@ public class TreeWalker {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWalker.class);
 
-	/** */
 	public static void main(String[] args) throws Exception {
 		Server server = Server.builder().setHost("localhost").setPort("1099").build();
 
 		JMXConnector conn = null;
 		try {
-			conn = JmxUtils.getServerConnection(server);
+			conn = server.getServerConnection();
 			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
 			TreeWalker tw = new TreeWalker();
@@ -55,7 +53,6 @@ public class TreeWalker {
 		}
 	}
 
-	/** */
 	public void walkTree(MBeanServerConnection connection) throws Exception {
 
 		// key here is null, null returns everything!
@@ -78,7 +75,6 @@ public class TreeWalker {
 		}
 	}
 
-	/** */
 	public void output(String name, Object attr) {
 		CompositeDataSupport cds;
 		if ((attr instanceof CompositeDataSupport)) {
@@ -91,7 +87,6 @@ public class TreeWalker {
 		}
 	}
 
-	/** */
 	public String format(Object value) {
 		if (value == null) {
 			return null;

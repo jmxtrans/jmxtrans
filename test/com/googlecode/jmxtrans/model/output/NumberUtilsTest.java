@@ -1,8 +1,8 @@
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output;
 
 import org.junit.Test;
 
-import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+import static com.googlecode.jmxtrans.model.output.NumberUtils.isNumeric;
 import static java.lang.Boolean.FALSE;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

@@ -21,9 +21,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.util.LifecycleException;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;

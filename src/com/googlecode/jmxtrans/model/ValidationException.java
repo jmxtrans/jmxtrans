@@ -1,6 +1,4 @@
-package com.googlecode.jmxtrans.util;
-
-import com.googlecode.jmxtrans.model.Query;
+package com.googlecode.jmxtrans.model;
 
 public class ValidationException extends Exception {
 
