@@ -37,6 +37,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
 	public static final String ROOT_PREFIX = "rootPrefix";
 
+	private static final String DEFAULT_ROOT_PREFIX = "servers";
+
 	private String rootPrefix = "servers";
 
 	private GenericKeyedObjectPool<InetSocketAddress, Socket> pool;
@@ -49,23 +51,14 @@ public class GraphiteWriter extends BaseOutputWriter {
 	public GraphiteWriter() { }
 
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		String host = (String) this.getSettings().get(HOST);
-		Object portObj = this.getSettings().get(PORT);
-		Integer port = null;
-		if (portObj instanceof String) {
-			port = Integer.parseInt((String) portObj);
-		} else if (portObj instanceof Integer) {
-			port = (Integer) portObj;
-		}
+		String host = getStringSetting(HOST, null);
+		Integer port = getIntegerSetting(PORT, null);
 
 		if (host == null || port == null) {
 			throw new ValidationException("Host and port can't be null", query);
 		}
 
-		String rootPrefixTmp = (String) this.getSettings().get(ROOT_PREFIX);
-		if (rootPrefixTmp != null) {
-			rootPrefix = rootPrefixTmp;
-		}
+		rootPrefix = getStringSetting(ROOT_PREFIX, DEFAULT_ROOT_PREFIX);
 
 		this.address = new InetSocketAddress(host, port);
 	}
