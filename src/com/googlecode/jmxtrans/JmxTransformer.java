@@ -1,12 +1,11 @@
 package com.googlecode.jmxtrans;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Closer;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.pool.KeyedObjectPool;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -15,34 +14,28 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerUtils;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.management.MBeanServer;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.googlecode.jmxtrans.cli.CliArgumentParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.pool.PoolUtils;
 import com.googlecode.jmxtrans.util.JsonUtils;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
@@ -60,17 +53,11 @@ public class JmxTransformer implements WatchedCallback {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxTransformer.class);
 
-	private Scheduler serverScheduler;
+	private final Scheduler serverScheduler;
 
 	private WatchDir watcher;
 
-	private JmxTransConfiguration configuration;
-
-	/**
-	 * Pools. TODO : Move to a PoolUtils or PoolRegistry so others can use it
-	 */
-	private Map<String, KeyedObjectPool> poolMap;
-	private final Map<String, ManagedGenericKeyedObjectPool> poolMBeans = new ConcurrentHashMap<String, ManagedGenericKeyedObjectPool>();
+	private final JmxTransConfiguration configuration;
 
 	private List<Server> masterServersList = new ArrayList<Server>();
 
@@ -81,24 +68,33 @@ public class JmxTransformer implements WatchedCallback {
 
 	private volatile boolean isRunning = false;
 
-	/** */
+	private final Injector injector;
+
+	@Inject
+	public JmxTransformer(Scheduler serverScheduler, JmxTransConfiguration configuration, Injector injector) {
+		this.serverScheduler = serverScheduler;
+		this.configuration = configuration;
+		this.injector = injector;
+	}
+
 	public static void main(String[] args) throws Exception {
-		JmxTransformer transformer = new JmxTransformer();
+		JmxTransConfiguration configuration = new CliArgumentParser().parseOptions(args);
+		if (configuration.isHelp()) {
+			return;
+		}
+
+		Injector injector = Guice.createInjector(new JmxTransModule(configuration));
+
+		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 
 		// Start the process
-		transformer.doMain(args);
+		transformer.doMain();
 	}
 
 	/**
 	 * The real main method.
 	 */
-	private void doMain(String[] args) throws Exception {
-		this.configuration = new CliArgumentParser().parseOptions(args);
-
-		if (configuration.isHelp()) {
-			return;
-		}
-
+	private void doMain() throws Exception {
 		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this, configuration);
 		ManagementFactory.getPlatformMBeanServer()
 				.registerMBean(mbean, mbean.getObjectName());
@@ -133,11 +129,9 @@ public class JmxTransformer implements WatchedCallback {
 		} else {
 			log.info("Starting Jmxtrans on : " + this.configuration.getJsonDirOrFile().toString());
 			try {
-				this.startupScheduler();
+				this.serverScheduler.start();
 
 				this.startupWatchdir();
-
-				this.setupObjectPooling();
 
 				this.startupSystem();
 
@@ -190,7 +184,7 @@ public class JmxTransformer implements WatchedCallback {
 	private synchronized void stopServices() throws LifecycleException {
 		try {
 			// Shutdown the scheduler
-			if (this.serverScheduler != null) {
+			if (this.serverScheduler.isStarted()) {
 				this.serverScheduler.shutdown(true);
 				log.debug("Shutdown server scheduler");
 				try {
@@ -199,7 +193,6 @@ public class JmxTransformer implements WatchedCallback {
 				} catch (InterruptedException e) {
 					log.error(e.getMessage(), e);
 				}
-				this.serverScheduler = null;
 			}
 
 			// Shutdown the file watch service
@@ -208,23 +201,6 @@ public class JmxTransformer implements WatchedCallback {
 				this.watcher = null;
 				log.debug("Shutdown watch service");
 			}
-
-			for (String key : poolMap.keySet()) {
-				MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-				mbs.unregisterMBean(poolMBeans.get(key).getObjectName());
-			}
-			this.poolMBeans.clear();
-
-			// Shutdown the pools
-			for (Entry<String, KeyedObjectPool> entry : this.poolMap.entrySet()) {
-				try {
-					entry.getValue().close();
-					log.debug("Closed object pool factory: " + entry.getKey());
-				} catch (Exception ex) {
-					log.error("Error closing object pool factory: " + entry.getKey());
-				}
-			}
-			this.poolMap = null;
 
 			// Shutdown the outputwriters
 			this.stopWriterAndClearMasterServerList();
@@ -272,38 +248,14 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	/**
-	 * start the server scheduler which loops over all the Server jobs
-	 */
-	private void startupScheduler() throws Exception {
-		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
-		Closer closer = Closer.create();
-		try {
-			InputStream stream;
-			if (configuration.getQuartPropertiesFile() == null) {
-				stream = closer.register(JmxTransformer.class.getResourceAsStream("/quartz.server.properties"));
-			} else {
-				stream = closer.register(new FileInputStream(configuration.getQuartPropertiesFile()));
-			}
-			serverSchedFact.initialize(stream);
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
-		}
-		this.serverScheduler = serverSchedFact.getScheduler();
-		this.serverScheduler.start();
-	}
-
-	/**
 	 * Handy method which runs the JmxProcess
 	 */
 	public void executeStandalone(JmxProcess process) throws Exception {
 		this.masterServersList = process.getServers();
 
-		this.startupScheduler();
-		this.setupObjectPooling();
+		this.serverScheduler.start();
 
-		this.processServersIntoJobs(this.serverScheduler);
+		this.processServersIntoJobs();
 
 		// Sleep for 10 seconds to wait for jobs to complete.
 		// There should be a better way, but it seems that way isn't working
@@ -316,33 +268,10 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void startupSystem() throws LifecycleException {
 		// process all the json files into Server objects
-		this.processFilesIntoServers(this.getJsonFiles());
+		this.processFilesIntoServers();
 
 		// process the servers into jobs
-		this.processServersIntoJobs(this.serverScheduler);
-	}
-
-	/**
-	 * Override this method if you'd like to add your own object pooling.
-	 *
-	 * @throws Exception
-	 */
-	protected void setupObjectPooling() throws Exception {
-		if (this.poolMap == null) {
-			this.poolMap = PoolUtils.getDefaultPoolMap();
-
-			this.poolMBeans.clear();
-
-			for (Map.Entry<String, KeyedObjectPool> poolEntry : poolMap.entrySet()) {
-				ManagedGenericKeyedObjectPool mbean =
-						new ManagedGenericKeyedObjectPool(
-								(GenericKeyedObjectPool) poolEntry.getValue(),
-								poolEntry.getKey());
-				ManagementFactory.getPlatformMBeanServer()
-						.registerMBean(mbean, mbean.getObjectName());
-				poolMBeans.put(poolEntry.getKey(), mbean);
-			}
-		}
+		this.processServersIntoJobs();
 	}
 
 	private void validateSetup(Server server, ImmutableSet<Query> queries) throws ValidationException {
@@ -353,17 +282,16 @@ public class JmxTransformer implements WatchedCallback {
 
 	private void validateSetup(Server server, Query query) throws ValidationException {
 		List<OutputWriter> writers = query.getOutputWriters();
-		if (writers != null) {
-			for (OutputWriter w : writers) {
-				w.validateSetup(server, query);
-			}
+		for (OutputWriter w : writers) {
+			injector.injectMembers(w);
+			w.validateSetup(server, query);
 		}
 	}
 
 	/**
 	 * Processes all the json files and manages the dedup process
 	 */
-	private void processFilesIntoServers(List<File> jsonFiles) throws LifecycleException {
+	private void processFilesIntoServers() throws LifecycleException {
 		// Shutdown the outputwriters and clear the current server list - this gives us a clean
 		// start when re-reading the json config files
 		try {
@@ -373,7 +301,7 @@ public class JmxTransformer implements WatchedCallback {
 			throw new LifecycleException(e);
 		}
 
-		for (File jsonFile : jsonFiles) {
+		for (File jsonFile : getJsonFiles()) {
 			JmxProcess process;
 			try {
 				process = JsonUtils.getJmxProcess(jsonFile);
@@ -398,7 +326,7 @@ public class JmxTransformer implements WatchedCallback {
 	 * <p/>
 	 * Needs to be called after processFiles()
 	 */
-	private void processServersIntoJobs(Scheduler scheduler) throws LifecycleException {
+	private void processServersIntoJobs() throws LifecycleException {
 		for (Server server : this.masterServersList) {
 			try {
 
@@ -414,7 +342,7 @@ public class JmxTransformer implements WatchedCallback {
 				this.validateSetup(server, server.getQueries());
 
 				// Now schedule the jobs for execution.
-				this.scheduleJob(scheduler, server);
+				this.scheduleJob(server);
 			} catch (ParseException ex) {
 				throw new LifecycleException("Error parsing cron expression: " + server.getCronExpression(), ex);
 			} catch (SchedulerException ex) {
@@ -428,14 +356,13 @@ public class JmxTransformer implements WatchedCallback {
 	/**
 	 * Schedules an individual job.
 	 */
-	private void scheduleJob(Scheduler scheduler, Server server) throws ParseException, SchedulerException {
+	private void scheduleJob(Server server) throws ParseException, SchedulerException {
 
 		String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(10);
 		JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
 
 		JobDataMap map = new JobDataMap();
 		map.put(Server.class.getName(), server);
-		map.put(PoolUtils.JMX_CONNECTION_FACTORY_POOL, this.poolMap.get(PoolUtils.JMX_CONNECTION_FACTORY_POOL));
 		jd.setJobDataMap(map);
 
 		Trigger trigger;
@@ -453,7 +380,7 @@ public class JmxTransformer implements WatchedCallback {
 			trigger = minuteTrigger;
 		}
 
-		scheduler.scheduleJob(jd, trigger);
+		serverScheduler.scheduleJob(jd, trigger);
 		if (log.isDebugEnabled()) {
 			log.debug("Scheduled job: " + jd.getName() + " for server: " + server);
 		}
@@ -462,18 +389,18 @@ public class JmxTransformer implements WatchedCallback {
 	/**
 	 * Deletes all of the Jobs
 	 */
-	private void deleteAllJobs(Scheduler scheduler) throws Exception {
+	private void deleteAllJobs() throws Exception {
 		List<JobDetail> allJobs = new ArrayList<JobDetail>();
-		String[] jobGroups = scheduler.getJobGroupNames();
+		String[] jobGroups = serverScheduler.getJobGroupNames();
 		for (String jobGroup : jobGroups) {
-			String[] jobNames = scheduler.getJobNames(jobGroup);
+			String[] jobNames = serverScheduler.getJobNames(jobGroup);
 			for (String jobName : jobNames) {
-				allJobs.add(scheduler.getJobDetail(jobName, jobGroup));
+				allJobs.add(serverScheduler.getJobDetail(jobName, jobGroup));
 			}
 		}
 
 		for (JobDetail jd : allJobs) {
-			scheduler.deleteJob(jd.getName(), jd.getGroup());
+			serverScheduler.deleteJob(jd.getName(), jd.getGroup());
 			if (log.isDebugEnabled()) {
 				log.debug("Deleted scheduled job: " + jd.getName() + " group: " + jd.getGroup());
 			}
@@ -516,33 +443,30 @@ public class JmxTransformer implements WatchedCallback {
 		return file.isFile() && file.getName().endsWith(".json");
 	}
 
-	/** */
 	@Override
 	public void fileModified(File file) throws Exception {
 		if (this.isJsonFile(file)) {
 			Thread.sleep(1000);
 			log.info("Configuration file modified: " + file);
-			this.deleteAllJobs(this.serverScheduler);
+			this.deleteAllJobs();
 			this.startupSystem();
 		}
 	}
 
-	/** */
 	@Override
 	public void fileDeleted(File file) throws Exception {
 		log.info("Configuration file deleted: " + file);
 		Thread.sleep(1000);
-		this.deleteAllJobs(this.serverScheduler);
+		this.deleteAllJobs();
 		this.startupSystem();
 	}
 
-	/** */
 	@Override
 	public void fileAdded(File file) throws Exception {
 		if (this.isJsonFile(file)) {
 			Thread.sleep(1000);
 			log.info("Configuration file added: " + file);
-			this.deleteAllJobs(this.serverScheduler);
+			this.deleteAllJobs();
 			this.startupSystem();
 		}
 	}

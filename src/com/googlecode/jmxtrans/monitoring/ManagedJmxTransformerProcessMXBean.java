@@ -1,13 +1,11 @@
 package com.googlecode.jmxtrans.monitoring;
 
-import java.io.File;
-
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 /**
  * The Interface ManagedJmxTransformerProcessMBean.
  */
-public interface ManagedJmxTransformerProcessMBean {
+public interface ManagedJmxTransformerProcessMXBean {
 	
 	/**
 	 * Start the JmxProcess.
@@ -56,12 +54,12 @@ public interface ManagedJmxTransformerProcessMBean {
 	 *
 	 * @param jsonDirOrFile the json dir or file
 	 */
-	void setJsonDirOrFile(File jsonDirOrFile);
+	void setJsonDirOrFile(String jsonDirOrFile);
 	
 	/**
 	 * Gets the json dir or file.
 	 *
 	 * @return the json dir or file
 	 */
-	File getJsonDirOrFile();
+	String getJsonDirOrFile();
 }

@@ -1,6 +1,10 @@
 package com.googlecode.jmxtrans.example;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import com.googlecode.jmxtrans.JmxTransformer;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
@@ -74,7 +78,8 @@ public class ActiveMQ2 {
 		JmxProcess process = new JmxProcess(serverBuilder.build());
 		jsonPrinter.prettyPrint(process);
 
-		JmxTransformer transformer = new JmxTransformer();
+		Injector injector = Guice.createInjector(new JmxTransModule(null));
+		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);
 
 		// for (int i = 0; i < 160; i++) {
