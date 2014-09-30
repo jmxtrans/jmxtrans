@@ -1,13 +1,11 @@
 {
   "servers" : [ {
     "port" : "1099",
-    "host" : "localhost",
+    "host" : "w2",
     "queries" : [ {
       "outputWriters" : [ {
-        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter",
         "settings" : {
-          "port" : 2003,
-         "host" : "mygraphite.mydomain"
         }
       } ],
       "obj" : "java.lang:type=Memory",
