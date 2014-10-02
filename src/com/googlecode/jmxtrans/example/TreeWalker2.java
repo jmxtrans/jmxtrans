@@ -8,7 +8,11 @@ import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.*;
+import javax.management.AttributeNotFoundException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.util.Set;
