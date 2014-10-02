@@ -15,6 +15,7 @@ public class JmxTransConfiguration {
 	 */
 	private int runPeriod = 60;
 	private boolean help = false;
+	private boolean booleanValueANumber = true;
 
 
 	/**
@@ -106,5 +107,13 @@ public class JmxTransConfiguration {
 
 	public boolean isHelp() {
 		return help;
+	}
+
+	public boolean isBooleanValueANumber() {
+		return booleanValueANumber;
+	}
+
+	public void setBooleanValueANumber(boolean booleanValueANumber) {
+		this.booleanValueANumber = booleanValueANumber;
 	}
 }

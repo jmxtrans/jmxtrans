@@ -1,6 +1,14 @@
 package com.googlecode.jmxtrans.example;
 
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.jmx.IdentityValueTransformer;
+import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
-import com.googlecode.jmxtrans.model.OutputWriter;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyMap;
@@ -84,7 +84,7 @@ public class TreeWalker3 {
 			Query query = queryBuilder.build();
 
 			try {
-				new JmxQueryProcessor().processQuery(connection, null, query);
+				new JmxQueryProcessor(new IdentityValueTransformer()).processQuery(connection, null, query);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}

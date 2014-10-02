@@ -24,6 +24,12 @@ public class JmxUtils {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
+	private final ValueTransformer valueTransformer;
+
+	public JmxUtils(ValueTransformer valueTransformer) {
+		this.valueTransformer = valueTransformer;
+	}
+
 	/**
 	 * Does the work for processing a Server object.
 	 */
@@ -47,7 +53,7 @@ public class JmxUtils {
 
 				List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
 				for (Query query : server.getQueries()) {
-					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, server, query);
+					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, server, query, valueTransformer);
 					threads.add(Executors.callable(pqt));
 				}
 
@@ -60,7 +66,7 @@ public class JmxUtils {
 			}
 		} else {
 			for (Query query : server.getQueries()) {
-				new JmxQueryProcessor().processQuery(mbeanServer, server, query);
+				new JmxQueryProcessor(new IdentityValueTransformer()).processQuery(mbeanServer, server, query);
 			}
 		}
 	}

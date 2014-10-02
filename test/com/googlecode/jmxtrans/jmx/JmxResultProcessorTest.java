@@ -3,25 +3,16 @@ package com.googlecode.jmxtrans.jmx;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
+import javax.management.*;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
 
 import static com.google.common.collect.FluentIterable.from;
 import static java.lang.Boolean.TRUE;
@@ -53,7 +44,7 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				ImmutableList.of(integerAttribute),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(), new IdentityValueTransformer()).getResults();
 
 		assertThat(results).hasSize(1);
 		Result integerResult = results.get(0);
@@ -73,7 +64,7 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				ImmutableList.of(integerAttribute),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(), new IdentityValueTransformer()).getResults();
 
 		assertThat(results).hasSize(1);
 		Result integerResult = results.get(0);
@@ -96,7 +87,7 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				ImmutableList.of(booleanAttribute),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(), new IdentityValueTransformer()).getResults();
 
 		assertThat(results).hasSize(1);
 		Result result = results.get(0);
@@ -121,7 +112,7 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				attr.asList(),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(), new IdentityValueTransformer()).getResults();
 
 		assertThat(results.size()).isGreaterThan(2);
 
@@ -150,7 +141,7 @@ public class JmxResultProcessorTest {
 				query,
 				memory,
 				attr.asList(),
-				memory.getClassName()).getResults();
+				memory.getClassName(), new IdentityValueTransformer()).getResults();
 
 		assertThat(results).hasSize(1);
 
