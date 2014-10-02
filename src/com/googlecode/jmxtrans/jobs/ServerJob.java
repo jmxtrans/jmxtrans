@@ -1,5 +1,8 @@
 package com.googlecode.jmxtrans.jobs;
 
+import com.googlecode.jmxtrans.connections.JMXConnectionParams;
+import com.googlecode.jmxtrans.jmx.JmxUtils;
+import com.googlecode.jmxtrans.model.Server;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -11,10 +14,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
 
-import com.googlecode.jmxtrans.connections.JMXConnectionParams;
-import com.googlecode.jmxtrans.jmx.JmxUtils;
-import com.googlecode.jmxtrans.model.Server;
-
 /**
  * This is a quartz job that is responsible for executing a Server object on a
  * cron schedule that is defined within the Server object.
@@ -24,11 +23,14 @@ import com.googlecode.jmxtrans.model.Server;
 public class ServerJob implements Job {
 	private static final Logger log = LoggerFactory.getLogger(ServerJob.class);
 
-	private final GenericKeyedObjectPool<JMXConnectionParams,JMXConnector> jmxPool;
+	private final GenericKeyedObjectPool<JMXConnectionParams, JMXConnector> jmxPool;
+
+	private final JmxUtils jmxUtils;
 
 	@Inject
-	public ServerJob(GenericKeyedObjectPool<JMXConnectionParams, JMXConnector> jmxPool) {
+	public ServerJob(GenericKeyedObjectPool<JMXConnectionParams, JMXConnector> jmxPool, JmxUtils jmxUtils) {
 		this.jmxPool = jmxPool;
+		this.jmxUtils = jmxUtils;
 	}
 
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -44,7 +46,7 @@ public class ServerJob implements Job {
 			if (!server.isLocal()) {
 				conn = jmxPool.borrowObject(connectionParams);
 			}
-			JmxUtils.processServer(server, conn);
+			jmxUtils.processServer(server, conn);
 		} catch (Exception e) {
 			log.error("Error in job for server: " + server, e);
 			throw new JobExecutionException(e);

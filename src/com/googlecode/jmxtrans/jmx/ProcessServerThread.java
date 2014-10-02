@@ -1,24 +1,26 @@
 package com.googlecode.jmxtrans.jmx;
 
-import javax.management.remote.JMXConnector;
-
 import com.googlecode.jmxtrans.model.Server;
+
+import javax.management.remote.JMXConnector;
 
 /**
  * Executes either a getAttribute or getAttributes query.
  */
 public class ProcessServerThread implements Runnable {
-	private Server server;
-	private JMXConnector conn;
+	private final Server server;
+	private final JMXConnector conn;
+	private final JmxUtils jmxUtils;
 
-	public ProcessServerThread(Server server, JMXConnector conn) {
+	public ProcessServerThread(Server server, JMXConnector conn, JmxUtils jmxUtils) {
 		this.server = server;
 		this.conn = conn;
+		this.jmxUtils = jmxUtils;
 	}
 
 	public void run() {
 		try {
-			JmxUtils.processServer(this.server, this.conn);
+			jmxUtils.processServer(this.server, this.conn);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
