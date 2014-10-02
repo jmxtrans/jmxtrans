@@ -1,30 +1,27 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.AttributeList;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
+import javax.management.*;
 import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.googlecode.jmxtrans.model.OutputWriter;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-
 public class JmxQueryProcessor {
 	private final Logger log = LoggerFactory.getLogger(getClass());
+
+	private final ValueTransformer valueTransformer;
+
+	public JmxQueryProcessor(ValueTransformer valueTransformer) {
+		this.valueTransformer = valueTransformer;
+	}
 
 	/**
 	 * Responsible for processing individual Queries.
@@ -58,7 +55,7 @@ public class JmxQueryProcessor {
 
 				AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
 
-				results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults();
+				results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName(), valueTransformer).getResults();
 			}
 		} catch (UnmarshalException ue) {
 			if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {

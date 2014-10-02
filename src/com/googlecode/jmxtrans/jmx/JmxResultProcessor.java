@@ -1,6 +1,9 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 
 import javax.management.Attribute;
 import javax.management.ObjectInstance;
@@ -15,11 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-
 import static com.google.common.collect.ImmutableList.Builder;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.transformValues;
 
 public class JmxResultProcessor {
 
@@ -27,12 +28,15 @@ public class JmxResultProcessor {
 	private final ObjectInstance objectInstance;
 	private final String className;
 	private final List<Attribute> attributes;
+	private final ValueTransformer valueTransformer;
 
-	public JmxResultProcessor(Query query, ObjectInstance objectInstance, List<Attribute> attributes, String className) {
+	@Inject
+	public JmxResultProcessor(Query query, ObjectInstance objectInstance, List<Attribute> attributes, String className, ValueTransformer valueTransformer) {
 		this.query = query;
 		this.objectInstance = objectInstance;
 		this.className = className;
 		this.attributes = attributes;
+		this.valueTransformer = valueTransformer;
 	}
 
 	public ImmutableList<Result> getResults() {
@@ -151,6 +155,8 @@ public class JmxResultProcessor {
 	 * Builds up the base Result object
 	 */
 	private Result getNewResultObject(String attributeName, Map<String, Object> values) {
-		return new Result(attributeName, className, query.getResultAlias(), objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values);
+		return new Result(attributeName, className, query.getResultAlias(),
+				objectInstance.getObjectName().getCanonicalKeyPropertyListString(),
+				transformValues(values, valueTransformer));
 	}
 }

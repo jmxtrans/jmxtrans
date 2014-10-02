@@ -1,21 +1,17 @@
 package com.googlecode.jmxtrans.example;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.management.AttributeNotFoundException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import java.io.IOException;
-import java.util.Set;
-
+import com.googlecode.jmxtrans.jmx.IdentityValueTransformer;
 import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.*;
+import javax.management.remote.JMXConnector;
+import java.io.IOException;
+import java.util.Set;
 
 /**
  * Walks a JMX tree and prints out all of the attribute values actually using
@@ -68,7 +64,7 @@ public class TreeWalker2 {
 			}
 
 			try {
-				new JmxQueryProcessor().processQuery(connection, null, query.build());
+				new JmxQueryProcessor(new IdentityValueTransformer()).processQuery(connection, null, query.build());
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}
