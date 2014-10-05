@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -21,6 +19,8 @@ import java.util.Set;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
 import static java.util.Arrays.asList;
 
@@ -168,12 +168,12 @@ public class Query {
 	public static final class Builder {
 
 		private String obj;
-		private final List<String> attr = Lists.newArrayList();
+		private final List<String> attr = newArrayList();
 		private String resultAlias;
-		private final List<String> keys = Lists.newArrayList();
+		private final List<String> keys = newArrayList();
 		private boolean allowDottedKeys;
-		private final List<OutputWriter> outputWriters = Lists.newArrayList();
-		private final Set<String> typeNames = Sets.newHashSet();
+		private final List<OutputWriter> outputWriters = newArrayList();
+		private final Set<String> typeNames = newHashSet();
 
 		private Builder() {}
 

@@ -36,7 +36,10 @@ public class InterestingInfo {
 		settings.put(GraphiteWriter.HOST, "192.168.192.133");
 		settings.put(GraphiteWriter.PORT, 2003);
 
-		GraphiteWriter gw = new GraphiteWriter(ImmutableList.<String>of(), false, settings);
+		GraphiteWriter gw = GraphiteWriter.builder()
+				.setHost("192.168.192.133")
+				.setPort(2003)
+				.build();
 
 		StdOutWriter sw = new StdOutWriter(ImmutableList.<String>of(), false, Collections.<String, Object>emptyMap());
 
