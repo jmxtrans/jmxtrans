@@ -1,6 +1,17 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.monitoring.ManagedObject;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +27,6 @@ import java.nio.channels.DatagramChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.monitoring.ManagedObject;
 
 /**
  * This output writer sends data to a host/port combination in the StatsD
@@ -56,7 +57,12 @@ public class StatsDWriter extends BaseOutputWriter {
 	 *
 	 * @throws IOException
 	 */
-	public StatsDWriter() throws IOException {
+	@JsonCreator
+	public StatsDWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
+		super(typeNames, debugEnabled, settings);
 		channel = DatagramChannel.open();
 		setBufferSize((short) 1500);
 	}

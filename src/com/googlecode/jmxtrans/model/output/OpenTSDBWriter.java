@@ -1,5 +1,9 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,8 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
 
@@ -25,6 +28,14 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 
 	protected Socket socket;
 	protected DataOutputStream out;
+
+	@JsonCreator
+	public OpenTSDBWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+	}
 
 	/**
 	 * Add the hostname tag "host" with the name of the host by default since OpenTSDB otherwise does not have this

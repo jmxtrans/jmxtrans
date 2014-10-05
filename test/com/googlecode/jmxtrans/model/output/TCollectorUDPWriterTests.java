@@ -2,6 +2,9 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,11 +19,9 @@ import org.slf4j.Logger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.Map;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-
+import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertSame;
@@ -54,15 +55,10 @@ public class TCollectorUDPWriterTests {
 		this.mockLog         = mock(Logger.class);
 
 
-			//
-			// Setup common mock interactions.
-			//
-
+		// Setup common mock interactions.
 		PowerMockito.whenNew(DatagramSocket.class).withAnyArguments().thenReturn(this.mockDgSocket);
 
-
-			// When results are needed.
-
+		// When results are needed.
 		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
 		when(this.mockResult.getValues()).thenReturn(testValues);
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
@@ -70,41 +66,28 @@ public class TCollectorUDPWriterTests {
 		when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");
 
 
-			//
-			// Prepare the object under test and test data.
-			//
+		// Prepare the object under test and test data.
+		Map<String, Object> settings = newHashMap();
+		settings.put("host", "localhost");
+		settings.put("port", 8923);
 
-		this.writer = new TCollectorUDPWriter();
-		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", 8923);
+		this.writer = new TCollectorUDPWriter(ImmutableList.<String>of(), false, settings);
 
-
-			// Inject the mock logger
-
+		// Inject the mock logger
 		Whitebox.setInternalState(TCollectorUDPWriter.class, Logger.class, this.mockLog);
 	}
 
 	@Test
 	public void	successfullySendMessageToTCollector() throws Exception {
-			//
-			// Prepare
-			//
-
+		// Prepare
 		ArgumentCaptor<DatagramPacket>	packetCapture = ArgumentCaptor.forClass(DatagramPacket.class);
 
-			//
-			// Execute
-			//
-
+		// Execute
 		this.writer.start();
 		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
-
-			//
-			// Verifications
-			//
-
+		// Verifications
 		verify(this.mockDgSocket).send(packetCapture.capture());
 
 		String sentString = new String(packetCapture.getValue().getData(),
@@ -120,44 +103,36 @@ public class TCollectorUDPWriterTests {
 	 */
 	@Test
 	public void	testSocketException () throws Exception {
-			//
-			// Prepare
-			//
-
+		// Prepare
 		SocketException	sockExc = new SocketException("X-SOCK-EXC-X");
 		PowerMockito.whenNew(DatagramSocket.class).withNoArguments().thenThrow(sockExc);
 
 		try {
-				//
-				// Execute
-				//
-
+			// Execute
 			this.writer.start();
 
 			fail("LifecycleException missing");
 		} catch ( LifecycleException lcExc ) {
-
-				//
-				// Verify
-				//
-
+			// Verify
 			assertSame(sockExc, lcExc.getCause());
 			verify(this.mockLog).error(contains("create a datagram socket"), eq(sockExc));
 		}
 	}
 
 	@Test(expected = LifecycleException.class)
-	public void	testValidateNullHost () throws Exception {
-		this.writer.addSetting("host", null);
-		this.writer.addSetting("port", 8923);
+	public void	exceptionIsThrownWhenHostIsNotDefined() throws Exception {
+		Map<String, Object> settings = newHashMap();
+		settings.put("port", 8923);
+		this.writer.setSettings(settings);
 
 		this.writer.start();
 	}
 
 	@Test(expected = LifecycleException.class)
-	public void	testValidateNullPort () throws Exception {
-		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", null);
+	public void	exceptionIsThrownWhenPortIsNotDefined() throws Exception {
+		Map<String, Object> settings = newHashMap();
+		settings.put("host", "localhost");
+		this.writer.setSettings(settings);
 
 		this.writer.start();
 	}

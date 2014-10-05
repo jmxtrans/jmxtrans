@@ -1,10 +1,18 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.naming.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.slf4j.LoggerFactory;
@@ -21,12 +29,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 /**
  * This writer is a port of the LibratoWriter from the embedded-jmxtrans
@@ -79,9 +81,17 @@ public class LibratoWriter extends BaseOutputWriter {
 	 */
 	private Proxy proxy;
 
+	@JsonCreator
+	public LibratoWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+	}
+
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		try {
-			url = new URL(getStringSetting(SETTING_URL, DEFAULT_LIBRATO_API_URL));
+			url = new URL(Settings.getStringSetting(this.getSettings(), SETTING_URL, DEFAULT_LIBRATO_API_URL));
 
 			user = getStringSetting(SETTING_USERNAME);
 
@@ -89,11 +99,11 @@ public class LibratoWriter extends BaseOutputWriter {
 			String token = getStringSetting(SETTING_TOKEN);
 			basicAuthentication = Base64Variants.getDefaultVariant().encode((user + ":" + token).getBytes(Charset.forName("US-ASCII")));
 
-			if (getStringSetting(SETTING_PROXY_HOST, null) != null && !getStringSetting(SETTING_PROXY_HOST, "").isEmpty()) {
-				proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(getStringSetting(SETTING_PROXY_HOST, null), getIntegerSetting(SETTING_PROXY_PORT, null)));
+			if (Settings.getStringSetting(this.getSettings(), SETTING_PROXY_HOST, null) != null && !Settings.getStringSetting(this.getSettings(), SETTING_PROXY_HOST, "").isEmpty()) {
+				proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Settings.getStringSetting(this.getSettings(), SETTING_PROXY_HOST, null), Settings.getIntegerSetting(this.getSettings(), SETTING_PROXY_PORT, null)));
 			}
 
-			libratoApiTimeoutInMillis = getIntSetting(SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS, DEFAULT_LIBRATO_API_TIMEOUT_IN_MILLIS);
+			libratoApiTimeoutInMillis = Settings.getIntSetting(getSettings(), SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS, DEFAULT_LIBRATO_API_TIMEOUT_IN_MILLIS);
 
 			logger.info("Start Librato writer connected to '{}', proxy {} with user '{}' ...", url, proxy, user);
 		} catch (MalformedURLException ex) {
@@ -197,12 +207,12 @@ public class LibratoWriter extends BaseOutputWriter {
 		if (server.getAlias() != null) {
 			return server.getAlias();
 		} else {
-			return cleanupStr(server.getHost());
+			return StringUtils.cleanupStr(server.getHost());
 		}
 	}
 
 	private String getStringSetting(String setting) throws ValidationException {
-		String s = super.getStringSetting(setting, null);
+		String s = Settings.getStringSetting(super.getSettings(), setting, null);
 		if (s == null) {
 			throw new ValidationException("Setting '" + setting + "' cannot be null", null);
 		}

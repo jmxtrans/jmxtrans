@@ -1,5 +1,7 @@
 package com.googlecode.jmxtrans.model;
 
+import com.google.common.collect.ImmutableMap;
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,7 +13,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author lanyonm
@@ -50,26 +51,29 @@ public class PropertyResolverTests {
 		map.put("port", "${myport}");
 		map.put("count", 10);
 
-		PropertyResolver.resolveMap(map);
-		Assert.assertEquals("w2", map.get("host"));
-		Assert.assertEquals("1099", map.get("port"));
-		Assert.assertEquals(10, map.get("count"));
+		ImmutableMap<String, Object> resolved = PropertyResolver.resolveMap(map);
+		Assertions.assertThat(resolved).containsEntry("host", "w2");
+		Assertions.assertThat(resolved).containsEntry("port", "1099");
+		Assertions.assertThat(resolved).containsEntry("count", 10);
 	}
 
 	@Test
 	public void testResolveMap() {
 		Map<String, Object> map = newHashMap();
-		assertEquals("w2", System.getProperty("myhost"));
-		assertEquals(null, System.getProperty("mihost"));
+		Assertions.assertThat(System.getProperty("myhost")).isEqualTo("w2");
+		Assertions.assertThat(System.getProperty("mihost")).isNull();
+
 		map.put("a", "${myhost}");
 		map.put("b", "${mihost:w4}");
 		map.put("c", "${mybean:defbean}.${mybean2:defbean2}");
 		map.put("d", "${myhost:defbean}.${mybean2:defbean2}");
-		PropertyResolver.resolveMap(map);
-		assertEquals("w2", map.get("a"));
-		assertEquals("w4", map.get("b"));
-		assertEquals("defbean.defbean2", map.get("c"));
-		assertEquals("w2.defbean2", map.get("d"));
+
+		ImmutableMap<String, Object> resolved = PropertyResolver.resolveMap(map);
+
+		Assertions.assertThat(resolved).containsEntry("a", "w2");
+		Assertions.assertThat(resolved).containsEntry("b", "w4");
+		Assertions.assertThat(resolved).containsEntry("c", "defbean.defbean2");
+		Assertions.assertThat(resolved).containsEntry("d", "w2.defbean2");
 	}
 
 	@Test

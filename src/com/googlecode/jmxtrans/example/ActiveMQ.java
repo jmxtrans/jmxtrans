@@ -1,8 +1,8 @@
 package com.googlecode.jmxtrans.example;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
@@ -11,6 +11,10 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
 import com.googlecode.jmxtrans.util.JsonPrinter;
+
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * This example shows how to query an ActiveMQ server for some information.
@@ -31,15 +35,12 @@ public class ActiveMQ {
 				.setHost("w2")
 				.setPort("1105")
 				.setAlias("w2_activemq_1105");
-		GraphiteWriter gw = new GraphiteWriter();
-		gw.addSetting(BaseOutputWriter.HOST, GW_HOST);
-		// gw.addSetting(GraphiteWriter.HOST, "localhost");
-		gw.addSetting(BaseOutputWriter.PORT, 2003);
+		Map<String, Object> settings = newHashMap();
+		settings.put(BaseOutputWriter.HOST, GW_HOST);
+		settings.put(BaseOutputWriter.PORT, 2003);
+		settings.put(BaseOutputWriter.DEBUG, true);
 
-		// use this to add data to GW path
-		gw.addTypeName("destinationName");
-		gw.addTypeName("Destination");
-		gw.addSetting(BaseOutputWriter.DEBUG, true);
+		GraphiteWriter gw = new GraphiteWriter(ImmutableList.of("destinationName", "Destination"), false, settings);
 
 		Query q = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Type=Subscription,clientId=*,consumerId=*,destinationName=*,destinationType=Queue,persistentMode=Non-Durable")
@@ -143,12 +144,12 @@ public class ActiveMQ {
 				.build();
 		serverBuilder.addQuery(q8);
 
-		GraphiteWriter gw2 = new GraphiteWriter();
-		gw2.addSetting(BaseOutputWriter.HOST, GW_HOST);
-		gw2.addSetting(BaseOutputWriter.PORT, 2003);
+		Map<String, Object> settings2 = newHashMap();
+		settings2.put(BaseOutputWriter.HOST, GW_HOST);
+		settings2.put(BaseOutputWriter.PORT, 2003);
+		settings2.put(BaseOutputWriter.DEBUG, true);
 
-		gw2.addTypeName("name");
-		gw2.addSetting(BaseOutputWriter.DEBUG, true);
+		GraphiteWriter gw2 = new GraphiteWriter(ImmutableList.of("name"), false, settings);
 
 		Query q9 = Query.builder()
 				.setObj("java.lang:type=MemoryPool,name=*")

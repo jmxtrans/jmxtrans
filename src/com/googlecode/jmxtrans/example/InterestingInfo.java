@@ -1,8 +1,8 @@
 package com.googlecode.jmxtrans.example;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
@@ -11,6 +11,11 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import com.googlecode.jmxtrans.util.JsonPrinter;
+
+import java.util.Collections;
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * This class produces the json that is in example.json.
@@ -27,11 +32,13 @@ public class InterestingInfo {
 				.setPort("1099")
 				.setNumQueryThreads(2);
 
-		GraphiteWriter gw = new GraphiteWriter();
-		gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
-		gw.addSetting(GraphiteWriter.PORT, 2003);
+		Map<String, Object> settings = newHashMap();
+		settings.put(GraphiteWriter.HOST, "192.168.192.133");
+		settings.put(GraphiteWriter.PORT, 2003);
 
-		StdOutWriter sw = new StdOutWriter();
+		GraphiteWriter gw = new GraphiteWriter(ImmutableList.<String>of(), false, settings);
+
+		StdOutWriter sw = new StdOutWriter(ImmutableList.<String>of(), false, Collections.<String, Object>emptyMap());
 
 		Query q = Query.builder()
 				.setObj("java.lang:type=Memory")

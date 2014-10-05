@@ -1,6 +1,17 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.NamingStrategy;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
+import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -11,16 +22,6 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.NamingStrategy;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
-import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 /**
  * Originally written by Balazs Kossovics <bko@witbe.net>.  Common base class for OpenTSDBWriter and TCollectorWriter.
@@ -43,6 +44,14 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	protected boolean mergeTypeNamesTags = DEFAULT_MERGE_TYPE_NAMES_TAGS;
 	protected boolean addHostnameTag = getAddHostnameTagDefault();
 	protected String hostnameTag;
+
+	@JsonCreator
+	public OpenTSDBGenericWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+	}
 
 	/**
 	 * Prepare for sending metrics, if needed.  For use by subclasses.
@@ -118,9 +127,6 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * Format the result string given the class name and attribute name of the source value, the timestamp, and the
 	 * value.
 	 *
-	 * @param className     - the name of the class of the MBean from which the value was sourced.
-	 * @param attributeName - the name of the attribute of the MBean from which the value was sourced.  For complex
-	 *                      types (such as CompositeData), the attribute name may describe a hierarchy.
 	 * @param epoch         - the timestamp of the metric.
 	 * @param value         - value of the attribute to use as the metric value.
 	 * @return String - the formatted result string.
@@ -255,10 +261,10 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 
 		tags = (Map<String, String>) this.getSettings().get("tags");
 
-		tagName = this.getStringSetting("tagName", "type");
-		mergeTypeNamesTags = this.getBooleanSetting("mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS);
+		tagName = Settings.getStringSetting(this.getSettings(), "tagName", "type");
+		mergeTypeNamesTags = Settings.getBooleanSetting(this.getSettings(), "mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS);
 
-		addHostnameTag = this.getBooleanSetting("addHostnameTag", this.getAddHostnameTagDefault());
+		addHostnameTag = Settings.getBooleanSetting(this.getSettings(), "addHostnameTag", this.getAddHostnameTagDefault());
 		if (addHostnameTag) {
 			try {
 				hostnameTag = java.net.InetAddress.getLocalHost().getHostName();
@@ -281,7 +287,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 */
 	protected void setupNamingStrategies() throws LifecycleException {
 		try {
-			String jexlExpr = this.getStringSetting("metricNamingExpression", null);
+			String jexlExpr = Settings.getStringSetting(this.getSettings(), "metricNamingExpression", null);
 			if (jexlExpr != null) {
 				this.metricNameStrategy = new JexlNamingStrategy(jexlExpr);
 			} else {

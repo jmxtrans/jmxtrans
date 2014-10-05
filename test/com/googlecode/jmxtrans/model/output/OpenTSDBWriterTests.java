@@ -2,6 +2,9 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,11 +23,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Map;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-
+import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -43,15 +44,15 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ OpenTSDBWriter.class })
 public class OpenTSDBWriterTests {
-	protected OpenTSDBWriter	writer;
-	protected Query			mockQuery;
-	protected Result		mockResult;
-	protected Socket		mockSocket;
-	protected DataOutputStream	mockOut;
-	protected InputStreamReader	mockInStreamRdr;
-	protected BufferedReader	mockBufRdr;
-	protected Logger		mockLog;
-	protected ImmutableMap<String, Object>	testValues;
+	protected OpenTSDBWriter writer;
+	protected Query mockQuery;
+	protected Result mockResult;
+	protected Socket mockSocket;
+	protected DataOutputStream mockOut;
+	protected InputStreamReader mockInStreamRdr;
+	protected BufferedReader mockBufRdr;
+	protected Logger mockLog;
+	protected ImmutableMap<String, Object> testValues;
 
 	/**
 	 * Prepare the test with standard mocks and mock interactions.  Also perform the base configuration of the
@@ -59,25 +60,19 @@ public class OpenTSDBWriterTests {
 	 */
 	@Before
 	public void	setupTest () throws Exception {
-			//
-			// Prepare Mock Objects
-			//
-
-		this.mockQuery       = mock(Query.class);
-		this.mockResult      = mock(Result.class);
-		this.mockSocket      = mock(Socket.class);
+		// Prepare Mock Objects
+		this.mockQuery = mock(Query.class);
+		this.mockResult = mock(Result.class);
+		this.mockSocket = mock(Socket.class);
 		this.mockInStreamRdr = mock(InputStreamReader.class);
-		this.mockBufRdr      = mock(BufferedReader.class);
-		this.mockLog         = mock(Logger.class);
+		this.mockBufRdr = mock(BufferedReader.class);
+		this.mockLog = mock(Logger.class);
 
-			// PowerMockito mocks for those final/static classes and methods:
-		this.mockOut    = PowerMockito.mock(DataOutputStream.class);
+		// PowerMockito mocks for those final/static classes and methods:
+		this.mockOut = PowerMockito.mock(DataOutputStream.class);
 
 
-			//
-			// Setup common mock interactions.
-			//
-
+		// Setup common mock interactions.
 		PowerMockito.whenNew(Socket.class).withParameterTypes(String.class, int.class).
 			withArguments("localhost", 4242).thenReturn(this.mockSocket);
 		PowerMockito.whenNew(DataOutputStream.class).withAnyArguments().thenReturn(this.mockOut);
@@ -85,7 +80,7 @@ public class OpenTSDBWriterTests {
 		PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(this.mockBufRdr);
 
 
-			// When results are needed.
+		// When results are needed.
 		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
 		when(this.mockResult.getValues()).thenReturn(testValues);
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
@@ -94,17 +89,15 @@ public class OpenTSDBWriterTests {
 		when(this.mockInStreamRdr.ready()).thenReturn(false);
 
 
-			//
-			// Prepare the object under test and test data.
-			//
+		// Prepare the object under test and test data.
 
-		this.writer = new OpenTSDBWriter();
-		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", 4242);
+		Map<String, Object> settings = newHashMap();
+		settings.put("host", "localhost");
+		settings.put("port", 4242);
 
+		this.writer = new OpenTSDBWriter(ImmutableList.<String>of(), false, settings);
 
-			// Inject the mock logger
-
+		// Inject the mock logger
 		Whitebox.setInternalState(OpenTSDBWriter.class, Logger.class, this.mockLog);
 	}
 
@@ -115,19 +108,12 @@ public class OpenTSDBWriterTests {
 	public void	testSuccessfulSendNoOpenTSDBResponse () throws Exception {
 		ArgumentCaptor<String>	lineCapture = ArgumentCaptor.forClass(String.class);
 
-			//
-			// Execute.
-			//
-
+		// Execute.
 		this.writer.start();
 		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
-
-			//
-			// Verify.
-			//
-
+		// Verify.
 		verify(this.mockOut).writeBytes(lineCapture.capture());
 
 		assertThat(lineCapture.getValue(), Matchers.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
@@ -140,26 +126,17 @@ public class OpenTSDBWriterTests {
 	 */
 	@Test
 	public void	testSuccessfulSendOpenTSDBResponse1 () throws Exception {
-			//
-			// Prepare.
-			//
-
+		// Prepare.
 		when(this.mockInStreamRdr.ready()).thenReturn(true).thenReturn(false);
 		when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X");
 
-			//
-			// Execute.
-			//
-
+		// Execute.
 		this.writer.start();
 		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
-			//
-			// Verify.
-			//
-
+		// Verify.
 		verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
 		verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
 	}
@@ -169,27 +146,17 @@ public class OpenTSDBWriterTests {
 	 */
 	@Test
 	public void	testSuccessfulSendOpenTSDBResponse2 () throws Exception {
-			//
-			// Prepare.
-			//
-
+		// Prepare.
 		when(this.mockInStreamRdr.ready()).thenReturn(true);
 		when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X").thenReturn(null);
 
-
-			//
-			// Execute.
-			//
-
+		// Execute.
 		this.writer.start();
 		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.stop();
 
 
-			//
-			// Verify.
-			//
-
+		// Verify.
 		verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
 		verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
 	}
@@ -199,27 +166,18 @@ public class OpenTSDBWriterTests {
 	 */
 	@Test
 	public void	testUnknownHostException () throws Exception {
-			//
-			// Prepare.
-			//
-
-		UnknownHostException	uhExc = new UnknownHostException("X-TEST-UHE-X");
+		// Prepare.
+		UnknownHostException uhExc = new UnknownHostException("X-TEST-UHE-X");
 		PowerMockito.whenNew(Socket.class).withParameterTypes(String.class, int.class).
 			withArguments("localhost", 4242).thenThrow(uhExc);
 
 		try {
-				//
-				// Execute.
-				//
-
+			// Execute.
 			this.writer.start();
 
 			fail("LifecycleException missing");
 		} catch ( LifecycleException lcExc ) {
-				//
-				// Verify.
-				//
-
+			// Verify.
 			assertSame(uhExc, lcExc.getCause());
 			verify(this.mockLog).error(contains("opening socket"), eq(uhExc));
 		}
@@ -230,26 +188,17 @@ public class OpenTSDBWriterTests {
 	 */
 	@Test
 	public void	testSocketCreationIOException () throws Exception {
-			//
-			// Prepare.
-			//
-
+		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
 		PowerMockito.whenNew(Socket.class).withParameterTypes(String.class, int.class).
 			withArguments("localhost", 4242).thenThrow(ioExc);
 
 		try {
-				//
-				// Execute.
-				//
-
+			// Execute.
 			this.writer.start();
 			fail("LifecycleException missing");
 		} catch ( LifecycleException lcExc ) {
-				//
-				// Verify.
-				//
-
+			// Verify.
 			assertSame(ioExc, lcExc.getCause());
 			verify(this.mockLog).error(contains("opening socket"), eq(ioExc));
 		}
@@ -260,27 +209,17 @@ public class OpenTSDBWriterTests {
 	 */
 	@Test
 	public void	testSocketCloseIOException () throws Exception {
-			//
-			// Prepare.
-			//
-
+		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
 		doThrow(ioExc).when(this.mockSocket).close();
 
-
-			//
-			// Execute.
-			//
-
+		// Execute.
 		this.writer.start();
 		try {
 			this.writer.stop();
 			fail("LifecycleException missing");
 		} catch ( LifecycleException lcExc ) {
-				//
-				// Verify.
-				//
-
+			// Verify.
 			assertSame(ioExc, lcExc.getCause());
 			verify(this.mockLog).error(contains("closing socket"), eq(ioExc));
 		}
@@ -291,26 +230,17 @@ public class OpenTSDBWriterTests {
 	 */
 	@Test
 	public void	testStartOutputIOException () throws Exception {
-			//
-			// Prepare.
-			//
-
+		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
 		when(this.mockSocket.getOutputStream()).thenThrow(ioExc);
 
-			//
-			// Execute.
-			//
-
+		// Execute.
 		this.writer.start();
 		try {
 			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("IOException missing");
 		} catch ( IOException ioCaught ) {
-				//
-				// Verify.
-				//
-
+			// Verify.
 			assertSame(ioExc, ioCaught);
 			verify(this.mockLog).error(contains("output stream"), eq(ioExc));
 		}
@@ -321,27 +251,17 @@ public class OpenTSDBWriterTests {
 	 */
 	@Test
 	public void	testSendOutputIOException () throws Exception {
-			//
-			// Prepare.
-			//
-
+		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
 		doThrow(ioExc).when(this.mockOut).writeBytes(anyString());
 
-
-			//
-			// Execute.
-			//
-
+		// Execute.
 		this.writer.start();
 		try {
 			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("IOException missing");
 		} catch ( IOException ioCaught ) {
-				//
-				// Verify.
-				//
-
+			// Verify.
 			assertSame(ioExc, ioCaught);
 			verify(this.mockLog).error(contains("writing result"), eq(ioExc));
 		}
@@ -349,44 +269,36 @@ public class OpenTSDBWriterTests {
 
 	@Test
 	public void	testFinishOutputIOException () throws Exception {
-			//
-			// Prepare.
-			//
-
+		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
 		doThrow(ioExc).when(this.mockOut).flush();
 
-
-			//
-			// Execute.
-			//
-
+		// Execute.
 		this.writer.start();
 		try {
 			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 			fail("exception on flush was not thrown");
 		} catch ( IOException ioCaught ) {
-				//
-				// Verify.
-				//
-
+			// Verify.
 			assertSame(ioExc, ioCaught);
 			verify(this.mockLog).error(contains("flush failed"), eq(ioExc));
 		}
 	}
 
 	@Test(expected = LifecycleException.class)
-	public void	testValidateNullHost () throws Exception {
-		this.writer.addSetting("host", null);
-		this.writer.addSetting("port", 4242);
+	public void	exceptionThrownIfHostIsNotDefined() throws Exception {
+		Map<String, Object> settings = newHashMap();
+		settings.put("port", 4242);
+		this.writer.setSettings(settings);
 
 		this.writer.start();
 	}
 
 	@Test(expected = LifecycleException.class)
-	public void	testValidateNullPort () throws Exception {
-		this.writer.addSetting("host", "localhost");
-		this.writer.addSetting("port", null);
+	public void	exceptionThrownIfPortIsNotDefined() throws Exception {
+		Map<String, Object> settings = newHashMap();
+		settings.put("host", "localhost");
+		this.writer.setSettings(settings);
 
 		this.writer.start();
 	}

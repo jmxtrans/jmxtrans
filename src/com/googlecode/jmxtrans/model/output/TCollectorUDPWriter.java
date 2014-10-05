@@ -1,5 +1,9 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,8 +13,7 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import java.util.Map;
 
 
 /**
@@ -25,6 +28,14 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 
 	protected SocketAddress address;
 	protected DatagramSocket dgSocket;
+
+	@JsonCreator
+	public TCollectorUDPWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+	}
 
 	/**
 	 * Do not add the hostname tag "host" with the name of the host by default since tcollector normally adds the

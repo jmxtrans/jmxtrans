@@ -1,13 +1,17 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import info.ganglia.gmetric4j.gmetric.GMetric;
 import info.ganglia.gmetric4j.gmetric.GMetricSlope;
 import org.junit.Test;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
+import java.util.Collections;
+import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static junit.framework.Assert.assertEquals;
 
 /**
@@ -24,15 +28,18 @@ public class GangliaWriterTests {
 		Query test = Query.builder()
 				.setObj("test")
 				.build();
-		new GangliaWriter().validateSetup(null, test);
+		new GangliaWriter(ImmutableList.<String>of(), false, Collections.<String, Object>emptyMap())
+				.validateSetup(null, test);
     }
 
     /** Test validation when only required parameters are set. */
     @Test
     public void testValidationMinimalSettings() throws ValidationException {
-        GangliaWriter writer = new GangliaWriter();
-        writer.addSetting(GangliaWriter.HOST, "192.168.1.144");
-		Query test = Query.builder()
+		Map<String, Object> settings = newHashMap();
+		settings.put(GangliaWriter.HOST, "192.168.1.144");
+
+		GangliaWriter writer = new GangliaWriter(ImmutableList.<String>of(), false, settings);
+        Query test = Query.builder()
 				.setObj("test")
 				.build();
 		Server server = Server.builder().setHost("localhost").setPort("123").build();
@@ -52,18 +59,20 @@ public class GangliaWriterTests {
     /** Test validation when all parameters are set. */
     @Test
     public void testValidationAllSettings() throws ValidationException {
-        final GangliaWriter writer = new GangliaWriter();
-        writer.addSetting(GangliaWriter.HOST, "192.168.1.144");
-        writer.addSetting(GangliaWriter.PORT, "25654");
-        writer.addSetting(GangliaWriter.ADDRESSING_MODE, "MULTICAST");
-        writer.addSetting(GangliaWriter.TTL, "4");
-        writer.addSetting(GangliaWriter.V31, "false");
-        writer.addSetting(GangliaWriter.UNITS, "km/h");
-        writer.addSetting(GangliaWriter.SLOPE, "NEGATIVE");
-        writer.addSetting(GangliaWriter.TMAX, "354");
-        writer.addSetting(GangliaWriter.DMAX, "24");
-        writer.addSetting(GangliaWriter.GROUP_NAME, "dummy");
-		Query test = Query.builder()
+		Map<String, Object> settings = newHashMap();
+		settings.put(GangliaWriter.HOST, "192.168.1.144");
+		settings.put(GangliaWriter.PORT, "25654");
+		settings.put(GangliaWriter.ADDRESSING_MODE, "MULTICAST");
+		settings.put(GangliaWriter.TTL, "4");
+		settings.put(GangliaWriter.V31, "false");
+		settings.put(GangliaWriter.UNITS, "km/h");
+		settings.put(GangliaWriter.SLOPE, "NEGATIVE");
+		settings.put(GangliaWriter.TMAX, "354");
+		settings.put(GangliaWriter.DMAX, "24");
+		settings.put(GangliaWriter.GROUP_NAME, "dummy");
+
+		final GangliaWriter writer = new GangliaWriter(ImmutableList.<String>of(), false, settings);
+        Query test = Query.builder()
 				.setObj("test")
 				.build();
 		Server server = Server.builder().setHost("localhost").setPort("123").build();

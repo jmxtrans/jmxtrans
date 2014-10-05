@@ -1,9 +1,16 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -12,12 +19,6 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 /**
  * <a href="http://sensuapp.org/docs/0.12/events">Sensu Event Data</a>
@@ -48,9 +49,17 @@ public class SensuWriter extends BaseOutputWriter {
 	private String sensuhost;
 	private String sensuhandler;
 
+	@JsonCreator
+	public SensuWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+	}
+
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		sensuhost = getStringSetting(SETTING_HOST, DEFAULT_SENSU_HOST);
-		sensuhandler = getStringSetting(SETTING_HANDLER, DEFAULT_SENSU_HANDLER);
+		sensuhost = Settings.getStringSetting(this.getSettings(), SETTING_HOST, DEFAULT_SENSU_HOST);
+		sensuhandler = Settings.getStringSetting(this.getSettings(), SETTING_HANDLER, DEFAULT_SENSU_HANDLER);
 		logger.info("Start Sensu writer connected to '{}' with handler {}", sensuhost, sensuhandler);
 	}
 

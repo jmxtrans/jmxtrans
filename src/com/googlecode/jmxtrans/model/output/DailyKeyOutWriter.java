@@ -1,10 +1,14 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Appender;
 import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.PatternLayout;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * This class is derived from KeyOutWriter. It uses DailyRollingFileAppender
@@ -28,10 +32,17 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 
 	private static final String DATE_PATTERN = "'.'yyyy-MM-dd";
 
-	public DailyKeyOutWriter() {
-		super();
+	@JsonCreator
+	public DailyKeyOutWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("outputFile") String outputFile,
+			@JsonProperty("maxLogFileSize") String maxLogFileSize,
+			@JsonProperty("maxLogBackupFiles") int maxLogBackupFiles,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, settings);
 	}
-	
+
 	/**
 	 * The maxLogFileSize and maxLogBackupFiles are ignored as per the existing behaviour of DailyKeyOutWriter.
 	 */

@@ -1,8 +1,15 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +29,6 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.google.common.collect.Maps.newHashMap;
@@ -118,7 +119,15 @@ public class StackdriverWriter extends BaseOutputWriter {
 	private int stackdriverApiTimeoutInMillis = DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS;
 
 	private JsonFactory jsonFactory = new JsonFactory();
-	
+
+	@JsonCreator
+	public StackdriverWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+	}
+
 	/**
 	 * Sets up the object and makes sure all the required parameters are available<br/>
 	 * Minimally a Stackdriver API key must be provided using the token setting
@@ -126,35 +135,35 @@ public class StackdriverWriter extends BaseOutputWriter {
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		try {
-			gatewayUrl = new URL(getStringSetting(SETTING_STACKDRIVER_API_URL, DEFAULT_STACKDRIVER_API_URL));
+			gatewayUrl = new URL(Settings.getStringSetting(this.getSettings(), SETTING_STACKDRIVER_API_URL, DEFAULT_STACKDRIVER_API_URL));
 		} catch (MalformedURLException e) {
 			throw new ValidationException("Invalid gateway URL passed " + gatewayUrl, query);
 		}
 
-		apiKey = getStringSetting(SETTING_STACKDRIVER_API_KEY, null);
+		apiKey = Settings.getStringSetting(this.getSettings(), SETTING_STACKDRIVER_API_KEY, null);
 
-		if (getStringSetting(SETTING_PROXY_HOST, null) != null && !getStringSetting(SETTING_PROXY_HOST, null).isEmpty()) {
-			proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(getStringSetting(SETTING_PROXY_HOST, null), getIntSetting(SETTING_PROXY_PORT, 0)));
+		if (Settings.getStringSetting(this.getSettings(), SETTING_PROXY_HOST, null) != null && !Settings.getStringSetting(this.getSettings(), SETTING_PROXY_HOST, null).isEmpty()) {
+			proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Settings.getStringSetting(this.getSettings(), SETTING_PROXY_HOST, null), Settings.getIntSetting(getSettings(), SETTING_PROXY_PORT, 0)));
 		}
 		
-		if (getStringSetting(SETTING_PREFIX, null) != null && !getStringSetting(SETTING_PREFIX, null).isEmpty()) {
-			if (!StringUtils.isAlphanumeric(getStringSetting(SETTING_PREFIX, null))) {
+		if (Settings.getStringSetting(this.getSettings(), SETTING_PREFIX, null) != null && !Settings.getStringSetting(this.getSettings(), SETTING_PREFIX, null).isEmpty()) {
+			if (!StringUtils.isAlphanumeric(Settings.getStringSetting(this.getSettings(), SETTING_PREFIX, null))) {
 				throw new ValidationException("Prefix setting must be alphanumeric only [A-Za-z0-9]", query);
 			}
-			prefix = getStringSetting(SETTING_PREFIX, null);
+			prefix = Settings.getStringSetting(this.getSettings(), SETTING_PREFIX, null);
 			logger.info("Setting prefix to " + prefix);
 		}
 		
 		logger.info("Starting Stackdriver writer connected to '{}', proxy {} ...", gatewayUrl, proxy);
 		
-		stackdriverApiTimeoutInMillis = getIntSetting(SETTING_STACKDRIVER_API_TIMEOUT_IN_MILLIS, DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS);
+		stackdriverApiTimeoutInMillis = Settings.getIntSetting(getSettings(), SETTING_STACKDRIVER_API_TIMEOUT_IN_MILLIS, DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS);
 
 		// try to get and instance ID
-		if (getStringSetting(SETTING_SOURCE_INSTANCE, null) != null && !getStringSetting(SETTING_SOURCE_INSTANCE, null).isEmpty()) {
+		if (Settings.getStringSetting(this.getSettings(), SETTING_SOURCE_INSTANCE, null) != null && !Settings.getStringSetting(this.getSettings(), SETTING_SOURCE_INSTANCE, null).isEmpty()) {
 			// if one is set directly use that
-			instanceId = getStringSetting(SETTING_SOURCE_INSTANCE, null);
+			instanceId = Settings.getStringSetting(this.getSettings(), SETTING_SOURCE_INSTANCE, null);
 			logger.info("Using instance ID {} from setting {}", instanceId, SETTING_SOURCE_INSTANCE);
-		} else if (getStringSetting(SETTING_DETECT_INSTANCE, null) != null && "AWS".equalsIgnoreCase(getStringSetting(SETTING_DETECT_INSTANCE, null))) {
+		} else if (Settings.getStringSetting(this.getSettings(), SETTING_DETECT_INSTANCE, null) != null && "AWS".equalsIgnoreCase(Settings.getStringSetting(this.getSettings(), SETTING_DETECT_INSTANCE, null))) {
 			// if setting is to detect, look on the local machine URL
 			logger.info("Detect instance set to AWS, trying to determine AWS instance ID");
 			instanceId = getLocalInstanceId("AWS", "http://169.254.169.254/latest/meta-data/instance-id", null);
@@ -163,7 +172,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			} else {
 				logger.info("Unable to detect AWS instance ID for this machine, sending metrics without an instance ID");
 			}
-		} else if (getStringSetting(SETTING_DETECT_INSTANCE, null) != null && "GCE".equalsIgnoreCase(getStringSetting(SETTING_DETECT_INSTANCE, null))) {
+		} else if (Settings.getStringSetting(this.getSettings(), SETTING_DETECT_INSTANCE, null) != null && "GCE".equalsIgnoreCase(Settings.getStringSetting(this.getSettings(), SETTING_DETECT_INSTANCE, null))) {
 			// if setting is to detect, look on the local machine URL
 			logger.info("Detect instance set to GCE, trying to determine GCE instance ID");
 			

@@ -1,6 +1,14 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PatternLayout;
@@ -15,20 +23,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
-
 /**
  * Writes out data in the same format as the GraphiteWriter, except to a file
  * and tab delimited. Takes advantage of Log4J RollingFileAppender to
  * automatically handle rolling the files after they reach a certain size.
- * 
+ * <p/>
  * The default max size of the log files are 10MB (maxLogFileSize) The default
  * number of rolled files to keep is 200 (maxLogBackupFiles)
- * 
+ *
  * @author jon
  */
 public class KeyOutWriter extends BaseOutputWriter {
@@ -44,11 +46,34 @@ public class KeyOutWriter extends BaseOutputWriter {
 	protected static final int MAX_LOG_BACKUP_FILES = 200;
 	protected static final String MAX_LOG_FILE_SIZE = "10MB";
 	protected static final String DEFAULT_DELIMITER = "\t";
-
 	protected Logger logger;
+
+
+	private final String outputFile;
+	private final String maxLogFileSize;
+	private final int maxLogBackupFiles;
 	protected String delimiter = DEFAULT_DELIMITER;
 
-	public KeyOutWriter() {
+	@JsonCreator
+	public KeyOutWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("outputFile") String outputFile,
+			@JsonProperty("maxLogFileSize") String maxLogFileSize,
+			@JsonProperty("maxLogBackupFiles") int maxLogBackupFiles,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+		this.outputFile = MoreObjects.firstNonNull(
+				outputFile,
+				(String) settings.get("outputFile"));
+		this.maxLogFileSize = firstNonNull(
+				maxLogFileSize,
+				(String) settings.get(SETTING_MAX_LOG_FILE_SIZE),
+				MAX_LOG_FILE_SIZE);
+		this.maxLogBackupFiles = firstNonNull(
+				maxLogBackupFiles,
+				(Integer) settings.get(SETTING_MAX_BACK_FILES),
+				MAX_LOG_BACKUP_FILES);
 	}
 
 	/**
@@ -56,20 +81,16 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 */
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		String fileStr = (String) this.getSettings().get("outputFile");
 		delimiter = getDelimiter();
-		if (fileStr == null) {
-			throw new ValidationException("You must specify an outputFile setting.", query);
-		}
 		// Check if we've already created a logger for this file. If so, use it.
-		if (loggers.containsKey(fileStr)) {
-			logger = loggers.get(fileStr);
+		if (loggers.containsKey(outputFile)) {
+			logger = loggers.get(outputFile);
 			return;
 		}
 		// need to create a logger
 		try {
-			logger = initLogger(fileStr);
-			loggers.put(fileStr, logger);
+			logger = initLogger(outputFile);
+			loggers.put(outputFile, logger);
 		} catch (IOException e) {
 			throw new ValidationException("Failed to setup log4j", query);
 		}
@@ -99,34 +120,30 @@ public class KeyOutWriter extends BaseOutputWriter {
 	/**
 	 * Initializes the logger. This is called when we need to create a new
 	 * logger for the given file name.
-	 * 
+	 *
 	 * @param fileStr
 	 * @return a new Logger instance for the given fileStr
 	 * @throws IOException
 	 */
 	protected Logger initLogger(String fileStr) throws IOException {
-		String maxLogFileSize = getSettingMaxFileSize();
-		Integer maxLogBackupFiles = getSettingMaxFileHistory();
-		
-		Appender appender = buildLog4jAppender(fileStr, maxLogFileSize, maxLogBackupFiles);
-
+		Appender appender = buildLog4jAppender(fileStr, getMaxLogFileSize(), getMaxLogBackupFiles());
 		LoggerFactory loggerFactory = buildLog4jLoggerFactory(appender);
-		
+
 		String loggerKey = buildLoggerName();
-		
+
 		// Create the logger and add to the map of loggers using our factory
 		LogManager.getLogger(loggerKey, loggerFactory);
-
 		return log4jLoggerFactory.getLogger(loggerKey);
 	}
-	
+
 	protected String buildLoggerName() {
 		return "KeyOutWriter" + this.hashCode();
 	}
-	
-	protected Appender buildLog4jAppender(String fileStr, String maxLogFileSize,
+
+	protected Appender buildLog4jAppender(
+			String fileStr, String maxLogFileSize,
 			Integer maxLogBackupFiles) throws IOException {
-		
+
 		PatternLayout pl = new PatternLayout(LOG_PATTERN);
 		final RollingFileAppender appender = new RollingFileAppender(pl, fileStr, true);
 		appender.setImmediateFlush(true);
@@ -134,10 +151,10 @@ public class KeyOutWriter extends BaseOutputWriter {
 		appender.setBufferSize(LOG_IO_BUFFER_SIZE_BYTES);
 		appender.setMaxFileSize(maxLogFileSize);
 		appender.setMaxBackupIndex(maxLogBackupFiles);
-		
+
 		return appender;
 	}
-	
+
 	protected LoggerFactory buildLog4jLoggerFactory(final Appender appender) {
 		return new LoggerFactory() {
 			@Override
@@ -150,35 +167,25 @@ public class KeyOutWriter extends BaseOutputWriter {
 			}
 		};
 	}
-	
-	protected String getSettingMaxFileSize() {
-		String maxLogFileSize = (String) this.getSettings().get(SETTING_MAX_LOG_FILE_SIZE);
-		if (maxLogFileSize == null) {
-			return MAX_LOG_FILE_SIZE;
-		}
-		else {
-			return maxLogFileSize;
-		}
+
+	public String getMaxLogFileSize() {
+		return maxLogFileSize;
 	}
-	
-	protected Integer getSettingMaxFileHistory() {
-		Integer maxLogBackupFiles = (Integer) this.getSettings().get(SETTING_MAX_BACK_FILES);
-		if (maxLogBackupFiles == null) {
-			return MAX_LOG_BACKUP_FILES;
-		}
-		else {
-			return maxLogBackupFiles;
-		}
+
+	public Integer getMaxLogBackupFiles() {
+		return maxLogBackupFiles;
 	}
-	
+
 	protected String getDelimiter() {
 		String delimiterLocal = (String) this.getSettings().get(SETTING_DELIMITER);
 		if (delimiterLocal == null) {
 			return DEFAULT_DELIMITER;
-		}
-		else {
+		} else {
 			return delimiterLocal;
 		}
 	}
 
+	public String getOutputFile() {
+		return outputFile;
+	}
 }

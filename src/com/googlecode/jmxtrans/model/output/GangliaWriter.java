@@ -1,6 +1,13 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import info.ganglia.gmetric4j.gmetric.GMetric;
 import info.ganglia.gmetric4j.gmetric.GMetricSlope;
 import info.ganglia.gmetric4j.gmetric.GMetricType;
@@ -14,12 +21,6 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 import static info.ganglia.gmetric4j.gmetric.GMetric.UDPAddressingMode;
 
@@ -72,20 +73,28 @@ public class GangliaWriter extends BaseOutputWriter {
 	protected String groupName = DEFAULT_GROUP_NAME;
 	protected String spoofedHostName = null;
 
+	@JsonCreator
+	public GangliaWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+	}
+
 	/** Parse and validate settings. */
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 
 		// Parse and validate host setting
-		host = getStringSetting(HOST, DEFAULT_HOST);
+		host = Settings.getStringSetting(this.getSettings(), HOST, DEFAULT_HOST);
 		if (host == null) throw new ValidationException("Host can't be null", query);
 
 		// Parse and validate port setting
-		port = getIntegerSetting(PORT, DEFAULT_PORT);
+		port = Settings.getIntegerSetting(this.getSettings(), PORT, DEFAULT_PORT);
 
 		// Parse and validate addressing mode setting
 		try {
-			addressingMode = UDPAddressingMode.valueOf(getStringSetting(ADDRESSING_MODE, ""));
+			addressingMode = UDPAddressingMode.valueOf(Settings.getStringSetting(this.getSettings(), ADDRESSING_MODE, ""));
 		} catch (IllegalArgumentException iae) {
 			try {
 				addressingMode = UDPAddressingMode.getModeForAddress(host);
@@ -97,25 +106,25 @@ public class GangliaWriter extends BaseOutputWriter {
 		}
 
 		// Parse and validate TTL setting
-		ttl = getIntegerSetting(TTL, DEFAULT_TTL);
+		ttl = Settings.getIntegerSetting(this.getSettings(), TTL, DEFAULT_TTL);
 
 		// Parse and validate protocol version setting
-		v31 = getBooleanSetting(V31, DEFAULT_V31);
+		v31 = Settings.getBooleanSetting(this.getSettings(), V31, DEFAULT_V31);
 
 		// Parse and validate unit setting
-		units = getStringSetting(UNITS, DEFAULT_UNITS);
+		units = Settings.getStringSetting(this.getSettings(), UNITS, DEFAULT_UNITS);
 
 		// Parse and validate slope setting
-		slope = GMetricSlope.valueOf(getStringSetting(SLOPE, DEFAULT_SLOPE.name()));
+		slope = GMetricSlope.valueOf(Settings.getStringSetting(this.getSettings(), SLOPE, DEFAULT_SLOPE.name()));
 
 		// Parse and validate tmax setting
-		tmax = getIntegerSetting(TMAX, DEFAULT_TMAX);
+		tmax = Settings.getIntegerSetting(this.getSettings(), TMAX, DEFAULT_TMAX);
 
 		// Parse and validate dmax setting
-		dmax = getIntegerSetting(DMAX, DEFAULT_DMAX);
+		dmax = Settings.getIntegerSetting(this.getSettings(), DMAX, DEFAULT_DMAX);
 
 		// Parse and validate group name setting
-		groupName = getStringSetting(GROUP_NAME, DEFAULT_GROUP_NAME);
+		groupName = Settings.getStringSetting(this.getSettings(), GROUP_NAME, DEFAULT_GROUP_NAME);
 
 		// Determine the spoofed hostname
 		spoofedHostName = getSpoofedHostName(server.getHost(), server.getAlias());

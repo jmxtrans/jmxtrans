@@ -1,8 +1,8 @@
 package com.googlecode.jmxtrans.example;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
@@ -10,6 +10,10 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GangliaWriter;
 import com.googlecode.jmxtrans.util.JsonPrinter;
+
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * This class hits a Graphite server running on port 2003 and sends the memory
@@ -28,11 +32,13 @@ public class Ganglia {
 				.setPort("1099")
 				.setAlias("fooalias");
 
-		GangliaWriter gw = new GangliaWriter();
-		gw.addSetting(GangliaWriter.HOST, "10.0.3.16");
-		gw.addSetting(GangliaWriter.PORT, 8649);
-		gw.addSetting(GangliaWriter.DEBUG, true);
-		gw.addSetting(GangliaWriter.GROUP_NAME, "memory");
+		Map<String, Object> settings = newHashMap();
+		settings.put(GangliaWriter.HOST, "10.0.3.16");
+		settings.put(GangliaWriter.PORT, 8649);
+		settings.put(GangliaWriter.DEBUG, true);
+		settings.put(GangliaWriter.GROUP_NAME, "memory");
+
+		GangliaWriter gw = new GangliaWriter(ImmutableList.<String>of(), false, settings);
 
 		Query q = Query.builder()
 				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")

@@ -1,7 +1,13 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -25,11 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-
 /**
  * This takes a JRobin template.xml file and then creates the database if it
  * doesn't already exist.
@@ -51,8 +52,12 @@ public class RRDToolWriter extends BaseOutputWriter {
 	public static final String GENERATE = "generate";
 	private static final char[] INITIALS = { ' ', '.' };
 
-	/** */
-	public RRDToolWriter() {
+	@JsonCreator
+	public RRDToolWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
 	}
 
 	public void validateSetup(Server server, Query query) throws ValidationException {
@@ -129,7 +134,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	private void doGenerate(List<Result> results) throws Exception {
-		if (isDebugEnabled() && this.getBooleanSetting(GENERATE)) {
+		if (isDebugEnabled() && Settings.getBooleanSetting(this.getSettings(), GENERATE)) {
 			StringBuilder sb = new StringBuilder("\n");
 			List<String> keys = new ArrayList<String>();
 
