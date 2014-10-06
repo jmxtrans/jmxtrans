@@ -27,28 +27,21 @@ import java.util.Map.Entry;
  * @author Yannick Robin
  */
 public class Log4JWriter extends BaseOutputWriter {
-	private Logger log;
+	private final Logger log;
+	private final String logger;
 
 	@JsonCreator
 	public Log4JWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("logger") String logger,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, debugEnabled, settings);
+		this.logger = firstNonNull(logger, (String) getSettings().get("logger"), "Log4JWriter");
+		this.log = Logger.getLogger("Log4JWriter." + this.logger);
 	}
 
-	/**
-	 * Get the logger
-	 */
-	public void validateSetup(Server server, final Query query) throws ValidationException {
-		String loggerName = (String) this.getSettings().get("logger");
-
-		if (loggerName == null || loggerName.equals("")) {
-			loggerName = "Log4JWriter";
-		}
-
-		log = Logger.getLogger("Log4JWriter." + loggerName);
-	}
+	public void validateSetup(Server server, final Query query) throws ValidationException {}
 
 	/**
 	 * Set the log context and log
@@ -83,5 +76,9 @@ public class Log4JWriter extends BaseOutputWriter {
 				}
 			}
 		}
+	}
+
+	public String getLogger() {
+		return logger;
 	}
 }
