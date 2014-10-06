@@ -52,7 +52,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	private final String outputFile;
 	private final String maxLogFileSize;
 	private final int maxLogBackupFiles;
-	protected String delimiter = DEFAULT_DELIMITER;
+	private final String delimiter;
 
 	@JsonCreator
 	public KeyOutWriter(
@@ -61,19 +61,25 @@ public class KeyOutWriter extends BaseOutputWriter {
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("maxLogFileSize") String maxLogFileSize,
 			@JsonProperty("maxLogBackupFiles") int maxLogBackupFiles,
+			@JsonProperty("delimiter") String delimiter,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, debugEnabled, settings);
 		this.outputFile = MoreObjects.firstNonNull(
 				outputFile,
-				(String) settings.get("outputFile"));
+				(String) getSettings().get("outputFile"));
 		this.maxLogFileSize = firstNonNull(
 				maxLogFileSize,
-				(String) settings.get(SETTING_MAX_LOG_FILE_SIZE),
+				(String) getSettings().get(SETTING_MAX_LOG_FILE_SIZE),
 				MAX_LOG_FILE_SIZE);
 		this.maxLogBackupFiles = firstNonNull(
 				maxLogBackupFiles,
-				(Integer) settings.get(SETTING_MAX_BACK_FILES),
+				(Integer) getSettings().get(SETTING_MAX_BACK_FILES),
 				MAX_LOG_BACKUP_FILES);
+		this.delimiter = firstNonNull(
+				delimiter,
+				(String) getSettings().get(SETTING_DELIMITER),
+				DEFAULT_DELIMITER
+		);
 	}
 
 	/**
@@ -81,7 +87,6 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 */
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		delimiter = getDelimiter();
 		// Check if we've already created a logger for this file. If so, use it.
 		if (loggers.containsKey(outputFile)) {
 			logger = loggers.get(outputFile);
@@ -176,13 +181,8 @@ public class KeyOutWriter extends BaseOutputWriter {
 		return maxLogBackupFiles;
 	}
 
-	protected String getDelimiter() {
-		String delimiterLocal = (String) this.getSettings().get(SETTING_DELIMITER);
-		if (delimiterLocal == null) {
-			return DEFAULT_DELIMITER;
-		} else {
-			return delimiterLocal;
-		}
+	public String getDelimiter() {
+		return delimiter;
 	}
 
 	public String getOutputFile() {

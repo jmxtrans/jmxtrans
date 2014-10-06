@@ -47,8 +47,9 @@ public class TimeBasedRollingKeyOutWriter extends KeyOutWriter {
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("maxLogFileSize") String maxLogFileSize,
 			@JsonProperty("maxLogBackupFiles") int maxLogBackupFiles,
+			@JsonProperty("delimiter") String delimiter,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, settings);
+		super(typeNames, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, delimiter, settings);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.googlecode.jmxtrans.example;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.JmxTransformer;
@@ -10,10 +9,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GangliaWriter;
 import com.googlecode.jmxtrans.util.JsonPrinter;
-
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * This class hits a Graphite server running on port 2003 and sends the memory
@@ -27,31 +22,37 @@ public class Ganglia {
 
 	/** */
 	public static void main(String[] args) throws Exception {
-		Server.Builder serverBuilder = Server.builder()
+		printer.prettyPrint(new JmxProcess(Server.builder()
 				.setHost("w2")
 				.setPort("1099")
-				.setAlias("fooalias");
-
-		Map<String, Object> settings = newHashMap();
-		settings.put(GangliaWriter.HOST, "10.0.3.16");
-		settings.put(GangliaWriter.PORT, 8649);
-		settings.put(GangliaWriter.DEBUG, true);
-		settings.put(GangliaWriter.GROUP_NAME, "memory");
-
-		GangliaWriter gw = new GangliaWriter(ImmutableList.<String>of(), false, settings);
-
-		Query q = Query.builder()
-				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
-				.addOutputWriter(gw)
-				.build();
-		serverBuilder.addQuery(q);
-
-		JmxProcess process = new JmxProcess(serverBuilder.build());
-		printer.prettyPrint(process);
+				.setAlias("fooalias")
+				.addQuery(Query.builder()
+						.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
+						.addOutputWriter(GangliaWriter.builder()
+							.setHost("10.0.3.16")
+							.setPort(8649)
+							.setDebugEnabled(true)
+							.setGroupName("memory")
+							.build())
+					.build())
+				.build()));
 
 		Injector injector = Guice.createInjector(new JmxTransModule(null));
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
-		transformer.executeStandalone(process);
+		transformer.executeStandalone(new JmxProcess(Server.builder()
+				.setHost("w2")
+				.setPort("1099")
+				.setAlias("fooalias")
+				.addQuery(Query.builder()
+						.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
+						.addOutputWriter(GangliaWriter.builder()
+							.setHost("10.0.3.16")
+							.setPort(8649)
+							.setDebugEnabled(true)
+							.setGroupName("memory")
+							.build())
+					.build())
+				.build()));
 	}
 
 }

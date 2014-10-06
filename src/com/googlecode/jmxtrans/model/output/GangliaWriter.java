@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +36,9 @@ public class GangliaWriter extends BaseOutputWriter {
 
 	private static final Pattern PATTERN_HOST_IP = Pattern.compile("(.+):([^:]+)$");
 
-	/** Logger. */
+	/**
+	 * Logger.
+	 */
 	private static final Logger log = LoggerFactory.getLogger(GangliaWriter.class);
 
 	/* Settings configuration keys. */
@@ -49,7 +53,6 @@ public class GangliaWriter extends BaseOutputWriter {
 	public static final String SPOOF_NAME = "spoofedHostName";
 
 	/* Settings default values. */
-	public static final String DEFAULT_HOST = null;
 	public static final int DEFAULT_PORT = 8649;
 	public static final UDPAddressingMode DEFAULT_ADDRESSING_MODE = UDPAddressingMode.UNICAST;
 	public static final int DEFAULT_TTL = 5;
@@ -61,71 +64,66 @@ public class GangliaWriter extends BaseOutputWriter {
 	public static final String DEFAULT_GROUP_NAME = "JMX";
 
 	/* Settings run-time values. */
-	protected String host = DEFAULT_HOST;
-	protected int port = DEFAULT_PORT;
-	protected UDPAddressingMode addressingMode = DEFAULT_ADDRESSING_MODE;
-	protected int ttl = DEFAULT_TTL;
-	protected boolean v31 = DEFAULT_V31;
-	protected String units = DEFAULT_UNITS;
-	protected GMetricSlope slope = DEFAULT_SLOPE;
-	protected int tmax = DEFAULT_TMAX;
-	protected int dmax = DEFAULT_DMAX;
-	protected String groupName = DEFAULT_GROUP_NAME;
-	protected String spoofedHostName = null;
+	private final String host;
+	private final int port;
+	private final UDPAddressingMode addressingMode;
+	private final int ttl;
+	private final boolean v31;
+	private final String units;
+	private final GMetricSlope slope;
+	private final int tmax;
+	private final int dmax;
+	private final String groupName;
+
+	private String spoofedHostName = null;
 
 	@JsonCreator
 	public GangliaWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("host") String host,
+			@JsonProperty("port") Integer port,
+			@JsonProperty("addressingMode") String addressingMode,
+			@JsonProperty("ttl") Integer ttl,
+			@JsonProperty("v31") Boolean v31,
+			@JsonProperty("units") String units,
+			@JsonProperty("slope") String slope,
+			@JsonProperty("tmax") Integer tmax,
+			@JsonProperty("dmax") Integer dmax,
+			@JsonProperty("groupName") String groupName,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, debugEnabled, settings);
+		this.host = MoreObjects.firstNonNull(host, (String) getSettings().get(HOST));
+		this.port = MoreObjects.firstNonNull(
+				port,
+				Settings.getIntSetting(getSettings(), PORT, DEFAULT_PORT));
+		this.addressingMode = computeAddressingMode(firstNonNull(
+				addressingMode,
+				(String) getSettings().get(ADDRESSING_MODE),
+				""
+		), this.host);
+		this.ttl = MoreObjects.firstNonNull(ttl, Settings.getIntegerSetting(getSettings(), TTL, DEFAULT_TTL));
+		this.v31 = MoreObjects.firstNonNull(v31, Settings.getBooleanSetting(getSettings(), V31, DEFAULT_V31));
+		this.units = firstNonNull(units, (String) getSettings().get(UNITS), DEFAULT_UNITS);
+		this.slope = GMetricSlope.valueOf(firstNonNull(
+				slope,
+				(String) getSettings().get(SLOPE),
+				DEFAULT_SLOPE.name()
+		));
+		this.tmax = MoreObjects.firstNonNull(tmax, Settings.getIntegerSetting(getSettings(), TMAX, DEFAULT_TMAX));
+		this.dmax = MoreObjects.firstNonNull(dmax, Settings.getIntegerSetting(getSettings(), DMAX, DEFAULT_DMAX));
+		this.groupName = firstNonNull(
+				groupName,
+				(String) getSettings().get(GROUP_NAME),
+				DEFAULT_GROUP_NAME
+		);
 	}
 
-	/** Parse and validate settings. */
+	/**
+	 * Parse and validate settings.
+	 */
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
-
-		// Parse and validate host setting
-		host = Settings.getStringSetting(this.getSettings(), HOST, DEFAULT_HOST);
-		if (host == null) throw new ValidationException("Host can't be null", query);
-
-		// Parse and validate port setting
-		port = Settings.getIntegerSetting(this.getSettings(), PORT, DEFAULT_PORT);
-
-		// Parse and validate addressing mode setting
-		try {
-			addressingMode = UDPAddressingMode.valueOf(Settings.getStringSetting(this.getSettings(), ADDRESSING_MODE, ""));
-		} catch (IllegalArgumentException iae) {
-			try {
-				addressingMode = UDPAddressingMode.getModeForAddress(host);
-			} catch (UnknownHostException uhe) {
-				addressingMode = DEFAULT_ADDRESSING_MODE;
-			} catch (IOException ioe) {
-				addressingMode = DEFAULT_ADDRESSING_MODE;
-			}
-		}
-
-		// Parse and validate TTL setting
-		ttl = Settings.getIntegerSetting(this.getSettings(), TTL, DEFAULT_TTL);
-
-		// Parse and validate protocol version setting
-		v31 = Settings.getBooleanSetting(this.getSettings(), V31, DEFAULT_V31);
-
-		// Parse and validate unit setting
-		units = Settings.getStringSetting(this.getSettings(), UNITS, DEFAULT_UNITS);
-
-		// Parse and validate slope setting
-		slope = GMetricSlope.valueOf(Settings.getStringSetting(this.getSettings(), SLOPE, DEFAULT_SLOPE.name()));
-
-		// Parse and validate tmax setting
-		tmax = Settings.getIntegerSetting(this.getSettings(), TMAX, DEFAULT_TMAX);
-
-		// Parse and validate dmax setting
-		dmax = Settings.getIntegerSetting(this.getSettings(), DMAX, DEFAULT_DMAX);
-
-		// Parse and validate group name setting
-		groupName = Settings.getStringSetting(this.getSettings(), GROUP_NAME, DEFAULT_GROUP_NAME);
-
 		// Determine the spoofed hostname
 		spoofedHostName = getSpoofedHostName(server.getHost(), server.getAlias());
 
@@ -143,7 +141,24 @@ public class GangliaWriter extends BaseOutputWriter {
 				GROUP_NAME + ": '" + groupName + "']");
 	}
 
-	/** Send query result values to Ganglia. */
+	private UDPAddressingMode computeAddressingMode(String mode, String host) {
+		// Parse and validate addressing mode setting
+		try {
+			return UDPAddressingMode.valueOf(mode);
+		} catch (IllegalArgumentException iae) {
+			try {
+				return UDPAddressingMode.getModeForAddress(host);
+			} catch (UnknownHostException uhe) {
+				return DEFAULT_ADDRESSING_MODE;
+			} catch (IOException ioe) {
+				return DEFAULT_ADDRESSING_MODE;
+			}
+		}
+	}
+
+	/**
+	 * Send query result values to Ganglia.
+	 */
 	@Override
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (final Result result : results) {
@@ -153,24 +168,8 @@ public class GangliaWriter extends BaseOutputWriter {
 					final String value = resultValue.getValue().toString();
 					GMetricType dataType = getType(resultValue.getValue());
 					log.debug("Sending Ganglia metric {}={} [type={}]", name, value, dataType);
-					new GMetric(
-							host,
-							port,
-							addressingMode,
-							ttl,
-							v31,
-							null,
-							spoofedHostName
-					).announce(
-							name,
-							value,
-							dataType,
-							units,
-							slope,
-							tmax,
-							dmax,
-							groupName
-					);
+					new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName)
+							.announce(name, value, dataType, units, slope, tmax, dmax, groupName);
 				}
 			}
 		}
@@ -252,4 +251,150 @@ public class GangliaWriter extends BaseOutputWriter {
 
 		return GMetricType.STRING;
 	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public String getAddressingMode() {
+		return addressingMode.name();
+	}
+
+	public int getTtl() {
+		return ttl;
+	}
+
+	public boolean isV31() {
+		return v31;
+	}
+
+	public String getUnits() {
+		return units;
+	}
+
+	public GMetricSlope getSlope() {
+		return slope;
+	}
+
+	public int getTmax() {
+		return tmax;
+	}
+
+	public int getDmax() {
+		return dmax;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static final class Builder {
+		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
+		private Boolean debugEnabled;
+		private String host;
+		private Integer port;
+		private String addressingMode;
+		private Integer ttl;
+		private Boolean v31;
+		private String units;
+		private String slope;
+		private Integer tmax;
+		private Integer dmax;
+		private String groupName;
+
+		private Builder() {
+		}
+
+		public Builder addTypeNames(List<String> typeNames) {
+			this.typeNames.addAll(typeNames);
+			return this;
+		}
+
+		public Builder addTypeName(String typeName) {
+			typeNames.add(typeName);
+			return this;
+		}
+
+		public Builder setDebugEnabled(boolean debugEnabled) {
+			this.debugEnabled = debugEnabled;
+			return this;
+		}
+
+		public Builder setHost(String host) {
+			this.host = host;
+			return this;
+		}
+
+		public Builder setPort(int port) {
+			this.port = port;
+			return this;
+		}
+
+		public Builder setAddressingMode(String addressingMode) {
+			this.addressingMode = addressingMode;
+			return this;
+		}
+
+		public Builder setTtl(Integer ttl) {
+			this.ttl = ttl;
+			return this;
+		}
+
+		public Builder setV31(Boolean v31) {
+			this.v31 = v31;
+			return this;
+		}
+
+		public Builder setUnits(String units) {
+			this.units = units;
+			return this;
+		}
+
+		public Builder setSlope(String slope) {
+			this.slope = slope;
+			return this;
+		}
+
+		public Builder setTmax(Integer tmax) {
+			this.tmax = tmax;
+			return this;
+		}
+
+		public Builder setDmax(Integer dmax) {
+			this.dmax = dmax;
+			return this;
+		}
+
+		public Builder setGroupName(String groupName) {
+			this.groupName = groupName;
+			return this;
+		}
+
+		public GangliaWriter build() {
+			return new GangliaWriter(
+					typeNames.build(),
+					debugEnabled,
+					host,
+					port,
+					addressingMode,
+					ttl,
+					v31,
+					units,
+					slope,
+					tmax,
+					dmax,
+					groupName,
+					null);
+		}
+
+	}
+
 }
