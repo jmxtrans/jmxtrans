@@ -13,15 +13,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SocketFactoryTests {
 
-	public static final int ECHO_SERVER_PORT = 4321;
 	private TCPEchoServer echoServer;
 	private InetSocketAddress echoServerAddress;
 
 	@Before
 	public void startEchoServer() {
-		echoServer = new TCPEchoServer(ECHO_SERVER_PORT);
+		echoServer = new TCPEchoServer();
 		echoServer.start();
-		echoServerAddress = new InetSocketAddress("localhost", ECHO_SERVER_PORT);
+		echoServerAddress = echoServer.getLocalSocketAddress();
 	}
 
 	@Test
