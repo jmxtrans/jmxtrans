@@ -1,6 +1,5 @@
 package com.googlecode.jmxtrans.example;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.JmxTransformer;
@@ -10,16 +9,9 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.RRDToolWriter;
 import com.googlecode.jmxtrans.util.JsonPrinter;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
-import static com.googlecode.jmxtrans.model.output.BaseOutputWriter.BINARY_PATH;
-import static com.googlecode.jmxtrans.model.output.BaseOutputWriter.DEBUG;
-import static com.googlecode.jmxtrans.model.output.BaseOutputWriter.OUTPUT_FILE;
-import static com.googlecode.jmxtrans.model.output.BaseOutputWriter.TEMPLATE_FILE;
-import static com.googlecode.jmxtrans.model.output.BaseOutputWriter.TYPE_NAMES;
-import static java.util.Arrays.asList;
+import java.io.File;
 
 /**
  * This example shows how to query an ActiveMQ server for some information.
@@ -34,57 +26,51 @@ public class ActiveMQ2 {
 
 	private static final JsonPrinter jsonPrinter = new JsonPrinter(System.out);
 
-	/** */
+	@SuppressFBWarnings(
+			value = "DMI_HARDCODED_ABSOLUTE_FILENAME",
+			justification = "Path to RRD binary is hardcoded as this is example code")
 	public static void main(String[] args) throws Exception {
+		RRDToolWriter gw = RRDToolWriter.builder()
+				.setTemplateFile(new File("memorypool-rrd-template.xml"))
+				.setOutputFile(new File("target/w2-TEST.rrd"))
+				.setBinaryPath(new File("/opt/local/bin"))
+				.setDebugEnabled(true)
+				.setGenerate(true)
+				.addTypeName("Destination")
+				.build();
 
-		Server.Builder serverBuilder = Server.builder()
+		JmxProcess process = new JmxProcess(Server.builder()
 				.setHost("w2")
 				.setPort("1105")
-				.setAlias("w2_activemq_1105");
-
-		Map<String, Object> settings = newHashMap();
-		settings.put(TEMPLATE_FILE, "memorypool-rrd-template.xml");
-		settings.put(OUTPUT_FILE, "target/w2-TEST.rrd");
-		settings.put(BINARY_PATH, "/opt/local/bin");
-		settings.put(DEBUG, "true");
-		settings.put(RRDToolWriter.GENERATE, "true");
-		settings.put(TYPE_NAMES, asList("Destination"));
-
-		RRDToolWriter gw = new RRDToolWriter(ImmutableList.<String>of(), false, settings);
-
-		Query q = Query.builder()
-				.setObj("org.apache.activemq:BrokerName=localhost,Type=Queue,Destination=*")
-				.addAttr("QueueSize")
-				.addAttr("MaxEnqueueTime")
-				.addAttr("MinEnqueueTime")
-				.addAttr("AverageEnqueueTime")
-				.addAttr("InFlightCount")
-				.addAttr("ConsumerCount")
-				.addAttr("ProducerCount")
-				.addAttr("DispatchCount")
-				.addAttr("DequeueCount")
-				.addAttr("EnqueueCount")
-				.addOutputWriter(gw)
-				.build();
-		serverBuilder.addQuery(q);
-
-		Query q2 = Query.builder()
-				.setObj("org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*")
-				.addAttr("QueueSize")
-				.addAttr("MaxEnqueueTime")
-				.addAttr("MinEnqueueTime")
-				.addAttr("AverageEnqueueTime")
-				.addAttr("InFlightCount")
-				.addAttr("ConsumerCount")
-				.addAttr("ProducerCount")
-				.addAttr("DispatchCount")
-				.addAttr("DequeueCount")
-				.addAttr("EnqueueCount")
-				.addOutputWriter(gw)
-				.build();
-		serverBuilder.addQuery(q2);
-
-		JmxProcess process = new JmxProcess(serverBuilder.build());
+				.setAlias("w2_activemq_1105")
+				.addQuery(Query.builder()
+						.setObj("org.apache.activemq:BrokerName=localhost,Type=Queue,Destination=*")
+						.addAttr("QueueSize")
+						.addAttr("MaxEnqueueTime")
+						.addAttr("MinEnqueueTime")
+						.addAttr("AverageEnqueueTime")
+						.addAttr("InFlightCount")
+						.addAttr("ConsumerCount")
+						.addAttr("ProducerCount")
+						.addAttr("DispatchCount")
+						.addAttr("DequeueCount")
+						.addAttr("EnqueueCount")
+						.addOutputWriter(gw)
+						.build())
+				.addQuery(Query.builder()
+						.setObj("org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*")
+						.addAttr("QueueSize")
+						.addAttr("MaxEnqueueTime")
+						.addAttr("MinEnqueueTime")
+						.addAttr("AverageEnqueueTime")
+						.addAttr("InFlightCount")
+						.addAttr("ConsumerCount")
+						.addAttr("ProducerCount")
+						.addAttr("DispatchCount")
+						.addAttr("DequeueCount")
+						.addAttr("EnqueueCount")
+						.addOutputWriter(gw)
+						.build()).build());
 		jsonPrinter.prettyPrint(process);
 
 		Injector injector = Guice.createInjector(new JmxTransModule(null));

@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static com.google.common.base.Preconditions.checkState;
+
 /**
  * This takes a JRobin template.xml file and then creates the database if it
  * doesn't already exist.
@@ -32,27 +35,26 @@ import java.util.Map.Entry;
  */
 public class RRDWriter extends BaseOutputWriter {
 
-	private File outputFile = null;
-	private File templateFile = null;
+	private final File outputFile;
+	private final File templateFile;
 
 	@JsonCreator
 	public RRDWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("outputFile") String outputFile,
+			@JsonProperty("templateFile") String templateFile,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, debugEnabled, settings);
+		this.outputFile = new File(MoreObjects.firstNonNull(outputFile, (String) getSettings().get(OUTPUT_FILE)));
+		this.templateFile = new File(MoreObjects.firstNonNull(templateFile, (String) getSettings().get(TEMPLATE_FILE)));
+		checkState(this.outputFile.exists(), "Output file must exist");
+		checkState(this.templateFile.exists(), "Template file must exist");
 	}
 
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
-		templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
-
-		if (!outputFile.exists() || !templateFile.exists()) {
-			throw new ValidationException("output file and template file can't be null", query);
-		}
 	}
 
-	/** */
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDb db = null;
 		try {
@@ -96,5 +98,13 @@ public class RRDWriter extends BaseOutputWriter {
 			result = new RrdDb(this.outputFile.getCanonicalPath());
 		}
 		return result;
+	}
+
+	public String getTemplateFile() {
+		return templateFile.getPath();
+	}
+
+	public String getOutputFile() {
+		return outputFile.getPath();
 	}
 }
