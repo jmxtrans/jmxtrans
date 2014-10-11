@@ -2,7 +2,9 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Query;
@@ -18,10 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 
 /**
  * Originally written by Balazs Kossovics <bko@witbe.net>.  Common base class for OpenTSDBWriter and TCollectorWriter.
@@ -35,22 +40,64 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(OpenTSDBGenericWriter.class);
 
-	protected String host;
-	protected Integer port;
-	protected Map<String, String> tags;
-	protected String tagName;
-	protected NamingStrategy metricNameStrategy;
+	protected final String host;
+	protected final Integer port;
+	protected final ImmutableMap<String, String> tags;
+	protected final String tagName;
+	protected final NamingStrategy metricNameStrategy;
 
-	protected boolean mergeTypeNamesTags = DEFAULT_MERGE_TYPE_NAMES_TAGS;
-	protected boolean addHostnameTag = getAddHostnameTagDefault();
-	protected String hostnameTag;
+	protected final boolean mergeTypeNamesTags;
+	protected final boolean addHostnameTag;
+	protected final String hostnameTag;
 
 	@JsonCreator
 	public OpenTSDBGenericWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("settings") Map<String, Object> settings) {
+			@JsonProperty("host") String host,
+			@JsonProperty("port") Integer port,
+			@JsonProperty("tags") Map<String, String> tags,
+			@JsonProperty("tagName") String tagName,
+			@JsonProperty("mergeTypeNamesTags") Boolean mergeTypeNamesTags,
+			@JsonProperty("metricNamingExpression") String metricNamingExpression,
+			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
+			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
 		super(typeNames, debugEnabled, settings);
+		this.host = resolveProps(MoreObjects.firstNonNull(host, (String) getSettings().get(HOST)));
+		this.port = MoreObjects.firstNonNull(port, Settings.getIntegerSetting(getSettings(), PORT, null));
+		this.tags = ImmutableMap.copyOf(firstNonNull(
+				tags,
+				(Map<String, String>) getSettings().get("tags"),
+				ImmutableMap.<String, String>of()));
+		this.tagName = firstNonNull(tagName, (String) getSettings().get("tagName"), "type");
+		this.mergeTypeNamesTags = MoreObjects.firstNonNull(
+				mergeTypeNamesTags,
+				Settings.getBooleanSetting(this.getSettings(), "mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS));
+
+		String jexlExpr = metricNamingExpression;
+		if (jexlExpr == null) {
+			jexlExpr = Settings.getStringSetting(this.getSettings(), "metricNamingExpression", null);
+		}
+		if (jexlExpr != null) {
+			try {
+				this.metricNameStrategy = new JexlNamingStrategy(jexlExpr);
+			} catch (JexlException jexlExc) {
+				throw new LifecycleException("failed to setup naming strategy", jexlExc);
+			}
+		} else {
+			this.metricNameStrategy = new ClassAttributeNamingStrategy();
+		}
+
+		this.addHostnameTag = firstNonNull(
+				addHostnameTag,
+				Settings.getBooleanSetting(this.getSettings(), "addHostnameTag", this.getAddHostnameTagDefault()),
+				getAddHostnameTagDefault());
+
+		if (this.addHostnameTag) {
+			hostnameTag = InetAddress.getLocalHost().getHostName();
+		} else {
+			hostnameTag = null;
+		}
 	}
 
 	/**
@@ -127,8 +174,8 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * Format the result string given the class name and attribute name of the source value, the timestamp, and the
 	 * value.
 	 *
-	 * @param epoch         - the timestamp of the metric.
-	 * @param value         - value of the attribute to use as the metric value.
+	 * @param epoch - the timestamp of the metric.
+	 * @param value - value of the attribute to use as the metric value.
 	 * @return String - the formatted result string.
 	 */
 	void formatResultString(StringBuilder resultString, String metricName, long epoch, Object value) {
@@ -197,8 +244,8 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	/**
 	 * Add the tag(s) for typeNames.
 	 *
-	 * @param    result - the result of the JMX query.
-	 * @param    resultString - current form of the metric string.
+	 * @param result       - the result of the JMX query.
+	 * @param resultString - current form of the metric string.
 	 * @return String - the updated metric string with the necessary tag(s) added.
 	 */
 	protected void addTypeNamesTags(StringBuilder resultString, Result result) {
@@ -220,7 +267,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * Write the results of the query.
 	 *
 	 * @param server
-	 * @param query - the query and its results.
+	 * @param query   - the query and its results.
 	 * @param results
 	 */
 	@Override
@@ -250,53 +297,12 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 */
 	@Override
 	public void start() throws LifecycleException {
-		host = (String) this.getSettings().get(HOST);
-
-		Object portObj = this.getSettings().get(PORT);
-		if (portObj instanceof String) {
-			port = Integer.parseInt((String) portObj);
-		} else if (portObj instanceof Integer) {
-			port = (Integer) portObj;
-		}
-
-		tags = (Map<String, String>) this.getSettings().get("tags");
-
-		tagName = Settings.getStringSetting(this.getSettings(), "tagName", "type");
-		mergeTypeNamesTags = Settings.getBooleanSetting(this.getSettings(), "mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS);
-
-		addHostnameTag = Settings.getBooleanSetting(this.getSettings(), "addHostnameTag", this.getAddHostnameTagDefault());
-		if (addHostnameTag) {
-			try {
-				hostnameTag = java.net.InetAddress.getLocalHost().getHostName();
-			} catch (UnknownHostException e) {
-				throw new LifecycleException("Cannot resolve local hostname for host= tag", e);
-			}
-		}
-
-		this.setupNamingStrategies();
 		this.prepareSender();
 	}
 
 	@Override
 	public void stop() throws LifecycleException {
 		this.shutdownSender();
-	}
-
-	/**
-	 * Set the naming strategies based on the configuration.
-	 */
-	protected void setupNamingStrategies() throws LifecycleException {
-		try {
-			String jexlExpr = Settings.getStringSetting(this.getSettings(), "metricNamingExpression", null);
-			if (jexlExpr != null) {
-				this.metricNameStrategy = new JexlNamingStrategy(jexlExpr);
-			} else {
-				this.metricNameStrategy = new ClassAttributeNamingStrategy();
-			}
-		} catch (JexlException jexlExc) {
-			throw new LifecycleException("failed to setup naming strategy", jexlExc);
-		}
-
 	}
 
 	/**
@@ -310,13 +316,8 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * - Replace all other invalid characters with '_'.
 	 */
 	protected String sanitizeString(String unsanitized) {
-		String sanitized;
-
-		sanitized =
-				unsanitized.
-						replaceAll("[\"']", "").
-						replaceAll("[^-_./a-zA-Z0-9]", "_");
-
-		return sanitized;
+		return unsanitized.
+				replaceAll("[\"']", "").
+				replaceAll("[^-_./a-zA-Z0-9]", "_");
 	}
 }

@@ -39,22 +39,22 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
  * Tests for {@link OpenTSDBGenericWriter}.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ OpenTSDBGenericWriter.class, InetAddress.class })
+@PrepareForTest({OpenTSDBGenericWriter.class, InetAddress.class})
 public class OpenTSDBGenericWriterTests {
 
-	protected Query			mockQuery;
-	protected Result		mockResult;
+	protected Query mockQuery;
+	protected Result mockResult;
 
 	// Interactions with the custom, test subclass of OpenTSDBGenericWriter.
-	protected boolean		tvAddHostnameTagDefault;
-	protected boolean		prepareSenderCalled;
-	protected boolean		shutdownSenderCalled;
-	protected boolean		startOutputCalled;
-	protected boolean		finishOutputCalled;
-	protected List<String>	tvMetricLinesSent;
+	protected boolean tvAddHostnameTagDefault;
+	protected boolean prepareSenderCalled;
+	protected boolean shutdownSenderCalled;
+	protected boolean startOutputCalled;
+	protected boolean finishOutputCalled;
+	protected List<String> tvMetricLinesSent;
 
 	@Before
-	public void	setupTest () {
+	public void setupTest() {
 		this.mockQuery = mock(Query.class);
 		this.mockResult = mock(Result.class);
 
@@ -67,16 +67,16 @@ public class OpenTSDBGenericWriterTests {
 		tvMetricLinesSent = new LinkedList<String>();
 
 		// Setup common mock interactions.
-		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("x-att1-x", (Object)"120021"));
+		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("x-att1-x", (Object) "120021"));
 		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
 		when(this.mockResult.getTypeName()).
-			thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
+				thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
 
 	}
 
 	@Test
-	public void	testMergedTypeNameValues1 () throws Exception {
+	public void testMergedTypeNameValues1() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 		// Verify the default is the same as the TRUE path.
 		writer.start();
@@ -88,7 +88,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testMergedTypeNameValues2 () throws Exception {
+	public void testMergedTypeNameValues2() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter("mergeTypeNamesTags", TRUE);
 
 		writer.start();
@@ -100,7 +100,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testMergedTypeNameValues3 () throws Exception {
+	public void testMergedTypeNameValues3() throws Exception {
 		// Verify the FALSE path.
 		OpenTSDBGenericWriter writer = createWriter("mergeTypeNamesTags", FALSE);
 
@@ -113,8 +113,8 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testEmptyTagSetting () throws Exception {
-		Map<String, String>	tagMap = newHashMap();
+	public void testEmptyTagSetting() throws Exception {
+		Map<String, String> tagMap = newHashMap();
 		Map<String, Object> settings = newHashMap();
 		settings.put("tags", tagMap);
 		OpenTSDBGenericWriter writer = new TestOpenTSDBGenericWriter(
@@ -122,7 +122,7 @@ public class OpenTSDBGenericWriterTests {
 				false,
 				settings);
 
-		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object)"120021"));
+		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
 
 		// Verify empty tag map.
 		Assertions.assertThat(writer.getTypeNames()).isEmpty();
@@ -132,12 +132,12 @@ public class OpenTSDBGenericWriterTests {
 		writer.stop();
 
 		assertTrue(
-			this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
+				this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
 	}
 
 	@Test
-	public void	testTagSetting () throws Exception {
-		Map<String, String>	tagMap;
+	public void testTagSetting() throws Exception {
+		Map<String, String> tagMap;
 
 		// Verify tag map with multiple values.
 		tagMap = newHashMap();
@@ -158,7 +158,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testAddHostnameTag () throws Exception {
+	public void testAddHostnameTag() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter("mergeTypeNamesTags", TRUE);
 
 		writer.start();
@@ -171,7 +171,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testDontAddHostnameTag () throws Exception {
+	public void testDontAddHostnameTag() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter("addHostnameTag", false);
 
 		writer.start();
@@ -182,7 +182,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testEmptyResultValues () throws Exception {
+	public void testEmptyResultValues() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
 		when(this.mockResult.getValues()).thenReturn(null);
@@ -195,7 +195,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testOneValueMatchingAttribute () throws Exception {
+	public void testOneValueMatchingAttribute() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
 		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
@@ -210,11 +210,11 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testMultipleValuesWithMatchingAttribute () throws Exception {
+	public void testMultipleValuesWithMatchingAttribute() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
 		when(this.mockResult.getValues()).
-			thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021", "XX-ATT-XX", (Object) "210012"));
+				thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021", "XX-ATT-XX", (Object) "210012"));
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
@@ -223,7 +223,7 @@ public class OpenTSDBGenericWriterTests {
 
 		String xLine;
 		String xxLine;
-		if ( this.tvMetricLinesSent.get(0).contains("XX-ATT-XX") ) {
+		if (this.tvMetricLinesSent.get(0).contains("XX-ATT-XX")) {
 			xxLine = this.tvMetricLinesSent.get(0);
 			xLine = this.tvMetricLinesSent.get(1);
 		} else {
@@ -239,7 +239,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testNonNumericValue () throws Exception {
+	public void testNonNumericValue() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
 		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "THIS-IS-NOT-A-NUMBER"));
@@ -252,7 +252,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testJexlNaming () throws Exception {
+	public void testJexlNaming() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter("metricNamingExpression", "'xx-jexl-constant-name-xx'");
 
 		writer.start();
@@ -263,14 +263,14 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test(expected = LifecycleException.class)
-	public void	testInvalidJexlNaming () throws Exception {
+	public void testInvalidJexlNaming() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter("metricNamingExpression", "invalid expression here");
 
 		writer.start();
 	}
 
 	@Test
-	public void	testDebugOuptutResultString () throws Exception {
+	public void testDebugOuptutResultString() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
@@ -278,7 +278,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testValidateValidHostPort () throws Exception {
+	public void testValidateValidHostPort() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter(ImmutableMap.of(
 				"host", (Object) "localhost",
 				"port", 4242));
@@ -288,7 +288,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testPortNumberAsString () throws Exception {
+	public void testPortNumberAsString() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter(ImmutableMap.of("host", (Object) "localhost", "port", "4242"));
 
 		writer.start();
@@ -296,7 +296,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testDefaultHookMethods () throws Exception {
+	public void testDefaultHookMethods() throws Exception {
 		OpenTSDBGenericWriter writer = new MinimalTestOpenTSDBGenericWriter(
 				ImmutableList.<String>of(),
 				false,
@@ -308,7 +308,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testHooksCalled () throws Exception {
+	public void testHooksCalled() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 		writer.start();
 		assertTrue(prepareSenderCalled);
@@ -331,7 +331,7 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testDebugEanbled () throws Exception {
+	public void testDebugEanbled() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter(ImmutableMap.of("host", (Object) "localhost", "port", 4242, "debug", true));
 
 		writer.start();
@@ -340,21 +340,18 @@ public class OpenTSDBGenericWriterTests {
 	}
 
 	@Test
-	public void	testLocalhostUnknownHostException () throws Exception {
-		// Prepare.
-		OpenTSDBGenericWriter writer = createWriter();
-		mockStatic(InetAddress.class);
+	public void testLocalhostUnknownHostException() throws Exception {
 		UnknownHostException unknownHostException = new UnknownHostException("X-TEST-UHE-X");
-		PowerMockito.when(InetAddress.getLocalHost()).thenThrow(unknownHostException);
-
 		try {
-			// Execute.
-			writer.start();
+			mockStatic(InetAddress.class);
+			PowerMockito.when(InetAddress.getLocalHost()).thenThrow(unknownHostException);
+
+			OpenTSDBGenericWriter writer = createWriter();
 
 			fail("LifecycleException missing");
-		} catch ( LifecycleException lcExc ) {
+		} catch (UnknownHostException ex) {
 			// Verify.
-			assertSame(unknownHostException, lcExc.getCause());
+			assertSame(unknownHostException, ex);
 		}
 	}
 
@@ -362,13 +359,13 @@ public class OpenTSDBGenericWriterTests {
 	 * Confirm operation when the host tag is enabled, but the local hostname is not known.
 	 */
 	@Test
-	public void	testNullHostTagname () throws Exception {
+	public void testNullHostTagname() throws Exception {
 		// Prepare.
-		OpenTSDBGenericWriter writer = createWriter("addHostnameTag", true);
 		InetAddress mockInetAddress = mock(InetAddress.class);
 		mockStatic(InetAddress.class);
 		PowerMockito.when(InetAddress.getLocalHost()).thenReturn(mockInetAddress);
 		when(mockInetAddress.getHostName()).thenReturn(null);
+		OpenTSDBGenericWriter writer = createWriter("addHostnameTag", true);
 
 
 		// Execute.
@@ -376,18 +373,18 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 
 		// Validate.
-		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));	// Ensure host tag is excluded
+		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));    // Ensure host tag is excluded
 	}
 
-	protected OpenTSDBGenericWriter	createWriter() {
+	protected OpenTSDBGenericWriter createWriter() throws LifecycleException, UnknownHostException {
 		return createWriter(Collections.<String, Object>emptyMap());
 	}
 
-	protected OpenTSDBGenericWriter	createWriter(String additionalSettingKey, Object additionalSettingValue) {
+	protected OpenTSDBGenericWriter createWriter(String additionalSettingKey, Object additionalSettingValue) throws LifecycleException, UnknownHostException {
 		return createWriter(ImmutableMap.of(additionalSettingKey, additionalSettingValue));
 	}
 
-	protected OpenTSDBGenericWriter	createWriter(Map<String, Object> additionalSettings) {
+	protected OpenTSDBGenericWriter createWriter(Map<String, Object> additionalSettings) throws LifecycleException, UnknownHostException {
 		Map<String, Object> settings = newHashMap();
 		settings.put("host", "localhost");
 		settings.put("port", 4242);
@@ -399,13 +396,12 @@ public class OpenTSDBGenericWriterTests {
 		return writer;
 	}
 
-	protected void	validateMergedTypeNameValues (String resultString, boolean mergedInd) {
-		if ( mergedInd ) {
+	protected void validateMergedTypeNameValues(String resultString, boolean mergedInd) {
+		if (mergedInd) {
 			assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
 			assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
 			assertTrue(resultString.matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
-		}
-		else {
+		} else {
 			assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
 			assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
 			assertTrue(resultString.matches(".*\\bType=x-type-x\\b.*"));
@@ -413,38 +409,38 @@ public class OpenTSDBGenericWriterTests {
 			assertTrue(resultString.matches(".*\\bName=x-name-x\\b.*"));
 			assertTrue(resultString.matches(".*\\bMissing=(\\s.*|$)"));
 		}
-}
+	}
 
 	private class TestOpenTSDBGenericWriter extends OpenTSDBGenericWriter {
 
 		public TestOpenTSDBGenericWriter(
 				@JsonProperty("typeNames") ImmutableList<String> typeNames,
 				@JsonProperty("debug") Boolean debugEnabled,
-				@JsonProperty("settings") Map<String, Object> settings) {
-			super(typeNames, debugEnabled, settings);
+				@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
+			super(typeNames, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
 		}
 
-		protected void	prepareSender() throws LifecycleException {
+		protected void prepareSender() throws LifecycleException {
 			OpenTSDBGenericWriterTests.this.prepareSenderCalled = true;
 		}
 
-		protected void	shutdownSender() throws LifecycleException {
+		protected void shutdownSender() throws LifecycleException {
 			OpenTSDBGenericWriterTests.this.shutdownSenderCalled = true;
 		}
 
-		protected void	startOutput() throws IOException {
+		protected void startOutput() throws IOException {
 			OpenTSDBGenericWriterTests.this.startOutputCalled = true;
 		}
 
-		protected void	finishOutput() throws IOException {
+		protected void finishOutput() throws IOException {
 			OpenTSDBGenericWriterTests.this.finishOutputCalled = true;
 		}
 
-		protected boolean	getAddHostnameTagDefault () {
-			return	tvAddHostnameTagDefault;
+		protected boolean getAddHostnameTagDefault() {
+			return tvAddHostnameTagDefault;
 		}
 
-		protected void	sendOutput (String metricLine) {
+		protected void sendOutput(String metricLine) {
 			OpenTSDBGenericWriterTests.this.tvMetricLinesSent.add(metricLine);
 		}
 	}
@@ -453,15 +449,15 @@ public class OpenTSDBGenericWriterTests {
 		public MinimalTestOpenTSDBGenericWriter(
 				@JsonProperty("typeNames") ImmutableList<String> typeNames,
 				@JsonProperty("debug") Boolean debugEnabled,
-				@JsonProperty("settings") Map<String, Object> settings) {
-			super(typeNames, debugEnabled, settings);
+				@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
+			super(typeNames, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
 		}
 
-		protected boolean getAddHostnameTagDefault () {
+		protected boolean getAddHostnameTagDefault() {
 			return tvAddHostnameTagDefault;
 		}
 
-		protected void sendOutput (String metricLine) {
+		protected void sendOutput(String metricLine) {
 			tvMetricLinesSent.add(metricLine);
 		}
 	}

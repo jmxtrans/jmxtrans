@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -90,12 +88,11 @@ public class OpenTSDBWriterTests {
 
 
 		// Prepare the object under test and test data.
-
-		Map<String, Object> settings = newHashMap();
-		settings.put("host", "localhost");
-		settings.put("port", 4242);
-
-		this.writer = new OpenTSDBWriter(ImmutableList.<String>of(), false, settings);
+		this.writer = OpenTSDBWriter.builder()
+				.setDebugEnabled(false)
+				.setHost("localhost")
+				.setPort(4242)
+				.build();
 
 		// Inject the mock logger
 		Whitebox.setInternalState(OpenTSDBWriter.class, Logger.class, this.mockLog);
@@ -285,21 +282,17 @@ public class OpenTSDBWriterTests {
 		}
 	}
 
-	@Test(expected = LifecycleException.class)
+	@Test(expected = NullPointerException.class)
 	public void	exceptionThrownIfHostIsNotDefined() throws Exception {
-		Map<String, Object> settings = newHashMap();
-		settings.put("port", 4242);
-		this.writer.setSettings(settings);
-
-		this.writer.start();
+		OpenTSDBWriter.builder()
+				.setPort(4242)
+				.build();
 	}
 
-	@Test(expected = LifecycleException.class)
+	@Test(expected = NullPointerException.class)
 	public void	exceptionThrownIfPortIsNotDefined() throws Exception {
-		Map<String, Object> settings = newHashMap();
-		settings.put("host", "localhost");
-		this.writer.setSettings(settings);
-
-		this.writer.start();
+		OpenTSDBWriter.builder()
+				.setHost("localhost")
+				.build();
 	}
 }

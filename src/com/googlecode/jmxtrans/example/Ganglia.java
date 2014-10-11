@@ -20,7 +20,6 @@ public class Ganglia {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
-	/** */
 	public static void main(String[] args) throws Exception {
 		printer.prettyPrint(new JmxProcess(Server.builder()
 				.setHost("w2")

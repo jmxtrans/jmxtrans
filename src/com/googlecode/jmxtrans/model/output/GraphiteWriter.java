@@ -177,6 +177,5 @@ public class GraphiteWriter extends BaseOutputWriter {
 					null
 			);
 		}
-
 	}
 }

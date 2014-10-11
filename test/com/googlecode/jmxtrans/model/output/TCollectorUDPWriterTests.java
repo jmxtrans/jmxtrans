@@ -38,21 +38,21 @@ import static org.mockito.Mockito.when;
  * Tests for {@link TCollectorUDPWriter}.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ TCollectorUDPWriter.class, DatagramSocket.class })
+@PrepareForTest({TCollectorUDPWriter.class, DatagramSocket.class})
 public class TCollectorUDPWriterTests {
-	protected TCollectorUDPWriter	writer;
-	protected Query			mockQuery;
-	protected Result		mockResult;
-	protected DatagramSocket	mockDgSocket;
-	protected Logger		mockLog;
-	protected ImmutableMap<String, Object>	testValues;
+	protected TCollectorUDPWriter writer;
+	protected Query mockQuery;
+	protected Result mockResult;
+	protected DatagramSocket mockDgSocket;
+	protected Logger mockLog;
+	protected ImmutableMap<String, Object> testValues;
 
 	@Before
-	public void	setupTest () throws Exception {
-		this.mockQuery       = mock(Query.class);
-		this.mockResult      = mock(Result.class);
-		this.mockDgSocket    = mock(DatagramSocket.class);
-		this.mockLog         = mock(Logger.class);
+	public void setupTest() throws Exception {
+		this.mockQuery = mock(Query.class);
+		this.mockResult = mock(Result.class);
+		this.mockDgSocket = mock(DatagramSocket.class);
+		this.mockLog = mock(Logger.class);
 
 
 		// Setup common mock interactions.
@@ -71,16 +71,20 @@ public class TCollectorUDPWriterTests {
 		settings.put("host", "localhost");
 		settings.put("port", 8923);
 
-		this.writer = new TCollectorUDPWriter(ImmutableList.<String>of(), false, settings);
+		this.writer = TCollectorUDPWriter.builder()
+				.setDebugEnabled(false)
+				.setHost("localhost")
+				.setPort(1234)
+				.build();
 
 		// Inject the mock logger
 		Whitebox.setInternalState(TCollectorUDPWriter.class, Logger.class, this.mockLog);
 	}
 
 	@Test
-	public void	successfullySendMessageToTCollector() throws Exception {
+	public void successfullySendMessageToTCollector() throws Exception {
 		// Prepare
-		ArgumentCaptor<DatagramPacket>	packetCapture = ArgumentCaptor.forClass(DatagramPacket.class);
+		ArgumentCaptor<DatagramPacket> packetCapture = ArgumentCaptor.forClass(DatagramPacket.class);
 
 		// Execute
 		this.writer.start();
@@ -91,8 +95,8 @@ public class TCollectorUDPWriterTests {
 		verify(this.mockDgSocket).send(packetCapture.capture());
 
 		String sentString = new String(packetCapture.getValue().getData(),
-		                               packetCapture.getValue().getOffset(),
-		                               packetCapture.getValue().getLength());
+				packetCapture.getValue().getOffset(),
+				packetCapture.getValue().getLength());
 
 		assertThat(sentString, Matchers.startsWith("X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
 		assertThat(sentString, not(containsString("host=")));
@@ -102,9 +106,9 @@ public class TCollectorUDPWriterTests {
 	 * Test a socket exception when creating the DatagramSocket.
 	 */
 	@Test
-	public void	testSocketException () throws Exception {
+	public void testSocketException() throws Exception {
 		// Prepare
-		SocketException	sockExc = new SocketException("X-SOCK-EXC-X");
+		SocketException sockExc = new SocketException("X-SOCK-EXC-X");
 		PowerMockito.whenNew(DatagramSocket.class).withNoArguments().thenThrow(sockExc);
 
 		try {
@@ -112,28 +116,24 @@ public class TCollectorUDPWriterTests {
 			this.writer.start();
 
 			fail("LifecycleException missing");
-		} catch ( LifecycleException lcExc ) {
+		} catch (LifecycleException lcExc) {
 			// Verify
 			assertSame(sockExc, lcExc.getCause());
 			verify(this.mockLog).error(contains("create a datagram socket"), eq(sockExc));
 		}
 	}
 
-	@Test(expected = LifecycleException.class)
-	public void	exceptionIsThrownWhenHostIsNotDefined() throws Exception {
-		Map<String, Object> settings = newHashMap();
-		settings.put("port", 8923);
-		this.writer.setSettings(settings);
-
-		this.writer.start();
+	@Test(expected = NullPointerException.class)
+	public void exceptionIsThrownWhenHostIsNotDefined() throws Exception {
+		TCollectorUDPWriter.builder()
+				.setPort(1234)
+				.build();
 	}
 
-	@Test(expected = LifecycleException.class)
-	public void	exceptionIsThrownWhenPortIsNotDefined() throws Exception {
-		Map<String, Object> settings = newHashMap();
-		settings.put("host", "localhost");
-		this.writer.setSettings(settings);
-
-		this.writer.start();
+	@Test(expected = NullPointerException.class)
+	public void exceptionIsThrownWhenPortIsNotDefined() throws Exception {
+		TCollectorUDPWriter.builder()
+				.setHost("localhost")
+				.build();
 	}
 }
