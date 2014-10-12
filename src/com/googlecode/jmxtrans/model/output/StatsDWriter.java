@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * This output writer sends data to a host/port combination in the StatsD
  * format.
@@ -38,12 +40,11 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(StatsDWriter.class);
 	public static final String ROOT_PREFIX = "rootPrefix";
-	private ByteBuffer sendBuffer;
+	private final ByteBuffer sendBuffer;
 
-	/** bucketType defaults to c == counter */
-	private String bucketType = "c";
-	private String rootPrefix = "servers";
-	private SocketAddress address;
+	private final String bucketType;
+	private final String rootPrefix;
+	private final InetSocketAddress address;
 	private final DatagramChannel channel;
 
 	private static final String BUCKET_TYPE = "bucketType";
@@ -61,17 +62,32 @@ public class StatsDWriter extends BaseOutputWriter {
 	public StatsDWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("host") String host,
+			@JsonProperty("port") Integer port,
+			@JsonProperty("bucketType") String bucketType,
+			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 		super(typeNames, debugEnabled, settings);
 		channel = DatagramChannel.open();
-		setBufferSize((short) 1500);
+		sendBuffer = ByteBuffer.allocate((short) 1500);
+
+		// bucketType defaults to c == counter
+		this.bucketType = firstNonNull(bucketType, (String) getSettings().get(BUCKET_TYPE), "c");
+		this.rootPrefix = firstNonNull(rootPrefix, (String) getSettings().get(ROOT_PREFIX), "servers");
+
+		if (host == null) {
+			host = (String) getSettings().get(HOST);
+		}
+
+		if (port == null) {
+			port = Settings.getIntegerSetting(getSettings(), PORT, null);
+		}
+		checkNotNull(host, "Host cannot be null");
+		checkNotNull(port, "Port cannot be null");
+		this.address = new InetSocketAddress(host, port);
 	}
 
-	public synchronized void setBufferSize(short packetBufferSize) {
-		if (sendBuffer != null) {
-			flush();
-		}
-		sendBuffer = ByteBuffer.allocate(packetBufferSize);
+	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
 
@@ -108,38 +124,6 @@ public class StatsDWriter extends BaseOutputWriter {
 		} catch (Exception e) {
 			throw new LifecycleException(e);
 		}
-	}
-
-	/** */
-	public void validateSetup(Server server, Query query) throws ValidationException {
-		String host = (String) this.getSettings().get(HOST);
-		Object portObj = this.getSettings().get(PORT);
-		Integer port = null;
-		if (portObj instanceof String) {
-			port = Integer.parseInt((String) portObj);
-		} else if (portObj instanceof Integer) {
-			port = (Integer) portObj;
-		}
-
-		if (host == null || port == null) {
-			throw new ValidationException("Host and port can't be null", query);
-		}
-
-		String rootPrefixTmp = (String) this.getSettings().get(ROOT_PREFIX);
-		if (rootPrefixTmp != null) {
-			rootPrefix = rootPrefixTmp;
-		}
-
-		// Read access to 'address' are synchronized. I'm not yet completely
-		// clear on the threading model used by JmxTrans, we might be able to
-		// reduce the number of locks. Still this synchronized block will not
-		// be expensive and at least ensure correctness of code.
-		synchronized (this) {
-			this.address = new InetSocketAddress(host, port);
-		}
-
-		if (this.getSettings().containsKey(BUCKET_TYPE))
-			bucketType = (String) this.getSettings().get(BUCKET_TYPE);
 	}
 
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
@@ -216,5 +200,17 @@ public class StatsDWriter extends BaseOutputWriter {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public String getBucketType() {
+		return bucketType;
+	}
+
+	public String getHostname() {
+		return address.getHostName();
+	}
+
+	public int getPort() {
+		return address.getPort();
 	}
 }
