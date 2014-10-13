@@ -185,7 +185,8 @@ public class OpenTSDBGenericWriterTests {
 	public void testEmptyResultValues() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
-		when(this.mockResult.getValues()).thenReturn(null);
+		ImmutableMap<String, Object> values = ImmutableMap.of();
+		when(this.mockResult.getValues()).thenReturn(values);
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
@@ -417,7 +418,7 @@ public class OpenTSDBGenericWriterTests {
 				@JsonProperty("typeNames") ImmutableList<String> typeNames,
 				@JsonProperty("debug") Boolean debugEnabled,
 				@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
-			super(typeNames, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
+			super(typeNames,  false, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
 		}
 
 		protected void prepareSender() throws LifecycleException {
@@ -450,7 +451,7 @@ public class OpenTSDBGenericWriterTests {
 				@JsonProperty("typeNames") ImmutableList<String> typeNames,
 				@JsonProperty("debug") Boolean debugEnabled,
 				@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
-			super(typeNames, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
+			super(typeNames, false, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
 		}
 
 		protected boolean getAddHostnameTagDefault() {

@@ -1,6 +1,8 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 
 import javax.management.Attribute;
 import javax.management.ObjectInstance;
@@ -14,9 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
 
 import static com.google.common.collect.ImmutableList.Builder;
 import static com.google.common.collect.Maps.newHashMap;
@@ -151,6 +150,6 @@ public class JmxResultProcessor {
 	 * Builds up the base Result object
 	 */
 	private Result getNewResultObject(String attributeName, Map<String, Object> values) {
-		return new Result(attributeName, className, query.getResultAlias(), objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values);
+		return new Result(System.currentTimeMillis(), attributeName, className, query.getResultAlias(), objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values);
 	}
 }

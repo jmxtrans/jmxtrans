@@ -37,6 +37,7 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 	@JsonCreator
 	public DailyKeyOutWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("maxLogFileSize") String maxLogFileSize,
@@ -44,7 +45,7 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 			@JsonProperty("delimiter") String delimiter,
 			@JsonProperty("datePattern") String datePattern,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, delimiter, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, delimiter, settings);
 		this.datePattern = firstNonNull(
 				datePattern,
 				(String) getSettings().get("datePattern"),

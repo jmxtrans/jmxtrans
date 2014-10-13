@@ -49,7 +49,7 @@ public class GraphiteWriterTests {
 		// a lot of setup for not much of a test ...
 		Server server = Server.builder().setHost("host").setPort("123").build();
 		Query query = Query.builder().build();
-		Result result = new Result("attributeName", "className", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
+		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
 
 		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
 		Socket socket = mock(Socket.class);

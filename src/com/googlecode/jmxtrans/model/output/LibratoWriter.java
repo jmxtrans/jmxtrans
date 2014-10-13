@@ -86,6 +86,7 @@ public class LibratoWriter extends BaseOutputWriter {
 	@JsonCreator
 	public LibratoWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("url") URL url,
 			@JsonProperty("libratoApiTimeoutInMillis") Integer libratoApiTimeoutInMillis,
@@ -94,7 +95,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			@JsonProperty("proxyHost") String proxyHost,
 			@JsonProperty("proxyPort") Integer proxyPort,
 			@JsonProperty("settings") Map<String, Object> settings) throws MalformedURLException {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.url = MoreObjects.firstNonNull(
 				url,
 				new URL(MoreObjects.firstNonNull(
@@ -125,13 +126,13 @@ public class LibratoWriter extends BaseOutputWriter {
 		logger.info("Start Librato writer connected to '{}', proxy {} with username '{}' ...", url, proxy, username);
 	}
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', proxy {} metrics {}", url, proxy, query);
 		writeToLibrato(server, query, results);
 	}
 
 	private void serialize(Server server, Query query, List<Result> results, OutputStream outputStream) throws IOException {
-		JsonGenerator g = jsonFactory.createJsonGenerator(outputStream, JsonEncoding.UTF8);
+		JsonGenerator g = jsonFactory.createGenerator(outputStream, JsonEncoding.UTF8);
 		g.writeStartObject();
 		g.writeArrayFieldStart("counters");
 		g.writeEndArray();

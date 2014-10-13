@@ -53,11 +53,12 @@ public class SensuWriter extends BaseOutputWriter {
 	@JsonCreator
 	public SensuWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("host") String host,
 			@JsonProperty("handler") String handler,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.host = firstNonNull(host, (String) getSettings().get(HOST), DEFAULT_SENSU_HOST);
 		this.handler = firstNonNull(handler, (String) getSettings().get(SETTING_HANDLER), DEFAULT_SENSU_HANDLER);
 	}
@@ -66,7 +67,7 @@ public class SensuWriter extends BaseOutputWriter {
 		logger.info("Start Sensu writer connected to '{}' with handler {}", host, handler);
 	}
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', metrics {}", host, query);
 		writeToSensu(server, query, results);
 	}

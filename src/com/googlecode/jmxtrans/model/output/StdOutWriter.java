@@ -21,9 +21,10 @@ public class StdOutWriter extends BaseOutputWriter {
 	@JsonCreator
 	public StdOutWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 	}
 
 	/**
@@ -32,7 +33,7 @@ public class StdOutWriter extends BaseOutputWriter {
 	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (Result r : results) {
 			System.out.println(r);
 		}

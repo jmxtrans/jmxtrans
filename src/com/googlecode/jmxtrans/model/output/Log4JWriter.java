@@ -33,10 +33,11 @@ public class Log4JWriter extends BaseOutputWriter {
 	@JsonCreator
 	public Log4JWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("logger") String logger,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.logger = firstNonNull(logger, (String) getSettings().get("logger"), "Log4JWriter");
 		this.log = Logger.getLogger("Log4JWriter." + this.logger);
 	}
@@ -46,7 +47,7 @@ public class Log4JWriter extends BaseOutputWriter {
 	/**
 	 * Set the log context and log
 	 */
-	public void doWrite(Server server, final Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, final Query query, ImmutableList<Result> results) throws Exception {
 		final List<String> typeNames = getTypeNames();
 
 		for (final Result result : results) {

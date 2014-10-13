@@ -34,6 +34,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 	@JsonCreator
 	public OpenTSDBWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
@@ -43,7 +44,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("metricNamingExpression") String metricNamingExpression,
 			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
-		super(typeNames, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
+		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
 	}
 
@@ -147,6 +148,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 
 	public static final class Builder {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
+		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
 		private String host;
 		private Integer port;
@@ -165,6 +167,11 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 
 		public Builder addTypeName(String typeName) {
 			typeNames.add(typeName);
+			return this;
+		}
+
+		public Builder setBooleanAsNumber(boolean booleanAsNumber) {
+			this.booleanAsNumber = booleanAsNumber;
 			return this;
 		}
 
@@ -216,6 +223,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		public OpenTSDBWriter build() throws LifecycleException, UnknownHostException {
 			return new OpenTSDBWriter(
 					typeNames.build(),
+					booleanAsNumber,
 					debugEnabled,
 					host,
 					port,
