@@ -1,9 +1,17 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -12,12 +20,6 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 /**
  * <a href="http://sensuapp.org/docs/0.12/events">Sensu Event Data</a>
@@ -34,38 +36,48 @@ import com.googlecode.jmxtrans.model.naming.KeyUtils;
  */
 public class SensuWriter extends BaseOutputWriter {
 
-	public final static String SETTING_HOST = "host";
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private final JsonFactory jsonFactory = new JsonFactory();
+
 	public final static String SETTING_HANDLER = "handler";
 	public final static String DEFAULT_SENSU_HOST = "localhost";
 	public final static String DEFAULT_SENSU_HANDLER = "graphite";
 
-	private final org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
-
-	private final JsonFactory jsonFactory = new JsonFactory();
 	/**
 	 * Sensu HTTP API URL
 	 */
-	private String sensuhost;
-	private String sensuhandler;
+	private final String host;
+	private final String handler;
+
+	@JsonCreator
+	public SensuWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("host") String host,
+			@JsonProperty("handler") String handler,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+		this.host = firstNonNull(host, (String) getSettings().get(HOST), DEFAULT_SENSU_HOST);
+		this.handler = firstNonNull(handler, (String) getSettings().get(SETTING_HANDLER), DEFAULT_SENSU_HANDLER);
+	}
 
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		sensuhost = getStringSetting(SETTING_HOST, DEFAULT_SENSU_HOST);
-		sensuhandler = getStringSetting(SETTING_HANDLER, DEFAULT_SENSU_HANDLER);
-		logger.info("Start Sensu writer connected to '{}' with handler {}", sensuhost, sensuhandler);
+		logger.info("Start Sensu writer connected to '{}' with handler {}", host, handler);
 	}
 
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		logger.debug("Export to '{}', metrics {}", sensuhost, query);
+		logger.debug("Export to '{}', metrics {}", host, query);
 		writeToSensu(server, query, results);
 	}
 
 	private void serialize(Server server, Query query, List<Result> results, OutputStream outputStream) throws IOException {
-		JsonGenerator g = jsonFactory.createJsonGenerator(outputStream, JsonEncoding.UTF8);
+		JsonGenerator g = jsonFactory.createGenerator(outputStream, JsonEncoding.UTF8);
 		g.useDefaultPrettyPrinter();
 		g.writeStartObject();
 		g.writeStringField("name", "jmxtrans");
 		g.writeStringField("type", "metric");
-		g.writeStringField("handler", sensuhandler);
+		g.writeStringField("handler", handler);
 
 		StringBuilder jsonoutput = new StringBuilder();
 		List<String> typeNames = getTypeNames();
@@ -92,10 +104,10 @@ public class SensuWriter extends BaseOutputWriter {
 	private void writeToSensu(Server server, Query query, List<Result> results) {
 		Socket socketConnection = null;
 		try {
-			socketConnection = new Socket(sensuhost, 3030);
+			socketConnection = new Socket(host, 3030);
 			serialize(server, query, results, socketConnection.getOutputStream());
 		} catch (Exception e) {
-			logger.warn("Failure to send result to Sensu server '{}'", sensuhost, e);
+			logger.warn("Failure to send result to Sensu server '{}'", host, e);
 		} finally {
 			if (socketConnection != null) {
 				try {
@@ -105,5 +117,13 @@ public class SensuWriter extends BaseOutputWriter {
 				}
 			}
 		}
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public String getHandler() {
+		return handler;
 	}
 }

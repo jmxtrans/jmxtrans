@@ -1,9 +1,17 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
-
 import static com.google.common.base.Charsets.ISO_8859_1;
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.apache.commons.lang.StringUtils.isAlphanumeric;
 
 /**
  * <a href="https://www.stackdriver.com//">Stackdriver</a> implementation of the
@@ -47,7 +50,7 @@ import static com.google.common.collect.Maps.newHashMap;
  * Optional, shouldn't be used at the same time as source or detectInstance.  Different way of namespacing.</li>
  * <li>"{@code source}": Instance of the machine ID that the JMX data is being collected from. Optional.
  * <li>"{@code detectInstance}": Set to "AWS" if you want to detect the local AWS instance ID on startup.  Optional. 
- * <li>"{@code stackdriverApiTimeoutInMillis}": read timeout of the calls to Stackdriver HTTP API. Optional, default
+ * <li>"{@code timeoutInMillis}": read timeout of the calls to Stackdriver HTTP API. Optional, default
  * value: {@value #DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS}.</li>
  * <li>"{@code enabled}": flag to enable/disable the writer. Optional, default value: <code>true</code>.</li>
  * </ul>
@@ -87,13 +90,15 @@ public class StackdriverWriter extends BaseOutputWriter {
 	 * The instance ID that metrics from this writer should be associated with in Stackdriver, an example of this
 	 * would be an EC2 instance ID in the form i-00000000 that is present in your environment.
 	 */
-	private String instanceId;
+	private final String instanceId;
+	private final String source;
+	private final String detectInstance;
 	
 	/**
 	 *  Prefix sent in the settings of this one writer.  Will be prepended before the metric names that are sent 
 	 *  to Stackdriver with a period in between.  Should be alphanumeric [A-Za-z0-9] with no punctuation or spaces.
 	 */
-	private String prefix;
+	private final String prefix;
 	
 	/**
 	 * The gateway URL to post metrics to, this can be overridden for testing locally but should generally be
@@ -101,89 +106,130 @@ public class StackdriverWriter extends BaseOutputWriter {
 	 * 
 	 * @see #DEFAULT_STACKDRIVER_API_URL
 	 */
-	private URL gatewayUrl;
+	private final URL gatewayUrl;
 
 	/**
 	 * A Proxy object that can be set using the proxyHost and proxyPort settings if the server can't post directly 
 	 * to the gateway
 	 */
-	private Proxy proxy;
+	private final Proxy proxy;
+	private final String proxyHost;
+	private final Integer proxyPort;
 	
 	/**
 	 * Stackdriver API key generated in the account settings section on Stackdriver.  Mandatory for data to be
 	 * recognized in the Stackdriver gateway.
 	 */
-	private String apiKey;
+	private final String apiKey;
 	
-	private int stackdriverApiTimeoutInMillis = DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS;
+	private int timeoutInMillis = DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS;
 
 	private JsonFactory jsonFactory = new JsonFactory();
-	
+
+	@JsonCreator
+	public StackdriverWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("gatewayUrl") String gatewayUrl,
+			@JsonProperty("apiKey") String apiKey,
+			@JsonProperty("proxyHost") String proxyHost,
+			@JsonProperty("proxyPort") Integer proxyPort,
+			@JsonProperty("prefix") String prefix,
+			@JsonProperty("timeoutInMillis") Integer timeoutInMillis,
+			@JsonProperty("source") String source,
+			@JsonProperty("detectInstance") String detectInstance,
+			@JsonProperty("settings") Map<String, Object> settings) throws MalformedURLException {
+		super(typeNames, debugEnabled, settings);
+		this.gatewayUrl = new URL(firstNonNull(
+				gatewayUrl,
+				(String) getSettings().get(SETTING_STACKDRIVER_API_URL),
+				DEFAULT_STACKDRIVER_API_URL));
+		this.apiKey = MoreObjects.firstNonNull(apiKey, (String) getSettings().get(SETTING_STACKDRIVER_API_KEY));
+
+		// Proxy configuration
+		if (proxyHost == null) {
+			proxyHost = (String) getSettings().get(SETTING_PROXY_HOST);
+		}
+		if (proxyPort == null) {
+			proxyPort = (Integer) getSettings().get(SETTING_PROXY_PORT);
+		}
+
+		this.proxyHost = proxyHost;
+		this.proxyPort = proxyPort;
+
+		if (!isNullOrEmpty(this.proxyHost)) {
+			proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(this.proxyHost, this.proxyPort));
+		} else {
+			proxy = null;
+		}
+
+		// Prefix
+		this.prefix = firstNonNull(prefix, (String) getSettings().get(SETTING_PREFIX), "");
+		if (!isNullOrEmpty(this.prefix)) {
+			if (!isAlphanumeric(this.prefix)) {
+				throw new IllegalArgumentException("Prefix setting must be alphanumeric only [A-Za-z0-9]");
+			}
+		}
+		logger.info("Setting prefix to " + this.prefix);
+
+		this.timeoutInMillis = firstNonNull(
+				timeoutInMillis,
+				Settings.getIntegerSetting(getSettings(), SETTING_STACKDRIVER_API_TIMEOUT_IN_MILLIS, null),
+				DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS);
+
+		// try to get and instance ID
+		if (source == null) {
+			source = (String) getSettings().get(SETTING_SOURCE_INSTANCE);
+		}
+		this.source = source;
+		if (detectInstance == null) {
+			detectInstance = (String) getSettings().get(SETTING_DETECT_INSTANCE);
+		}
+		this.detectInstance = detectInstance;
+		this.instanceId = computeInstanceId(this.source, this.detectInstance);
+	}
+
 	/**
 	 * Sets up the object and makes sure all the required parameters are available<br/>
 	 * Minimally a Stackdriver API key must be provided using the token setting
 	 */
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		try {
-			gatewayUrl = new URL(getStringSetting(SETTING_STACKDRIVER_API_URL, DEFAULT_STACKDRIVER_API_URL));
-		} catch (MalformedURLException e) {
-			throw new ValidationException("Invalid gateway URL passed " + gatewayUrl, query);
-		}
-
-		apiKey = getStringSetting(SETTING_STACKDRIVER_API_KEY, null);
-
-		if (getStringSetting(SETTING_PROXY_HOST, null) != null && !getStringSetting(SETTING_PROXY_HOST, null).isEmpty()) {
-			proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(getStringSetting(SETTING_PROXY_HOST, null), getIntSetting(SETTING_PROXY_PORT, 0)));
-		}
-		
-		if (getStringSetting(SETTING_PREFIX, null) != null && !getStringSetting(SETTING_PREFIX, null).isEmpty()) {
-			if (!StringUtils.isAlphanumeric(getStringSetting(SETTING_PREFIX, null))) {
-				throw new ValidationException("Prefix setting must be alphanumeric only [A-Za-z0-9]", query);
-			}
-			prefix = getStringSetting(SETTING_PREFIX, null);
-			logger.info("Setting prefix to " + prefix);
-		}
-		
 		logger.info("Starting Stackdriver writer connected to '{}', proxy {} ...", gatewayUrl, proxy);
-		
-		stackdriverApiTimeoutInMillis = getIntSetting(SETTING_STACKDRIVER_API_TIMEOUT_IN_MILLIS, DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS);
-
-		// try to get and instance ID
-		if (getStringSetting(SETTING_SOURCE_INSTANCE, null) != null && !getStringSetting(SETTING_SOURCE_INSTANCE, null).isEmpty()) {
-			// if one is set directly use that
-			instanceId = getStringSetting(SETTING_SOURCE_INSTANCE, null);
-			logger.info("Using instance ID {} from setting {}", instanceId, SETTING_SOURCE_INSTANCE);
-		} else if (getStringSetting(SETTING_DETECT_INSTANCE, null) != null && "AWS".equalsIgnoreCase(getStringSetting(SETTING_DETECT_INSTANCE, null))) {
-			// if setting is to detect, look on the local machine URL
-			logger.info("Detect instance set to AWS, trying to determine AWS instance ID");
-			instanceId = getLocalInstanceId("AWS", "http://169.254.169.254/latest/meta-data/instance-id", null);
-			if (instanceId != null) {
-				logger.info("Detected instance ID as {}", instanceId);
-			} else {
-				logger.info("Unable to detect AWS instance ID for this machine, sending metrics without an instance ID");
-			}
-		} else if (getStringSetting(SETTING_DETECT_INSTANCE, null) != null && "GCE".equalsIgnoreCase(getStringSetting(SETTING_DETECT_INSTANCE, null))) {
-			// if setting is to detect, look on the local machine URL
-			logger.info("Detect instance set to GCE, trying to determine GCE instance ID");
-			
-			// GCE requires a header on its metadata requests
-			Map<String,String> headers = newHashMap();
-			headers.put("X-Google-Metadata-Request", "True");
-			
-			instanceId = getLocalInstanceId("GCE", "http://metadata/computeMetadata/v1/instance/id", headers);
-			if (instanceId != null) {
-				logger.info("Detected instance ID as {}", instanceId);
-			} else {
-				logger.info("Unable to detect GCE instance ID for this machine, sending metrics without an instance ID");
-			}
-		} else {
-			// no instance ID, the metrics will be sent as "bare" custom metrics and not associated with an instance
-			instanceId = null;
-			logger.info("No source instance ID passed, and not set to detect, sending metrics without an instance ID");
-		}
 	}
-	
+
+	private String computeInstanceId(String source, String detectInstance) {
+		String result;
+		if (!isNullOrEmpty(source)) {
+			// if one is set directly use that
+			result = source;
+			logger.info("Using instance ID {} from setting {}", result, SETTING_SOURCE_INSTANCE);
+		} else {
+			if ("AWS".equalsIgnoreCase(detectInstance)) {
+				// if setting is to detect, look on the local machine URL
+				logger.info("Detect instance set to AWS, trying to determine AWS instance ID");
+				result = getLocalInstanceId("AWS", "http://169.254.169.254/latest/meta-data/instance-id", null);
+				if (result != null) {
+				} else {
+					logger.info("Unable to detect AWS instance ID for this machine, sending metrics without an instance ID");
+				}
+			} else if ("GCE".equalsIgnoreCase(detectInstance)) {
+				// if setting is to detect, look on the local machine URL
+				logger.info("Detect instance set to GCE, trying to determine GCE instance ID");
+				result = getLocalInstanceId("GCE", "http://metadata/computeMetadata/v1/instance/id", ImmutableMap.of("X-Google-Metadata-Request", "True"));
+				if (result == null) {
+					logger.info("Unable to detect GCE instance ID for this machine, sending metrics without an instance ID");
+				}
+			} else {
+				// no instance ID, the metrics will be sent as "bare" custom metrics and not associated with an instance
+				result = null;
+				logger.info("No source instance ID passed, and not set to detect, sending metrics without an instance ID");
+			}
+		}
+		logger.info("Detected instance ID as {}", result);
+		return result;
+	}
+
 	/**
 	 * Implementation of the base writing method.  Operates in two stages:
 	 * <br/>
@@ -213,7 +259,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	private String getGatewayMessage(final List<Result> results) throws IOException {
 		int valueCount = 0;
 		Writer writer = new StringWriter();
-		JsonGenerator g = jsonFactory.createJsonGenerator(writer);
+		JsonGenerator g = jsonFactory.createGenerator(writer);
 		g.writeStartObject();
 		g.writeNumberField("timestamp", System.currentTimeMillis() / 1000);
 		g.writeNumberField("proto_version", STACKDRIVER_PROTOCOL_VERSION);
@@ -320,7 +366,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			urlConnection.setRequestMethod("POST");
 			urlConnection.setDoInput(true);
 			urlConnection.setDoOutput(true);
-			urlConnection.setReadTimeout(stackdriverApiTimeoutInMillis);
+			urlConnection.setReadTimeout(timeoutInMillis);
 			urlConnection.setRequestProperty("content-type", "application/json; charset=utf-8");
 			urlConnection.setRequestProperty("x-stackdriver-apikey", apiKey);
 
@@ -384,5 +430,37 @@ public class StackdriverWriter extends BaseOutputWriter {
 			logger.warn("unable to determine " + cloudProvider + " instance ID", e);
 		}
 		return detectedInstanceId;
+	}
+
+	public String getGatewayUrl() {
+		return gatewayUrl.toString();
+	}
+
+	public String getProxyHost() {
+		return proxyHost;
+	}
+
+	public Integer getProxyPort() {
+		return proxyPort;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public String getApiKey() {
+		return apiKey;
+	}
+
+	public int getTimeoutInMillis() {
+		return timeoutInMillis;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public String getDetectInstance() {
+		return detectInstance;
 	}
 }

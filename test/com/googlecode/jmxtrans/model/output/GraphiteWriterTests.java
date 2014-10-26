@@ -1,22 +1,18 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Map;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 
 import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.googlecode.jmxtrans.model.output.BaseOutputWriter.PORT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -24,31 +20,27 @@ import static org.mockito.Mockito.when;
 
 public class GraphiteWriterTests {
 
-	@Test(expected = ValidationException.class)
-	public void validationExceptionIfNoHostConfigured() throws ValidationException {
+	@Test(expected = NullPointerException.class)
+	public void hostIsRequired() throws ValidationException {
 		try {
-			GraphiteWriter writer = new GraphiteWriter();
-			Map<String, Object> settings = newHashMap();
-			settings.put(PORT, 123);
-			writer.setSettings(settings);
-			writer.validateSetup(null, null);
-		} catch (ValidationException ve) {
-			assertThat(ve).hasMessage("Host and port can't be null");
-			throw ve;
+			GraphiteWriter.builder()
+					.setPort(123)
+					.build();
+		} catch (NullPointerException npe) {
+			assertThat(npe).hasMessage("Host cannot be null.");
+			throw npe;
 		}
 	}
 
-	@Test(expected = ValidationException.class)
-	public void validationExceptionIfNoPortConfigured() throws ValidationException {
+	@Test(expected = NullPointerException.class)
+	public void portIsRequired() throws ValidationException {
 		try {
-			GraphiteWriter writer = new GraphiteWriter();
-			Map<String, Object> settings = newHashMap();
-			settings.put(BaseOutputWriter.HOST, "localhost");
-			writer.setSettings(settings);
-			writer.validateSetup(null, null);
-		} catch (ValidationException ve) {
-			assertThat(ve).hasMessage("Host and port can't be null");
-			throw ve;
+			GraphiteWriter.builder()
+					.setHost("localhost")
+					.build();
+		} catch (NullPointerException npe) {
+			assertThat(npe).hasMessage("Port cannot be null.");
+			throw npe;
 		}
 	}
 
@@ -65,7 +57,10 @@ public class GraphiteWriterTests {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(out);
 
-		GraphiteWriter writer = new GraphiteWriter();
+		GraphiteWriter writer = GraphiteWriter.builder()
+				.setHost("localhost")
+				.setPort(2003)
+				.build();
 		writer.setPool(pool);
 
 		writer.doWrite(server, query, of(result));

@@ -1,26 +1,33 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
-
-import java.util.List;
-
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class isn't finished yet.
- * 
+ *
  * @author jon
  */
 public class VelocityWriter extends BaseOutputWriter {
 
-	public VelocityWriter() {
+	@JsonCreator
+	public VelocityWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
 	}
 
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {

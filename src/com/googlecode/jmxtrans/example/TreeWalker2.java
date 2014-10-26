@@ -1,5 +1,10 @@
 package com.googlecode.jmxtrans.example;
 
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,12 +15,8 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
-
-import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.output.StdOutWriter;
 
 /**
  * Walks a JMX tree and prints out all of the attribute values actually using
@@ -61,7 +62,7 @@ public class TreeWalker2 {
 
 			Query.Builder query = Query.builder()
 					.setObj(name.getCanonicalName())
-					.addOutputWriter(new StdOutWriter());
+					.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, Collections.<String, Object>emptyMap()));
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
 				query.addAttr(attrInfo.getName());

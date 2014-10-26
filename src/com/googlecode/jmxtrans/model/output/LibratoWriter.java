@@ -1,10 +1,20 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.base.Charsets;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.naming.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.slf4j.LoggerFactory;
@@ -17,16 +27,9 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 /**
  * This writer is a port of the LibratoWriter from the embedded-jmxtrans
@@ -41,11 +44,10 @@ import com.googlecode.jmxtrans.model.naming.KeyUtils;
  * <ul>
  * <li>"{@code url}": Librato server URL. Optional, default value:
  * {@value #DEFAULT_LIBRATO_API_URL}.</li>
- * <li>"{@code user}": Librato user. Mandatory</li>
+ * <li>"{@code username}": Librato username. Mandatory</li>
  * <li>"{@code token}": Librato token. Mandatory</li>
  * <li>"{@code libratoApiTimeoutInMillis}": read timeout of the calls to Librato
- * HTTP API. Optional, default value:
- * {@value #DEFAULT_LIBRATO_API_TIMEOUT_IN_MILLIS}.</li>
+ * HTTP API. Optional, default value: 1000.</li>
  * </ul>
  *
  * @author <a href="mailto:cleclerc@cloudbees.com">Cyrille Le Clerc</a>
@@ -59,7 +61,6 @@ public class LibratoWriter extends BaseOutputWriter {
 	public final static String SETTING_PROXY_PORT = "proxyPort";
 	public static final String DEFAULT_LIBRATO_API_URL = "https://metrics-api.librato.com/v1/metrics";
 	public static final String SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS = "libratoApiTimeoutInMillis";
-	public static final int DEFAULT_LIBRATO_API_TIMEOUT_IN_MILLIS = 1000;
 
 	private final org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -67,38 +68,61 @@ public class LibratoWriter extends BaseOutputWriter {
 	/**
 	 * Librato HTTP API URL
 	 */
-	private URL url;
-	private int libratoApiTimeoutInMillis = DEFAULT_LIBRATO_API_TIMEOUT_IN_MILLIS;
+	private final URL url;
+	private final int libratoApiTimeoutInMillis;
 	/**
 	 * Librato HTTP API authentication username
 	 */
-	private String user;
-	private String basicAuthentication;
+	private final String username;
+	private final String token;
+	private final String basicAuthentication;
 	/**
 	 * Optional proxy for the http API calls
 	 */
+	private final String proxyHost;
+	private final Integer proxyPort;
 	private Proxy proxy;
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-		try {
-			url = new URL(getStringSetting(SETTING_URL, DEFAULT_LIBRATO_API_URL));
-
-			user = getStringSetting(SETTING_USERNAME);
-
-			// Librato HTTP API authentication token
-			String token = getStringSetting(SETTING_TOKEN);
-			basicAuthentication = Base64Variants.getDefaultVariant().encode((user + ":" + token).getBytes(Charset.forName("US-ASCII")));
-
-			if (getStringSetting(SETTING_PROXY_HOST, null) != null && !getStringSetting(SETTING_PROXY_HOST, "").isEmpty()) {
-				proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(getStringSetting(SETTING_PROXY_HOST, null), getIntegerSetting(SETTING_PROXY_PORT, null)));
-			}
-
-			libratoApiTimeoutInMillis = getIntSetting(SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS, DEFAULT_LIBRATO_API_TIMEOUT_IN_MILLIS);
-
-			logger.info("Start Librato writer connected to '{}', proxy {} with user '{}' ...", url, proxy, user);
-		} catch (MalformedURLException ex) {
-			logger.error("Error :", ex);
+	@JsonCreator
+	public LibratoWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("url") URL url,
+			@JsonProperty("libratoApiTimeoutInMillis") Integer libratoApiTimeoutInMillis,
+			@JsonProperty("username") String username,
+			@JsonProperty("token") String token,
+			@JsonProperty("proxyHost") String proxyHost,
+			@JsonProperty("proxyPort") Integer proxyPort,
+			@JsonProperty("settings") Map<String, Object> settings) throws MalformedURLException {
+		super(typeNames, debugEnabled, settings);
+		this.url = MoreObjects.firstNonNull(
+				url,
+				new URL(MoreObjects.firstNonNull(
+						(String) this.getSettings().get(SETTING_URL),
+						DEFAULT_LIBRATO_API_URL)));
+		this.libratoApiTimeoutInMillis = MoreObjects.firstNonNull(
+				libratoApiTimeoutInMillis,
+				Settings.getIntSetting(getSettings(), SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS, 1000));
+		this.username = MoreObjects.firstNonNull(
+				username,
+				(String) getSettings().get(SETTING_USERNAME));
+		this.token = MoreObjects.firstNonNull(
+				token,
+				(String) getSettings().get(SETTING_TOKEN));
+		this.basicAuthentication = Base64Variants
+				.getDefaultVariant()
+				.encode((this.username + ":" + this.token).getBytes(Charsets.US_ASCII));
+		this.proxyHost = proxyHost != null ? proxyHost : (String) getSettings().get(SETTING_PROXY_HOST);
+		this.proxyPort = proxyPort != null ? proxyPort : Settings.getIntegerSetting(getSettings(), SETTING_PROXY_PORT, null);
+		if (this.proxyHost != null && this.proxyPort != null) {
+			this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(this.proxyHost, this.proxyPort));
+		} else {
+			this.proxy = null;
 		}
+	}
+
+	public void validateSetup(Server server, Query query) throws ValidationException {
+		logger.info("Start Librato writer connected to '{}', proxy {} with username '{}' ...", url, proxy, username);
 	}
 
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
@@ -167,13 +191,13 @@ public class LibratoWriter extends BaseOutputWriter {
 			serialize(server, query, results, urlConnection.getOutputStream());
 			int responseCode = urlConnection.getResponseCode();
 			if (responseCode != 200) {
-				logger.warn("Failure {}:'{}' to send result to Librato server '{}' with proxy {}, user {}", responseCode, urlConnection.getResponseMessage(), url, proxy, user);
+				logger.warn("Failure {}:'{}' to send result to Librato server '{}' with proxy {}, username {}", responseCode, urlConnection.getResponseMessage(), url, proxy, username);
 			}
 			if (logger.isTraceEnabled()) {
 				IOUtils.copy(urlConnection.getInputStream(), System.out);
 			}
 		} catch (Exception e) {
-			logger.warn("Failure to send result to Librato server '{}' with proxy {}, user {}", url, proxy, user, e);
+			logger.warn("Failure to send result to Librato server '{}' with proxy {}, username {}", url, proxy, username, e);
 		} finally {
 			if (urlConnection != null) {
 				try {
@@ -197,15 +221,31 @@ public class LibratoWriter extends BaseOutputWriter {
 		if (server.getAlias() != null) {
 			return server.getAlias();
 		} else {
-			return cleanupStr(server.getHost());
+			return StringUtils.cleanupStr(server.getHost());
 		}
 	}
 
-	private String getStringSetting(String setting) throws ValidationException {
-		String s = super.getStringSetting(setting, null);
-		if (s == null) {
-			throw new ValidationException("Setting '" + setting + "' cannot be null", null);
-		}
-		return s;
+	public URL getUrl() {
+		return url;
+	}
+
+	public int getLibratoApiTimeoutInMillis() {
+		return libratoApiTimeoutInMillis;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public String getProxyHost() {
+		return proxyHost;
+	}
+
+	public Integer getProxyPort() {
+		return proxyPort;
 	}
 }

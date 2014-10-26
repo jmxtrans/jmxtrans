@@ -2,13 +2,11 @@ package com.googlecode.jmxtrans.example;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
 import com.googlecode.jmxtrans.util.JsonPrinter;
 
@@ -31,15 +29,14 @@ public class ActiveMQ {
 				.setHost("w2")
 				.setPort("1105")
 				.setAlias("w2_activemq_1105");
-		GraphiteWriter gw = new GraphiteWriter();
-		gw.addSetting(BaseOutputWriter.HOST, GW_HOST);
-		// gw.addSetting(GraphiteWriter.HOST, "localhost");
-		gw.addSetting(BaseOutputWriter.PORT, 2003);
 
-		// use this to add data to GW path
-		gw.addTypeName("destinationName");
-		gw.addTypeName("Destination");
-		gw.addSetting(BaseOutputWriter.DEBUG, true);
+		GraphiteWriter gw = GraphiteWriter.builder()
+				.addTypeName("destinationName")
+				.addTypeName("Destination")
+				.setDebugEnabled(true)
+				.setHost(GW_HOST)
+				.setPort(2003)
+				.build();
 
 		Query q = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Type=Subscription,clientId=*,consumerId=*,destinationName=*,destinationType=Queue,persistentMode=Non-Durable")
@@ -143,16 +140,15 @@ public class ActiveMQ {
 				.build();
 		serverBuilder.addQuery(q8);
 
-		GraphiteWriter gw2 = new GraphiteWriter();
-		gw2.addSetting(BaseOutputWriter.HOST, GW_HOST);
-		gw2.addSetting(BaseOutputWriter.PORT, 2003);
-
-		gw2.addTypeName("name");
-		gw2.addSetting(BaseOutputWriter.DEBUG, true);
 
 		Query q9 = Query.builder()
 				.setObj("java.lang:type=MemoryPool,name=*")
-				.addOutputWriter(gw2)
+				.addOutputWriter(GraphiteWriter.builder()
+						.addTypeName("name")
+						.setDebugEnabled(true)
+						.setHost(GW_HOST)
+						.setPort(2003)
+						.build())
 				.build();
 		serverBuilder.addQuery(q9);
 

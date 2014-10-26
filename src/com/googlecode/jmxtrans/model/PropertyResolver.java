@@ -2,13 +2,17 @@ package com.googlecode.jmxtrans.model;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.FluentIterable.from;
+import static com.google.common.collect.ImmutableMap.copyOf;
+import static com.google.common.collect.Maps.transformValues;
 
 /***
  *
@@ -20,6 +24,8 @@ import static com.google.common.collect.FluentIterable.from;
 public class PropertyResolver {
 
 	private static PropertyResolverFunc RESOLVE_PROPERTIES = new PropertyResolverFunc();
+
+	private static ObjectPropertyResolverFunc RESOLVE_OBJECT_PROPERTIES = new ObjectPropertyResolverFunc();
 
 	/**
 	 * Resolve a property from System Properties (aka ${key}) key:defval is
@@ -106,18 +112,15 @@ public class PropertyResolver {
 	 * Parse Map and resolve Strings value with resolveProps
 	 */
 	@CheckReturnValue
-	public static void resolveMap(Map<String, Object> map) {
-		for (Map.Entry<String, Object> entry : map.entrySet()) {
-			if (entry.getValue() instanceof String)
-				map.put(entry.getKey(), resolveProps((String) entry.getValue()));
-		}
+	public static ImmutableMap<String, Object> resolveMap(@Nonnull Map<String, Object> map) {
+		return copyOf(transformValues(map, RESOLVE_OBJECT_PROPERTIES));
 	}
 
 	/**
 	 * Parse List and resolve Strings value with resolveProps
 	 */
 	@CheckReturnValue
-	public static ImmutableList<String> resolveList(List<String> list) {
+	public static ImmutableList<String> resolveList(@Nonnull List<String> list) {
 		return from(list)
 				.transform(RESOLVE_PROPERTIES)
 				.toList();
@@ -128,6 +131,17 @@ public class PropertyResolver {
 		@Override
 		public String apply(@Nullable String input) {
 			return resolveProps(input);
+		}
+	}
+
+	private static class ObjectPropertyResolverFunc implements Function<Object, Object> {
+		@Nullable
+		@Override
+		public Object apply(@Nullable Object input) {
+			if (input instanceof String) {
+				return resolveProps((String) input);
+			}
+			return input;
 		}
 	}
 }

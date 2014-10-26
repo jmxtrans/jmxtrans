@@ -1,7 +1,14 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -25,10 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it
@@ -42,27 +46,37 @@ import com.googlecode.jmxtrans.model.ValidationException;
  * @author jon
  */
 public class RRDToolWriter extends BaseOutputWriter {
-
 	private static final Logger log = LoggerFactory.getLogger(RRDToolWriter.class);
 
-	private File outputFile = null;
-	private File templateFile = null;
-	private File binaryPath = null;
 	public static final String GENERATE = "generate";
 	private static final char[] INITIALS = { ' ', '.' };
 
-	/** */
-	public RRDToolWriter() {
+	private final File outputFile;
+	private final File templateFile;
+	private final File binaryPath;
+	private final boolean generate;
+
+	@JsonCreator
+	public RRDToolWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("outputFile") String outputFile,
+			@JsonProperty("templateFile") String templateFile,
+			@JsonProperty("binaryPath") String binaryPath,
+			@JsonProperty("generate") Boolean generate,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, settings);
+		this.outputFile = new File(MoreObjects.firstNonNull(outputFile, (String) getSettings().get(OUTPUT_FILE)));
+		this.templateFile = new File(MoreObjects.firstNonNull(templateFile, (String) getSettings().get(TEMPLATE_FILE)));
+		this.binaryPath = new File(MoreObjects.firstNonNull(binaryPath, (String) getSettings().get(BINARY_PATH)));
+		this.generate = MoreObjects.firstNonNull(generate, Settings.getBooleanSetting(getSettings(), "generate", Boolean.TRUE));
+
+		checkState(this.outputFile.exists(), "Output file must exist");
+		checkState(this.templateFile.exists(), "Template file must exist");
+		checkState(this.binaryPath.exists(), "RRD Binary must exist");
 	}
 
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		outputFile = new File((String) this.getSettings().get(OUTPUT_FILE));
-		templateFile = new File((String) this.getSettings().get(TEMPLATE_FILE));
-		binaryPath = new File((String) this.getSettings().get(BINARY_PATH));
-
-		if (!outputFile.exists() || !templateFile.exists() || !binaryPath.exists()) {
-			throw new ValidationException("output, template and binary path file can't be null", query);
-		}
 	}
 
 	/**
@@ -70,7 +84,6 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 * make it shorter. Not ideal at all, but works fairly well it seems.
 	 */
 	public String getDataSourceName(String typeName, String attributeName, String entry) {
-
 		String result;
 		if (typeName != null) {
 			result = typeName + attributeName + entry;
@@ -90,7 +103,6 @@ public class RRDToolWriter extends BaseOutputWriter {
 		return result;
 	}
 
-	/** */
 	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDef def = getDatabaseTemplateSpec();
 
@@ -129,7 +141,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	}
 
 	private void doGenerate(List<Result> results) throws Exception {
-		if (isDebugEnabled() && this.getBooleanSetting(GENERATE)) {
+		if (isDebugEnabled() && generate) {
 			StringBuilder sb = new StringBuilder("\n");
 			List<String> keys = new ArrayList<String>();
 
@@ -286,4 +298,79 @@ public class RRDToolWriter extends BaseOutputWriter {
 		}
 		return String.valueOf(dbl);
 	}
+
+	public String getOutputFile() {
+		return outputFile.getPath();
+	}
+
+	public String getTemplateFile() {
+		return templateFile.getPath();
+	}
+
+	public String getBinaryPath() {
+		return binaryPath.getPath();
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static final class Builder {
+		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
+		private Boolean debugEnabled;
+		private File outputFile;
+		private File templateFile;
+		private File binaryPath;
+		private Boolean generate;
+
+		private Builder() {}
+
+		public Builder addTypeNames(List<String> typeNames) {
+			this.typeNames.addAll(typeNames);
+			return this;
+		}
+
+		public Builder addTypeName(String typeName) {
+			typeNames.add(typeName);
+			return this;
+		}
+
+		public Builder setDebugEnabled(boolean debugEnabled) {
+			this.debugEnabled = debugEnabled;
+			return this;
+		}
+
+		public Builder setOutputFile(File outputFile) {
+			this.outputFile = outputFile;
+			return this;
+		}
+
+		public Builder setTemplateFile(File templateFile) {
+			this.templateFile = templateFile;
+			return this;
+		}
+
+		public Builder setBinaryPath(File binaryPath) {
+			this.binaryPath = binaryPath;
+			return this;
+		}
+
+		public Builder setGenerate(Boolean generate) {
+			this.generate = generate;
+			return this;
+		}
+
+		public RRDToolWriter build() {
+			return new RRDToolWriter(
+					typeNames.build(),
+					debugEnabled,
+					outputFile.getPath(),
+					templateFile.getPath(),
+					binaryPath.getPath(),
+					generate,
+					null
+			);
+		}
+	}
+
 }

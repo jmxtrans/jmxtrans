@@ -1,5 +1,10 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,8 +14,9 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -25,6 +31,22 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 
 	protected SocketAddress address;
 	protected DatagramSocket dgSocket;
+
+	@JsonCreator
+	public TCollectorUDPWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("host") String host,
+			@JsonProperty("port") Integer port,
+			@JsonProperty("tags") Map<String, String> tags,
+			@JsonProperty("tagName") String tagName,
+			@JsonProperty("mergeTypeNamesTags") Boolean mergeTypeNamesTags,
+			@JsonProperty("metricNamingExpression") String metricNamingExpression,
+			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
+			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
+		super(typeNames, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
+				addHostnameTag, settings);
+	}
 
 	/**
 	 * Do not add the hostname tag "host" with the name of the host by default since tcollector normally adds the
@@ -70,5 +92,95 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 
 		this.dgSocket.send(packet);
 	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static final class Builder {
+		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
+		private Boolean debugEnabled;
+		private String host;
+		private Integer port;
+		private final ImmutableMap.Builder<String, String> tags = ImmutableMap.builder();
+		private String tagName;
+		private Boolean mergeTypeNamesTags;
+		private String metricNamingExpression;
+		private Boolean addHostnameTag;
+
+		private Builder() {}
+
+		public Builder addTypeNames(List<String> typeNames) {
+			this.typeNames.addAll(typeNames);
+			return this;
+		}
+
+		public Builder addTypeName(String typeName) {
+			typeNames.add(typeName);
+			return this;
+		}
+
+		public Builder setDebugEnabled(boolean debugEnabled) {
+			this.debugEnabled = debugEnabled;
+			return this;
+		}
+
+		public Builder setHost(String host) {
+			this.host = host;
+			return this;
+		}
+
+		public Builder setPort(int port) {
+			this.port  = port;
+			return this;
+		}
+
+		public Builder addTag(String key, String value) {
+			this.tags.put(key, value);
+			return this;
+		}
+
+		public Builder addTags(Map<String, String> tags) {
+			this.tags.putAll(tags);
+			return this;
+		}
+
+		public Builder setTagName(String tagName) {
+			this.tagName = tagName;
+			return this;
+		}
+
+		public Builder setMergeTypeNamesTags(Boolean mergeTypeNamesTags) {
+			this.mergeTypeNamesTags = mergeTypeNamesTags;
+			return this;
+		}
+
+		public Builder setMetricNamingExpression(String metricNamingExpression) {
+			this.metricNamingExpression = metricNamingExpression;
+			return this;
+		}
+
+		public Builder setAddHostnameTag(Boolean addHostnameTag) {
+			this.addHostnameTag = addHostnameTag;
+			return this;
+		}
+
+		public TCollectorUDPWriter build() throws LifecycleException, UnknownHostException {
+			return new TCollectorUDPWriter(
+					typeNames.build(),
+					debugEnabled,
+					host,
+					port,
+					tags.build(),
+					tagName,
+					mergeTypeNamesTags,
+					metricNamingExpression,
+					addHostnameTag,
+					null
+			);
+		}
+	}
+
+
 
 }

@@ -17,33 +17,19 @@ public class Graphite {
 	private static JsonPrinter printer = new JsonPrinter(System.out);
 
 	public static void main(String[] args) throws Exception {
-
-		GraphiteWriter gw = new GraphiteWriter();
-		gw.addSetting(GraphiteWriter.HOST, "192.168.192.133");
-		gw.addSetting(GraphiteWriter.PORT, 2003);
-		gw.addSetting(GraphiteWriter.DEBUG, true);
-		gw.addSetting(GraphiteWriter.ROOT_PREFIX, "jon.foo.bar");
-
-		Query q = Query.builder()
-				.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
-				.addOutputWriter(gw)
-				.build();
-
-		Server server = Server.builder()
+		printer.prettyPrint(new JmxProcess(Server.builder()
 				.setHost("w2")
 				.setPort("1099")
-				.addQuery(q)
-				.build();
-
-		JmxProcess process = new JmxProcess(server);
-		printer.prettyPrint(process);
-		// JmxTransformer transformer = new JmxTransformer();
-		// transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.execute(jmx);
-		// Thread.sleep(1000);
-		// }
+				.addQuery(Query.builder()
+						.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
+						.addOutputWriter(GraphiteWriter.builder()
+								.setHost("192.168.192.133")
+								.setPort(2003)
+								.setDebugEnabled(true)
+								.setRootPrefix("jon.foo.bar")
+								.build())
+						.build())
+				.build()));
 	}
 
 }

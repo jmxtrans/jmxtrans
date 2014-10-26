@@ -9,9 +9,13 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.RollingPolicy;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Extension of KeyOutWriter to use Logback for its logging.  This version supports outputting with a time and size
@@ -36,9 +40,21 @@ public class TimeBasedRollingKeyOutWriter extends KeyOutWriter {
 	private static final String DEFAULT_OUTPUT_PATTERN = "%msg%n";
 	private static final String SETTING_OUTPUT_PATTERN = "outputPattern";
 
+	@JsonCreator
+	public TimeBasedRollingKeyOutWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("outputFile") String outputFile,
+			@JsonProperty("maxLogFileSize") String maxLogFileSize,
+			@JsonProperty("maxLogBackupFiles") int maxLogBackupFiles,
+			@JsonProperty("delimiter") String delimiter,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		super(typeNames, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, delimiter, settings);
+	}
+
 	@Override
 	protected Logger initLogger(String fileStr) throws IOException {
-		RollingPolicy rollingPolicy = initRollingPolicy(fileStr, getSettingMaxFileHistory(), getSettingMaxFileSize());
+		RollingPolicy rollingPolicy = initRollingPolicy(fileStr, getMaxLogBackupFiles(), getMaxLogFileSize());
 		RollingFileAppender appender = buildAppender(buildEncoder(), rollingPolicy);
 		
 		rollingPolicy.start();
