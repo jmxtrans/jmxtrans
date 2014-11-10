@@ -25,14 +25,14 @@ public class VelocityWriter extends BaseOutputWriter {
 	@JsonCreator
 	public VelocityWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 	}
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void validateSetup(Server server, Query query) throws ValidationException {

@@ -61,13 +61,14 @@ public class StatsDWriter extends BaseOutputWriter {
 	@JsonCreator
 	public StatsDWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
 			@JsonProperty("bucketType") String bucketType,
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		channel = DatagramChannel.open();
 		sendBuffer = ByteBuffer.allocate((short) 1500);
 
@@ -126,7 +127,7 @@ public class StatsDWriter extends BaseOutputWriter {
 		}
 	}
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 
 		List<String> typeNames = this.getTypeNames();
 

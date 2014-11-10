@@ -62,7 +62,7 @@ public class TreeWalker2 {
 
 			Query.Builder query = Query.builder()
 					.setObj(name.getCanonicalName())
-					.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, Collections.<String, Object>emptyMap()));
+					.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()));
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
 				query.addAttr(attrInfo.getName());

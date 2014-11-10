@@ -47,12 +47,13 @@ public class GraphiteWriter extends BaseOutputWriter {
 	@JsonCreator
 	public GraphiteWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.rootPrefix = resolveProps(
 				firstNonNull(
 						rootPrefix,
@@ -77,7 +78,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
 
 		try {
@@ -130,6 +131,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	public static final class Builder {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
+		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
 		private String rootPrefix;
 		private String host;
@@ -144,6 +146,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 		public Builder addTypeName(String typeName) {
 			typeNames.add(typeName);
+			return this;
+		}
+
+		public Builder setBooleanAsNumber(boolean booleanAsNumber) {
+			this.booleanAsNumber = booleanAsNumber;
 			return this;
 		}
 
@@ -170,6 +177,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 		public GraphiteWriter build() {
 			return new GraphiteWriter(
 					typeNames.build(),
+					booleanAsNumber,
 					debugEnabled,
 					rootPrefix,
 					host,

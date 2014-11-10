@@ -55,6 +55,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	@JsonCreator
 	public NagiosWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("filters") List<String> filters,
 			@JsonProperty("thresholds") List<String> thresholds,
@@ -63,7 +64,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			@JsonProperty("prefix") String prefix,
 			@JsonProperty("suffix") String suffix,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.filters = resolveList(firstNonNull(
 				filters,
 				(List<String>) getSettings().get(FILTERS),
@@ -140,7 +141,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	 * The meat of the output. Nagios format..
 	 */
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		checkFile(query);
 		List<String> typeNames = getTypeNames();
 

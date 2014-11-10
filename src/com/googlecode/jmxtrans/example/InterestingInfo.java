@@ -41,7 +41,7 @@ public class InterestingInfo {
 				.setPort(2003)
 				.build();
 
-		StdOutWriter sw = new StdOutWriter(ImmutableList.<String>of(), false, Collections.<String, Object>emptyMap());
+		StdOutWriter sw = new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap());
 
 		Query q = Query.builder()
 				.setObj("java.lang:type=Memory")

@@ -129,6 +129,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	@JsonCreator
 	public StackdriverWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("gatewayUrl") String gatewayUrl,
 			@JsonProperty("apiKey") String apiKey,
@@ -139,7 +140,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			@JsonProperty("source") String source,
 			@JsonProperty("detectInstance") String detectInstance,
 			@JsonProperty("settings") Map<String, Object> settings) throws MalformedURLException {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.gatewayUrl = new URL(firstNonNull(
 				gatewayUrl,
 				(String) getSettings().get(SETTING_STACKDRIVER_API_URL),
@@ -238,7 +239,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	 * Second posts the message to the Stackdriver gateway via HTTP
 	 */
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		String gatewayMessage = getGatewayMessage(results);
 		
 		// message won't be returned if there are no numeric values in the query results

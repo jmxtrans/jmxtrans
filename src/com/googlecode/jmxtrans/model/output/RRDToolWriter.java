@@ -59,13 +59,14 @@ public class RRDToolWriter extends BaseOutputWriter {
 	@JsonCreator
 	public RRDToolWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("templateFile") String templateFile,
 			@JsonProperty("binaryPath") String binaryPath,
 			@JsonProperty("generate") Boolean generate,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.outputFile = new File(MoreObjects.firstNonNull(outputFile, (String) getSettings().get(OUTPUT_FILE)));
 		this.templateFile = new File(MoreObjects.firstNonNull(templateFile, (String) getSettings().get(TEMPLATE_FILE)));
 		this.binaryPath = new File(MoreObjects.firstNonNull(binaryPath, (String) getSettings().get(BINARY_PATH)));
@@ -103,7 +104,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 		return result;
 	}
 
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDef def = getDatabaseTemplateSpec();
 
 		List<String> dsNames = getDsNames(def.getDsDefs());
@@ -317,6 +318,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 
 	public static final class Builder {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
+		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
 		private File outputFile;
 		private File templateFile;
@@ -332,6 +334,11 @@ public class RRDToolWriter extends BaseOutputWriter {
 
 		public Builder addTypeName(String typeName) {
 			typeNames.add(typeName);
+			return this;
+		}
+
+		public Builder setBooleanAsNumber(boolean booleanAsNumber) {
+			this.booleanAsNumber = booleanAsNumber;
 			return this;
 		}
 
@@ -363,6 +370,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 		public RRDToolWriter build() {
 			return new RRDToolWriter(
 					typeNames.build(),
+					booleanAsNumber,
 					debugEnabled,
 					outputFile.getPath(),
 					templateFile.getPath(),

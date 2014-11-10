@@ -2,11 +2,19 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
+import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
+import com.googlecode.jmxtrans.model.results.ValueTransformer;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -15,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveMap;
 import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
@@ -40,10 +49,12 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	private ImmutableList<String> typeNames;
 	private boolean debugEnabled;
 	private Map<String, Object> settings;
+	private final ValueTransformer valueTransformer;
 
 	@JsonCreator
 	public BaseOutputWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		// resolve and initialize settings first, so we cean refer to them to initialize other fields
@@ -59,6 +70,12 @@ public abstract class BaseOutputWriter implements OutputWriter {
 				debugEnabled,
 				getBooleanSetting(this.settings, DEBUG),
 				false);
+
+		if (booleanAsNumber) {
+			this.valueTransformer = new BooleanAsNumberValueTransformer(0, 1);
+		} else {
+			this.valueTransformer = new IdentityValueTransformer();
+		}
 	}
 
 	protected <T> T firstNonNull(@Nullable T first, @Nullable T second, @Nullable T third) {
@@ -122,5 +139,37 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	@Override
 	public void stop() throws LifecycleException {
 		// Do nothing.
+	}
+
+	@Override
+	public final void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+		internalWrite(server, query, from(results).transform(new ResultValuesTransformer(valueTransformer)).toList());
+	}
+
+	protected abstract void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
+
+	private static final class ResultValuesTransformer implements Function<Result, Result> {
+
+		private final ValueTransformer valueTransformer;
+
+		private ResultValuesTransformer(ValueTransformer valueTransformer) {
+			this.valueTransformer = valueTransformer;
+		}
+
+		@Nullable
+		@Override
+		public Result apply(@Nullable Result input) {
+			if (input == null) {
+				return null;
+			}
+			return new Result(
+					input.getEpoch(),
+					input.getAttributeName(),
+					input.getClassName(),
+					input.getClassNameAlias(),
+					input.getTypeName(),
+					Maps.transformValues(input.getValues(), valueTransformer)
+			);
+		}
 	}
 }

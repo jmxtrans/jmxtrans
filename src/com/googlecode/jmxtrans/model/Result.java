@@ -25,11 +25,11 @@ public class Result {
 	private final long epoch;
 	private final String classNameAlias;
 
-	public Result(String attributeName, String className, String classNameAlias, String typeName, Map<String, Object> values) {
+	public Result(long epoch, String attributeName, String className, String classNameAlias, String typeName, Map<String, Object> values) {
 		this.className = className;
 		this.typeName = typeName;
 		this.values = ImmutableMap.copyOf(values);
-		this.epoch = System.currentTimeMillis();
+		this.epoch = epoch;
 		this.attributeName = attributeName;
 		this.classNameAlias = classNameAlias;
 	}

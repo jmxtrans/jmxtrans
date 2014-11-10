@@ -53,6 +53,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	@JsonCreator
 	public OpenTSDBGenericWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
@@ -62,7 +63,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 			@JsonProperty("metricNamingExpression") String metricNamingExpression,
 			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.host = resolveProps(MoreObjects.firstNonNull(host, (String) getSettings().get(HOST)));
 		this.port = MoreObjects.firstNonNull(port, Settings.getIntegerSetting(getSettings(), PORT, null));
 		this.tags = ImmutableMap.copyOf(firstNonNull(
@@ -271,7 +272,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	 * @param results
 	 */
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		this.startOutput();
 		for (Result result : results) {
 			for (String resultString : resultParser(result)) {

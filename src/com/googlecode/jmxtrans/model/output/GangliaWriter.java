@@ -80,6 +80,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	@JsonCreator
 	public GangliaWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
@@ -92,7 +93,7 @@ public class GangliaWriter extends BaseOutputWriter {
 			@JsonProperty("dmax") Integer dmax,
 			@JsonProperty("groupName") String groupName,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.host = MoreObjects.firstNonNull(host, (String) getSettings().get(HOST));
 		this.port = MoreObjects.firstNonNull(
 				port,
@@ -160,7 +161,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	 * Send query result values to Ganglia.
 	 */
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (final Result result : results) {
 			if (result.getValues() != null) {
 				for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {
@@ -298,6 +299,7 @@ public class GangliaWriter extends BaseOutputWriter {
 
 	public static final class Builder {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
+		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
 		private String host;
 		private Integer port;
@@ -320,6 +322,11 @@ public class GangliaWriter extends BaseOutputWriter {
 
 		public Builder addTypeName(String typeName) {
 			typeNames.add(typeName);
+			return this;
+		}
+
+		public Builder setBooleanAsNumber(boolean booleanAsNumber) {
+			this.booleanAsNumber = booleanAsNumber;
 			return this;
 		}
 
@@ -381,6 +388,7 @@ public class GangliaWriter extends BaseOutputWriter {
 		public GangliaWriter build() {
 			return new GangliaWriter(
 					typeNames.build(),
+					booleanAsNumber,
 					debugEnabled,
 					host,
 					port,
