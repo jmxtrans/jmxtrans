@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 /**
  * Allows us to pool socket connections.
@@ -61,16 +60,6 @@ public class SocketFactory extends BaseKeyedPoolableObjectFactory<InetSocketAddr
 		}
 		if (socket.isOutputShutdown()) {
 			log.error("Socket output is shutdown [{}]", address);
-			return false;
-		}
-		// This is a slow test, let's at least put it last. Should probably be removed anyway.
-		try {
-			socket.setSoTimeout(100);
-			if (socket.getInputStream().read() == -1) {
-				return false;
-			}
-		} catch (SocketTimeoutException e) {
-		} catch (Exception e) {
 			return false;
 		}
 		return true;
