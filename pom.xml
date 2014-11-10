@@ -774,6 +774,11 @@
 			</build>
 		</profile>
 		<profile>
+			<!--
+				RPM packaging is done in a profile to ensure that it does not impact build on platforms not supporting
+				RPM tools. Once we are happy with how this works, we could probably autoactivate this profile if
+				appropriate tools are detected on the system.
+			-->
 			<id>rpm</id>
 			<build>
 				<plugins>
