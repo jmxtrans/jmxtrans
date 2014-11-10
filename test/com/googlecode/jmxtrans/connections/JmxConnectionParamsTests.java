@@ -58,4 +58,48 @@ public class JmxConnectionParamsTests {
 		assertThat(p1.hashCode()).isNotEqualTo(p2.hashCode());
 	}
 
+	@Test
+	public void twoDifferentConnectionParamsAreEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("key", "value"));
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("key", "value"));
+		assertThat(p1).isEqualTo(p2);
+	}
+
+	@Test
+	public void connectionParamsWithDifferentEnvironmentsAreNotEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("key", "value1"));
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("key", "value2"));
+		assertThat(p1).isNotEqualTo(p2);
+	}
+
+	@Test
+	public void connectionParamsSameUrlAndNoEnvironmentAreEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.<String, Object>of());
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.<String, Object>of());
+		assertThat(p1).isEqualTo(p2);
+	}
+
+	@Test
+	public void connectionParamsDifferentUrlAndNoEnvironmentAreNotEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.<String, Object>of());
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL_2),
+				ImmutableMap.<String, Object>of());
+		assertThat(p1).isNotEqualTo(p2);
+	}
+
 }
