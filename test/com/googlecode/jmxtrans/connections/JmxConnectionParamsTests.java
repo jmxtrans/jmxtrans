@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.connections;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
@@ -99,6 +100,50 @@ public class JmxConnectionParamsTests {
 		JMXConnectionParams p2 = new JMXConnectionParams(
 				new JMXServiceURL(JMX_URL_2),
 				ImmutableMap.<String, Object>of());
+		assertThat(p1).isNotEqualTo(p2);
+	}
+
+	@Test
+	public void connectionParamsWithArrayAsEnvironmentValueAreEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", new String[]{ "value" }));
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", new String[]{ "value" }));
+		assertThat(p1).isEqualTo(p2);
+	}
+
+	@Test
+	public void connectionParamsWithDifferentArrayAsEnvironmentValueAreNotEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", new String[]{ "value1" }));
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", new String[]{ "value2" }));
+		assertThat(p1).isNotEqualTo(p2);
+	}
+
+	@Test
+	public void connectionParamsWithListsAsEnvironmentValueAreEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", ImmutableList.of("value")));
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", ImmutableList.of("value")));
+		assertThat(p1).isEqualTo(p2);
+	}
+
+	@Test
+	public void connectionParamsWithDifferentListsAsEnvironmentValueAreNotEquals() throws MalformedURLException {
+		JMXConnectionParams p1 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", ImmutableList.of("value1")));
+		JMXConnectionParams p2 = new JMXConnectionParams(
+				new JMXServiceURL(JMX_URL),
+				ImmutableMap.of("test", ImmutableList.of("value2")));
 		assertThat(p1).isNotEqualTo(p2);
 	}
 
