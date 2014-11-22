@@ -20,6 +20,7 @@ LOG_DIR=${LOG_DIR:-"."}
 LOG_FILE=${LOG_FILE:-"/dev/null"}
 
 JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
+ADDON_JARS=${ADDON_JARS:-""}
 JSON_DIR=${JSON_DIR:-"."}
 SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
 HARDKILL_THRESHOLD=${HARDKILL_THRESHOLD:-60}
@@ -85,9 +86,9 @@ start() {
     fi
 
     if [ -z "$FILENAME" ]; then
-        EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
+        EXEC=${EXEC:-"-classpath $JAR_FILE:$ADDON_JARS com.googlecode.jmxtrans.JmxTransformer -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
     else
-        EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
+        EXEC=${EXEC:-"-classpath $JAR_FILE:$ADDON_JARS com.googlecode.jmxtrans.JmxTransformer -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR"}
     fi
 
     nohup $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS $EXEC >>$LOG_FILE 2>&1 &
