@@ -212,7 +212,7 @@
 							<mainClass>${main.class}</mainClass>
 							<commandLineArguments>
 								<commandLineArgument>-j</commandLineArgument>
-								<commandLineArgument>/etc/${package.daemon.name}</commandLineArgument>
+								<commandLineArgument>/var/lib/${project.artifactId}</commandLineArgument>
 							</commandLineArguments>
 							<platforms>
 								<platform>jsw</platform>
@@ -805,8 +805,10 @@
 								<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
 							</defineStatements>
 							<preinstallScriptlet>
-								<script>/usr/sbin/useradd -c "${project.name}" -s /sbin/nologin -r -d \
-									${package.install.dir} ${package.user} 2> /dev/null || :
+								<script>
+									/usr/sbin/groupadd ${package.group} 2> /dev/null
+									/usr/sbin/useradd -c "${project.name}" -s /sbin/nologin -r -d \
+									${package.install.dir} -g ${package.group} ${package.user}
 								</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
@@ -816,7 +818,8 @@
 								<script>
 									/sbin/service ${package.daemon.name} stop > /dev/null 2>&amp;1
 									/sbin/chkconfig --del ${package.daemon.name}
-									/usr/sbin/userdel ${package.user} 2> /dev/null
+									/usr/sbin/groupdel ${package.user}
+									/usr/sbin/userdel ${package.group}
 								</script>
 							</preremoveScriptlet>
 							<requires>
@@ -852,6 +855,15 @@
 									</sources>
 								</mapping>
 								<mapping>
+									<directory>/usr/bin</directory>
+									<filemode>755</filemode>
+									<sources>
+										<source>
+											<location>${project.basedir}/bin/</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
 									<directory>/etc/${package.daemon.name}</directory>
 									<configuration>true</configuration>
 									<sources>
@@ -867,6 +879,9 @@
 											<location>${package.install.dir}/bin/${package.daemon.name}</location>
 										</softlinkSource>
 									</sources>
+								</mapping>
+								<mapping>
+									<directory>/var/lib/${project.artifactId}</directory>
 								</mapping>
 								<mapping>
 									<directory>/var/log/${package.daemon.name}</directory>
