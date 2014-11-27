@@ -214,6 +214,14 @@
 								<commandLineArgument>-j</commandLineArgument>
 								<commandLineArgument>/var/lib/${project.artifactId}</commandLineArgument>
 							</commandLineArguments>
+							<jvmSettings>
+								<extraArguments>
+									<extraArgument>-Dcom.sun.management.jmxremote</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
+								</extraArguments>
+							</jvmSettings>
 							<platforms>
 								<platform>jsw</platform>
 							</platforms>
@@ -806,20 +814,24 @@
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>
-									/usr/sbin/groupadd ${package.group} 2> /dev/null
-									/usr/sbin/useradd -c "${project.name}" -s /sbin/nologin -r -d \
-									${package.install.dir} -g ${package.group} ${package.user}
+									if [ $1 = 1 ]; then
+										/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+										${package.install.dir} -U ${package.user}
+									fi
 								</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
-								<script>/sbin/chkconfig --add ${package.daemon.name}</script>
+								<script>
+									/sbin/chkconfig --add ${package.daemon.name}
+								</script>
 							</postinstallScriptlet>
 							<preremoveScriptlet>
 								<script>
-									/sbin/service ${package.daemon.name} stop > /dev/null 2>&amp;1
-									/sbin/chkconfig --del ${package.daemon.name}
-									/usr/sbin/groupdel ${package.user}
-									/usr/sbin/userdel ${package.group}
+									if [ $1 = 0 ]; then
+										/sbin/service ${package.daemon.name} stop
+										/sbin/chkconfig --del ${package.daemon.name}
+										/usr/sbin/userdel ${package.user}
+									fi
 								</script>
 							</preremoveScriptlet>
 							<requires>
