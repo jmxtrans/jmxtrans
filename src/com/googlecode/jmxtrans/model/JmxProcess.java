@@ -2,40 +2,41 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
 /**
  * This is the container for a list of Servers.
- * 
+ *
  * @author jon
  */
 @JsonSerialize(include = NON_NULL)
 public class JmxProcess {
 
 	private String name;
-	private List<Server> servers = new ArrayList<Server>();
+	private ImmutableList<Server> servers;
 	private Integer numMultiThreadedServers;
 
 	public JmxProcess() {
+		this(ImmutableList.<Server>of());
 	}
 
 	public JmxProcess(Server server) {
-		this.servers.add(server);
+		this.servers = ImmutableList.of(server);
 	}
 
-	public JmxProcess(List<Server> servers) {
+	public JmxProcess(ImmutableList<Server> servers) {
 		this.setServers(servers);
 	}
 
 	public void setServers(List<Server> servers) {
-		this.servers = servers;
+		this.servers = ImmutableList.copyOf(servers);
 	}
 
-	public List<Server> getServers() {
+	public ImmutableList<Server> getServers() {
 		return servers;
 	}
 

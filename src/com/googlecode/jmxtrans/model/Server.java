@@ -436,7 +436,7 @@ public class Server {
 	 */
 	// FIXME: the params for this method should be Set<Server> as there are multiple assumptions that they are unique
 	@CheckReturnValue
-	public static List<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
+	public static ImmutableList<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
 		ImmutableList.Builder<Server> results = ImmutableList.builder();
 		List<Server> toProcess = new ArrayList<Server>(secondList);
 		for (Server firstServer : firstList) {
