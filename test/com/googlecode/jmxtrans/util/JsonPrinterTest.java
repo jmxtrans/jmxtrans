@@ -1,16 +1,13 @@
 package com.googlecode.jmxtrans.util;
 
 import com.google.common.io.Closer;
+import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,7 +50,6 @@ public class JsonPrinterTest {
 	}
 
 	private JmxProcess standardProcess() {
-		List<Server> servers = new ArrayList<Server>();
 		Server server = Server.builder()
 				.setAlias("alias")
 				.setHost("example.org")
@@ -62,8 +58,7 @@ public class JsonPrinterTest {
 					.setObj("obj")
 					.build())
 				.build();
-		servers.add(server);
-		return new JmxProcess(servers);
+		return new JmxProcess(server);
 	}
 
 }
