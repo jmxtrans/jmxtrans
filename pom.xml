@@ -41,6 +41,17 @@
 			<name>Cyrille Le Clerc</name>
 			<email>cleclerc@cloudbees.com</email>
 		</developer>
+		<developer>
+			<id>gehel</id>
+			<name>Guillaume Lederrey</name>
+			<email>guillaume.lederrey@gmail.com</email>
+			<url>http://slashdevslashrandom.wordpress.com/</url>
+			<organization>Nestlé Nespresso SA</organization>
+			<organizationUrl>http://www.nespresso.com</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
 	</developers>
 
 	<scm>
@@ -59,7 +70,7 @@
 		-->
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<!-- some versions used by multiple dependencies -->
-		<jackson.version>2.4.2</jackson.version>
+		<jackson.version>2.4.4</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<package.daemon.name>${project.artifactId}d</package.daemon.name>
@@ -67,7 +78,6 @@
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
 	</properties>
 
 	<dependencies>
@@ -75,7 +85,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -87,7 +97,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2</version>
 		</dependency>
 
 		<dependency>
@@ -123,7 +133,7 @@
 		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
-			<version>4.0-beta4</version>
+			<version>4.0-beta5</version>
 		</dependency>
 
 		<dependency>
@@ -135,25 +145,19 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.2</version>
+			<version>1.10</version>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>1.4</version>
+			<version>2.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>2.5</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
+			<version>2.6</version>
 		</dependency>
 
 		<dependency>
@@ -165,25 +169,25 @@
 		<dependency>
 			<groupId>info.ganglia.gmetric4j</groupId>
 			<artifactId>gmetric4j</artifactId>
-			<version>1.0.3</version>
+			<version>1.0.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
+			<version>1.2.17</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.sf.jpathwatch</groupId>
 			<artifactId>jpathwatch</artifactId>
 			<version>0.95</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.acplt</groupId>
-			<artifactId>oncrpc</artifactId>
-			<version>1.0.7</version>
 		</dependency>
 
 		<!-- JEXL support for configurable naming strategy expressions -->
@@ -200,24 +204,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
-			<version>1.2.0.201112221803-r</version>
-		</dependency>
-
-		<!-- JSR160 (JMX Remoting) protocol -->
-		<dependency>
-			<groupId>org.jboss.remoting3</groupId>
-			<artifactId>remoting-jmx</artifactId>
-			<version>1.0.1.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.remotingjmx</groupId>
-			<artifactId>remoting-jmx</artifactId>
-			<version>1.1.1.CR2</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.jrobin</groupId>
 			<artifactId>jrobin</artifactId>
 			<version>1.5.9</version>
@@ -226,19 +212,19 @@
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
-			<version>1.8.4</version>
+			<version>1.8.6</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.6</version>
+			<version>1.7.7</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.6</version>
+			<version>1.7.7</version>
 		</dependency>
 
 		<dependency>
@@ -246,6 +232,50 @@
 			<artifactId>annotations</artifactId>
 			<version>3.0.0</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<!--
+				There is no compile time dependency on acplt. There might be a runtime dependency that I did not
+				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
+			-->
+			<groupId>org.acplt</groupId>
+			<artifactId>oncrpc</artifactId>
+			<version>1.0.7</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<!--
+				There is no compile time dependency on jgit. There might be a runtime dependency that I did not
+				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
+			-->
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>3.6.0.201411121045-m1</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- JSR160 (JMX Remoting) protocol -->
+		<dependency>
+			<!--
+				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
+				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
+			-->
+			<groupId>org.jboss.remoting3</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<version>1.0.1.Final</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!--
+				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
+				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
+			-->
+			<groupId>org.jboss.remotingjmx</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<version>2.0.1.CR1</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- UNIT TESTING -->
@@ -259,10 +289,18 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>1.6.1</version>
+			<version>1.7.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-core</artifactId>
+			<version>1.3</version>
+			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
 
+		<!--
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>
@@ -270,23 +308,42 @@
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-
+		-->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>1.3</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>1.9.5</version>
+			<version>1.10.8</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.5.6</version>
+			<version>1.6.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-core</artifactId>
+			<version>1.6.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>
-			<version>1.5.6</version>
+			<version>1.6.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-reflect</artifactId>
+			<version>1.6.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -419,7 +476,6 @@
 		</pluginManagement>
 
 		<plugins>
-
 			<plugin>
 				<groupId>com.google.code.sortpom</groupId>
 				<artifactId>maven-sortpom-plugin</artifactId>
@@ -627,7 +683,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.0</version>
 				<configuration>
 					<effort>Max</effort>
 					<threshold>Default</threshold>
