@@ -1,6 +1,9 @@
 package com.googlecode.jmxtrans.cli;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.File;
+import java.util.List;
 
 public class JmxTransConfiguration {
 	private boolean continueOnJsonError = false;
@@ -16,6 +19,7 @@ public class JmxTransConfiguration {
 	private int runPeriod = 60;
 	private boolean help = false;
 
+	private List<File> additionalJars = ImmutableList.of();
 
 	/**
 	 * If it is false, then JmxTrans will stop when one of the JSON
@@ -94,7 +98,7 @@ public class JmxTransConfiguration {
 	/**
 	 * Gets the run period.
 	 *
-	 * @return the run period
+	 * @return the number of seconds between two runs
 	 */
 	public int getRunPeriod() {
 		return runPeriod;
@@ -106,5 +110,13 @@ public class JmxTransConfiguration {
 
 	public boolean isHelp() {
 		return help;
+	}
+
+	public List<File> getAdditionalJars() {
+		return additionalJars;
+	}
+
+	public void setAdditionalJars(List<File> additionalJars) {
+		this.additionalJars = additionalJars;
 	}
 }

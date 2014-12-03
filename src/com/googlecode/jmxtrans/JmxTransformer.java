@@ -4,19 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.googlecode.jmxtrans.cli.CliArgumentParser;
-import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.guice.JmxTransModule;
-import com.googlecode.jmxtrans.jobs.ServerJob;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.OutputWriter;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.util.JsonUtils;
-import com.googlecode.jmxtrans.util.WatchDir;
-import com.googlecode.jmxtrans.util.WatchedCallback;
+import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -39,6 +27,20 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import com.googlecode.jmxtrans.cli.CliArgumentParser;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
+import com.googlecode.jmxtrans.jobs.ServerJob;
+import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.WatchDir;
+import com.googlecode.jmxtrans.util.WatchedCallback;
 
 import static com.googlecode.jmxtrans.model.Server.mergeServerLists;
 
@@ -81,6 +83,11 @@ public class JmxTransformer implements WatchedCallback {
 		JmxTransConfiguration configuration = new CliArgumentParser().parseOptions(args);
 		if (configuration.isHelp()) {
 			return;
+		}
+
+		ClassLoaderEnricher enricher = new ClassLoaderEnricher();
+		for (File jar : configuration.getAdditionalJars()) {
+			enricher.add(jar);
 		}
 
 		Injector injector = Guice.createInjector(new JmxTransModule(configuration));

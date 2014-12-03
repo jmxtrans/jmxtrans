@@ -1,10 +1,12 @@
 package com.googlecode.jmxtrans.cli;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import java.io.File;
@@ -55,6 +57,12 @@ public class CliArgumentParser {
 				} catch (NumberFormatException nfe) {
 					throw new OptionsException("Seconds between server job runs must be an integer");
 				}
+			} else if (option.getOpt().equals("a")) {
+				ImmutableList.Builder<File> jars = ImmutableList.builder();
+				for (String jar : option.getValues()) {
+					jars.add(new File(jar));
+				}
+				configuration.setAdditionalJars(jars.build());
 			} else if (option.getOpt().equals("h")) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("java -jar jmxtrans-all.jar", getOptions());
@@ -75,6 +83,13 @@ public class CliArgumentParser {
 		options.addOption("e", false, "Run endlessly. Default false.");
 		options.addOption("q", true, "Path to quartz configuration file.");
 		options.addOption("s", true, "Seconds between server job runs (not defined with cron). Default: 60");
+		options.addOption(OptionBuilder
+				.withArgName("a")
+				.withLongOpt("additionalJars")
+				.hasArgs()
+				.withValueSeparator(',')
+				.withDescription("Coma delimited list of additional jars to add to the class path")
+				.create());
 		options.addOption("h", false, "Help");
 		return options;
 	}
