@@ -8,3 +8,4 @@ out
 *.iws
 *.ipr
 target
+vagrant/.vagrant

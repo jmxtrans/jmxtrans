@@ -35,6 +35,13 @@
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<!-- some versions used by multiple dependencies -->
 		<jackson.version>2.4.2</jackson.version>
+		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
+		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
+		<package.user>${project.artifactId}</package.user>
+		<package.group>${project.artifactId}</package.group>
+		<package.daemon.name>${project.artifactId}d</package.daemon.name>
+		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
+
 	</properties>
 
 	<developers>
@@ -158,7 +165,7 @@
 							<transformers>
 								<transformer
 										implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.googlecode.jmxtrans.JmxTransformer</mainClass>
+									<mainClass>${main.class}</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
@@ -183,6 +190,70 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>appassembler</id>
+						<phase>package</phase>
+						<goals>
+							<goal>assemble</goal>
+							<goal>generate-daemons</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<daemons>
+						<daemon>
+							<id>${package.daemon.name}</id>
+							<mainClass>${main.class}</mainClass>
+							<commandLineArguments>
+								<commandLineArgument>-j</commandLineArgument>
+								<commandLineArgument>/var/lib/${project.artifactId}</commandLineArgument>
+							</commandLineArguments>
+							<jvmSettings>
+								<extraArguments>
+									<extraArgument>-Dcom.sun.management.jmxremote</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
+								</extraArguments>
+							</jvmSettings>
+							<platforms>
+								<platform>jsw</platform>
+							</platforms>
+							<generatorConfigurations>
+								<generatorConfiguration>
+									<generator>jsw</generator>
+									<includes>
+										<include>linux-x86-32</include>
+										<include>linux-x86-64</include>
+									</includes>
+									<configuration>
+										<wrapper.pidfile>/var/run/${package.daemon.name}</wrapper.pidfile>
+										<property>
+											<name>run.as.user.envvar</name>
+											<value>${package.user}</value>
+										</property>
+										<property>
+											<name>wrapper.logfile</name>
+											<value>/var/log/${package.daemon.name}/${project.artifactId}.log</value>
+										</property>
+									</configuration>
+								</generatorConfiguration>
+							</generatorConfigurations>
+						</daemon>
+					</daemons>
+					<programs>
+						<program>
+							<mainClass>${main.class}</mainClass>
+							<id>${project.artifactId}</id>
+						</program>
+					</programs>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -321,8 +392,18 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>appassembler-maven-plugin</artifactId>
+					<version>1.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
 					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>rpm-maven-plugin</artifactId>
+					<version>2.1-alpha-4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.pitest</groupId>
@@ -696,6 +777,136 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!--
+				RPM packaging is done in a profile to ensure that it does not impact build on platforms not supporting
+				RPM tools. Once we are happy with how this works, we could probably autoactivate this profile if
+				appropriate tools are detected on the system.
+			-->
+			<id>rpm</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>rpm-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-rpm</id>
+								<goals>
+									<goal>attached-rpm</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<group>Applications/Communications</group>
+							<defineStatements>
+								<!--
+									The package contains Tanukisoft libs for multiple architectures. Multi-arch package
+									do not exist, so we *should* split this package in a jmxtrans-common package
+									plus an arch specific package for each architecture, containing only the Tanukisoft
+									libraries. I think this is overkill, so let's create a non compliant noarch package.
+								-->
+								<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
+							</defineStatements>
+							<preinstallScriptlet>
+								<script>
+									if [ $1 = 1 ]; then
+										/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+										${package.install.dir} -U ${package.user}
+									fi
+								</script>
+							</preinstallScriptlet>
+							<postinstallScriptlet>
+								<script>
+									/sbin/chkconfig --add ${package.daemon.name}
+								</script>
+							</postinstallScriptlet>
+							<preremoveScriptlet>
+								<script>
+									if [ $1 = 0 ]; then
+										/sbin/service ${package.daemon.name} stop
+										/sbin/chkconfig --del ${package.daemon.name}
+										/usr/sbin/userdel ${package.user}
+									fi
+								</script>
+							</preremoveScriptlet>
+							<requires>
+								<require>java</require>
+							</requires>
+							<mappings>
+								<mapping>
+									<directory>${package.install.dir}/etc</directory>
+									<sources>
+										<source>
+											<location>${jsw.dir}/etc</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>${package.install.dir}/bin</directory>
+									<filemode>755</filemode>
+									<sources>
+										<source>
+											<location>${jsw.dir}/bin</location>
+											<excludes>
+												<exclude>*.bat</exclude>
+											</excludes>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>${package.install.dir}/lib</directory>
+									<sources>
+										<source>
+											<location>${jsw.dir}/lib</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/usr/bin</directory>
+									<filemode>755</filemode>
+									<sources>
+										<source>
+											<location>${project.basedir}/bin/</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/etc/${package.daemon.name}</directory>
+									<configuration>true</configuration>
+									<sources>
+										<softlinkSource>
+											<location>${package.install.dir}/etc</location>
+										</softlinkSource>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/etc/init.d</directory>
+									<sources>
+										<softlinkSource>
+											<location>${package.install.dir}/bin/${package.daemon.name}</location>
+										</softlinkSource>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/var/lib/${project.artifactId}</directory>
+								</mapping>
+								<mapping>
+									<directory>/var/log/${package.daemon.name}</directory>
+									<username>${package.user}</username>
+									<groupname>${package.group}</groupname>
+								</mapping>
+								<mapping>
+									<directory>/var/run/${package.daemon.name}</directory>
+									<username>${package.user}</username>
+									<groupname>${package.group}</groupname>
+								</mapping>
+							</mappings>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
