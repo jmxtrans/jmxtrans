@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -17,32 +17,13 @@
 
 	<url>http://www.jmxtrans.org</url>
 
-	<scm>
-		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
-		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
-		<url>https://github.com/jmxtrans/jmxtrans</url>
-		<tag>HEAD</tag>
-	</scm>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!--
-			Maximum number of checkstyle violations allowed. Build will fail
-			if there are more than this number of violations. Feel free to
-			increase this number if you have a reason. The goal is not to be
-			dogmatic, but to provide consistency in the code.
-		-->
-		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
-		<!-- some versions used by multiple dependencies -->
-		<jackson.version>2.4.2</jackson.version>
-		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
-		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
-		<package.user>${project.artifactId}</package.user>
-		<package.group>${project.artifactId}</package.group>
-		<package.daemon.name>${project.artifactId}d</package.daemon.name>
-		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
-
-	</properties>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
 	<developers>
 		<developer>
@@ -62,18 +43,256 @@
 		</developer>
 	</developers>
 
-	<licenses>
-		<license>
-			<name>MIT License</name>
-			<url>http://www.opensource.org/licenses/mit-license.php</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+	<scm>
+		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
+		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/jmxtrans/jmxtrans</url>
+	</scm>
+
+	<properties>
+		<!--
+			Maximum number of checkstyle violations allowed. Build will fail
+			if there are more than this number of violations. Feel free to
+			increase this number if you have a reason. The goal is not to be
+			dogmatic, but to provide consistency in the code.
+		-->
+		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
+		<!-- some versions used by multiple dependencies -->
+		<jackson.version>2.4.2</jackson.version>
+		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
+		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
+		<package.daemon.name>${project.artifactId}d</package.daemon.name>
+		<package.group>${project.artifactId}</package.group>
+		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
+		<package.user>${project.artifactId}</package.user>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-guava</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>18.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>4.0-beta4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>info.ganglia.gmetric4j</groupId>
+			<artifactId>gmetric4j</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.jpathwatch</groupId>
+			<artifactId>jpathwatch</artifactId>
+			<version>0.95</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.acplt</groupId>
+			<artifactId>oncrpc</artifactId>
+			<version>1.0.7</version>
+		</dependency>
+
+		<!-- JEXL support for configurable naming strategy expressions -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-jexl</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>1.2.0.201112221803-r</version>
+		</dependency>
+
+		<!-- JSR160 (JMX Remoting) protocol -->
+		<dependency>
+			<groupId>org.jboss.remoting3</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<version>1.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.remotingjmx</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<version>1.1.1.CR2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jrobin</groupId>
+			<artifactId>jrobin</artifactId>
+			<version>1.5.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>1.8.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<version>3.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- UNIT TESTING -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>1.6.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<version>1.3</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>1.5.6</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>1.5.6</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 
 	<build>
-
-		<sourceDirectory>src</sourceDirectory>
-		<testSourceDirectory>test</testSourceDirectory>
 
 		<resources>
 			<resource>
@@ -94,227 +313,13 @@
 			</testResource>
 		</testResources>
 
-		<plugins>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>de.andrena.tools.nopackagecycles</groupId>
-						<artifactId>no-package-cycles-enforcer-rule</artifactId>
-						<version>1.0.5</version>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<id>enforce-no-package-cycles</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<phase>test-compile</phase>
-						<configuration>
-							<rules>
-								<NoPackageCyclesRule
-										implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"/>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<includes>
-						<include>**/Test*.java</include>
-						<include>**/*Test.java</include>
-						<include>**/*TestCase.java</include>
-						<include>**/*Tests.java</include>
-					</includes>
-					<systemPropertyVariables>
-						<jmxtrans.log.dir>${project.build.directory}</jmxtrans.log.dir>
-						<myhost>w2</myhost>
-						<myport>1099</myport>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>all</shadedClassifierName>
-							<transformers>
-								<transformer
-										implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>${main.class}</mainClass>
-								</transformer>
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/assembly/dist.xml</descriptor>
-					</descriptors>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>appassembler-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>appassembler</id>
-						<phase>package</phase>
-						<goals>
-							<goal>assemble</goal>
-							<goal>generate-daemons</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<daemons>
-						<daemon>
-							<id>${package.daemon.name}</id>
-							<mainClass>${main.class}</mainClass>
-							<commandLineArguments>
-								<commandLineArgument>-j</commandLineArgument>
-								<commandLineArgument>/var/lib/${project.artifactId}</commandLineArgument>
-							</commandLineArguments>
-							<jvmSettings>
-								<extraArguments>
-									<extraArgument>-Dcom.sun.management.jmxremote</extraArgument>
-									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
-									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
-									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
-								</extraArguments>
-							</jvmSettings>
-							<platforms>
-								<platform>jsw</platform>
-							</platforms>
-							<generatorConfigurations>
-								<generatorConfiguration>
-									<generator>jsw</generator>
-									<includes>
-										<include>linux-x86-32</include>
-										<include>linux-x86-64</include>
-									</includes>
-									<configuration>
-										<wrapper.pidfile>/var/run/${package.daemon.name}</wrapper.pidfile>
-										<property>
-											<name>run.as.user.envvar</name>
-											<value>${package.user}</value>
-										</property>
-										<property>
-											<name>wrapper.logfile</name>
-											<value>/var/log/${package.daemon.name}/${project.artifactId}.log</value>
-										</property>
-									</configuration>
-								</generatorConfiguration>
-							</generatorConfigurations>
-						</daemon>
-					</daemons>
-					<programs>
-						<program>
-							<mainClass>${main.class}</mainClass>
-							<id>${project.artifactId}</id>
-						</program>
-					</programs>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.pitest</groupId>
-				<artifactId>pitest-maven</artifactId>
-				<configuration>
-					<mutators>
-						<mutator>DEFAULTS</mutator>
-						<mutator>REMOVE_CONDITIONALS</mutator>
-						<mutator>INLINE_CONSTS</mutator>
-						<mutator>NON_VOID_METHOD_CALLS</mutator>
-						<mutator>CONSTRUCTOR_CALLS</mutator>
-					</mutators>
-					<mutationThreshold>0</mutationThreshold>
-					<coverageThreshold>0</coverageThreshold>
-					<targetClasses>
-						<param>com.googlecode.jmxtrans.*</param>
-					</targetClasses>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<configuration>
-					<configLocation>src/etc/checkstyle.xml</configLocation>
-					<consoleOutput>true</consoleOutput>
-					<maxAllowedViolations>${checkstyle.max.allowed.violations}</maxAllowedViolations>
-				</configuration>
-				<executions>
-					<execution>
-						<id>checkstyle-check</id>
-						<goals>
-							<goal>check</goal>
-						</goals>
-						<phase>verify</phase>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Default</threshold>
-				</configuration>
-			</plugin>
-
-		</plugins>
-
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>com.google.code.sortpom</groupId>
+					<artifactId>maven-sortpom-plugin</artifactId>
+					<version>2.3.0</version>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
@@ -413,10 +418,293 @@
 			</plugins>
 		</pluginManagement>
 
+		<plugins>
+
+			<plugin>
+				<groupId>com.google.code.sortpom</groupId>
+				<artifactId>maven-sortpom-plugin</artifactId>
+				<configuration>
+					<predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
+					<sortDependencies>scope,groupId,artifactId</sortDependencies>
+					<sortPlugins>groupId,artifactId</sortPlugins>
+					<lineSeparator>\n</lineSeparator>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<sortProperties>true</sortProperties>
+					<keepBlankLines>true</keepBlankLines>
+					<nrOfIndentSpace>-1</nrOfIndentSpace>
+					<verifyFail>Stop</verifyFail>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+						<phase>verify</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>src/etc/checkstyle.xml</configLocation>
+					<consoleOutput>true</consoleOutput>
+					<maxAllowedViolations>${checkstyle.max.allowed.violations}</maxAllowedViolations>
+				</configuration>
+				<executions>
+					<execution>
+						<id>checkstyle-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<phase>verify</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>de.andrena.tools.nopackagecycles</groupId>
+						<artifactId>no-package-cycles-enforcer-rule</artifactId>
+						<version>1.0.5</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>enforce-no-package-cycles</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<phase>test-compile</phase>
+						<configuration>
+							<rules>
+								<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>all</shadedClassifierName>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>${main.class}</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<?SORTPOM IGNORE?>
+			<!-- assembly has to run after shade -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/assembly/dist.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<?SORTPOM RESUME?>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>**/Test*.java</include>
+						<include>**/*Test.java</include>
+						<include>**/*TestCase.java</include>
+						<include>**/*Tests.java</include>
+					</includes>
+					<systemPropertyVariables>
+						<jmxtrans.log.dir>${project.build.directory}</jmxtrans.log.dir>
+						<myhost>w2</myhost>
+						<myport>1099</myport>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<configuration>
+					<daemons>
+						<daemon>
+							<id>${package.daemon.name}</id>
+							<mainClass>${main.class}</mainClass>
+							<commandLineArguments>
+								<commandLineArgument>-j</commandLineArgument>
+								<commandLineArgument>/var/lib/${project.artifactId}</commandLineArgument>
+							</commandLineArguments>
+							<jvmSettings>
+								<extraArguments>
+									<extraArgument>-Dcom.sun.management.jmxremote</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
+								</extraArguments>
+							</jvmSettings>
+							<platforms>
+								<platform>jsw</platform>
+							</platforms>
+							<generatorConfigurations>
+								<generatorConfiguration>
+									<generator>jsw</generator>
+									<includes>
+										<include>linux-x86-32</include>
+										<include>linux-x86-64</include>
+									</includes>
+									<configuration>
+										<wrapper.pidfile>/var/run/${package.daemon.name}</wrapper.pidfile>
+										<property>
+											<name>run.as.user.envvar</name>
+											<value>${package.user}</value>
+										</property>
+										<property>
+											<name>wrapper.logfile</name>
+											<value>/var/log/${package.daemon.name}/${project.artifactId}.log</value>
+										</property>
+									</configuration>
+								</generatorConfiguration>
+							</generatorConfigurations>
+						</daemon>
+					</daemons>
+					<programs>
+						<program>
+							<mainClass>${main.class}</mainClass>
+							<id>${project.artifactId}</id>
+						</program>
+					</programs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>appassembler</id>
+						<goals>
+							<goal>assemble</goal>
+							<goal>generate-daemons</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<effort>Max</effort>
+					<threshold>Default</threshold>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<configuration>
+					<mutators>
+						<mutator>DEFAULTS</mutator>
+						<mutator>REMOVE_CONDITIONALS</mutator>
+						<mutator>INLINE_CONSTS</mutator>
+						<mutator>NON_VOID_METHOD_CALLS</mutator>
+						<mutator>CONSTRUCTOR_CALLS</mutator>
+					</mutators>
+					<mutationThreshold>0</mutationThreshold>
+					<coverageThreshold>0</coverageThreshold>
+					<targetClasses>
+						<param>com.googlecode.jmxtrans.*</param>
+					</targetClasses>
+				</configuration>
+			</plugin>
+		</plugins>
+
+		<sourceDirectory>src</sourceDirectory>
+		<testSourceDirectory>test</testSourceDirectory>
+
 	</build>
 
 	<reporting>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.12.1</version>
+				<configuration>
+					<configLocation>src/etc/checkstyle.xml</configLocation>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<links>
+						<link>http://docs.oracle.com/javase/6/docs/api</link>
+						<link>http://commons.apache.org/pool/api-1.6</link>
+						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.4</link>
+						<link>http://fasterxml.github.io/jackson-core/javadoc/2.4</link>
+						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.4</link>
+						<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc</link>
+					</links>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
+					<targetJdk>1.6</targetJdk>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
@@ -436,33 +724,13 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-				<version>2.4</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<links>
-						<link>http://docs.oracle.com/javase/6/docs/api</link>
-						<link>http://commons.apache.org/pool/api-1.6</link>
-						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.4</link>
-						<link>http://fasterxml.github.io/jackson-core/javadoc/2.4</link>
-						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.4</link>
-						<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc</link>
-					</links>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>2.17</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.1</version>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.6</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -474,21 +742,9 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
-					<targetJdk>1.6</targetJdk>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.12.1</version>
-				<configuration>
-					<configLocation>src/etc/checkstyle.xml</configLocation>
-				</configuration>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jdepend-maven-plugin</artifactId>
+				<version>2.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -524,241 +780,11 @@
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.6</version>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jdepend-maven-plugin</artifactId>
-				<version>2.0</version>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.1</version>
 			</plugin>
 		</plugins>
 	</reporting>
-
-	<dependencies>
-
-		<dependency>
-			<groupId>commons-cli</groupId>
-			<artifactId>commons-cli</artifactId>
-			<version>1.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>1.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.5</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-pool</groupId>
-			<artifactId>commons-pool</artifactId>
-			<version>1.6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>18.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-			<version>4.0-beta4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>annotations</artifactId>
-			<version>3.0.0</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>info.ganglia.gmetric4j</groupId>
-			<artifactId>gmetric4j</artifactId>
-			<version>1.0.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-guava</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>net.sf.jpathwatch</groupId>
-			<artifactId>jpathwatch</artifactId>
-			<version>0.95</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jrobin</groupId>
-			<artifactId>jrobin</artifactId>
-			<version>1.5.9</version>
-		</dependency>
-
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.acplt</groupId>
-			<artifactId>oncrpc</artifactId>
-			<version>1.0.7</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
-			<version>1.2.0.201112221803-r</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-			<version>1.8.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.1.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId>
-			<version>1.7</version>
-		</dependency>
-
-
-		<!-- JEXL support for configurable naming strategy expressions -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-jexl</artifactId>
-			<version>2.1.1</version>
-		</dependency>
-
-
-		<!-- JSR160 (JMX Remoting) protocol -->
-		<dependency>
-			<groupId>org.jboss.remoting3</groupId>
-			<artifactId>remoting-jmx</artifactId>
-			<version>1.0.1.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.remotingjmx</groupId>
-			<artifactId>remoting-jmx</artifactId>
-			<version>1.1.1.CR2</version>
-		</dependency>
-
-
-		<!-- UNIT TESTING -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<version>1.6.1</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
-			<version>1.3</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>1.9.5</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>1.5.6</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.5.6</version>
-			<scope>test</scope>
-		</dependency>
-
-	</dependencies>
 
 	<profiles>
 		<profile>
@@ -771,10 +797,10 @@
 						<executions>
 							<execution>
 								<id>pitest</id>
-								<phase>verify</phase>
 								<goals>
 									<goal>mutationCoverage</goal>
 								</goals>
+								<phase>verify</phase>
 							</execution>
 						</executions>
 					</plugin>
@@ -793,14 +819,6 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>rpm-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-rpm</id>
-								<goals>
-									<goal>attached-rpm</goal>
-								</goals>
-							</execution>
-						</executions>
 						<configuration>
 							<group>Applications/Communications</group>
 							<defineStatements>
@@ -813,26 +831,20 @@
 								<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
 							</defineStatements>
 							<preinstallScriptlet>
-								<script>
-									if [ $1 = 1 ]; then
+								<script>if [ $1 = 1 ]; then
 										/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
 										${package.install.dir} -U ${package.user}
-									fi
-								</script>
+									fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
-								<script>
-									/sbin/chkconfig --add ${package.daemon.name}
-								</script>
+								<script>/sbin/chkconfig --add ${package.daemon.name}</script>
 							</postinstallScriptlet>
 							<preremoveScriptlet>
-								<script>
-									if [ $1 = 0 ]; then
+								<script>if [ $1 = 0 ]; then
 										/sbin/service ${package.daemon.name} stop
 										/sbin/chkconfig --del ${package.daemon.name}
 										/usr/sbin/userdel ${package.user}
-									fi
-								</script>
+									fi</script>
 							</preremoveScriptlet>
 							<requires>
 								<require>java</require>
@@ -907,6 +919,14 @@
 								</mapping>
 							</mappings>
 						</configuration>
+						<executions>
+							<execution>
+								<id>attach-rpm</id>
+								<goals>
+									<goal>attached-rpm</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
