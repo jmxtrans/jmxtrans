@@ -2,6 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/jmxtrans/jmxtrans.png?branch=master)](http://travis-ci.org/jmxtrans/jmxtrans)
 [![Build Status](https://buildhive.cloudbees.com/job/jmxtrans/job/jmxtrans/badge/icon)](https://buildhive.cloudbees.com/job/jmxtrans/job/jmxtrans/)
+[![Dependency Status](https://www.versioneye.com/user/projects/5421de9e3a8c2f2b8b000056/badge.svg?style=flat)](https://www.versioneye.com/user/projects/5421de9e3a8c2f2b8b000056)
 
 This is the source code repository for the jmxtrans project.
 
