@@ -6,6 +6,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
+import com.googlecode.jmxtrans.connections.JMXConnectionParams;
+import com.googlecode.jmxtrans.connections.JmxConnectionFactory;
+import com.googlecode.jmxtrans.connections.SocketFactory;
+import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.Scheduler;
@@ -14,6 +20,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.management.remote.JMXConnector;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,20 +31,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 
-import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
-import com.googlecode.jmxtrans.connections.JMXConnectionParams;
-import com.googlecode.jmxtrans.connections.JmxConnectionFactory;
-import com.googlecode.jmxtrans.connections.SocketFactory;
-import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
-
 public class JmxTransModule extends AbstractModule {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	private final JmxTransConfiguration configuration;
 
-	public JmxTransModule(JmxTransConfiguration configuration) {
+	public JmxTransModule(@Nonnull JmxTransConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
