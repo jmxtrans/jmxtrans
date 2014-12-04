@@ -459,6 +459,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cobertura-maven-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
 					<version>3.0.0</version>
 				</plugin>
@@ -676,6 +681,28 @@
 							<goal>generate-daemons</goal>
 						</goals>
 						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<configuration>
+					<check>
+						<branchRate>0</branchRate>
+						<lineRate>0</lineRate>
+						<packageBranchRate>0</packageBranchRate>
+						<packageLineRate>0</packageLineRate>
+						<totalBranchRate>30</totalBranchRate>
+						<totalLineRate>33</totalLineRate>
+					</check>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>clean</goal>
+							<goal>check</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
