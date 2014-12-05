@@ -69,6 +69,7 @@
 			dogmatic, but to provide consistency in the code.
 		-->
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
+		<github.global.server>github</github.global.server>
 		<!-- some versions used by multiple dependencies -->
 		<jackson.version>2.4.4</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
@@ -373,6 +374,11 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.github.github</groupId>
+					<artifactId>site-maven-plugin</artifactId>
+					<version>0.10</version>
+				</plugin>
+				<plugin>
 					<groupId>com.google.code.sortpom</groupId>
 					<artifactId>maven-sortpom-plugin</artifactId>
 					<version>2.3.0</version>
@@ -455,7 +461,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>appassembler-maven-plugin</artifactId>
-					<version>1.8.1</version>
+					<version>1.9</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -481,6 +487,23 @@
 		</pluginManagement>
 
 		<plugins>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<configuration>
+					<message>Creating site for ${project.name}
+						${project.version}
+					</message>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>site</phase>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>com.google.code.sortpom</groupId>
 				<artifactId>maven-sortpom-plugin</artifactId>

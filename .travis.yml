@@ -1,3 +1,13 @@
 language: java
 install: mvn dependency:go-offline -B -V
-script: "mvn clean verify -B -V"
+before_script: "git clone -b travis `git config --get remote.origin.url` target/travis"
+script: mvn clean verify -B -V
+after_success:
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site
+branches:
+  except:
+    - travis
+    - gh-pages
+env:
+  global:
+    - secure: "J+lRFlE7ISkg362ROM7TeEg2+C8YGM0H4pimlEaf6g9e7QiT4zidpDxH6v9cOHl7B5hFiZ8K6CizfBpwq5AFrWfpPCO22VZMj4oX6tAKsD6AEeDt6x8dxcpx0aiRYrwnARKCucPnLCLWKSEor3BkO+v8LHAw9YMGOk770B64hIs="
