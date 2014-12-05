@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>DailyKeyOutWriter xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../apidocs/com/googlecode/jmxtrans/model/output/DailyKeyOutWriter.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> com.googlecode.jmxtrans.model.output;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> com.fasterxml.jackson.annotation.JsonCreator;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> com.fasterxml.jackson.annotation.JsonProperty;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.log4j.Appender;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> org.apache.log4j.DailyRollingFileAppender;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.apache.log4j.PatternLayout;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment"> * This class is derived from KeyOutWriter. It uses DailyRollingFileAppender</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment"> * instead of RollingFileAppender.</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_javadoccomment"> * Writes out data in the same format as the GraphiteWriter, except to a file</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_javadoccomment"> * and tab delimited. Takes advantage of Log4J DailyRollingFileAppender to</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_javadoccomment"> * automatically handle rolling the files at defined intervals (datePattern).</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_javadoccomment"> * Note that this writer will NOT clean up after itself. The files will not be</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_javadoccomment"> * deleted. It is up to the user to clean things up.</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment"> * The datePattern is taken directly from DailyRollingFileAppender DatePattern.</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment"> * The default datePattern will roll the files at midnight once a day</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment"> * ("'.'yyyy-MM-dd") See the documentation for DailyRollingFileAppender for</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment"> * other useful patterns.</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/DailyKeyOutWriter.html">DailyKeyOutWriter</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/KeyOutWriter.html">KeyOutWriter</a> {
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DATE_PATTERN = <span class="jxr_string">"'.'yyyy-MM-dd"</span>;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String datePattern;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	@JsonCreator
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/DailyKeyOutWriter.html">DailyKeyOutWriter</a>(
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  			@JsonProperty(<span class="jxr_string">"typeNames"</span>) ImmutableList&lt;String&gt; typeNames,
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  			@JsonProperty(<span class="jxr_string">"booleanAsNumber"</span>) <strong class="jxr_keyword">boolean</strong> booleanAsNumber,
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  			@JsonProperty(<span class="jxr_string">"debug"</span>) Boolean debugEnabled,
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  			@JsonProperty(<span class="jxr_string">"outputFile"</span>) String outputFile,
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  			@JsonProperty(<span class="jxr_string">"maxLogFileSize"</span>) String maxLogFileSize,
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  			@JsonProperty(<span class="jxr_string">"maxLogBackupFiles"</span>) <strong class="jxr_keyword">int</strong> maxLogBackupFiles,
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  			@JsonProperty(<span class="jxr_string">"delimiter"</span>) String delimiter,
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  			@JsonProperty(<span class="jxr_string">"datePattern"</span>) String datePattern,
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  			@JsonProperty(<span class="jxr_string">"settings"</span>) Map&lt;String, Object&gt; settings) {
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  		<strong class="jxr_keyword">super</strong>(typeNames, booleanAsNumber, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, delimiter, settings);
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  		<strong class="jxr_keyword">this</strong>.datePattern = firstNonNull(
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  				datePattern,
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  				(String) getSettings().get(<span class="jxr_string">"datePattern"</span>),
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  				DATE_PATTERN
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		);
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">	 * The maxLogFileSize and maxLogBackupFiles are ignored as per the existing behaviour of DailyKeyOutWriter.</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	@Override
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">protected</strong> Appender buildLog4jAppender(String fileStr, String maxLogFileSize, Integer maxLogBackupFiles)
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			<strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> DailyRollingFileAppender(<strong class="jxr_keyword">new</strong> PatternLayout(LOG_PATTERN), fileStr, datePattern);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  	}
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	@Override
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	<strong class="jxr_keyword">protected</strong> String buildLoggerName() {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"DailyKeyOutWriter"</span> + <strong class="jxr_keyword">this</strong>.hashCode();
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	}
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	<strong class="jxr_keyword">public</strong> String getDatePattern() {
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  		<strong class="jxr_keyword">return</strong> datePattern;
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	}
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2014. All rights reserved.</div>
+</body>
+</html>

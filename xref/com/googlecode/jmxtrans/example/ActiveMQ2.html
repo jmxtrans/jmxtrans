@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>ActiveMQ2 xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../apidocs/com/googlecode/jmxtrans/example/ActiveMQ2.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> com.googlecode.jmxtrans.example;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> com.google.inject.Guice;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> com.google.inject.Injector;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.JmxTransformer;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.guice.JmxTransModule;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.JmxProcess;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Query;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Server;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.output.RRDToolWriter;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.util.JsonPrinter;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> java.io.File;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_javadoccomment"> * This example shows how to query an ActiveMQ server for some information.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_javadoccomment"> * The point of this example is to show that * works as part of the objectName.</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_javadoccomment"> * It also shows that you don't have to set an attribute to get for a query.</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment"> * jmxtrans will get all attributes on an object if you don't specify any.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> * @author jon</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../com/googlecode/jmxtrans/example/ActiveMQ2.html">ActiveMQ2</a> {
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../com/googlecode/jmxtrans/util/JsonPrinter.html">JsonPrinter</a> jsonPrinter = <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/util/JsonPrinter.html">JsonPrinter</a>(System.out);
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  	@SuppressFBWarnings(
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  			value = <span class="jxr_string">"DMI_HARDCODED_ABSOLUTE_FILENAME"</span>,
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  			justification = <span class="jxr_string">"Path to RRD binary is hardcoded as this is example code"</span>)
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  		File outputFile = <strong class="jxr_keyword">new</strong> File(<span class="jxr_string">"target/w2-TEST.rrd"</span>);
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  		<strong class="jxr_keyword">if</strong> (!outputFile.exists() &amp;&amp; !outputFile.createNewFile()) {
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"Could not create output file"</span>);
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  		}
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  		RRDToolWriter gw = RRDToolWriter.builder()
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  				.setTemplateFile(<strong class="jxr_keyword">new</strong> File(<span class="jxr_string">"memorypool-rrd-template.xml"</span>))
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  				.setOutputFile(outputFile)
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  				.setBinaryPath(<strong class="jxr_keyword">new</strong> File(<span class="jxr_string">"/opt/local/bin"</span>))
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  				.setDebugEnabled(<strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  				.setGenerate(<strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  				.addTypeName(<span class="jxr_string">"Destination"</span>)
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  				.build();
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  		JmxProcess process = <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/JmxProcess.html">JmxProcess</a>(Server.builder()
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  				.setHost(<span class="jxr_string">"w2"</span>)
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  				.setPort(<span class="jxr_string">"1105"</span>)
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  				.setAlias(<span class="jxr_string">"w2_activemq_1105"</span>)
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  				.addQuery(Query.builder()
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  						.setObj(<span class="jxr_string">"org.apache.activemq:BrokerName=localhost,Type=Queue,Destination=*"</span>)
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  						.addAttr(<span class="jxr_string">"QueueSize"</span>)
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  						.addAttr(<span class="jxr_string">"MaxEnqueueTime"</span>)
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  						.addAttr(<span class="jxr_string">"MinEnqueueTime"</span>)
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  						.addAttr(<span class="jxr_string">"AverageEnqueueTime"</span>)
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  						.addAttr(<span class="jxr_string">"InFlightCount"</span>)
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  						.addAttr(<span class="jxr_string">"ConsumerCount"</span>)
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  						.addAttr(<span class="jxr_string">"ProducerCount"</span>)
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  						.addAttr(<span class="jxr_string">"DispatchCount"</span>)
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  						.addAttr(<span class="jxr_string">"DequeueCount"</span>)
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  						.addAttr(<span class="jxr_string">"EnqueueCount"</span>)
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  						.addOutputWriter(gw)
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  						.build())
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  				.addQuery(Query.builder()
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  						.setObj(<span class="jxr_string">"org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*"</span>)
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  						.addAttr(<span class="jxr_string">"QueueSize"</span>)
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  						.addAttr(<span class="jxr_string">"MaxEnqueueTime"</span>)
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  						.addAttr(<span class="jxr_string">"MinEnqueueTime"</span>)
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  						.addAttr(<span class="jxr_string">"AverageEnqueueTime"</span>)
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  						.addAttr(<span class="jxr_string">"InFlightCount"</span>)
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  						.addAttr(<span class="jxr_string">"ConsumerCount"</span>)
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  						.addAttr(<span class="jxr_string">"ProducerCount"</span>)
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  						.addAttr(<span class="jxr_string">"DispatchCount"</span>)
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  						.addAttr(<span class="jxr_string">"DequeueCount"</span>)
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  						.addAttr(<span class="jxr_string">"EnqueueCount"</span>)
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  						.addOutputWriter(gw)
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  						.build()).build());
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		jsonPrinter.prettyPrint(process);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		Injector injector = Guice.createInjector(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/guice/JmxTransModule.html">JmxTransModule</a>(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/cli/JmxTransConfiguration.html">JmxTransConfiguration</a>()));
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		JmxTransformer transformer = injector.getInstance(JmxTransformer.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		transformer.executeStandalone(process);
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	}
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2014. All rights reserved.</div>
+</body>
+</html>
