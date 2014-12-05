@@ -1,5 +1,5 @@
 language: java
-install: mvn dependency:go-offline -B -V
+install: mvn verify -DskipTests=true -B -V
 before_script: "git clone -b travis `git config --get remote.origin.url` target/travis"
 script: mvn clean verify -B -V
 after_success:
