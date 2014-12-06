@@ -761,6 +761,9 @@
 					<coverageThreshold>84</coverageThreshold>
 					<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>
 					<historyOutputFile>${project.basedir}/pitest-history.xml</historyOutputFile>
+					<jvmArgs>
+						<value>-XX:MaxPermSize=256M</value>
+					</jvmArgs>
 					<targetClasses>
 						<param>com.googlecode.jmxtrans.*</param>
 					</targetClasses>
