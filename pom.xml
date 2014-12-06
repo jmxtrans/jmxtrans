@@ -757,11 +757,14 @@
 						<mutator>NON_VOID_METHOD_CALLS</mutator>
 						<mutator>CONSTRUCTOR_CALLS</mutator>
 					</mutators>
-					<mutationThreshold>0</mutationThreshold>
-					<coverageThreshold>0</coverageThreshold>
+					<mutationThreshold>26</mutationThreshold>
+					<coverageThreshold>84</coverageThreshold>
+					<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>
+					<historyOutputFile>${project.basedir}/pitest-history.xml</historyOutputFile>
 					<targetClasses>
 						<param>com.googlecode.jmxtrans.*</param>
 					</targetClasses>
+					<timestampedReports>false</timestampedReports>
 				</configuration>
 			</plugin>
 		</plugins>

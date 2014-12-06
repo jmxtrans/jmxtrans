@@ -1,9 +1,9 @@
 language: java
 install: mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
 before_script: "git clone -b travis `git config --get remote.origin.url` target/travis"
-script: mvn clean verify -B -V
+script: mvn verify -B -V -PwithMutationTests
 after_success:
-  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site --settings target/travis/settings.xml
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site --settings target/travis/settings.xml -B -V
 branches:
   except:
     - travis
