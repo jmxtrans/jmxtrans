@@ -760,7 +760,7 @@
 					<mutationThreshold>26</mutationThreshold>
 					<coverageThreshold>83</coverageThreshold>
 					<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>
-					<historyOutputFile>${project.basedir}/pitest-history.xml</historyOutputFile>
+					<historyOutputFile>${project.build.directory}/pitest-history.xml</historyOutputFile>
 					<jvmArgs>
 						<value>-XX:MaxPermSize=256M</value>
 					</jvmArgs>
