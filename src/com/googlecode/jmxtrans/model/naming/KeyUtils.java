@@ -144,6 +144,24 @@ public final class KeyUtils {
 	 * @return the concated type name values
 	 */
 	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
+		return getConcatedTypeNameValues(typeNames, typeNameStr, getTypeNameValuesSeparator(null));
+	}
+
+	/**
+	 * Given a typeName string, get the first match from the typeNames setting.
+	 * In other words, suppose you have:
+	 * <p/>
+	 * typeName=name=PS Eden Space,type=MemoryPool
+	 * <p/>
+	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
+	 * string
+	 *
+	 * @param typeNames   the type names
+	 * @param typeNameStr the type name str
+	 * @param separator
+	 * @return the concated type name values
+	 */
+	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr, String separator) {
 		if ((typeNames == null) || (typeNames.size() == 0)) {
 			return null;
 		}
@@ -153,10 +171,10 @@ public final class KeyUtils {
 			String result = typeNameValueMap.get(key);
 			if (result != null) {
 				sb.append(result);
-				sb.append("_");
+				sb.append(separator);
 			}
 		}
-		return org.apache.commons.lang.StringUtils.chomp(sb.toString(), "_");
+		return org.apache.commons.lang.StringUtils.chomp(sb.toString(), separator);
 	}
 
 	/**
@@ -207,16 +225,30 @@ public final class KeyUtils {
 	public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
 		Set<String> queryTypeNames = query.getTypeNames();
 		if (queryTypeNames != null && queryTypeNames.size() > 0) {
-			List<String> allNames = new ArrayList<String>(queryTypeNames);
+			List<String> filteredTypeNames = new ArrayList<String>(queryTypeNames);
 			for (String name : typeNames) {
-				if (!allNames.contains(name)) {
-					allNames.add(name);
+				if (!filteredTypeNames.contains(name)) {
+					filteredTypeNames.add(name);
 				}
 			}
-			return getConcatedTypeNameValues(allNames, typeName);
+			return getConcatedTypeNameValues(filteredTypeNames, typeName, getTypeNameValuesSeparator(query));
 		} else {
-			return getConcatedTypeNameValues(typeNames, typeName);
+			return getConcatedTypeNameValues(typeNames, typeName, getTypeNameValuesSeparator(query));
 		}
+	}
+
+	/**
+	 * Given a query, return a separator for type names based on its configuration.
+	 * If query is null, return the default separator.
+	 *
+	 * @param query   the query
+	 * @return the separator
+	 */
+	private static String getTypeNameValuesSeparator(Query query) {
+		if (query != null && query.isAllowDottedKeys()) {
+			return ".";
+		}
+		return "_";
 	}
 
 	/**
