@@ -79,6 +79,11 @@ public class JmxResultProcessor {
 			Result r = getNewResultObject(attribute.getName(), values);
 			processTabularDataSupport(accumulator, attribute.getName(), tds);
 			accumulator.add(r);
+		}  else if (value instanceof Map) {
+			// should probably check the Map type before casting
+			Map<String,Object> values = (Map<String, Object>) value;
+			Result r = getNewResultObject(attribute.getName(), values);
+			accumulator.add(r);
 		} else {
 			Map<String, Object> values = newHashMap();
 			values.put(attribute.getName(), value);
