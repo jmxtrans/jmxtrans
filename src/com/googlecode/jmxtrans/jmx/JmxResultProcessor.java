@@ -94,7 +94,7 @@ public class JmxResultProcessor {
 	private <K, V> ImmutableMap<String, V> convertKeysToString(Map<K, V> value) {
 		ImmutableMap.Builder<String, V> values = ImmutableMap.builder();
 		for (Map.Entry<K, V> entry : value.entrySet()) {
-			values.put(entry.getKey() == null ? null: entry.getKey().toString(), entry.getValue());
+			values.put(entry.getKey().toString(), entry.getValue());
 		}
 		return values.build();
 	}
