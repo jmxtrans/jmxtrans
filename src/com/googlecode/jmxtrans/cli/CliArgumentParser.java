@@ -89,7 +89,7 @@ public class CliArgumentParser {
 				.hasArgs()
 				.withValueSeparator(',')
 				.withDescription("Coma delimited list of additional jars to add to the class path")
-				.create());
+				.create("a"));
 		options.addOption("h", false, "Help");
 		return options;
 	}
