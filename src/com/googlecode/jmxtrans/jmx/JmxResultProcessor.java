@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 
@@ -80,9 +81,7 @@ public class JmxResultProcessor {
 			processTabularDataSupport(accumulator, attribute.getName(), tds);
 			accumulator.add(r);
 		}  else if (value instanceof Map) {
-			// should probably check the Map type before casting
-			Map<String,Object> values = (Map<String, Object>) value;
-			Result r = getNewResultObject(attribute.getName(), values);
+			Result r = getNewResultObject(attribute.getName(), convertKeysToString((Map<Object, Object>) value));
 			accumulator.add(r);
 		} else {
 			Map<String, Object> values = newHashMap();
@@ -90,6 +89,14 @@ public class JmxResultProcessor {
 			Result r = getNewResultObject(attribute.getName(), values);
 			accumulator.add(r);
 		}
+	}
+
+	private <K, V> ImmutableMap<String, V> convertKeysToString(Map<K, V> value) {
+		ImmutableMap.Builder<String, V> values = ImmutableMap.builder();
+		for (Map.Entry<K, V> entry : value.entrySet()) {
+			values.put(entry.getKey() == null ? null: entry.getKey().toString(), entry.getValue());
+		}
+		return values.build();
 	}
 
 	/**
