@@ -3,6 +3,9 @@ package com.googlecode.jmxtrans.jmx;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,9 +22,6 @@ import javax.management.ReflectionException;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
 
 import static com.google.common.collect.FluentIterable.from;
 import static java.lang.Boolean.TRUE;
@@ -164,6 +164,42 @@ public class JmxResultProcessorTest {
 
 		Object objectValue = result.getValues().get("init");
 		assertThat(objectValue).isInstanceOf(Long.class);
+	}
+
+	@Test
+	public void canReadMapData() throws MalformedObjectNameException {
+		Attribute mapAttribute = new Attribute("map", ImmutableMap.of("key1", "value1", "key2", "value2"));
+
+		List<Result> results = new JmxResultProcessor(
+				query,
+				new ObjectInstance("java.lang:type=Memory", "java.lang.SomeClass"),
+				ImmutableList.of(mapAttribute),
+				"java.lang.SomeClass"
+		).getResults();
+
+		assertThat(results).isNotNull();
+		assertThat(results).hasSize(1);
+		Result result = results.get(0);
+		assertThat(result.getValues()).hasSize(2);
+		assertThat(result.getValues()).isEqualTo(ImmutableMap.of("key1", "value1", "key2", "value2"));
+	}
+
+	@Test
+	public void canReadMapDataWithNonStringKeys() throws MalformedObjectNameException {
+		Attribute mapAttribute = new Attribute("map", ImmutableMap.of(1, "value1", 2, "value2"));
+
+		List<Result> results = new JmxResultProcessor(
+				query,
+				new ObjectInstance("java.lang:type=Memory", "java.lang.SomeClass"),
+				ImmutableList.of(mapAttribute),
+				"java.lang.SomeClass"
+		).getResults();
+
+		assertThat(results).isNotNull();
+		assertThat(results).hasSize(1);
+		Result result = results.get(0);
+		assertThat(result.getValues()).hasSize(2);
+		assertThat(result.getValues()).isEqualTo(ImmutableMap.of("1", "value1", "2", "value2"));
 	}
 
 	public ObjectInstance getRuntime() throws MalformedObjectNameException, InstanceNotFoundException {

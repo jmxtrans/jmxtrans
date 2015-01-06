@@ -592,6 +592,22 @@
 						</goals>
 						<phase>package</phase>
 						<configuration>
+							<filters>
+								<filter>
+						<!-- 
+							Signature files from other jars, if included, prevent the "all" jar from starting with:
+							"java.lang.SecurityException: Invalid signature file digest for Manifest main attributes"
+							This filter excludes signatures files from other signed jars.
+							Specifically avoid including ECLISPE_.* from org.eclipse.jgit.
+						-->
+										<artifact>*:*</artifact>
+										<excludes>
+											<exclude>META-INF/*.SF</exclude>
+											<exclude>META-INF/*.DSA</exclude>
+											<exclude>META-INF/*.RSA</exclude>
+										</excludes>
+								</filter>
+							</filters>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>all</shadedClassifierName>
 							<transformers>
