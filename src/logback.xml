@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <Append>true</Append>
+    <File>${jmxtrans.log.dir}/jmxtrans.log</File>
+    <encoder>
+      <pattern>[%d{dd MMM yyyy HH:mm:ss}] [%t] %-6r %-5p \(%C:%L\) - %msg%n</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${jmxtrans.log.dir}/jmxtrans.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <maxHistory>7</maxHistory>
+    </rollingPolicy>
+  </appender>
+  <appender name="asyncAppender" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="fileAppender" />
+    <queueSize>1024</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <includeCallerData>true</includeCallerData>
+  </appender>
+  <logger name="com.googlecode.jmxtrans" level="${jmxtrans.log.level}">
+    <appender-ref ref="asyncAppender"/>
+  </logger>
+  <logger name="org.quartz" level="WARN">
+    <appender-ref ref="asyncAppender"/>
+  </logger>
+  <root level="ERROR">
+    <appender-ref ref="asyncAppender"/>
+  </root>
+</configuration>
