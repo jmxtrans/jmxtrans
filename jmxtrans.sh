@@ -41,8 +41,9 @@ CPU_CORES=${CPU_CORES:-"1"}
 IO_FRACTION=${IO_FRACTION:-"85"}
 JMX_PORT=${JMX_PORT:-"2101"}
 LOG_LEVEL=${LOG_LEVEL:-"debug"}
+LOGBACK_CONFIG=${LOGBACK_CONFIG:-"logback.xml"}
 CONTINUE_ON_ERROR=${CONTINUE_ON_ERROR:-"false"}
-JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log.dir=$LOG_DIR"
+JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log.dir=$LOG_DIR -Dlogback.configurationFile=${LOGBACK_CONFIG}"
 
 
 MONITOR_OPTS=${MONITOR_OPTS:-"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=${JMX_PORT}"}
