@@ -105,6 +105,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 								log.error("Error writing to Graphite, clearing Graphite socket pool");
 								pool.returnObject(address, socket);
 								pool.clear();
+								socket = pool.borrowObject(address);
+								writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
 							}
 						} else {
 							log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
