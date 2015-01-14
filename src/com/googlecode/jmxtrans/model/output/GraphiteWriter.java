@@ -112,7 +112,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				log.error("Error writing to Graphite, clearing Graphite socket pool");
 				pool.invalidateObject(address, socket);
 			} else {
-			  pool.returnObject(address, socket);
+				pool.returnObject(address, socket);
 			}
 		}
 	}
