@@ -80,10 +80,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
+		PrintWriter writer = null;
 
 		try {
 			socket = pool.borrowObject(address);
-			PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
+			writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
 
 			List<String> typeNames = this.getTypeNames();
 
@@ -108,7 +109,12 @@ public class GraphiteWriter extends BaseOutputWriter {
 				}
 			}
 		} finally {
-			pool.returnObject(address, socket);
+			if (writer != null && writer.checkError()) {
+				log.error("Error writing to Graphite, clearing Graphite socket pool");
+				pool.invalidateObject(address, socket);
+			} else {
+				pool.returnObject(address, socket);
+			}
 		}
 	}
 
