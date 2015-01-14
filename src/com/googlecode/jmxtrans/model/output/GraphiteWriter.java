@@ -80,10 +80,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
+		PrintWriter writer = null;
 
 		try {
 			socket = pool.borrowObject(address);
-			PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
+			writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
 
 			List<String> typeNames = this.getTypeNames();
 
@@ -100,14 +101,6 @@ public class GraphiteWriter extends BaseOutputWriter {
 									+ result.getEpoch() / 1000 + "\n";
 							log.debug("Graphite Message: {}", line);
 							writer.write(line);
-							writer.flush();
-							if (writer.checkError()) {
-								log.error("Error writing to Graphite, clearing Graphite socket pool");
-								pool.returnObject(address, socket);
-								pool.clear();
-								socket = pool.borrowObject(address);
-								writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
-							}
 						} else {
 							log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 						}
@@ -115,7 +108,12 @@ public class GraphiteWriter extends BaseOutputWriter {
 				}
 			}
 		} finally {
-			pool.returnObject(address, socket);
+			if (writer.checkError()) {
+				log.error("Error writing to Graphite, clearing Graphite socket pool");
+				pool.invalidateObject(address, socket);
+			} else {
+			  pool.returnObject(address, socket);
+			}
 		}
 	}
 
