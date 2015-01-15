@@ -101,7 +101,6 @@ public class GraphiteWriter extends BaseOutputWriter {
 									+ result.getEpoch() / 1000 + "\n";
 							log.debug("Graphite Message: {}", line);
 							writer.write(line);
-							writer.flush();
 						} else {
 							log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 						}

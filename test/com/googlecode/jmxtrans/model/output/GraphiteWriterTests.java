@@ -9,13 +9,17 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import static com.google.common.collect.ImmutableList.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class GraphiteWriterTests {
@@ -67,6 +71,38 @@ public class GraphiteWriterTests {
 
 		// check that Graphite format is respected
 		assertThat(out.toString()).startsWith("servers.host_123.classNameAlias.attributeName_key 1 ");
+	}
+
+
+	@Test
+	public void socketInvalidatedWhenError() throws Exception {
+		// a lot of setup for not much of a test ...
+		Server server = Server.builder().setHost("host").setPort("123").build();
+		Query query = Query.builder().build();
+		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
+
+		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
+		Socket socket = mock(Socket.class);
+		when(pool.borrowObject(any(InetSocketAddress.class))).thenReturn(socket);
+		UnflushableByteArrayOutputStream out = new UnflushableByteArrayOutputStream();
+		when(socket.getOutputStream()).thenReturn(out);
+
+		GraphiteWriter writer = GraphiteWriter.builder()
+				.setHost("localhost")
+				.setPort(2003)
+				.build();
+		writer.setPool(pool);
+
+		writer.doWrite(server, query, of(result));
+		verify(pool).invalidateObject(any(InetSocketAddress.class), eq(socket));
+		verify(pool, never()).returnObject(any(InetSocketAddress.class), eq(socket));
+	}
+
+	private static class UnflushableByteArrayOutputStream extends ByteArrayOutputStream {
+		@Override
+		public void flush() throws IOException {
+			throw new IOException();
+		}
 	}
 
 }
