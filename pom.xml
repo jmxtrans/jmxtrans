@@ -774,7 +774,7 @@
 						<mutator>CONSTRUCTOR_CALLS</mutator>
 					</mutators>
 					<mutationThreshold>26</mutationThreshold>
-					<coverageThreshold>83</coverageThreshold>
+					<coverageThreshold>80</coverageThreshold>
 					<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>
 					<historyOutputFile>${project.build.directory}/pitest-history.xml</historyOutputFile>
 					<jvmArgs>
