@@ -1006,6 +1006,14 @@
 									</sources>
 								</mapping>
 								<mapping>
+									<directory>${package.install.dir}/tools</directory>
+									<sources>
+										<source>
+											<location>${project.basedir}/tools</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
 									<directory>/usr/bin</directory>
 									<directoryIncluded>false</directoryIncluded>
 									<filemode>755</filemode>
