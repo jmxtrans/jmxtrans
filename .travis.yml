@@ -1,6 +1,9 @@
 language: java
 before_install: "git clone -b travis `git config --get remote.origin.url` target/travis"
-install: mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
+install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y rpm
+  - mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
 script: ./travis-script.sh
 after_success:
   - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site --settings target/travis/settings.xml -B -V
