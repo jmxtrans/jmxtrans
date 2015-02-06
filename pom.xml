@@ -8,9 +8,9 @@
 		<version>9</version>
 	</parent>
 
-	<groupId>org.jmxtrans.jmxtrans</groupId>
+	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>247-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>jmxtrans</name>
 	<description>JMX metrics exporter</description>
