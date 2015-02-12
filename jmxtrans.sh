@@ -17,7 +17,7 @@ fi
 
 JAVA_HOME=${JAVA_HOME:-"/usr"}
 LOG_DIR=${LOG_DIR:-"."}
-LOG_FILE=${LOG_FILE:-"/dev/null"}
+STDOUT_REDIRECT_FILE=${STDOUT_REDIRECT_FILE:-"/dev/null"}
 
 JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
 ADDITIONAL_JARS=${ADDITIONAL_JARS:-""}
@@ -91,7 +91,7 @@ start() {
         EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR -a $ADDITIONAL_JARS"}
     fi
 
-    nohup $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS $EXEC >>$LOG_FILE 2>&1 &
+    nohup $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS $EXEC >>$STDOUT_REDIRECT_FILE 2>&1 &
 
     if [ ! -z "$PIDFILE" ]; then
         echo $! > "$PIDFILE"
