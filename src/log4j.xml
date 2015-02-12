@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{dd MMM yyyy HH:mm:ss}] %-6r %-5p (%C:%L) - %m\n"/>
+        </layout>
+    </appender>
+
+    <appender name="asyncAppender" class="org.apache.log4j.AsyncAppender">
+        <param name="BufferSize" value="1024" />
+        <param name="Blocking" value="true" />
+        <!-- needed to get the class:linenumber output
+             @see http://marc.info/?l=log4j-user&m=105591790712092&w=2 -->
+        <param name="LocationInfo" value="true"/>
+        <appender-ref ref="fileAppender" />
+    </appender>
+
+    <appender name="fileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="${jmxtrans.log.dir}/jmxtrans.log"/>
+        <param name="Append" value="true"/>
+        <param name="DatePattern" value="'.'yyyyMMdd"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{dd MMM yyyy HH:mm:ss}] [%t] %-6r %-5p (%C:%L) - %m\n"/>
+        </layout>
+    </appender>
+
+    <logger name="com.googlecode.jmxtrans">
+        <level value="${jmxtrans.log.level}"/>
+    </logger>
+
+    <logger name="org.quartz">
+        <level value="warn"/>
+    </logger>
+
+    <root>
+        <level value="error"/>
+        <appender-ref ref="asyncAppender"/>
+    </root>
+
+</log4j:configuration>
