@@ -8,9 +8,9 @@
 		<version>9</version>
 	</parent>
 
-	<groupId>org.jmxtrans.jmxtrans</groupId>
+	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>247-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>jmxtrans</name>
 	<description>JMX metrics exporter</description>
@@ -60,6 +60,17 @@
 		<tag>HEAD</tag>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
 	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<properties>
 		<!--
@@ -425,6 +436,20 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
+					<executions>
+						<execution>
+							<id>sign-artifacts</id>
+							<goals>
+								<goal>sign</goal>
+							</goals>
+							<phase>verify</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
 					<version>2.5.2</version>
 				</plugin>
@@ -437,6 +462,9 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.1</version>
+					<configuration>
+						<releaseProfiles>gpg</releaseProfiles>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -452,6 +480,19 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.2.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar-no-fork</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -483,6 +524,17 @@
 					<artifactId>pitest-maven</artifactId>
 					<version>1.1.2</version>
 				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>1.6.5</version>
+					<extensions>true</extensions>
+					<configuration>
+						<serverId>ossrh</serverId>
+						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+						<autoReleaseAfterClose>true</autoReleaseAfterClose>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -492,8 +544,7 @@
 				<artifactId>site-maven-plugin</artifactId>
 				<configuration>
 					<message>Creating site for ${project.name}
-						${project.version}
-					</message>
+						${project.version}</message>
 				</configuration>
 				<executions>
 					<execution>
@@ -581,6 +632,24 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -594,18 +663,18 @@
 						<configuration>
 							<filters>
 								<filter>
-						<!-- 
-							Signature files from other jars, if included, prevent the "all" jar from starting with:
-							"java.lang.SecurityException: Invalid signature file digest for Manifest main attributes"
-							This filter excludes signatures files from other signed jars.
-							Specifically avoid including ECLISPE_.* from org.eclipse.jgit.
-						-->
-										<artifact>*:*</artifact>
-										<excludes>
-											<exclude>META-INF/*.SF</exclude>
-											<exclude>META-INF/*.DSA</exclude>
-											<exclude>META-INF/*.RSA</exclude>
-										</excludes>
+									<!--
+										Signature files from other jars, if included, prevent the "all" jar from starting with:
+										"java.lang.SecurityException: Invalid signature file digest for Manifest main attributes"
+										This filter excludes signatures files from other signed jars.
+										Specifically avoid including ECLISPE_.* from org.eclipse.jgit.
+									-->
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
 								</filter>
 							</filters>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
@@ -618,6 +687,10 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 
 			<?SORTPOM IGNORE?>
@@ -774,7 +847,7 @@
 						<mutator>CONSTRUCTOR_CALLS</mutator>
 					</mutators>
 					<mutationThreshold>26</mutationThreshold>
-					<coverageThreshold>83</coverageThreshold>
+					<coverageThreshold>80</coverageThreshold>
 					<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>
 					<historyOutputFile>${project.build.directory}/pitest-history.xml</historyOutputFile>
 					<jvmArgs>
@@ -785,6 +858,10 @@
 					</targetClasses>
 					<timestampedReports>false</timestampedReports>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 
@@ -959,8 +1036,8 @@
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
-										/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-										${package.install.dir} -U ${package.user}
+									/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+									${package.install.dir} -U ${package.user}
 									fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
@@ -968,9 +1045,9 @@
 							</postinstallScriptlet>
 							<preremoveScriptlet>
 								<script>if [ $1 = 0 ]; then
-										/sbin/service ${package.daemon.name} stop
-										/sbin/chkconfig --del ${package.daemon.name}
-										/usr/sbin/userdel ${package.user}
+									/sbin/service ${package.daemon.name} stop
+									/sbin/chkconfig --del ${package.daemon.name}
+									/usr/sbin/userdel ${package.user}
 									fi</script>
 							</preremoveScriptlet>
 							<requires>
@@ -1063,6 +1140,17 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>gpg</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
 					</plugin>
 				</plugins>
 			</build>

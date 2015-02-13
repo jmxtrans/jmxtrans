@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -82,6 +83,9 @@ public class LibratoWriter extends BaseOutputWriter {
 	private final String proxyHost;
 	private final Integer proxyPort;
 	private Proxy proxy;
+	
+	@VisibleForTesting
+	final String httpUserAgent;
 
 	@JsonCreator
 	public LibratoWriter(
@@ -120,6 +124,11 @@ public class LibratoWriter extends BaseOutputWriter {
 		} else {
 			this.proxy = null;
 		}
+		this.httpUserAgent =
+				"jmxtrans-standalone/1 " + "(" +
+						System.getProperty("java.vm.name") + "/" + System.getProperty("java.version") + "; " +
+						System.getProperty("os.name") + "-" + System.getProperty("os.arch") + "/" + System.getProperty("os.version")
+						+ ")";
 	}
 
 	public void validateSetup(Server server, Query query) throws ValidationException {
@@ -188,6 +197,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			urlConnection.setReadTimeout(libratoApiTimeoutInMillis);
 			urlConnection.setRequestProperty("content-type", "application/json; charset=utf-8");
 			urlConnection.setRequestProperty("Authorization", "Basic " + basicAuthentication);
+			urlConnection.setRequestProperty("User-Agent", httpUserAgent);
 
 			serialize(server, query, results, urlConnection.getOutputStream());
 			int responseCode = urlConnection.getResponseCode();
