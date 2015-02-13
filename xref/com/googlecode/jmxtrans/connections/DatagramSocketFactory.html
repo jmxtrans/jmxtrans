@@ -23,25 +23,27 @@
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  	@Override
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  	<strong class="jxr_keyword">public</strong> DatagramSocket makeObject(SocketAddress socketAddress) <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> DatagramSocket(socketAddress);
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  	}
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_javadoccomment">	 * Closes the socket.</em>
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  	@Override
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> destroyObject(SocketAddress key, DatagramSocket socket) <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  		socket.close();
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  	}
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment">	 * Validates that the socket is good.</em>
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  	@Override
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> validateObject(SocketAddress key, DatagramSocket socket) {
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  		<strong class="jxr_keyword">return</strong> socket.isBound() &amp;&amp; !socket.isClosed() &amp;&amp; socket.isConnected();
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	}
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  }
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  		DatagramSocket datagramSocket = <strong class="jxr_keyword">new</strong> DatagramSocket();
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  		datagramSocket.connect(socketAddress);
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  		<strong class="jxr_keyword">return</strong> datagramSocket;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  	}
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment">	 * Closes the socket.</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  	@Override
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> destroyObject(SocketAddress key, DatagramSocket socket) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  		socket.close();
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	}
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">	 * Validates that the socket is good.</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	@Override
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> validateObject(SocketAddress key, DatagramSocket socket) {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  		<strong class="jxr_keyword">return</strong> socket.isBound() &amp;&amp; !socket.isClosed() &amp;&amp; socket.isConnected();
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	}
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2015. All rights reserved.</div>
