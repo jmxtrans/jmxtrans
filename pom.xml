@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -73,22 +74,22 @@
 	</distributionManagement>
 
 	<properties>
-		<!--
-			Maximum number of checkstyle violations allowed. Build will fail
-			if there are more than this number of violations. Feel free to
-			increase this number if you have a reason. The goal is not to be
-			dogmatic, but to provide consistency in the code.
-		-->
+		<!-- Maximum number of checkstyle violations allowed. Build will fail if 
+			there are more than this number of violations. Feel free to increase this 
+			number if you have a reason. The goal is not to be dogmatic, but to provide 
+			consistency in the code. -->
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
 		<!-- some versions used by multiple dependencies -->
 		<jackson.version>2.4.4</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
+		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
 		<package.daemon.name>${project.artifactId}d</package.daemon.name>
 		<package.group>${project.artifactId}</package.group>
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
+		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -247,10 +248,9 @@
 		</dependency>
 
 		<dependency>
-			<!--
-				There is no compile time dependency on acplt. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
+			<!-- There is no compile time dependency on acplt. There might be a runtime 
+				dependency that I did not identify yet, so let's keep it for the moment. 
+				After further analysis, we might be able to remove it. -->
 			<groupId>org.acplt</groupId>
 			<artifactId>oncrpc</artifactId>
 			<version>1.0.7</version>
@@ -258,10 +258,9 @@
 		</dependency>
 
 		<dependency>
-			<!--
-				There is no compile time dependency on jgit. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
+			<!-- There is no compile time dependency on jgit. There might be a runtime 
+				dependency that I did not identify yet, so let's keep it for the moment. 
+				After further analysis, we might be able to remove it. -->
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
 			<version>3.6.0.201411121045-m1</version>
@@ -270,20 +269,18 @@
 
 		<!-- JSR160 (JMX Remoting) protocol -->
 		<dependency>
-			<!--
-				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
+			<!-- There is no compile time dependency on jboss remoting. There might 
+				be a runtime dependency that I did not identify yet, so let's keep it for 
+				the moment. After further analysis, we might be able to remove it. -->
 			<groupId>org.jboss.remoting3</groupId>
 			<artifactId>remoting-jmx</artifactId>
 			<version>1.0.1.Final</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<!--
-				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
+			<!-- There is no compile time dependency on jboss remoting. There might 
+				be a runtime dependency that I did not identify yet, so let's keep it for 
+				the moment. After further analysis, we might be able to remove it. -->
 			<groupId>org.jboss.remotingjmx</groupId>
 			<artifactId>remoting-jmx</artifactId>
 			<version>2.0.1.CR1</version>
@@ -312,15 +309,8 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
-			<version>1.3</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		-->
+		<!-- <dependency> <groupId>org.hamcrest</groupId> <artifactId>hamcrest-all</artifactId> 
+			<version>1.3</version> <type>jar</type> <scope>test</scope> </dependency> -->
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
@@ -626,7 +616,8 @@
 						<phase>test-compile</phase>
 						<configuration>
 							<rules>
-								<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
+								<NoPackageCyclesRule
+									implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
 							</rules>
 						</configuration>
 					</execution>
@@ -663,12 +654,10 @@
 						<configuration>
 							<filters>
 								<filter>
-									<!--
-										Signature files from other jars, if included, prevent the "all" jar from starting with:
-										"java.lang.SecurityException: Invalid signature file digest for Manifest main attributes"
-										This filter excludes signatures files from other signed jars.
-										Specifically avoid including ECLISPE_.* from org.eclipse.jgit.
-									-->
+									<!-- Signature files from other jars, if included, prevent the "all" 
+										jar from starting with: "java.lang.SecurityException: Invalid signature file 
+										digest for Manifest main attributes" This filter excludes signatures files 
+										from other signed jars. Specifically avoid including ECLISPE_.* from org.eclipse.jgit. -->
 									<artifact>*:*</artifact>
 									<excludes>
 										<exclude>META-INF/*.SF</exclude>
@@ -680,7 +669,8 @@
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>all</shadedClassifierName>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>${main.class}</mainClass>
 								</transformer>
 							</transformers>
@@ -1012,11 +1002,10 @@
 			</build>
 		</profile>
 		<profile>
-			<!--
-				RPM packaging is done in a profile to ensure that it does not impact build on platforms not supporting
-				RPM tools. Once we are happy with how this works, we could probably autoactivate this profile if
-				appropriate tools are detected on the system.
-			-->
+			<!-- RPM packaging is done in a profile to ensure that it does not impact 
+				build on platforms not supporting RPM tools. Once we are happy with how this 
+				works, we could probably autoactivate this profile if appropriate tools are 
+				detected on the system. -->
 			<id>rpm</id>
 			<build>
 				<plugins>
@@ -1026,18 +1015,19 @@
 						<configuration>
 							<group>Applications/Communications</group>
 							<defineStatements>
-								<!--
-									The package contains Tanukisoft libs for multiple architectures. Multi-arch package
-									do not exist, so we *should* split this package in a jmxtrans-common package
-									plus an arch specific package for each architecture, containing only the Tanukisoft
-									libraries. I think this is overkill, so let's create a non compliant noarch package.
-								-->
+								<!-- The package contains Tanukisoft libs for multiple architectures. 
+									Multi-arch package do not exist, so we *should* split this package in a jmxtrans-common 
+									package plus an arch specific package for each architecture, containing only 
+									the Tanukisoft libraries. I think this is overkill, so let's create a non 
+									compliant noarch package. -->
 								<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
-									/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-									${package.install.dir} -U ${package.user}
+									/usr/sbin/useradd -c
+									"${project.name}" -s /bin/sh -r -d \
+									${package.install.dir} -U
+									${package.user}
 									fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
@@ -1045,7 +1035,8 @@
 							</postinstallScriptlet>
 							<preremoveScriptlet>
 								<script>if [ $1 = 0 ]; then
-									/sbin/service ${package.daemon.name} stop
+									/sbin/service ${package.daemon.name}
+									stop
 									/sbin/chkconfig --del ${package.daemon.name}
 									/usr/sbin/userdel ${package.user}
 									fi</script>
@@ -1151,6 +1142,55 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>dpkg</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.3</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<skipPOMs>true</skipPOMs>
+									<deb>${project.build.directory}/${project.artifactId}-${project.version}.deb</deb>
+									<dataSet>
+										<data>
+											<src>${project.build.directory}/jmxtrans-${project.version}-dist.tar.gz</src>
+											<type>archive</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/usr/share</prefix>
+												<user>jmxtrans</user>
+												<group>jmxtrans</group>
+											</mapper>
+										</data>
+										<data>
+											<src>${project.basedir}/src/deb/init.d/</src>
+											<type>directory</type>
+											<excludes>.DS_Store</excludes>
+											<mapper>
+												<type>perm</type>
+												<prefix>/etc/init.d</prefix>
+												<filemode>755</filemode>
+												<user>root</user>
+												<group>root</group>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

@@ -9,3 +9,4 @@ out
 *.ipr
 target
 vagrant/.vagrant
+.settings

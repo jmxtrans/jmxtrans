@@ -1,0 +1,5 @@
+[[name]] ([[version]]) stable; urgency=low
+
+  * See http://jmxtrans.googlecode.com/ for more details.
+
+ -- Pushkar Raste <praste@bloomnberg.net, pushkar.raste@gmail.com> [[buildTimeStamp]]
