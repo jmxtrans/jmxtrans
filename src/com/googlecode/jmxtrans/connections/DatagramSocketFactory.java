@@ -15,7 +15,9 @@ public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory<Socket
 	 */
 	@Override
 	public DatagramSocket makeObject(SocketAddress socketAddress) throws Exception {
-		return new DatagramSocket(socketAddress);
+		DatagramSocket datagramSocket = new DatagramSocket();
+		datagramSocket.connect(socketAddress);
+		return datagramSocket;
 	}
 
 	/**
