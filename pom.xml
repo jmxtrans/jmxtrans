@@ -85,10 +85,12 @@
 		<jackson.version>2.4.4</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
+		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
 		<package.daemon.name>${project.artifactId}d</package.daemon.name>
 		<package.group>${project.artifactId}</package.group>
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
+		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -1151,6 +1153,55 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>deb</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.3</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<skipPOMs>true</skipPOMs>
+									<deb>${project.build.directory}/${project.artifactId}-${project.version}.deb</deb>
+									<dataSet>
+										<data>
+											<src>${project.build.directory}/jmxtrans-${project.version}-dist.tar.gz</src>
+											<type>archive</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/usr/share/jmxtrans</prefix>
+												<user>jmxtrans</user>
+												<group>jmxtrans</group>
+												<strip>1</strip>
+											</mapper>
+										</data>
+										<data>
+											<src>${project.basedir}/src/deb/init.d/</src>
+											<type>directory</type>
+											<excludes>.DS_Store</excludes>
+											<mapper>
+												<type>perm</type>
+												<prefix>/etc/init.d</prefix>
+												<filemode>755</filemode>
+												<user>root</user>
+												<group>root</group>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
