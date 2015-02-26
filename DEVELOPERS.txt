@@ -1,3 +1,10 @@
+WARNING: the instructions below are mostly outdated as we are moving to a
+Maven build. They are kept there as we do not have much better at the moment.
+
+If you want to play with the new Maven build, you can try running `mvn clean install`.
+Additional profiles to generate for example RPM files are available with
+`mvn clean install -Prpm`.
+
 How to do a release (must be on an Ubuntu machine):
 
 Run these commands on a vm:
