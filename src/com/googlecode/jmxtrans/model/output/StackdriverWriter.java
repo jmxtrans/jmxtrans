@@ -63,12 +63,15 @@ public class StackdriverWriter extends BaseOutputWriter {
 	
 	public static final String DEFAULT_STACKDRIVER_API_URL = "https://custom-gateway.stackdriver.com/v1/custom";
 	
+	// unedited api key value in the config file that means we should retrieve it from the metadata
+	public static final String ORIGINAL_STACKDRIVER_API_KEY = "STACKDRIVER_API_KEY";
+	
 	// names of settings
 	public static final String SETTING_STACKDRIVER_API_URL = "url";
 	
 	public final static String SETTING_PROXY_PORT = "proxyPort";
 	
-    public final static String SETTING_PROXY_HOST = "proxyHost";
+	public final static String SETTING_PROXY_HOST = "proxyHost";
 	
 	public static final String SETTING_STACKDRIVER_API_KEY = "token";
 	
@@ -129,6 +132,22 @@ public class StackdriverWriter extends BaseOutputWriter {
 		}
 
 		apiKey = getStringSetting(SETTING_STACKDRIVER_API_KEY, null);
+		if (ORIGINAL_STACKDRIVER_API_KEY.equals(apiKey)) {
+			// retrieve API key from metadata
+			logger.info("API key unspecified; attempting to retrieve from GCE metadata");
+			
+			// GCE requires a header on its metadata requests
+			Map<String,String> headers = new HashMap<String,String>();
+			headers.put("X-Google-Metadata-Request", "True");
+			
+			String newApiKey = getMetadataValue("GCE", "http://metadata/computeMetadata/v1/project/stackdriver-api-key", headers);
+			if (newApiKey != null) {
+				logger.info("Retrieved API key from metadata: {}", newApiKey);
+				apiKey = newApiKey;
+			} else {
+				logger.info("Unable to retrieve the API key from metadata, sending metrics will probably fail");
+			}
+		}
 
 		if (getStringSetting(SETTING_PROXY_HOST, null) != null && !getStringSetting(SETTING_PROXY_HOST, null).isEmpty()) {
 			proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(getStringSetting(SETTING_PROXY_HOST, null), getIntSetting(SETTING_PROXY_PORT, 0)));
@@ -154,7 +173,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 		} else if (getStringSetting(SETTING_DETECT_INSTANCE, null) != null && "AWS".equalsIgnoreCase(getStringSetting(SETTING_DETECT_INSTANCE, null))) {
 			// if setting is to detect, look on the local machine URL
 			logger.info("Detect instance set to AWS, trying to determine AWS instance ID");
-			instanceId = getLocalInstanceId("AWS", "http://169.254.169.254/latest/meta-data/instance-id", null);
+			instanceId = getMetadataValue("AWS", "http://169.254.169.254/latest/meta-data/instance-id", null);
 			if (instanceId != null) {
 				logger.info("Detected instance ID as {}", instanceId);
 			} else {
@@ -168,7 +187,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			Map<String,String> headers = new HashMap<String,String>();
 			headers.put("X-Google-Metadata-Request", "True");
 			
-			instanceId = getLocalInstanceId("GCE", "http://metadata/computeMetadata/v1/instance/id", headers);
+			instanceId = getMetadataValue("GCE", "http://metadata/computeMetadata/v1/instance/id", headers);
 			if (instanceId != null) {
 				logger.info("Detected instance ID as {}", instanceId);
 			} else {
@@ -349,14 +368,12 @@ public class StackdriverWriter extends BaseOutputWriter {
 	}
 	
 	/**
-	 * Use a Cloud provider local metadata endpoint to determine the instance ID that this code is running on. 
-	 * Useful if you don't want to configure the instance ID manually. 
-	 * Pass detectInstance param with a cloud provider ID (AWS|GCE) to have this run in your configuration.
+	 * Retrieve a value from the Cloud provider's local metadata endpoint.
 	 * 
-	 * @return String containing an instance id, or null if none is found
+	 * @return The metadata value as a String, or null if none is found
 	 */
-	private String getLocalInstanceId(final String cloudProvider, final String metadataEndpoint, final Map<String,String> headers) {
-		String detectedInstanceId = null;
+	private String getMetadataValue(final String cloudProvider, final String metadataEndpoint, final Map<String,String> headers) {
+		String metadataValue = null;
 		try {
 			String inputLine = null;
 			final URL metadataUrl = new URL(metadataEndpoint);
@@ -369,12 +386,12 @@ public class StackdriverWriter extends BaseOutputWriter {
 			}
 			BufferedReader in = new BufferedReader(new InputStreamReader(metadataConnection.getInputStream(), "UTF-8"));
 			while ((inputLine = in.readLine()) != null) {
-				detectedInstanceId = inputLine;
+				metadataValue = inputLine;
 			}
 			in.close();
 		} catch (Exception e) {
-			logger.warn("unable to determine " + cloudProvider + " instance ID", e);
+			logger.warn("Exception while retrieving " + cloudProvider + " metadata at " + metadataEndpoint, e);
 		}
-		return detectedInstanceId;
+		return metadataValue;
 	}
 }
