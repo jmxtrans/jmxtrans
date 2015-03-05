@@ -31,7 +31,7 @@ fi
 RETVAL=0
 
 do_start() {
-    /usr/bin/touch "$PIDFILE" && /bin/chown "$JMXTRANS_USER":"$JMXTRANS_USER" "$PIDFILE"
+    /usr/bin/touch "$PIDFILE" && /bin/chown "$JMXTRANS_USER":"$JMXTRANS_GROUP" "$PIDFILE"
     start-stop-daemon --start -b --pidfile $PIDFILE --oknodo \
         --chuid $JMXTRANS_USER:$JMXTRANS_GROUP -u $JMXTRANS_USER -g $JMXTRANS_GROUP -v \
         -d /usr/share/jmxtrans --exec $RUNCMD -- start
