@@ -1,5 +1,0 @@
-@PACKAGE@ (@VERSION@-@DEB_VERSION@) stable; urgency=low
-
-  * See http://jmxtrans.googlecode.com/ for more details.
-
- -- Jon Stevens <latchkey@gmail.com>  @PROPER_NOW@
