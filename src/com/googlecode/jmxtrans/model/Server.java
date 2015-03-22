@@ -5,13 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
@@ -428,35 +426,4 @@ public class Server {
 		}
 	}
 
-	/**
-	 * Merges two lists of servers (and their queries). Based on the equality of
-	 * both sets of objects. Public for testing purposes.
-	 * @param secondList
-	 * @param firstList
-	 */
-	// FIXME: the params for this method should be Set<Server> as there are multiple assumptions that they are unique
-	@CheckReturnValue
-	public static ImmutableList<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
-		ImmutableList.Builder<Server> results = ImmutableList.builder();
-		List<Server> toProcess = new ArrayList<Server>(secondList);
-		for (Server firstServer : firstList) {
-			if (toProcess.contains(firstServer)) {
-				Server found = toProcess.get(secondList.indexOf(firstServer));
-				results.add(merge(firstServer, found));
-				// remove server as it is already merged
-				toProcess.remove(found);
-			} else {
-				results.add(firstServer);
-			}
-		}
-		// add servers from the second list that are not in the first one
-		results.addAll(toProcess);
-		return results.build();
-	}
-
-	private static Server merge(Server firstServer, Server secondServer) {
-		return builder(firstServer)
-				.addQueries(secondServer.getQueries())
-				.build();
-	}
 }

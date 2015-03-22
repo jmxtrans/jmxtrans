@@ -1,14 +1,44 @@
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans;
 
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
+import com.googlecode.jmxtrans.model.ValidationException;
 import org.junit.Test;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.googlecode.jmxtrans.model.Server.mergeServerLists;
+import static com.google.common.collect.ImmutableList.of;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MergingTests {
+public class ConfigurationParserTest {
+
+	@Test(expected = LifecycleException.class)
+	public void failParsingOnErrorIfRequested() throws URISyntaxException, LifecycleException {
+		File validInput = new File(ConfigurationParserTest.class.getResource("/example.json").toURI());
+		File invalidInput = new File("/non/existing/file");
+
+		boolean continueOnJsonError = false;
+
+		new ConfigurationParser().parseServers(of(validInput, invalidInput), continueOnJsonError);
+	}
+
+	@Test
+	public void continueParsingOnErrorIfRequested() throws URISyntaxException, LifecycleException {
+		File validInput = new File(ConfigurationParserTest.class.getResource("/example.json").toURI());
+		File invalidInput = new File("/non/existing/file");
+
+		boolean continueOnJsonError = true;
+
+		ImmutableList servers = new ConfigurationParser().parseServers(of(validInput, invalidInput), continueOnJsonError);
+
+		assertThat(servers).hasSize(1);
+	}
 
 	@Test
 	public void mergeAlreadyExistingServerDoesNotModifyList() throws ValidationException {
@@ -18,7 +48,7 @@ public class MergingTests {
 		List<Server> newServers = new ArrayList<Server>();
 		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto"));
 
-		List<Server> merged = mergeServerLists(existingServers, newServers);
+		List<Server> merged = new ConfigurationParser().mergeServerLists(existingServers, newServers);
 
 		assertThat(merged).hasSize(1);
 
@@ -34,7 +64,7 @@ public class MergingTests {
 		List<Server> newServers = new ArrayList<Server>();
 		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "tutu"));
 
-		List<Server> merged = mergeServerLists(existingServers, newServers);
+		List<Server> merged = new ConfigurationParser().mergeServerLists(existingServers, newServers);
 
 		assertThat(merged).hasSize(1);
 		Server mergedServer = merged.get(0);
@@ -117,7 +147,7 @@ public class MergingTests {
 		List<Server> adding = new ArrayList<Server>();
 
 		adding.add(s2);
-		existing = mergeServerLists(existing, adding);
+		existing = new ConfigurationParser().mergeServerLists(existing, adding);
 
 		// should only have one server with 1 query since we just added the same
 		// server and same query.
@@ -125,10 +155,11 @@ public class MergingTests {
 		assertThat(existing.get(0).getQueries()).hasSize(1);
 
 		adding.add(s3);
-		existing = mergeServerLists(existing, adding);
+		existing = new ConfigurationParser().mergeServerLists(existing, adding);
 
 		assertThat(existing).hasSize(2);
 		assertThat(existing.get(0).getQueries()).hasSize(1);
 		assertThat(existing.get(1).getQueries()).hasSize(2);
 	}
+
 }
