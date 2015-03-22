@@ -5,6 +5,18 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
+import com.googlecode.jmxtrans.cli.CliArgumentParser;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
+import com.googlecode.jmxtrans.jobs.ServerJob;
+import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.util.WatchDir;
+import com.googlecode.jmxtrans.util.WatchedCallback;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -28,22 +40,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.googlecode.jmxtrans.cli.CliArgumentParser;
-import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.guice.JmxTransModule;
-import com.googlecode.jmxtrans.jobs.ServerJob;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.OutputWriter;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.util.JsonUtils;
-import com.googlecode.jmxtrans.util.WatchDir;
-import com.googlecode.jmxtrans.util.WatchedCallback;
-
-import static com.googlecode.jmxtrans.model.Server.mergeServerLists;
-
 /**
  * Main() class that takes an argument which is the directory to look in for
  * files which contain json data that defines queries to run against JMX
@@ -57,9 +53,13 @@ public class JmxTransformer implements WatchedCallback {
 
 	private final Scheduler serverScheduler;
 
-	private WatchDir watcher;
-
 	private final JmxTransConfiguration configuration;
+
+	private final ConfigurationParser configurationParser;
+
+	private final Injector injector;
+
+	private WatchDir watcher;
 
 	private ImmutableList<Server> masterServersList = ImmutableList.of();
 
@@ -70,12 +70,11 @@ public class JmxTransformer implements WatchedCallback {
 
 	private volatile boolean isRunning = false;
 
-	private final Injector injector;
-
 	@Inject
-	public JmxTransformer(Scheduler serverScheduler, JmxTransConfiguration configuration, Injector injector) {
+	public JmxTransformer(Scheduler serverScheduler, JmxTransConfiguration configuration, ConfigurationParser configurationParser, Injector injector) {
 		this.serverScheduler = serverScheduler;
 		this.configuration = configuration;
+		this.configurationParser = configurationParser;
 		this.injector = injector;
 	}
 
@@ -308,24 +307,7 @@ public class JmxTransformer implements WatchedCallback {
 			throw new LifecycleException(e);
 		}
 
-		for (File jsonFile : getJsonFiles()) {
-			JmxProcess process;
-			try {
-				process = JsonUtils.getJmxProcess(jsonFile);
-				if (log.isDebugEnabled()) {
-					log.debug("Loaded file: " + jsonFile.getAbsolutePath());
-				}
-				this.masterServersList = mergeServerLists(this.masterServersList, process.getServers());
-			} catch (Exception ex) {
-				if (configuration.isContinueOnJsonError()) {
-					throw new LifecycleException("Error parsing json: " + jsonFile, ex);
-				} else {
-					// error parsing one file should not prevent the startup of JMXTrans
-					log.error("Error parsing json: " + jsonFile, ex);
-				}
-			}
-		}
-
+		this.masterServersList = configurationParser.parseServers(getJsonFiles(), configuration.isContinueOnJsonError());
 	}
 
 	/**
