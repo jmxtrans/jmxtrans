@@ -364,6 +364,11 @@
 			<version>1.6.2</version>
 			<scope>test</scope>
 		</dependency>
+		 <dependency>
+	         <groupId>com.amazonaws</groupId>
+	         <artifactId>aws-java-sdk</artifactId>
+             <version>1.7.2</version>
+         </dependency>
 
 	</dependencies>
 
