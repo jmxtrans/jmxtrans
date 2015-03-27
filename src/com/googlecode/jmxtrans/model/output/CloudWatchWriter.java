@@ -76,7 +76,7 @@ public class CloudWatchWriter extends BaseOutputWriter {
 
 			in = new BufferedReader(
 					new InputStreamReader(
-							conn.getInputStream()));
+							conn.getInputStream(), "UTF-8"));
 			while ((inputLine = in.readLine()) != null) {
 				if (inputLine.contains(REGION)) {
 					String[] splitLine = inputLine.split(":");
