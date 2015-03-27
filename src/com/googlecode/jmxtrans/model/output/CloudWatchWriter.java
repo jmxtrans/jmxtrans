@@ -44,7 +44,7 @@ public class CloudWatchWriter extends BaseOutputWriter {
 
 	public static final String METADATA_URL = "http://169.254.169.254/latest/dynamic/instance-identity/document";
 	public static final String REGION = "region";
-    public static final String ENCODING = "UTF-8";
+	public static final String ENCODING = "UTF-8";
 
 	@JsonCreator
 	public CloudWatchWriter(
