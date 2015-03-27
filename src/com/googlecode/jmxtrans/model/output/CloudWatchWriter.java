@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Writes data to <a href="http://aws.amazon.com/cloudwatch/">AWS CloudWatch</a> using the AWS Java SDK
  *
- * @author <a href="mailto:@amazon.de">Sascha Moellering</a>
+ * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
 
 public class CloudWatchWriter extends BaseOutputWriter {
