@@ -25,7 +25,6 @@
       </activation>
       <properties>
         <gpg.homedir>./target/travis/</gpg.homedir>
-        <gpg.secretKeyring>jmxtrans-travis.gpg</gpg.secretKeyring>
       </properties>
     </profile>
   </profiles>
