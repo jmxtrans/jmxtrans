@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.util;
 
+import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
@@ -69,18 +70,21 @@ public abstract class SignalInterceptor {
 	 * <code>sun.misc.Signal*</code> classes don't exist.
 	 * </p>
 	 */
+	@IgnoreJRERequirement
 	private static class SignalInterceptorHelper implements SignalHandler {
 
 		private final SignalHandler oldHandler;
 
 		private final SignalInterceptor interceptor;
 
+		@IgnoreJRERequirement
 		SignalInterceptorHelper(String signame, SignalInterceptor interceptor) {
 			this.interceptor = interceptor;
 			Signal signal = new Signal(signame);
 			oldHandler = Signal.handle(signal, this);
 		}
 
+		@IgnoreJRERequirement
 		public void handle(Signal sig) {
 			if (interceptor.handle(sig.getName()) && (oldHandler != null)) {
 				oldHandler.handle(sig);
