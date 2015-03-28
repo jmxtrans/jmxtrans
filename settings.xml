@@ -12,5 +12,22 @@
       <username>${env.SONATYPE_USERNAME}</username>
       <password>${env.SONATYPE_PASSWORD}</password>
     </server>
+    <server>
+      <id>gpg.passphrase</id>
+      <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+    </server>
   </servers>
+  <profiles>
+    <profile>
+      <id>gpg</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <gpg.homedir>./target/travis/</gpg.homedir>
+        <gpg.secretKeyring>jmxtrans-travis.gpg</gpg.secretKeyring>
+      </properties>
+    </profile>
+  <profiles>
 </settings>
+
