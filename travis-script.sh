@@ -10,8 +10,8 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       echo "Do not release commits created by maven release plugin"
     else
       echo "Building release"
-      mvn release:prepare --settings target/travis/settings.xml -B -V -PwithMutationTests,gpg,rpm,deb
-      mvn release:perform --settings target/travis/settings.xml -B -V -PwithMutationTests,gpg,rpm,deb
+      mvn release:prepare --settings target/travis/settings.xml -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings target/travis/settings.xml"
+      mvn release:perform --settings target/travis/settings.xml -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings target/travis/settings.xml"
       git checkout master
       git merge release
       git push origin HEAD
