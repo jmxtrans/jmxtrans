@@ -28,6 +28,6 @@
         <gpg.secretKeyring>jmxtrans-travis.gpg</gpg.secretKeyring>
       </properties>
     </profile>
-  <profiles>
+  </profiles>
 </settings>
 
