@@ -12,6 +12,10 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       echo "Do not release commits created by maven release plugin"
     else
       echo "Building release"
+
+      git config --global user.email "travis@jmxtrans.org"
+      git config --global user.name "JmxTrans travis build"
+
       mvn release:prepare --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
       mvn release:perform --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
       git checkout master
