@@ -3,8 +3,6 @@ set -ev
 
 MVN_SETTINGS=`pwd`/target/travis/settings.xml
 
-mvn help:effective-settings
-
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   if [ "$TRAVIS_BRANCH" == "master" ]; then
     echo "Building master"
