@@ -24,7 +24,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
-        <gpg.homedir>./target/travis/</gpg.homedir>
+        <gpg.homedir>${env.HOME}/target/travis/</gpg.homedir>
       </properties>
     </profile>
   </profiles>
