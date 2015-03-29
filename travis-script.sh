@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ev
 
-MVN_SETTINGS=`pwd`/target/travis/settings.xml
+MVN_SETTINGS=${HOME}/travis/settings.xml
 
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   if [ "$TRAVIS_BRANCH" == "master" ]; then
