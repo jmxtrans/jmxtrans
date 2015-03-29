@@ -499,6 +499,7 @@
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.1</version>
 					<configuration>
+						<goals>deploy nexus-staging:release</goals>
 						<releaseProfiles>gpg,deb,rpm</releaseProfiles>
 					</configuration>
 				</plugin>
