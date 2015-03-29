@@ -24,6 +24,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
+        <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
         <gpg.homedir>${env.HOME}/travis/</gpg.homedir>
       </properties>
     </profile>
