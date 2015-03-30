@@ -13,6 +13,12 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     else
       echo "Building release"
 
+      # decrypt SSH key so we can push release to GitHub
+      gpg --homedir ${HOME}/travis \
+          --output ${HOME}/.ssh/id_rsa \
+          --passphrase ${GPG_PASSPHRASE} \
+          --decrypt ${HOME}/travis/id_rsa.gpg
+
       # configure our git identity
       git config --global user.email "travis@jmxtrans.org"
       git config --global user.name "JmxTrans travis build"
