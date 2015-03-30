@@ -13,8 +13,15 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     else
       echo "Building release"
 
+      # configure our git identity
       git config --global user.email "travis@jmxtrans.org"
       git config --global user.name "JmxTrans travis build"
+
+      # travis checkout the commit as detatched head (which is normally what we
+      # want) but maven release plugin does not like working in detatched head
+      # mode. This might be a problem if other commits have already been pushed
+      # to the release branch, but in that case we will have problem anyway.
+      git checkout release
 
       mvn release:prepare --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
       mvn release:perform --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
