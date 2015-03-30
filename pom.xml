@@ -10,7 +10,7 @@
 
 	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans</artifactId>
-	<version>247-SNAPSHOT</version>
+	<version>247</version>
 	<packaging>jar</packaging>
 	<name>jmxtrans</name>
 	<description>JMX metrics exporter</description>
@@ -61,6 +61,7 @@
 	<scm>
 		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
 		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
+		<tag>jmxtrans-247</tag>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
 	</scm>
 
