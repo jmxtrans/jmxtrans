@@ -10,7 +10,7 @@
 
 	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans</artifactId>
-	<version>247</version>
+	<version>248-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>jmxtrans</name>
 	<description>JMX metrics exporter</description>
@@ -61,7 +61,7 @@
 	<scm>
 		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
 		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
-		<tag>jmxtrans-247</tag>
+		<tag>HEAD</tag>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
 	</scm>
 
@@ -669,7 +669,7 @@
 						<phase>test-compile</phase>
 						<configuration>
 							<rules>
-								<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
+								<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
 							</rules>
 						</configuration>
 					</execution>
