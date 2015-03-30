@@ -32,9 +32,11 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
       mvn release:prepare --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
       mvn release:perform --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
-      git checkout master
+
+      git fetch
+      git checkout -b master origin/master
       git merge release
-      git push origin HEAD
+      git push origin master
     fi
   else
     echo "Building feature branch"
