@@ -500,7 +500,7 @@
 					<version>2.5.1</version>
 					<configuration>
 						<preparationGoals>sortpom:sort clean verify</preparationGoals>
-						<goals>deploy nexus-staging:release</goals>
+						<goals>deploy</goals>
 						<releaseProfiles>gpg,deb,rpm</releaseProfiles>
 					</configuration>
 				</plugin>
