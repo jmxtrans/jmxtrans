@@ -18,6 +18,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
           --output ${HOME}/.ssh/id_rsa \
           --passphrase ${GPG_PASSPHRASE} \
           --decrypt ${HOME}/travis/id_rsa.gpg
+      chmod 644 ${HOME}/.ssh/id_rsa
 
       # configure our git identity
       git config --global user.email "travis@jmxtrans.org"
