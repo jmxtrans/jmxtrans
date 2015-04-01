@@ -812,6 +812,8 @@
 									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
 									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
 									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
+                                                                        <extraArgument>-Djmxtrans.log.level=INFO</extraArgument>
+                                                                        <extraArgument>-Djmxtrans.log.dir=/var/log/jmxtransd</extraArgument>
 								</extraArguments>
 							</jvmSettings>
 							<platforms>
