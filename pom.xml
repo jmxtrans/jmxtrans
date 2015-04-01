@@ -94,6 +94,7 @@
 		<package.group>${project.artifactId}</package.group>
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
+                <package.userId>102</package.userId>
 		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -1095,9 +1096,10 @@
 								<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
 							</defineStatements>
 							<preinstallScriptlet>
-								<script>if [ $1 = 1 ]; then
+							                <script>if [ $1 = 1 ]; then
+                                                                        /usr/sbin/groupadd -g ${package.userId} ${package.user} 
 									/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-									${package.install.dir} -U ${package.user}
+									${package.install.dir} -u ${package.userId} -g ${package.userId} ${package.user}
 									fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
