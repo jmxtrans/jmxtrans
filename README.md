@@ -10,7 +10,7 @@ This is the source code repository for the jmxtrans project.
 
 This is effectively the missing connector between speaking to a JVM via JMX on one end and whatever logging / monitoring / graphing package that you can dream up on the other end.
 
-jmxtrans is very powerful tool which uses easily generated JSON based configuration files and then outputs the data in whatever format you desire. It does this with a very efficient engine design that will scale to communicating with thousands of machines from a single jmxtrans instance.
+jmxtrans is very powerful tool which uses easily generated JSON ([or YAML](https://github.com/jmxtrans/jmxtrans/blob/master/tools/yaml2jmxtrans.py)) based configuration files and then outputs the data in whatever format you desire. It does this with a very efficient engine design that will scale to communicating with thousands of machines from a single jmxtrans instance.
 
 The core engine is very solid and there are writers for [Graphite](http://graphite.wikidot.com/), [StatsD](https://github.com/etsy/statsd), [Ganglia](http://ganglia.sourceforge.net/), [cacti/rrdtool](http://www.cacti.net/), [OpenTSDB](http://opentsdb.net/), text files, and stdout. Feel free to suggest more on the discussion group or issue tracker.
 
