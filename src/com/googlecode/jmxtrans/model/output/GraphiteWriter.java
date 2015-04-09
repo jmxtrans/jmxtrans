@@ -49,11 +49,12 @@ public class GraphiteWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
 		this.rootPrefix = resolveProps(
 				firstNonNull(
 						rootPrefix,
@@ -96,7 +97,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 						Object value = values.getValue();
 						if (NumberUtils.isNumeric(value)) {
 
-							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix, useObjDomain)
 									.replaceAll("[()]", "_") + " " + value.toString() + " "
 									+ result.getEpoch() / 1000 + "\n";
 							log.debug("Graphite Message: {}", line);
@@ -138,6 +139,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
 		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
+		private Boolean useObjDomain;
 		private String rootPrefix;
 		private String host;
 		private Integer port;
@@ -163,6 +165,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 			this.debugEnabled = debugEnabled;
 			return this;
 		}
+		
+		public Builder setUseObjDomain(boolean useObjDomain) {
+			this.useObjDomain = useObjDomain;
+			return this;
+		}
 
 		public Builder setRootPrefix(String rootPrefix) {
 			this.rootPrefix = rootPrefix;
@@ -184,6 +191,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 					typeNames.build(),
 					booleanAsNumber,
 					debugEnabled,
+					useObjDomain,
 					rootPrefix,
 					host,
 					port,

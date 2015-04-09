@@ -26,13 +26,12 @@ public final class KeyUtils {
 	 * @param rootPrefix the root prefix
 	 * @return the key string
 	 */
-	public static String getKeyString(Server server, Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
+	public static String getKeyString(Server server, Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames, String rootPrefix, boolean useObjDomain) {
 		StringBuilder sb = new StringBuilder();
 		addRootPrefix(rootPrefix, sb);
 		addAlias(server, sb);
 		sb.append(".");
-		// Allow people to use something other than the classname as the output.
-		addClassName(result, sb);
+		addObjectName(query, result, sb, useObjDomain);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -50,7 +49,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyString(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addClassName(result, sb);
+		addObjectName(query, result, sb, false);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -68,7 +67,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyStringWithDottedKeys(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addClassName(result, sb);
+		addObjectName(query, result, sb, false);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyStringDotted(result, values, query.isAllowDottedKeys(), sb);
@@ -93,12 +92,15 @@ public final class KeyUtils {
 		sb.append(alias);
 	}
 
-	private static void addClassName(Result result, StringBuilder sb) {
-		// Allow people to use something other than the classname as the output.
-		if (result.getClassNameAlias() != null) {
-			sb.append(result.getClassNameAlias());
+	private static void addObjectName(Query query, Result result, StringBuilder sb, boolean useObjectDomain) {
+		if (useObjectDomain) {
+			sb.append(StringUtils.cleanupStr(query.getObjDomain(), true));
 		} else {
-			sb.append(StringUtils.cleanupStr(result.getClassName()));
+			if (result.getClassNameAlias() != null) {
+				sb.append(result.getClassNameAlias());
+			} else {
+				sb.append(StringUtils.cleanupStr(result.getClassName()));
+			}
 		}
 	}
 

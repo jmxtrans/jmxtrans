@@ -77,7 +77,7 @@ public class BaseOutputWriterTests {
 	public void booleanValuesAreTransformedToNumber() throws Exception {
 		final ArrayList<Result> processedResults = Lists.newArrayList();
 		BaseOutputWriter outputWriter = new BaseOutputWriter(
-				ImmutableList.<String>of(), true, false, Maps.<String, Object>newHashMap()) {
+				ImmutableList.<String>of(), true, false, false, Maps.<String, Object>newHashMap()) {
 			@Override
 			protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 				processedResults.addAll(results);
@@ -99,7 +99,7 @@ public class BaseOutputWriterTests {
 	public void booleanValuesAreNotTransformedToNumber() throws Exception {
 		final ArrayList<Result> processedResults = Lists.newArrayList();
 		BaseOutputWriter outputWriter = new BaseOutputWriter(
-				ImmutableList.<String>of(), false, false, Maps.<String, Object>newHashMap()) {
+				ImmutableList.<String>of(), false, false, false, Maps.<String, Object>newHashMap()) {
 			@Override
 			protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 				processedResults.addAll(results);
@@ -125,7 +125,7 @@ public class BaseOutputWriterTests {
 
 	private static final class TestBaseOuputWriter extends BaseOutputWriter {
 		public TestBaseOuputWriter() {
-			super(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap());
+			super(ImmutableList.<String>of(), false, false, false, Collections.<String, Object>emptyMap());
 		}
 
 		@Override

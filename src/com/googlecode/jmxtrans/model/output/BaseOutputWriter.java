@@ -45,9 +45,11 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	public static final String BINARY_PATH = "binaryPath";
 	public static final String DEBUG = "debug";
 	public static final String TYPE_NAMES = "typeNames";
+	public static final String USE_OBJ_DOMAIN = "useObjDomain";
 
 	private ImmutableList<String> typeNames;
 	private boolean debugEnabled;
+	protected boolean useObjDomain;
 	private Map<String, Object> settings;
 	private final ValueTransformer valueTransformer;
 
@@ -56,6 +58,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		// resolve and initialize settings first, so we cean refer to them to initialize other fields
 		this.settings = resolveMap(MoreObjects.firstNonNull(
@@ -70,7 +73,11 @@ public abstract class BaseOutputWriter implements OutputWriter {
 				debugEnabled,
 				getBooleanSetting(this.settings, DEBUG),
 				false);
-
+		this.useObjDomain = firstNonNull(
+				useObjDomain,
+				getBooleanSetting(this.settings, USE_OBJ_DOMAIN),
+				false);
+				
 		if (booleanAsNumber) {
 			this.valueTransformer = new BooleanAsNumberValueTransformer(0, 1);
 		} else {

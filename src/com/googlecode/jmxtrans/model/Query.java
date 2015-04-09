@@ -68,6 +68,18 @@ public class Query {
 	public String getObj() {
 		return obj;
 	}
+	
+	/**
+	 * The JMX object domain, the part of the Object that comes before the :
+	 * E.g. if obj is "java.lang:type=Memory" then this will return "java.lang"
+	 */
+	public String getObjDomain() {
+		String domain = "";
+		if (obj != null && obj.contains(":")) {
+			domain = obj.substring(0, obj.indexOf(":"));
+		}
+		return domain;
+	}
 
 	/**
 	 * The alias allows you to specify what you would like the results of the

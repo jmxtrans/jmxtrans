@@ -131,6 +131,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("gatewayUrl") String gatewayUrl,
 			@JsonProperty("apiKey") String apiKey,
 			@JsonProperty("proxyHost") String proxyHost,
@@ -140,7 +141,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			@JsonProperty("source") String source,
 			@JsonProperty("detectInstance") String detectInstance,
 			@JsonProperty("settings") Map<String, Object> settings) throws MalformedURLException {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
 		this.gatewayUrl = new URL(firstNonNull(
 				gatewayUrl,
 				(String) getSettings().get(SETTING_STACKDRIVER_API_URL),

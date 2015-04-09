@@ -43,10 +43,11 @@ public class RRDWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("templateFile") String templateFile,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
 		this.outputFile = new File(MoreObjects.firstNonNull(outputFile, (String) getSettings().get(OUTPUT_FILE)));
 		this.templateFile = new File(MoreObjects.firstNonNull(templateFile, (String) getSettings().get(TEMPLATE_FILE)));
 		checkState(this.outputFile.exists(), "Output file must exist");

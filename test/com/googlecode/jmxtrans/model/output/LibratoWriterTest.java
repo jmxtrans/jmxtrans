@@ -17,6 +17,7 @@ public class LibratoWriterTest {
 				ImmutableList.<String>of(),
 				false,
 				false,
+				false,
 				new URL(LibratoWriter.DEFAULT_LIBRATO_API_URL),
 				1000,
 				"username",

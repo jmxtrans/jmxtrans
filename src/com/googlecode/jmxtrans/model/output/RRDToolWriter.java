@@ -61,12 +61,13 @@ public class RRDToolWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("templateFile") String templateFile,
 			@JsonProperty("binaryPath") String binaryPath,
 			@JsonProperty("generate") Boolean generate,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
 		this.outputFile = new File(MoreObjects.firstNonNull(outputFile, (String) getSettings().get(OUTPUT_FILE)));
 		this.templateFile = new File(MoreObjects.firstNonNull(templateFile, (String) getSettings().get(TEMPLATE_FILE)));
 		this.binaryPath = new File(MoreObjects.firstNonNull(binaryPath, (String) getSettings().get(BINARY_PATH)));
@@ -320,6 +321,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
 		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
+		private Boolean useObjDomain;
 		private File outputFile;
 		private File templateFile;
 		private File binaryPath;
@@ -344,6 +346,11 @@ public class RRDToolWriter extends BaseOutputWriter {
 
 		public Builder setDebugEnabled(boolean debugEnabled) {
 			this.debugEnabled = debugEnabled;
+			return this;
+		}
+		
+		public Builder setUseObjDomain(boolean useObjDomain) {
+			this.useObjDomain = useObjDomain;
 			return this;
 		}
 
@@ -372,6 +379,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 					typeNames.build(),
 					booleanAsNumber,
 					debugEnabled,
+					useObjDomain,
 					outputFile.getPath(),
 					templateFile.getPath(),
 					binaryPath.getPath(),

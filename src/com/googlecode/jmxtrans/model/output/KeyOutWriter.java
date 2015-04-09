@@ -59,12 +59,13 @@ public class KeyOutWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("maxLogFileSize") String maxLogFileSize,
 			@JsonProperty("maxLogBackupFiles") int maxLogBackupFiles,
 			@JsonProperty("delimiter") String delimiter,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
 		this.outputFile = MoreObjects.firstNonNull(
 				outputFile,
 				(String) getSettings().get("outputFile"));
@@ -115,7 +116,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 
-						logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
+						logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null, useObjDomain) + delimiter
 								+ values.getValue().toString() + delimiter + result.getEpoch());
 					}
 				}

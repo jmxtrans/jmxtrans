@@ -55,10 +55,11 @@ public class SensuWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("host") String host,
 			@JsonProperty("handler") String handler,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
 		this.host = firstNonNull(host, (String) getSettings().get(HOST), DEFAULT_SENSU_HOST);
 		this.handler = firstNonNull(handler, (String) getSettings().get(SETTING_HANDLER), DEFAULT_SENSU_HANDLER);
 	}
@@ -88,7 +89,7 @@ public class SensuWriter extends BaseOutputWriter {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 						Object value = values.getValue();
-						jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, null)).append(" ")
+						jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, null, useObjDomain)).append(" ")
 								.append(value).append(" ")
 								.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
 								.append(System.getProperty("line.separator"));

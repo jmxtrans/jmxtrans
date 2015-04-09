@@ -57,6 +57,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("filters") List<String> filters,
 			@JsonProperty("thresholds") List<String> thresholds,
 			@JsonProperty("nagiosHost") String nagiosHost,
@@ -64,7 +65,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			@JsonProperty("prefix") String prefix,
 			@JsonProperty("suffix") String suffix,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
 		this.filters = resolveList(firstNonNull(
 				filters,
 				(List<String>) getSettings().get(FILTERS),
@@ -149,7 +150,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					String[] str_array = KeyUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
+					String[] str_array = KeyUtils.getKeyString(server, query, result, values, typeNames, null, useObjDomain).split("\\.");
 					if (NumberUtils.isNumeric(values.getValue()) && filters.contains(str_array[2])) {
 						int threshold_pos = filters.indexOf(str_array[2]);
 						StringBuilder sb = new StringBuilder();
