@@ -34,7 +34,7 @@ public final class KeyUtils {
 		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
-		addKeyString(result, values, sb);
+		addKeyString(query, result, values, sb);
 		return sb.toString();
 	}
 
@@ -52,25 +52,7 @@ public final class KeyUtils {
 		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
-		addKeyString(result, values, sb);
-		return sb.toString();
-	}
-
-	/**
-	 * Gets the key string, with dot allowed
-	 *
-	 * @param query     the query
-	 * @param result    the result
-	 * @param values    the values
-	 * @param typeNames the type names
-	 * @return the key string
-	 */
-	public static String getKeyStringWithDottedKeys(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
-		StringBuilder sb = new StringBuilder();
-		addMBeanIdentifier(query, result, sb);
-		sb.append(".");
-		addTypeName(query, result, typeNames, sb);
-		addKeyStringDotted(result, values, query.isAllowDottedKeys(), sb);
+		addKeyString(query, result, values, sb);
 		return sb.toString();
 	}
 
@@ -124,14 +106,9 @@ public final class KeyUtils {
 		}
 	}
 
-	private static void addKeyString(Result result, Map.Entry<String, Object> values, StringBuilder sb) {
+	private static void addKeyString(Query query, Result result, Map.Entry<String, Object> values, StringBuilder sb) {
 		String keyStr = computeKey(result, values);
-		sb.append(StringUtils.cleanupStr(keyStr));
-	}
-
-	private static void addKeyStringDotted(Result result, Map.Entry<String, Object> values, boolean isAllowDottedKeys, StringBuilder sb) {
-		String keyStr = computeKey(result, values);
-		sb.append(StringUtils.cleanupStr(keyStr, isAllowDottedKeys));
+		sb.append(StringUtils.cleanupStr(keyStr, query.isAllowDottedKeys()));
 	}
 
 	private static String computeKey(Result result, Map.Entry<String, Object> values) {
