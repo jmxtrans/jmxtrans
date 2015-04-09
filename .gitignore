@@ -9,5 +9,3 @@ out
 *.ipr
 target
 vagrant/.vagrant
-.settings
-/scrapbook.jpage
