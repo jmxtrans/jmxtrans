@@ -31,7 +31,7 @@ public final class KeyUtils {
 		addRootPrefix(rootPrefix, sb);
 		addAlias(server, sb);
 		sb.append(".");
-		addObjectName(result, sb, useObjDomain);
+		addKey(result, sb, useObjDomain);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -49,7 +49,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyString(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addObjectName(result, sb, false);
+		addKey(result, sb, false);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -67,7 +67,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyStringWithDottedKeys(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addObjectName(result, sb, false);
+		addKey(result, sb, false);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyStringDotted(result, values, query.isAllowDottedKeys(), sb);
@@ -92,7 +92,21 @@ public final class KeyUtils {
 		sb.append(alias);
 	}
 
-	private static void addObjectName(Result result, StringBuilder sb, boolean useObjectDomain) {
+	/**
+	 * Adds a key to the StringBuilder
+	 * 
+	 * It uses in order of preference:
+	 * 
+	 * 1. resultAlias if that was specified as part of the query
+	 * 2. The domain portion of the ObjectName in the query if useObjDomain is set to true
+	 * 3. else, the Class Name of the MBean. I.e. ClassName will be used by default if the 
+	 * user doesn't specify anything special
+	 * 
+	 * @param result
+	 * @param sb
+	 * @param useObjectDomain
+	 */
+	private static void addKey(Result result, StringBuilder sb, boolean useObjectDomain) {
 		if (result.getKeyAlias() != null) {
 			sb.append(result.getKeyAlias());
 		} else if (useObjectDomain) {
