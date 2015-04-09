@@ -336,6 +336,11 @@ public class GangliaWriter extends BaseOutputWriter {
 			this.debugEnabled = debugEnabled;
 			return this;
 		}
+		
+		public Builder setUseObjDomain(boolean useObjDomain) {
+			this.useObjDomain = useObjDomain;
+			return this;
+		}
 
 		public Builder setHost(String host) {
 			this.host = host;

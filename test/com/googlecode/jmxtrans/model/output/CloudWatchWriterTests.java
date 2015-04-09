@@ -27,8 +27,10 @@ public class CloudWatchWriterTests {
 		Query query = Query.builder()
 				.setObj("test")
 				.build();
+		
 		Server server = Server.builder().setHost("localhost").setPort("123").build();
 		writer.validateSetup(server, query);
+		System.out.println("I got here");
 	}
 
 	@Test(expected = IllegalArgumentException.class)

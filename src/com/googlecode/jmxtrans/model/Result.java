@@ -20,13 +20,15 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 public class Result {
 	private final String attributeName;
 	private final String className;
+	private final String objDomain;
 	private final String typeName;
 	private final ImmutableMap<String, Object> values;
 	private final long epoch;
 	private final String classNameAlias;
 
-	public Result(long epoch, String attributeName, String className, String classNameAlias, String typeName, Map<String, Object> values) {
+	public Result(long epoch, String attributeName, String className, String objDomain, String classNameAlias, String typeName, Map<String, Object> values) {
 		this.className = className;
+		this.objDomain = objDomain;
 		this.typeName = typeName;
 		this.values = ImmutableMap.copyOf(values);
 		this.epoch = epoch;
@@ -36,6 +38,10 @@ public class Result {
 
 	public String getClassName() {
 		return className;
+	}
+	
+	public String getObjDomain() {
+		return objDomain;
 	}
 
 	/**
@@ -63,7 +69,7 @@ public class Result {
 
 	@Override
 	public String toString() {
-		return "Result [attributeName=" + attributeName + ", className=" + className + ", typeName=" + typeName + ", values=" + values + ", epoch="
+		return "Result [attributeName=" + attributeName + ", className=" + className + ", objDomain=" + objDomain + ", typeName=" + typeName + ", values=" + values + ", epoch="
 				+ epoch + "]";
 	}
 }
