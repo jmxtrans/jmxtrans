@@ -82,7 +82,6 @@ public class GangliaWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
 			@JsonProperty("addressingMode") String addressingMode,
@@ -94,7 +93,7 @@ public class GangliaWriter extends BaseOutputWriter {
 			@JsonProperty("dmax") Integer dmax,
 			@JsonProperty("groupName") String groupName,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.host = MoreObjects.firstNonNull(host, (String) getSettings().get(HOST));
 		this.port = MoreObjects.firstNonNull(
 				port,
@@ -302,7 +301,6 @@ public class GangliaWriter extends BaseOutputWriter {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
 		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
-		private Boolean useObjDomain;
 		private String host;
 		private Integer port;
 		private String addressingMode;
@@ -334,11 +332,6 @@ public class GangliaWriter extends BaseOutputWriter {
 
 		public Builder setDebugEnabled(boolean debugEnabled) {
 			this.debugEnabled = debugEnabled;
-			return this;
-		}
-		
-		public Builder setUseObjDomain(boolean useObjDomain) {
-			this.useObjDomain = useObjDomain;
 			return this;
 		}
 
@@ -397,7 +390,6 @@ public class GangliaWriter extends BaseOutputWriter {
 					typeNames.build(),
 					booleanAsNumber,
 					debugEnabled,
-					useObjDomain,
 					host,
 					port,
 					addressingMode,

@@ -418,7 +418,7 @@ public class OpenTSDBGenericWriterTests {
 				@JsonProperty("typeNames") ImmutableList<String> typeNames,
 				@JsonProperty("debug") Boolean debugEnabled,
 				@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
-			super(typeNames,  false, debugEnabled, false, "localhost", 1234, null, null, null, null, null, settings);
+			super(typeNames,  false, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
 		}
 
 		protected void prepareSender() throws LifecycleException {
@@ -451,7 +451,7 @@ public class OpenTSDBGenericWriterTests {
 				@JsonProperty("typeNames") ImmutableList<String> typeNames,
 				@JsonProperty("debug") Boolean debugEnabled,
 				@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
-			super(typeNames, false, debugEnabled, false, "localhost", 1234, null, null, null, null, null, settings);
+			super(typeNames, false, debugEnabled, "localhost", 1234, null, null, null, null, null, settings);
 		}
 
 		protected boolean getAddHostnameTagDefault() {

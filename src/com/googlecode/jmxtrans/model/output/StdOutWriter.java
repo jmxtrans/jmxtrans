@@ -23,9 +23,8 @@ public class StdOutWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 	}
 
 	/**

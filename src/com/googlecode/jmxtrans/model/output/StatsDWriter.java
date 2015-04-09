@@ -63,13 +63,12 @@ public class StatsDWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
 			@JsonProperty("bucketType") String bucketType,
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
-		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		channel = DatagramChannel.open();
 		sendBuffer = ByteBuffer.allocate((short) 1500);
 
@@ -142,7 +141,7 @@ public class StatsDWriter extends BaseOutputWriter {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 
-						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix, useObjDomain)
+						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 								+ ":" + values.getValue().toString() + "|" + bucketType + "\n";
 
 						if (isDebugEnabled()) {

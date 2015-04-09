@@ -26,12 +26,12 @@ public final class KeyUtils {
 	 * @param rootPrefix the root prefix
 	 * @return the key string
 	 */
-	public static String getKeyString(Server server, Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames, String rootPrefix, boolean useObjDomain) {
+	public static String getKeyString(Server server, Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames, String rootPrefix) {
 		StringBuilder sb = new StringBuilder();
 		addRootPrefix(rootPrefix, sb);
 		addAlias(server, sb);
 		sb.append(".");
-		addKey(result, sb, useObjDomain);
+		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -49,7 +49,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyString(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addKey(result, sb, false);
+		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -67,7 +67,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyStringWithDottedKeys(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addKey(result, sb, false);
+		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyStringDotted(result, values, query.isAllowDottedKeys(), sb);
@@ -98,7 +98,7 @@ public final class KeyUtils {
 	 * It uses in order of preference:
 	 * 
 	 * 1. resultAlias if that was specified as part of the query
-	 * 2. The domain portion of the ObjectName in the query if useObjDomain is set to true
+	 * 2. The domain portion of the ObjectName in the query if useObjDomainAsKey is set to true
 	 * 3. else, the Class Name of the MBean. I.e. ClassName will be used by default if the 
 	 * user doesn't specify anything special
 	 * 
@@ -106,11 +106,11 @@ public final class KeyUtils {
 	 * @param sb
 	 * @param useObjectDomain
 	 */
-	private static void addKey(Result result, StringBuilder sb, boolean useObjectDomain) {
+	private static void addMBeanIdentifier(Query query, Result result, StringBuilder sb) {
 		if (result.getKeyAlias() != null) {
 			sb.append(result.getKeyAlias());
-		} else if (useObjectDomain) {
-			sb.append(StringUtils.cleanupStr(result.getObjDomain(), true));
+		} else if (query.isUseObjDomainAsKey()) {
+			sb.append(StringUtils.cleanupStr(result.getObjDomain(), query.isAllowDottedKeys()));
 		} else {
 			sb.append(StringUtils.cleanupStr(result.getClassName()));
 		}

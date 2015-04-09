@@ -35,10 +35,9 @@ public class Log4JWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("logger") String logger,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.logger = firstNonNull(logger, (String) getSettings().get("logger"), "Log4JWriter");
 		this.log = Logger.getLogger("Log4JWriter." + this.logger);
 	}
@@ -65,7 +64,7 @@ public class Log4JWriter extends BaseOutputWriter {
 						}
 
 						MDC.put("server", alias);
-						MDC.put("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null, useObjDomain));
+						MDC.put("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null));
 						MDC.put("value", values.getValue());
 						if (result.getKeyAlias() != null) {
 							MDC.put("resultAlias", result.getKeyAlias());

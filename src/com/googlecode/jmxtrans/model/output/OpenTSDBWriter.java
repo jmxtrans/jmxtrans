@@ -36,7 +36,6 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
 			@JsonProperty("tags") Map<String, String> tags,
@@ -45,7 +44,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("metricNamingExpression") String metricNamingExpression,
 			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
-		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
+		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
 	}
 
@@ -151,7 +150,6 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
 		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
-		private Boolean useObjDomain;
 		private String host;
 		private Integer port;
 		private final ImmutableMap.Builder<String, String> tags = ImmutableMap.builder();
@@ -179,11 +177,6 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 
 		public Builder setDebugEnabled(boolean debugEnabled) {
 			this.debugEnabled = debugEnabled;
-			return this;
-		}
-		
-		public Builder setUseObjDomain(boolean useObjDomain) {
-			this.useObjDomain = useObjDomain;
 			return this;
 		}
 
@@ -232,7 +225,6 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 					typeNames.build(),
 					booleanAsNumber,
 					debugEnabled,
-					useObjDomain,
 					host,
 					port,
 					tags.build(),

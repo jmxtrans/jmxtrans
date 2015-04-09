@@ -54,10 +54,9 @@ public class CloudWatchWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("namespace") String namespace,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.namespace = MoreObjects.firstNonNull(namespace, (String) getSettings().get("namespace"));
 		if (isNullOrEmpty(this.namespace)) throw new IllegalArgumentException("namespace cannot be null or empty");
 	}
@@ -180,7 +179,6 @@ public class CloudWatchWriter extends BaseOutputWriter {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
 		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
-		private Boolean useObjDomain;
 		private String namespace;
 
 		private Builder() {
@@ -206,11 +204,6 @@ public class CloudWatchWriter extends BaseOutputWriter {
 			return this;
 		}
 		
-		public Builder setUseObjDomain(boolean useObjDomain) {
-			this.useObjDomain = useObjDomain;
-			return this;
-		}
-
 		public Builder setNamespace(String namespace) {
 			this.namespace = namespace;
 			return this;
@@ -221,7 +214,6 @@ public class CloudWatchWriter extends BaseOutputWriter {
 					typeNames.build(),
 					booleanAsNumber,
 					debugEnabled,
-					useObjDomain,
 					namespace,
 					null);
 		}

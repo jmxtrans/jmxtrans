@@ -92,7 +92,6 @@ public class LibratoWriter extends BaseOutputWriter {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("useObjDomain") Boolean useObjDomain,
 			@JsonProperty("url") URL url,
 			@JsonProperty("libratoApiTimeoutInMillis") Integer libratoApiTimeoutInMillis,
 			@JsonProperty("username") String username,
@@ -100,7 +99,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			@JsonProperty("proxyHost") String proxyHost,
 			@JsonProperty("proxyPort") Integer proxyPort,
 			@JsonProperty("settings") Map<String, Object> settings) throws MalformedURLException {
-		super(typeNames, booleanAsNumber, debugEnabled, useObjDomain, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.url = MoreObjects.firstNonNull(
 				url,
 				new URL(MoreObjects.firstNonNull(

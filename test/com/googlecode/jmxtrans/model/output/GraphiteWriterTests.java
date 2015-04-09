@@ -50,7 +50,7 @@ public class GraphiteWriterTests {
 		}
 	}
 	
-	private static GraphiteWriter getGraphiteWriter(OutputStream out, boolean useObjDomain) throws Exception {
+	private static GraphiteWriter getGraphiteWriter(OutputStream out) throws Exception {
 		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
 		Socket socket = mock(Socket.class);
 		when(pool.borrowObject(any(InetSocketAddress.class))).thenReturn(socket);
@@ -60,7 +60,6 @@ public class GraphiteWriterTests {
 		GraphiteWriter writer = GraphiteWriter.builder()
 				.setHost("localhost")
 				.setPort(2003)
-				.setUseObjDomain(useObjDomain)
 				.build();
 		writer.setPool(pool);
 		
@@ -74,7 +73,7 @@ public class GraphiteWriterTests {
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		GraphiteWriter writer = getGraphiteWriter(out, false);
+		GraphiteWriter writer = getGraphiteWriter(out);
 
 		writer.doWrite(server, query, of(result));
 
@@ -85,13 +84,13 @@ public class GraphiteWriterTests {
 	@Test
 	public void useObjDomainWorks() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").build();
-		Query query = Query.builder().build();
+		Query query = Query.builder().setUseObjDomainAsKey(true).build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		// Set useObjDomain to true
-		GraphiteWriter writer = getGraphiteWriter(out, true);
+		GraphiteWriter writer = getGraphiteWriter(out);
 
 		writer.doWrite(server, query, of(result));
 
