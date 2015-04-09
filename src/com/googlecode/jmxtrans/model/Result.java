@@ -24,16 +24,16 @@ public class Result {
 	private final String typeName;
 	private final ImmutableMap<String, Object> values;
 	private final long epoch;
-	private final String classNameAlias;
+	private final String keyAlias;
 
-	public Result(long epoch, String attributeName, String className, String objDomain, String classNameAlias, String typeName, Map<String, Object> values) {
+	public Result(long epoch, String attributeName, String className, String objDomain, String keyAlias, String typeName, Map<String, Object> values) {
 		this.className = className;
 		this.objDomain = objDomain;
 		this.typeName = typeName;
 		this.values = ImmutableMap.copyOf(values);
 		this.epoch = epoch;
 		this.attributeName = attributeName;
-		this.classNameAlias = classNameAlias;
+		this.keyAlias = keyAlias;
 	}
 
 	public String getClassName() {
@@ -47,8 +47,8 @@ public class Result {
 	/**
 	 * Specified as part of the query.
 	 */
-	public String getClassNameAlias() {
-		return classNameAlias;
+	public String getKeyAlias() {
+		return keyAlias;
 	}
 
 	public String getTypeName() {

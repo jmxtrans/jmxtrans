@@ -67,8 +67,8 @@ public class Log4JWriter extends BaseOutputWriter {
 						MDC.put("server", alias);
 						MDC.put("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null, useObjDomain));
 						MDC.put("value", values.getValue());
-						if (result.getClassNameAlias() != null) {
-							MDC.put("resultAlias", result.getClassNameAlias());
+						if (result.getKeyAlias() != null) {
+							MDC.put("resultAlias", result.getKeyAlias());
 						}
 						MDC.put("attributeName", result.getAttributeName());
 						MDC.put("key", values.getKey());

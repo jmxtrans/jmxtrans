@@ -62,7 +62,7 @@ public class JmxResultProcessorTest {
 
 		assertThat(integerResult.getAttributeName()).isEqualTo("StartTime");
 		assertThat(integerResult.getClassName()).isEqualTo("sun.management.RuntimeImpl");
-		assertThat(integerResult.getClassNameAlias()).isEqualTo("resultAlias");
+		assertThat(integerResult.getKeyAlias()).isEqualTo("resultAlias");
 		assertThat(integerResult.getTypeName()).isEqualTo("type=Runtime");
 		assertThat(integerResult.getValues()).hasSize(1);
 	}

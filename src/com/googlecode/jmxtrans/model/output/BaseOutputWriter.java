@@ -174,7 +174,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 					input.getAttributeName(),
 					input.getClassName(),
 					input.getObjDomain(),
-					input.getClassNameAlias(),
+					input.getKeyAlias(),
 					input.getTypeName(),
 					Maps.transformValues(input.getValues(), valueTransformer)
 			);

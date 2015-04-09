@@ -93,8 +93,8 @@ public final class KeyUtils {
 	}
 
 	private static void addObjectName(Result result, StringBuilder sb, boolean useObjectDomain) {
-		if (result.getClassNameAlias() != null) {
-			sb.append(result.getClassNameAlias());
+		if (result.getKeyAlias() != null) {
+			sb.append(result.getKeyAlias());
 		} else if (useObjectDomain) {
 			sb.append(StringUtils.cleanupStr(result.getObjDomain(), true));
 		} else {
