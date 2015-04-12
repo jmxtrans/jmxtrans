@@ -21,7 +21,7 @@ public class ClassAttributeNamingStrategy implements NamingStrategy {
 	public String formatName(Result result) {
 		StringBuilder formatted = new StringBuilder();
 		String attName = result.getAttributeName();
-		String className = result.getClassNameAlias();
+		String className = result.getKeyAlias();
 
 		if (className == null)
 			className = result.getClassName();

@@ -31,8 +31,7 @@ public final class KeyUtils {
 		addRootPrefix(rootPrefix, sb);
 		addAlias(server, sb);
 		sb.append(".");
-		// Allow people to use something other than the classname as the output.
-		addClassName(result, sb);
+		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -50,7 +49,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyString(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addClassName(result, sb);
+		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(result, values, sb);
@@ -68,7 +67,7 @@ public final class KeyUtils {
 	 */
 	public static String getKeyStringWithDottedKeys(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
-		addClassName(result, sb);
+		addMBeanIdentifier(query, result, sb);
 		sb.append(".");
 		addTypeName(query, result, typeNames, sb);
 		addKeyStringDotted(result, values, query.isAllowDottedKeys(), sb);
@@ -93,10 +92,25 @@ public final class KeyUtils {
 		sb.append(alias);
 	}
 
-	private static void addClassName(Result result, StringBuilder sb) {
-		// Allow people to use something other than the classname as the output.
-		if (result.getClassNameAlias() != null) {
-			sb.append(result.getClassNameAlias());
+	/**
+	 * Adds a key to the StringBuilder
+	 * 
+	 * It uses in order of preference:
+	 * 
+	 * 1. resultAlias if that was specified as part of the query
+	 * 2. The domain portion of the ObjectName in the query if useObjDomainAsKey is set to true
+	 * 3. else, the Class Name of the MBean. I.e. ClassName will be used by default if the 
+	 * user doesn't specify anything special
+	 * 
+	 * @param result
+	 * @param sb
+	 * @param useObjectDomain
+	 */
+	private static void addMBeanIdentifier(Query query, Result result, StringBuilder sb) {
+		if (result.getKeyAlias() != null) {
+			sb.append(result.getKeyAlias());
+		} else if (query.isUseObjDomainAsKey()) {
+			sb.append(StringUtils.cleanupStr(result.getObjDomain(), query.isAllowDottedKeys()));
 		} else {
 			sb.append(StringUtils.cleanupStr(result.getClassName()));
 		}

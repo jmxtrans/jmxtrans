@@ -40,6 +40,7 @@ public class Query {
 	private final ImmutableList<String> attr;
 	private final ImmutableSet<String> typeNames;
 	private final String resultAlias;
+	private final boolean useObjDomainAsKey;
 	private final boolean allowDottedKeys;
 	private final ImmutableList<OutputWriter> outputWriters;
 
@@ -50,12 +51,14 @@ public class Query {
 			@JsonProperty("attr") List<String> attr,
 			@JsonProperty("typeNames") Set<String> typeNames,
 			@JsonProperty("resultAlias") String resultAlias,
+			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("outputWriters") List<OutputWriter> outputWriters
 	) {
 		this.obj = obj;
 		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
 		this.resultAlias = resultAlias;
+		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
 		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, Collections.<OutputWriter>emptyList()));
@@ -75,6 +78,14 @@ public class Query {
 	 */
 	public String getResultAlias() {
 		return resultAlias;
+	}
+
+	/**
+	 * The useObjDomainAsKey property allows you to specify the use of the Domain portion of the Object Name
+	 * as part of the output key instead of using the ClassName of the MBean which is the default behavior.
+	 */
+	public boolean isUseObjDomainAsKey() {
+		return useObjDomainAsKey;
 	}
 
 	/**
@@ -112,7 +123,8 @@ public class Query {
 
 	@Override
 	public String toString() {
-		return "Query [obj=" + obj + ", resultAlias=" + resultAlias + ", attr=" + attr + "]";
+		return "Query [obj=" + obj + ", useObjDomainAsKey:" + useObjDomainAsKey + 
+				", resultAlias=" + resultAlias + ", attr=" + attr + "]";
 	}
 
 	@Override
@@ -171,6 +183,7 @@ public class Query {
 		private final List<String> attr = newArrayList();
 		private String resultAlias;
 		private final List<String> keys = newArrayList();
+		private boolean useObjDomainAsKey;
 		private boolean allowDottedKeys;
 		private final List<OutputWriter> outputWriters = newArrayList();
 		private final Set<String> typeNames = newHashSet();
@@ -189,6 +202,11 @@ public class Query {
 
 		public Builder setResultAlias(String resultAlias) {
 			this.resultAlias = resultAlias;
+			return this;
+		}
+		
+		public Builder setUseObjDomainAsKey(boolean useObjDomainAsKey) {
+			this.useObjDomainAsKey = useObjDomainAsKey;
 			return this;
 		}
 
@@ -227,6 +245,7 @@ public class Query {
 					this.attr,
 					this.typeNames,
 					this.resultAlias,
+					this.useObjDomainAsKey,
 					this.allowDottedKeys,
 					this.outputWriters
 			);

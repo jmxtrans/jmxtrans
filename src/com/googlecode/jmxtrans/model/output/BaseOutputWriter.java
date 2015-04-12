@@ -57,7 +57,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		// resolve and initialize settings first, so we cean refer to them to initialize other fields
+		// resolve and initialize settings first, so we can refer to them to initialize other fields
 		this.settings = resolveMap(MoreObjects.firstNonNull(
 				settings,
 				Collections.<String, Object>emptyMap()));
@@ -70,7 +70,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 				debugEnabled,
 				getBooleanSetting(this.settings, DEBUG),
 				false);
-
+				
 		if (booleanAsNumber) {
 			this.valueTransformer = new BooleanAsNumberValueTransformer(0, 1);
 		} else {
@@ -166,7 +166,8 @@ public abstract class BaseOutputWriter implements OutputWriter {
 					input.getEpoch(),
 					input.getAttributeName(),
 					input.getClassName(),
-					input.getClassNameAlias(),
+					input.getObjDomain(),
+					input.getKeyAlias(),
 					input.getTypeName(),
 					Maps.transformValues(input.getValues(), valueTransformer)
 			);

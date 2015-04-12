@@ -101,12 +101,12 @@ public class JexlNamingStrategy implements NamingStrategy {
 	protected void populateContext(JexlContext context, Result result) {
 		context.set(VAR__CLASSNAME, result.getClassName());
 		context.set(VAR__ATTRIBUTE_NAME, result.getAttributeName());
-		context.set(VAR__CLASSNAME_ALIAS, result.getClassNameAlias());
+		context.set(VAR__CLASSNAME_ALIAS, result.getKeyAlias());
 
 		Map<String, String> typeNameMap = KeyUtils.getTypeNameValueMap(result.getTypeName());
 		context.set(VAR__TYPENAME, typeNameMap);
 
-		String effectiveClassname = result.getClassNameAlias();
+		String effectiveClassname = result.getKeyAlias();
 		if (effectiveClassname == null) {
 			effectiveClassname = result.getClassName();
 		}
