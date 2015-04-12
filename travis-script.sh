@@ -30,8 +30,8 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       # to the release branch, but in that case we will have problem anyway.
       git checkout release
 
-      mvn release:prepare --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
-      mvn release:perform --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
+      mvn release:prepare --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
+      mvn release:perform --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
 
       git fetch
       git checkout -b master origin/master
@@ -44,5 +44,5 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   fi
 else
   echo "Building pull request"
-  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb
+  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests
 fi
