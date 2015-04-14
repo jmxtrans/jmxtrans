@@ -113,6 +113,9 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 	@Override
 	protected void sendOutput(String metricLine) throws IOException {
 		try {
+			if(isDebugEnabled()){
+				log.debug("Sending to server {}:{} line={}", host,port,metricLine);
+			}
 			this.out.writeBytes("put " + metricLine + "\n");
 		} catch (IOException e) {
 			log.error("error writing result to the output stream", e);
