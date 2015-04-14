@@ -411,6 +411,7 @@
 				<directory>test</directory>
 				<includes>
 					<include>example.json</include>
+					<include>booleanTest.json</include>
 				</includes>
 			</testResource>
 		</testResources>
