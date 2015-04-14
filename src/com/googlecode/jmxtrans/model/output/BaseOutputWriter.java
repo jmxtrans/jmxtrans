@@ -45,6 +45,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	public static final String BINARY_PATH = "binaryPath";
 	public static final String DEBUG = "debug";
 	public static final String TYPE_NAMES = "typeNames";
+	public static final String BOOLEAN_AS_NUMBER = "booleanAsNumber";
 
 	private ImmutableList<String> typeNames;
 	private boolean debugEnabled;
@@ -70,9 +71,13 @@ public abstract class BaseOutputWriter implements OutputWriter {
 				debugEnabled,
 				getBooleanSetting(this.settings, DEBUG),
 				false);
-				
+
+		// Get the value of the boolean from the JSON settings if it exists, otherwise default it to the value
+		// of the boolean passed into the Constructor. 
+		booleanAsNumber = getBooleanSetting(this.settings, BOOLEAN_AS_NUMBER, booleanAsNumber);
+
 		if (booleanAsNumber) {
-			this.valueTransformer = new BooleanAsNumberValueTransformer(0, 1);
+			this.valueTransformer = new BooleanAsNumberValueTransformer(1, 0);
 		} else {
 			this.valueTransformer = new IdentityValueTransformer();
 		}

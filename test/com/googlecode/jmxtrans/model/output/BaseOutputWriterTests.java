@@ -91,8 +91,8 @@ public class BaseOutputWriterTests {
 
 		assertThat(processedResults).hasSize(1);
 		Result processedResult = processedResults.get(0);
-		assertThat(processedResult.getValues().get("true")).isEqualTo(0);
-		assertThat(processedResult.getValues().get("false")).isEqualTo(1);
+		assertThat(processedResult.getValues().get("true")).isEqualTo(1);
+		assertThat(processedResult.getValues().get("false")).isEqualTo(0);
 	}
 
 	@Test
