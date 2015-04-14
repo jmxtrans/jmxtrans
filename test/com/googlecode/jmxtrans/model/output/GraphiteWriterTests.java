@@ -1,6 +1,8 @@
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.ConfigurationParser;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -10,6 +12,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -49,12 +52,12 @@ public class GraphiteWriterTests {
 			throw npe;
 		}
 	}
-	
+
 	private static GraphiteWriter getGraphiteWriter(OutputStream out) throws Exception {
 		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
 		Socket socket = mock(Socket.class);
 		when(pool.borrowObject(any(InetSocketAddress.class))).thenReturn(socket);
-		
+
 		when(socket.getOutputStream()).thenReturn(out);
 
 		GraphiteWriter writer = GraphiteWriter.builder()
@@ -62,7 +65,7 @@ public class GraphiteWriterTests {
 				.setPort(2003)
 				.build();
 		writer.setPool(pool);
-		
+
 		return writer;
 	}
 
@@ -80,22 +83,51 @@ public class GraphiteWriterTests {
 		// check that Graphite format is respected
 		assertThat(out.toString()).startsWith("servers.host_123.classNameAlias.attributeName_key 1 ");
 	}
-	
+
 	@Test
 	public void useObjDomainWorks() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").build();
+		// Set useObjDomain to true
 		Query query = Query.builder().setUseObjDomainAsKey(true).build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		
-		// Set useObjDomain to true
+
 		GraphiteWriter writer = getGraphiteWriter(out);
 
 		writer.doWrite(server, query, of(result));
 
 		// check that Graphite format is respected
 		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName_key 1 ");
+	}
+
+	@Test
+	public void booleanAsNumberWorks() throws Exception {
+		File testInput = new File(GraphiteWriterTests.class.getResource("/booleanTest.json").toURI());
+
+		boolean continueOnJsonError = true;
+
+		ImmutableList servers = new ConfigurationParser().parseServers(of(testInput), continueOnJsonError);
+
+		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)true));
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
+		Socket socket = mock(Socket.class);
+		when(pool.borrowObject(any(InetSocketAddress.class))).thenReturn(socket);
+
+		when(socket.getOutputStream()).thenReturn(out);
+
+		Server server = ((Server)servers.get(0));
+		Query query = server.getQueries().asList().get(0);
+		GraphiteWriter writer = (GraphiteWriter) (query.getOutputWriters().get(0));
+		writer.setPool(pool);
+
+		writer.doWrite(server, query, of(result));
+
+		// check that the booleanAsNumber property was picked up from the JSON
+		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName_key 1");
 	}
 
 
