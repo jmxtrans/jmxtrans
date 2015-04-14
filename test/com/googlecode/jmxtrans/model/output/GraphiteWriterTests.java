@@ -144,7 +144,7 @@ public class GraphiteWriterTests {
 		writer.doWrite(server, query, of(result));
 
 		// check that the booleanAsNumber property was picked up from the JSON
-		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName_key 1");
+		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName.key 1");
 	}
 
 
