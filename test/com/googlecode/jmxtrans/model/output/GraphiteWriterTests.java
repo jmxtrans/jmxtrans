@@ -97,6 +97,23 @@ public class GraphiteWriterTests {
 		// check that Graphite format is respected
 		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName_key 1 ");
 	}
+	
+	@Test
+	public void allowDottedWorks() throws Exception {
+		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
+		Query query = Query.builder().setAllowDottedKeys(true).build();
+		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		
+		// Set useObjDomain to true
+		GraphiteWriter writer = getGraphiteWriter(out);
+
+		writer.doWrite(server, query, of(result));
+		System.out.println(out.toString());
+		// check that Graphite format is respected
+		assertThat(out.toString()).startsWith("servers.host.className.attributeName.key 1 ");
+	}
 
 
 	@Test
