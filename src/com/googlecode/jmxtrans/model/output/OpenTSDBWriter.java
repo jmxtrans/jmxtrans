@@ -115,7 +115,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		try {
 			
 			if (isDebugEnabled() || log.isDebugEnabled()) {
-				log.debug("Sending to server {}:{} line={}", host, port,metricLine);
+				log.debug("Sending to server {}:{} line={}", host, port, metricLine);
 			}
 			
 			this.out.writeBytes("put " + metricLine + "\n");
