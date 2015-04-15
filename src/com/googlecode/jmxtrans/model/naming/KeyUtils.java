@@ -160,7 +160,7 @@ public final class KeyUtils {
 		StringBuilder sb = new StringBuilder();
 		for (String key : typeNames) {
 			String result = typeNameValueMap.get(key);
-			if (result != null && !StringUtils.isBlank(result)) {
+			if (result != null && !result.isEmpty()) {
 				sb.append(result);
 				sb.append(separator);
 			}
@@ -193,9 +193,9 @@ public final class KeyUtils {
 		for (String oneToken : tokens) {
 			if (oneToken.length() > 0) {
 				String[] keyValue = splitTypeNameValue(oneToken);
-				result.put(keyValue[0], keyValue[1]);
+					result.put(keyValue[0], keyValue[1]);
+				}
 			}
-		}
 		return result;
 	}
 
@@ -254,7 +254,10 @@ public final class KeyUtils {
 		String[] result;
 		String[] keys = typeNameToken.split("=", 2);
 
-		if (keys.length == 2) {
+		for (int i=0; i<keys.length; i++) {
+		}
+
+		if (keys.length == 2 && !StringUtils.isBlankOrEmptyString(keys[1])) {
 			result = keys;
 		} else {
 			result = new String[2];

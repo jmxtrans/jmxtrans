@@ -56,7 +56,7 @@ public final class StringUtils {
 	 * @param name  the String to check, may be null
 	 * @return <code>true</code> if the String is null, empty, equals the empty string or whitespace
 	 */
-	public static boolean isBlank(String name) {
+	public static boolean isBlankOrEmptyString(String name) {
 		return org.apache.commons.lang.StringUtils.isBlank(name) || "\"\"".equals(name);
 	}
 }
