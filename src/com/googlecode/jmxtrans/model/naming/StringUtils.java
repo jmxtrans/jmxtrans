@@ -40,4 +40,23 @@ public final class StringUtils {
 		clean = SPACE_PAT.matcher(clean).replaceAll("");
 		return clean;
 	}
+
+	/**
+	 * Checks if a String is whitespace, empty (""), equals empty String ("\"\"") or null.
+	 *
+	 * <pre>
+	 * StringUtils.isBlank(null)      = true
+	 * StringUtils.isBlank("")        = true
+	 * StringUtils.isBlank(" ")       = true
+	 * StringUtils.isBlank("\"\"")    = true
+	 * StringUtils.isBlank("bob")     = false
+	 * StringUtils.isBlank("  bob  ") = false
+	 * </pre>
+	 *
+	 * @param name  the String to check, may be null
+	 * @return <code>true</code> if the String is null, empty, equals the empty string or whitespace
+	 */
+	public static boolean isBlank(String name) {
+		return org.apache.commons.lang.StringUtils.isBlank(name) || "\"\"".equals(name);
+	}
 }
