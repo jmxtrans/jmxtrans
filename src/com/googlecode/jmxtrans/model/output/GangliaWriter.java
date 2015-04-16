@@ -166,7 +166,10 @@ public class GangliaWriter extends BaseOutputWriter {
 			if (result.getValues() != null) {
 				for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {
 					final String name = KeyUtils.getKeyString(query, result, resultValue, getTypeNames());
-					final String value = resultValue.getValue().toString();
+					String value = resultValue.getValue().toString();
+					BigDecimal bd = new BigDecimal(value);
+					if (bd.compareTo(new BigDecimal("1E-308”)) <= 0)
+						value = "0";
 					GMetricType dataType = getType(resultValue.getValue());
 					log.debug("Sending Ganglia metric {}={} [type={}]", name, value, dataType);
 					new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName)
