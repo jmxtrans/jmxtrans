@@ -64,6 +64,7 @@ public class GangliaWriter extends BaseOutputWriter {
 	public static final int DEFAULT_DMAX = 0;
 	public static final int DEFAULT_TMAX = 60;
 	public static final String DEFAULT_GROUP_NAME = "JMX";
+	public static final BigDecimal GANGLIA_MIN_DOUBLE = new BigDecimal("1E-308");
 
 	/* Settings run-time values. */
 	private final String host;
@@ -168,14 +169,14 @@ public class GangliaWriter extends BaseOutputWriter {
 			if (result.getValues() != null) {
 				for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {
 					final String name = KeyUtils.getKeyString(query, result, resultValue, getTypeNames());
-					String value = resultValue.getValue().toString();
-					BigDecimal bd = new BigDecimal(value);
-					if (bd.compareTo(new BigDecimal("1E-308")) <= 0)
-						value = "0";
+					
+					BigDecimal value = new BigDecimal(resultValue.getValue().toString());
+					String strValue = value.compareTo(GANGLIA_MIN_DOUBLE) <= 0 ? "0" : value.toString();
+
 					GMetricType dataType = getType(resultValue.getValue());
-					log.debug("Sending Ganglia metric {}={} [type={}]", name, value, dataType);
+					log.debug("Sending Ganglia metric {}={} [type={}]", name, strValue, dataType);
 					new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName)
-							.announce(name, value, dataType, units, slope, tmax, dmax, groupName);
+							.announce(name, strValue, dataType, units, slope, tmax, dmax, groupName);
 				}
 			}
 		}
