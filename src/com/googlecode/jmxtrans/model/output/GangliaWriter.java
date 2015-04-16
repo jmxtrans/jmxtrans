@@ -170,7 +170,7 @@ public class GangliaWriter extends BaseOutputWriter {
 					final String name = KeyUtils.getKeyString(query, result, resultValue, getTypeNames());
 					String value = resultValue.getValue().toString();
 					BigDecimal bd = new BigDecimal(value);
-					if (bd.compareTo(new BigDecimal("1E-308”)) <= 0)
+					if (bd.compareTo(new BigDecimal("1E-308")) <= 0)
 						value = "0";
 					GMetricType dataType = getType(resultValue.getValue());
 					log.debug("Sending Ganglia metric {}={} [type={}]", name, value, dataType);
