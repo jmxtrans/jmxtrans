@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.math.BigDecimal;
+
 import static info.ganglia.gmetric4j.gmetric.GMetric.UDPAddressingMode;
 
 /**
