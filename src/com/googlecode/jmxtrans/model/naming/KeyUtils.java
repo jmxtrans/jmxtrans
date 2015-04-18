@@ -81,7 +81,7 @@ public final class KeyUtils {
 	 * 
 	 * 1. resultAlias if that was specified as part of the query
 	 * 2. The domain portion of the ObjectName in the query if useObjDomainAsKey is set to true
-	 * 3. else, the Class Name of the MBean. I.e. ClassName will be used by default if the
+	 * 3. else, the Class Name of the MBean. I.e. ClassName will be used by default if the 
 	 * user doesn't specify anything special
 	 * 
 	 * @param result
