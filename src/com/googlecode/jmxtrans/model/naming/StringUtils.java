@@ -24,7 +24,7 @@ public final class StringUtils {
 	 * Chomps trailing . when allowDottedKeys is true.
 	 * Chomps trailing _ when allowDottedKeys is false.
 	 *
-	 * @param name			  the name
+	 * @param name            the name
 	 * @param allowDottedKeys whether we remove the dots or not.
 	 * @return
 	 */

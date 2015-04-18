@@ -154,40 +154,40 @@ public class GraphiteWriterTests {
 		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName.key 1");
 	}
 	
-	    @Test
-    public void checkEmptyTypeNamesAreIgnored() throws Exception {
-        Server server = Server.builder().setHost("host").setPort("123").build();
-        // Set useObjDomain to true
-        Query query = Query.builder()
-                .setUseObjDomainAsKey(true)
-                .setAllowDottedKeys(true)
-                .setObj("\"yammer.metrics\":name=\"uniqueName\",type=\"\"").build();
+		@Test
+	public void checkEmptyTypeNamesAreIgnored() throws Exception {
+		Server server = Server.builder().setHost("host").setPort("123").build();
+		// Set useObjDomain to true
+		Query query = Query.builder()
+				.setUseObjDomainAsKey(true)
+				.setAllowDottedKeys(true)
+				.setObj("\"yammer.metrics\":name=\"uniqueName\",type=\"\"").build();
 
-        Result result = new Result(System.currentTimeMillis(),
-                "Attribute",
-                "com.yammer.metrics.reporting.JmxReporter$Counter",
-                "yammer.metrics",
-                null,
-                "name=\"uniqueName\",type=\"\"",
-                ImmutableMap.of("Attribute", (Object)0));
+		Result result = new Result(System.currentTimeMillis(),
+				"Attribute",
+				"com.yammer.metrics.reporting.JmxReporter$Counter",
+				"yammer.metrics",
+				null,
+				"name=\"uniqueName\",type=\"\"",
+				ImmutableMap.of("Attribute", (Object)0));
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        ArrayList<String> typeNames = new ArrayList<String>();
-        typeNames.add("name");
-        typeNames.add("type");
-        GraphiteWriter writer = getGraphiteWriter(out, typeNames);
+		ArrayList<String> typeNames = new ArrayList<String>();
+		typeNames.add("name");
+		typeNames.add("type");
+		GraphiteWriter writer = getGraphiteWriter(out, typeNames);
 
-        writer.doWrite(server, query, of(result));
+		writer.doWrite(server, query, of(result));
 
-        // check that the empty type "type" is ignored when allowDottedKeys is true
-        assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
-        
-        // check that the empty type "type" is ignored when allowDottedKeys is false
+		// check that the empty type "type" is ignored when allowDottedKeys is true
+		assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
+		
+		// check that the empty type "type" is ignored when allowDottedKeys is false
 		query = Query.builder()
 				.setUseObjDomainAsKey(true)
-		        .setAllowDottedKeys(false)
-		        .setObj("\"yammer.metrics\":name=\"uniqueName\",type=\"\"").build();
+				.setAllowDottedKeys(false)
+				.setObj("\"yammer.metrics\":name=\"uniqueName\",type=\"\"").build();
 		
 		out = new ByteArrayOutputStream();
 		writer = getGraphiteWriter(out, typeNames);
