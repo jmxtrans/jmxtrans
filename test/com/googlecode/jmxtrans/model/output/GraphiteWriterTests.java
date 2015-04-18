@@ -180,9 +180,21 @@ public class GraphiteWriterTests {
 
         writer.doWrite(server, query, of(result));
 
-        // check that the empty type "type" is ignored
+        // check that the empty type "type" is ignored when allowDottedKeys is true
         assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
-    }
+        
+        // check that the empty type "type" is ignored when allowDottedKeys is false
+		query = Query.builder()
+				.setUseObjDomainAsKey(true)
+		        .setAllowDottedKeys(false)
+		        .setObj("\"yammer.metrics\":name=\"uniqueName\",type=\"\"").build();
+		
+		out = new ByteArrayOutputStream();
+		writer = getGraphiteWriter(out, typeNames);
+		
+		writer.doWrite(server, query, of(result));
+		assertThat(out.toString()).startsWith("servers.host_123.yammer_metrics.uniqueName.Attribute 0 ");
+	}
 
 	@Test
 	public void socketInvalidatedWhenError() throws Exception {
