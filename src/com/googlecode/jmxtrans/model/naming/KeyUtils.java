@@ -193,9 +193,9 @@ public final class KeyUtils {
         for (String oneToken : tokens) {
             if (oneToken.length() > 0) {
                 String[] keyValue = splitTypeNameValue(oneToken);
-                    result.put(keyValue[0], keyValue[1]);
-                }
+                result.put(keyValue[0], keyValue[1]);
             }
+        }
         return result;
     }
 
@@ -253,9 +253,6 @@ public final class KeyUtils {
     private static String[] splitTypeNameValue(String typeNameToken) {
         String[] result;
         String[] keys = typeNameToken.split("=", 2);
-
-        for (int i=0; i<keys.length; i++) {
-        }
 
         if (keys.length == 2) {
             result = keys;
