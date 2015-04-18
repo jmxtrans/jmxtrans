@@ -154,7 +154,7 @@ public class GraphiteWriterTests {
 		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName.key 1");
 	}
 	
-		@Test
+	@Test
 	public void checkEmptyTypeNamesAreIgnored() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").build();
 		// Set useObjDomain to true
