@@ -10,10 +10,10 @@ public class StringUtilsTest {
 	public void testCleanupStr() {
 		assertEquals("addfber1241qdw!èé$", StringUtils.cleanupStr("addfber1241qdw!èé$"));
 		assertEquals("abcd_abcd", StringUtils.cleanupStr("abcd.abcd"));
-		assertEquals("abcd_abcd_", StringUtils.cleanupStr("abcd.abcd."));
+		assertEquals("abcd_abcd", StringUtils.cleanupStr("abcd.abcd."));
 		assertEquals("_abcd_abcd", StringUtils.cleanupStr(".abcd_abcd"));
 		assertEquals("abcd_abcd", StringUtils.cleanupStr("abcd/abcd"));
-		assertEquals("abcd_abcd_", StringUtils.cleanupStr("abcd/abcd/"));
+		assertEquals("abcd_abcd", StringUtils.cleanupStr("abcd/abcd/"));
 		assertEquals("_abcd_abcd", StringUtils.cleanupStr("/abcd_abcd"));
 		assertEquals("abcd_abcd", StringUtils.cleanupStr("abcd'_abcd'"));
 		assertEquals("_abcd_abcd", StringUtils.cleanupStr("/abcd\"_abcd\""));
@@ -26,7 +26,7 @@ public class StringUtilsTest {
 	public void testCleanupStrDottedKeysKept() {
 		assertEquals("addfber1241qdw!èé$", StringUtils.cleanupStr("addfber1241qdw!èé$", true));
 		assertEquals("abcd.abcd", StringUtils.cleanupStr("abcd.abcd", true));
-		assertEquals("abcd.abcd.", StringUtils.cleanupStr("abcd.abcd.", true));
+		assertEquals("abcd.abcd", StringUtils.cleanupStr("abcd.abcd.", true));
 		assertEquals(".abcd_abcd", StringUtils.cleanupStr(".abcd_abcd", true));
 		assertEquals("abcd_abcd", StringUtils.cleanupStr("abcd/abcd", true));
 		assertEquals("abcd_abcd_", StringUtils.cleanupStr("abcd/abcd/", true));

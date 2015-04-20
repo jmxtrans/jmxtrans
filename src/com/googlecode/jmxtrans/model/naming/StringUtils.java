@@ -21,6 +21,8 @@ public final class StringUtils {
 
 	/**
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
+	 * Chomps trailing . when allowDottedKeys is true.
+	 * Chomps trailing _ when allowDottedKeys is false.
 	 *
 	 * @param name            the name
 	 * @param allowDottedKeys whether we remove the dots or not.
@@ -31,13 +33,16 @@ public final class StringUtils {
 			return null;
 		}
 		Pattern pattern;
+		String separator;
 		if (!allowDottedKeys) {
 			pattern = DOT_SLASH_UNDERSCORE_PAT;
+			separator = "_";
 		} else {
 			pattern = SLASH_UNDERSCORE_PAT;
+			separator = ".";
 		}
 		String clean = pattern.matcher(name).replaceAll("_");
 		clean = SPACE_PAT.matcher(clean).replaceAll("");
-		return clean;
+		return org.apache.commons.lang.StringUtils.chomp(clean, separator);
 	}
 }
