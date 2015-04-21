@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.google.common.collect.ImmutableList.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,8 +54,12 @@ public class GraphiteWriterTests {
 			throw npe;
 		}
 	}
-
+	
 	private static GraphiteWriter getGraphiteWriter(OutputStream out) throws Exception {
+		return getGraphiteWriter(out, new ArrayList<String>());
+	}
+
+	private static GraphiteWriter getGraphiteWriter(OutputStream out, List<String> typeNames) throws Exception {
 		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
 		Socket socket = mock(Socket.class);
 		when(pool.borrowObject(any(InetSocketAddress.class))).thenReturn(socket);
@@ -63,6 +69,7 @@ public class GraphiteWriterTests {
 		GraphiteWriter writer = GraphiteWriter.builder()
 				.setHost("localhost")
 				.setPort(2003)
+				.addTypeNames(typeNames)
 				.build();
 		writer.setPool(pool);
 
@@ -146,7 +153,60 @@ public class GraphiteWriterTests {
 		// check that the booleanAsNumber property was picked up from the JSON
 		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName.key 1");
 	}
+	
+	@Test
+	public void checkEmptyTypeNamesAreIgnored() throws Exception {
+		Server server = Server.builder().setHost("host").setPort("123").build();
+		// Set useObjDomain to true
+		Query query = Query.builder()
+				.setUseObjDomainAsKey(true)
+				.setAllowDottedKeys(true)
+				.setObj("\"yammer.metrics\":name=\"uniqueName\",type=\"\"").build();
 
+		Result result = new Result(System.currentTimeMillis(),
+				"Attribute",
+				"com.yammer.metrics.reporting.JmxReporter$Counter",
+				"yammer.metrics",
+				null,
+				"name=\"uniqueName\",type=\"\"",
+				ImmutableMap.of("Attribute", (Object)0));
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		ArrayList<String> typeNames = new ArrayList<String>();
+		typeNames.add("name");
+		typeNames.add("type");
+		GraphiteWriter writer = getGraphiteWriter(out, typeNames);
+
+		writer.doWrite(server, query, of(result));
+
+		// check that the empty type "type" is ignored when allowDottedKeys is true
+		assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
+		
+		// check that this also works when literal " characters aren't included in the JMX ObjectName
+		query = Query.builder()
+				.setUseObjDomainAsKey(true)
+				.setAllowDottedKeys(true)
+				.setObj("yammer.metrics:name=uniqueName,type=").build();
+		
+		out = new ByteArrayOutputStream();
+		writer = getGraphiteWriter(out, typeNames);
+		
+		writer.doWrite(server, query, of(result));
+		assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
+		
+		// check that the empty type "type" is ignored when allowDottedKeys is false
+		query = Query.builder()
+				.setUseObjDomainAsKey(true)
+				.setAllowDottedKeys(false)
+				.setObj("\"yammer.metrics\":name=\"uniqueName\",type=\"\"").build();
+		
+		out = new ByteArrayOutputStream();
+		writer = getGraphiteWriter(out, typeNames);
+		
+		writer.doWrite(server, query, of(result));
+		assertThat(out.toString()).startsWith("servers.host_123.yammer_metrics.uniqueName.Attribute 0 ");
+	}
 
 	@Test
 	public void socketInvalidatedWhenError() throws Exception {
