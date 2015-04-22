@@ -86,13 +86,13 @@ public class BaseOutputWriterTests {
 			public void validateSetup(Server server, Query query) throws ValidationException {
 			}
 		};
-		Result result = new Result(0, "", "", "", "", ImmutableMap.<String, Object>of("true", true, "false", false));
+		Result result = new Result(0, "", "", "", "", "", ImmutableMap.<String, Object>of("true", true, "false", false));
 		outputWriter.doWrite(null, null, ImmutableList.of(result));
 
 		assertThat(processedResults).hasSize(1);
 		Result processedResult = processedResults.get(0);
-		assertThat(processedResult.getValues().get("true")).isEqualTo(0);
-		assertThat(processedResult.getValues().get("false")).isEqualTo(1);
+		assertThat(processedResult.getValues().get("true")).isEqualTo(1);
+		assertThat(processedResult.getValues().get("false")).isEqualTo(0);
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class BaseOutputWriterTests {
 			public void validateSetup(Server server, Query query) throws ValidationException {
 			}
 		};
-		Result result = new Result(0, "", "", "", "", ImmutableMap.<String, Object>of("true", true, "false", false));
+		Result result = new Result(0, "", "", "", "", "", ImmutableMap.<String, Object>of("true", true, "false", false));
 		outputWriter.doWrite(null, null, ImmutableList.of(result));
 
 		assertThat(processedResults).hasSize(1);

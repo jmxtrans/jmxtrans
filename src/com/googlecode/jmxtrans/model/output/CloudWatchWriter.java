@@ -203,7 +203,7 @@ public class CloudWatchWriter extends BaseOutputWriter {
 			this.debugEnabled = debugEnabled;
 			return this;
 		}
-
+		
 		public Builder setNamespace(String namespace) {
 			this.namespace = namespace;
 			return this;

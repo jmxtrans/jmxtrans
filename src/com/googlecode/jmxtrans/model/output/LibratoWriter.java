@@ -156,7 +156,7 @@ public class LibratoWriter extends BaseOutputWriter {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 					if (NumberUtils.isNumeric(values.getValue())) {
 						g.writeStartObject();
-						g.writeStringField("name", KeyUtils.getKeyStringWithDottedKeys(query, result, values, typeNames));
+						g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
 						if (source != null && !source.isEmpty()) {
 							g.writeStringField("source", source);
 						}

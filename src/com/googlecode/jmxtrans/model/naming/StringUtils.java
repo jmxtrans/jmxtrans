@@ -21,6 +21,7 @@ public final class StringUtils {
 
 	/**
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
+	 * Chomps any trailing . or _ character.
 	 *
 	 * @param name            the name
 	 * @param allowDottedKeys whether we remove the dots or not.
@@ -38,6 +39,8 @@ public final class StringUtils {
 		}
 		String clean = pattern.matcher(name).replaceAll("_");
 		clean = SPACE_PAT.matcher(clean).replaceAll("");
+		clean = org.apache.commons.lang.StringUtils.chomp(clean, ".");
+		clean = org.apache.commons.lang.StringUtils.chomp(clean, "_");
 		return clean;
 	}
 }
