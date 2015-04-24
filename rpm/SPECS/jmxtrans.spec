@@ -80,8 +80,11 @@ rm -rf %{buildroot}
 %if 0%{?suse_version} > 1140
 %service_add_pre jmxtrans.service
 %endif
-/usr/sbin/useradd -c "JMXTrans" \
-        -s /sbin/nologin -r -d %{xappdir} %{xuser} 2> /dev/null || :
+USER_ID=`id -u %{xuser} 2>/dev/null`
+if [ -z "$USER_ID" ]; then
+  /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+									    ${package.install.dir} -U %{xuser} 2> /dev/null || :
+fi
 
 %post
 %if 0%{?suse_version} > 1140
