@@ -1120,8 +1120,11 @@
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
-									/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-									${package.install.dir} -U ${package.user}
+                  USER_ID=`id -u %{package.user} 2>/dev/null`
+                    if [ -z "$USER_ID" ]; then
+									    /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+									    ${package.install.dir} -U ${package.user}
+                    fi
 									fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
