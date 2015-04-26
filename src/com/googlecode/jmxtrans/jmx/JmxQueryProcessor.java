@@ -31,6 +31,7 @@ public class JmxQueryProcessor {
 	 */
 	public void processQuery(MBeanServerConnection mbeanServer, Server server, Query query) throws Exception {
 		ObjectName oName = new ObjectName(query.getObj());
+		
 		for (ObjectName queryName : mbeanServer.queryNames(oName, null)) {
 			ImmutableList<Result> results = fetchResults(mbeanServer, query, queryName);
 			runOutputWritersForQuery(server, query, results);
@@ -58,7 +59,7 @@ public class JmxQueryProcessor {
 
 				AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
 
-				results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName()).getResults();
+				results = new JmxResultProcessor(query, oi, al.asList(), info.getClassName(), queryName.getDomain()).getResults();
 			}
 		} catch (UnmarshalException ue) {
 			if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {

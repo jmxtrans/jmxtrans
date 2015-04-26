@@ -9,6 +9,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
+import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import info.ganglia.gmetric4j.gmetric.GMetric;
 import info.ganglia.gmetric4j.gmetric.GMetricSlope;
 import info.ganglia.gmetric4j.gmetric.GMetricType;
@@ -76,6 +78,8 @@ public class GangliaWriter extends BaseOutputWriter {
 	private final String groupName;
 
 	private String spoofedHostName = null;
+
+	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
 
 	@JsonCreator
 	public GangliaWriter(
@@ -166,11 +170,13 @@ public class GangliaWriter extends BaseOutputWriter {
 			if (result.getValues() != null) {
 				for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {
 					final String name = KeyUtils.getKeyString(query, result, resultValue, getTypeNames());
-					final String value = resultValue.getValue().toString();
+
+					Object transformedValue = valueTransformer.apply(resultValue.getValue());
+
 					GMetricType dataType = getType(resultValue.getValue());
-					log.debug("Sending Ganglia metric {}={} [type={}]", name, value, dataType);
+					log.debug("Sending Ganglia metric {}={} [type={}]", name, transformedValue, dataType);
 					new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName)
-							.announce(name, value, dataType, units, slope, tmax, dmax, groupName);
+							.announce(name, transformedValue.toString(), dataType, units, slope, tmax, dmax, groupName);
 				}
 			}
 		}

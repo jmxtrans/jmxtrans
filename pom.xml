@@ -90,7 +90,7 @@
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
-		<package.daemon.name>${project.artifactId}d</package.daemon.name>
+		<package.daemon.name>${project.artifactId}</package.daemon.name>
 		<package.group>${project.artifactId}</package.group>
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
@@ -411,6 +411,7 @@
 				<directory>test</directory>
 				<includes>
 					<include>example.json</include>
+					<include>booleanTest.json</include>
 				</includes>
 			</testResource>
 		</testResources>
@@ -429,6 +430,11 @@
 					<groupId>com.google.code.sortpom</groupId>
 					<artifactId>maven-sortpom-plugin</artifactId>
 					<version>2.3.0</version>
+				</plugin>
+				<plugin>
+					<groupId>net.ju-n.maven.plugins</groupId>
+					<artifactId>checksum-maven-plugin</artifactId>
+					<version>1.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -621,6 +627,24 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>net.ju-n.maven.plugins</groupId>
+				<artifactId>checksum-maven-plugin</artifactId>
+				<configuration>
+					<algorithms>
+						<algorithm>MD5</algorithm>
+						<algorithm>SHA-1</algorithm>
+						<algorithm>SHA-256</algorithm>
+					</algorithms>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>artifacts</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -669,7 +693,7 @@
 						<phase>test-compile</phase>
 						<configuration>
 							<rules>
-								<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
+								<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
 							</rules>
 						</configuration>
 					</execution>
@@ -1096,8 +1120,11 @@
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
-									/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-									${package.install.dir} -U ${package.user}
+                  USER_ID=`id -u %{package.user} 2>/dev/null`
+                    if [ -z "$USER_ID" ]; then
+									    /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+									    ${package.install.dir} -U ${package.user}
+                    fi
 									fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>

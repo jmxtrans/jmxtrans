@@ -284,8 +284,8 @@ public class StackdriverWriter extends BaseOutputWriter {
 						}
 						
 						// put the class name or its alias if available
-						if (!metric.getClassNameAlias().isEmpty()) {
-							nameBuilder.append(metric.getClassNameAlias());
+						if (!metric.getKeyAlias().isEmpty()) {
+							nameBuilder.append(metric.getKeyAlias());
 							
 						} else {
 							nameBuilder.append(metric.getClassName());	

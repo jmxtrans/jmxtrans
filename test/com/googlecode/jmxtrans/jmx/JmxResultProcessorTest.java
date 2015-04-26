@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JmxResultProcessorTest {
 
 	private Query query;
+	private final static String TEST_DOMAIN_NAME = "ObjectDomainName";
 
 	@Before
 	public void initConfiguration() {
@@ -53,14 +54,15 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				ImmutableList.of(integerAttribute),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
 
 		assertThat(results).hasSize(1);
 		Result integerResult = results.get(0);
 
 		assertThat(integerResult.getAttributeName()).isEqualTo("StartTime");
 		assertThat(integerResult.getClassName()).isEqualTo("sun.management.RuntimeImpl");
-		assertThat(integerResult.getClassNameAlias()).isEqualTo("resultAlias");
+		assertThat(integerResult.getKeyAlias()).isEqualTo("resultAlias");
 		assertThat(integerResult.getTypeName()).isEqualTo("type=Runtime");
 		assertThat(integerResult.getValues()).hasSize(1);
 	}
@@ -73,7 +75,8 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				ImmutableList.of(integerAttribute),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
 
 		assertThat(results).hasSize(1);
 		Result integerResult = results.get(0);
@@ -96,7 +99,8 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				ImmutableList.of(booleanAttribute),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
 
 		assertThat(results).hasSize(1);
 		Result result = results.get(0);
@@ -121,7 +125,8 @@ public class JmxResultProcessorTest {
 				query,
 				runtime,
 				attr.asList(),
-				runtime.getClassName()).getResults();
+				runtime.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
 
 		assertThat(results.size()).isGreaterThan(2);
 
@@ -150,7 +155,8 @@ public class JmxResultProcessorTest {
 				query,
 				memory,
 				attr.asList(),
-				memory.getClassName()).getResults();
+				memory.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
 
 		assertThat(results).hasSize(1);
 
@@ -174,7 +180,8 @@ public class JmxResultProcessorTest {
 				query,
 				new ObjectInstance("java.lang:type=Memory", "java.lang.SomeClass"),
 				ImmutableList.of(mapAttribute),
-				"java.lang.SomeClass"
+				"java.lang.SomeClass",
+				TEST_DOMAIN_NAME
 		).getResults();
 
 		assertThat(results).isNotNull();
@@ -192,7 +199,8 @@ public class JmxResultProcessorTest {
 				query,
 				new ObjectInstance("java.lang:type=Memory", "java.lang.SomeClass"),
 				ImmutableList.of(mapAttribute),
-				"java.lang.SomeClass"
+				"java.lang.SomeClass",
+				TEST_DOMAIN_NAME
 		).getResults();
 
 		assertThat(results).isNotNull();

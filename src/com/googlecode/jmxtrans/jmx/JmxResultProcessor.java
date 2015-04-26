@@ -26,12 +26,14 @@ public class JmxResultProcessor {
 	private final Query query;
 	private final ObjectInstance objectInstance;
 	private final String className;
+	private final String objDomain;
 	private final List<Attribute> attributes;
 
-	public JmxResultProcessor(Query query, ObjectInstance objectInstance, List<Attribute> attributes, String className) {
+	public JmxResultProcessor(Query query, ObjectInstance objectInstance, List<Attribute> attributes, String className, String objDomain) {
 		this.query = query;
 		this.objectInstance = objectInstance;
 		this.className = className;
+		this.objDomain = objDomain;
 		this.attributes = attributes;
 	}
 
@@ -162,6 +164,6 @@ public class JmxResultProcessor {
 	 * Builds up the base Result object
 	 */
 	private Result getNewResultObject(String attributeName, Map<String, Object> values) {
-		return new Result(System.currentTimeMillis(), attributeName, className, query.getResultAlias(), objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values);
+		return new Result(System.currentTimeMillis(), attributeName, className, objDomain, query.getResultAlias(), objectInstance.getObjectName().getCanonicalKeyPropertyListString(), values);
 	}
 }
