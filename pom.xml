@@ -10,7 +10,7 @@
 
 	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans</artifactId>
-	<version>250-SNAPSHOT</version>
+	<version>250</version>
 	<packaging>jar</packaging>
 	<name>jmxtrans</name>
 	<description>JMX metrics exporter</description>
@@ -61,7 +61,7 @@
 	<scm>
 		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
 		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>jmxtrans-250</tag>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
 	</scm>
 
@@ -1120,7 +1120,7 @@
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
-                  USER_ID=`id -u %{package.user} 2>/dev/null`
+                  USER_ID=`id -u %{package.user} 2&gt;/dev/null`
                     if [ -z "$USER_ID" ]; then
 									    /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
 									    ${package.install.dir} -U ${package.user}
