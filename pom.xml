@@ -10,7 +10,7 @@
 
 	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans</artifactId>
-	<version>249-SNAPSHOT</version>
+	<version>250-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>jmxtrans</name>
 	<description>JMX metrics exporter</description>
