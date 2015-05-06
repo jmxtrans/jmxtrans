@@ -5,9 +5,8 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import info.ganglia.gmetric4j.gmetric.GMetric;
 import info.ganglia.gmetric4j.gmetric.GMetricSlope;
+import org.junit.Assert;
 import org.junit.Test;
-
-import static junit.framework.Assert.assertEquals;
 
 /**
  * Tests for {@link GangliaWriter}.
@@ -32,16 +31,16 @@ public class GangliaWriterTests {
 				.build();
 		Server server = Server.builder().setHost("localhost").setPort("123").build();
 		writer.validateSetup(server, test);
-        assertEquals("192.168.1.144", writer.getHost());
-        assertEquals(GangliaWriter.DEFAULT_PORT, writer.getPort());
-        assertEquals(GangliaWriter.DEFAULT_ADDRESSING_MODE.name(), writer.getAddressingMode());
-        assertEquals(GangliaWriter.DEFAULT_TTL, writer.getTtl());
-        assertEquals(GangliaWriter.DEFAULT_V31, writer.isV31());
-        assertEquals(GangliaWriter.DEFAULT_UNITS, writer.getUnits());
-        assertEquals(GangliaWriter.DEFAULT_SLOPE, writer.getSlope());
-        assertEquals(GangliaWriter.DEFAULT_TMAX, writer.getTmax());
-        assertEquals(GangliaWriter.DEFAULT_DMAX, writer.getDmax());
-        assertEquals(GangliaWriter.DEFAULT_GROUP_NAME, writer.getGroupName());
+        Assert.assertEquals("192.168.1.144", writer.getHost());
+        Assert.assertEquals(GangliaWriter.DEFAULT_PORT, writer.getPort());
+        Assert.assertEquals(GangliaWriter.DEFAULT_ADDRESSING_MODE.name(), writer.getAddressingMode());
+        Assert.assertEquals(GangliaWriter.DEFAULT_TTL, writer.getTtl());
+        Assert.assertEquals(GangliaWriter.DEFAULT_V31, writer.isV31());
+        Assert.assertEquals(GangliaWriter.DEFAULT_UNITS, writer.getUnits());
+        Assert.assertEquals(GangliaWriter.DEFAULT_SLOPE, writer.getSlope());
+        Assert.assertEquals(GangliaWriter.DEFAULT_TMAX, writer.getTmax());
+        Assert.assertEquals(GangliaWriter.DEFAULT_DMAX, writer.getDmax());
+        Assert.assertEquals(GangliaWriter.DEFAULT_GROUP_NAME, writer.getGroupName());
     }
 
     /** Test validation when all parameters are set. */
@@ -65,15 +64,15 @@ public class GangliaWriterTests {
 				.build();
 		Server server = Server.builder().setHost("localhost").setPort("123").build();
 		writer.validateSetup(server, test);
-        assertEquals("192.168.1.144", writer.getHost());
-        assertEquals(25654, writer.getPort());
-        assertEquals(GMetric.UDPAddressingMode.MULTICAST.name(), writer.getAddressingMode());
-        assertEquals(4, writer.getTtl());
-        assertEquals(false, writer.isV31());
-        assertEquals("km/h", writer.getUnits());
-        assertEquals(GMetricSlope.NEGATIVE, writer.getSlope());
-        assertEquals(354, writer.getTmax());
-        assertEquals(24, writer.getDmax());
-        assertEquals("dummy", writer.getGroupName());
+        Assert.assertEquals("192.168.1.144", writer.getHost());
+        Assert.assertEquals(25654, writer.getPort());
+        Assert.assertEquals(GMetric.UDPAddressingMode.MULTICAST.name(), writer.getAddressingMode());
+        Assert.assertEquals(4, writer.getTtl());
+        Assert.assertEquals(false, writer.isV31());
+        Assert.assertEquals("km/h", writer.getUnits());
+        Assert.assertEquals(GMetricSlope.NEGATIVE, writer.getSlope());
+        Assert.assertEquals(354, writer.getTmax());
+        Assert.assertEquals(24, writer.getDmax());
+        Assert.assertEquals("dummy", writer.getGroupName());
     }
 }

@@ -6,10 +6,12 @@ import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -22,16 +24,8 @@ import java.net.SocketException;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.contains;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.contains;
+import static org.mockito.Matchers.eq;
 
 
 /**
@@ -49,10 +43,10 @@ public class TCollectorUDPWriterTests {
 
 	@Before
 	public void setupTest() throws Exception {
-		this.mockQuery = mock(Query.class);
-		this.mockResult = mock(Result.class);
-		this.mockDgSocket = mock(DatagramSocket.class);
-		this.mockLog = mock(Logger.class);
+		this.mockQuery = Mockito.mock(Query.class);
+		this.mockResult = Mockito.mock(Result.class);
+		this.mockDgSocket = Mockito.mock(DatagramSocket.class);
+		this.mockLog = Mockito.mock(Logger.class);
 
 
 		// Setup common mock interactions.
@@ -60,10 +54,10 @@ public class TCollectorUDPWriterTests {
 
 		// When results are needed.
 		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
-		when(this.mockResult.getValues()).thenReturn(testValues);
-		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
-		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
-		when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");
+		Mockito.when(this.mockResult.getValues()).thenReturn(testValues);
+		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
+		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
+		Mockito.when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");
 
 
 		// Prepare the object under test and test data.
@@ -92,14 +86,14 @@ public class TCollectorUDPWriterTests {
 		this.writer.stop();
 
 		// Verifications
-		verify(this.mockDgSocket).send(packetCapture.capture());
+		Mockito.verify(this.mockDgSocket).send(packetCapture.capture());
 
 		String sentString = new String(packetCapture.getValue().getData(),
 				packetCapture.getValue().getOffset(),
 				packetCapture.getValue().getLength());
 
-		assertThat(sentString, Matchers.startsWith("X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
-		assertThat(sentString, not(containsString("host=")));
+		Assert.assertThat(sentString, Matchers.startsWith("X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
+		Assert.assertThat(sentString, Matchers.not(Matchers.containsString("host=")));
 	}
 
 	/**
@@ -115,11 +109,11 @@ public class TCollectorUDPWriterTests {
 			// Execute
 			this.writer.start();
 
-			fail("LifecycleException missing");
+			Assert.fail("LifecycleException missing");
 		} catch (LifecycleException lcExc) {
 			// Verify
-			assertSame(sockExc, lcExc.getCause());
-			verify(this.mockLog).error(contains("create a datagram socket"), eq(sockExc));
+			Assert.assertSame(sockExc, lcExc.getCause());
+			Mockito.verify(this.mockLog).error(contains("create a datagram socket"), eq(sockExc));
 		}
 	}
 

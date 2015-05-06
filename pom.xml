@@ -60,6 +60,9 @@
 
 	<modules>
 		<module>jmxtrans</module>
+		<module>jmxtrans-utils</module>
+		<module>jmxtrans-output</module>
+		<module>jmxtrans-examples</module>
 	</modules>
 
 	<scm>
@@ -222,6 +225,26 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-examples</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.jrobin</groupId>
 				<artifactId>jrobin</artifactId>
 				<version>1.5.9</version>
@@ -352,6 +375,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 	<build>
 
 		<pluginManagement>
@@ -746,7 +770,6 @@
 				<artifactId>nexus-staging-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
-
 	</build>
 
 	<reporting>

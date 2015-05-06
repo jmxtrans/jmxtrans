@@ -16,28 +16,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-cloudwatch</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-core</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -60,10 +40,6 @@
 			<artifactId>commons-cli</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
@@ -76,20 +52,8 @@
 			<artifactId>commons-pool</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>info.ganglia.gmetric4j</groupId>
-			<artifactId>gmetric4j</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jpathwatch</groupId>
-			<artifactId>jpathwatch</artifactId>
 		</dependency>
 		<dependency>
 			<!-- JEXL support for configurable naming strategy expressions -->
@@ -97,17 +61,8 @@
 			<artifactId>commons-jexl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>animal-sniffer-annotations</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.jrobin</groupId>
-			<artifactId>jrobin</artifactId>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-utils</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
@@ -116,10 +71,6 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
@@ -133,24 +84,6 @@
 			-->
 			<groupId>org.acplt</groupId>
 			<artifactId>oncrpc</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<!--
-				AWS CloudWatch needs a recent version of http client.
-			-->
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<!--
-				There is no compile time dependency on jgit. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
-			<version>3.7.0.201502260915-r</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -196,26 +129,6 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-reflect</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -389,10 +302,6 @@
 						<phase>package</phase>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 

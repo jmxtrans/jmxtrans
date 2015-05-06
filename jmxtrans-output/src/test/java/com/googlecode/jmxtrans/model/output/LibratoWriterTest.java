@@ -2,12 +2,11 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class LibratoWriterTest {
 
@@ -26,7 +25,7 @@ public class LibratoWriterTest {
 				ImmutableMap.<String, Object>of()
 		);
 
-		assertThat(writer.httpUserAgent)
+		Assertions.assertThat(writer.httpUserAgent)
 				.startsWith("jmxtrans-standalone/")
 				.contains(System.getProperty("os.name"))
 				.contains(System.getProperty("os.arch"))

@@ -6,6 +6,7 @@ import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,16 +25,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.contains;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.contains;
+import static org.mockito.Matchers.eq;
 
 
 /**
@@ -59,12 +53,12 @@ public class OpenTSDBWriterTests {
 	@Before
 	public void	setupTest () throws Exception {
 		// Prepare Mock Objects
-		this.mockQuery = mock(Query.class);
-		this.mockResult = mock(Result.class);
-		this.mockSocket = mock(Socket.class);
-		this.mockInStreamRdr = mock(InputStreamReader.class);
-		this.mockBufRdr = mock(BufferedReader.class);
-		this.mockLog = mock(Logger.class);
+		this.mockQuery = Mockito.mock(Query.class);
+		this.mockResult = Mockito.mock(Result.class);
+		this.mockSocket = Mockito.mock(Socket.class);
+		this.mockInStreamRdr = Mockito.mock(InputStreamReader.class);
+		this.mockBufRdr = Mockito.mock(BufferedReader.class);
+		this.mockLog = Mockito.mock(Logger.class);
 
 		// PowerMockito mocks for those final/static classes and methods:
 		this.mockOut = PowerMockito.mock(DataOutputStream.class);
@@ -80,11 +74,11 @@ public class OpenTSDBWriterTests {
 
 		// When results are needed.
 		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
-		when(this.mockResult.getValues()).thenReturn(testValues);
-		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
-		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
-		when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");
-		when(this.mockInStreamRdr.ready()).thenReturn(false);
+		Mockito.when(this.mockResult.getValues()).thenReturn(testValues);
+		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
+		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
+		Mockito.when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");
+		Mockito.when(this.mockInStreamRdr.ready()).thenReturn(false);
 
 
 		// Prepare the object under test and test data.
@@ -111,10 +105,10 @@ public class OpenTSDBWriterTests {
 		this.writer.stop();
 
 		// Verify.
-		verify(this.mockOut).writeBytes(lineCapture.capture());
+		Mockito.verify(this.mockOut).writeBytes(lineCapture.capture());
 
-		assertThat(lineCapture.getValue(), Matchers.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
-		assertThat(lineCapture.getValue(), Matchers.containsString(" host="));
+		Assert.assertThat(lineCapture.getValue(), Matchers.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
+		Assert.assertThat(lineCapture.getValue(), Matchers.containsString(" host="));
 	}
 
 	/**
@@ -124,8 +118,8 @@ public class OpenTSDBWriterTests {
 	@Test
 	public void	testSuccessfulSendOpenTSDBResponse1 () throws Exception {
 		// Prepare.
-		when(this.mockInStreamRdr.ready()).thenReturn(true).thenReturn(false);
-		when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X");
+		Mockito.when(this.mockInStreamRdr.ready()).thenReturn(true).thenReturn(false);
+		Mockito.when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X");
 
 		// Execute.
 		this.writer.start();
@@ -134,8 +128,8 @@ public class OpenTSDBWriterTests {
 
 
 		// Verify.
-		verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
-		verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
+		Mockito.verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
+		Mockito.verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
 	}
 
 	/**
@@ -144,8 +138,8 @@ public class OpenTSDBWriterTests {
 	@Test
 	public void	testSuccessfulSendOpenTSDBResponse2 () throws Exception {
 		// Prepare.
-		when(this.mockInStreamRdr.ready()).thenReturn(true);
-		when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X").thenReturn(null);
+		Mockito.when(this.mockInStreamRdr.ready()).thenReturn(true);
+		Mockito.when(this.mockBufRdr.readLine()).thenReturn("X-OPENTSDB-MSG-X").thenReturn(null);
 
 		// Execute.
 		this.writer.start();
@@ -154,8 +148,8 @@ public class OpenTSDBWriterTests {
 
 
 		// Verify.
-		verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
-		verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
+		Mockito.verify(this.mockOut).writeBytes(Mockito.startsWith("put X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
+		Mockito.verify(this.mockLog).warn("OpenTSDB says: X-OPENTSDB-MSG-X");
 	}
 
 	/**
@@ -172,11 +166,11 @@ public class OpenTSDBWriterTests {
 			// Execute.
 			this.writer.start();
 
-			fail("LifecycleException missing");
+			Assert.fail("LifecycleException missing");
 		} catch ( LifecycleException lcExc ) {
 			// Verify.
-			assertSame(uhExc, lcExc.getCause());
-			verify(this.mockLog).error(contains("opening socket"), eq(uhExc));
+			Assert.assertSame(uhExc, lcExc.getCause());
+			Mockito.verify(this.mockLog).error(contains("opening socket"), eq(uhExc));
 		}
 	}
 
@@ -193,11 +187,11 @@ public class OpenTSDBWriterTests {
 		try {
 			// Execute.
 			this.writer.start();
-			fail("LifecycleException missing");
+			Assert.fail("LifecycleException missing");
 		} catch ( LifecycleException lcExc ) {
 			// Verify.
-			assertSame(ioExc, lcExc.getCause());
-			verify(this.mockLog).error(contains("opening socket"), eq(ioExc));
+			Assert.assertSame(ioExc, lcExc.getCause());
+			Mockito.verify(this.mockLog).error(contains("opening socket"), eq(ioExc));
 		}
 	}
 
@@ -208,17 +202,17 @@ public class OpenTSDBWriterTests {
 	public void	testSocketCloseIOException () throws Exception {
 		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
-		doThrow(ioExc).when(this.mockSocket).close();
+		Mockito.doThrow(ioExc).when(this.mockSocket).close();
 
 		// Execute.
 		this.writer.start();
 		try {
 			this.writer.stop();
-			fail("LifecycleException missing");
+			Assert.fail("LifecycleException missing");
 		} catch ( LifecycleException lcExc ) {
 			// Verify.
-			assertSame(ioExc, lcExc.getCause());
-			verify(this.mockLog).error(contains("closing socket"), eq(ioExc));
+			Assert.assertSame(ioExc, lcExc.getCause());
+			Mockito.verify(this.mockLog).error(contains("closing socket"), eq(ioExc));
 		}
 	}
 
@@ -229,17 +223,17 @@ public class OpenTSDBWriterTests {
 	public void	testStartOutputIOException () throws Exception {
 		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
-		when(this.mockSocket.getOutputStream()).thenThrow(ioExc);
+		Mockito.when(this.mockSocket.getOutputStream()).thenThrow(ioExc);
 
 		// Execute.
 		this.writer.start();
 		try {
 			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-			fail("IOException missing");
+			Assert.fail("IOException missing");
 		} catch ( IOException ioCaught ) {
 			// Verify.
-			assertSame(ioExc, ioCaught);
-			verify(this.mockLog).error(contains("output stream"), eq(ioExc));
+			Assert.assertSame(ioExc, ioCaught);
+			Mockito.verify(this.mockLog).error(contains("output stream"), eq(ioExc));
 		}
 	}
 
@@ -250,17 +244,17 @@ public class OpenTSDBWriterTests {
 	public void	testSendOutputIOException () throws Exception {
 		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
-		doThrow(ioExc).when(this.mockOut).writeBytes(anyString());
+		Mockito.doThrow(ioExc).when(this.mockOut).writeBytes(anyString());
 
 		// Execute.
 		this.writer.start();
 		try {
 			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-			fail("IOException missing");
+			Assert.fail("IOException missing");
 		} catch ( IOException ioCaught ) {
 			// Verify.
-			assertSame(ioExc, ioCaught);
-			verify(this.mockLog).error(contains("writing result"), eq(ioExc));
+			Assert.assertSame(ioExc, ioCaught);
+			Mockito.verify(this.mockLog).error(contains("writing result"), eq(ioExc));
 		}
 	}
 
@@ -268,17 +262,17 @@ public class OpenTSDBWriterTests {
 	public void	testFinishOutputIOException () throws Exception {
 		// Prepare.
 		IOException	ioExc = new IOException("X-TEST-IO-EXC-X");
-		doThrow(ioExc).when(this.mockOut).flush();
+		Mockito.doThrow(ioExc).when(this.mockOut).flush();
 
 		// Execute.
 		this.writer.start();
 		try {
 			this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-			fail("exception on flush was not thrown");
+			Assert.fail("exception on flush was not thrown");
 		} catch ( IOException ioCaught ) {
 			// Verify.
-			assertSame(ioExc, ioCaught);
-			verify(this.mockLog).error(contains("flush failed"), eq(ioExc));
+			Assert.assertSame(ioExc, ioCaught);
+			Mockito.verify(this.mockLog).error(contains("flush failed"), eq(ioExc));
 		}
 	}
 

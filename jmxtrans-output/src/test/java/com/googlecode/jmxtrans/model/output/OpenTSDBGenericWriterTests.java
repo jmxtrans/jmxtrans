@@ -7,9 +7,11 @@ import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -25,14 +27,6 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 
 /**
@@ -55,8 +49,8 @@ public class OpenTSDBGenericWriterTests {
 
 	@Before
 	public void setupTest() {
-		this.mockQuery = mock(Query.class);
-		this.mockResult = mock(Result.class);
+		this.mockQuery = Mockito.mock(Query.class);
+		this.mockResult = Mockito.mock(Result.class);
 
 		// Setup test data
 		tvAddHostnameTagDefault = true;
@@ -67,10 +61,10 @@ public class OpenTSDBGenericWriterTests {
 		tvMetricLinesSent = new LinkedList<String>();
 
 		// Setup common mock interactions.
-		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("x-att1-x", (Object) "120021"));
-		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
-		when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
-		when(this.mockResult.getTypeName()).
+		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("x-att1-x", (Object) "120021"));
+		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
+		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
+		Mockito.when(this.mockResult.getTypeName()).
 				thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
 
 	}
@@ -83,7 +77,7 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertEquals(1, tvMetricLinesSent.size());
+		Assert.assertEquals(1, tvMetricLinesSent.size());
 		validateMergedTypeNameValues(tvMetricLinesSent.get(0), true);
 	}
 
@@ -95,7 +89,7 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertEquals(1, tvMetricLinesSent.size());
+		Assert.assertEquals(1, tvMetricLinesSent.size());
 		validateMergedTypeNameValues(tvMetricLinesSent.get(0), true);
 	}
 
@@ -108,7 +102,7 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertEquals(1, tvMetricLinesSent.size());
+		Assert.assertEquals(1, tvMetricLinesSent.size());
 		validateMergedTypeNameValues(tvMetricLinesSent.get(0), false);
 	}
 
@@ -122,7 +116,7 @@ public class OpenTSDBGenericWriterTests {
 				false,
 				settings);
 
-		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
+		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
 
 		// Verify empty tag map.
 		Assertions.assertThat(writer.getTypeNames()).isEmpty();
@@ -131,7 +125,7 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertTrue(
+		Assert.assertTrue(
 				this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
 	}
 
@@ -150,11 +144,11 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
-		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag1-x=x-tag1val-x\\b.*"));
-		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag2-x=x-tag2val-x\\b.*"));
-		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag3-x=x-tag3val-x\\b.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag1-x=x-tag1val-x\\b.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag2-x=x-tag2val-x\\b.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bx-tag3-x=x-tag3val-x\\b.*"));
 	}
 
 	@Test
@@ -165,9 +159,9 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertEquals(1, tvMetricLinesSent.size());
+		Assert.assertEquals(1, tvMetricLinesSent.size());
 		validateMergedTypeNameValues(tvMetricLinesSent.get(0), true);
-		assertTrue(this.tvMetricLinesSent.get(0).matches(".*host=.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*host=.*"));
 	}
 
 	@Test
@@ -178,7 +172,7 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
+		Assert.assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
 	}
 
 	@Test
@@ -186,41 +180,41 @@ public class OpenTSDBGenericWriterTests {
 		OpenTSDBGenericWriter writer = createWriter();
 
 		ImmutableMap<String, Object> values = ImmutableMap.of();
-		when(this.mockResult.getValues()).thenReturn(values);
+		Mockito.when(this.mockResult.getValues()).thenReturn(values);
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertEquals(0, this.tvMetricLinesSent.size());
+		Assert.assertEquals(0, this.tvMetricLinesSent.size());
 	}
 
 	@Test
 	public void testOneValueMatchingAttribute() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
-		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
+		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-		assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
-		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\btype=.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
+		Assert.assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\btype=.*"));
 	}
 
 	@Test
 	public void testMultipleValuesWithMatchingAttribute() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
-		when(this.mockResult.getValues()).
+		Mockito.when(this.mockResult.getValues()).
 				thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021", "XX-ATT-XX", (Object) "210012"));
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
-		assertEquals(2, this.tvMetricLinesSent.size());
+		Assert.assertEquals(2, this.tvMetricLinesSent.size());
 
 		String xLine;
 		String xxLine;
@@ -232,24 +226,24 @@ public class OpenTSDBGenericWriterTests {
 			xxLine = this.tvMetricLinesSent.get(1);
 		}
 
-		assertTrue(xLine.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-		assertTrue(xLine.matches(".*\\btype=X-ATT-X\\b.*"));
+		Assert.assertTrue(xLine.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+		Assert.assertTrue(xLine.matches(".*\\btype=X-ATT-X\\b.*"));
 
-		assertTrue(xxLine.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 210012.*"));
-		assertTrue(xxLine.matches(".*\\btype=XX-ATT-XX\\b.*"));
+		Assert.assertTrue(xxLine.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 210012.*"));
+		Assert.assertTrue(xxLine.matches(".*\\btype=XX-ATT-XX\\b.*"));
 	}
 
 	@Test
 	public void testNonNumericValue() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 
-		when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "THIS-IS-NOT-A-NUMBER"));
+		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "THIS-IS-NOT-A-NUMBER"));
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertEquals(0, this.tvMetricLinesSent.size());
+		Assert.assertEquals(0, this.tvMetricLinesSent.size());
 	}
 
 	@Test
@@ -260,7 +254,7 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.stop();
 
-		assertTrue(this.tvMetricLinesSent.get(0).matches("^xx-jexl-constant-name-xx 0 120021.*"));
+		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches("^xx-jexl-constant-name-xx 0 120021.*"));
 	}
 
 	@Test(expected = LifecycleException.class)
@@ -312,22 +306,22 @@ public class OpenTSDBGenericWriterTests {
 	public void testHooksCalled() throws Exception {
 		OpenTSDBGenericWriter writer = createWriter();
 		writer.start();
-		assertTrue(prepareSenderCalled);
-		assertFalse(shutdownSenderCalled);
-		assertFalse(startOutputCalled);
-		assertFalse(finishOutputCalled);
+		Assert.assertTrue(prepareSenderCalled);
+		Assert.assertFalse(shutdownSenderCalled);
+		Assert.assertFalse(startOutputCalled);
+		Assert.assertFalse(finishOutputCalled);
 
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-		assertTrue(prepareSenderCalled);
-		assertFalse(shutdownSenderCalled);
-		assertTrue(startOutputCalled);
-		assertTrue(finishOutputCalled);
+		Assert.assertTrue(prepareSenderCalled);
+		Assert.assertFalse(shutdownSenderCalled);
+		Assert.assertTrue(startOutputCalled);
+		Assert.assertTrue(finishOutputCalled);
 
 		writer.stop();
-		assertTrue(prepareSenderCalled);
-		assertTrue(shutdownSenderCalled);
-		assertTrue(startOutputCalled);
-		assertTrue(finishOutputCalled);
+		Assert.assertTrue(prepareSenderCalled);
+		Assert.assertTrue(shutdownSenderCalled);
+		Assert.assertTrue(startOutputCalled);
+		Assert.assertTrue(finishOutputCalled);
 
 	}
 
@@ -344,15 +338,15 @@ public class OpenTSDBGenericWriterTests {
 	public void testLocalhostUnknownHostException() throws Exception {
 		UnknownHostException unknownHostException = new UnknownHostException("X-TEST-UHE-X");
 		try {
-			mockStatic(InetAddress.class);
+			PowerMockito.mockStatic(InetAddress.class);
 			PowerMockito.when(InetAddress.getLocalHost()).thenThrow(unknownHostException);
 
 			OpenTSDBGenericWriter writer = createWriter();
 
-			fail("LifecycleException missing");
+			Assert.fail("LifecycleException missing");
 		} catch (UnknownHostException ex) {
 			// Verify.
-			assertSame(unknownHostException, ex);
+			Assert.assertSame(unknownHostException, ex);
 		}
 	}
 
@@ -362,10 +356,10 @@ public class OpenTSDBGenericWriterTests {
 	@Test
 	public void testNullHostTagname() throws Exception {
 		// Prepare.
-		InetAddress mockInetAddress = mock(InetAddress.class);
-		mockStatic(InetAddress.class);
+		InetAddress mockInetAddress = Mockito.mock(InetAddress.class);
+		PowerMockito.mockStatic(InetAddress.class);
 		PowerMockito.when(InetAddress.getLocalHost()).thenReturn(mockInetAddress);
-		when(mockInetAddress.getHostName()).thenReturn(null);
+		Mockito.when(mockInetAddress.getHostName()).thenReturn(null);
 		OpenTSDBGenericWriter writer = createWriter("addHostnameTag", true);
 
 
@@ -374,7 +368,7 @@ public class OpenTSDBGenericWriterTests {
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
 
 		// Validate.
-		assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));    // Ensure host tag is excluded
+		Assert.assertFalse(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));    // Ensure host tag is excluded
 	}
 
 	protected OpenTSDBGenericWriter createWriter() throws LifecycleException, UnknownHostException {
@@ -399,16 +393,16 @@ public class OpenTSDBGenericWriterTests {
 
 	protected void validateMergedTypeNameValues(String resultString, boolean mergedInd) {
 		if (mergedInd) {
-			assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-			assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
-			assertTrue(resultString.matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
+			Assert.assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+			Assert.assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
+			Assert.assertTrue(resultString.matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
 		} else {
-			assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-			assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
-			assertTrue(resultString.matches(".*\\bType=x-type-x\\b.*"));
-			assertTrue(resultString.matches(".*\\bGroup=x-group-x\\b.*"));
-			assertTrue(resultString.matches(".*\\bName=x-name-x\\b.*"));
-			assertTrue(resultString.matches(".*\\bMissing=(\\s.*|$)"));
+			Assert.assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
+			Assert.assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
+			Assert.assertTrue(resultString.matches(".*\\bType=x-type-x\\b.*"));
+			Assert.assertTrue(resultString.matches(".*\\bGroup=x-group-x\\b.*"));
+			Assert.assertTrue(resultString.matches(".*\\bName=x-name-x\\b.*"));
+			Assert.assertTrue(resultString.matches(".*\\bMissing=(\\s.*|$)"));
 		}
 	}
 
