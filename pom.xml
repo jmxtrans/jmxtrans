@@ -12,7 +12,7 @@
 	<artifactId>jmxtrans-parent</artifactId>
 	<version>251-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>jmxtrans parent pom</name>
+	<name>JmxTrans - parent project</name>
 	<description>JMX metrics exporter</description>
 
 	<url>http://www.jmxtrans.org</url>
@@ -63,6 +63,7 @@
 		<module>jmxtrans-utils</module>
 		<module>jmxtrans-output</module>
 		<module>jmxtrans-examples</module>
+		<module>jmxtrans-core</module>
 	</modules>
 
 	<scm>
@@ -103,6 +104,9 @@
 		<package.user>${project.artifactId}</package.user>
 		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<verify.mutationThreshold>100</verify.mutationThreshold>
+		<verify.totalBranchRate>100</verify.totalBranchRate>
+		<verify.totalLineRate>100</verify.totalLineRate>
 	</properties>
 
 	<dependencyManagement>
@@ -231,12 +235,47 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
 				<artifactId>jmxtrans-examples</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jmxtrans</groupId>
 				<artifactId>jmxtrans-output</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-cloudwatch</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-ganglia</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-jrobin</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-log4j</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-velocity</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -257,12 +296,17 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.12</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.12</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>1.7.12</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
@@ -423,6 +467,34 @@
 							<phase>verify</phase>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>de.is24.mavenplugins</groupId>
+					<artifactId>deadcode4j-maven-plugin</artifactId>
+					<version>2.0.1</version>
+					<configuration>
+						<classesToIgnore>
+							<param>com.googlecode.jmxtrans.example.ActiveMQ</param>
+							<param>com.googlecode.jmxtrans.example.ActiveMQ2</param>
+							<param>com.googlecode.jmxtrans.example.Ehcache</param>
+							<param>com.googlecode.jmxtrans.example.Ganglia</param>
+							<param>com.googlecode.jmxtrans.example.Graphite</param>
+							<param>com.googlecode.jmxtrans.example.HeapMemory</param>
+							<param>com.googlecode.jmxtrans.example.Hibernate</param>
+							<param>com.googlecode.jmxtrans.example.InterestingInfo</param>
+							<param>com.googlecode.jmxtrans.example.MemoryPool</param>
+							<param>com.googlecode.jmxtrans.example.Tester</param>
+							<param>com.googlecode.jmxtrans.example.TreeWalker</param>
+							<param>com.googlecode.jmxtrans.example.TreeWalker2</param>
+							<param>com.googlecode.jmxtrans.example.TreeWalker3</param>
+						</classesToIgnore>
+						<interfacesMarkingLiveCode>
+							<param>com.googlecode.jmxtrans.model.OutputWriter</param>
+						</interfacesMarkingLiveCode>
+						<skipSendingUsageStatistics>false</skipSendingUsageStatistics>
+						<skipUpdateCheck>true</skipUpdateCheck>
+						<usageStatisticsComment>JmxTrans - https://github.com/jmxtrans/jmxtrans</usageStatisticsComment>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>net.ju-n.maven.plugins</groupId>
@@ -647,8 +719,8 @@
 							<lineRate>0</lineRate>
 							<packageBranchRate>0</packageBranchRate>
 							<packageLineRate>0</packageLineRate>
-							<totalBranchRate>30</totalBranchRate>
-							<totalLineRate>33</totalLineRate>
+							<totalBranchRate>${verify.totalBranchRate}</totalBranchRate>
+							<totalLineRate>${verify.totalLineRate}</totalLineRate>
 						</check>
 					</configuration>
 					<executions>
@@ -693,13 +765,15 @@
 							<mutator>NON_VOID_METHOD_CALLS</mutator>
 							<mutator>CONSTRUCTOR_CALLS</mutator>
 						</mutators>
-						<mutationThreshold>26</mutationThreshold>
-						<coverageThreshold>34</coverageThreshold>
+						<coverageThreshold>0</coverageThreshold>
+						<mutationThreshold>${verify.mutationThreshold}</mutationThreshold>
 						<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>
 						<historyOutputFile>${project.build.directory}/pitest-history.xml</historyOutputFile>
+						<reportsDirectory>${project.build.directory}/site/pit-reports</reportsDirectory>
 						<jvmArgs>
 							<value>-XX:MaxPermSize=256M</value>
 						</jvmArgs>
+						<threads>4</threads>
 						<targetClasses>
 							<param>com.googlecode.jmxtrans.*</param>
 						</targetClasses>
@@ -907,6 +981,38 @@
 									<goal>mutationCoverage</goal>
 								</goals>
 								<phase>verify</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>refreshPITHistory</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-pit-history</id>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<phase>install</phase>
+								<configuration>
+									<outputDirectory>${project.basedir}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.build.directory}</directory>
+											<includes>
+												<include>pitest-history.xml</include>
+											</includes>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>

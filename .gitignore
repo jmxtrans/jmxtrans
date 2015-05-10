@@ -12,3 +12,4 @@ target
 vagrant/.vagrant
 .settings
 scrapbook.jpage
+jmxtrans/vagrant/.vagrant

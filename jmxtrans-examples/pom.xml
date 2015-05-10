@@ -9,6 +9,16 @@
 
 	<artifactId>jmxtrans-examples</artifactId>
 
+	<name>JmxTrans - Examples</name>
+
+	<description>This module contains examples of how to use JmxTrans. It is not included in the final packaging.</description>
+
+	<properties>
+		<verify.mutationThreshold>0</verify.mutationThreshold>
+		<verify.totalBranchRate>0</verify.totalBranchRate>
+		<verify.totalLineRate>0</verify.totalLineRate>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -20,11 +30,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
-			<artifactId>jmxtrans</artifactId>
+			<artifactId>jmxtrans-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
-			<artifactId>jmxtrans-output</artifactId>
+			<artifactId>jmxtrans-output-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-ganglia</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-jrobin</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -38,6 +56,19 @@
 	</dependencies>
 
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- There is no Java that require testing, let's skip PIT -->
+					<groupId>org.pitest</groupId>
+					<artifactId>pitest-maven</artifactId>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>com.github.github</groupId>
@@ -52,16 +83,6 @@
 			<plugin>
 				<groupId>net.ju-n.maven.plugins</groupId>
 				<artifactId>checksum-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<configuration>
-					<check>
-						<totalBranchRate>0</totalBranchRate>
-						<totalLineRate>0</totalLineRate>
-					</check>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
