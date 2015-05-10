@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 if [ "$1" = "purge" ] ; then
-        update-rc.d [[name]] remove >/dev/null
+        update-rc.d jmxtrans remove >/dev/null
 fi
 
 if [ "$1" = purge ] && [ -e /usr/share/debconf/confmodule ]; then

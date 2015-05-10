@@ -6,7 +6,7 @@ set -e
 . /usr/share/debconf/confmodule
 
 # defaults file
-CONFIG="/etc/default/[[name]]"
+CONFIG="/etc/default/jmxtrans"
 
 # defaults for JVM
 HEAP_SIZE="512"
@@ -44,33 +44,33 @@ case "$1" in
     configure)
 
         ##### deal with logs #####
-        mkdir -p /var/log/[[name]]
-        chown jmxtrans:jmxtrans /var/log/[[name]]
+        mkdir -p /var/log/jmxtrans
+        chown jmxtrans:jmxtrans /var/log/jmxtrans
 
-        if [ ! -d /usr/share/[[name]]/logs -a ! -h /usr/share/[[name]]/logs ]; then
-            cd /usr/share/[[name]]
-            ln -fs /var/log/[[name]] logs
+        if [ ! -d /usr/share/jmxtrans/logs -a ! -h /usr/share/jmxtrans/logs ]; then
+            cd /usr/share/jmxtrans
+            ln -fs /var/log/jmxtrans logs
         fi
         ##### deal with logs #####
 
         # collect user inputs
-        db_get [[name]]/jvm_heap_size
+        db_get jmxtrans/jvm_heap_size
         if [ ! -z "$RET" ]; then
             HEAP_SIZE="${RET}"
         fi
 
         HEAP_NUMBER=$(echo $HEAP_SIZE|sed 's/[a-zA-Z]//g')
 
-        mkdir -p /var/lib/[[name]] || true
-        chown jmxtrans:jmxtrans /var/lib/[[name]]
+        mkdir -p /var/lib/jmxtrans || true
+        chown jmxtrans:jmxtrans /var/lib/jmxtrans
 
         # populate defaults file
         if [ ! -e "$CONFIG" ]; then
-            echo "# default file for package [[name]]" > "$CONFIG"
-            echo "export LOG_DIR=\"/var/log/[[name]]\"" >> "$CONFIG"
-            echo "export LOG_FILE=\"/var/log/[[name]]/[[name]].log\"" >> "$CONFIG"
+            echo "# default file for package jmxtrans" > "$CONFIG"
+            echo "export LOG_DIR=\"/var/log/jmxtrans\"" >> "$CONFIG"
+            echo "export LOG_FILE=\"/var/log/jmxtrans/jmxtrans.log\"" >> "$CONFIG"
             echo "export SECONDS_BETWEEN_RUNS=60" >> "$CONFIG"
-            echo "export JSON_DIR=\"/var/lib/[[name]]\"" >> "$CONFIG"
+            echo "export JSON_DIR=\"/var/lib/jmxtrans\"" >> "$CONFIG"
             echo "export HEAP_SIZE=${HEAP_SIZE}" >> "$CONFIG"
             echo "export LOG_LEVEL=debug" >> "$CONFIG"
             echo "export JAR_FILE=/usr/share/jmxtrans/lib/jmxtrans-all.jar" >> "$CONFIG"
