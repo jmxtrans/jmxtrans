@@ -158,7 +158,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.jobs.ServerJob.java">com/googlecode/jmxtrans/jobs/ServerJob.java</a>
+                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.model.naming.StringUtils.java">com/googlecode/jmxtrans/model/naming/StringUtils.java</a>
                 </td>
                 <td>
                   0
@@ -186,7 +186,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.model.naming.StringUtils.java">com/googlecode/jmxtrans/model/naming/StringUtils.java</a>
+                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.jobs.ServerJob.java">com/googlecode/jmxtrans/jobs/ServerJob.java</a>
                 </td>
                 <td>
                   0
@@ -340,7 +340,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.cli.OptionsException.java">com/googlecode/jmxtrans/cli/OptionsException.java</a>
+                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.ConfigurationParser.java">com/googlecode/jmxtrans/ConfigurationParser.java</a>
                 </td>
                 <td>
                   0
@@ -354,7 +354,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.ConfigurationParser.java">com/googlecode/jmxtrans/ConfigurationParser.java</a>
+                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.cli.OptionsException.java">com/googlecode/jmxtrans/cli/OptionsException.java</a>
                 </td>
                 <td>
                   0
@@ -844,7 +844,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.example.TreeWalker2.java">com/googlecode/jmxtrans/example/TreeWalker2.java</a>
+                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.example.Tester.java">com/googlecode/jmxtrans/example/Tester.java</a>
                 </td>
                 <td>
                   0
@@ -858,7 +858,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.example.Tester.java">com/googlecode/jmxtrans/example/Tester.java</a>
+                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.example.TreeWalker2.java">com/googlecode/jmxtrans/example/TreeWalker2.java</a>
                 </td>
                 <td>
                   0
