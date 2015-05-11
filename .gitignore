@@ -7,7 +7,9 @@ out
 *.iml
 *.iws
 *.ipr
+*.bak
 target
 vagrant/.vagrant
 .settings
 scrapbook.jpage
+jmxtrans/vagrant/.vagrant

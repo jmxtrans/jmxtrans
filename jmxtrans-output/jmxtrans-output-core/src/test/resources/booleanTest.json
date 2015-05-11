@@ -1,0 +1,19 @@
+{
+  "servers" : [ {
+    "port" : "123",
+    "host" : "host",
+    "queries" : [ {
+      "obj" : "java.lang:type=ClassLoading",
+      "useObjDomainAsKey" : true,
+      "allowDottedKeys" : true,
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+        "settings" : {
+          "port" : 123,
+          "host" : "localhost",
+          "booleanAsNumber" : true
+        }
+      } ]
+    } ]
+  }]
+}
