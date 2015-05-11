@@ -13,78 +13,77 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.ValidationException;
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> info.ganglia.gmetric4j.gmetric.GMetric;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> info.ganglia.gmetric4j.gmetric.GMetricSlope;
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.junit.Test;
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> junit.framework.Assert.assertEquals;
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment"> * Tests for {@link GangliaWriter}.</em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment"> *</em>
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment"> * @author Zack Radick</em>
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> * @author Julien Nicoulaud &lt;<a href="http://github.com/nicoulaj&gt" target="alexandria_uri">http://github.com/nicoulaj&gt</a>;</em>
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/GangliaWriterTests.html">GangliaWriterTests</a> {
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>      <em class="jxr_javadoccomment">/** Test validation when no parameter is set. */</em>
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>      @Test(expected = NullPointerException.<strong class="jxr_keyword">class</strong>)
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testValidationWithoutSettings() <strong class="jxr_keyword">throws</strong> ValidationException {
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  		GangliaWriter.builder().build();
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>      }
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <em class="jxr_javadoccomment">/** Test validation when only required parameters are set. */</em>
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>      @Test
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testValidationMinimalSettings() <strong class="jxr_keyword">throws</strong> ValidationException {
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  		GangliaWriter writer = GangliaWriter.builder().setHost(<span class="jxr_string">"192.168.1.144"</span>).build();
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>          Query test = Query.builder()
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  				.setObj(<span class="jxr_string">"test"</span>)
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  				.build();
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  		Server server = Server.builder().setHost(<span class="jxr_string">"localhost"</span>).setPort(<span class="jxr_string">"123"</span>).build();
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  		writer.validateSetup(server, test);
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>          assertEquals(<span class="jxr_string">"192.168.1.144"</span>, writer.getHost());
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>          assertEquals(GangliaWriter.DEFAULT_PORT, writer.getPort());
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>          assertEquals(GangliaWriter.DEFAULT_ADDRESSING_MODE.name(), writer.getAddressingMode());
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>          assertEquals(GangliaWriter.DEFAULT_TTL, writer.getTtl());
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>          assertEquals(GangliaWriter.DEFAULT_V31, writer.isV31());
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>          assertEquals(GangliaWriter.DEFAULT_UNITS, writer.getUnits());
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>          assertEquals(GangliaWriter.DEFAULT_SLOPE, writer.getSlope());
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>          assertEquals(GangliaWriter.DEFAULT_TMAX, writer.getTmax());
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>          assertEquals(GangliaWriter.DEFAULT_DMAX, writer.getDmax());
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>          assertEquals(GangliaWriter.DEFAULT_GROUP_NAME, writer.getGroupName());
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>      }
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>      <em class="jxr_javadoccomment">/** Test validation when all parameters are set. */</em>
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>      @Test
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testValidationAllSettings() <strong class="jxr_keyword">throws</strong> ValidationException {
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  		GangliaWriter writer = GangliaWriter.builder()
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  				.setHost(<span class="jxr_string">"192.168.1.144"</span>)
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  				.setPort(25654)
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  				.setAddressingMode(<span class="jxr_string">"MULTICAST"</span>)
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  				.setTtl(4)
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  				.setV31(false)
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  				.setUnits(<span class="jxr_string">"km/h"</span>)
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  				.setSlope(<span class="jxr_string">"NEGATIVE"</span>)
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  				.setTmax(354)
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  				.setDmax(24)
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  				.setGroupName(<span class="jxr_string">"dummy"</span>)
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  				.build();
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>          Query test = Query.builder()
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  				.setObj(<span class="jxr_string">"test"</span>)
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  				.build();
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		Server server = Server.builder().setHost(<span class="jxr_string">"localhost"</span>).setPort(<span class="jxr_string">"123"</span>).build();
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		writer.validateSetup(server, test);
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>          assertEquals(<span class="jxr_string">"192.168.1.144"</span>, writer.getHost());
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>          assertEquals(25654, writer.getPort());
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>          assertEquals(GMetric.UDPAddressingMode.MULTICAST.name(), writer.getAddressingMode());
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>          assertEquals(4, writer.getTtl());
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>          assertEquals(false, writer.isV31());
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>          assertEquals(<span class="jxr_string">"km/h"</span>, writer.getUnits());
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>          assertEquals(GMetricSlope.NEGATIVE, writer.getSlope());
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>          assertEquals(354, writer.getTmax());
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>          assertEquals(24, writer.getDmax());
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>          assertEquals(<span class="jxr_string">"dummy"</span>, writer.getGroupName());
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>      }
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  }
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.junit.Assert;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment"> * Tests for {@link GangliaWriter}.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment"> * @author Zack Radick</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment"> * @author Julien Nicoulaud &lt;<a href="http://github.com/nicoulaj&gt" target="alexandria_uri">http://github.com/nicoulaj&gt</a>;</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/GangliaWriterTests.html">GangliaWriterTests</a> {
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>      <em class="jxr_javadoccomment">/** Test validation when no parameter is set. */</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>      @Test(expected = NullPointerException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testValidationWithoutSettings() <strong class="jxr_keyword">throws</strong> ValidationException {
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  		GangliaWriter.builder().build();
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>      }
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>      <em class="jxr_javadoccomment">/** Test validation when only required parameters are set. */</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>      @Test
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testValidationMinimalSettings() <strong class="jxr_keyword">throws</strong> ValidationException {
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  		GangliaWriter writer = GangliaWriter.builder().setHost(<span class="jxr_string">"192.168.1.144"</span>).build();
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>          Query test = Query.builder()
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  				.setObj(<span class="jxr_string">"test"</span>)
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  				.build();
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  		Server server = Server.builder().setHost(<span class="jxr_string">"localhost"</span>).setPort(<span class="jxr_string">"123"</span>).build();
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  		writer.validateSetup(server, test);
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>          Assert.assertEquals(<span class="jxr_string">"192.168.1.144"</span>, writer.getHost());
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>          Assert.assertEquals(GangliaWriter.DEFAULT_PORT, writer.getPort());
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>          Assert.assertEquals(GangliaWriter.DEFAULT_ADDRESSING_MODE.name(), writer.getAddressingMode());
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>          Assert.assertEquals(GangliaWriter.DEFAULT_TTL, writer.getTtl());
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>          Assert.assertEquals(GangliaWriter.DEFAULT_V31, writer.isV31());
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>          Assert.assertEquals(GangliaWriter.DEFAULT_UNITS, writer.getUnits());
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>          Assert.assertEquals(GangliaWriter.DEFAULT_SLOPE, writer.getSlope());
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>          Assert.assertEquals(GangliaWriter.DEFAULT_TMAX, writer.getTmax());
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>          Assert.assertEquals(GangliaWriter.DEFAULT_DMAX, writer.getDmax());
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>          Assert.assertEquals(GangliaWriter.DEFAULT_GROUP_NAME, writer.getGroupName());
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>      }
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <em class="jxr_javadoccomment">/** Test validation when all parameters are set. */</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      @Test
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testValidationAllSettings() <strong class="jxr_keyword">throws</strong> ValidationException {
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  		GangliaWriter writer = GangliaWriter.builder()
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  				.setHost(<span class="jxr_string">"192.168.1.144"</span>)
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  				.setPort(25654)
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  				.setAddressingMode(<span class="jxr_string">"MULTICAST"</span>)
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  				.setTtl(4)
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  				.setV31(false)
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  				.setUnits(<span class="jxr_string">"km/h"</span>)
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  				.setSlope(<span class="jxr_string">"NEGATIVE"</span>)
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  				.setTmax(354)
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  				.setDmax(24)
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  				.setGroupName(<span class="jxr_string">"dummy"</span>)
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  				.build();
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          Query test = Query.builder()
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  				.setObj(<span class="jxr_string">"test"</span>)
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  				.build();
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		Server server = Server.builder().setHost(<span class="jxr_string">"localhost"</span>).setPort(<span class="jxr_string">"123"</span>).build();
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		writer.validateSetup(server, test);
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>          Assert.assertEquals(<span class="jxr_string">"192.168.1.144"</span>, writer.getHost());
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          Assert.assertEquals(25654, writer.getPort());
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          Assert.assertEquals(GMetric.UDPAddressingMode.MULTICAST.name(), writer.getAddressingMode());
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          Assert.assertEquals(4, writer.getTtl());
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>          Assert.assertEquals(false, writer.isV31());
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>          Assert.assertEquals(<span class="jxr_string">"km/h"</span>, writer.getUnits());
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>          Assert.assertEquals(GMetricSlope.NEGATIVE, writer.getSlope());
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>          Assert.assertEquals(354, writer.getTmax());
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          Assert.assertEquals(24, writer.getDmax());
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          Assert.assertEquals(<span class="jxr_string">"dummy"</span>, writer.getGroupName());
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>      }
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2015. All rights reserved.</div>

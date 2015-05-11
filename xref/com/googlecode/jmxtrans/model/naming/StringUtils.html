@@ -29,26 +29,29 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment">	 * Replaces all . and / with _ and removes all spaces and double/single quotes.</em>
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment">	 *</em>
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment">	 * @param name            the name</em>
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment">	 * @param allowDottedKeys whether we remove the dots or not.</em>
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment">	 * @return</em>
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String cleanupStr(String name, <strong class="jxr_keyword">boolean</strong> allowDottedKeys) {
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  		<strong class="jxr_keyword">if</strong> (name == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  		}
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  		Pattern pattern;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  		<strong class="jxr_keyword">if</strong> (!allowDottedKeys) {
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  			pattern = DOT_SLASH_UNDERSCORE_PAT;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  			pattern = SLASH_UNDERSCORE_PAT;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  		}
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  		String clean = pattern.matcher(name).replaceAll(<span class="jxr_string">"_"</span>);
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  		clean = SPACE_PAT.matcher(clean).replaceAll(<span class="jxr_string">""</span>);
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  		<strong class="jxr_keyword">return</strong> clean;
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  	}
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  }
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment">	 * Chomps any trailing . or _ character.</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment">	 *</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment">	 * @param name            the name</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment">	 * @param allowDottedKeys whether we remove the dots or not.</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment">	 * @return</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String cleanupStr(String name, <strong class="jxr_keyword">boolean</strong> allowDottedKeys) {
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  		<strong class="jxr_keyword">if</strong> (name == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  		}
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  		Pattern pattern;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  		<strong class="jxr_keyword">if</strong> (!allowDottedKeys) {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  			pattern = DOT_SLASH_UNDERSCORE_PAT;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  			pattern = SLASH_UNDERSCORE_PAT;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  		}
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  		String clean = pattern.matcher(name).replaceAll(<span class="jxr_string">"_"</span>);
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  		clean = SPACE_PAT.matcher(clean).replaceAll(<span class="jxr_string">""</span>);
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  		clean = org.apache.commons.lang.StringUtils.chomp(clean, <span class="jxr_string">"."</span>);
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  		clean = org.apache.commons.lang.StringUtils.chomp(clean, <span class="jxr_string">"_"</span>);
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  		<strong class="jxr_keyword">return</strong> clean;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	}
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2015. All rights reserved.</div>
