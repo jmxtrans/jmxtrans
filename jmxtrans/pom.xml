@@ -11,12 +11,10 @@
 	<artifactId>jmxtrans</artifactId>
 	<packaging>jar</packaging>
 	<name>JmxTrans</name>
-	<description>
-		JMX metrics exporter.
+	<description>JMX metrics exporter.
 
 		This module creates the packaging for JmxTrans. It does not contain any application code, but creates .deb, .rpm
-		or other packaging.
-	</description>
+		or other packaging.</description>
 
 	<properties>
 		<verify.mutationThreshold>0</verify.mutationThreshold>
