@@ -655,6 +655,8 @@
 					<artifactId>maven-scm-publish-plugin</artifactId>
 					<version>1.1</version>
 					<configuration>
+						<!-- try to reduce the number of files sent in one git add command -->
+						<addUniqueDirectory>true</addUniqueDirectory>
 						<scmBranch>gh-pages</scmBranch>
 						<tryUpdate>true</tryUpdate>
 						<serverId>github</serverId>
