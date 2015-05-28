@@ -6,7 +6,7 @@ install:
   - mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
 script: ./travis-script.sh
 after_success:
-  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "$SITE_BRANCH_NAME" && mvn site --settings ${HOME}/travis/settings.xml -B -V && mvn site:stage scm-publish:publish-scm --settings ${HOME}/travis/settings.xml -B -V
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "$SITE_BRANCH_NAME" && mvn site-deploy --settings ${HOME}/travis/settings.xml -B -V && mvn site:stage scm-publish:publish-scm --settings ${HOME}/travis/settings.xml -B -V
 branches:
   except:
     - travis
