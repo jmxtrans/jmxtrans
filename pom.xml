@@ -683,7 +683,7 @@
 						<id>sitestage</id>
 						<goals>
 							<goal>publish-scm</goal>
-						<goals>
+						</goals>
 						<phase>site-deploy</phase>
 						</execution>
 					</executions>
