@@ -40,7 +40,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     fi
   else
     echo "Building feature branch"
-    mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb
+    mvn install --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb
   fi
 else
   echo "Building pull request"
