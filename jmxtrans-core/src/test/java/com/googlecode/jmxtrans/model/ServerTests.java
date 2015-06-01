@@ -86,46 +86,49 @@ public class ServerTests {
 
 	@Test
 	public void testServerVariableHandling() {
-		// we add some variables to the System.properties list 
-		String alias = "somealias";
-		String port = "1234";
-		String host = "localhost.local";
-		String username = "acme";
-		String password = "password";
-		String url = "service:jmx:remoting-jms://amce.local:1234";
+		try{
+			// we add some variables to the System.properties list 
 		
-		System.setProperty("myalias", alias);
-		System.setProperty("myport", port);
-		System.setProperty("myhost", host);
-		System.setProperty("myusername",username);
-		System.setProperty("mypassword", password);
-		System.setProperty("myurl", url);
-		
-		Server s1 = Server.builder()
-					.setAlias("${myalias}")
-					.setPort("${myport}")
-					.setHost("${myhost}")
-					.setUsername("${myusername}")
-					.setPassword("${mypassword}")
-					.setUrl("${myurl}")
-					.build();
-		Server s2 = Server.builder()
-					.setAlias(alias)
-					.setPort(port)
-					.setHost(host)
-					.setUsername(username)
-					.setPassword(password)
-					.setUrl(url)
-					.build();
-		assertEquals(s1.hashCode(), s2.hashCode());
-		
-		
-		System.clearProperty("myalias");
-		System.clearProperty("myport");
-		System.clearProperty("myhost");
-		System.clearProperty("myusername");
-		System.clearProperty("myusername");
-		System.clearProperty("myurl");
+			String alias = "somealias";
+			String port = "1234";
+			String host = "localhost.local";
+			String username = "acme";
+			String password = "password";
+			String url = "service:jmx:remoting-jms://amce.local:1234";
+			
+			System.setProperty("myalias", alias);
+			System.setProperty("myport", port);
+			System.setProperty("myhost", host);
+			System.setProperty("myusername",username);
+			System.setProperty("mypassword", password);
+			System.setProperty("myurl", url);
+			
+			Server serverFromSystemProperties = Server.builder()
+						.setAlias("${myalias}")
+						.setPort("${myport}")
+						.setHost("${myhost}")
+						.setUsername("${myusername}")
+						.setPassword("${mypassword}")
+						.setUrl("${myurl}")
+						.build();
+			Server serverFromDirectParameters = Server.builder()
+						.setAlias(alias)
+						.setPort(port)
+						.setHost(host)
+						.setUsername(username)
+						.setPassword(password)
+						.setUrl(url)
+						.build();
+			assertEquals(serverFromSystemProperties.hashCode(), serverFromDirectParameters.hashCode());
+			
+		}finally{
+			System.clearProperty("myalias");
+			System.clearProperty("myport");
+			System.clearProperty("myhost");
+			System.clearProperty("myusername");
+			System.clearProperty("myusername");
+			System.clearProperty("myurl");
+		}
 	}
 	
 	@Test
