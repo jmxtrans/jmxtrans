@@ -86,7 +86,7 @@ public class Server {
 			@JsonProperty("queries") List<Query> queries) {
 		this.alias = resolveProps(alias);
 		this.host = resolveProps(host);
-		this.port = port;
+		this.port = resolveProps(port);
 		this.username = resolveProps(username);
 		this.password = resolveProps(password);
 		this.protocolProviderPackages = protocolProviderPackages;
