@@ -2,6 +2,9 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
@@ -56,6 +59,25 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 	@Override
 	protected boolean getAddHostnameTagDefault() {
 		return false;
+	}
+	/**
+	* Write the results of the query.
+	 *
+	 * @param server
+	 * @param query   - the query and its results.
+	 * @param results
+	*/
+	@Override
+	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+		this.startOutput();
+		for (Result result : results) {
+			for (String resultString : resultParser(result)) {
+				if (isDebugEnabled())
+				log.debug("TCollectorUDP Message: {}", resultString);
+				this.sendOutput(resultString);
+			}
+		}
+		this.finishOutput();
 	}
 
 	/**
