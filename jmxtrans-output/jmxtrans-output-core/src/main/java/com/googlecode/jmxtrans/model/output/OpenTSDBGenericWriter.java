@@ -198,8 +198,6 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	List<String> resultParser(Result result) {
 		List<String> resultStrings = new LinkedList<String>();
 		Map<String, Object> values = result.getValues();
-		if (values == null)
-			return resultStrings;
 
 		String attributeName = result.getAttributeName();
 
