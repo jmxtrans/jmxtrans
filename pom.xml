@@ -218,6 +218,11 @@
 				<version>2.1.1</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>kafka_2.10</artifactId>
+				<version>0.8.2.1</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity</artifactId>
 				<version>1.7</version>
@@ -266,6 +271,11 @@
 			<dependency>
 				<groupId>org.jmxtrans</groupId>
 				<artifactId>jmxtrans-output-jrobin</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-kafka</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

@@ -3,6 +3,7 @@ package com.googlecode.jmxtrans.model;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
@@ -55,6 +56,7 @@ public class Result {
 		return typeName;
 	}
 
+	@Nonnull
 	public ImmutableMap<String, Object> getValues() {
 		return values;
 	}

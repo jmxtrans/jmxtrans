@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jmxtrans</groupId>
+		<artifactId>jmxtrans-output</artifactId>
+		<version>251-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jmxtrans-output-kafka</artifactId>
+
+	<name>JmxTrans - Kafka output writers</name>
+
+	<properties>
+		<verify.mutationThreshold>80</verify.mutationThreshold>
+		<verify.totalBranchRate>85</verify.totalBranchRate>
+		<verify.totalLineRate>90</verify.totalLineRate>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_2.10</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+</project>
