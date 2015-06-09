@@ -52,6 +52,15 @@
 				<role>developer</role>
 			</roles>
 		</developer>
+		<developer>
+                        <id>utkarshcmu</id>
+                        <name>Utkarsh Bhatnagar</name>
+                        <email>utkarsh.cmu@gmail.com</email>
+                        <url>http://www.cloudart.io</url>
+                        <roles>
+                                <role>developer</role>
+                        </roles>
+                </developer>
 	</developers>
 
 	<prerequisites>

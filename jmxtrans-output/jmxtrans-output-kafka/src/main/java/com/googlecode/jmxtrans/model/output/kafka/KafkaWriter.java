@@ -40,7 +40,9 @@ import static java.util.Arrays.asList;
  * This low latency and thread safe output writer sends data to a kafka topics in JSON format.
  * Kafka Topics can be passed as separated by commas such as kafka01,kafka02.
  *
- * @author utkarsh bhatnagar
+ * @author : utkarsh bhatnagar
+ * @github user : utkarshcmu
+ * @email : utkarsh.cmu@gmail.com
  */
 
 @NotThreadSafe
