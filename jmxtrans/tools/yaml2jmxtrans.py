@@ -221,7 +221,7 @@ def usage():
 
 if __name__ == '__main__':
     # query attributes to copy
-    query_attributes = ["obj", "resultAlias", "attr", "typeName", "allowDottedKeys"]
+    query_attributes = ["obj", "resultAlias", "attr", "typeName", "allowDottedKeys", "useObjDomainAsKey"]
     outputWriters_attributes = ["settings", "@class"]
     
     if len(sys.argv) != 2:
