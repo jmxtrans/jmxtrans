@@ -62,7 +62,7 @@ public class KafkaWriterTests {
 		settings.put("serializer.class", "kafka.serializer.StringEncoder");
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
-		settings.put("topics", "myTopic");
+		settings.put("topics", "cloudwatch_ec2");
 		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", settings);
 	}
 	
