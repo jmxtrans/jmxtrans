@@ -21,6 +21,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -29,7 +30,6 @@ import java.util.Map.Entry;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
-
 import static com.fasterxml.jackson.core.JsonEncoding.UTF8;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
@@ -64,7 +64,7 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("topics") String topics,
-			@JsonProperty("settings") Map<String, Object> settings) {
+			@JsonProperty("settings") Map<String, Object> settings) throws Exception {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.rootPrefix = resolveProps(
 				firstNonNull(
@@ -77,7 +77,16 @@ public class KafkaWriter extends BaseOutputWriter {
 		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
 		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
 		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
-		this.topics = asList(Settings.getStringSetting(settings, "topics", null).split(","));
+		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
+		if ( kafkaProperties.getProperty("metadata.broker.list") == null )
+			throw new NullPointerException("metadata.broker.list Kafka property cannot be null.");
+		if ( kafkaProperties.getProperty("zk.connect") == null )
+			throw new NullPointerException("zk.connect Kafka property cannot be null.");
+		if( kafkaProperties.getProperty("serializer.class") == null )
+			throw new NullPointerException("serializer.class Kafka property cannot be null");
+		Iterator<String> iter = this.topics.iterator();
+		if(iter.next().length() == 0)
+			throw new Exception("Kafka topics list cannot be empty.");
 		jsonFactory = new JsonFactory();
 	}
 	
