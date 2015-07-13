@@ -5,7 +5,6 @@ import java.util.Map;
 
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
-
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -13,7 +12,6 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -54,7 +52,7 @@ public class KafkaWriterTests {
 				.contains("\"timestamp\":0");
 	}
 	
-	private static KafkaWriter getTestKafkaWriter() throws Exception {
+	private static KafkaWriter getTestKafkaWriter() {
 		ImmutableList typenames = ImmutableList.of();
 		Map<String,Object> settings = new HashMap<String,Object>();
 		settings.put("zk.connect", "host:2181");
