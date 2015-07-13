@@ -54,7 +54,7 @@ public class KafkaWriterTests {
 				.contains("\"timestamp\":0");
 	}
 	
-	private static KafkaWriter getTestKafkaWriter() {
+	private static KafkaWriter getTestKafkaWriter() throws Exception {
 		ImmutableList typenames = ImmutableList.of();
 		Map<String,Object> settings = new HashMap<String,Object>();
 		settings.put("zk.connect", "host:2181");

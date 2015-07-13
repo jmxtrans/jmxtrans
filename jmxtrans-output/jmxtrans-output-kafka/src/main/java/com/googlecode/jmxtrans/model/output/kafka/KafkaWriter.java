@@ -64,7 +64,7 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("topics") String topics,
-			@JsonProperty("settings") Map<String, Object> settings) {
+			@JsonProperty("settings") Map<String, Object> settings) throws Exception {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.rootPrefix = resolveProps(
 				firstNonNull(
@@ -86,7 +86,7 @@ public class KafkaWriter extends BaseOutputWriter {
 			throw new NullPointerException("serializer.class Kafka property cannot be null");
 		Iterator<String> iter = this.topics.iterator();
 		if(iter.next().length() == 0)
-			throw new NullPointerException("Kafka topics list cannot be null");
+			throw new Exception("Kafka topics list cannot be empty.");
 		jsonFactory = new JsonFactory();
 	}
 	
