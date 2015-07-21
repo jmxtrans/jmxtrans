@@ -137,16 +137,6 @@
 
 		<plugins>
 			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<configuration>
-					<merge>true</merge>
-					<message>Creating site for ${project.name}
-						${project.version}</message>
-					<path>${project.artifactId}</path>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>net.ju-n.maven.plugins</groupId>
 				<artifactId>checksum-maven-plugin</artifactId>
 			</plugin>
@@ -209,17 +199,6 @@
 				</executions>
 			</plugin>
 			<?SORTPOM RESUME?>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemPropertyVariables>
-						<jmxtrans.log.dir>${project.build.directory}</jmxtrans.log.dir>
-						<myhost>w2</myhost>
-						<myport>1099</myport>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>appassembler-maven-plugin</artifactId>
