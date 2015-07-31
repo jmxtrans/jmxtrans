@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jmxtrans</groupId>
+		<artifactId>jmxtrans-parent</artifactId>
+		<version>251-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jmxtrans-output</artifactId>
+
+	<packaging>pom</packaging>
+
+	<name>jmxtrans - output writers</name>
+
+	<description>This module groups all different output writers.
+
+		Different output writers have different dependencies. To ensure that those dependencies do not leak to other
+		output writer, or that we can limit to number of dependencies at runtime, output writers are split into
+		separate modules based on the dependencies they use. For example, the CloudWatch output writers depends on the
+		AWS SDK, which is quite large and not used by any other output writer. If you only want to send metrics to
+		Graphite, there should be no need to have the AWS SDK in your classpath at runtime.
+
+		Some dependencies are also problematic. They can introduce incompatibilities. For example, a few writers are
+		based directly on log4j or logback. This direct dependence breaks the use of SLF4J. By isolating those output
+		writers to a specific module, we can ensure this has minimal impact.</description>
+	<modules>
+		<module>jmxtrans-output-cloudwatch</module>
+		<module>jmxtrans-output-core</module>
+		<module>jmxtrans-output-ganglia</module>
+		<module>jmxtrans-output-jrobin</module>
+		<module>jmxtrans-output-log4j</module>
+		<module>jmxtrans-output-velocity</module>
+		<module>jmxtrans-output-kafka</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<configuration>
+					<merge>true</merge>
+					<message>Creating site for ${project.name}
+						${project.version}</message>
+					<path>${project.artifactId}</path>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

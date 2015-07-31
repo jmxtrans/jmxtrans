@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set -e
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+# defaults file
+CONFIG="/etc/default/jmxtrans"
+
+# defaults for JVM
+HEAP_SIZE="512"
+
+purge_line () {
+    if [ -s "$1" ]; then
+        # safely create a temp file
+        t=$(tempfile) || exit
+        trap "rm -f -- '$t'" EXIT
+
+        # purge line
+        sed "/$2/d" "$1" > "$t"
+        mv "$t" "$1"
+
+        # cleanup temp file
+        rm -f -- "$t"
+        trap - EXIT
+    fi
+}
+
+sed_file () {
+    # safely create a temp file
+    t=$(tempfile) || exit
+    trap "rm -f -- '$t'" EXIT
+
+    sed "s/$1/$2/g" "$3" > "$t"
+    mv "$t" "$3"
+
+    # cleanup temp file
+    rm -f -- "$t"
+    trap - EXIT
+}
+
+case "$1" in
+    configure)
+
+        ##### deal with logs #####
+        mkdir -p /var/log/jmxtrans
+        chown jmxtrans:jmxtrans /var/log/jmxtrans
+
+        if [ ! -d /usr/share/jmxtrans/logs -a ! -h /usr/share/jmxtrans/logs ]; then
+            cd /usr/share/jmxtrans
+            ln -fs /var/log/jmxtrans logs
+        fi
+        ##### deal with logs #####
+
+        # collect user inputs
+        db_get jmxtrans/jvm_heap_size
+        if [ ! -z "$RET" ]; then
+            HEAP_SIZE="${RET}"
+        fi
+
+        HEAP_NUMBER=$(echo $HEAP_SIZE|sed 's/[a-zA-Z]//g')
+
+        mkdir -p /var/lib/jmxtrans || true
+        chown jmxtrans:jmxtrans /var/lib/jmxtrans
+
+        # populate defaults file
+        if [ ! -e "$CONFIG" ]; then
+            echo "# default file for package jmxtrans" > "$CONFIG"
+            echo "export LOG_DIR=\"/var/log/jmxtrans\"" >> "$CONFIG"
+            echo "export LOG_FILE=\"/var/log/jmxtrans/jmxtrans.log\"" >> "$CONFIG"
+            echo "export SECONDS_BETWEEN_RUNS=60" >> "$CONFIG"
+            echo "export JSON_DIR=\"/var/lib/jmxtrans\"" >> "$CONFIG"
+            echo "export HEAP_SIZE=${HEAP_SIZE}" >> "$CONFIG"
+            echo "export LOG_LEVEL=debug" >> "$CONFIG"
+            echo "export JAR_FILE=/usr/share/jmxtrans/lib/jmxtrans-all.jar" >> "$CONFIG"
+        fi
+
+        chmod 644 "${CONFIG}" || true
+    ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+    ;;
+esac
+
+if [ -x "/etc/init.d/jmxtrans" ]; then
+        if [ ! -e "/etc/init/jmxtrans.conf" ]; then
+                update-rc.d jmxtrans defaults >/dev/null
+        fi  
+        invoke-rc.d jmxtrans start || exit $?
+fi
+
+
+exit 0
+

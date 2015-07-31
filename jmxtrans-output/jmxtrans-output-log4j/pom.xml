@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jmxtrans</groupId>
+		<artifactId>jmxtrans-output</artifactId>
+		<version>251-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jmxtrans-output-log4j</artifactId>
+
+	<name>JmxTrans - log4j output writers</name>
+
+	<description>This module contains output writers that have direct dependencies on logging frameworks.</description>
+
+	<properties>
+		<verify.mutationThreshold>0</verify.mutationThreshold>
+		<verify.totalBranchRate>0</verify.totalBranchRate>
+		<verify.totalLineRate>0</verify.totalLineRate>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<configuration>
+					<merge>true</merge>
+					<message>Creating site for ${project.name}
+						${project.version}</message>
+					<path>jmxtrans-output/${project.artifactId}</path>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>net.ju-n.maven.plugins</groupId>
+				<artifactId>checksum-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

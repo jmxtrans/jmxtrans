@@ -1,0 +1,11 @@
+Package: jmxtrans
+Version: [[version]]
+Maintainer: Pushkar Raste <praste@bloomberg.net, pushkar.raste@gmail.com>
+Architecture: all
+Section: admin
+Priority: optional
+Depends: debconf (>= 0.5) | debconf-2.0
+Suggests: java2-runtime
+Recommends: python-yaml
+Description: [[version]] - jmxtrans
+ dependency package, installs jmxtrans

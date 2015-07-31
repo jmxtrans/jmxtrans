@@ -1,0 +1,4 @@
+Template: jmxtrans/jvm_heap_size
+Type: string
+Description: JVM Min/Max Heap size (MB):
+ The default is 512.

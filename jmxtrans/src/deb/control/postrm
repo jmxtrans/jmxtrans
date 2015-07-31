@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+if [ "$1" = "purge" ] ; then
+        update-rc.d jmxtrans remove >/dev/null
+fi
+
+if [ "$1" = purge ] && [ -e /usr/share/debconf/confmodule ]; then
+        . /usr/share/debconf/confmodule
+        db_purge
+fi

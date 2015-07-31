@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.jmxtrans</groupId>
+		<artifactId>jmxtrans-parent</artifactId>
+		<version>251-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jmxtrans</artifactId>
+	<packaging>jar</packaging>
+	<name>JmxTrans</name>
+	<description>JMX metrics exporter.
+
+		This module creates the packaging for JmxTrans. It does not contain any application code, but creates .deb, .rpm
+		or other packaging.</description>
+
+	<properties>
+		<verify.mutationThreshold>0</verify.mutationThreshold>
+		<verify.totalBranchRate>0</verify.totalBranchRate>
+		<verify.totalLineRate>0</verify.totalLineRate>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!--
+				There is no compile time dependency on acplt. There might be a runtime dependency that I did not
+				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
+			-->
+			<groupId>org.acplt</groupId>
+			<artifactId>oncrpc</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!-- JSR160 (JMX Remoting) protocol -->
+			<!--
+				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
+				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
+			-->
+			<groupId>org.jboss.remoting3</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<version>1.0.1.Final</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!--
+				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
+				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
+			-->
+			<groupId>org.jboss.remotingjmx</groupId>
+			<artifactId>remoting-jmx</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-core</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-cloudwatch</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-core</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-ganglia</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-jrobin</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-kafka</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-log4j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-velocity</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+
+		<resources>
+			<resource>
+				<directory>src</directory>
+				<includes>
+					<include>log4j.xml</include>
+					<include>quartz.server.properties</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- There is no Java code in this project, let's skip animal-sniffer -->
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>animal-sniffer-check</id>
+							<phase>none</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<!-- There is no Java code in this project, let's skip PIT -->
+					<groupId>org.pitest</groupId>
+					<artifactId>pitest-maven</artifactId>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<configuration>
+					<merge>true</merge>
+					<message>Creating site for ${project.name}
+						${project.version}</message>
+					<path>${project.artifactId}</path>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>net.ju-n.maven.plugins</groupId>
+				<artifactId>checksum-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<filters>
+								<filter>
+									<!--
+										Signature files from other jars, if included, prevent the "all" jar from starting with:
+										"java.lang.SecurityException: Invalid signature file digest for Manifest main attributes"
+										This filter excludes signatures files from other signed jars.
+										Specifically avoid including ECLISPE_.* from org.eclipse.jgit.
+									-->
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>all</shadedClassifierName>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>${main.class}</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<?SORTPOM IGNORE?>
+			<!-- assembly has to run after shade -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<tarLongFileMode>posix</tarLongFileMode>
+					<descriptors>
+						<descriptor>src/assembly/dist.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<?SORTPOM RESUME?>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<jmxtrans.log.dir>${project.build.directory}</jmxtrans.log.dir>
+						<myhost>w2</myhost>
+						<myport>1099</myport>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<configuration>
+					<daemons>
+						<daemon>
+							<id>${package.daemon.name}</id>
+							<mainClass>${main.class}</mainClass>
+							<commandLineArguments>
+								<commandLineArgument>-j</commandLineArgument>
+								<commandLineArgument>/var/lib/${project.artifactId}</commandLineArgument>
+							</commandLineArguments>
+							<jvmSettings>
+								<extraArguments>
+									<extraArgument>-Dcom.sun.management.jmxremote</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
+									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
+								</extraArguments>
+							</jvmSettings>
+							<platforms>
+								<platform>jsw</platform>
+							</platforms>
+							<generatorConfigurations>
+								<generatorConfiguration>
+									<generator>jsw</generator>
+									<includes>
+										<include>linux-x86-32</include>
+										<include>linux-x86-64</include>
+									</includes>
+									<configuration>
+										<wrapper.pidfile>/var/run/${package.daemon.name}</wrapper.pidfile>
+										<property>
+											<name>run.as.user.envvar</name>
+											<value>${package.user}</value>
+										</property>
+										<property>
+											<name>wrapper.logfile</name>
+											<value>/var/log/${package.daemon.name}/${project.artifactId}.log</value>
+										</property>
+									</configuration>
+								</generatorConfiguration>
+							</generatorConfigurations>
+						</daemon>
+					</daemons>
+					<programs>
+						<program>
+							<mainClass>${main.class}</mainClass>
+							<id>${project.artifactId}</id>
+						</program>
+					</programs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>appassembler</id>
+						<goals>
+							<goal>assemble</goal>
+							<goal>generate-daemons</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
+		<sourceDirectory>src</sourceDirectory>
+
+	</build>
+	<profiles>
+		<profile>
+			<!--
+				RPM packaging is done in a profile to ensure that it does not impact build on platforms not supporting
+				RPM tools. Once we are happy with how this works, we could probably autoactivate this profile if
+				appropriate tools are detected on the system.
+			-->
+			<id>rpm</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>rpm-maven-plugin</artifactId>
+						<configuration>
+							<group>Applications/Communications</group>
+							<defineStatements>
+								<!--
+									The package contains Tanukisoft libs for multiple architectures. Multi-arch package
+									do not exist, so we *should* split this package in a jmxtrans-common package
+									plus an arch specific package for each architecture, containing only the Tanukisoft
+									libraries. I think this is overkill, so let's create a non compliant noarch package.
+								-->
+								<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
+							</defineStatements>
+							<preinstallScriptlet>
+								<script>if [ $1 = 1 ]; then
+                  USER_ID=`id -u %{package.user} 2&gt;/dev/null`
+                    if [ -z "$USER_ID" ]; then
+									    /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+									    ${package.install.dir} -U ${package.user}
+                    fi
+									fi</script>
+							</preinstallScriptlet>
+							<postinstallScriptlet>
+								<script>/sbin/chkconfig --add ${package.daemon.name}</script>
+							</postinstallScriptlet>
+							<preremoveScriptlet>
+								<script>if [ $1 = 0 ]; then
+									/sbin/service ${package.daemon.name} stop
+									/sbin/chkconfig --del ${package.daemon.name}
+									/usr/sbin/userdel ${package.user}
+									fi</script>
+							</preremoveScriptlet>
+							<requires>
+								<require>java</require>
+							</requires>
+							<mappings>
+								<mapping>
+									<directory>${package.install.dir}/etc</directory>
+									<sources>
+										<source>
+											<location>${jsw.dir}/etc</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>${package.install.dir}/bin</directory>
+									<filemode>755</filemode>
+									<sources>
+										<source>
+											<location>${jsw.dir}/bin</location>
+											<excludes>
+												<exclude>*.bat</exclude>
+											</excludes>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>${package.install.dir}/lib</directory>
+									<sources>
+										<source>
+											<location>${jsw.dir}/lib</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>${package.install.dir}/tools</directory>
+									<sources>
+										<source>
+											<location>${project.basedir}/tools</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/usr/bin</directory>
+									<directoryIncluded>false</directoryIncluded>
+									<filemode>755</filemode>
+									<sources>
+										<source>
+											<location>${project.basedir}/bin/</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/etc/${package.daemon.name}</directory>
+									<configuration>true</configuration>
+									<sources>
+										<softlinkSource>
+											<location>${package.install.dir}/etc</location>
+										</softlinkSource>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/etc/init.d</directory>
+									<sources>
+										<softlinkSource>
+											<location>${package.install.dir}/bin/${package.daemon.name}</location>
+										</softlinkSource>
+									</sources>
+								</mapping>
+								<mapping>
+									<directory>/var/lib/${project.artifactId}</directory>
+								</mapping>
+								<mapping>
+									<directory>/var/log/${package.daemon.name}</directory>
+									<username>${package.user}</username>
+									<groupname>${package.group}</groupname>
+								</mapping>
+								<mapping>
+									<directory>/var/run/${package.daemon.name}</directory>
+									<username>${package.user}</username>
+									<groupname>${package.group}</groupname>
+								</mapping>
+							</mappings>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-rpm</id>
+								<goals>
+									<goal>attached-rpm</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>deb</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.4</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<skipPOMs>true</skipPOMs>
+									<deb>${project.build.directory}/${project.artifactId}-${project.version}.deb</deb>
+									<dataSet>
+										<data>
+											<src>${project.build.directory}/jmxtrans-${project.version}-dist.tar.gz</src>
+											<type>archive</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/usr/share/jmxtrans</prefix>
+												<user>jmxtrans</user>
+												<group>jmxtrans</group>
+												<strip>1</strip>
+											</mapper>
+										</data>
+										<data>
+											<src>${project.basedir}/src/deb/init.d/</src>
+											<type>directory</type>
+											<excludes>.DS_Store</excludes>
+											<mapper>
+												<type>perm</type>
+												<prefix>/etc/init.d</prefix>
+												<filemode>755</filemode>
+												<user>root</user>
+												<group>root</group>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

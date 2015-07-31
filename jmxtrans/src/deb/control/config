@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+db_input high jmxtrans/jvm_heap_size || true
+db_go
