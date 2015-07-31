@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>251</version>
+		<version>252-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans</artifactId>
