@@ -111,8 +111,16 @@ public class JmxResultProcessor {
 		Map<String, Object> values = newHashMap();
 
 		Set<String> keys = t.keySet();
+		keyLoop:
 		for (String key : keys) {
 			Object value = cds.get(key);
+			if (query.getKeys().size() > 0) {
+				for (String queryKey: query.getKeys()) {
+					if (!key.contains(queryKey)) {
+						continue keyLoop;
+					}
+				}
+			}
 			if (value instanceof TabularDataSupport) {
 				TabularDataSupport tds = (TabularDataSupport) value;
 				processTabularDataSupport(accumulator, attributeName + "." + key, tds);
