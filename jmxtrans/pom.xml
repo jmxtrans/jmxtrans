@@ -321,8 +321,9 @@
 								<script>if [ $1 = 1 ]; then
                   USER_ID=`id -u %{package.user} 2&gt;/dev/null`
                     if [ -z "$USER_ID" ]; then
+									    groupadd -f ${package.user}
 									    /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-									    ${package.install.dir} -U ${package.user}
+									    ${package.install.dir} -G ${package.user} ${package.user}
                     fi
 									fi</script>
 							</preinstallScriptlet>
