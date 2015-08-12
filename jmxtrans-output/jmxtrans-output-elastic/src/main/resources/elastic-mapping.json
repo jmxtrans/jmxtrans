@@ -1,0 +1,37 @@
+{
+  "jmx-entry": {
+    "properties": {
+      "attributeName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "className": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "key": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "objDomain": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "server": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "timestamp": {
+        "type": "long"
+      },
+      "typeName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "value": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}

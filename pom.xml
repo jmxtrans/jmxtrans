@@ -274,6 +274,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-elastic</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
 				<artifactId>jmxtrans-output-ganglia</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -345,11 +350,11 @@
 			</dependency>
 			<dependency>
 				<!--
-					AWS CloudWatch needs a recent version of http client.
+					AWS CloudWatch and Jest (elastic search client) need a recent version of http client.
 				-->
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.3.6</version>
+				<version>4.5</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
@@ -648,6 +653,10 @@
 							<goals>
 								<goal>jar</goal>
 							</goals>
+							<!-- avoid doclint warnings that make maven build fail in java 8 -->
+							<configuration>
+								<additionalparam>-Xdoclint:none</additionalparam>
+							</configuration>
 						</execution>
 					</executions>
 				</plugin>

@@ -74,6 +74,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-elastic</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-output-ganglia</artifactId>
 			<scope>runtime</scope>
 		</dependency>

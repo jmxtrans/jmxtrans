@@ -30,10 +30,12 @@ public class StdOutWriter extends BaseOutputWriter {
 	/**
 	 * nothing to validate
 	 */
+	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
-	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	@Override
+	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (Result r : results) {
 			System.out.println(r);
 		}
