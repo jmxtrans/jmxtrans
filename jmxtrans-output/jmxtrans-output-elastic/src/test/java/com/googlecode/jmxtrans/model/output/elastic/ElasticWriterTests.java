@@ -28,10 +28,10 @@ public class ElasticWriterTests {
 
 	@Mock
 	private JestClient mockClient;
-    @Mock
-    private JestResult jestResultTrue;
-    @Mock
-    private JestResult jestResultFalse;
+	@Mock
+	private JestResult jestResultTrue;
+	@Mock
+	private JestResult jestResultFalse;
 
 	@Test
 	public void sendMessageToElastic() throws Exception {
@@ -46,14 +46,14 @@ public class ElasticWriterTests {
 
 		// return for call, does index exist
 		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
-        // return for call, is index created
+		// return for call, is index created
 		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
 		when(mockClient.execute(Matchers.<IndicesExists>any())).thenReturn(jestResultFalse);
 		when(mockClient.execute(Matchers.<PutMapping>any())).thenReturn(jestResultTrue);
 
 		ElasticWriter writer = new ElasticWriter(typenames, true, "rootPrefix", true, connectionUrl, settings);
 		// client for testing
-        writer.setJestClient(mockClient);
+		writer.setJestClient(mockClient);
 
 		// increase coverage
 		writer.start();

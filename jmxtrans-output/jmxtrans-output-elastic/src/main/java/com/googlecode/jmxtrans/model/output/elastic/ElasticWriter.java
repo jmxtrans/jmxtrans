@@ -49,18 +49,18 @@ public class ElasticWriter extends BaseOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(ElasticWriter.class);
 	
 	private static final String DEFAULT_ROOT_PREFIX = "jmxtrans";
-    private static final Object CREATE_MAPPING_LOCK = new Object();
+	private static final Object CREATE_MAPPING_LOCK = new Object();
 
-    private final JsonFactory jsonFactory;
+	private final JsonFactory jsonFactory;
 
 	private JestClient jestClient = null;
 
 	private final String rootPrefix;
 	private final String connectionUrl;
-    private static final String TYPE_NAME = "jmx-entry";
-    private String indexName;
+	private static final String TYPE_NAME = "jmx-entry";
+	private String indexName;
 
-    @JsonCreator
+	@JsonCreator
 	public ElasticWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
@@ -79,7 +79,7 @@ public class ElasticWriter extends BaseOutputWriter {
 
 		this.jsonFactory = new JsonFactory();
 		this.connectionUrl = connectionUrl;
-        this.indexName = this.rootPrefix + "_jmx-entries";
+		this.indexName = this.rootPrefix + "_jmx-entries";
 
 	}
 
@@ -94,7 +94,7 @@ public class ElasticWriter extends BaseOutputWriter {
 				Object value = values.getValue();
 				if (isNumeric(value)) {
 					String message = createJsonMessage(server, query, typeNames, result, values, value);
-                    log.debug("Insert into Elastic: Index: [{}] Type: [{}] Message: [{}]", indexName, TYPE_NAME, message);
+					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Message: [{}]", indexName, TYPE_NAME, message);
 					Index index = new Index.Builder(message).index(indexName).type(TYPE_NAME).build();
 					jestClient.execute(index);
 				} else {
@@ -108,15 +108,15 @@ public class ElasticWriter extends BaseOutputWriter {
 
 		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
 
-        String alias;
-        if (server.getAlias() != null) {
-            alias = server.getAlias();
-        } else {
-            alias = server.getHost() + "_" + server.getPort();
-            alias = StringUtils.cleanupStr(alias);
-        }
+		String alias;
+		if (server.getAlias() != null) {
+			alias = server.getAlias();
+		} else {
+			alias = server.getHost() + "_" + server.getPort();
+			alias = StringUtils.cleanupStr(alias);
+		}
 
-        Closer closer = Closer.create();
+		Closer closer = Closer.create();
 		try {
 			ByteArrayOutputStream out = closer.register(new ByteArrayOutputStream());
 			JsonGenerator generator = closer.register(jsonFactory.createGenerator(out, UTF8));
@@ -149,8 +149,8 @@ public class ElasticWriter extends BaseOutputWriter {
 	}
 
 	@Override
-    public void start() throws LifecycleException {
-        super.start();
+	public void start() throws LifecycleException {
+		super.start();
 
 		if (jestClient == null) {
 			log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
@@ -161,75 +161,75 @@ public class ElasticWriter extends BaseOutputWriter {
 							.build());
 			jestClient = factory.getObject();
 
-        }
+		}
 		else {
 			log.info("Note: using injected jestClient instead of creating a new one: [{}]", jestClient);
 		}
 
-        createMapping(jestClient, indexName, TYPE_NAME);
+		createMapping(jestClient, indexName, TYPE_NAME);
 
-    }
+	}
 
-    private static void createMapping(JestClient jestClient, String indexName, String typeName) {
-        synchronized (CREATE_MAPPING_LOCK) {
-            try {
-                IndicesExists indicesExists = new IndicesExists.Builder(indexName).build();
-                boolean indexExists = jestClient.execute(indicesExists).isSucceeded();
+	private static void createMapping(JestClient jestClient, String indexName, String typeName) {
+		synchronized (CREATE_MAPPING_LOCK) {
+			try {
+				IndicesExists indicesExists = new IndicesExists.Builder(indexName).build();
+				boolean indexExists = jestClient.execute(indicesExists).isSucceeded();
 
-                if (!indexExists) {
+				if (!indexExists) {
 
-                    CreateIndex createIndex = new CreateIndex.Builder(indexName).build();
-                    jestClient.execute(createIndex);
+					CreateIndex createIndex = new CreateIndex.Builder(indexName).build();
+					jestClient.execute(createIndex);
 
-                    PutMapping putMapping = new PutMapping.Builder(indexName, typeName,
-                            "{\n" +
-                                    "  \"jmx-entry\": {\n" +
-                                    "    \"properties\": {\n" +
-                                    "      \"attributeName\": {\n" +
-                                    "        \"type\": \"string\",\n" +
-                                    "        \"index\": \"not_analyzed\"\n" +
-                                    "      },\n" +
-                                    "      \"key\": {\n" +
-                                    "        \"type\": \"string\",\n" +
-                                    "        \"index\": \"not_analyzed\"\n" +
-                                    "      },\n" +
-                                    "      \"metric\": {\n" +
-                                    "        \"type\": \"string\",\n" +
-                                    "        \"index\": \"not_analyzed\"\n" +
-                                    "      },\n" +
-                                    "      \"server\": {\n" +
-                                    "        \"type\": \"string\",\n" +
-                                    "        \"index\": \"not_analyzed\"\n" +
-                                    "      },\n" +
-                                    "      \"timestamp\": {\n" +
-                                    "        \"type\": \"date\"\n" +
-                                    "      },\n" +
-                                    "      \"resultAlias\": {\n" +
-                                    "        \"type\": \"string\",\n" +
-                                    "        \"index\": \"not_analyzed\"\n" +
-                                    "      },\n" +
-                                    "      \"value\": {\n" +
-                                    "        \"type\": \"float\"\n" +
-                                    "      }\n" +
-                                    "    }\n" +
-                                    "  }\n" +
-                                    "}").build();
+					PutMapping putMapping = new PutMapping.Builder(indexName, typeName,
+							"{\n" +
+									"  \"jmx-entry\": {\n" +
+									"    \"properties\": {\n" +
+									"      \"attributeName\": {\n" +
+									"        \"type\": \"string\",\n" +
+									"        \"index\": \"not_analyzed\"\n" +
+									"      },\n" +
+									"      \"key\": {\n" +
+									"        \"type\": \"string\",\n" +
+									"        \"index\": \"not_analyzed\"\n" +
+									"      },\n" +
+									"      \"metric\": {\n" +
+									"        \"type\": \"string\",\n" +
+									"        \"index\": \"not_analyzed\"\n" +
+									"      },\n" +
+									"      \"server\": {\n" +
+									"        \"type\": \"string\",\n" +
+									"        \"index\": \"not_analyzed\"\n" +
+									"      },\n" +
+									"      \"timestamp\": {\n" +
+									"        \"type\": \"date\"\n" +
+									"      },\n" +
+									"      \"resultAlias\": {\n" +
+									"        \"type\": \"string\",\n" +
+									"        \"index\": \"not_analyzed\"\n" +
+									"      },\n" +
+									"      \"value\": {\n" +
+									"        \"type\": \"float\"\n" +
+									"      }\n" +
+									"    }\n" +
+									"  }\n" +
+									"}").build();
 
-                    JestResult result = jestClient.execute(putMapping);
-                    if (!result.isSucceeded()) {
-                        log.warn("Failed to create mapping: {}", result.getErrorMessage());
-                    }
-                    else {
-                        log.info("Created mapping for index {}", indexName);
-                    }
-                }
-            } catch (IOException e) {
-                log.warn("Cannot create mapping for elastic search database.", e);
-            }
-        }
-    }
+					JestResult result = jestClient.execute(putMapping);
+					if (!result.isSucceeded()) {
+						log.warn("Failed to create mapping: {}", result.getErrorMessage());
+					}
+					else {
+						log.info("Created mapping for index {}", indexName);
+					}
+				}
+			} catch (IOException e) {
+				log.warn("Cannot create mapping for elastic search database.", e);
+			}
+		}
+	}
 
-    @Override
+	@Override
 	public void stop() throws LifecycleException {
 		super.stop();
 		jestClient.shutdownClient();
