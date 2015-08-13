@@ -24,7 +24,6 @@ import io.searchbox.core.Index;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,20 +83,20 @@ public class ElasticWriter extends BaseOutputWriter {
 		this.jsonFactory = new JsonFactory();
 		this.connectionUrl = connectionUrl;
 		this.indexName = this.rootPrefix + "_jmx-entries";
-        this.jestClient = createJestClient(connectionUrl);
-    }
+		this.jestClient = createJestClient(connectionUrl);
+	}
 
-    private JestClient createJestClient(String connectionUrl) {
-        log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
-        JestClientFactory factory = new JestClientFactory();
-        factory.setHttpClientConfig(
-                new HttpClientConfig.Builder(connectionUrl)
-                        .multiThreaded(true)
-                        .build());
-        return factory.getObject();
-    }
+	private JestClient createJestClient(String connectionUrl) {
+		log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
+		JestClientFactory factory = new JestClientFactory();
+		factory.setHttpClientConfig(
+				new HttpClientConfig.Builder(connectionUrl)
+						.multiThreaded(true)
+						.build());
+		return factory.getObject();
+	}
 
-    @Override
+	@Override
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		List<String> typeNames = this.getTypeNames();
 
@@ -122,7 +121,7 @@ public class ElasticWriter extends BaseOutputWriter {
 
 		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
 
-        Closer closer = Closer.create();
+		Closer closer = Closer.create();
 		try {
 			ByteArrayOutputStream out = closer.register(new ByteArrayOutputStream());
 			JsonGenerator generator = closer.register(jsonFactory.createGenerator(out, UTF8));
@@ -144,21 +143,21 @@ public class ElasticWriter extends BaseOutputWriter {
 		}
 	}
 
-    private String createAlias(Server server) {
-        String alias;
-        if (server.getAlias() != null) {
-            alias = server.getAlias();
-        } else {
-            alias = server.getHost() + "_" + server.getPort();
-            alias = StringUtils.cleanupStr(alias);
-        }
-        return alias;
-    }
+	private String createAlias(Server server) {
+		String alias;
+		if (server.getAlias() != null) {
+			alias = server.getAlias();
+		} else {
+			alias = server.getHost() + "_" + server.getPort();
+			alias = StringUtils.cleanupStr(alias);
+		}
+		return alias;
+	}
 
-    @VisibleForTesting
+	@VisibleForTesting
 	void setJestClient(JestClient jestClient) {
-        log.info("Note: using injected jestClient instead of default client: [{}]", jestClient);
-        this.jestClient = jestClient;
+		log.info("Note: using injected jestClient instead of default client: [{}]", jestClient);
+		this.jestClient = jestClient;
 	}
 
 	@Override
@@ -168,41 +167,41 @@ public class ElasticWriter extends BaseOutputWriter {
 
 	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws IOException {
 		synchronized (CREATE_MAPPING_LOCK) {
-            IndicesExists indicesExists = new IndicesExists.Builder(indexName).build();
-            boolean indexExists = jestClient.execute(indicesExists).isSucceeded();
+			IndicesExists indicesExists = new IndicesExists.Builder(indexName).build();
+			boolean indexExists = jestClient.execute(indicesExists).isSucceeded();
 
-            if (!indexExists) {
+			if (!indexExists) {
 
-                CreateIndex createIndex = new CreateIndex.Builder(indexName).build();
-                jestClient.execute(createIndex);
+				CreateIndex createIndex = new CreateIndex.Builder(indexName).build();
+				jestClient.execute(createIndex);
 
-                URL url = ElasticWriter.class.getResource("/elastic-mapping.json");
-                String mapping = Resources.toString(url, Charsets.UTF_8);
+				URL url = ElasticWriter.class.getResource("/elastic-mapping.json");
+				String mapping = Resources.toString(url, Charsets.UTF_8);
 
-                PutMapping putMapping = new PutMapping.Builder(indexName, typeName,mapping).build();
+				PutMapping putMapping = new PutMapping.Builder(indexName, typeName,mapping).build();
 
-                JestResult result = jestClient.execute(putMapping);
-                if (!result.isSucceeded()) {
-                    log.warn("Failed to create mapping: {}", result.getErrorMessage());
-                }
-                else {
-                    log.info("Created mapping for index {}", indexName);
-                }
-            }
+				JestResult result = jestClient.execute(putMapping);
+				if (!result.isSucceeded()) {
+					log.warn("Failed to create mapping: {}", result.getErrorMessage());
+				}
+				else {
+					log.info("Created mapping for index {}", indexName);
+				}
+			}
 		}
 	}
 
-    @Override
-    public void start() throws LifecycleException {
-        super.start();
-        try {
-            createMappingIfNeeded(jestClient, indexName, TYPE_NAME);
-        } catch (IOException e) {
-            throw new LifecycleException("Failed to create elastic mapping.", e);
-        }
-    }
+	@Override
+	public void start() throws LifecycleException {
+		super.start();
+		try {
+			createMappingIfNeeded(jestClient, indexName, TYPE_NAME);
+		} catch (IOException e) {
+			throw new LifecycleException("Failed to create elastic mapping.", e);
+		}
+	}
 
-    @Override
+	@Override
 	public void stop() throws LifecycleException {
 		super.stop();
 		jestClient.shutdownClient();

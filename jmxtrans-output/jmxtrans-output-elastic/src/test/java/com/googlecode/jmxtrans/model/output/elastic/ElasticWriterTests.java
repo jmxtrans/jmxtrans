@@ -8,20 +8,20 @@ import com.googlecode.jmxtrans.model.Server;
 import io.searchbox.action.Action;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
-import io.searchbox.core.Index;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ElasticWriterTests {
@@ -46,18 +46,18 @@ public class ElasticWriterTests {
 
 		// return for call, does index exist
 		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
-        when(mockClient.execute(Matchers.<IndicesExists>isA(IndicesExists.class))).thenReturn(jestResultFalse);
+		when(mockClient.execute(Matchers.<IndicesExists>isA(IndicesExists.class))).thenReturn(jestResultFalse);
 
-        // return for call, is index created
-        when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
+		// return for call, is index created
+		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
 		when(mockClient.execute(Matchers.<PutMapping>isA(PutMapping.class))).thenReturn(jestResultTrue);
 
 		ElasticWriter writer = new ElasticWriter(typenames, true, "rootPrefix", true, connectionUrl, settings);
 		// client for testing
 		writer.setJestClient(mockClient);
 
-        // creates the index if needed
-        writer.start();
+		// creates the index if needed
+		writer.start();
 
 		writer.doWrite(server, query, ImmutableList.of(result));
 
