@@ -207,6 +207,11 @@
 				<version>1.0.10</version>
 			</dependency>
 			<dependency>
+				<groupId>io.searchbox</groupId>
+				<artifactId>jest</artifactId>
+				<version>0.1.6</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.inject</groupId>
 				<artifactId>javax.inject</artifactId>
 				<version>1</version>
@@ -653,10 +658,6 @@
 							<goals>
 								<goal>jar</goal>
 							</goals>
-							<!-- avoid doclint warnings that make maven build fail in java 8 -->
-							<configuration>
-								<additionalparam>-Xdoclint:none</additionalparam>
-							</configuration>
 						</execution>
 					</executions>
 				</plugin>

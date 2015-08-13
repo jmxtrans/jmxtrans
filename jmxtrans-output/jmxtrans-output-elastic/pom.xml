@@ -24,7 +24,6 @@
 		<dependency>
 			<groupId>io.searchbox</groupId>
 			<artifactId>jest</artifactId>
-			<version>0.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>

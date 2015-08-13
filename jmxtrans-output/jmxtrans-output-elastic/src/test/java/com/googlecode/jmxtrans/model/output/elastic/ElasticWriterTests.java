@@ -46,17 +46,18 @@ public class ElasticWriterTests {
 
 		// return for call, does index exist
 		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
-		// return for call, is index created
-		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
-		when(mockClient.execute(Matchers.<IndicesExists>any())).thenReturn(jestResultFalse);
-		when(mockClient.execute(Matchers.<PutMapping>any())).thenReturn(jestResultTrue);
+        when(mockClient.execute(Matchers.<IndicesExists>isA(IndicesExists.class))).thenReturn(jestResultFalse);
+
+        // return for call, is index created
+        when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
+		when(mockClient.execute(Matchers.<PutMapping>isA(PutMapping.class))).thenReturn(jestResultTrue);
 
 		ElasticWriter writer = new ElasticWriter(typenames, true, "rootPrefix", true, connectionUrl, settings);
 		// client for testing
 		writer.setJestClient(mockClient);
 
-		// increase coverage
-		writer.start();
+        // creates the index if needed
+        writer.start();
 
 		writer.doWrite(server, query, ImmutableList.of(result));
 

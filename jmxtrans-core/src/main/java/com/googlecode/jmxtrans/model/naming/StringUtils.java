@@ -25,7 +25,7 @@ public final class StringUtils {
 	 *
 	 * @param name            the name
 	 * @param allowDottedKeys whether we remove the dots or not.
-	 * @return
+	 * @return the cleaned up string
 	 */
 	public static String cleanupStr(String name, boolean allowDottedKeys) {
 		if (name == null) {
