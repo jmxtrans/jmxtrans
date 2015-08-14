@@ -56,7 +56,7 @@ public class ElasticWriter extends BaseOutputWriter {
 
 	private final JsonFactory jsonFactory;
 
-	private JestClient jestClient = null;
+	private JestClient jestClient;
 
 	private final String rootPrefix;
 	private final String connectionUrl;
@@ -165,7 +165,7 @@ public class ElasticWriter extends BaseOutputWriter {
 		// no validations
 	}
 
-	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws IOException {
+	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws ElasticWriterException, IOException {
 		synchronized (CREATE_MAPPING_LOCK) {
 			IndicesExists indicesExists = new IndicesExists.Builder(indexName).build();
 			boolean indexExists = jestClient.execute(indicesExists).isSucceeded();
@@ -182,7 +182,7 @@ public class ElasticWriter extends BaseOutputWriter {
 
 				JestResult result = jestClient.execute(putMapping);
 				if (!result.isSucceeded()) {
-					log.warn("Failed to create mapping: {}", result.getErrorMessage());
+					throw new ElasticWriterException(String.format("Failed to create mapping: %s", result.getErrorMessage()));
 				}
 				else {
 					log.info("Created mapping for index {}", indexName);
@@ -196,7 +196,7 @@ public class ElasticWriter extends BaseOutputWriter {
 		super.start();
 		try {
 			createMappingIfNeeded(jestClient, indexName, TYPE_NAME);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new LifecycleException("Failed to create elastic mapping.", e);
 		}
 	}
@@ -205,5 +205,15 @@ public class ElasticWriter extends BaseOutputWriter {
 	public void stop() throws LifecycleException {
 		super.stop();
 		jestClient.shutdownClient();
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("ElasticWriter{");
+		sb.append("rootPrefix='").append(rootPrefix).append('\'');
+		sb.append(", connectionUrl='").append(connectionUrl).append('\'');
+		sb.append(", indexName='").append(indexName).append('\'');
+		sb.append('}');
+		return sb.toString();
 	}
 }
