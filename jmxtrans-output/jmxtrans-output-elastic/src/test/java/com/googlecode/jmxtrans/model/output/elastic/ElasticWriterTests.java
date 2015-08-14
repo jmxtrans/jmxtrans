@@ -10,6 +10,8 @@ import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -17,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,26 +36,26 @@ public class ElasticWriterTests {
 	@Mock
 	private JestResult jestResultFalse;
 
+	@Before
+	public void initializeMocks() {
+		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
+		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
+	}
+
 	@Test
 	public void sendMessageToElastic() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").build();
 		Query query = Query.builder().build();
 		Result result = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
 
-		ImmutableList<String> typenames = ImmutableList.of();
-		Map<String,Object> settings = new HashMap<String,Object>();
-
-		String connectionUrl = "http://localhost";
+		ElasticWriter writer =  createElasticWriter();
 
 		// return for call, does index exist
-		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
-		when(mockClient.execute(Matchers.<IndicesExists>isA(IndicesExists.class))).thenReturn(jestResultFalse);
+		when(mockClient.execute(Matchers.isA(IndicesExists.class))).thenReturn(jestResultFalse);
 
 		// return for call, is index created
-		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
-		when(mockClient.execute(Matchers.<PutMapping>isA(PutMapping.class))).thenReturn(jestResultTrue);
+		when(mockClient.execute(Matchers.isA(PutMapping.class))).thenReturn(jestResultTrue);
 
-		ElasticWriter writer = new ElasticWriter(typenames, true, "rootPrefix", true, connectionUrl, settings);
 		// client for testing
 		writer.setJestClient(mockClient);
 
@@ -61,8 +64,42 @@ public class ElasticWriterTests {
 
 		writer.doWrite(server, query, ImmutableList.of(result));
 
+		writer.stop();
+
 		Mockito.verify(mockClient, atLeast(2)).execute(Matchers.<Action<JestResult>>any());
 
+	}
+
+	@Test
+	public void indexCreateFailure() throws Exception {
+
+		ElasticWriter writer = createElasticWriter();
+
+		// return for call, does index exist
+		when(mockClient.execute(Matchers.isA(IndicesExists.class))).thenReturn(jestResultFalse);
+
+		// return for call, is index created: return false
+		when(jestResultFalse.getErrorMessage()).thenReturn("Unknown error creating index in elastic");
+
+		// client for testing
+		writer.setJestClient(mockClient);
+
+		// creates the index if needed
+		writer.start();
+
+		writer.stop();
+
+		Mockito.verify(mockClient, atLeast(2)).execute(Matchers.<Action<JestResult>>any());
+
+	}
+
+	private ElasticWriter createElasticWriter() throws IOException {
+		ImmutableList<String> typenames = ImmutableList.of();
+		Map<String,Object> settings = new HashMap<String,Object>();
+
+		String connectionUrl = "http://localhost";
+
+		return new ElasticWriter(typenames, true, "rootPrefix", true, connectionUrl, settings);
 	}
 
 }
