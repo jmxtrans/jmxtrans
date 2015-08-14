@@ -3,11 +3,9 @@ package com.googlecode.jmxtrans.model.output.elastic;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.Closer;
 import com.google.common.io.Resources;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
@@ -28,14 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static com.fasterxml.jackson.core.JsonEncoding.UTF8;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
@@ -52,15 +49,13 @@ public class ElasticWriter extends BaseOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(ElasticWriter.class);
 	
 	private static final String DEFAULT_ROOT_PREFIX = "jmxtrans";
+	private static final String TYPE_NAME = "jmx-entry";
+
 	private static final Object CREATE_MAPPING_LOCK = new Object();
 
-	private final JsonFactory jsonFactory;
-
 	private JestClient jestClient;
-
 	private final String rootPrefix;
 	private final String connectionUrl;
-	private static final String TYPE_NAME = "jmx-entry";
 	private String indexName;
 
 	@JsonCreator
@@ -80,7 +75,6 @@ public class ElasticWriter extends BaseOutputWriter {
 						(String) getSettings().get("rootPrefix"),
 						DEFAULT_ROOT_PREFIX));		
 
-		this.jsonFactory = new JsonFactory();
 		this.connectionUrl = connectionUrl;
 		this.indexName = this.rootPrefix + "_jmx-entries";
 		this.jestClient = createJestClient(connectionUrl);
@@ -106,9 +100,9 @@ public class ElasticWriter extends BaseOutputWriter {
 			for (Entry<String, Object> values : resultValues.entrySet()) {
 				Object value = values.getValue();
 				if (isNumeric(value)) {
-					String message = createJsonMessage(server, query, typeNames, result, values, value);
-					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Message: [{}]", indexName, TYPE_NAME, message);
-					Index index = new Index.Builder(message).index(indexName).type(TYPE_NAME).build();
+					Map<String, Object> map = createMap(server, query, typeNames, result, values, value);
+					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, TYPE_NAME, map);
+					Index index = new Index.Builder(map).index(indexName).type(TYPE_NAME).build();
 					jestClient.execute(index);
 				} else {
 					log.warn("Unable to submit non-numeric value to Elastic: [{}] from result [{}]", value, result);
@@ -117,30 +111,20 @@ public class ElasticWriter extends BaseOutputWriter {
 		}
 	}
 
-	private String createJsonMessage(Server server, Query query, List<String> typeNames, Result result, Entry<String, Object> values, Object value) throws IOException {
+	private Map<String, Object> createMap(Server server, Query query, List<String> typeNames, Result result, Entry<String, Object> values, Object value) {
 
 		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
 
-		Closer closer = Closer.create();
-		try {
-			ByteArrayOutputStream out = closer.register(new ByteArrayOutputStream());
-			JsonGenerator generator = closer.register(jsonFactory.createGenerator(out, UTF8));
-			generator.writeStartObject();
-			generator.writeStringField("server", createAlias(server));
-			generator.writeStringField("metric", keyString);
-			generator.writeNumberField("value", Double.parseDouble(value.toString()));
-			generator.writeStringField("resultAlias", result.getKeyAlias());
-			generator.writeStringField("attributeName", result.getAttributeName());
-			generator.writeStringField("key", values.getKey());
-			generator.writeNumberField("timestamp", result.getEpoch());
-			generator.writeEndObject();
-			generator.close();
-			return out.toString("UTF-8");
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
-		}
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("server", createAlias(server));
+		map.put("metric", keyString);
+		map.put("value", Double.parseDouble(value.toString()));
+		map.put("resultAlias", result.getKeyAlias());
+		map.put("attributeName", result.getAttributeName());
+		map.put("key", values.getKey());
+		map.put("timestamp", result.getEpoch());
+
+		return map;
 	}
 
 	private String createAlias(Server server) {
@@ -158,11 +142,6 @@ public class ElasticWriter extends BaseOutputWriter {
 	void setJestClient(JestClient jestClient) {
 		log.info("Note: using injected jestClient instead of default client: [{}]", jestClient);
 		this.jestClient = jestClient;
-	}
-
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
-		// no validations
 	}
 
 	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws ElasticWriterException, IOException {
@@ -205,6 +184,11 @@ public class ElasticWriter extends BaseOutputWriter {
 	public void stop() throws LifecycleException {
 		super.stop();
 		jestClient.shutdownClient();
+	}
+
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {
+
 	}
 
 	@Override

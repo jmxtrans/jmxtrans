@@ -35,6 +35,7 @@ import static org.mockito.Mockito.*;
 public class ElasticWriterTests {
 
     private static final String PREFIX = "rootPrefix";
+
     @Mock
 	private JestClient mockClient;
 	@Mock
@@ -78,7 +79,7 @@ public class ElasticWriterTests {
 
 	}
 
-    @Test
+	@Test
     public void sendMessageToElasticAndVerify() throws Exception {
 
         String host = "myHost";
@@ -143,7 +144,7 @@ public class ElasticWriterTests {
 		// client for testing
 		writer.setJestClient(mockClient);
 
-		// creates the index if needed
+		// expected to throw an exception
 		writer.start();
 
 	}
@@ -155,6 +156,12 @@ public class ElasticWriterTests {
 		String connectionUrl = "http://localhost";
 
 		return new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, settings);
+	}
+
+	@Test
+	public void checkToString() throws Exception {
+		ElasticWriter elasticWriter = createElasticWriter();
+		assertTrue(elasticWriter.toString().contains("ElasticWriter"));
 	}
 
 }

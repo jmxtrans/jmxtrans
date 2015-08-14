@@ -12,7 +12,7 @@
 	<name>JmxTrans - ElasticSearch output writers</name>
 
 	<properties>
-		<verify.mutationThreshold>80</verify.mutationThreshold>
+		<verify.mutationThreshold>60</verify.mutationThreshold>
 		<verify.totalBranchRate>75</verify.totalBranchRate>
 		<verify.totalLineRate>75</verify.totalLineRate>
 	</properties>
