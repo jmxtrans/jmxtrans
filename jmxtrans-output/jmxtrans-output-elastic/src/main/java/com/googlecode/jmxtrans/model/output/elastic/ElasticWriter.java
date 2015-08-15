@@ -2,7 +2,6 @@ package com.googlecode.jmxtrans.model.output.elastic;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
@@ -52,10 +51,12 @@ public class ElasticWriter extends BaseOutputWriter {
 
 	private static final Object CREATE_MAPPING_LOCK = new Object();
 
+	// injected for mockito unit tests: do not make final
 	private JestClient jestClient;
+
 	private final String rootPrefix;
 	private final String connectionUrl;
-	private String indexName;
+	private final String indexName;
 
 	@JsonCreator
 	public ElasticWriter(
@@ -102,7 +103,10 @@ public class ElasticWriter extends BaseOutputWriter {
 					Map<String, Object> map = createMap(server, query, typeNames, result, values, value);
 					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, TYPE_NAME, map);
 					Index index = new Index.Builder(map).index(indexName).type(TYPE_NAME).build();
-					jestClient.execute(index);
+					JestResult addToIndex = jestClient.execute(index);
+					if (!addToIndex.isSucceeded()) {
+						throw new ElasticWriterException(String.format("Unable to write entry to elastic: %s", addToIndex.getErrorMessage()));
+					}
 				} else {
 					log.warn("Unable to submit non-numeric value to Elastic: [{}] from result [{}]", value, result);
 				}
@@ -137,11 +141,6 @@ public class ElasticWriter extends BaseOutputWriter {
 		return alias;
 	}
 
-	@VisibleForTesting
-	void setJestClient(JestClient jestClient) {
-		log.info("Note: using injected jestClient instead of default client: [{}]", jestClient);
-		this.jestClient = jestClient;
-	}
 
 	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws ElasticWriterException, IOException {
 		synchronized (CREATE_MAPPING_LOCK) {
@@ -187,7 +186,7 @@ public class ElasticWriter extends BaseOutputWriter {
 
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
-
+		// no validations
 	}
 
 	@Override
