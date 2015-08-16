@@ -120,7 +120,8 @@ public class ElasticWriterTests {
         String host = "myHost";
         String port = "56677";
 
-		Server serverWithKnownValues = Server.builder().setHost(host).setPort(port).build();
+		String serverAlias = "myAlias";
+		Server serverWithKnownValues = Server.builder().setHost(host).setPort(port).setAlias(serverAlias).build();
 
         int epoch = 1123455;
         String attributeName = "attributeName123";
@@ -143,70 +144,21 @@ public class ElasticWriterTests {
         verify(mockClient).execute(argument.capture());
         assertEquals(PREFIX + "_jmx-entries", argument.getValue().getIndex());
 
-        // some values are not included, if these are necessary we should include them
         Gson gson = new Gson();
         String data = argument.getValue().getData(gson);
         assertTrue("Contains host", data.contains(host));
         assertTrue("Contains port", data.contains(port));
         assertTrue("Contains attribute name", data.contains(attributeName));
-        //assertTrue("Contains class name", data.contains(className));
-        //assertTrue("Contains object domain", data.contains(objDomain));
+        assertTrue("Contains class name", data.contains(className));
+        assertTrue("Contains object domain", data.contains(objDomain));
         assertTrue("Contains classNameAlias", data.contains(classNameAlias));
-        //assertTrue("Contains type name", data.contains(typeName));
+        assertTrue("Contains type name", data.contains(typeName));
         assertTrue("Contains timestamp", data.contains(String.valueOf(epoch)));
         assertTrue("Contains key", data.contains(key));
         assertTrue("Contains value", data.contains(String.valueOf(value)));
-		//assertTrue("Contains serverAlias", data.contains(serverAlias));
-
-    }
-
-	@Test
-	public void sendMessageWithServerAliasToElasticAndVerify() throws Exception {
-
-		String host = "myHost";
-		String port = "56677";
-
-		String serverAlias = "myAlias";
-		Server serverWithKnownValues = Server.builder().setHost(host).setPort(port).setAlias(serverAlias).build();
-
-		int epoch = 1123455;
-		String attributeName = "attributeName123";
-		String className = "className123";
-		String objDomain = "objDomain123";
-		String classNameAlias = "classNameAlias123";
-		String typeName = "typeName123";
-		String key = "myKey";
-		int value = 1122;
-
-		Result resultWithKnownValues = new Result(epoch, attributeName, className, objDomain, classNameAlias, typeName, ImmutableMap.of(key, (Object) value));
-
-		ArgumentCaptor<Index> argument = ArgumentCaptor.forClass(Index.class);
-
-		// return for call, add index entry
-		when(mockClient.execute(Matchers.isA(Index.class))).thenReturn(jestResultTrue);
-
-		writer.doWrite(serverWithKnownValues, query, ImmutableList.of(resultWithKnownValues));
-
-		verify(mockClient).execute(argument.capture());
-		assertEquals(PREFIX + "_jmx-entries", argument.getValue().getIndex());
-
-		// some values are not included, if these are necessary we should include them
-		// with alias the host and port information is lost, is that expected?
-		Gson gson = new Gson();
-		String data = argument.getValue().getData(gson);
-		//assertTrue("Contains host", data.contains(host));
-		//assertTrue("Contains port", data.contains(port));
-		assertTrue("Contains attribute name", data.contains(attributeName));
-		//assertTrue("Contains class name", data.contains(className));
-		//assertTrue("Contains object domain", data.contains(objDomain));
-		assertTrue("Contains classNameAlias", data.contains(classNameAlias));
-		//assertTrue("Contains type name", data.contains(typeName));
-		assertTrue("Contains timestamp", data.contains(String.valueOf(epoch)));
-		assertTrue("Contains key", data.contains(key));
-		assertTrue("Contains value", data.contains(String.valueOf(value)));
 		assertTrue("Contains serverAlias", data.contains(serverAlias));
 
-	}
+    }
 
 	@Test(expected = LifecycleException.class)
 	public void indexCreateFailure() throws Exception {

@@ -27,12 +27,10 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
-import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
@@ -47,7 +45,7 @@ public class ElasticWriter extends BaseOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(ElasticWriter.class);
 	
 	private static final String DEFAULT_ROOT_PREFIX = "jmxtrans";
-	private static final String TYPE_NAME = "jmx-entry";
+	private static final String ELASTIC_TYPE_NAME = "jmx-entry";
 
 	private static final Object CREATE_MAPPING_LOCK = new Object();
 
@@ -92,7 +90,6 @@ public class ElasticWriter extends BaseOutputWriter {
 
 	@Override
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		List<String> typeNames = this.getTypeNames();
 
 		for (Result result : results) {
 			log.debug("Query result: [{}]", result);
@@ -100,9 +97,22 @@ public class ElasticWriter extends BaseOutputWriter {
 			for (Entry<String, Object> values : resultValues.entrySet()) {
 				Object value = values.getValue();
 				if (isNumeric(value)) {
-					Map<String, Object> map = createMap(server, query, typeNames, result, values, value);
-					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, TYPE_NAME, map);
-					Index index = new Index.Builder(map).index(indexName).type(TYPE_NAME).build();
+
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("serverAlias", server.getAlias());
+					map.put("server", server.getHost());
+					map.put("port", server.getPort());
+					map.put("objDomain", result.getObjDomain());
+					map.put("className", result.getClassName());
+					map.put("typeName", result.getTypeName());
+					map.put("attributeName", result.getAttributeName());
+					map.put("key", values.getKey());
+					map.put("keyAlias", result.getKeyAlias());
+					map.put("value", Double.parseDouble(value.toString()));
+					map.put("timestamp", result.getEpoch());
+
+					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, ELASTIC_TYPE_NAME, map);
+					Index index = new Index.Builder(map).index(indexName).type(ELASTIC_TYPE_NAME).build();
 					JestResult addToIndex = jestClient.execute(index);
 					if (!addToIndex.isSucceeded()) {
 						throw new ElasticWriterException(String.format("Unable to write entry to elastic: %s", addToIndex.getErrorMessage()));
@@ -112,22 +122,6 @@ public class ElasticWriter extends BaseOutputWriter {
 				}
 			}
 		}
-	}
-
-	private Map<String, Object> createMap(Server server, Query query, List<String> typeNames, Result result, Entry<String, Object> values, Object value) {
-
-		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
-
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("server", createAlias(server));
-		map.put("metric", keyString);
-		map.put("value", Double.parseDouble(value.toString()));
-		map.put("resultAlias", result.getKeyAlias());
-		map.put("attributeName", result.getAttributeName());
-		map.put("key", values.getKey());
-		map.put("timestamp", result.getEpoch());
-
-		return map;
 	}
 
 	private String createAlias(Server server) {
@@ -172,7 +166,7 @@ public class ElasticWriter extends BaseOutputWriter {
 	public void start() throws LifecycleException {
 		super.start();
 		try {
-			createMappingIfNeeded(jestClient, indexName, TYPE_NAME);
+			createMappingIfNeeded(jestClient, indexName, ELASTIC_TYPE_NAME);
 		} catch (Exception e) {
 			throw new LifecycleException("Failed to create elastic mapping.", e);
 		}
