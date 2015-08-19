@@ -11,9 +11,6 @@ public final class StringUtils {
 
 	/**
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
-	 *
-	 * @param name the name
-	 * @return the string
 	 */
 	public static String cleanupStr(String name) {
 		return cleanupStr(name, false);
@@ -23,9 +20,7 @@ public final class StringUtils {
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
 	 * Chomps any trailing . or _ character.
 	 *
-	 * @param name            the name
 	 * @param allowDottedKeys whether we remove the dots or not.
-	 * @return
 	 */
 	public static String cleanupStr(String name, boolean allowDottedKeys) {
 		if (name == null) {

@@ -207,6 +207,11 @@
 				<version>1.0.10</version>
 			</dependency>
 			<dependency>
+				<groupId>io.searchbox</groupId>
+				<artifactId>jest</artifactId>
+				<version>0.1.6</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.inject</groupId>
 				<artifactId>javax.inject</artifactId>
 				<version>1</version>
@@ -270,6 +275,11 @@
 			<dependency>
 				<groupId>org.jmxtrans</groupId>
 				<artifactId>jmxtrans-output-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans-output-elastic</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -345,11 +355,11 @@
 			</dependency>
 			<dependency>
 				<!--
-					AWS CloudWatch needs a recent version of http client.
+					AWS CloudWatch and Jest (elastic search client) need a recent version of http client.
 				-->
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.3.6</version>
+				<version>4.5</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>

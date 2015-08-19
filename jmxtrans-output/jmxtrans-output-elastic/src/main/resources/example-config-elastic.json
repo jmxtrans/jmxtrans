@@ -1,0 +1,33 @@
+{
+  "servers" : [ {
+    "port" : "9400",
+    "host" : "192.168.86.136",
+    "alias" : "my elastic search test server",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.elastic.ElasticWriter",
+        "connectionUrl" : "http://192.168.86.136:9200",
+        "rootPrefix" : "test"
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage" ]
+    }, {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.elastic.ElasticWriter",
+        "connectionUrl" : "http://192.168.86.136:9200",
+        "rootPrefix" : "test"
+      } ],
+      "obj" : "java.lang:name=CMS Old Gen,type=MemoryPool",
+      "attr" : [ "Usage" ]
+    }, {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.elastic.ElasticWriter",
+        "connectionUrl" : "http://192.168.86.136:9200",
+        "rootPrefix" : "test"
+      } ],
+      "obj" : "java.lang:name=ConcurrentMarkSweep,type=GarbageCollector",
+      "attr" : [ "LastGcInfo" ]
+    } ],
+    "numQueryThreads" : 2
+  } ]
+}

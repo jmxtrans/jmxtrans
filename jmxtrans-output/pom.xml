@@ -24,6 +24,7 @@
 		Some dependencies are also problematic. They can introduce incompatibilities. For example, a few writers are
 		based directly on log4j or logback. This direct dependence breaks the use of SLF4J. By isolating those output
 		writers to a specific module, we can ensure this has minimal impact.</description>
+
 	<modules>
 		<module>jmxtrans-output-cloudwatch</module>
 		<module>jmxtrans-output-core</module>
@@ -32,6 +33,7 @@
 		<module>jmxtrans-output-log4j</module>
 		<module>jmxtrans-output-velocity</module>
 		<module>jmxtrans-output-kafka</module>
+		<module>jmxtrans-output-elastic</module>
 	</modules>
 
 	<build>

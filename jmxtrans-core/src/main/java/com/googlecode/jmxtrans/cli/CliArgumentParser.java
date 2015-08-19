@@ -88,7 +88,7 @@ public class CliArgumentParser {
 				.withLongOpt("additionalJars")
 				.hasArgs()
 				.withValueSeparator(',')
-				.withDescription("Coma delimited list of additional jars to add to the class path")
+				.withDescription("Comma delimited list of additional jars to add to the class path")
 				.create("a"));
 		options.addOption("h", false, "Help");
 		return options;
