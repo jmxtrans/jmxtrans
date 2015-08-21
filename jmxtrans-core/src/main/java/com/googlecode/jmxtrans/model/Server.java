@@ -25,6 +25,8 @@ import javax.management.remote.JMXServiceURL;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -172,6 +174,14 @@ public class Server {
 	}
 
 	public String getHost() {
+		if (pid != null) {
+			try {
+				return InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 		if (host == null && url == null) {
 			return null;
 		}
