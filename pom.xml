@@ -454,28 +454,8 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>com.github.github</groupId>
-					<artifactId>site-maven-plugin</artifactId>
-					<!--
-						version 0.11 seem to have some problem to publish, let's wait until 0.12 to upgrade
-					-->
-					<version>0.10</version>
-					<configuration>
-						<message>Creating site for ${project.name}
-							${project.version}</message>
-					</configuration>
-					<executions>
-						<execution>
-							<goals>
-								<goal>site</goal>
-							</goals>
-							<phase>site</phase>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>com.google.code.sortpom</groupId>
-					<artifactId>maven-sortpom-plugin</artifactId>
+					<groupId>com.github.ekryd.sortpom</groupId>
+					<artifactId>sortpom-maven-plugin</artifactId>
 					<version>2.4.0</version>
 					<configuration>
 						<predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
@@ -494,6 +474,26 @@
 								<goal>verify</goal>
 							</goals>
 							<phase>verify</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>com.github.github</groupId>
+					<artifactId>site-maven-plugin</artifactId>
+					<!--
+						version 0.11 seem to have some problem to publish, let's wait until 0.12 to upgrade
+					-->
+					<version>0.10</version>
+					<configuration>
+						<message>Creating site for ${project.name}
+							${project.version}</message>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>site</goal>
+							</goals>
+							<phase>site</phase>
 						</execution>
 					</executions>
 				</plugin>
@@ -563,6 +563,14 @@
 						<consoleOutput>true</consoleOutput>
 						<maxAllowedViolations>${checkstyle.max.allowed.violations}</maxAllowedViolations>
 					</configuration>
+					<dependencies>
+						<!-- to workaround https://github.com/jcgay/maven-color/issues/8 -->
+						<dependency>
+							<groupId>org.slf4j</groupId>
+							<artifactId>jcl-over-slf4j</artifactId>
+							<version>1.7.5</version>
+						</dependency>
+					</dependencies>
 					<executions>
 						<execution>
 							<id>checkstyle-check</id>
@@ -572,14 +580,6 @@
 							<phase>verify</phase>
 						</execution>
 					</executions>
-					<dependencies>
-						<!-- to workaround https://github.com/jcgay/maven-color/issues/8 -->
-						<dependency>
-							<groupId>org.slf4j</groupId>
-							<artifactId>jcl-over-slf4j</artifactId>
-							<version>1.7.5</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -830,12 +830,12 @@
 
 		<plugins>
 			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>com.github.ekryd.sortpom</groupId>
 				<artifactId>sortpom-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
