@@ -10,14 +10,19 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.collect.ImmutableList.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.google.common.collect.ImmutableList.of;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link OpenTSDBWriter}.
