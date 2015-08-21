@@ -96,9 +96,14 @@ public class Server {
 			@JsonProperty("numQueryThreads") Integer numQueryThreads,
 			@JsonProperty("local") boolean local,
 			@JsonProperty("queries") List<Query> queries) {
+
+		Preconditions.checkArgument(pid != null || url != null || host != null,
+			"You must provide the pid or the [url|host and port]");
+		Preconditions.checkArgument(!(pid != null && (url != null || host != null)),
+			"You must provide the pid OR the url, not both");
+
 		this.alias = resolveProps(alias);
 		this.pid = resolveProps(pid);
-		this.host = resolveProps(host);
 		this.port = resolveProps(port);
 		this.username = resolveProps(username);
 		this.password = resolveProps(password);
@@ -109,8 +114,18 @@ public class Server {
 		this.local = local;
 		this.queries = copyOf(queries);
 
-		Preconditions.checkArgument(getPid() != null || getUrl() != null, "You must provide the pid or the [url|host and port]");
-		Preconditions.checkArgument(!(getPid() != null && getUrl() != null), "You must provide the pid OR the url, not both");
+		// when connecting in local, we cache the host after retrieving it from the network card
+		if(pid != null) {
+			try {
+				this.host = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				// should work, so just throw a runtime if it doesn't
+				throw new RuntimeException(e);
+			}
+		}
+		else {
+			this.host = resolveProps(host);
+		}
 	}
 
 	/**
@@ -174,14 +189,6 @@ public class Server {
 	}
 
 	public String getHost() {
-		if (pid != null) {
-			try {
-				return InetAddress.getLocalHost().getHostName();
-			} catch (UnknownHostException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
 		if (host == null && url == null) {
 			return null;
 		}
@@ -402,7 +409,7 @@ public class Server {
 		private Builder(Server server) {
 			this.alias = server.alias;
 			this.pid = server.pid;
-			this.host = server.host;
+			this.host = (server.pid != null ? null : server.host); // let the host be deduced in the constructor
 			this.port = server.port;
 			this.username = server.username;
 			this.password = server.password;
