@@ -78,28 +78,22 @@ public class ServerJob implements Job {
 
 	private JMXServiceURL extractJMXServiceURLFromPid(String pid) throws Exception
 	{
-		// attach to the target application
-		VirtualMachine vm = VirtualMachine.attach(pid	);
+		VirtualMachine vm = VirtualMachine.attach(pid);
 
 		try {
-			// get the connector address
 			String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
 
-			// no connector address, so we start the JMX agent
 			if (connectorAddress == null) {
 				String agent = vm.getSystemProperties().getProperty("java.home") +
 					File.separator + "lib" + File.separator + "management-agent.jar";
 				vm.loadAgent(agent);
 
-				// agent is started, get the connector address
 				connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
 			}
 
-			// establish connection to connector server
 			return new JMXServiceURL(connectorAddress);
 		}
-		finally
-		{
+		finally {
 			vm.detach();
 		}
 	}
