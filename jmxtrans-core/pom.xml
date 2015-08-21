@@ -14,10 +14,10 @@
 	<description>This module contains most of the core logic of JmxTrans.</description>
 
 	<properties>
+		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
 		<verify.mutationThreshold>43</verify.mutationThreshold>
 		<verify.totalBranchRate>46</verify.totalBranchRate>
 		<verify.totalLineRate>46</verify.totalLineRate>
-		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
 	</properties>
 
 	<dependencies>
