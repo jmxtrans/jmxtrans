@@ -1,0 +1,14 @@
+{
+  "servers" : [ {
+    "pid" : "${pid}",
+    "queries" : [ {
+      "obj" : "java.lang:type=MemoryPool,name=*",
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.Slf4JOutputWriter",
+        "settings" : {
+            "debug" : true
+        }
+      } ]
+    } ]
+  } ]
+}

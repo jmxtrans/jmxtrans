@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -18,18 +19,16 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.lang.management.ManagementFactory;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.*;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
-import static java.util.Arrays.asList;
-import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
-import static javax.naming.Context.SECURITY_CREDENTIALS;
-import static javax.naming.Context.SECURITY_PRINCIPAL;
+import static com.googlecode.jmxtrans.model.PropertyResolver.*;
+import static java.util.Arrays.*;
+import static javax.management.remote.JMXConnectorFactory.*;
+import static javax.naming.Context.*;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the
@@ -41,6 +40,7 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 @JsonPropertyOrder(value = {
 		"alias",
 		"local",
+		"pid",
 		"host",
 		"port",
 		"username",
@@ -57,6 +57,7 @@ public class Server {
 	private static final String BACK = "/jmxrmi";
 
 	private final String alias;
+	private final String pid;
 	private final String host;
 	private final String port;
 	private final String username;
@@ -74,6 +75,7 @@ public class Server {
 	@JsonCreator
 	public Server(
 			@JsonProperty("alias") String alias,
+			@JsonProperty("pid") String pid,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") String port,
 			@JsonProperty("username") String username,
@@ -85,6 +87,7 @@ public class Server {
 			@JsonProperty("local") boolean local,
 			@JsonProperty("queries") List<Query> queries) {
 		this.alias = resolveProps(alias);
+		this.pid = resolveProps(pid);
 		this.host = resolveProps(host);
 		this.port = resolveProps(port);
 		this.username = resolveProps(username);
@@ -95,6 +98,9 @@ public class Server {
 		this.numQueryThreads = numQueryThreads;
 		this.local = local;
 		this.queries = copyOf(queries);
+
+		Preconditions.checkArgument(getPid() != null || getUrl() != null, "You must provide the pid or the [url|host and port]");
+		Preconditions.checkArgument(!(getPid() != null && getUrl() != null), "You must provide the pid OR the url, not both");
 	}
 
 	/**
@@ -148,10 +154,21 @@ public class Server {
 		return this.alias;
 	}
 
+	/**
+	 * Returns the pid of the local process jmxtrans will attach to
+	 *
+	 * @return pid of the java process
+	 */
+	public String getPid() {
+		if(this.pid == null) {
+			return null;
+		}
+		return this.pid;
+	}
+
 	public String getHost() {
 		if (host == null && url == null) {
-			// TODO: shouldn't we just return a null in this case ?
-			throw new IllegalStateException("host is null and url is null. Cannot construct host dynamically.");
+			return null;
 		}
 
 		if (host != null) {
@@ -168,7 +185,7 @@ public class Server {
 
 	public String getPort() {
 		if (port == null && url == null) {
-			throw new IllegalStateException("port is null and url is null.  Cannot construct port dynamically.");
+			return null;
 		}
 		if (this.port != null) {
 			return port;
@@ -213,16 +230,11 @@ public class Server {
 	public String getUrl() {
 		if (this.url == null) {
 			if ((this.host == null) || (this.port == null)) {
-				throw new RuntimeException("url is null and host or port is null. cannot construct url dynamically.");
+				return null;
 			}
 			return FRONT + this.host + ":" + this.port + BACK;
 		}
 		return this.url;
-	}
-
-	@JsonIgnore
-	public JMXServiceURL getJmxServiceURL() throws MalformedURLException {
-		return new JMXServiceURL(getUrl());
 	}
 
 	@JsonIgnore
@@ -249,7 +261,14 @@ public class Server {
 
 	@Override
 	public String toString() {
-		return "Server [host=" + this.host + ", port=" + this.port + ", url=" + this.url + ", cronExpression=" + this.cronExpression
+		String msg;
+		if(pid != null) {
+			msg = "pid=" + pid;
+		}
+		else {
+			msg = "host=" + this.host + ", port=" + this.port + ", url=" + this.url;
+		}
+		return "Server [" + msg + ", cronExpression=" + this.cronExpression
 				+ ", numQueryThreads=" + this.numQueryThreads + "]";
 	}
 
@@ -274,6 +293,7 @@ public class Server {
 		return new EqualsBuilder()
 				.append(this.getHost(), other.getHost())
 				.append(this.getPort(), other.getPort())
+				.append(this.getPid(), other.getPid())
 				.append(this.getNumQueryThreads(), other.getNumQueryThreads())
 				.append(this.getCronExpression(), other.getCronExpression())
 				.append(this.getAlias(), other.getAlias())
@@ -287,6 +307,7 @@ public class Server {
 		return new HashCodeBuilder(13, 21)
 				.append(this.getHost())
 				.append(this.getPort())
+				.append(this.getPid())
 				.append(this.getNumQueryThreads())
 				.append(this.getCronExpression())
 				.append(this.getAlias())
@@ -318,6 +339,7 @@ public class Server {
 	@NotThreadSafe
 	public static final class Builder {
 		private String alias;
+		private String pid;
 		private String host;
 		private String port;
 		private String username;
@@ -333,6 +355,7 @@ public class Server {
 
 		private Builder(Server server) {
 			this.alias = server.alias;
+			this.pid = server.pid;
 			this.host = server.host;
 			this.port = server.port;
 			this.username = server.username;
@@ -347,6 +370,11 @@ public class Server {
 
 		public Builder setAlias(String alias) {
 			this.alias = alias;
+			return this;
+		}
+
+		public Builder setPid(String pid) {
+			this.pid = pid;
 			return this;
 		}
 
@@ -413,6 +441,7 @@ public class Server {
 		public Server build() {
 			return new Server(
 					alias,
+					pid,
 					host,
 					port,
 					username,

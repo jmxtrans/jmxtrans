@@ -2,10 +2,7 @@ package com.googlecode.jmxtrans.model;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author lanyonm
@@ -81,7 +78,17 @@ public class ServerTests {
 		assertFalse(s1.equals("hi"));
 		assertEquals(s1, s2);
 		assertTrue(s1.equals(s2));
-		assertNotSame(s1, s3);
+		assertNotEquals(s1, s3);
+	}
+
+	@Test
+	public void testEquals_forPid() {
+		Server s1 = Server.builder().setPid("1").build();
+		Server s2 = Server.builder().setPid("2").build();
+		Server s3 = Server.builder(s1).build();
+
+		assertEquals(s1, s3);
+		assertNotEquals(s1, s2);
 	}
 
 	@Test
@@ -90,6 +97,7 @@ public class ServerTests {
 			// we add some variables to the System.properties list 
 		
 			String alias = "somealias";
+			String pid = "123";
 			String port = "1234";
 			String host = "localhost.local";
 			String username = "acme";
@@ -97,6 +105,7 @@ public class ServerTests {
 			String url = "service:jmx:remoting-jms://amce.local:1234";
 			
 			System.setProperty("myalias", alias);
+			System.setProperty("mypid", pid);
 			System.setProperty("myport", port);
 			System.setProperty("myhost", host);
 			System.setProperty("myusername",username);
@@ -120,9 +129,16 @@ public class ServerTests {
 						.setUrl(url)
 						.build();
 			assertEquals(serverFromSystemProperties.hashCode(), serverFromDirectParameters.hashCode());
+
+			Server serverPid = Server.builder()
+				.setPid("${mypid}")
+				.build();
+
+			assertEquals("123", serverPid.getPid());
 			
 		}finally{
 			System.clearProperty("myalias");
+			System.clearProperty("mypid");
 			System.clearProperty("myport");
 			System.clearProperty("myhost");
 			System.clearProperty("myusername");
@@ -144,5 +160,42 @@ public class ServerTests {
 				.build();
 		assertEquals(s1.hashCode(), s2.hashCode());
 		assertFalse(s1.hashCode() == s3.hashCode());
+	}
+
+	@Test
+	public void testToString() {
+		Server s1 = Server.builder()
+				.setPid("123")
+				.setCronExpression("cron")
+				.setNumQueryThreads(2)
+				.build();
+
+		Server s2 = Server.builder()
+			.setHost("mydomain")
+			.setPort("1234")
+			.setUrl("service:jmx:remoting-jmx://mysys.mydomain:8004")
+			.setCronExpression("cron")
+			.setNumQueryThreads(2)
+			.build();
+
+		assertEquals("Server [pid=123, cronExpression=cron, numQueryThreads=2]", s1.toString());
+		assertEquals(
+			"Server [host=mydomain, port=1234, url=service:jmx:remoting-jmx://mysys.mydomain:8004, cronExpression=cron, numQueryThreads=2]",
+			s2.toString());
+	}
+
+	@Test
+	public void testIntegrity() {
+		try {
+			Server.builder().setPid("123").setUrl("aaa").build();
+			fail("Pid and Url should not be allowed at the same time");
+		}
+		catch(IllegalArgumentException e) {}
+
+		try {
+			Server.builder().build();
+			fail("No Pid or Url can't work");
+		}
+		catch(IllegalArgumentException e) {}
 	}
 }

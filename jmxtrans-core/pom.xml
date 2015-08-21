@@ -111,6 +111,13 @@
 			<artifactId>slf4j-simple</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.sun</groupId>
+			<artifactId>tools</artifactId>
+			<version>1.6.0</version>
+			<scope>system</scope>
+			<systemPath>${toolsjar}</systemPath>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -132,4 +139,40 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>windows_profile</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<properties>
+				<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
+			</properties>
+		</profile>
+		<profile>
+			<id>unix_profile</id>
+			<activation>
+				<os>
+					<family>unix</family>
+				</os>
+			</activation>
+			<properties>
+				<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
+			</properties>
+		</profile>
+		<profile>
+			<id>osx_profile</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
+			</properties>
+		</profile>
+	</profiles>
 </project>
