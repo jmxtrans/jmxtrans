@@ -23,12 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.*;
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.googlecode.jmxtrans.model.PropertyResolver.*;
-import static java.util.Arrays.*;
-import static javax.management.remote.JMXConnectorFactory.*;
-import static javax.naming.Context.*;
+import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
+import static java.util.Arrays.asList;
+import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
+import static javax.naming.Context.SECURITY_CREDENTIALS;
+import static javax.naming.Context.SECURITY_PRINCIPAL;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the
