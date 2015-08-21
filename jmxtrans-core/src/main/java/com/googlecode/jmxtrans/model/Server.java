@@ -8,9 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -260,34 +257,11 @@ public class Server {
 	}
 
 	@JsonIgnore
-	public JMXServiceURL getJmxServiceURL() throws IOException, AttachNotSupportedException,
-		AgentLoadException, AgentInitializationException {
+	public JMXServiceURL getJmxServiceURL() throws IOException {
 		if(this.pid != null) {
-			return extractJMXServiceURLFromPid(this.pid);
+			return JMXServiceURLFactory.extractJMXServiceURLFromPid(this.pid);
 		}
 		return new JMXServiceURL(getUrl());
-	}
-
-	private JMXServiceURL extractJMXServiceURLFromPid(String pid)
-		throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
-		VirtualMachine vm = VirtualMachine.attach(pid);
-
-		try {
-			String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-
-			if (connectorAddress == null) {
-				String agent = vm.getSystemProperties().getProperty("java.home") +
-					File.separator + "lib" + File.separator + "management-agent.jar";
-				vm.loadAgent(agent);
-
-				connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-			}
-
-			return new JMXServiceURL(connectorAddress);
-		}
-		finally {
-			vm.detach();
-		}
 	}
 
 	@JsonIgnore
@@ -379,6 +353,40 @@ public class Server {
 	 */
 	public String getProtocolProviderPackages() {
 		return protocolProviderPackages;
+	}
+
+	/**
+	 * Factory to create a JMXServiceURL from a pid. Inner class to prevent class
+	 * loader issues when tools.jar isn't present.
+	 */
+	private static class JMXServiceURLFactory {
+
+		public static JMXServiceURL extractJMXServiceURLFromPid(String pid) throws IOException {
+
+			try {
+				VirtualMachine vm = VirtualMachine.attach(pid);
+
+				try {
+					String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+
+					if (connectorAddress == null) {
+						String agent = vm.getSystemProperties().getProperty("java.home") +
+								File.separator + "lib" + File.separator + "management-agent.jar";
+						vm.loadAgent(agent);
+
+						connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+					}
+
+					return new JMXServiceURL(connectorAddress);
+				} finally {
+					vm.detach();
+				}
+			}
+			catch(Exception e) {
+				throw new IOException(e);
+			}
+		}
+
 	}
 
 	public static Builder builder() {
