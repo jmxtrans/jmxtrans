@@ -17,6 +17,7 @@
 		<verify.mutationThreshold>43</verify.mutationThreshold>
 		<verify.totalBranchRate>46</verify.totalBranchRate>
 		<verify.totalLineRate>46</verify.totalLineRate>
+		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
 	</properties>
 
 	<dependencies>
@@ -139,40 +140,4 @@
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>windows_profile</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
-			<properties>
-				<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-			</properties>
-		</profile>
-		<profile>
-			<id>unix_profile</id>
-			<activation>
-				<os>
-					<family>unix</family>
-				</os>
-			</activation>
-			<properties>
-				<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-			</properties>
-		</profile>
-		<profile>
-			<id>osx_profile</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-				<os>
-					<family>mac</family>
-				</os>
-			</activation>
-			<properties>
-				<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-			</properties>
-		</profile>
-	</profiles>
 </project>
