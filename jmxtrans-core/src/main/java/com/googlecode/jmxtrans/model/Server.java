@@ -161,9 +161,6 @@ public class Server {
 	 * @return pid of the java process
 	 */
 	public String getPid() {
-		if(this.pid == null) {
-			return null;
-		}
 		return this.pid;
 	}
 
