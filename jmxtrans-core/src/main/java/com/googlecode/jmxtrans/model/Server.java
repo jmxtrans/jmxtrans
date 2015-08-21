@@ -8,6 +8,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
+import com.sun.tools.attach.VirtualMachine;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -18,6 +22,8 @@ import javax.management.MBeanServer;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +60,7 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 @ThreadSafe
 public class Server {
 
+	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
 
@@ -233,6 +240,37 @@ public class Server {
 			return FRONT + this.host + ":" + this.port + BACK;
 		}
 		return this.url;
+	}
+
+	@JsonIgnore
+	public JMXServiceURL getJmxServiceURL() throws IOException, AttachNotSupportedException,
+		AgentLoadException, AgentInitializationException {
+		if(this.pid != null) {
+			return extractJMXServiceURLFromPid(this.pid);
+		}
+		return new JMXServiceURL(getUrl());
+	}
+
+	private JMXServiceURL extractJMXServiceURLFromPid(String pid)
+		throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
+		VirtualMachine vm = VirtualMachine.attach(pid);
+
+		try {
+			String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+
+			if (connectorAddress == null) {
+				String agent = vm.getSystemProperties().getProperty("java.home") +
+					File.separator + "lib" + File.separator + "management-agent.jar";
+				vm.loadAgent(agent);
+
+				connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+			}
+
+			return new JMXServiceURL(connectorAddress);
+		}
+		finally {
+			vm.detach();
+		}
 	}
 
 	@JsonIgnore

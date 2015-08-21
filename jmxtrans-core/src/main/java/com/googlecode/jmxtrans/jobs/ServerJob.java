@@ -3,7 +3,6 @@ package com.googlecode.jmxtrans.jobs;
 import com.googlecode.jmxtrans.connections.JMXConnectionParams;
 import com.googlecode.jmxtrans.jmx.JmxUtils;
 import com.googlecode.jmxtrans.model.Server;
-import com.sun.tools.attach.VirtualMachine;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
-import java.io.File;
 
 /**
  * This is a quartz job that is responsible for executing a Server object on a
@@ -24,8 +22,6 @@ import java.io.File;
  * @author jon
  */
 public class ServerJob implements Job {
-
-	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 
 	private static final Logger log = LoggerFactory.getLogger(ServerJob.class);
 
@@ -49,13 +45,7 @@ public class ServerJob implements Job {
 		JMXConnectionParams connectionParams = null;
 
 		try {
-			JMXServiceURL jmxUrl;
-			if(server.getPid() != null) {
-				jmxUrl = extractJMXServiceURLFromPid(server.getPid());
-			}
-			else {
-				jmxUrl = new JMXServiceURL(server.getUrl());
-			}
+			JMXServiceURL jmxUrl = server.getJmxServiceURL();
 
 			connectionParams = new JMXConnectionParams(jmxUrl, server.getEnvironment());
 			if (!server.isLocal()) {
@@ -74,27 +64,5 @@ public class ServerJob implements Job {
 		}
 
 		log.debug("+++++ Finished server job: {}", server);
-	}
-
-	private JMXServiceURL extractJMXServiceURLFromPid(String pid) throws Exception
-	{
-		VirtualMachine vm = VirtualMachine.attach(pid);
-
-		try {
-			String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-
-			if (connectorAddress == null) {
-				String agent = vm.getSystemProperties().getProperty("java.home") +
-					File.separator + "lib" + File.separator + "management-agent.jar";
-				vm.loadAgent(agent);
-
-				connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-			}
-
-			return new JMXServiceURL(connectorAddress);
-		}
-		finally {
-			vm.detach();
-		}
 	}
 }
