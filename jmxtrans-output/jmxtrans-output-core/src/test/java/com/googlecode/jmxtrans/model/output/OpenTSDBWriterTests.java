@@ -1,29 +1,23 @@
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,7 +100,7 @@ public class OpenTSDBWriterTests {
 
 	@Test
 	public void writeSingleResult() throws Exception {
-		Server server = Server.builder().build();
+		Server server = Server.builder().setPid("1").build();
 		Query query = Query.builder().build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
 

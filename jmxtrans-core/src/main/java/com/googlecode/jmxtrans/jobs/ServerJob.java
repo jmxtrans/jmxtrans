@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXServiceURL;
 
 /**
  * This is a quartz job that is responsible for executing a Server object on a
@@ -21,6 +22,7 @@ import javax.management.remote.JMXConnector;
  * @author jon
  */
 public class ServerJob implements Job {
+
 	private static final Logger log = LoggerFactory.getLogger(ServerJob.class);
 
 	private final GenericKeyedObjectPool<JMXConnectionParams, JMXConnector> jmxPool;
@@ -41,8 +43,11 @@ public class ServerJob implements Job {
 
 		JMXConnector conn = null;
 		JMXConnectionParams connectionParams = null;
+
 		try {
-			connectionParams = new JMXConnectionParams(server.getJmxServiceURL(), server.getEnvironment());
+			JMXServiceURL jmxUrl = server.getJmxServiceURL();
+
+			connectionParams = new JMXConnectionParams(jmxUrl, server.getEnvironment());
 			if (!server.isLocal()) {
 				conn = jmxPool.borrowObject(connectionParams);
 			}
