@@ -77,7 +77,7 @@ public class KafkaWriter extends BaseOutputWriter {
 		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
 		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
 		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
-		this.topics = asList(topics.split(","));
+		this.topics = asList(Settings.getStringSetting(settings, "topics", null).split(","));
 		jsonFactory = new JsonFactory();
 	}
 	
