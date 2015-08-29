@@ -70,8 +70,6 @@ public class KafkaWriter extends BaseOutputWriter {
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
 						DEFAULT_ROOT_PREFIX));		
-		if (topics == null)
-			throw new NullPointerException("Topics cannot be null.");
 		// Setting all the required Kafka Properties
 		Properties kafkaProperties =  new Properties();
 		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));
