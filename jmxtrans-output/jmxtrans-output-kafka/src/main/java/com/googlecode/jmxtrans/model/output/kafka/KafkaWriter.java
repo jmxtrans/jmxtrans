@@ -29,7 +29,6 @@ import java.util.Map.Entry;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
-
 import static com.fasterxml.jackson.core.JsonEncoding.UTF8;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
@@ -77,7 +76,7 @@ public class KafkaWriter extends BaseOutputWriter {
 		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
 		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
 		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
-		this.topics = asList(topics.split(","));
+		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
 		jsonFactory = new JsonFactory();
 	}
 	
