@@ -20,6 +20,7 @@
 		<verify.mutationThreshold>0</verify.mutationThreshold>
 		<verify.totalBranchRate>0</verify.totalBranchRate>
 		<verify.totalLineRate>0</verify.totalLineRate>
+		<dollar.sign>$</dollar.sign>
 	</properties>
 
 	<dependencies>
@@ -243,6 +244,8 @@
 									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
 									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
 									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
+									<extraArgument>-Djmxtrans.log.level=INFO</extraArgument>
+									<extraArgument>-Djmxtrans.log.dir=/var/log/${package.daemon.name}</extraArgument>
 								</extraArguments>
 							</jvmSettings>
 							<platforms>
@@ -319,13 +322,20 @@
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
-                  USER_ID=`id -u %{package.user} 2&gt;/dev/null`
-                    if [ -z "$USER_ID" ]; then
-									    groupadd -f ${package.user}
-									    /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-									    ${package.install.dir} -G ${package.user} ${package.user}
-                    fi
-									fi</script>
+									USER_ID=${dollar.sign}(id -u ${package.user} 2&gt;/dev/null)
+									if [ -z "$USER_ID" ]; then
+										REDHAT_RELEASE=${dollar.sign}(lsb_release -sr|cut -d"." -f1)
+										if [ ${dollar.sign}{REDHAT_RELEASE} -gt 5 ]; then
+											/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+											${package.install.dir} -u ${package.userId} -U ${package.user}
+										else
+											/usr/sbin/groupadd -g ${package.userId} ${package.user}
+											/usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
+												${package.install.dir} -g ${package.userId} \
+												-u ${package.userId} ${package.user}
+										fi
+									fi
+								fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
 								<script>/sbin/chkconfig --add ${package.daemon.name}</script>
