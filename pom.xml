@@ -111,6 +111,7 @@
 		<package.group>${project.artifactId}</package.group>
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
+                <package.userId>102</package.userId>
 		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<verify.mutationThreshold>100</verify.mutationThreshold>
