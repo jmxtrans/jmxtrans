@@ -17,10 +17,10 @@
 		or other packaging.</description>
 
 	<properties>
+		<dollar.sign>$</dollar.sign>
 		<verify.mutationThreshold>0</verify.mutationThreshold>
 		<verify.totalBranchRate>0</verify.totalBranchRate>
 		<verify.totalLineRate>0</verify.totalLineRate>
-		<dollar.sign>$</dollar.sign>
 	</properties>
 
 	<dependencies>

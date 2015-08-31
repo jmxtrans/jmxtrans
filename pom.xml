@@ -53,14 +53,14 @@
 			</roles>
 		</developer>
 		<developer>
-                        <id>utkarshcmu</id>
-                        <name>Utkarsh Bhatnagar</name>
-                        <email>utkarsh.cmu@gmail.com</email>
-                        <url>http://www.cloudart.io</url>
-                        <roles>
-                                <role>developer</role>
-                        </roles>
-                </developer>
+			<id>utkarshcmu</id>
+			<name>Utkarsh Bhatnagar</name>
+			<email>utkarsh.cmu@gmail.com</email>
+			<url>http://www.cloudart.io</url>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
 	</developers>
 
 	<prerequisites>
@@ -111,7 +111,7 @@
 		<package.group>${project.artifactId}</package.group>
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
-                <package.userId>102</package.userId>
+		<package.userId>102</package.userId>
 		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<verify.mutationThreshold>100</verify.mutationThreshold>
