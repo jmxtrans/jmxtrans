@@ -346,6 +346,7 @@
 							</preremoveScriptlet>
 							<requires>
 								<require>java</require>
+								<require>/usr/bin/lsb_release</require>
 							</requires>
 							<mappings>
 								<mapping>
