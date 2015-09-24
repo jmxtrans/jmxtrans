@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+
 /**
  * Main() class that takes an argument which is the directory to look in for
  * files which contain json data that defines queries to run against JMX
@@ -405,11 +407,15 @@ public class JmxTransformer implements WatchedCallback {
 	private List<File> getJsonFiles() {
 		// TODO : should use a FileVisitor (Once we update to Java 7)
 		File[] files;
-		if ((this.configuration.getJsonDirOrFile() != null) && this.configuration.getJsonDirOrFile().isFile()) {
+		File jsonDirOrFile = configuration.getJsonDirOrFile();
+		if (jsonDirOrFile == null) {
+			throw new IllegalStateException("Configuration should specify configuration directory or file, with -j of -f option");
+		}
+		if (jsonDirOrFile.isFile()) {
 			files = new File[1];
-			files[0] = this.configuration.getJsonDirOrFile();
+			files[0] = jsonDirOrFile;
 		} else {
-			files = this.configuration.getJsonDirOrFile().listFiles();
+			files = firstNonNull(jsonDirOrFile.listFiles(), new File[0]);
 		}
 
 		List<File> result = new ArrayList<File>();

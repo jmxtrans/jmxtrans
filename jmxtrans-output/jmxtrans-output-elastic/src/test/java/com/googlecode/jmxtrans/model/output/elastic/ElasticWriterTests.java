@@ -10,6 +10,7 @@ import com.googlecode.jmxtrans.model.Server;
 import io.searchbox.action.Action;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
+import io.searchbox.core.DocumentResult;
 import io.searchbox.core.Index;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -36,7 +38,7 @@ public class ElasticWriterTests {
     @Mock(name = "jestClient")
 	private JestClient mockClient;
 	@Mock
-	private JestResult jestResultTrue;
+	private DocumentResult jestResultTrue;
 	@Mock
 	private JestResult jestResultFalse;
 
@@ -60,13 +62,13 @@ public class ElasticWriterTests {
 	public void sendMessageToElastic() throws Exception {
 
 		// return for call, does index exist
-		when(mockClient.execute(Matchers.isA(IndicesExists.class))).thenReturn(jestResultFalse);
+		when(mockClient.execute(isA(IndicesExists.class))).thenReturn(jestResultFalse);
 
 		// return for call, is index created
-		when(mockClient.execute(Matchers.isA(PutMapping.class))).thenReturn(jestResultTrue);
+		when(mockClient.execute(isA(PutMapping.class))).thenReturn(jestResultTrue);
 
 		// return for call, add index entry
-		when(mockClient.execute(Matchers.isA(Index.class))).thenReturn(jestResultTrue);
+		when(mockClient.execute(isA(Index.class))).thenReturn(jestResultTrue);
 
         // creates the index if needed
         writer.start();
@@ -93,7 +95,7 @@ public class ElasticWriterTests {
 	public void sendMessageToElasticWriteThrowsException() throws Exception {
 
 		// return for call, is index created
-		when(mockClient.execute(Matchers.isA(Action.class))).thenThrow(new IOException("Failed to add index entry to elastic."));
+		when(mockClient.execute(isA(Action.class))).thenThrow(new IOException("Failed to add index entry to elastic."));
 
 		writer.doWrite(server, query, ImmutableList.of(result));
 
@@ -105,7 +107,7 @@ public class ElasticWriterTests {
 	public void sendMessageToElasticWriteResultNotSucceeded() throws Exception {
 
 		// return for call, is index created
-		when(mockClient.execute(Matchers.isA(Action.class))).thenReturn(jestResultFalse);
+		when(mockClient.execute(isA(Action.class))).thenReturn(jestResultFalse);
 		when(jestResultFalse.getErrorMessage()).thenReturn("Failed to add index entry to elastic.");
 
 		writer.doWrite(server, query, ImmutableList.of(result));
@@ -137,7 +139,7 @@ public class ElasticWriterTests {
         ArgumentCaptor<Index> argument = ArgumentCaptor.forClass(Index.class);
 
 		// return for call, add index entry
-		when(mockClient.execute(Matchers.isA(Index.class))).thenReturn(jestResultTrue);
+		when(mockClient.execute(isA(Index.class))).thenReturn(jestResultTrue);
 
         writer.doWrite(serverWithKnownValues, query, ImmutableList.of(resultWithKnownValues));
 
@@ -164,10 +166,10 @@ public class ElasticWriterTests {
 	public void indexCreateFailure() throws Exception {
 
 		// return for call, does index exist
-		when(mockClient.execute(Matchers.isA(IndicesExists.class))).thenReturn(jestResultFalse);
+		when(mockClient.execute(isA(IndicesExists.class))).thenReturn(jestResultFalse);
 
         // return for call, is index created; return false
-        when(mockClient.execute(Matchers.isA(PutMapping.class))).thenReturn(jestResultFalse);
+        when(mockClient.execute(isA(PutMapping.class))).thenReturn(jestResultFalse);
 
         // return error message
 		when(jestResultFalse.getErrorMessage()).thenReturn("Unknown error creating index in elastic");
