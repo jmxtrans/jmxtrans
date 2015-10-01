@@ -121,6 +121,20 @@ public class GraphiteWriterTests {
 	}
 
 	@Test
+	public void useAllTypeNamesWorks() throws Exception {
+		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
+		Query query = Query.builder().setUseAllTypeNames(true).build();
+		String typeName = "typeName,typeNameKey1=typeNameValue1,typeNameKey2=typeNameValue2";
+		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, typeName, ImmutableMap.of("key", (Object)1));
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		GraphiteWriter writer = getGraphiteWriter(out);
+		writer.doWrite(server, query, of(result));
+
+		Assertions.assertThat( out.toString()).startsWith("servers.host.className.typeNameValue1_typeNameValue2.attributeName_key 1 ");
+	}
+
+	@Test
 	public void booleanAsNumberWorks() throws Exception {
 		File testInput = new File(GraphiteWriterTests.class.getResource("/booleanTest.json").toURI());
 

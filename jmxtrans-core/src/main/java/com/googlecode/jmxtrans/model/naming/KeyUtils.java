@@ -188,13 +188,8 @@ public final class KeyUtils {
 		}
 
 		Map<String, String> result = newHashMap();
-		String[] tokens = typeNameStr.split(",");
-
-		for (String oneToken : tokens) {
-			if (oneToken.length() > 0) {
-				String[] keyValue = splitTypeNameValue(oneToken);
-				result.put(keyValue[0], keyValue[1]);
-			}
+		for (TypeNameValue typeNameValue : TypeNameValue.extract(typeNameStr)) {
+			result.put(typeNameValue.getKey(), typeNameValue.getValue());
 		}
 		return result;
 	}
@@ -215,7 +210,15 @@ public final class KeyUtils {
 	 */
 	public static String getConcatedTypeNameValues(Query query, List<String> typeNames, String typeName) {
 		Set<String> queryTypeNames = query.getTypeNames();
-		if (queryTypeNames != null && queryTypeNames.size() > 0) {
+		if (query.isUseAllTypeNames()) {
+			List<String> allTypeNames = new ArrayList<String>();
+			for (TypeNameValue typeNameValue : TypeNameValue.extract(typeName)){
+				if (typeNameValue.getValue() != null && !typeNameValue.getValue().isEmpty()) {
+					allTypeNames.add(typeNameValue.getKey());
+				}
+			}
+			return getConcatedTypeNameValues(allTypeNames, typeName, getTypeNameValuesSeparator(query));
+		} else if (queryTypeNames != null && queryTypeNames.size() > 0) {
 			List<String> filteredTypeNames = new ArrayList<String>(queryTypeNames);
 			for (String name : typeNames) {
 				if (!filteredTypeNames.contains(name)) {
@@ -240,28 +243,5 @@ public final class KeyUtils {
 			return ".";
 		}
 		return "_";
-	}
-
-	/**
-	 * Given a single type-name-key and value from a typename strig (e.g. "type=MemoryPool"), extract the key and
-	 * the value and return both.
-	 *
-	 * @param typeNameToken - the string containing the pair.
-	 * @return String[2] where String[0] = the key and String[1] = the value.  If the given string is not in the
-	 * format "key=value" then String[0] = the original string and String[1] = "".
-	 */
-	private static String[] splitTypeNameValue(String typeNameToken) {
-		String[] result;
-		String[] keys = typeNameToken.split("=", 2);
-
-		if (keys.length == 2) {
-			result = keys;
-		} else {
-			result = new String[2];
-			result[0] = keys[0];
-			result[1] = "";
-		}
-
-		return result;
 	}
 }

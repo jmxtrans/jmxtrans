@@ -30,7 +30,7 @@ import static java.util.Arrays.asList;
  * @author jon
  */
 @JsonSerialize(include = NON_NULL)
-@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "outputWriters"})
+@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
 @ThreadSafe
 @Immutable // Note that outputWriters is neither thread safe nor immutable (yet)
 public class Query {
@@ -42,6 +42,7 @@ public class Query {
 	private final String resultAlias;
 	private final boolean useObjDomainAsKey;
 	private final boolean allowDottedKeys;
+	private final boolean useAllTypeNames;
 	private final ImmutableList<OutputWriter> outputWriters;
 
 	@JsonCreator
@@ -53,6 +54,7 @@ public class Query {
 			@JsonProperty("resultAlias") String resultAlias,
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
+			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
 			@JsonProperty("outputWriters") List<OutputWriter> outputWriters
 	) {
 		this.obj = obj;
@@ -61,6 +63,7 @@ public class Query {
 		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
 		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
+		this.useAllTypeNames = useAllTypeNames;
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, Collections.<OutputWriter>emptyList()));
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 	}
@@ -114,6 +117,10 @@ public class Query {
 
 	public boolean isAllowDottedKeys() {
 		return allowDottedKeys;
+	}
+
+	public boolean isUseAllTypeNames() {
+		return useAllTypeNames;
 	}
 
 	@Nonnull
@@ -185,6 +192,7 @@ public class Query {
 		private final List<String> keys = newArrayList();
 		private boolean useObjDomainAsKey;
 		private boolean allowDottedKeys;
+		private boolean useAllTypeNames;
 		private final List<OutputWriter> outputWriters = newArrayList();
 		private final Set<String> typeNames = newHashSet();
 
@@ -224,6 +232,11 @@ public class Query {
 			return this;
 		}
 
+		public Builder setUseAllTypeNames(boolean useAllTypeNames) {
+			this.useAllTypeNames = useAllTypeNames;
+			return this;
+		}
+
 		public Builder addOutputWriter(OutputWriter outputWriter) {
 			return addOutputWriters(outputWriter);
 		}
@@ -247,6 +260,7 @@ public class Query {
 					this.resultAlias,
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
+					this.useAllTypeNames,
 					this.outputWriters
 			);
 		}
