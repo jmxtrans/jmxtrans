@@ -83,10 +83,9 @@ public final class KeyUtils {
 	 * 2. The domain portion of the ObjectName in the query if useObjDomainAsKey is set to true
 	 * 3. else, the Class Name of the MBean. I.e. ClassName will be used by default if the 
 	 * user doesn't specify anything special
-	 * 
+	 * @param query
 	 * @param result
 	 * @param sb
-	 * @param useObjectDomain
 	 */
 	private static void addMBeanIdentifier(Query query, Result result, StringBuilder sb) {
 		if (result.getKeyAlias() != null) {
