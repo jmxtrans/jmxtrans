@@ -71,19 +71,22 @@ public class GraphiteWriterTests {
 		return writer;
 	}
 
+	private static String getOutput(Server server, Query query, Result result) throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		GraphiteWriter writer = getGraphiteWriter(out);
+		writer.doWrite(server, query, of(result));
+		return out.toString();
+	}
+
 	@Test
 	public void writeSingleResult() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").build();
 		Query query = Query.builder().build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		GraphiteWriter writer = getGraphiteWriter(out);
-
-		writer.doWrite(server, query, of(result));
-
 		// check that Graphite format is respected
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.classNameAlias.attributeName_key 1 ");
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host_123.classNameAlias.attributeName_key 1 ");
 	}
 
 	@Test
@@ -93,45 +96,40 @@ public class GraphiteWriterTests {
 		Query query = Query.builder().setUseObjDomainAsKey(true).build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		GraphiteWriter writer = getGraphiteWriter(out);
-
-		writer.doWrite(server, query, of(result));
-
 		// check that Graphite format is respected
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName_key 1 ");
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host_123.objDomain.attributeName_key 1 ");
 	}
 	
 	@Test
 	public void allowDottedWorks() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
+		// Set allowDottedKeys to true
 		Query query = Query.builder().setAllowDottedKeys(true).build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		
-		// Set useObjDomain to true
-		GraphiteWriter writer = getGraphiteWriter(out);
-
-		writer.doWrite(server, query, of(result));
-		System.out.println(out.toString());
 		// check that Graphite format is respected
-		Assertions.assertThat(out.toString()).startsWith("servers.host.className.attributeName.key 1 ");
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host.className.attributeName.key 1 ");
 	}
 
 	@Test
 	public void useAllTypeNamesWorks() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
+		// Set useAllTypeNames to true
 		Query query = Query.builder().setUseAllTypeNames(true).build();
 		String typeName = "typeName,typeNameKey1=typeNameValue1,typeNameKey2=typeNameValue2";
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, typeName, ImmutableMap.of("key", (Object)1));
+		String typeNameReordered = "typeNameKey2=typeNameValue2,typeName,typeNameKey1=typeNameValue1";
+		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null,
+				typeName, ImmutableMap.of("key", (Object)1));
+		Result resultWithTypeNameReordered = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null,
+				typeNameReordered, ImmutableMap.of("key", (Object)1));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		GraphiteWriter writer = getGraphiteWriter(out);
-		writer.doWrite(server, query, of(result));
-
-		Assertions.assertThat( out.toString()).startsWith("servers.host.className.typeNameValue1_typeNameValue2.attributeName_key 1 ");
+		// check that Graphite format is respected
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host.className.typeNameValue1_typeNameValue2.attributeName_key 1 ");
+		Assertions.assertThat(getOutput(server, query, resultWithTypeNameReordered))
+				.startsWith("servers.host.className.typeNameValue2_typeNameValue1.attributeName_key 1 ");
 	}
 
 	@Test
