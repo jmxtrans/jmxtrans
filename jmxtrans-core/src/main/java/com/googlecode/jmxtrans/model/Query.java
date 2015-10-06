@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
+import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -13,6 +16,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +48,7 @@ public class Query {
 	private final boolean allowDottedKeys;
 	private final boolean useAllTypeNames;
 	private final ImmutableList<OutputWriter> outputWriters;
+	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
 
 	@JsonCreator
 	public Query(
@@ -66,6 +71,8 @@ public class Query {
 		this.useAllTypeNames = useAllTypeNames;
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, Collections.<OutputWriter>emptyList()));
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
+
+		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 	}
 
 	/**
@@ -128,6 +135,10 @@ public class Query {
 		return outputWriters;
 	}
 
+	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
+		return this.typeNameValuesStringBuilder.build(typeNames, typeNameStr);
+	}
+
 	@Override
 	public String toString() {
 		return "Query [obj=" + obj + ", useObjDomainAsKey:" + useObjDomainAsKey + 
@@ -177,6 +188,18 @@ public class Query {
 			return 0;
 		}
 		return writers.size();
+	}
+
+	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {
+		String separator = isAllowDottedKeys() ? "." : TypeNameValuesStringBuilder.DEFAULT_SEPARATOR;
+		Set<String> typeNames = getTypeNames();
+		if (isUseAllTypeNames()) {
+			return new UseAllTypeNameValuesStringBuilder(separator);
+		} else if (typeNames != null && typeNames.size() > 0) {
+			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<String>(typeNames));
+		} else {
+			return new TypeNameValuesStringBuilder(separator);
+		}
 	}
 
 	public static Builder builder() {

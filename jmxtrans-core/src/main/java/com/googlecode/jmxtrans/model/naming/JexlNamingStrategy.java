@@ -2,6 +2,7 @@ package com.googlecode.jmxtrans.model.naming;
 
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
@@ -102,7 +103,7 @@ public class JexlNamingStrategy implements NamingStrategy {
 		context.set(VAR__ATTRIBUTE_NAME, result.getAttributeName());
 		context.set(VAR__CLASSNAME_ALIAS, result.getKeyAlias());
 
-		Map<String, String> typeNameMap = KeyUtils.getTypeNameValueMap(result.getTypeName());
+		Map<String, String> typeNameMap = TypeNameValue.extractMap(result.getTypeName());
 		context.set(VAR__TYPENAME, typeNameMap);
 
 		String effectiveClassname = result.getKeyAlias();

@@ -1,11 +1,15 @@
-package com.googlecode.jmxtrans.model.naming;
+package com.googlecode.jmxtrans.model.naming.typename;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
-class TypeNameValue {
+import static com.google.common.collect.Maps.newHashMap;
+
+public class TypeNameValue {
 	private String key;
 	private String value;
 
@@ -65,6 +69,32 @@ class TypeNameValue {
 				return new TypeNameValuesIterator(typeNameStr);
 			}
 		};
+	}
+
+	/**
+	 * Given a typeNameStr string, create a Map with every key and value in the typeNameStr.
+	 * For example:
+	 * <p/>
+	 * typeNameStr=name=PS Eden Space,type=MemoryPool
+	 * <p/>
+	 * Returns a Map with the following key/value pairs (excluding the quotes):
+	 * <p/>
+	 * "name"  =>  "PS Eden Space"
+	 * "type"  =>  "MemoryPool"
+	 *
+	 * @param typeNameStr the type name str
+	 * @return Map<String, String> of type-name-key / value pairs.
+	 */
+	public static Map<String, String> extractMap(String typeNameStr) {
+		if (typeNameStr == null) {
+			return Collections.emptyMap();
+		}
+
+		Map<String, String> result = newHashMap();
+		for (TypeNameValue typeNameValue : extract(typeNameStr)) {
+			result.put(typeNameValue.getKey(), typeNameValue.getValue());
+		}
+		return result;
 	}
 
 	private static class TypeNameValuesIterator implements Iterator<TypeNameValue> {
