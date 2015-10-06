@@ -1,5 +1,8 @@
 package com.googlecode.jmxtrans.model.naming;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import java.util.Iterator;
 
 class TypeNameValue {
@@ -11,12 +14,48 @@ class TypeNameValue {
 		this.value = value;
 	}
 
+	public TypeNameValue(String key) {
+		this(key, "");
+	}
+
 	public String getKey() {
 		return key;
 	}
 
 	public String getValue() {
 		return value;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
+		if (o == this) {
+			return true;
+		}
+		if (o.getClass() != this.getClass()) {
+			return false;
+		}
+
+		if (!(o instanceof TypeNameValue)) {
+			return false;
+		}
+
+		TypeNameValue other = (TypeNameValue) o;
+
+		return new EqualsBuilder()
+				.append(this.getKey(), other.getKey())
+				.append(this.getValue(), other.getValue())
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(37, 89)
+				.append(this.getKey())
+				.append(this.getValue())
+				.toHashCode();
 	}
 
 	public static Iterable<TypeNameValue> extract(final String typeNameStr) {
@@ -47,7 +86,12 @@ class TypeNameValue {
 		@Override
 		public TypeNameValue next() {
 			String[] keyVal = tokens[iterator].split("=", 2);
-			TypeNameValue result = new TypeNameValue(keyVal[0], keyVal.length > 1 ? keyVal[1] : "");
+			TypeNameValue result;
+			if (keyVal.length > 1) {
+				result = new TypeNameValue(keyVal[0], keyVal[1]);
+			} else {
+				result = new TypeNameValue(keyVal[0]);
+			}
 			++iterator;
 			skipEmpty();
 			return result;
