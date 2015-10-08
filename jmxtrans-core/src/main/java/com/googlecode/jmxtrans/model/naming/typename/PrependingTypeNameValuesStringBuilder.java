@@ -15,9 +15,11 @@ public class PrependingTypeNameValuesStringBuilder extends TypeNameValuesStringB
 	@Override
 	public String build(List<String> typeNames, String typeNameStr) {
 		List<String> resultingTypeNames = new ArrayList<String>(prependedTypeNames);
-		for (String name : typeNames) {
-			if (!resultingTypeNames.contains(name)) {
-				resultingTypeNames.add(name);
+		if (typeNames != null) {
+			for (String name : typeNames) {
+				if (!resultingTypeNames.contains(name)) {
+					resultingTypeNames.add(name);
+				}
 			}
 		}
 		return doBuild(resultingTypeNames, typeNameStr);
