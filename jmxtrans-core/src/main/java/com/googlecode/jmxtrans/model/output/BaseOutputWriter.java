@@ -11,7 +11,7 @@ import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
@@ -127,7 +127,7 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 * string
 	 */
 	protected String getConcatedTypeNameValues(String typeNameStr) {
-		return KeyUtils.getConcatedTypeNameValues(this.getTypeNames(), typeNameStr);
+		return TypeNameValuesStringBuilder.getDefaultBuilder().build(this.getTypeNames(), typeNameStr);
 	}
 
 	/**

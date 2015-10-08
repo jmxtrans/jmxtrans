@@ -6,6 +6,7 @@ import java.util.Map;
 public class TypeNameValuesStringBuilder {
 
 	public static final String DEFAULT_SEPARATOR = "_";
+	private static final TypeNameValuesStringBuilder defaultBuilder = new TypeNameValuesStringBuilder();
 	private String separator;
 
 	public TypeNameValuesStringBuilder() {
@@ -18,6 +19,10 @@ public class TypeNameValuesStringBuilder {
 
 	public String build(List<String> typeNames, String typeNameStr) {
 		return doBuild(typeNames, typeNameStr);
+	}
+
+	public static TypeNameValuesStringBuilder getDefaultBuilder() {
+		return defaultBuilder;
 	}
 
 	protected final String doBuild(List<String> typeNames, String typeNameStr) {

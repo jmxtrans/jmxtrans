@@ -3,14 +3,11 @@ package com.googlecode.jmxtrans.model.naming;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 
 import java.util.List;
 import java.util.Map;
 
 public final class KeyUtils {
-
-	private static TypeNameValuesStringBuilder typeNameValuesStringBuilder = new TypeNameValuesStringBuilder();
 
 	private KeyUtils() {}
 	/**
@@ -117,23 +114,6 @@ public final class KeyUtils {
 			keyStr = result.getAttributeName() + "." + values.getKey();
 		}
 		return keyStr;
-	}
-
-	/**
-	 * Given a typeName string, get the first match from the typeNames setting.
-	 * In other words, suppose you have:
-	 * <p/>
-	 * typeName=name=PS Eden Space,type=MemoryPool
-	 * <p/>
-	 * If you addTypeName("name"), then it'll retrieve 'PS Eden Space' from the
-	 * string
-	 *
-	 * @param typeNames   the type names
-	 * @param typeNameStr the type name str
-	 * @return the concated type name values
-	 */
-	public static String getConcatedTypeNameValues(List<String> typeNames, String typeNameStr) {
-		return typeNameValuesStringBuilder.build(typeNames, typeNameStr);
 	}
 
 }
