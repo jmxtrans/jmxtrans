@@ -11,7 +11,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -293,7 +293,8 @@ public class StackdriverWriter extends BaseOutputWriter {
 						}
 						
 						// Wildcard "typeNames" substitution
-						String typeName = com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr(KeyUtils.getConcatedTypeNameValues(typeNames, metric.getTypeName()));
+						String typeName = com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr(
+								TypeNameValuesStringBuilder.getDefaultBuilder().build(typeNames, metric.getTypeName()));
 						if (typeName != null && typeName.length() > 0) {
 							nameBuilder.append(".");
 							nameBuilder.append(typeName);
