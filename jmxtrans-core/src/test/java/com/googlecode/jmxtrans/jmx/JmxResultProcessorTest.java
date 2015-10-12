@@ -68,6 +68,23 @@ public class JmxResultProcessorTest {
 	}
 
 	@Test
+	public void doesNotReorderTypeNames() throws MalformedObjectNameException {
+		String className = "java.lang.SomeClass";
+		String propertiesOutOfOrder = "z-key=z-value,a-key=a-value,k-key=k-value";
+		List<Result> results = new JmxResultProcessor(
+				query,
+				new ObjectInstance(className + ":" + propertiesOutOfOrder, className),
+				ImmutableList.of(new Attribute("SomeAttribute", 1)),
+				className,
+				TEST_DOMAIN_NAME).getResults();
+
+		assertThat(results).hasSize(1);
+		Result integerResult = results.get(0);
+		assertThat(integerResult.getTypeName()).isEqualTo(propertiesOutOfOrder);
+
+	}
+
+	@Test
 	public void canReadSingleIntegerValue() throws MalformedObjectNameException, InstanceNotFoundException {
 		Attribute integerAttribute = new Attribute("CollectionCount", 51L);
 		ObjectInstance runtime = getRuntime();
