@@ -5,6 +5,9 @@ addons:
   apt:
     packages:
     - rpm
+cache:
+  directories:
+  - $HOME/.m2
 install:
   - mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
 script: ./travis-script.sh
