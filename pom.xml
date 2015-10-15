@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    The MIT License
+    Copyright (c) 2010 JmxTrans team
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -16,6 +40,12 @@
 	<description>JMX metrics exporter</description>
 
 	<url>http://www.jmxtrans.org</url>
+	<inceptionYear>2010</inceptionYear>
+
+	<organization>
+		<name>JmxTrans team</name>
+		<url>https://github.com/jmxtrans/</url>
+	</organization>
 
 	<licenses>
 		<license>
@@ -499,6 +529,36 @@
 					</executions>
 				</plugin>
 				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>2.11</version>
+					<configuration>
+						<header>com/mycila/maven/plugin/license/templates/MIT.txt</header>
+						<strictCheck>true</strictCheck>
+						<properties>
+							<year>2015</year>
+							<owner>${project.organization.name}</owner>
+						</properties>
+						<excludes>
+							<exclude>.gitignore</exclude>
+							<exclude>.idea/**</exclude>
+							<exclude>README.md</exclude>
+							<exclude>target/**</exclude>
+							<exclude>**/pitest-history.xml</exclude>
+							<exclude>*.bak</exclude>
+							<exclude>.puml</exclude>
+						</excludes>
+					</configuration>
+					<executions>
+						<execution>
+							<id>license-check</id>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>de.is24.mavenplugins</groupId>
 					<artifactId>deadcode4j-maven-plugin</artifactId>
 					<version>2.0.1</version>
@@ -842,6 +902,10 @@
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
