@@ -16,6 +16,12 @@
 	<description>JMX metrics exporter</description>
 
 	<url>http://www.jmxtrans.org</url>
+	<inceptionYear>2010</inceptionYear>
+
+	<organization>
+		<name>JmxTrans team</name>
+		<url>https://github.com/jmxtrans/</url>
+	</organization>
 
 	<licenses>
 		<license>
@@ -499,6 +505,36 @@
 					</executions>
 				</plugin>
 				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>2.11</version>
+					<configuration>
+						<header>com/mycila/maven/plugin/license/templates/MIT.txt</header>
+						<strictCheck>true</strictCheck>
+						<properties>
+							<year>2015</year>
+							<owner>${project.organization.name}</owner>
+						</properties>
+						<excludes>
+							<exclude>.gitignore</exclude>
+							<exclude>.idea/**</exclude>
+							<exclude>README.md</exclude>
+							<exclude>target/**</exclude>
+							<exclude>**/pitest-history.xml</exclude>
+							<exclude>*.bak</exclude>
+							<exclude>.puml</exclude>
+						</excludes>
+					</configuration>
+					<executions>
+						<execution>
+							<id>license-check</id>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>de.is24.mavenplugins</groupId>
 					<artifactId>deadcode4j-maven-plugin</artifactId>
 					<version>2.0.1</version>
@@ -842,6 +878,10 @@
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
