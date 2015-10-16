@@ -45,6 +45,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 	private final String rootPrefix;
 	private final InetSocketAddress address;
 
+	private boolean didWarnAboutNonNumeric = false;
+
 	@JsonCreator
 	public GraphiteWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
@@ -103,7 +105,12 @@ public class GraphiteWriter extends BaseOutputWriter {
 							log.debug("Graphite Message: {}", line);
 							writer.write(line);
 						} else {
-							log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
+							if (!didWarnAboutNonNumeric) {
+								log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
+								log.warn("The warning above is displayed once per writer, there are possibly more non-numeric values");
+								didWarnAboutNonNumeric = true;
+							}
+							log.debug("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 						}
 					}
 				}
