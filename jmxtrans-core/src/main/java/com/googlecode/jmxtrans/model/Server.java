@@ -31,6 +31,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.sun.tools.attach.VirtualMachine;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -85,21 +88,46 @@ public class Server {
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
 
-	private final String alias;
-	private final String pid;
+	/**
+	 * Some writers (GraphiteWriter) use the alias in generation of the unique
+	 * key which references this server.
+	 */
+	@Getter private final String alias;
+
+	/** Returns the pid of the local process jmxtrans will attach to. */
+	@Getter private final String pid;
 	private final String host;
 	private final String port;
-	private final String username;
-	private final String password;
-	private final String protocolProviderPackages;
+	@Getter private final String username;
+	@Getter private final String password;
+	/**
+	 * This is some obtuse shit for enabling weblogic support.
+	 * <p/>
+	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
+	 * html
+	 * <p/>
+	 * You'd set this to: weblogic.management.remote
+	 */
+	@Getter private final String protocolProviderPackages;
 	private final String url;
-	private final String cronExpression;
-	private final Integer numQueryThreads;
+	/**
+	 * Each server can set a cronExpression for the scheduler. If the
+	 * cronExpression is null, then the job is run immediately and once.
+	 * Otherwise, it is added to the scheduler for immediate execution and run
+	 * according to the cronExpression.
+	 */
+	@Getter private final String cronExpression;
+	/** The number of query threads for this server. */
+	@Getter private final Integer numQueryThreads;
 
-	// if using local JMX to embed JmxTrans to query the local MBeanServer
-	private final boolean local;
+	/**
+	 * Whether the current local Java process should be used or not (useful for
+	 * polling the embedded JVM when using JmxTrans inside a JVM to poll JMX
+	 * stats and push them remotely)
+	 */
+	@Getter private final boolean local;
 
-	private final ImmutableSet<Query> queries;
+	@Getter private final ImmutableSet<Query> queries;
 
 	@JsonCreator
 	public Server(
@@ -190,23 +218,6 @@ public class Server {
 		return ManagementFactory.getPlatformMBeanServer();
 	}
 
-	/**
-	 * Some writers (GraphiteWriter) use the alias in generation of the unique
-	 * key which references this server.
-	 */
-	public String getAlias() {
-		return this.alias;
-	}
-
-	/**
-	 * Returns the pid of the local process jmxtrans will attach to
-	 *
-	 * @return pid of the java process
-	 */
-	public String getPid() {
-		return this.pid;
-	}
-
 	public String getHost() {
 		if (host == null && url == null) {
 			return null;
@@ -243,27 +254,6 @@ public class Server {
 		return computedPort;
 	}
 
-	public String getUsername() {
-		return this.username;
-	}
-
-	public String getPassword() {
-		return this.password;
-	}
-
-	/**
-	 * Whether the current local Java process should be used or not (useful for
-	 * polling the embedded JVM when using JmxTrans inside a JVM to poll JMX
-	 * stats and push them remotely)
-	 */
-	public boolean isLocal() {
-		return local;
-	}
-
-	public ImmutableSet<Query> getQueries() {
-		return this.queries;
-	}
-
 	/**
 	 * The jmx url to connect to. If null, it builds this from host/port with a
 	 * standard configuration. Other JVM's may want to set this value.
@@ -289,23 +279,6 @@ public class Server {
 	@JsonIgnore
 	public boolean isQueriesMultiThreaded() {
 		return (this.numQueryThreads != null) && (this.numQueryThreads > 0);
-	}
-
-	/**
-	 * The number of query threads for this server.
-	 */
-	public Integer getNumQueryThreads() {
-		return this.numQueryThreads;
-	}
-
-	/**
-	 * Each server can set a cronExpression for the scheduler. If the
-	 * cronExpression is null, then the job is run immediately and once.
-	 * Otherwise, it is added to the scheduler for immediate execution and run
-	 * according to the cronExpression.
-	 */
-	public String getCronExpression() {
-		return this.cronExpression;
 	}
 
 	@Override
@@ -366,18 +339,6 @@ public class Server {
 	}
 
 	/**
-	 * This is some obtuse shit for enabling weblogic support.
-	 * <p/>
-	 * http://download.oracle.com/docs/cd/E13222_01/wls/docs90/jmx/accessWLS.
-	 * html
-	 * <p/>
-	 * You'd set this to: weblogic.management.remote
-	 */
-	public String getProtocolProviderPackages() {
-		return protocolProviderPackages;
-	}
-
-	/**
 	 * Factory to create a JMXServiceURL from a pid. Inner class to prevent class
 	 * loader issues when tools.jar isn't present.
 	 */
@@ -420,18 +381,19 @@ public class Server {
 	}
 
 	@NotThreadSafe
+	@Accessors(chain = true)
 	public static final class Builder {
-		private String alias;
-		private String pid;
-		private String host;
-		private String port;
-		private String username;
-		private String password;
-		private String protocolProviderPackages;
-		private String url;
-		private String cronExpression;
-		private Integer numQueryThreads;
-		private boolean local;
+		@Setter private String alias;
+		@Setter private String pid;
+		@Setter private String host;
+		@Setter private String port;
+		@Setter private String username;
+		@Setter private String password;
+		@Setter private String protocolProviderPackages;
+		@Setter private String url;
+		@Setter private String cronExpression;
+		@Setter private Integer numQueryThreads;
+		@Setter private boolean local;
 		private final List<Query> queries = new ArrayList<Query>();
 
 		private Builder() {}
@@ -449,36 +411,6 @@ public class Server {
 			this.numQueryThreads = server.numQueryThreads;
 			this.local = server.local;
 			this.queries.addAll(server.queries);
-		}
-
-		public Builder setAlias(String alias) {
-			this.alias = alias;
-			return this;
-		}
-
-		public Builder setPid(String pid) {
-			this.pid = pid;
-			return this;
-		}
-
-		public Builder setHost(String host) {
-			this.host = host;
-			return this;
-		}
-
-		public Builder setPort(String port) {
-			this.port = port;
-			return this;
-		}
-
-		public Builder setUsername(String username) {
-			this.username = username;
-			return this;
-		}
-
-		public Builder setPassword(String password) {
-			this.password = password;
-			return this;
 		}
 
 		public Builder setProtocolProviderPackages(String protocolProviderPackages) {

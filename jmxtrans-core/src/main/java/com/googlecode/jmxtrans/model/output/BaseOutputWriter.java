@@ -37,6 +37,7 @@ import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder
 import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -69,8 +70,8 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	public static final String TYPE_NAMES = "typeNames";
 	public static final String BOOLEAN_AS_NUMBER = "booleanAsNumber";
 
-	private ImmutableList<String> typeNames;
-	private boolean debugEnabled;
+	@Getter private ImmutableList<String> typeNames;
+	@Getter	private boolean debugEnabled;
 	private Map<String, Object> settings;
 	private final ValueTransformer valueTransformer;
 
@@ -129,14 +130,6 @@ public abstract class BaseOutputWriter implements OutputWriter {
 		if (settings.containsKey(TYPE_NAMES)) {
 			this.typeNames = copyOf((List<String>) settings.get(TYPE_NAMES));
 		}
-	}
-
-	public boolean isDebugEnabled() {
-		return debugEnabled;
-	}
-
-	public List<String> getTypeNames() {
-		return typeNames;
 	}
 
 	/**

@@ -374,6 +374,12 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>1.16.6</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
 				<!--
 					There is no compile time dependency on acplt. There might be a runtime dependency that I did not
 					identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
@@ -691,7 +697,7 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
 								</rules>
 							</configuration>
 						</execution>

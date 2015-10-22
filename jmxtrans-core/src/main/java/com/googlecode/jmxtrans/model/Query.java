@@ -31,6 +31,9 @@ import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -61,15 +64,38 @@ import static java.util.Arrays.asList;
 @Immutable // Note that outputWriters is neither thread safe nor immutable (yet)
 public class Query {
 
-	private final String obj;
-	private final ImmutableList<String> keys;
-	private final ImmutableList<String> attr;
-	private final ImmutableSet<String> typeNames;
-	private final String resultAlias;
-	private final boolean useObjDomainAsKey;
-	private final boolean allowDottedKeys;
-	private final boolean useAllTypeNames;
-	private final ImmutableList<OutputWriter> outputWriters;
+	/** The JMX object representation: java.lang:type=Memory */
+	@Getter private final String obj;
+	@Nonnull @Getter private final ImmutableList<String> keys;
+
+	@Nonnull @Getter private final ImmutableList<String> attr;
+
+	/**
+	 * The list of type names used in a JMX bean string when querying with a
+	 * wildcard which is used to expose the actual type name value to the key
+	 * string. e.g. for this JMX name
+	 * <p/>
+	 * typeName=name=PS Eden Space,type=MemoryPool
+	 * <p/>
+	 * If you add a typeName("name"), then it'll retrieve 'PS Eden Space' from
+	 * the string
+	 */
+	@Getter private final ImmutableSet<String> typeNames;
+
+	/**
+	 * The alias allows you to specify what you would like the results of the
+	 * query to go into.
+	 */
+	@Getter private final String resultAlias;
+
+	/**
+	 * The useObjDomainAsKey property allows you to specify the use of the Domain portion of the Object Name
+	 * as part of the output key instead of using the ClassName of the MBean which is the default behavior.
+	 */
+	@Getter private final boolean useObjDomainAsKey;
+	@Getter private final boolean allowDottedKeys;
+	@Getter private final boolean useAllTypeNames;
+	@Nonnull @Getter private final ImmutableList<OutputWriter> outputWriters;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
 
 	@JsonCreator
@@ -95,66 +121,6 @@ public class Query {
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
-	}
-
-	/**
-	 * The JMX object representation: java.lang:type=Memory
-	 */
-	public String getObj() {
-		return obj;
-	}
-
-	/**
-	 * The alias allows you to specify what you would like the results of the
-	 * query to go into.
-	 */
-	public String getResultAlias() {
-		return resultAlias;
-	}
-
-	/**
-	 * The useObjDomainAsKey property allows you to specify the use of the Domain portion of the Object Name
-	 * as part of the output key instead of using the ClassName of the MBean which is the default behavior.
-	 */
-	public boolean isUseObjDomainAsKey() {
-		return useObjDomainAsKey;
-	}
-
-	/**
-	 * The list of type names used in a JMX bean string when querying with a
-	 * wildcard which is used to expose the actual type name value to the key
-	 * string. e.g. for this JMX name
-	 * <p/>
-	 * typeName=name=PS Eden Space,type=MemoryPool
-	 * <p/>
-	 * If you add a typeName("name"), then it'll retrieve 'PS Eden Space' from
-	 * the string
-	 */
-	public ImmutableSet<String> getTypeNames() {
-		return typeNames;
-	}
-
-	@Nonnull
-	public ImmutableList<String> getAttr() {
-		return attr;
-	}
-
-	@Nonnull
-	public ImmutableList<String> getKeys() {
-		return keys;
-	}
-
-	public boolean isAllowDottedKeys() {
-		return allowDottedKeys;
-	}
-
-	public boolean isUseAllTypeNames() {
-		return useAllTypeNames;
-	}
-
-	@Nonnull
-	public ImmutableList<OutputWriter> getOutputWriters() {
-		return outputWriters;
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -229,37 +195,22 @@ public class Query {
 	}
 
 	@NotThreadSafe
+	@Accessors(chain = true)
 	public static final class Builder {
-
-		private String obj;
+		@Setter private String obj;
 		private final List<String> attr = newArrayList();
-		private String resultAlias;
+		@Setter private String resultAlias;
 		private final List<String> keys = newArrayList();
-		private boolean useObjDomainAsKey;
-		private boolean allowDottedKeys;
-		private boolean useAllTypeNames;
+		@Setter private boolean useObjDomainAsKey;
+		@Setter private boolean allowDottedKeys;
+		@Setter private boolean useAllTypeNames;
 		private final List<OutputWriter> outputWriters = newArrayList();
 		private final Set<String> typeNames = newHashSet();
 
 		private Builder() {}
 
-		public Builder setObj(String obj) {
-			this.obj = obj;
-			return this;
-		}
-
 		public Builder addAttr(String... attr) {
 			this.attr.addAll(asList(attr));
-			return this;
-		}
-
-		public Builder setResultAlias(String resultAlias) {
-			this.resultAlias = resultAlias;
-			return this;
-		}
-		
-		public Builder setUseObjDomainAsKey(boolean useObjDomainAsKey) {
-			this.useObjDomainAsKey = useObjDomainAsKey;
 			return this;
 		}
 
@@ -269,16 +220,6 @@ public class Query {
 
 		public Builder addKeys(String... keys) {
 			this.keys.addAll(asList(keys));
-			return this;
-		}
-
-		public Builder setAllowDottedKeys(boolean allowDottedKeys) {
-			this.allowDottedKeys = allowDottedKeys;
-			return this;
-		}
-
-		public Builder setUseAllTypeNames(boolean useAllTypeNames) {
-			this.useAllTypeNames = useAllTypeNames;
 			return this;
 		}
 

@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.connections;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import lombok.Getter;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -40,20 +41,12 @@ import static java.lang.reflect.Array.getLength;
  * probably a cleaner way to do this, but this will come later.
  */
 public class JMXConnectionParams {
-	private final JMXServiceURL url;
-	private final ImmutableMap<String, ?> environment;
+	@Getter private final JMXServiceURL url;
+	@Getter private final ImmutableMap<String, ?> environment;
 
 	public JMXConnectionParams(JMXServiceURL url, Map<String, ?> environment) {
 		this.url = url;
 		this.environment = ImmutableMap.copyOf(environment);
-	}
-
-	public JMXServiceURL getUrl() {
-		return url;
-	}
-
-	public ImmutableMap<String, ?> getEnvironment() {
-		return environment;
 	}
 
 	@Override

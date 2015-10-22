@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.monitoring;
 
 import com.google.common.base.MoreObjects;
+import lombok.Getter;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 
 import javax.management.MalformedObjectNameException;
@@ -39,7 +40,7 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	private ObjectName objectName;
 
 	/** The default pool name. */
-	private final String poolName;
+	@Getter private final String poolName;
 
 	/** The pool. */
 	private final GenericKeyedObjectPool pool;
@@ -53,15 +54,6 @@ public class ManagedGenericKeyedObjectPool implements ManagedGenericKeyedObjectP
 	public ManagedGenericKeyedObjectPool(GenericKeyedObjectPool pool, String poolName) {
 		this.poolName = MoreObjects.firstNonNull(poolName, "Noname");
 		this.pool = pool;
-	}
-
-	/**
-	 * Gets the pool name.
-	 *
-	 * @return the pool name
-	 */
-	public String getPoolName() {
-		return poolName;
 	}
 
 	@Override
