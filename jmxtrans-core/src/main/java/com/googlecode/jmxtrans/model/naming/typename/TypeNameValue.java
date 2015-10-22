@@ -22,8 +22,8 @@
  */
 package com.googlecode.jmxtrans.model.naming.typename;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,9 +31,10 @@ import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 
+@EqualsAndHashCode
 public class TypeNameValue {
-	private String key;
-	private String value;
+	@Getter private String key;
+	@Getter private String value;
 
 	public TypeNameValue(String key, String value) {
 		this.key = key;
@@ -42,46 +43,6 @@ public class TypeNameValue {
 
 	public TypeNameValue(String key) {
 		this(key, "");
-	}
-
-	public String getKey() {
-		return key;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (o == null) {
-			return false;
-		}
-		if (o == this) {
-			return true;
-		}
-		if (o.getClass() != this.getClass()) {
-			return false;
-		}
-
-		if (!(o instanceof TypeNameValue)) {
-			return false;
-		}
-
-		TypeNameValue other = (TypeNameValue) o;
-
-		return new EqualsBuilder()
-				.append(this.getKey(), other.getKey())
-				.append(this.getValue(), other.getValue())
-				.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(37, 89)
-				.append(this.getKey())
-				.append(this.getValue())
-				.toHashCode();
 	}
 
 	public static Iterable<TypeNameValue> extract(final String typeNameStr) {

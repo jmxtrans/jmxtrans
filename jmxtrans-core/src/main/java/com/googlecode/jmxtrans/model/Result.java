@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
+import lombok.Getter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -41,13 +42,14 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 @ThreadSafe
 @Immutable
 public class Result {
-	private final String attributeName;
-	private final String className;
-	private final String objDomain;
-	private final String typeName;
-	private final ImmutableMap<String, Object> values;
-	private final long epoch;
-	private final String keyAlias;
+	@Getter private final String attributeName;
+	@Getter private final String className;
+	@Getter private final String objDomain;
+	@Getter private final String typeName;
+	@Nonnull @Getter private final ImmutableMap<String, Object> values;
+	@Getter private final long epoch;
+	/** Specified as part of the query. */
+	@Getter private final String keyAlias;
 
 	public Result(long epoch, String attributeName, String className, String objDomain, String keyAlias, String typeName, Map<String, Object> values) {
 		this.className = className;
@@ -57,38 +59,6 @@ public class Result {
 		this.epoch = epoch;
 		this.attributeName = attributeName;
 		this.keyAlias = keyAlias;
-	}
-
-	public String getClassName() {
-		return className;
-	}
-	
-	public String getObjDomain() {
-		return objDomain;
-	}
-
-	/**
-	 * Specified as part of the query.
-	 */
-	public String getKeyAlias() {
-		return keyAlias;
-	}
-
-	public String getTypeName() {
-		return typeName;
-	}
-
-	@Nonnull
-	public ImmutableMap<String, Object> getValues() {
-		return values;
-	}
-
-	public String getAttributeName() {
-		return attributeName;
-	}
-
-	public long getEpoch() {
-		return this.epoch;
 	}
 
 	@Override

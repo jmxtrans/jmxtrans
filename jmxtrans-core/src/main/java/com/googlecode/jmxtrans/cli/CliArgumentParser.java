@@ -68,7 +68,7 @@ public class CliArgumentParser {
 			} else if (option.getOpt().equals("q")) {
 				File quartzConfigFile = new File(option.getValue());
 				if (quartzConfigFile.exists() && quartzConfigFile.isFile()) {
-					configuration.setQuartPropertiesFile(option.getValue());
+					configuration.setQuartzPropertiesFile(option.getValue());
 				} else {
 					throw new OptionsException("Could not find path to the quartz properties file: "
 							+ quartzConfigFile.getAbsolutePath());

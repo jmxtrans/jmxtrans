@@ -25,6 +25,8 @@ package com.googlecode.jmxtrans.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -38,9 +40,9 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 @JsonSerialize(include = NON_NULL)
 public class JmxProcess {
 
-	private String name;
+	@Getter @Setter private String name;
 	private ImmutableList<Server> servers;
-	private Integer numMultiThreadedServers;
+	@Getter private Integer numMultiThreadedServers;
 
 	public JmxProcess() {
 		this(ImmutableList.<Server>of());
@@ -77,15 +79,4 @@ public class JmxProcess {
 		this.numMultiThreadedServers = numMultiThreadedServers;
 	}
 
-	public Integer getNumMultiThreadedServers() {
-		return numMultiThreadedServers;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
 }

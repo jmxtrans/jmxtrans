@@ -85,10 +85,10 @@ public class JmxTransModule extends AbstractModule {
 		Closer closer = Closer.create();
 		try {
 			InputStream stream;
-			if (configuration.getQuartPropertiesFile() == null) {
+			if (configuration.getQuartzPropertiesFile() == null) {
 				stream = closer.register(JmxTransModule.class.getResourceAsStream("/quartz.server.properties"));
 			} else {
-				stream = closer.register(new FileInputStream(configuration.getQuartPropertiesFile()));
+				stream = closer.register(new FileInputStream(configuration.getQuartzPropertiesFile()));
 			}
 			serverSchedFact.initialize(stream);
 		} catch (Throwable t) {

@@ -23,122 +23,46 @@
 package com.googlecode.jmxtrans.cli;
 
 import com.google.common.collect.ImmutableList;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.List;
 
 public class JmxTransConfiguration {
-	private boolean continueOnJsonError = false;
-	private File jsonDirOrFile;
-	private boolean runEndlessly = false;
-	/**
-	 * The Quartz server properties.
-	 */
-	private String quartPropertiesFile = null;
-	/**
-	 * The seconds between server job runs.
-	 */
-	private int runPeriod = 60;
-	private boolean help = false;
-
-	private List<File> additionalJars = ImmutableList.of();
-
 	/**
 	 * If it is false, then JmxTrans will stop when one of the JSON
 	 * configuration file is invalid. Otherwise, it will just print an error
 	 * and continue processing.
-	 *
-	 * @param continueOnJsonError
 	 */
-	public void setContinueOnJsonError(boolean continueOnJsonError) {
-		this.continueOnJsonError = continueOnJsonError;
-	}
+	@Getter @Setter
+	private boolean continueOnJsonError = false;
 
-	/**
-	 * Sets the json dir or file.
-	 *
-	 * @param jsonDirOrFile the json dir or file
-	 */
-	public void setJsonDirOrFile(File jsonDirOrFile) {
-		this.jsonDirOrFile = jsonDirOrFile;
-	}
+	@Getter @Setter
+	private File jsonDirOrFile;
 
 	/**
 	 * If this is true, then this class will execute the main() loop and then
 	 * wait 60 seconds until running again.
-	 *
-	 * @param runEndlessly
 	 */
-	public void setRunEndlessly(boolean runEndlessly) {
-		this.runEndlessly = runEndlessly;
-	}
+	@Getter @Setter
+	private boolean runEndlessly = false;
+	/**
+	 * The Quartz server properties.
+	 */
+	@Getter @Setter
+	private String quartzPropertiesFile = null;
 
 	/**
-	 * Sets the quart properties file.
-	 *
-	 * @param quartPropertiesFile the quart properties file
+	 * The seconds between server job runs.
 	 */
-	public void setQuartPropertiesFile(String quartPropertiesFile) {
-		this.quartPropertiesFile = quartPropertiesFile;
-	}
+	@Getter @Setter
+	private int runPeriod = 60;
 
-	/**
-	 * Sets the run period.
-	 *
-	 * @param runPeriod the run period
-	 */
-	public void setRunPeriod(int runPeriod) {
-		this.runPeriod = runPeriod;
-	}
+	@Getter @Setter
+	private boolean help = false;
 
-	/**
-	 * Gets the json dir or file.
-	 *
-	 * @return the json dir or file
-	 */
-	public File getJsonDirOrFile() {
-		return jsonDirOrFile;
-	}
+	@Getter @Setter
+	private List<File> additionalJars = ImmutableList.of();
 
-	public boolean isRunEndlessly() {
-		return runEndlessly;
-	}
-
-	public boolean isContinueOnJsonError() {
-		return continueOnJsonError;
-	}
-
-	/**
-	 * Gets the quart properties file.
-	 *
-	 * @return the quart properties file
-	 */
-	public String getQuartPropertiesFile() {
-		return quartPropertiesFile;
-	}
-
-	/**
-	 * Gets the run period.
-	 *
-	 * @return the number of seconds between two runs
-	 */
-	public int getRunPeriod() {
-		return runPeriod;
-	}
-
-	public void setHelp(boolean help) {
-		this.help = help;
-	}
-
-	public boolean isHelp() {
-		return help;
-	}
-
-	public List<File> getAdditionalJars() {
-		return additionalJars;
-	}
-
-	public void setAdditionalJars(List<File> additionalJars) {
-		this.additionalJars = additionalJars;
-	}
 }
