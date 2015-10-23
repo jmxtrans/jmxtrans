@@ -72,11 +72,12 @@ public class OnlyOnceLogger {
 		this.maxHistorySize = maxHistorySize;
 	}
 
-	public void warnOnce(String format, Object... arguments) {
+	public void infoOnce(String format, Object... arguments) {
 		if (maxHistorySizeReached()) return;
+		if (!logger.isInfoEnabled()) return;
 
 		LogEntry logEntry = new LogEntry(format, arguments);
-		if (shouldLog(logEntry)) logger.warn(format, arguments);
+		if (shouldLog(logEntry)) logger.info(format, arguments);
 	}
 
 	private synchronized boolean maxHistorySizeReached() {

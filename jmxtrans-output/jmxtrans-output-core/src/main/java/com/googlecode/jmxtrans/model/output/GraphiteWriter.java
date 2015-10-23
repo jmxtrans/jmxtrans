@@ -128,7 +128,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 							log.debug("Graphite Message: {}", line);
 							writer.write(line);
 						} else {
-							onlyOnceLogger.warnOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
+							onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 						}
 					}
 				}
