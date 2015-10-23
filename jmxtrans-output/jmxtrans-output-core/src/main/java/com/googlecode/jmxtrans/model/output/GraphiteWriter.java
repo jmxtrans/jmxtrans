@@ -30,7 +30,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.OnlyOnceLogger;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +47,7 @@ import java.util.Map.Entry;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * This low latency and thread safe output writer sends data to a host/port combination
@@ -66,6 +67,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	private final String rootPrefix;
 	private final InetSocketAddress address;
+
+	private final OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(log);
 
 	@JsonCreator
 	public GraphiteWriter(
@@ -117,7 +120,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
 						Object value = values.getValue();
-						if (NumberUtils.isNumeric(value)) {
+						if (isNumeric(value)) {
 
 							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 									.replaceAll("[()]", "_") + " " + value.toString() + " "
@@ -125,7 +128,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 							log.debug("Graphite Message: {}", line);
 							writer.write(line);
 						} else {
-							log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
+							onlyOnceLogger.warnOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 						}
 					}
 				}
