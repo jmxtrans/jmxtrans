@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.util;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,73 +31,77 @@ import org.slf4j.Logger;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OnlyOnceLoggerTest {
 
 	@Mock private Logger logger;
 
+	@Before
+	public void setupLogger() {
+		when(logger.isInfoEnabled()).thenReturn(true);
+	}
+
 	@Test
 	public void firstMessageShouldBeLogged() {
 		new OnlyOnceLogger(logger)
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 
-		verify(logger, times(1)).warn("my message", "argument 1", "argument 2", "argument 3");
+		verify(logger, times(1)).info("my message", "argument 1", "argument 2", "argument 3");
 	}
 
 	@Test
 	public void sameMessageShouldOnlyBeLoggedOnce() {
 		OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(logger);
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 
-		verify(logger, times(1)).warn("my message", "argument 1", "argument 2", "argument 3");
+		verify(logger, times(1)).info("my message", "argument 1", "argument 2", "argument 3");
 	}
 
 	@Test
 	public void differentMessagesShouldAllBeLogged() {
 		OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(logger);
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 		onlyOnceLogger
-				.warnOnce("my other message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my other message", "argument 1", "argument 2", "argument 3");
 
-		verify(logger, times(1)).warn("my message", "argument 1", "argument 2", "argument 3");
-		verify(logger, times(1)).warn("my other message", "argument 1", "argument 2", "argument 3");
+		verify(logger, times(1)).info("my message", "argument 1", "argument 2", "argument 3");
+		verify(logger, times(1)).info("my other message", "argument 1", "argument 2", "argument 3");
 	}
 
 	@Test
 	public void differentArgumentsShouldAllBeLogged() {
 		OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(logger);
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "other argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "other argument 2", "argument 3");
 
-		verify(logger, times(1)).warn("my message", "argument 1", "argument 2", "argument 3");
-		verify(logger, times(1)).warn("my message", "argument 1", "other argument 2", "argument 3");
+		verify(logger, times(1)).info("my message", "argument 1", "argument 2", "argument 3");
+		verify(logger, times(1)).info("my message", "argument 1", "other argument 2", "argument 3");
 	}
 
 	@Test
 	public void interleavedMessagesShouldBeLoggedOnlyOnce() {
 		OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(logger);
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 		onlyOnceLogger
-				.warnOnce("my other message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my other message", "argument 1", "argument 2", "argument 3");
 		onlyOnceLogger
-				.warnOnce("my message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
 		onlyOnceLogger
-				.warnOnce("my other message", "argument 1", "argument 2", "argument 3");
+				.infoOnce("my other message", "argument 1", "argument 2", "argument 3");
 
-		verify(logger, times(1)).warn("my message", "argument 1", "argument 2", "argument 3");
-		verify(logger, times(1)).warn("my other message", "argument 1", "argument 2", "argument 3");
+		verify(logger, times(1)).info("my message", "argument 1", "argument 2", "argument 3");
+		verify(logger, times(1)).info("my other message", "argument 1", "argument 2", "argument 3");
 	}
 
 	@Test
@@ -104,10 +109,22 @@ public class OnlyOnceLoggerTest {
 		OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(logger, 50);
 		for (int i = 0; i < 100; i++) {
 			onlyOnceLogger
-					.warnOnce("my message", "argument 1", "argument 2", i);
+					.infoOnce("my message", "argument 1", "argument 2", i);
 		}
 
-		verify(logger, times(50)).warn(anyString(), any(), any(), any());
+		verify(logger, times(50)).info(anyString(), any(), any(), any());
+	}
+
+	@Test
+	public void dontLogIfLoggingIsDisabled() {
+		reset(logger);
+		when(logger.isInfoEnabled()).thenReturn(false);
+
+		OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(logger);
+		onlyOnceLogger
+				.infoOnce("my message", "argument 1", "argument 2", "argument 3");
+
+		verify(logger, never()).info(anyString(), any(), any(), any());
 	}
 
 }
