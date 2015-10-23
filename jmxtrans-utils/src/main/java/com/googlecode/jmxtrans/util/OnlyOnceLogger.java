@@ -73,10 +73,14 @@ public class OnlyOnceLogger {
 	}
 
 	public void warnOnce(String format, Object... arguments) {
-		if (alreadyLogged.size() >= maxHistorySize) return;
+		if (maxHistorySizeReached()) return;
 
 		LogEntry logEntry = new LogEntry(format, arguments);
 		if (shouldLog(logEntry)) logger.warn(format, arguments);
+	}
+
+	private synchronized boolean maxHistorySizeReached() {
+		return alreadyLogged.size() >= maxHistorySize;
 	}
 
 	private synchronized boolean shouldLog(LogEntry logEntry) {
