@@ -38,9 +38,9 @@
 	<description>This module contains utilities that do not have direct dependencies on JmxTrans.</description>
 
 	<properties>
-		<verify.mutationThreshold>56</verify.mutationThreshold>
-		<verify.totalBranchRate>75</verify.totalBranchRate>
-		<verify.totalLineRate>50</verify.totalLineRate>
+		<verify.mutationThreshold>54</verify.mutationThreshold>
+		<verify.totalBranchRate>66</verify.totalBranchRate>
+		<verify.totalLineRate>60</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -64,6 +64,16 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
