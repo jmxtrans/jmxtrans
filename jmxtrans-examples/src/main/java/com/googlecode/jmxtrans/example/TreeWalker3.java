@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -122,7 +123,7 @@ public class TreeWalker3 {
 		}
 	}
 
-	private static final class ResultCapture implements OutputWriter {
+	private static final class ResultCapture implements OutputWriter, OutputWriterFactory {
 
 		private List<Result> results;
 
@@ -148,5 +149,9 @@ public class TreeWalker3 {
 		@Override
 		public void validateSetup(Server server, Query query) throws ValidationException {}
 
+		@Override
+		public OutputWriter create() {
+			return this;
+		}
 	}
 }

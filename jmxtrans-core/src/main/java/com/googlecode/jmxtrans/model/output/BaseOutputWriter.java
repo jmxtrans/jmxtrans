@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -59,7 +60,7 @@ import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
  * @author jon
  */
 @NotThreadSafe
-public abstract class BaseOutputWriter implements OutputWriter {
+public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFactory {
 
 	public static final String HOST = "host";
 	public static final String PORT = "port";
@@ -167,6 +168,11 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	}
 
 	protected abstract void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
+
+	@Override
+	public OutputWriter create() {
+		return this;
+	}
 
 	private static final class ResultValuesTransformer implements Function<Result, Result> {
 

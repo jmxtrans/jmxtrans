@@ -248,7 +248,7 @@ public class JmxTransformer implements WatchedCallback {
 	private void stopWriterAndClearMasterServerList() {
 		for (Server server : this.masterServersList) {
 			for (Query query : server.getQueries()) {
-				for (OutputWriter writer : query.getOutputWriters()) {
+				for (OutputWriter writer : query.getOutputWriterInstances()) {
 					try {
 						writer.stop();
 						log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
@@ -311,8 +311,7 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	private void validateSetup(Server server, Query query) throws ValidationException {
-		List<OutputWriter> writers = query.getOutputWriters();
-		for (OutputWriter w : writers) {
+		for (OutputWriter w : (List<OutputWriter>) query.getOutputWriterInstances()) {
 			injector.injectMembers(w);
 			w.validateSetup(server, query);
 		}
@@ -345,7 +344,7 @@ public class JmxTransformer implements WatchedCallback {
 
 				// need to inject the poolMap
 				for (Query query : server.getQueries()) {
-					for (OutputWriter writer : query.getOutputWriters()) {
+					for (OutputWriter writer : query.getOutputWriterInstances()) {
 						writer.start();
 					}
 				}

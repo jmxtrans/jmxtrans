@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
@@ -38,6 +40,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
@@ -95,7 +98,7 @@ public class Query {
 	@Getter private final boolean useObjDomainAsKey;
 	@Getter private final boolean allowDottedKeys;
 	@Getter private final boolean useAllTypeNames;
-	@Nonnull @Getter private final ImmutableList<OutputWriter> outputWriters;
+	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriters;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
 
 	@JsonCreator
@@ -108,7 +111,7 @@ public class Query {
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
-			@JsonProperty("outputWriters") List<OutputWriter> outputWriters
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
 	) {
 		this.obj = obj;
 		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
@@ -117,7 +120,7 @@ public class Query {
 		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
 		this.useAllTypeNames = useAllTypeNames;
-		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, Collections.<OutputWriter>emptyList()));
+		this.outputWriters = ImmutableList.copyOf(outputWriters);
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
@@ -125,6 +128,16 @@ public class Query {
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
 		return this.typeNameValuesStringBuilder.build(typeNames, typeNameStr);
+	}
+
+	public Iterable<OutputWriter> getOutputWriterInstances() {
+		return FluentIterable.from(outputWriters).transform(new Function<OutputWriterFactory, OutputWriter>() {
+			@Nullable
+			@Override
+			public OutputWriter apply(OutputWriterFactory input) {
+				return input.create();
+			}
+		}).toList();
 	}
 
 	@Override
@@ -171,7 +184,7 @@ public class Query {
 				.toHashCode();
 	}
 
-	private static int sizeOf(List<OutputWriter> writers) {
+	private static int sizeOf(List<?> writers) {
 		if (writers == null) {
 			return 0;
 		}
@@ -204,7 +217,7 @@ public class Query {
 		@Setter private boolean useObjDomainAsKey;
 		@Setter private boolean allowDottedKeys;
 		@Setter private boolean useAllTypeNames;
-		private final List<OutputWriter> outputWriters = newArrayList();
+		private final List<OutputWriterFactory> outputWriters = newArrayList();
 		private final Set<String> typeNames = newHashSet();
 
 		private Builder() {}
@@ -223,11 +236,11 @@ public class Query {
 			return this;
 		}
 
-		public Builder addOutputWriter(OutputWriter outputWriter) {
+		public Builder addOutputWriter(OutputWriterFactory outputWriter) {
 			return addOutputWriters(outputWriter);
 		}
 
-		public Builder addOutputWriters(OutputWriter... outputWriters) {
+		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
 			this.outputWriters.addAll(asList(outputWriters));
 			return this;
 		}
