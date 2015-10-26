@@ -20,18 +20,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.util;
 
-public final class ServerFixtures {
-	private ServerFixtures() {}
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.TextNode;
 
-	public static Server createServerWithOneQuery(String host, String port, String queryObject) {
-		return Server.builder()
-				.setHost(host)
-				.setPort(port)
-				.addQuery(Query.builder()
-					.setObj(queryObject)
-					.build())
-				.build();
+import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
+
+public class PlaceholderResolverJsonNodeFactory extends JsonNodeFactory {
+
+	@Override
+	public TextNode textNode(String text) {
+		return super.textNode(resolveProps(text));
 	}
 }

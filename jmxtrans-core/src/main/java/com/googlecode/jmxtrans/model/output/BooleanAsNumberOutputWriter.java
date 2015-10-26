@@ -20,29 +20,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.googlecode.jmxtrans.model.JmxProcess;
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ValidationException;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Map;
 
-public final class JsonUtils {
+import static java.util.Collections.emptyMap;
 
-	private JsonUtils() {}
+public class BooleanAsNumberOutputWriter implements OutputWriter {
+	@Override
+	public void start() throws LifecycleException {
+	}
 
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(File file) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setNodeFactory(new PlaceholderResolverJsonNodeFactory());
-		mapper.registerModule(new GuavaModule());
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
+	@Override
+	public void stop() throws LifecycleException {
+	}
+
+	@Override
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+
+	}
+
+	@Override
+	public Map<String, Object> getSettings() {
+		return emptyMap();
+	}
+
+	@Override
+	public void setSettings(Map<String, Object> settings) {
+	}
+
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 }

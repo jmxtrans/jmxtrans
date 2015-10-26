@@ -24,10 +24,8 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
@@ -37,6 +35,7 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
+import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import lombok.Getter;
 
@@ -146,17 +145,11 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 		return TypeNameValuesStringBuilder.getDefaultBuilder().build(this.getTypeNames(), typeNameStr);
 	}
 
-	/**
-	 * A do nothing method.
-	 */
 	@Override
 	public void start() throws LifecycleException {
 		// Do nothing.
 	}
 
-	/**
-	 * A do nothing method.
-	 */
 	@Override
 	public void stop() throws LifecycleException {
 		// Do nothing.
@@ -174,29 +167,4 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 		return this;
 	}
 
-	private static final class ResultValuesTransformer implements Function<Result, Result> {
-
-		private final ValueTransformer valueTransformer;
-
-		private ResultValuesTransformer(ValueTransformer valueTransformer) {
-			this.valueTransformer = valueTransformer;
-		}
-
-		@Nullable
-		@Override
-		public Result apply(@Nullable Result input) {
-			if (input == null) {
-				return null;
-			}
-			return new Result(
-					input.getEpoch(),
-					input.getAttributeName(),
-					input.getClassName(),
-					input.getObjDomain(),
-					input.getKeyAlias(),
-					input.getTypeName(),
-					Maps.transformValues(input.getValues(), valueTransformer)
-			);
-		}
-	}
 }
