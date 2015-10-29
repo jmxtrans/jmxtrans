@@ -36,6 +36,10 @@ outputWriters:
 # Global port to query JMX on
 query_port: 5400
 
+# Default query attributes, may be overridden by the query definition
+query_defaults:
+  allowDottedKeys: true
+
 # Query definitions, every query needs obj, resultAlias, attr
 #   from jmxtrans format, "name" must be given for referencing
 #   the query in host sets
