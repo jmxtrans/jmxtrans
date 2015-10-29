@@ -29,6 +29,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
@@ -74,6 +75,7 @@ public class CloudWatchWriter extends BaseOutputWriter {
 		if (isNullOrEmpty(this.namespace)) throw new IllegalArgumentException("namespace cannot be null or empty");
 	}
 
+	@JsonIgnore
 	@VisibleForTesting
 	void setCloudWatchClient(AmazonCloudWatchClient cloudWatchClient) {
 		this.cloudWatchClient = cloudWatchClient;

@@ -22,11 +22,17 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -87,6 +93,13 @@ public class CloudWatchWriterTests {
 		MetricDatum metricDatum = request.getMetricData().get(0);
 		assertThat(metricDatum.getMetricName()).isEqualTo("attributeName_key");
 		assertThat(metricDatum.getValue()).isEqualTo(1);
+	}
+
+	@Test
+	public void loadingFromFile() throws URISyntaxException, IOException {
+		File input = new File(CloudWatchWriterTests.class.getResource("/cloud-watch.json").toURI());
+		JmxProcess process = JsonUtils.getJmxProcess(input);
+		assertThat(process.getName()).isEqualTo("cloud-watch.json");
 	}
 
 }
