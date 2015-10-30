@@ -281,10 +281,9 @@ public class InfluxDbWriter extends BaseOutputWriter {
 
 		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
 				.tag(TAG_HOSTNAME, server.getHost()).consistency(writeConsistency).build();
-		Point point;
 		for (Result result : results) {
 			Map<String, String> resultTagsToApply = buildResultTagMap(result);
-			point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), TimeUnit.MILLISECONDS)
+			Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), TimeUnit.MILLISECONDS)
 					.tag(resultTagsToApply).fields(result.getValues()).build();
 			batchPoints.point(point);
 		}
