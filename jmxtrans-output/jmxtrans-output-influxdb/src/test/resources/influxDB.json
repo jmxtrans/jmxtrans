@@ -1,0 +1,30 @@
+{
+   "servers":[
+      {
+         "alias":"testhost",
+         "host":"localhost",
+         "port":"1105",
+         "queries":[
+            {
+               "obj":"java.lang:type=OperatingSystem",
+               "attr":[
+                  "SystemLoadAverage"
+               ],
+               "resultAlias":"jvm.cpu",
+               "outputWriters":[
+                  {
+                     "@class":"com.googlecode.jmxtrans.model.output.InfluxDbWriter",
+                     "username": "root",
+              		 "password": "root",
+              		 "database": "newDB",
+              		 "url": "http://localhost:8086",
+                     "settings":{
+                        "resultTags":["typeName","className"]
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}

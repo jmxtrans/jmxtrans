@@ -27,6 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,9 +49,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.JsonUtils;
 
 /**
  * Tests for {@link InfluxDbWriter}.
@@ -88,14 +95,13 @@ public class InfluxDbWriterTests {
 		// measurement,<comma separated key=val tags>" " <comma separated
 		// key=val fields>
 		Map<String, String> expectedTags = new TreeMap<String, String>();
-		expectedTags.put(TAG_ATTRIBUTE_NAME, result.getAttributeName());
-		expectedTags.put(TAG_CLASS_NAME, result.getClassName());
-		expectedTags.put(TAG_OBJ_DOMAIN, result.getObjDomain());
-		expectedTags.put(TAG_TYPE_NAME, result.getTypeName());
-		expectedTags.put(TAG_TYPE_NAME, result.getTypeName());
+		expectedTags.put(ResultTag.ATTRIBUTENAME.getValue(), result.getAttributeName());
+		expectedTags.put(ResultTag.CLASSNAME.getValue(), result.getClassName());
+		expectedTags.put(ResultTag.OBJDOMAIN.getValue(), result.getObjDomain());
+		expectedTags.put(ResultTag.TYPENAME.getValue(), result.getTypeName());
 		expectedTags.put(TAG_HOSTNAME, HOST);
 		String lineProtocol = buildLineProtocol(result.getKeyAlias(), expectedTags);
-		
+
 		List<Point> points = batchPoints.getPoints();
 		assertThat(points).hasSize(1);
 
@@ -118,16 +124,46 @@ public class InfluxDbWriterTests {
 			assertThat(batchPoints.getConsistency()).isEqualTo(consistencyLevel);
 		}
 	}
-	
+
 	@Test
-	public void defaultWriteConsistencyIsAll() throws Exception {
-			InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
-			writer.setInfluxDB(influxDB);
+	public void onlyRequestedResultPropertiesAreAppliedAsTags() throws Exception {
+		for (ResultTag expectedResultTag : ResultTag.values()) {
+			List<String> expectedResultTags = Arrays.asList(expectedResultTag.getValue());
+			InfluxDB mockInfluxDB = mock(InfluxDB.class);
+			InfluxDbWriter writer = getTestInfluxDbWriter(
+					ImmutableMap.<String, Object> of(SETTING_RESULT_TAGS, expectedResultTags));
+
+			writer.setInfluxDB(mockInfluxDB);
 			writer.doWrite(server, query, results);
 
-			verify(influxDB).write(messageCaptor.capture());
+			verify(mockInfluxDB).write(messageCaptor.capture());
 			BatchPoints batchPoints = messageCaptor.getValue();
-			assertThat(batchPoints.getConsistency()).isEqualTo(ConsistencyLevel.ALL);
+			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
+
+			assertThat(lineProtocol).contains(expectedResultTag.getValue());
+			EnumSet<ResultTag> unexpectedResultTags = EnumSet.complementOf(EnumSet.of(expectedResultTag));
+			for (ResultTag unexpectedResultTag : unexpectedResultTags) {
+				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getValue());
+			}
+		}
+	}
+
+	@Test
+	public void defaultWriteConsistencyIsAll() throws Exception {
+		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
+		writer.setInfluxDB(influxDB);
+		writer.doWrite(server, query, results);
+
+		verify(influxDB).write(messageCaptor.capture());
+		BatchPoints batchPoints = messageCaptor.getValue();
+		assertThat(batchPoints.getConsistency()).isEqualTo(ConsistencyLevel.ALL);
+	}
+
+	@Test
+	public void loadingFromFile() throws URISyntaxException, IOException {
+		File input = new File(InfluxDbWriterTests.class.getResource("/influxDB.json").toURI());
+		JmxProcess process = JsonUtils.getJmxProcess(input);
+		assertThat(process.getName()).isEqualTo("influxDB.json");
 	}
 
 	private String buildLineProtocol(String measurement, Map<String, String> expectedTags) {
@@ -143,10 +179,11 @@ public class InfluxDbWriterTests {
 		}
 		return sb.toString();
 	}
-	
+
 	private static InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
 		return getTestInfluxDbWriter(ImmutableMap.<String, Object> of());
 	}
+
 	private static InfluxDbWriter getTestInfluxDbWriter(Map<String, Object> settings) {
 		return new InfluxDbWriter(ImmutableList.<String> of(), false, false, "http://localhost:8086", "username",
 				"password", DATABASE_NAME, settings);

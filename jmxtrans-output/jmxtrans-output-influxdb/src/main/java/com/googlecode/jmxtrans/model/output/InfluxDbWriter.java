@@ -22,9 +22,14 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import java.lang.reflect.Method;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
@@ -50,10 +55,31 @@ import com.googlecode.jmxtrans.model.ValidationException;
  */
 public class InfluxDbWriter extends BaseOutputWriter {
 
-	public static final String TAG_TYPE_NAME = "typeName";
-	public static final String TAG_OBJ_DOMAIN = "objDomain";
-	public static final String TAG_CLASS_NAME = "className";
-	public static final String TAG_ATTRIBUTE_NAME = "attributeName";
+	public enum ResultTag {
+
+		TYPENAME("typeName"), OBJDOMAIN("objDomain"), CLASSNAME("className"), ATTRIBUTENAME("attributeName");
+
+		private String value;
+		private String methodName;
+
+		ResultTag(String value) {
+			this.value = value;
+			this.methodName = "get" + StringUtils.capitalize(value);
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public String getMethodName() {
+			return methodName;
+		}
+	}
+
+	public static final String SETTING_RESULT_TAGS = "resultTags";
+	// Write all result tags by default
+	private EnumSet<ResultTag> resultTagsToWrite = EnumSet.allOf(ResultTag.class);
+
 	public static final String TAG_HOSTNAME = "hostname";
 	/**
 	 * Logger.
@@ -62,7 +88,7 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	public static final String SETTING_WRITE_CONSISTENCY = "writeConsistency";
 	private static final String DEFAULT_WRITE_CONSISTENCY = "ALL";
 
-	private static final String SETTING_RETENTION_POLICY = "retentionPolicy";
+	public static final String SETTING_RETENTION_POLICY = "retentionPolicy";
 	private static final String DEFAULT_RETENTION_POLICY = "default";
 
 	private String database;
@@ -82,13 +108,37 @@ public class InfluxDbWriter extends BaseOutputWriter {
 
 		this.database = database;
 
-		String consistencySetting = Settings
-				.getStringSetting(settings, SETTING_WRITE_CONSISTENCY, DEFAULT_WRITE_CONSISTENCY).toUpperCase();
-		writeConsistency = ConsistencyLevel.valueOf(consistencySetting);
-		retentionPolicy = Settings.getStringSetting(settings, SETTING_RETENTION_POLICY, DEFAULT_RETENTION_POLICY);
+		initWriteConsistency(settings);
+		initRetentionPolicy(settings);
+		initResultTagsToWrite(settings);
+
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
 		influxDB = InfluxDBFactory.connect(url, username, password);
+	}
+
+	private void initWriteConsistency(Map<String, Object> settings) {
+		String consistencySetting = Settings
+				.getStringSetting(settings, SETTING_WRITE_CONSISTENCY, DEFAULT_WRITE_CONSISTENCY).toUpperCase();
+		writeConsistency = ConsistencyLevel.valueOf(consistencySetting);
+		LOG.debug("Write consistency set to: {}", writeConsistency);
+	}
+
+	private void initRetentionPolicy(Map<String, Object> settings) {
+		retentionPolicy = Settings.getStringSetting(settings, SETTING_RETENTION_POLICY, DEFAULT_RETENTION_POLICY);
+		LOG.debug("Retention Policy set to: {}", retentionPolicy);
+	}
+
+	private void initResultTagsToWrite(Map<String, Object> settings) {
+		@SuppressWarnings("unchecked")
+		List<String> resultTags = (List<String>) settings.get(SETTING_RESULT_TAGS);
+		if (resultTags != null) {
+			resultTagsToWrite.clear();
+			for (String resultTag : resultTags) {
+				resultTagsToWrite.add(ResultTag.valueOf(resultTag.toUpperCase()));
+			}
+		}
+		LOG.debug("Result Tags to write set to: {}", resultTagsToWrite);
 	}
 
 	@VisibleForTesting
@@ -102,7 +152,7 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) {
+	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
 		influxDB.createDatabase(database);
 
@@ -110,13 +160,20 @@ public class InfluxDbWriter extends BaseOutputWriter {
 				.tag(TAG_HOSTNAME, server.getHost()).consistency(writeConsistency).build();
 		Point point;
 		for (Result result : results) {
+			Map<String, String> resultTagsToApply = buildResultTagsToApply(result);
 			point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), TimeUnit.MILLISECONDS)
-					.tag(TAG_ATTRIBUTE_NAME, result.getAttributeName()).tag(TAG_CLASS_NAME, result.getClassName())
-					.tag(TAG_OBJ_DOMAIN, result.getObjDomain()).tag(TAG_TYPE_NAME, result.getTypeName())
-					.fields(result.getValues()).build();
-
+					.tag(resultTagsToApply).fields(result.getValues()).build();
 			batchPoints.point(point);
 		}
 		influxDB.write(batchPoints);
+	}
+
+	private Map<String, String> buildResultTagsToApply(Result result) throws Exception {
+		Map<String, String> resultTagsToApply = new TreeMap<String, String>();
+		for (ResultTag resultTagToWrite : resultTagsToWrite) {
+			Method m = result.getClass().getMethod(resultTagToWrite.getMethodName());
+			resultTagsToApply.put(resultTagToWrite.getValue(), (String) m.invoke(result));
+		}
+		return resultTagsToApply;
 	}
 }
