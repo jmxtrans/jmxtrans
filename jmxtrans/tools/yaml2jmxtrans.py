@@ -51,13 +51,16 @@ class Queries(object):
     """
     Generate query object snippets suitable for consumption by jmxtrans
     """
-    def __init__(self, queries, query_attributes, outputWriters, outputWriters_attributes, monitor_host, monitor_port):
+    def __init__(self, queries, query_attributes, query_defaults,
+            outputWriters, outputWriters_attributes, monitor_host,
+            monitor_port):
         """
         Initialize Queries configuration with data from YAML structure, making
         named queries accessible by name
         """
         self.queries = {}
         self.query_attributes = query_attributes
+        self.query_defaults = query_defaults
         self.outputWriters = []
         self.outputWriters_attributes = outputWriters_attributes
         self.monitor_host = monitor_host
@@ -68,6 +71,8 @@ class Queries(object):
             for attribute in query_attributes:
                 if attribute in query:
                     queryentry[attribute] = query[attribute]
+                elif attribute in query_defaults:
+                    queryentry[attribute] = query_defaults[attribute]
                 else:
                     queryentry[attribute] = None
             self.queries[query['name']] = queryentry
@@ -265,7 +270,8 @@ if __name__ == '__main__':
     graphite_host = yf['graphite_host'] if ('graphite_host' in yf) else None
     graphite_port = yf['graphite_port'] if ('graphite_port' in yf) else None
 
-    q = Queries(yf['queries'], query_attributes, outputWriters, outputWriters_attributes, graphite_host, graphite_port)
+    q = Queries(yf['queries'], query_attributes, yf.get('query_defaults', {}),
+        outputWriters, outputWriters_attributes, graphite_host, graphite_port)
     h = HostSets(yf['sets'])
 
     for set_name in h.set_names():
