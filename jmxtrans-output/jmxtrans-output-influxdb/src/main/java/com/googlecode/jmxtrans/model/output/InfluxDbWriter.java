@@ -46,6 +46,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.sun.istack.internal.NotNull;
 
 /**
  * {@link com.googlecode.jmxtrans.model.OutputWriter} for
@@ -84,12 +85,6 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	}
 
 	/**
-	 * Setting name that allows attributes from {@link Result} limited by
-	 * {@link ResultAttribute} values to be written as {@link Point} tags
-	 */
-	public static final String SETTING_RESULT_TAGS = "resultTags";
-
-	/**
 	 * The {@link EnumSet} of {@link ResultAttribute} attributes of
 	 * {@link Result} that will be written as {@link Point} tags
 	 */
@@ -103,51 +98,19 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	private static final Logger LOG = LoggerFactory.getLogger(InfluxDbWriter.class);
 
 	/**
-	 * <p>
-	 * The name of the setting that can be used to control the write consistency
-	 * of each {@link BatchPoints} sent to InfluxDB. Allowed values are:
-	 * </p>
-	 * 
-	 * <ul>
-	 * <li>ALL = Write succeeds only if write reached all cluster members.</li>
-	 * <li>ANY = Write succeeds if write reached any cluster members.</li>
-	 * <li>ONE = Write succeeds if write reached at least one cluster members.
-	 * </li>
-	 * <li>QUORUM = Write succeeds only if write reached a quorum of cluster
-	 * members.</li>
-	 * </ul>
-	 *
-	 */
-	public static final String SETTING_WRITE_CONSISTENCY = "writeConsistency";
-
-	/**
-	 * <p>
-	 * The default value of write consistency for each measurement where no
-	 * writeConsistency setting is provided in the json config.
-	 * </p>
-	 * ALL = Write succeeds only if write reached all cluster members.
-	 */
-	private static final String DEFAULT_WRITE_CONSISTENCY = "ALL";
-
-	/**
-	 * 
-	 * The name of the setting that can be used to control the <a href=
-	 * "https://influxdb.com/docs/v0.9/concepts/key_concepts.html#retention-policy">
-	 * The retention policy</a> for the measurement
-	 */
-	public static final String SETTING_RETENTION_POLICY = "retentionPolicy";
-
-	/**
 	 * The deault <a href=
 	 * "https://influxdb.com/docs/v0.9/concepts/key_concepts.html#retention-policy">
 	 * The retention policy</a> for each measuremen where no retentionPolicy
 	 * setting is provided in the json config
 	 */
-	private static final String DEFAULT_RETENTION_POLICY = "default";
-
-	private String database;
-	private ConsistencyLevel writeConsistency = ConsistencyLevel.ALL;
-	private String retentionPolicy;
+	public static final String DEFAULT_RETENTION_POLICY = "default";
+	
+	@NotNull
+	private final String database;
+	@NotNull
+	private final ConsistencyLevel writeConsistency;
+	@NotNull
+	private final String retentionPolicy;
 
 	/** Thread safe **/
 	InfluxDB influxDB;
@@ -172,38 +135,30 @@ public class InfluxDbWriter extends BaseOutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber, @JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("url") String url, @JsonProperty("username") String username,
 			@JsonProperty("password") String password, @JsonProperty("database") String database,
+			@JsonProperty("writeConsistency") String writeConsistency,
+			@JsonProperty("retentionPolicy") String retentionPolicy,
+			@JsonProperty("resultTags") List<String> resultTags,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 
 		this.database = database;
 
-		initWriteConsistency(settings);
-		initRetentionPolicy(settings);
-		initResultAttributesToWriteAsTags(settings);
+		this.writeConsistency = StringUtils.isNotBlank(writeConsistency) ? ConsistencyLevel.valueOf(writeConsistency)
+				: ConsistencyLevel.ALL;
+
+		this.retentionPolicy = StringUtils.isNotBlank(retentionPolicy) ? retentionPolicy : DEFAULT_RETENTION_POLICY;
+
+		initResultAttributesToWriteAsTags(resultTags);
 
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
 		influxDB = InfluxDBFactory.connect(url, username, password);
 	}
 
-	private void initWriteConsistency(Map<String, Object> settings) {
-		String consistencySetting = Settings
-				.getStringSetting(settings, SETTING_WRITE_CONSISTENCY, DEFAULT_WRITE_CONSISTENCY).toUpperCase();
-		writeConsistency = ConsistencyLevel.valueOf(consistencySetting);
-		LOG.debug("Write consistency set to: {}", writeConsistency);
-	}
-
-	private void initRetentionPolicy(Map<String, Object> settings) {
-		retentionPolicy = Settings.getStringSetting(settings, SETTING_RETENTION_POLICY, DEFAULT_RETENTION_POLICY);
-		LOG.debug("Retention Policy set to: {}", retentionPolicy);
-	}
-	
-	private void initResultAttributesToWriteAsTags(Map<String, Object> settings) {
-		@SuppressWarnings("unchecked")
-		List<String> resultTagsFromSettings = (List<String>) settings.get(SETTING_RESULT_TAGS);
-		if (resultTagsFromSettings != null) {
+	private void initResultAttributesToWriteAsTags(List<String> resultTags) {
+		if (resultTags != null) {
 			resultAttributesToWriteAsTags.clear();
-			for (String resultTag : resultTagsFromSettings) {
+			for (String resultTag : resultTags) {
 				resultAttributesToWriteAsTags.add(ResultAttribute.valueOf(resultTag.toUpperCase()));
 			}
 		}
@@ -285,12 +240,17 @@ public class InfluxDbWriter extends BaseOutputWriter {
 		}
 		influxDB.write(batchPoints);
 	}
-	
+
 	/**
-	 * Adds data from {@link Result} to a map based on the attributes configured in <code>resultAttributesToWriteAsTags</code>
-	 * @param result The {@link Result} to get the data from 
-	 * @return A map based on the attributes configured in <code>resultAttributesToWriteAsTags</code>
-	 * @throws Exception If refection cannot be performed on the {@link Result}
+	 * Adds data from {@link Result} to a map based on the attributes configured
+	 * in <code>resultAttributesToWriteAsTags</code>
+	 * 
+	 * @param result
+	 *            The {@link Result} to get the data from
+	 * @return A map based on the attributes configured in
+	 *         <code>resultAttributesToWriteAsTags</code>
+	 * @throws Exception
+	 *             If refection cannot be performed on the {@link Result}
 	 */
 	private Map<String, String> buildResultTagMap(Result result) throws Exception {
 		Map<String, String> resultTagsToApply = new TreeMap<String, String>();

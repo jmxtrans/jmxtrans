@@ -18,9 +18,9 @@
               		 "password": "root",
               		 "database": "newDB",
               		 "url": "http://localhost:8086",
-                     "settings":{
-                        "resultTags":["typeName","className"]
-                     }
+              		 "resultTags":["typeName","className"],
+              		 "retentionPolicy":"default",
+              		 "writeConsistency":"ALL"
                   }
                ]
             }

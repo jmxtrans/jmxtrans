@@ -113,8 +113,7 @@ public class InfluxDbWriterTests {
 	public void allWriteConsistencyCanAppliedViaSettings() throws Exception {
 		for (ConsistencyLevel consistencyLevel : ConsistencyLevel.values()) {
 			InfluxDB mockInfluxDB = mock(InfluxDB.class);
-			InfluxDbWriter writer = getTestInfluxDbWriter(
-					ImmutableMap.<String, Object> of(SETTING_WRITE_CONSISTENCY, consistencyLevel.value()));
+			InfluxDbWriter writer = getTestInfluxDbWriterWithWriteConsistency(consistencyLevel);
 
 			writer.setInfluxDB(mockInfluxDB);
 			writer.doWrite(server, query, results);
@@ -130,8 +129,7 @@ public class InfluxDbWriterTests {
 		for (ResultAttribute expectedResultTag : ResultAttribute.values()) {
 			List<String> expectedResultTags = Arrays.asList(expectedResultTag.getTagName());
 			InfluxDB mockInfluxDB = mock(InfluxDB.class);
-			InfluxDbWriter writer = getTestInfluxDbWriter(
-					ImmutableMap.<String, Object> of(SETTING_RESULT_TAGS, expectedResultTags));
+			InfluxDbWriter writer = getTestInfluxDbWriterWithResultTags(expectedResultTags);
 
 			writer.setInfluxDB(mockInfluxDB);
 			writer.doWrite(server, query, results);
@@ -158,6 +156,17 @@ public class InfluxDbWriterTests {
 		BatchPoints batchPoints = messageCaptor.getValue();
 		assertThat(batchPoints.getConsistency()).isEqualTo(ConsistencyLevel.ALL);
 	}
+	
+	@Test
+	public void defaultRetentionPolicyIsDefault() throws Exception {
+		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
+		writer.setInfluxDB(influxDB);
+		writer.doWrite(server, query, results);
+
+		verify(influxDB).write(messageCaptor.capture());
+		BatchPoints batchPoints = messageCaptor.getValue();
+		assertThat(batchPoints.getRetentionPolicy()).isEqualTo(DEFAULT_RETENTION_POLICY);
+	}
 
 	@Test
 	public void loadingFromFile() throws URISyntaxException, IOException {
@@ -181,11 +190,21 @@ public class InfluxDbWriterTests {
 	}
 
 	private static InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
-		return getTestInfluxDbWriter(ImmutableMap.<String, Object> of());
+		return getTestInfluxDbWriter(null, null, null);
 	}
-
-	private static InfluxDbWriter getTestInfluxDbWriter(Map<String, Object> settings) {
+	
+	private static InfluxDbWriter getTestInfluxDbWriterWithResultTags(List<String> resultTags) {
+		return getTestInfluxDbWriter(null, null, resultTags);
+	}
+	
+	private static InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
+		return getTestInfluxDbWriter(consistencyLevel, null, null);
+	}
+	
+	
+	private static InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy, List<String> resultTags) {
+		String writeConsistencyLevel = consistencyLevel == null ? null :  consistencyLevel.name();
 		return new InfluxDbWriter(ImmutableList.<String> of(), false, false, "http://localhost:8086", "username",
-				"password", DATABASE_NAME, settings);
+				"password", DATABASE_NAME, writeConsistencyLevel, retentionPolicy, resultTags, null);
 	}
 }
