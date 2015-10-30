@@ -22,12 +22,12 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import java.lang.reflect.Method;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.influxdb.InfluxDB;
@@ -43,46 +43,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.ReflectionException;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
-import com.sun.istack.internal.NotNull;
 
 /**
  * {@link com.googlecode.jmxtrans.model.OutputWriter} for
  * <a href="https://influxdb.com/index.html">InfluxDB</a>.
  *
- * @author Simon Hutchinson <https://github.com/sihutch>
+ * @author Simon Hutchinson
+ *         <a href="https://github.com/sihutch">github.com/sihutch</a>
  */
 public class InfluxDbWriter extends BaseOutputWriter {
-
-	/**
-	 * Enumerates the members of {@link Result} that may be written as
-	 * {@link Point} tags
-	 * 
-	 * @author Simon Hutchinson <https://github.com/sihutch>
-	 *
-	 */
-	public enum ResultAttribute {
-
-		TYPENAME("typeName"), OBJDOMAIN("objDomain"), CLASSNAME("className"), ATTRIBUTENAME("attributeName");
-
-		private String tagName;
-		private String accessorMethod;
-
-		ResultAttribute(String tagName) {
-			this.tagName = tagName;
-			this.accessorMethod = "get" + StringUtils.capitalize(tagName);
-		}
-
-		public String getTagName() {
-			return tagName;
-		}
-
-		public String getAccessorMethod() {
-			return accessorMethod;
-		}
-	}
 
 	/**
 	 * The {@link EnumSet} of {@link ResultAttribute} attributes of
@@ -104,12 +78,9 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	 * setting is provided in the json config
 	 */
 	public static final String DEFAULT_RETENTION_POLICY = "default";
-	
-	@NotNull
+
 	private final String database;
-	@NotNull
 	private final ConsistencyLevel writeConsistency;
-	@NotNull
 	private final String retentionPolicy;
 
 	/** Thread safe **/
@@ -234,30 +205,18 @@ public class InfluxDbWriter extends BaseOutputWriter {
 				.tag(TAG_HOSTNAME, server.getHost()).consistency(writeConsistency).build();
 		for (Result result : results) {
 			Map<String, String> resultTagsToApply = buildResultTagMap(result);
-			Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), TimeUnit.MILLISECONDS)
+			Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
 					.tag(resultTagsToApply).fields(result.getValues()).build();
 			batchPoints.point(point);
 		}
 		influxDB.write(batchPoints);
 	}
 
-	/**
-	 * Adds data from {@link Result} to a map based on the attributes configured
-	 * in <code>resultAttributesToWriteAsTags</code>
-	 * 
-	 * @param result
-	 *            The {@link Result} to get the data from
-	 * @return A map based on the attributes configured in
-	 *         <code>resultAttributesToWriteAsTags</code>
-	 * @throws Exception
-	 *             If refection cannot be performed on the {@link Result}
-	 */
-	private Map<String, String> buildResultTagMap(Result result) throws Exception {
-		Map<String, String> resultTagsToApply = new TreeMap<String, String>();
+	private Map<String, String> buildResultTagMap(Result result) throws ReflectionException {
+		Map<String, String> resultTagMap = new TreeMap<String, String>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
-			Method m = result.getClass().getMethod(resultAttribute.getAccessorMethod());
-			resultTagsToApply.put(resultAttribute.getTagName(), (String) m.invoke(result));
+			resultAttribute.addAttribute(resultTagMap, result);
 		}
-		return resultTagsToApply;
+		return resultTagMap;
 	}
 }
