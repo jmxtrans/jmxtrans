@@ -58,6 +58,7 @@
 		<module>jmxtrans-output-velocity</module>
 		<module>jmxtrans-output-kafka</module>
 		<module>jmxtrans-output-elastic</module>
+		<module>jmxtrans-output-influxdb</module>
 	</modules>
 
 	<build>
