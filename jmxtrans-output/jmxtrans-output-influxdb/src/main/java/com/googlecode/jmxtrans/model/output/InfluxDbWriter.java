@@ -95,10 +95,6 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	 */
 	private EnumSet<ResultAttribute> resultAttributesToWriteAsTags = EnumSet.allOf(ResultAttribute.class);
 
-	/**
-	 * The names of the tag written to every {@link Point} that will contain the
-	 * value of {@link Server#getHost()}
-	 */
 	public static final String TAG_HOSTNAME = "hostname";
 
 	/**
