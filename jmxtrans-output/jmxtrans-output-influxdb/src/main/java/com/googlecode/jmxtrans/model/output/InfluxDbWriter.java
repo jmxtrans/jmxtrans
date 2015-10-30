@@ -54,6 +54,7 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	public static final String TAG_OBJ_DOMAIN = "objDomain";
 	public static final String TAG_CLASS_NAME = "className";
 	public static final String TAG_ATTRIBUTE_NAME = "attributeName";
+	public static final String TAG_HOSTNAME = "hostname";
 	/**
 	 * Logger.
 	 */
@@ -106,7 +107,7 @@ public class InfluxDbWriter extends BaseOutputWriter {
 		influxDB.createDatabase(database);
 
 		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
-				.consistency(writeConsistency).build();
+				.tag(TAG_HOSTNAME, server.getHost()).consistency(writeConsistency).build();
 		Point point;
 		for (Result result : results) {
 			point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), TimeUnit.MILLISECONDS)

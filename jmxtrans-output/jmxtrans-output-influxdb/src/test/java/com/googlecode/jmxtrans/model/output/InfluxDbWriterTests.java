@@ -22,14 +22,10 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.SETTING_WRITE_CONSISTENCY;
-import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_ATTRIBUTE_NAME;
-import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_CLASS_NAME;
-import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_OBJ_DOMAIN;
-import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_TYPE_NAME;
+import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Map;
@@ -62,6 +58,7 @@ import com.googlecode.jmxtrans.model.Server;
 public class InfluxDbWriterTests {
 
 	private static final String DATABASE_NAME = "database";
+	private static final String HOST = "localhost";
 	@Mock
 	private InfluxDB influxDB;
 	@Captor
@@ -95,8 +92,10 @@ public class InfluxDbWriterTests {
 		expectedTags.put(TAG_CLASS_NAME, result.getClassName());
 		expectedTags.put(TAG_OBJ_DOMAIN, result.getObjDomain());
 		expectedTags.put(TAG_TYPE_NAME, result.getTypeName());
+		expectedTags.put(TAG_TYPE_NAME, result.getTypeName());
+		expectedTags.put(TAG_HOSTNAME, HOST);
 		String lineProtocol = buildLineProtocol(result.getKeyAlias(), expectedTags);
-
+		
 		List<Point> points = batchPoints.getPoints();
 		assertThat(points).hasSize(1);
 
