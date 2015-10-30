@@ -20,60 +20,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.model.output.support.pool;
 
 import com.google.common.io.Closer;
-import com.googlecode.jmxtrans.test.TCPEchoServer;
-import org.junit.Rule;
-import org.junit.Test;
+import stormpot.Allocator;
+import stormpot.Slot;
 
-import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.charset.Charset;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public class SocketAllocator implements Allocator<SocketPoolable> {
 
-public class SocketFactoryTests {
+	private final InetSocketAddress server;
+	private final int socketTimeoutMillis;
+	private final Charset charset;
 
-	@Rule
-	public TCPEchoServer echoServer = new TCPEchoServer();
+	public SocketAllocator(InetSocketAddress server, int socketTimeoutMillis, Charset charset) {
+		this.server = server;
+		this.socketTimeoutMillis = socketTimeoutMillis;
+		this.charset = charset;
+	}
 
-	@Test
-	public void createdSocketIsValid() throws IOException {
+	@Override
+	public SocketPoolable allocate(Slot slot) throws Exception {
+		// create new InetSocketAddress to ensure name resolution is done again
+		SocketAddress serverAddress = new InetSocketAddress(server.getHostName(), server.getPort());
+		Socket socket = new Socket();
+		socket.setKeepAlive(false);
+		socket.connect(serverAddress, socketTimeoutMillis);
+
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), charset));
+
+		return new SocketPoolable(slot, socket, writer);
+	}
+
+	@Override
+	public void deallocate(SocketPoolable poolable) throws Exception {
 		Closer closer = Closer.create();
 		try {
-			SocketFactory socketFactory = new SocketFactory();
-			Socket socket = closer.register(socketFactory.makeObject(getServerAddress()));
-			assertThat(socketFactory.validateObject(getServerAddress(), socket)).isTrue();
+			closer.register(poolable.getSocket());
+			closer.register(poolable.getWriter());
 		} catch (Throwable t) {
-			throw closer.rethrow(t);
+			closer.rethrow(t);
 		} finally {
 			closer.close();
 		}
 	}
-
-	@Test
-	public void nullSocketIsInvalid() {
-		assertThat(new SocketFactory().validateObject(getServerAddress(), null)).isFalse();
-	}
-
-	@Test
-	public void closedSocketIsInvalid() throws IOException {
-		Closer closer = Closer.create();
-		try {
-			SocketFactory socketFactory = new SocketFactory();
-			Socket socket = closer.register(socketFactory.makeObject(getServerAddress()));
-			socket.close();
-			assertThat(socketFactory.validateObject(getServerAddress(), socket)).isFalse();
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
-		}
-	}
-
-	private InetSocketAddress getServerAddress() {
-		return echoServer.getLocalSocketAddress();
-	}
-
 }

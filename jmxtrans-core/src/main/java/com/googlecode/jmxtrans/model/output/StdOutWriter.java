@@ -25,6 +25,8 @@ package com.googlecode.jmxtrans.model.output;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -38,7 +40,13 @@ import java.util.Map;
  * 
  * @author jon
  */
-public class StdOutWriter extends BaseOutputWriter {
+public class StdOutWriter implements OutputWriterFactory {
+
+	private final ImmutableList<String> typeNames;
+	private final  boolean booleanAsNumber;
+	private final  Boolean debugEnabled;
+	private final  Map<String, Object> settings;
+
 
 	@JsonCreator
 	public StdOutWriter(
@@ -46,20 +54,42 @@ public class StdOutWriter extends BaseOutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
-	}
-
-	/**
-	 * nothing to validate
-	 */
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
+			this.typeNames = typeNames;
+			this.booleanAsNumber = booleanAsNumber;
+			this.debugEnabled = debugEnabled;
+			this.settings = settings;
 	}
 
 	@Override
-	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		for (Result r : results) {
-			System.out.println(r);
+	public OutputWriter create() {
+		return new W(
+				typeNames,
+				booleanAsNumber,
+				debugEnabled,
+				settings
+		);
+	}
+
+
+	public static class W extends BaseOutputWriter {
+		public W (
+				ImmutableList<String> typeNames,
+				boolean booleanAsNumber,
+				Boolean debugEnabled,
+				Map<String, Object> settings) {
+			super(typeNames, booleanAsNumber, debugEnabled, settings);
+		}
+
+		@Override
+		public void validateSetup(Server server, Query query) throws ValidationException {
+			// nothing to validate
+		}
+
+		@Override
+		protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+			for (Result r : results) {
+				System.out.println(r);
+			}
 		}
 	}
 }

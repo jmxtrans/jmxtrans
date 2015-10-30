@@ -20,29 +20,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
 
-import java.io.File;
-import java.io.IOException;
+public final class ServerFixtures {
+	private ServerFixtures() {}
 
-public final class JsonUtils {
+	public static Server createServerWithOneQuery(String host, String port, String queryObject) {
+		return Server.builder()
+				.setHost(host)
+				.setPort(port)
+				.addQuery(Query.builder()
+					.setObj(queryObject)
+					.build())
+				.build();
+	}
 
-	private JsonUtils() {}
-
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(File file) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setNodeFactory(new PlaceholderResolverJsonNodeFactory());
-		mapper.registerModule(new GuavaModule());
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
+	public static Server dummyServer() {
+		return createServerWithOneQuery("host.example.net", "4321", "myQuery");
 	}
 }

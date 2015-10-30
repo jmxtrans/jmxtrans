@@ -92,7 +92,7 @@ public class JmxQueryProcessor {
 	}
 
 	private void runOutputWritersForQuery(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		for (OutputWriter writer : query.getOutputWriters()) {
+		for (OutputWriter writer : query.getOutputWriterInstances()) {
 			writer.doWrite(server, query, results);
 		}
 		log.debug("Finished running outputWriters for query: {}", query);

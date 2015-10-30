@@ -20,29 +20,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.results;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.googlecode.jmxtrans.model.JmxProcess;
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.results.ValueTransformer;
 
-import java.io.File;
-import java.io.IOException;
+import javax.annotation.Nullable;
 
-public final class JsonUtils {
+public class ResultValuesTransformer implements Function<Result, Result> {
 
-	private JsonUtils() {}
+	private final ValueTransformer valueTransformer;
 
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(File file) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setNodeFactory(new PlaceholderResolverJsonNodeFactory());
-		mapper.registerModule(new GuavaModule());
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
+	public ResultValuesTransformer(ValueTransformer valueTransformer) {
+		this.valueTransformer = valueTransformer;
 	}
+
+	@Nullable
+	@Override
+	public Result apply(@Nullable Result input) {
+		if (input == null) {
+			return null;
+		}
+		return new Result(
+				input.getEpoch(),
+				input.getAttributeName(),
+				input.getClassName(),
+				input.getObjDomain(),
+				input.getKeyAlias(),
+				input.getTypeName(),
+				Maps.transformValues(input.getValues(), valueTransformer)
+		);
+	}
+
 }

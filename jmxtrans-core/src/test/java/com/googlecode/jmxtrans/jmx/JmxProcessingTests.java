@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -47,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JmxProcessingTests {
@@ -67,11 +69,14 @@ public class JmxProcessingTests {
 
 	@Test
 	public void querySimpleAttribute() throws Exception {
+		OutputWriterFactory outputWriterFactory = mock(OutputWriterFactory.class);
 		OutputWriter outputWriter = mock(OutputWriter.class);
+		when(outputWriterFactory.create()).thenReturn(outputWriter);
+
 		Query query = Query.builder()
 				.setObj(MBEAN_NAME)
 				.addAttr("DummyValue")
-				.addOutputWriter(outputWriter)
+				.addOutputWriter(outputWriterFactory)
 				.build();
 
 		new JmxQueryProcessor().processQuery(server, null, query);

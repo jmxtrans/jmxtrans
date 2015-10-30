@@ -20,29 +20,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output.support.pool;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.googlecode.jmxtrans.model.JmxProcess;
+import lombok.Getter;
+import stormpot.Poolable;
+import stormpot.Slot;
 
-import java.io.File;
-import java.io.IOException;
+import javax.annotation.Nonnull;
+import java.io.Writer;
+import java.net.Socket;
 
-public final class JsonUtils {
+public class SocketPoolable implements Poolable {
+	@Nonnull
+	private final Slot slot;
+	@Nonnull
+	@Getter
+	private final Socket socket;
+	@Nonnull
+	@Getter
+	private final Writer writer;
 
-	private JsonUtils() {}
+	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
+		this.slot = slot;
+		this.socket = socket;
+		this.writer = writer;
+	}
 
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(File file) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setNodeFactory(new PlaceholderResolverJsonNodeFactory());
-		mapper.registerModule(new GuavaModule());
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
+	@Override
+	public void release() {
+		slot.release(this);
+	}
+
+	public void invalidate() {
+		slot.expire(this);
 	}
 }

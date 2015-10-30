@@ -20,29 +20,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.googlecode.jmxtrans.model.JmxProcess;
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
-import java.io.File;
+import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.Writer;
 
-public final class JsonUtils {
-
-	private JsonUtils() {}
-
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(File file) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setNodeFactory(new PlaceholderResolverJsonNodeFactory());
-		mapper.registerModule(new GuavaModule());
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
-	}
+public interface WriterBasedOutputWriter {
+	void write(
+			@Nonnull Writer writer,
+			@Nonnull Server server,
+			@Nonnull Query query,
+			@Nonnull ImmutableList<Result> results) throws IOException;
 }
