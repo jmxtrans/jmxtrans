@@ -95,10 +95,10 @@ public class InfluxDbWriterTests {
 		// measurement,<comma separated key=val tags>" " <comma separated
 		// key=val fields>
 		Map<String, String> expectedTags = new TreeMap<String, String>();
-		expectedTags.put(ResultTag.ATTRIBUTENAME.getValue(), result.getAttributeName());
-		expectedTags.put(ResultTag.CLASSNAME.getValue(), result.getClassName());
-		expectedTags.put(ResultTag.OBJDOMAIN.getValue(), result.getObjDomain());
-		expectedTags.put(ResultTag.TYPENAME.getValue(), result.getTypeName());
+		expectedTags.put(ResultAttribute.ATTRIBUTENAME.getTagName(), result.getAttributeName());
+		expectedTags.put(ResultAttribute.CLASSNAME.getTagName(), result.getClassName());
+		expectedTags.put(ResultAttribute.OBJDOMAIN.getTagName(), result.getObjDomain());
+		expectedTags.put(ResultAttribute.TYPENAME.getTagName(), result.getTypeName());
 		expectedTags.put(TAG_HOSTNAME, HOST);
 		String lineProtocol = buildLineProtocol(result.getKeyAlias(), expectedTags);
 
@@ -127,8 +127,8 @@ public class InfluxDbWriterTests {
 
 	@Test
 	public void onlyRequestedResultPropertiesAreAppliedAsTags() throws Exception {
-		for (ResultTag expectedResultTag : ResultTag.values()) {
-			List<String> expectedResultTags = Arrays.asList(expectedResultTag.getValue());
+		for (ResultAttribute expectedResultTag : ResultAttribute.values()) {
+			List<String> expectedResultTags = Arrays.asList(expectedResultTag.getTagName());
 			InfluxDB mockInfluxDB = mock(InfluxDB.class);
 			InfluxDbWriter writer = getTestInfluxDbWriter(
 					ImmutableMap.<String, Object> of(SETTING_RESULT_TAGS, expectedResultTags));
@@ -140,10 +140,10 @@ public class InfluxDbWriterTests {
 			BatchPoints batchPoints = messageCaptor.getValue();
 			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
 
-			assertThat(lineProtocol).contains(expectedResultTag.getValue());
-			EnumSet<ResultTag> unexpectedResultTags = EnumSet.complementOf(EnumSet.of(expectedResultTag));
-			for (ResultTag unexpectedResultTag : unexpectedResultTags) {
-				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getValue());
+			assertThat(lineProtocol).contains(expectedResultTag.getTagName());
+			EnumSet<ResultAttribute> unexpectedResultTags = EnumSet.complementOf(EnumSet.of(expectedResultTag));
+			for (ResultAttribute unexpectedResultTag : unexpectedResultTags) {
+				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getTagName());
 			}
 		}
 	}

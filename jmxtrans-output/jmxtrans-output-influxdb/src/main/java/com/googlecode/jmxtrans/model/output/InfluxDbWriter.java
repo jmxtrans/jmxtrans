@@ -55,40 +55,98 @@ import com.googlecode.jmxtrans.model.ValidationException;
  */
 public class InfluxDbWriter extends BaseOutputWriter {
 
-	public enum ResultTag {
+	/**
+	 * Enumerates the members of {@link Result} that may be written as
+	 * {@link Point} tags
+	 * 
+	 * @author Simon Hutchinson <https://github.com/sihutch>
+	 *
+	 */
+	public enum ResultAttribute {
 
 		TYPENAME("typeName"), OBJDOMAIN("objDomain"), CLASSNAME("className"), ATTRIBUTENAME("attributeName");
 
-		private String value;
-		private String methodName;
+		private String tagName;
+		private String accessorMethod;
 
-		ResultTag(String value) {
-			this.value = value;
-			this.methodName = "get" + StringUtils.capitalize(value);
+		ResultAttribute(String tagName) {
+			this.tagName = tagName;
+			this.accessorMethod = "get" + StringUtils.capitalize(tagName);
 		}
 
-		public String getValue() {
-			return value;
+		public String getTagName() {
+			return tagName;
 		}
 
-		public String getMethodName() {
-			return methodName;
+		public String getAccessorMethod() {
+			return accessorMethod;
 		}
 	}
 
+	/**
+	 * Setting name that allows attributes from {@link Result} limited by
+	 * {@link ResultAttribute} values to be written as {@link Point} tags
+	 */
 	public static final String SETTING_RESULT_TAGS = "resultTags";
-	// Write all result tags by default
-	private EnumSet<ResultTag> resultTagsToWrite = EnumSet.allOf(ResultTag.class);
 
+	/**
+	 * The {@link EnumSet} of {@link ResultAttribute} attributes of
+	 * {@link Result} that will be written as {@link Point} tags
+	 */
+	private EnumSet<ResultAttribute> resultAttributesToWriteAsTags = EnumSet.allOf(ResultAttribute.class);
+
+	/**
+	 * The names of the tag written to every {@link Point} that will contain the
+	 * value of {@link Server#getHost()}
+	 */
 	public static final String TAG_HOSTNAME = "hostname";
+
 	/**
 	 * Logger.
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(InfluxDbWriter.class);
+
+	/**
+	 * <p>
+	 * The name of the setting that can be used to control the write consistency
+	 * of each {@link BatchPoints} sent to InfluxDB. Allowed values are:
+	 * </p>
+	 * 
+	 * <ul>
+	 * <li>ALL = Write succeeds only if write reached all cluster members.</li>
+	 * <li>ANY = Write succeeds if write reached any cluster members.</li>
+	 * <li>ONE = Write succeeds if write reached at least one cluster members.
+	 * </li>
+	 * <li>QUORUM = Write succeeds only if write reached a quorum of cluster
+	 * members.</li>
+	 * </ul>
+	 *
+	 */
 	public static final String SETTING_WRITE_CONSISTENCY = "writeConsistency";
+
+	/**
+	 * <p>
+	 * The default value of write consistency for each measurement where no
+	 * writeConsistency setting is provided in the json config.
+	 * </p>
+	 * ALL = Write succeeds only if write reached all cluster members.
+	 */
 	private static final String DEFAULT_WRITE_CONSISTENCY = "ALL";
 
+	/**
+	 * 
+	 * The name of the setting that can be used to control the <a href=
+	 * "https://influxdb.com/docs/v0.9/concepts/key_concepts.html#retention-policy">
+	 * The retention policy</a> for the measurement
+	 */
 	public static final String SETTING_RETENTION_POLICY = "retentionPolicy";
+
+	/**
+	 * The deault <a href=
+	 * "https://influxdb.com/docs/v0.9/concepts/key_concepts.html#retention-policy">
+	 * The retention policy</a> for each measuremen where no retentionPolicy
+	 * setting is provided in the json config
+	 */
 	private static final String DEFAULT_RETENTION_POLICY = "default";
 
 	private String database;
@@ -98,6 +156,21 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	/** Thread safe **/
 	InfluxDB influxDB;
 
+	/**
+	 * @param typeNames
+	 * @param booleanAsNumber
+	 * @param debugEnabled
+	 * @param url
+	 *            - The url e.g http://localhost:8086 to InfluxDB
+	 * @param username
+	 *            - The username for InfluxDB
+	 * @param password
+	 *            - The password for InfluxDB
+	 * @param database
+	 *            - The name of the database (created if does not exist) on
+	 *            InfluxDB to write the measurements to
+	 * @param settings
+	 */
 	@JsonCreator
 	public InfluxDbWriter(@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber, @JsonProperty("debug") Boolean debugEnabled,
@@ -110,7 +183,7 @@ public class InfluxDbWriter extends BaseOutputWriter {
 
 		initWriteConsistency(settings);
 		initRetentionPolicy(settings);
-		initResultTagsToWrite(settings);
+		initResultAttributesToWriteAsTags(settings);
 
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
@@ -128,17 +201,17 @@ public class InfluxDbWriter extends BaseOutputWriter {
 		retentionPolicy = Settings.getStringSetting(settings, SETTING_RETENTION_POLICY, DEFAULT_RETENTION_POLICY);
 		LOG.debug("Retention Policy set to: {}", retentionPolicy);
 	}
-
-	private void initResultTagsToWrite(Map<String, Object> settings) {
+	
+	private void initResultAttributesToWriteAsTags(Map<String, Object> settings) {
 		@SuppressWarnings("unchecked")
-		List<String> resultTags = (List<String>) settings.get(SETTING_RESULT_TAGS);
-		if (resultTags != null) {
-			resultTagsToWrite.clear();
-			for (String resultTag : resultTags) {
-				resultTagsToWrite.add(ResultTag.valueOf(resultTag.toUpperCase()));
+		List<String> resultTagsFromSettings = (List<String>) settings.get(SETTING_RESULT_TAGS);
+		if (resultTagsFromSettings != null) {
+			resultAttributesToWriteAsTags.clear();
+			for (String resultTag : resultTagsFromSettings) {
+				resultAttributesToWriteAsTags.add(ResultAttribute.valueOf(resultTag.toUpperCase()));
 			}
 		}
-		LOG.debug("Result Tags to write set to: {}", resultTagsToWrite);
+		LOG.debug("Result Tags to write set to: {}", resultAttributesToWriteAsTags);
 	}
 
 	@VisibleForTesting
@@ -148,9 +221,59 @@ public class InfluxDbWriter extends BaseOutputWriter {
 
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
-		// TODO Auto-generated method stub
+		// Not implemented
 	}
 
+	/**
+	 * <p>
+	 * Each {@link Result} is written as a {@link Point} to InfluxDB
+	 * </p>
+	 * 
+	 * <p>
+	 * The measurement for the {@link Point} is to {@link Result#getKeyAlias()}
+	 * <p>
+	 * <a href=
+	 * "https://influxdb.com/docs/v0.9/concepts/key_concepts.html#retention-policy">
+	 * The retention policy</a> for the measurement is set to "default" unless
+	 * overridden in settings:
+	 * </p>
+	 * 
+	 * <p>
+	 * The write consistency level defaults to "ALL" unless overridden in
+	 * settings:
+	 * 
+	 * <ul>
+	 * <li>ALL = Write succeeds only if write reached all cluster members.</li>
+	 * <li>ANY = Write succeeds if write reached any cluster members.</li>
+	 * <li>ONE = Write succeeds if write reached at least one cluster members.
+	 * </li>
+	 * <li>QUORUM = Write succeeds only if write reached a quorum of cluster
+	 * members.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * The time key for the {@link Point} is set to {@link Result#getEpoch()}
+	 * </p>
+	 * 
+	 * <p>
+	 * All {@link Result#getValues()} are written as fields to the {@link Point}
+	 * </p>
+	 * 
+	 * <p>
+	 * The following properties from {@link Result} are written as tags to the
+	 * {@link Point} unless overriden in settings:
+	 * 
+	 * <ul>
+	 * <li>{@link Result#getAttributeName()}</li>
+	 * <li>{@link Result#getClassName()}</li>
+	 * <li>{@link Result#getObjDomain()}</li>
+	 * <li>{@link Result#getTypeName()}</li>
+	 * </ul>
+	 * <p>
+	 * {@link Server#getHost()} is set as a tag on every {@link Point}
+	 * </p>
+	 * 
+	 */
 	@Override
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
@@ -160,19 +283,25 @@ public class InfluxDbWriter extends BaseOutputWriter {
 				.tag(TAG_HOSTNAME, server.getHost()).consistency(writeConsistency).build();
 		Point point;
 		for (Result result : results) {
-			Map<String, String> resultTagsToApply = buildResultTagsToApply(result);
+			Map<String, String> resultTagsToApply = buildResultTagMap(result);
 			point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), TimeUnit.MILLISECONDS)
 					.tag(resultTagsToApply).fields(result.getValues()).build();
 			batchPoints.point(point);
 		}
 		influxDB.write(batchPoints);
 	}
-
-	private Map<String, String> buildResultTagsToApply(Result result) throws Exception {
+	
+	/**
+	 * Adds data from {@link Result} to a map based on the attributes configured in <code>resultAttributesToWriteAsTags</code>
+	 * @param result The {@link Result} to get the data from 
+	 * @return A map based on the attributes configured in <code>resultAttributesToWriteAsTags</code>
+	 * @throws Exception If refection cannot be performed on the {@link Result}
+	 */
+	private Map<String, String> buildResultTagMap(Result result) throws Exception {
 		Map<String, String> resultTagsToApply = new TreeMap<String, String>();
-		for (ResultTag resultTagToWrite : resultTagsToWrite) {
-			Method m = result.getClass().getMethod(resultTagToWrite.getMethodName());
-			resultTagsToApply.put(resultTagToWrite.getValue(), (String) m.invoke(result));
+		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
+			Method m = result.getClass().getMethod(resultAttribute.getAccessorMethod());
+			resultTagsToApply.put(resultAttribute.getTagName(), (String) m.invoke(result));
 		}
 		return resultTagsToApply;
 	}
