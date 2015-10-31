@@ -23,16 +23,18 @@
 package com.googlecode.jmxtrans.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * 
@@ -42,63 +44,30 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ResultAttributeTests {
-	
+
 	private Map<String, String> attributeMap;
-	private static final String VALUE_ATTRIBUTE_NAME = "attributeName1";
-	private static final String VALUE_CLASS_NAME = "className1";
-	private static final String VALUE_OBJ_DOMAIN = "objDomain1";
-	private static final String VALUE_TYPE_NAME = "typeName1";
-	@Mock Result result;
-	
+	Result result = new Result(2l, "attributeName1", "className1", "objDomain1", "keyAlias1", "typeName1",
+			ImmutableMap.of("key", (Object) 1));
+
 	@Before
 	public void setup() {
 		attributeMap = new HashMap<String, String>();
-		when(result.getAttributeName()).thenReturn(VALUE_ATTRIBUTE_NAME);
-		when(result.getClassName()).thenReturn(VALUE_CLASS_NAME);
-		when(result.getObjDomain()).thenReturn(VALUE_OBJ_DOMAIN);
-		when(result.getTypeName()).thenReturn(VALUE_TYPE_NAME);
 	}
-	
+
 	@Test
 	public void nothingIsAddedToTheAttributeMapForANullResult() throws Exception {
 		assertThat(attributeMap).isEmpty();
 		ResultAttribute.ATTRIBUTENAME.addAttribute(attributeMap, null);
 		assertThat(attributeMap).isEmpty();
 	}
-	
+
 	@Test
-	public void attributeNameFromResultCanBeWrittenToMap() throws Exception {
-		ResultAttribute resultAttribute = ResultAttribute.ATTRIBUTENAME;
-		assertThat(attributeMap).isEmpty();
-		resultAttribute.addAttribute(attributeMap, result);
-		ensureThatResultAttributeValueIsInMap(resultAttribute, VALUE_ATTRIBUTE_NAME);	
-	}
-	
-	@Test
-	public void classNameFromResultCanBeWrittenToMap() throws Exception {
-		ResultAttribute resultAttribute = ResultAttribute.CLASSNAME;
-		assertThat(attributeMap).isEmpty();
-		resultAttribute.addAttribute(attributeMap, result);
-		ensureThatResultAttributeValueIsInMap(resultAttribute, VALUE_CLASS_NAME);	
-	}
-	
-	@Test
-	public void objDomainFromResultCanBeWrittenToMap() throws Exception {
-		ResultAttribute resultAttribute = ResultAttribute.OBJDOMAIN;
-		assertThat(attributeMap).isEmpty();
-		resultAttribute.addAttribute(attributeMap, result);
-		ensureThatResultAttributeValueIsInMap(resultAttribute, VALUE_OBJ_DOMAIN);	
-	}
-	
-	@Test
-	public void typeNameFromResultCanBeWrittenToMap() throws Exception {
-		ResultAttribute resultAttribute = ResultAttribute.TYPENAME;
-		assertThat(attributeMap).isEmpty();
-		resultAttribute.addAttribute(attributeMap, result);
-		ensureThatResultAttributeValueIsInMap(resultAttribute, VALUE_TYPE_NAME);	
-	}
-	
-	private void ensureThatResultAttributeValueIsInMap(ResultAttribute resultAttribute, String expectedValue) {
-		assertThat(attributeMap).containsEntry(resultAttribute.getAttributeName(), expectedValue);
+	public void attributeNamesFromResultAreWrittenToMap() throws Exception {
+		for (ResultAttribute resultAttribute : ResultAttribute.values()) {
+			resultAttribute.addAttribute(attributeMap, result);
+			Method m = result.getClass().getMethod("get" + StringUtils.capitalize(resultAttribute.getAttributeName()));
+			String expectedValue = (String) m.invoke(result);
+			assertThat(attributeMap).containsEntry(resultAttribute.getAttributeName(), expectedValue);
+		}
 	}
 }
