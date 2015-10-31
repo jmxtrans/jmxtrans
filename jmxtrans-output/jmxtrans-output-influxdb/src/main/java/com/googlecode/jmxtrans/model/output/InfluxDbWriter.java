@@ -22,33 +22,27 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.apache.commons.lang.StringUtils;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDB.ConsistencyLevel;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.BatchPoints;
-import org.influxdb.dto.Point;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDB.ConsistencyLevel;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static java.util.Collections.emptyMap;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * {@link com.googlecode.jmxtrans.model.OutputWriter} for
@@ -57,105 +51,40 @@ import com.googlecode.jmxtrans.model.ValidationException;
  * @author Simon Hutchinson
  *         <a href="https://github.com/sihutch">github.com/sihutch</a>
  */
-public class InfluxDbWriter extends BaseOutputWriter {
+@ThreadSafe
+public class InfluxDbWriter implements OutputWriter {
+
+	public static final String TAG_HOSTNAME = "hostname";
+
+	@Nonnull private final InfluxDB influxDB;
+	@Nonnull private final String database;
+	@Nonnull private final ConsistencyLevel writeConsistency;
+	@Nonnull private final String retentionPolicy;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
 	 * {@link Result} that will be written as {@link Point} tags
 	 */
-	private ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
+	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
-	public static final String TAG_HOSTNAME = "hostname";
-
-	/**
-	 * Logger.
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(InfluxDbWriter.class);
-
-	/**
-	 * The deault <a href=
-	 * "https://influxdb.com/docs/v0.9/concepts/key_concepts.html#retention-policy">
-	 * The retention policy</a> for each measuremen where no retentionPolicy
-	 * setting is provided in the json config
-	 */
-	public static final String DEFAULT_RETENTION_POLICY = "default";
-
-	private final String database;
-	private final ConsistencyLevel writeConsistency;
-	private final String retentionPolicy;
-
-	/** Thread safe **/
-	InfluxDB influxDB;
-
-	/**
-	 * @param typeNames
-	 * @param booleanAsNumber
-	 * @param debugEnabled
-	 * @param url
-	 *            - The url e.g http://localhost:8086 to InfluxDB
-	 * @param username
-	 *            - The username for InfluxDB
-	 * @param password
-	 *            - The password for InfluxDB
-	 * @param database
-	 *            - The name of the database (created if does not exist) on
-	 *            InfluxDB to write the measurements to
-	 * @param settings
-	 */
-	@JsonCreator
-	public InfluxDbWriter(@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber, @JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("url") String url, @JsonProperty("username") String username,
-			@JsonProperty("password") String password, @JsonProperty("database") String database,
-			@JsonProperty("writeConsistency") String writeConsistency,
-			@JsonProperty("retentionPolicy") String retentionPolicy,
-			@JsonProperty("resultTags") List<String> resultTags,
-			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
-
+	public InfluxDbWriter(
+			@Nonnull InfluxDB influxDB,
+			@Nonnull String database,
+			@Nonnull ConsistencyLevel writeConsistency,
+			@Nonnull String retentionPolicy,
+			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags) {
 		this.database = database;
-
-		this.writeConsistency = StringUtils.isNotBlank(writeConsistency) ? ConsistencyLevel.valueOf(writeConsistency)
-				: ConsistencyLevel.ALL;
-
-		this.retentionPolicy = StringUtils.isNotBlank(retentionPolicy) ? retentionPolicy : DEFAULT_RETENTION_POLICY;
-
-		initResultAttributesToWriteAsTags(resultTags);
-
-		LOG.debug("Connecting to url: {} as: username: {}", url, username);
-
-		influxDB = InfluxDBFactory.connect(url, username, password);
-	}
-
-	private void initResultAttributesToWriteAsTags(List<String> resultTags) {
-		EnumSet<ResultAttribute> resultAttributes = EnumSet.noneOf(ResultAttribute.class);
-		if (resultTags != null) {
-			for (String resultTag : resultTags) {
-				resultAttributes.add(ResultAttribute.valueOf(resultTag.toUpperCase()));
-			}
-		} else {
-			resultAttributes = EnumSet.allOf(ResultAttribute.class);
-		}
-		
-		resultAttributesToWriteAsTags = Sets.immutableEnumSet(resultAttributes);
-		LOG.debug("Result Tags to write set to: {}", resultAttributesToWriteAsTags);
-	}
-
-	@VisibleForTesting
-	void setInfluxDB(InfluxDB influxDB) {
+		this.writeConsistency = writeConsistency;
+		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
-	}
-
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
-		// Not implemented
+		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 	}
 
 	/**
 	 * <p>
 	 * Each {@link Result} is written as a {@link Point} to InfluxDB
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The measurement for the {@link Point} is to {@link Result#getKeyAlias()}
 	 * <p>
@@ -164,11 +93,11 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	 * The retention policy</a> for the measurement is set to "default" unless
 	 * overridden in settings:
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The write consistency level defaults to "ALL" unless overridden in
 	 * settings:
-	 * 
+	 *
 	 * <ul>
 	 * <li>ALL = Write succeeds only if write reached all cluster members.</li>
 	 * <li>ANY = Write succeeds if write reached any cluster members.</li>
@@ -177,19 +106,19 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	 * <li>QUORUM = Write succeeds only if write reached a quorum of cluster
 	 * members.</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
 	 * The time key for the {@link Point} is set to {@link Result#getEpoch()}
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * All {@link Result#getValues()} are written as fields to the {@link Point}
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The following properties from {@link Result} are written as tags to the
 	 * {@link Point} unless overriden in settings:
-	 * 
+	 *
 	 * <ul>
 	 * <li>{@link Result#getAttributeName()}</li>
 	 * <li>{@link Result#getClassName()}</li>
@@ -199,10 +128,10 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	 * <p>
 	 * {@link Server#getHost()} is set as a tag on every {@link Point}
 	 * </p>
-	 * 
+	 *
 	 */
 	@Override
-	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
 		influxDB.createDatabase(database);
 
@@ -223,5 +152,27 @@ public class InfluxDbWriter extends BaseOutputWriter {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}
 		return resultTagMap;
+	}
+
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {
+		// Not implemented
+	}
+
+	@Override
+	public void start() throws LifecycleException {
+	}
+
+	@Override
+	public void stop() throws LifecycleException {
+	}
+
+	@Override
+	public Map<String, Object> getSettings() {
+		return emptyMap();
+	}
+
+	@Override
+	public void setSettings(Map<String, Object> settings) {
 	}
 }
