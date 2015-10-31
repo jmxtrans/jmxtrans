@@ -42,6 +42,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.ReflectionException;
 import com.googlecode.jmxtrans.model.Result;
@@ -59,10 +61,10 @@ import com.googlecode.jmxtrans.model.ValidationException;
 public class InfluxDbWriter extends BaseOutputWriter {
 
 	/**
-	 * The {@link EnumSet} of {@link ResultAttribute} attributes of
+	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
 	 * {@link Result} that will be written as {@link Point} tags
 	 */
-	private EnumSet<ResultAttribute> resultAttributesToWriteAsTags = EnumSet.allOf(ResultAttribute.class);
+	private ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	public static final String TAG_HOSTNAME = "hostname";
 
@@ -127,12 +129,16 @@ public class InfluxDbWriter extends BaseOutputWriter {
 	}
 
 	private void initResultAttributesToWriteAsTags(List<String> resultTags) {
+		EnumSet<ResultAttribute> resultAttributes = EnumSet.noneOf(ResultAttribute.class);
 		if (resultTags != null) {
-			resultAttributesToWriteAsTags.clear();
 			for (String resultTag : resultTags) {
-				resultAttributesToWriteAsTags.add(ResultAttribute.valueOf(resultTag.toUpperCase()));
+				resultAttributes.add(ResultAttribute.valueOf(resultTag.toUpperCase()));
 			}
+		} else {
+			resultAttributes = EnumSet.allOf(ResultAttribute.class);
 		}
+		
+		resultAttributesToWriteAsTags = Sets.immutableEnumSet(resultAttributes);
 		LOG.debug("Result Tags to write set to: {}", resultAttributesToWriteAsTags);
 	}
 
