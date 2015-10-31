@@ -31,16 +31,16 @@
 		<version>252-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>jmxtrans-utils</artifactId>
+	<artifactId>jmxtrans-test-utils</artifactId>
 
-	<name>JmxTrans - utils</name>
+	<name>JmxTrans - test utils</name>
 
-	<description>This module contains utilities that do not have direct dependencies on JmxTrans.</description>
+	<description>This module contains utilities used purely in tests.</description>
 
 	<properties>
-		<verify.mutationThreshold>53</verify.mutationThreshold>
-		<verify.totalBranchRate>66</verify.totalBranchRate>
-		<verify.totalLineRate>60</verify.totalLineRate>
+		<verify.mutationThreshold>0</verify.mutationThreshold>
+		<verify.totalBranchRate>0</verify.totalBranchRate>
+		<verify.totalLineRate>0</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -49,51 +49,13 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jpathwatch</groupId>
-			<artifactId>jpathwatch</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>animal-sniffer-annotations</artifactId>
-			<optional>true</optional>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>annotations</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -105,13 +67,20 @@
 				<configuration>
 					<merge>true</merge>
 					<message>Creating site for ${project.name}
-						${project.version}</message>
+                        ${project.version}</message>
 					<path>${project.artifactId}</path>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>net.ju-n.maven.plugins</groupId>
 				<artifactId>checksum-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

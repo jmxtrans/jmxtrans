@@ -20,23 +20,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.test;
 
 import com.google.common.io.Closer;
+import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
 
-public class TCPEchoServer {
+public class TCPEchoServer extends ExternalResource {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -44,6 +47,16 @@ public class TCPEchoServer {
 	private volatile ServerSocket server;
 
 	private final Object startSynchro = new Object();
+
+	@Override
+	public void before() {
+		start();
+	}
+
+	@Override
+	protected void after() {
+		stop();
+	}
 
 	public void start() {
 		if (thread != null) {
@@ -88,8 +101,8 @@ public class TCPEchoServer {
 			synchronized (startSynchro) {
 				startSynchro.notifyAll();
 			}
-			BufferedReader in = closer.register(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-			PrintWriter out = closer.register(new PrintWriter(socket.getOutputStream()));
+			BufferedReader in = closer.register(new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8)));
+			PrintWriter out = closer.register(new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8)));
 			String line;
 			while ((line = in.readLine()) != null) {
 				out.print(line);

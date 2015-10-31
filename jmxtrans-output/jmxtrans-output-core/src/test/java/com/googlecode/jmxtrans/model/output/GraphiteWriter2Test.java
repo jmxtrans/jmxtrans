@@ -20,29 +20,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.googlecode.jmxtrans.model.JmxProcess;
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
+import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 
-public final class JsonUtils {
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
+import static org.assertj.core.api.Assertions.assertThat;
 
-	private JsonUtils() {}
+public class GraphiteWriter2Test {
 
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public static JmxProcess getJmxProcess(File file) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setNodeFactory(new PlaceholderResolverJsonNodeFactory());
-		mapper.registerModule(new GuavaModule());
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
+	@Test
+	public void correctFormatIsSentToGraphite() throws IOException {
+		WriterBasedOutputWriter outputWriter = new GraphiteWriter2.W(ImmutableList.<String>of(), "servers");
+		StringWriter writer = new StringWriter();
+
+		outputWriter.write(writer, dummyServer(), dummyQuery(), dummyResults());
+
+		String graphiteLine = writer.toString();
+		assertThat(graphiteLine)
+				.hasLineCount(1)
+				.startsWith("servers")
+				.contains("example_net_4321")
+				.endsWith(" 10 0\n");
 	}
+
 }
