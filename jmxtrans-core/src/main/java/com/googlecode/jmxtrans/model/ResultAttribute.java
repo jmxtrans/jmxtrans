@@ -58,17 +58,13 @@ public enum ResultAttribute {
 	 *            The map to add the {@link Result} data to
 	 * @param result
 	 *            The {@link Result} to get the data from
-	 * @throws ReflectionException
+	 * @throws Exception
 	 *             If reflection cannot be performed on the {@link Result}
 	 */
-	public void addAttribute(Map<String, String> attributeMap, Result result) throws ReflectionException {
+	public void addAttribute(Map<String, String> attributeMap, Result result) throws Exception {
 		if (attributeMap != null && result != null) {
-			try {
 				Method m = result.getClass().getMethod(accessorMethod);
 				attributeMap.put(attributeName, (String) m.invoke(result));
-			} catch (Exception e) {
-				throw new ReflectionException(e);
-			}
 		}
 	}
 }

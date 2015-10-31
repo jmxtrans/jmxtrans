@@ -45,7 +45,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.ReflectionException;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
@@ -218,7 +217,7 @@ public class InfluxDbWriter extends BaseOutputWriter {
 		influxDB.write(batchPoints);
 	}
 
-	private Map<String, String> buildResultTagMap(Result result) throws ReflectionException {
+	private Map<String, String> buildResultTagMap(Result result) throws Exception {
 		Map<String, String> resultTagMap = new TreeMap<String, String>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addAttribute(resultTagMap, result);
