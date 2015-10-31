@@ -55,13 +55,6 @@ public class ResultAttributeTests {
 	}
 
 	@Test
-	public void nothingIsAddedToTheAttributeMapForANullResult() throws Exception {
-		assertThat(attributeMap).isEmpty();
-		ResultAttribute.ATTRIBUTENAME.addAttribute(attributeMap, null);
-		assertThat(attributeMap).isEmpty();
-	}
-
-	@Test
 	public void attributeNamesFromResultAreWrittenToMap() throws Exception {
 		for (ResultAttribute resultAttribute : ResultAttribute.values()) {
 			resultAttribute.addAttribute(attributeMap, result);

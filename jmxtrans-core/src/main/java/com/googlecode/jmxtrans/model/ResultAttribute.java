@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -51,8 +52,8 @@ public enum ResultAttribute {
 	}
 
 	/**
-	 * Calls the Getter defined by the {@link ResultAttribute} on the {@link Result}
-	 * add adds the entry to the supplied {@link Map}
+	 * Calls the Getter defined by the {@link ResultAttribute} on the
+	 * {@link Result} add adds the entry to the supplied {@link Map}
 	 * 
 	 * @param attributeMap
 	 *            The map to add the {@link Result} data to
@@ -61,10 +62,8 @@ public enum ResultAttribute {
 	 * @throws Exception
 	 *             If reflection cannot be performed on the {@link Result}
 	 */
-	public void addAttribute(Map<String, String> attributeMap, Result result) throws Exception {
-		if (attributeMap != null && result != null) {
-				Method m = result.getClass().getMethod(accessorMethod);
-				attributeMap.put(attributeName, (String) m.invoke(result));
-		}
+	public void addAttribute(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) throws Exception {
+		Method m = result.getClass().getMethod(accessorMethod);
+		attributeMap.put(attributeName, (String) m.invoke(result));
 	}
 }
