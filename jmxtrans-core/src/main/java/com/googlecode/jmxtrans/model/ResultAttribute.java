@@ -28,6 +28,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import lombok.SneakyThrows;
+
 /**
  * Enumerates the attributes of {@link Result}
  * 
@@ -59,10 +61,10 @@ public enum ResultAttribute {
 	 *            The map to add the {@link Result} data to
 	 * @param result
 	 *            The {@link Result} to get the data from
-	 * @throws Exception
-	 *             If reflection cannot be performed on the {@link Result}
-	 */
-	public void addAttribute(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) throws Exception {
+	*/
+	//Reflection errors have been covered fully by tests
+	@SneakyThrows(Exception.class)
+	public void addAttribute(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) {
 		Method m = result.getClass().getMethod(accessorMethod);
 		attributeMap.put(attributeName, (String) m.invoke(result));
 	}
