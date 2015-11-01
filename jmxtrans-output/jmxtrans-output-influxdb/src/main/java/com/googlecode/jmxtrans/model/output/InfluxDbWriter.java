@@ -22,27 +22,26 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.OutputWriter;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.ResultAttribute;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
+
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.ThreadSafe;
-import java.util.Map;
-import java.util.TreeMap;
-
-import static java.util.Collections.emptyMap;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.googlecode.jmxtrans.model.OutputWriterAdapter;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.ResultAttribute;
+import com.googlecode.jmxtrans.model.Server;
 
 /**
  * {@link com.googlecode.jmxtrans.model.OutputWriter} for
@@ -52,7 +51,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  *         <a href="https://github.com/sihutch">github.com/sihutch</a>
  */
 @ThreadSafe
-public class InfluxDbWriter implements OutputWriter {
+public class InfluxDbWriter extends OutputWriterAdapter {
 
 	public static final String TAG_HOSTNAME = "hostname";
 
@@ -152,27 +151,5 @@ public class InfluxDbWriter implements OutputWriter {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}
 		return resultTagMap;
-	}
-
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
-		// Not implemented
-	}
-
-	@Override
-	public void start() throws LifecycleException {
-	}
-
-	@Override
-	public void stop() throws LifecycleException {
-	}
-
-	@Override
-	public Map<String, Object> getSettings() {
-		return emptyMap();
-	}
-
-	@Override
-	public void setSettings(Map<String, Object> settings) {
 	}
 }

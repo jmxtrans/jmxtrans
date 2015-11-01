@@ -13,7 +13,7 @@
                "resultAlias":"jvm.cpu",
                "outputWriters":[
                   {
-                     "@class":"com.googlecode.jmxtrans.model.output.InfluxDbWriter",
+                     "@class":"com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
                      "username": "root",
               		 "password": "root",
               		 "database": "newDB",

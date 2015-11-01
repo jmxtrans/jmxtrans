@@ -22,16 +22,15 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.DEFAULT_RETENTION_POLICY;
+import static com.google.common.collect.Sets.immutableEnumSet;
 import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_HOSTNAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -72,6 +72,10 @@ public class InfluxDbWriterTests {
 	private InfluxDB influxDB;
 	@Captor
 	private ArgumentCaptor<BatchPoints> messageCaptor;
+	
+	private ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.ALL;
+	private String DEFAULT_RETENTION_POLICY = "default";
+	private ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = immutableEnumSet(EnumSet.allOf(ResultAttribute.class));
 
 	Server server = Server.builder().setHost("localhost").setPort("123").build();
 	Query query = Query.builder().setObj("test").build();
@@ -82,8 +86,6 @@ public class InfluxDbWriterTests {
 	@Test
 	public void pointsAreWrittenToInfluxDb() throws Exception {
 		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
-
-		writer.setInfluxDB(influxDB);
 		writer.doWrite(server, query, results);
 
 		verify(influxDB).write(messageCaptor.capture());
@@ -112,15 +114,13 @@ public class InfluxDbWriterTests {
 	}
 
 	@Test
-	public void allWriteConsistencyCanAppliedViaSettings() throws Exception {
+	public void writeConsistencyLevelsAreAppliedToBatchPointsBeingWritten() throws Exception {
 		for (ConsistencyLevel consistencyLevel : ConsistencyLevel.values()) {
-			InfluxDB mockInfluxDB = mock(InfluxDB.class);
 			InfluxDbWriter writer = getTestInfluxDbWriterWithWriteConsistency(consistencyLevel);
 
-			writer.setInfluxDB(mockInfluxDB);
 			writer.doWrite(server, query, results);
 
-			verify(mockInfluxDB).write(messageCaptor.capture());
+			verify(influxDB,atLeastOnce()).write(messageCaptor.capture());
 			BatchPoints batchPoints = messageCaptor.getValue();
 			assertThat(batchPoints.getConsistency()).isEqualTo(consistencyLevel);
 		}
@@ -129,14 +129,11 @@ public class InfluxDbWriterTests {
 	@Test
 	public void onlyRequestedResultPropertiesAreAppliedAsTags() throws Exception {
 		for (ResultAttribute expectedResultTag : ResultAttribute.values()) {
-			List<String> expectedResultTags = Arrays.asList(expectedResultTag.getAttributeName());
-			InfluxDB mockInfluxDB = mock(InfluxDB.class);
+			ImmutableSet<ResultAttribute> expectedResultTags = ImmutableSet.of(expectedResultTag);
 			InfluxDbWriter writer = getTestInfluxDbWriterWithResultTags(expectedResultTags);
-
-			writer.setInfluxDB(mockInfluxDB);
 			writer.doWrite(server, query, results);
 
-			verify(mockInfluxDB).write(messageCaptor.capture());
+			verify(influxDB, atLeastOnce()).write(messageCaptor.capture());
 			BatchPoints batchPoints = messageCaptor.getValue();
 			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
 
@@ -146,28 +143,6 @@ public class InfluxDbWriterTests {
 				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getAttributeName());
 			}
 		}
-	}
-
-	@Test
-	public void defaultWriteConsistencyIsAll() throws Exception {
-		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
-		writer.setInfluxDB(influxDB);
-		writer.doWrite(server, query, results);
-
-		verify(influxDB).write(messageCaptor.capture());
-		BatchPoints batchPoints = messageCaptor.getValue();
-		assertThat(batchPoints.getConsistency()).isEqualTo(ConsistencyLevel.ALL);
-	}
-
-	@Test
-	public void defaultRetentionPolicyIsDefault() throws Exception {
-		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
-		writer.setInfluxDB(influxDB);
-		writer.doWrite(server, query, results);
-
-		verify(influxDB).write(messageCaptor.capture());
-		BatchPoints batchPoints = messageCaptor.getValue();
-		assertThat(batchPoints.getRetentionPolicy()).isEqualTo(DEFAULT_RETENTION_POLICY);
 	}
 
 	@Test
@@ -191,22 +166,20 @@ public class InfluxDbWriterTests {
 		return sb.toString();
 	}
 
-	private static InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
-		return getTestInfluxDbWriter(null, null, null);
+	private InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL,DEFAULT_RETENTION_POLICY,DEFAULT_RESULT_ATTRIBUTES);
 	}
 
-	private static InfluxDbWriter getTestInfluxDbWriterWithResultTags(List<String> resultTags) {
-		return getTestInfluxDbWriter(null, null, resultTags);
+	private InfluxDbWriter getTestInfluxDbWriterWithResultTags(ImmutableSet<ResultAttribute> resultTags) {
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL,DEFAULT_RETENTION_POLICY, resultTags);
 	}
 
-	private static InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
-		return getTestInfluxDbWriter(consistencyLevel, null, null);
+	private InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
+		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY,DEFAULT_RESULT_ATTRIBUTES);
 	}
 
-	private static InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy,
-			List<String> resultTags) {
-		String writeConsistencyLevel = consistencyLevel == null ? null : consistencyLevel.name();
-		return new InfluxDbWriter(ImmutableList.<String> of(), false, false, "http://localhost:8086", "username",
-				"password", DATABASE_NAME, writeConsistencyLevel, retentionPolicy, resultTags, null);
+	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy,
+			ImmutableSet<ResultAttribute> resultTags) {
+		return new InfluxDbWriter(influxDB,DATABASE_NAME, consistencyLevel, retentionPolicy, resultTags);
 	}
 }
