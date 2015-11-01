@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,11 +57,18 @@ public class ResultAttributeTests {
 
 	@Test
 	public void attributeNamesFromResultAreWrittenToMap() throws Exception {
+		
 		for (ResultAttribute resultAttribute : ResultAttribute.values()) {
 			resultAttribute.addAttribute(attributeMap, result);
-			Method m = result.getClass().getMethod("get" + StringUtils.capitalize(resultAttribute.getAttributeName()));
+			String attributeName = enumValueToAttribute(resultAttribute);
+			Method m = result.getClass().getMethod("get" + WordUtils.capitalize(attributeName));
 			String expectedValue = (String) m.invoke(result);
-			assertThat(attributeMap).containsEntry(resultAttribute.getAttributeName(), expectedValue);
+			assertThat(attributeMap).containsEntry(attributeName, expectedValue);
 		}
+	}
+	
+	private String enumValueToAttribute(ResultAttribute attribute) {
+		String[] split = attribute.name().split("_");
+		return StringUtils.lowerCase(split[0]) + WordUtils.capitalizeFully(split[1]);
 	}
 }

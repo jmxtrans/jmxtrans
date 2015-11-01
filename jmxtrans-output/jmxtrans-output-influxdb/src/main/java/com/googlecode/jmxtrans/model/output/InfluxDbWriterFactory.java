@@ -102,7 +102,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 		EnumSet<ResultAttribute> resultAttributes = EnumSet.noneOf(ResultAttribute.class);
 		if (resultTags != null) {
 			for (String resultTag : resultTags) {
-				resultAttributes.add(ResultAttribute.valueOf(resultTag.toUpperCase()));
+				resultAttributes.add(ResultAttribute.fromAttribute(resultTag));
 			}
 		} else {
 			resultAttributes = EnumSet.allOf(ResultAttribute.class);

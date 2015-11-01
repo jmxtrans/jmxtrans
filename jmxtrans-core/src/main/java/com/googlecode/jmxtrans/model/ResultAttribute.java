@@ -22,15 +22,17 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import com.google.common.annotations.VisibleForTesting;
-import lombok.SneakyThrows;
-import lombok.ToString;
+import static org.apache.commons.lang.StringUtils.capitalize;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import static org.apache.commons.lang.StringUtils.capitalize;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang.StringUtils;
+
+import lombok.SneakyThrows;
+import lombok.ToString;
 
 /**
  * Enumerates the attributes of {@link Result}
@@ -42,21 +44,35 @@ import static org.apache.commons.lang.StringUtils.capitalize;
 @ToString
 public enum ResultAttribute {
 
-	TYPENAME("typeName"), OBJDOMAIN("objDomain"), CLASSNAME("className"), ATTRIBUTENAME("attributeName");
+	TYPE_NAME("typeName"), OBJ_DOMAIN("objDomain"), CLASS_NAME("className"), ATTRIBUTE_NAME("attributeName");
 
-	@Nonnull private String attributeName;
-	@Nonnull private String accessorMethod;
+	@Nonnull
+	private String attributeName;
+	@Nonnull
+	private String accessorMethod;
 
 	private ResultAttribute(String attributeName) {
 		this.attributeName = attributeName;
 		this.accessorMethod = "get" + capitalize(attributeName);
 	}
 
-	// This accessor is only used in tests. It is probably possible to improve the tests to remove this dependency
-	// and completely remove this accessor.
-	@VisibleForTesting
-	public String getAttributeName() {
-		return attributeName;
+	/**
+	 * Get the {@link ResultAttribute} value from the attribute name
+	 * 
+	 * @param attributeName
+	 *            <p>The attribute name for the {@link ResultAttribute} allowed values are:</p>
+	 *            <ul>
+	 *            	<li>typeName</li>
+	 *              <li>objDomain</li>
+	 *              <li>className</li>
+	 *              <li>attributeName</li>
+	 *            </ul>
+	 * @return the {@link ResultAttribute}
+	 */
+	public static ResultAttribute fromAttribute(@Nonnull String attributeName) {
+		String[] split = StringUtils.splitByCharacterTypeCamelCase(attributeName);
+		StringBuilder sb = new StringBuilder(split[0].toUpperCase()).append("_").append(split[1].toUpperCase());
+		return valueOf(sb.toString());
 	}
 
 	/**
@@ -67,8 +83,8 @@ public enum ResultAttribute {
 	 *            The map to add the {@link Result} data to
 	 * @param result
 	 *            The {@link Result} to get the data from
-	*/
-	//Reflection errors have been covered fully by tests
+	 */
+	// Reflection errors have been covered fully by tests
 	@SneakyThrows
 	public void addAttribute(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) {
 		Method m = result.getClass().getMethod(accessorMethod);

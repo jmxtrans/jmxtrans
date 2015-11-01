@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
@@ -99,10 +101,10 @@ public class InfluxDbWriterTests {
 		// measurement,<comma separated key=val tags>" " <comma separated
 		// key=val fields>
 		Map<String, String> expectedTags = new TreeMap<String, String>();
-		expectedTags.put(ResultAttribute.ATTRIBUTENAME.getAttributeName(), result.getAttributeName());
-		expectedTags.put(ResultAttribute.CLASSNAME.getAttributeName(), result.getClassName());
-		expectedTags.put(ResultAttribute.OBJDOMAIN.getAttributeName(), result.getObjDomain());
-		expectedTags.put(ResultAttribute.TYPENAME.getAttributeName(), result.getTypeName());
+		expectedTags.put(enumValueToAttribute(ResultAttribute.ATTRIBUTE_NAME), result.getAttributeName());
+		expectedTags.put(enumValueToAttribute(ResultAttribute.CLASS_NAME), result.getClassName());
+		expectedTags.put(enumValueToAttribute(ResultAttribute.OBJ_DOMAIN), result.getObjDomain());
+		expectedTags.put(enumValueToAttribute(ResultAttribute.TYPE_NAME), result.getTypeName());
 		expectedTags.put(TAG_HOSTNAME, HOST);
 		String lineProtocol = buildLineProtocol(result.getKeyAlias(), expectedTags);
 
@@ -137,10 +139,10 @@ public class InfluxDbWriterTests {
 			BatchPoints batchPoints = messageCaptor.getValue();
 			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
 
-			assertThat(lineProtocol).contains(expectedResultTag.getAttributeName());
+			assertThat(lineProtocol).contains(enumValueToAttribute(expectedResultTag));
 			EnumSet<ResultAttribute> unexpectedResultTags = EnumSet.complementOf(EnumSet.of(expectedResultTag));
 			for (ResultAttribute unexpectedResultTag : unexpectedResultTags) {
-				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getAttributeName());
+				assertThat(lineProtocol).doesNotContain(enumValueToAttribute(unexpectedResultTag));
 			}
 		}
 	}
@@ -181,5 +183,10 @@ public class InfluxDbWriterTests {
 	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy,
 			ImmutableSet<ResultAttribute> resultTags) {
 		return new InfluxDbWriter(influxDB,DATABASE_NAME, consistencyLevel, retentionPolicy, resultTags);
+	}
+	
+	private String enumValueToAttribute(ResultAttribute attribute) {
+		String[] split = attribute.name().split("_");
+		return StringUtils.lowerCase(split[0]) + WordUtils.capitalizeFully(split[1]);
 	}
 }
