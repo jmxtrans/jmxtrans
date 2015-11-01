@@ -109,6 +109,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-influxdb</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-output-jrobin</artifactId>
 			<scope>runtime</scope>
 		</dependency>
