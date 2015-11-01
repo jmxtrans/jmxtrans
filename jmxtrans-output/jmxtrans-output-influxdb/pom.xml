@@ -54,6 +54,11 @@
 			<artifactId>influxdb-java</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-core</artifactId>
 		</dependency>

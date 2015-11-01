@@ -22,13 +22,15 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.google.common.annotations.VisibleForTesting;
+import lombok.SneakyThrows;
+import lombok.ToString;
+
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-
-import lombok.SneakyThrows;
+import static org.apache.commons.lang.StringUtils.capitalize;
 
 /**
  * Enumerates the attributes of {@link Result}
@@ -37,18 +39,22 @@ import lombok.SneakyThrows;
  *         <a href="https://github.com/sihutch">github.com/sihutch</a>
  *
  */
+@ToString
 public enum ResultAttribute {
 
 	TYPENAME("typeName"), OBJDOMAIN("objDomain"), CLASSNAME("className"), ATTRIBUTENAME("attributeName");
 
-	private String attributeName;
-	private String accessorMethod;
+	@Nonnull private String attributeName;
+	@Nonnull private String accessorMethod;
 
 	private ResultAttribute(String attributeName) {
 		this.attributeName = attributeName;
-		this.accessorMethod = "get" + StringUtils.capitalize(attributeName);
+		this.accessorMethod = "get" + capitalize(attributeName);
 	}
 
+	// This accessor is only used in tests. It is probably possible to improve the tests to remove this dependency
+	// and completely remove this accessor.
+	@VisibleForTesting
 	public String getAttributeName() {
 		return attributeName;
 	}
@@ -63,7 +69,7 @@ public enum ResultAttribute {
 	 *            The {@link Result} to get the data from
 	*/
 	//Reflection errors have been covered fully by tests
-	@SneakyThrows(Exception.class)
+	@SneakyThrows
 	public void addAttribute(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) {
 		Method m = result.getClass().getMethod(accessorMethod);
 		attributeMap.put(attributeName, (String) m.invoke(result));
