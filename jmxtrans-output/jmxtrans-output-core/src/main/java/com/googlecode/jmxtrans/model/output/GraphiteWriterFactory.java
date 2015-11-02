@@ -29,8 +29,6 @@ import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.TcpOutputWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.net.InetSocketAddress;
@@ -38,7 +36,6 @@ import java.net.InetSocketAddress;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * This low latency and thread safe output writer sends data to a host/port combination
