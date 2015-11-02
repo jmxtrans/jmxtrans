@@ -22,33 +22,34 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
+import com.googlecode.jmxtrans.model.QueryFixtures;
+import com.googlecode.jmxtrans.model.ResultFixtures;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
-import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
-import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
-import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GraphiteWriter2Test {
+public class SensuWriter2Test {
 
 	@Test
-	public void correctFormatIsSentToGraphite() throws IOException {
-		WriterBasedOutputWriter outputWriter = new GraphiteWriter2(ImmutableList.<String>of(), "servers");
+	public void metricsAreFormattedCorrectly() throws IOException {
 		StringWriter writer = new StringWriter();
+		SensuWriter2 sensuWriter = new SensuWriter2(new GraphiteWriter2(ImmutableList.<String>of(), null), new JsonFactory());
 
-		outputWriter.write(writer, dummyServer(), dummyQuery(), dummyResults());
+		sensuWriter.write(writer, ServerFixtures.dummyServer(), QueryFixtures.dummyQuery(), ResultFixtures.dummyResults());
 
-		String graphiteLine = writer.toString();
-		assertThat(graphiteLine)
-				.hasLineCount(1)
-				.startsWith("servers")
-				.contains("example_net_4321")
-				.endsWith(" 10 0\n");
+		assertThat(writer.toString()).isEqualTo(
+				"{\n" +
+				"  \"name\" : \"jmxtrans\",\n" +
+				"  \"type\" : \"metric\",\n" +
+				"  \"handler\" : \"graphite\",\n" +
+				"  \"output\" : \"host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0\\n\"\n" +
+				"}");
 	}
 
 }

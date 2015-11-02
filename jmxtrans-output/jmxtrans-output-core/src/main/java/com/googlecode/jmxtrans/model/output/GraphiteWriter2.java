@@ -22,117 +22,65 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.OutputWriter;
-import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
-import com.googlecode.jmxtrans.model.output.support.TcpOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
 import com.googlecode.jmxtrans.util.OnlyOnceLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.io.Writer;
-import java.net.InetSocketAddress;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
-/**
- * This low latency and thread safe output writer sends data to a host/port combination
- * in the Graphite format.
- *
- * @see <a href="http://graphite.wikidot.com/getting-your-data-into-graphite">Getting your data into Graphite</a>
- */
 @ThreadSafe
-public class GraphiteWriter2 implements OutputWriterFactory {
+public class GraphiteWriter2 implements WriterBasedOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(GraphiteWriter2.class);
+	private final OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(log);
 
-	private static final String DEFAULT_ROOT_PREFIX = "servers";
+	@Nonnull private final ImmutableList<String> typeNames;
+	@Nullable private final String rootPrefix;
 
-	private final String rootPrefix;
-	private final InetSocketAddress graphiteServer;
-	private final ImmutableList<String> typeNames;
-	private final boolean booleanAsNumber;
-
-	@JsonCreator
-	public GraphiteWriter2(
-			@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
-			@JsonProperty("rootPrefix") String rootPrefix,
-			@JsonProperty("host") String host,
-			@JsonProperty("port") Integer port) {
+	public GraphiteWriter2(@Nonnull ImmutableList<String> typeNames, @Nullable String rootPrefix) {
 		this.typeNames = typeNames;
-		this.booleanAsNumber = booleanAsNumber;
-		this.rootPrefix = firstNonNull(rootPrefix, DEFAULT_ROOT_PREFIX);
-
-		this.graphiteServer = new InetSocketAddress(
-				checkNotNull(host, "Host cannot be null."),
-				checkNotNull(port, "Port cannot be null."));
+		this.rootPrefix = rootPrefix;
 	}
 
 	@Override
-	public OutputWriter create() {
-		return ResultTransformerOutputWriter.booleanToNumber(
-				booleanAsNumber,
-				TcpOutputWriter.builder(graphiteServer, new W(typeNames, rootPrefix))
-						.setCharset(UTF_8)
-						.build()
-		);
-	}
+	public void write(
+			@Nonnull Writer writer,
+			@Nonnull Server server,
+			@Nonnull Query query,
+			@Nonnull ImmutableList<Result> results) throws IOException {
 
-	@ThreadSafe
-	public static class W implements WriterBasedOutputWriter {
-		private final OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(log);
+		for (Result result : results) {
+			log.debug("Query result: {}", result);
+			Map<String, Object> resultValues = result.getValues();
+			if (resultValues != null) {
+				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+					Object value = values.getValue();
+					if (isNumeric(value)) {
 
-		private final ImmutableList<String> typeNames;
-		private final String rootPrefix;
-
-		public W(ImmutableList<String> typeNames, String rootPrefix) {
-			this.typeNames = typeNames;
-			this.rootPrefix = rootPrefix;
-		}
-
-		@Override
-		public void write(
-				@Nonnull Writer writer,
-				@Nonnull Server server,
-				@Nonnull Query query,
-				@Nonnull ImmutableList<Result> results) throws IOException {
-
-			for (Result result : results) {
-				log.debug("Query result: {}", result);
-				Map<String, Object> resultValues = result.getValues();
-				if (resultValues != null) {
-					for (Entry<String, Object> values : resultValues.entrySet()) {
-						Object value = values.getValue();
-						if (isNumeric(value)) {
-
-							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-									.replaceAll("[()]", "_") + " " + value.toString() + " "
-									+ result.getEpoch() / 1000 + "\n";
-							log.debug("Graphite Message: {}", line);
-							writer.write(line);
-						} else {
-							onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
-						}
+						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+								.replaceAll("[()]", "_") + " " + value.toString() + " "
+								+ SECONDS.convert(result.getEpoch(), MILLISECONDS) + "\n";
+						log.debug("Graphite Message: {}", line);
+						writer.write(line);
+					} else {
+						onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 					}
 				}
 			}
 		}
 	}
-
 }
