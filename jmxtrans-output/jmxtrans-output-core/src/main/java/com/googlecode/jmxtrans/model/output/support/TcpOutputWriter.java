@@ -24,12 +24,10 @@ package com.googlecode.jmxtrans.model.output.support;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketExpiration;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
@@ -44,11 +42,10 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
-import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class TcpOutputWriter<T extends WriterBasedOutputWriter> implements OutputWriter {
+public class TcpOutputWriter<T extends WriterBasedOutputWriter> extends OutputWriterAdapter{
 
 	@Nonnull private final T target;
 	@Nonnull private final Pool<SocketPoolable> socketPool;
@@ -56,16 +53,6 @@ public class TcpOutputWriter<T extends WriterBasedOutputWriter> implements Outpu
 	public TcpOutputWriter(@Nonnull T target, @Nonnull Pool<SocketPoolable> socketPool) {
 		this.target = target;
 		this.socketPool = socketPool;
-	}
-
-	@Override
-	public void start() throws LifecycleException {
-
-	}
-
-	@Override
-	public void stop() throws LifecycleException {
-
 	}
 
 	@Override
@@ -83,21 +70,6 @@ public class TcpOutputWriter<T extends WriterBasedOutputWriter> implements Outpu
 		} catch (InterruptedException e) {
 			throw new IllegalStateException("Could not get socket from pool, please check is the server is available");
 		}
-	}
-
-	@Override
-	public Map<String, Object> getSettings() {
-		return null;
-	}
-
-	@Override
-	public void setSettings(Map<String, Object> settings) {
-
-	}
-
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
-
 	}
 
 	public static <T extends WriterBasedOutputWriter> Builder<T> builder(
