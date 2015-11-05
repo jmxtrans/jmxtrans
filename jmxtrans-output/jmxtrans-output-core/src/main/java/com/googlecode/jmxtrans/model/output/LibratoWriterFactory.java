@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.HttpOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.HttpUrlConnectionConfigurer;
@@ -83,7 +82,7 @@ public class LibratoWriterFactory implements OutputWriterFactory {
 	}
 
 	@Override
-	public OutputWriter create() {
+	public ResultTransformerOutputWriter<HttpOutputWriter<LibratoWriter2>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
 				new HttpOutputWriter<LibratoWriter2>(

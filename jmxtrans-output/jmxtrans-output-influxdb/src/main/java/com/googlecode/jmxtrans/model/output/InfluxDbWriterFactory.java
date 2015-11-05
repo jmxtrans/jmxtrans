@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
@@ -114,7 +113,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	}
 
 	@Override
-	public OutputWriter create() {
+	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
 				writeConsistency, retentionPolicy, resultAttributesToWriteAsTags));
 	}
