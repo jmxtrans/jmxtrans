@@ -22,13 +22,22 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.googlecode.jmxtrans.test.RequiresIO;
+import com.kaching.platform.testing.AllowDNSResolution;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author lanyonm
  */
+@Category(RequiresIO.class)
+@AllowDNSResolution
 public class ServerTests {
 
 	@Test

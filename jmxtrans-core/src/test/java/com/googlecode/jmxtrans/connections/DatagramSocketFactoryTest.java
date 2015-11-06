@@ -22,7 +22,11 @@
  */
 package com.googlecode.jmxtrans.connections;
 
+import com.googlecode.jmxtrans.test.RequiresIO;
+import com.kaching.platform.testing.AllowNetworkAccess;
+import com.kaching.platform.testing.AllowNetworkListen;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
@@ -30,19 +34,24 @@ import java.net.InetSocketAddress;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Category(RequiresIO.class)
+@AllowNetworkListen(ports = 0)
+@AllowNetworkAccess(endpoints = "*:" + DatagramSocketFactoryTest.PORT)
 public class DatagramSocketFactoryTest {
+
+	public static final int PORT = 50123;
+
 	@Test
 	public void testDatagramSocketFactoryMakeObject() throws Exception {
-		int port = 50123;
 
 		DatagramSocketFactory socketFactory = new DatagramSocketFactory();
 
-		InetSocketAddress socketAddress = new InetSocketAddress(Inet4Address.getLocalHost(), port);
+		InetSocketAddress socketAddress = new InetSocketAddress(Inet4Address.getLocalHost(), PORT);
 
 		DatagramSocket socketObject = socketFactory.makeObject(socketAddress);
 
 		// Test if the remote address/port is the correct one.
-		assertThat(socketObject.getPort()).isEqualTo(port);
+		assertThat(socketObject.getPort()).isEqualTo(PORT);
 		assertThat(socketObject.getInetAddress()).isEqualTo(Inet4Address.getLocalHost());
 	}
 }

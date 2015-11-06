@@ -457,6 +457,12 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>com.kaching.platform</groupId>
+				<artifactId>kawala-testing</artifactId>
+				<version>0.1.6</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.12</version>
@@ -539,6 +545,13 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.kaching.platform</groupId>
+			<artifactId>kawala-testing</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 
@@ -844,6 +857,7 @@
 							<include>**/*TestCase.java</include>
 							<include>**/*Tests.java</include>
 						</includes>
+						<argLine>-Djava.security.manager=com.kaching.platform.testing.LessIOSecurityManager</argLine>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -919,7 +933,7 @@
 				<plugin>
 					<groupId>org.pitest</groupId>
 					<artifactId>pitest-maven</artifactId>
-					<version>1.1.6</version>
+					<version>1.1.7</version>
 					<configuration>
 						<mutators>
 							<mutator>DEFAULTS</mutator>
@@ -928,6 +942,10 @@
 							<mutator>NON_VOID_METHOD_CALLS</mutator>
 							<mutator>CONSTRUCTOR_CALLS</mutator>
 						</mutators>
+						<excludedGroups>
+							<excludedGroup>com.googlecode.jmxtrans.test.IntegrationTest</excludedGroup>
+							<excludedGroup>com.googlecode.jmxtrans.test.RequiresIO</excludedGroup>
+						</excludedGroups>
 						<coverageThreshold>0</coverageThreshold>
 						<mutationThreshold>${verify.mutationThreshold}</mutationThreshold>
 						<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>

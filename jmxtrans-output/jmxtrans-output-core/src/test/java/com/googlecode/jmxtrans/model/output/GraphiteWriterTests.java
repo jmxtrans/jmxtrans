@@ -29,9 +29,12 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.test.RequiresIO;
+import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
@@ -46,6 +49,8 @@ import java.util.List;
 
 import static com.google.common.collect.ImmutableList.of;
 
+@Category(RequiresIO.class)
+@AllowDNSResolution
 public class GraphiteWriterTests {
 
 	@Test(expected = NullPointerException.class)

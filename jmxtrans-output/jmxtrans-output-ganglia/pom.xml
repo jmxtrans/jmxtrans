@@ -38,7 +38,7 @@
 	<description>This module contains Ganglia output writers.</description>
 
 	<properties>
-		<verify.mutationThreshold>45</verify.mutationThreshold>
+		<verify.mutationThreshold>0</verify.mutationThreshold>
 		<verify.totalBranchRate>4</verify.totalBranchRate>
 		<verify.totalLineRate>58</verify.totalLineRate>
 	</properties>
@@ -71,6 +71,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-test-utils</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

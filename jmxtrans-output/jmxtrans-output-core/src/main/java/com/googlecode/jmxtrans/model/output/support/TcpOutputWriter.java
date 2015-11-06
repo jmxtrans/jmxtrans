@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model.output.support;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -35,7 +36,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import stormpot.BlazePool;
 import stormpot.Config;
-import stormpot.Pool;
+import stormpot.LifecycledPool;
 import stormpot.Timeout;
 
 import javax.annotation.Nonnull;
@@ -48,9 +49,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class TcpOutputWriter<T extends WriterBasedOutputWriter> extends OutputWriterAdapter{
 
 	@Nonnull private final T target;
-	@Nonnull private final Pool<SocketPoolable> socketPool;
+	@Nonnull private final LifecycledPool<SocketPoolable> socketPool;
 
-	public TcpOutputWriter(@Nonnull T target, @Nonnull Pool<SocketPoolable> socketPool) {
+	public TcpOutputWriter(@Nonnull T target, @Nonnull LifecycledPool<SocketPoolable> socketPool) {
 		this.target = target;
 		this.socketPool = socketPool;
 	}
@@ -70,6 +71,11 @@ public class TcpOutputWriter<T extends WriterBasedOutputWriter> extends OutputWr
 		} catch (InterruptedException e) {
 			throw new IllegalStateException("Could not get socket from pool, please check is the server is available");
 		}
+	}
+
+	@Override
+	public void stop() throws LifecycleException {
+		socketPool.shutdown();
 	}
 
 	public static <T extends WriterBasedOutputWriter> Builder<T> builder(
@@ -99,7 +105,7 @@ public class TcpOutputWriter<T extends WriterBasedOutputWriter> extends OutputWr
 							charset))
 					.setExpiration(new SocketExpiration())
 					.setSize(poolSize);
-			Pool<SocketPoolable> pool = new BlazePool<SocketPoolable>(config);
+			LifecycledPool<SocketPoolable> pool = new BlazePool<SocketPoolable>(config);
 			return new TcpOutputWriter<T>(target, pool);
 		}
 	}
