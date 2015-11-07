@@ -28,8 +28,11 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.test.RequiresIO;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -50,7 +53,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Category(RequiresIO.class)
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Incompatibility with LessIOSecurityManager")
 public class JmxProcessingTests {
 
 	public static final String MBEAN_NAME = "domain:type=SomeType";

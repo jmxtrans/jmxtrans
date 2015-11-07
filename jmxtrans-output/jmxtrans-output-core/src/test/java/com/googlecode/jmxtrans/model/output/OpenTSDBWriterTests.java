@@ -26,8 +26,11 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.test.RequiresIO;
+import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -49,7 +52,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for {@link OpenTSDBWriter}.
  */
-
+@Category(RequiresIO.class)
+@AllowDNSResolution
 public class OpenTSDBWriterTests {
 	protected OpenTSDBWriter writer;
 	protected Query mockQuery;

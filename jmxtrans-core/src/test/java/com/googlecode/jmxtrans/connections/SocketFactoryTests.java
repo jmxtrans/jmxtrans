@@ -23,9 +23,13 @@
 package com.googlecode.jmxtrans.connections;
 
 import com.google.common.io.Closer;
+import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.test.TCPEchoServer;
+import com.kaching.platform.testing.AllowNetworkAccess;
+import com.kaching.platform.testing.AllowNetworkListen;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -33,6 +37,9 @@ import java.net.Socket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Category(RequiresIO.class)
+@AllowNetworkAccess(endpoints = "127.0.0.1:*")
+@AllowNetworkListen(ports = 0)
 public class SocketFactoryTests {
 
 	@Rule

@@ -38,9 +38,9 @@
 	<description>This module contains output writers that do not have any special dependencies.</description>
 
 	<properties>
-		<verify.mutationThreshold>29</verify.mutationThreshold>
-		<verify.totalBranchRate>28</verify.totalBranchRate>
-		<verify.totalLineRate>36</verify.totalLineRate>
+		<verify.mutationThreshold>13</verify.mutationThreshold>
+		<verify.totalBranchRate>25</verify.totalBranchRate>
+		<verify.totalLineRate>35</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -108,6 +108,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.jayway.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
@@ -115,6 +120,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.javacrumbs.json-unit</groupId>
+			<artifactId>json-unit-fluent</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

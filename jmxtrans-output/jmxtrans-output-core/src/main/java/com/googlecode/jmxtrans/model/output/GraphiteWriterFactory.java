@@ -25,7 +25,6 @@ package com.googlecode.jmxtrans.model.output;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.TcpOutputWriter;
@@ -70,7 +69,7 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 	}
 
 	@Override
-	public OutputWriter create() {
+	public ResultTransformerOutputWriter<TcpOutputWriter<GraphiteWriter2>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
 				TcpOutputWriter.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))

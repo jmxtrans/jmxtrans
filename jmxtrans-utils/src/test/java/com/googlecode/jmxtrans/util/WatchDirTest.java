@@ -22,10 +22,13 @@
  */
 package com.googlecode.jmxtrans.util;
 
+import com.googlecode.jmxtrans.test.IntegrationTest;
+import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -38,6 +41,8 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+@AllowLocalFileAccess(paths = "%TMP_DIR%")
+@Category(IntegrationTest.class)
 public class WatchDirTest {
 
 	/**
