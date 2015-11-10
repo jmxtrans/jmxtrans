@@ -39,8 +39,8 @@
 
 	<properties>
 		<verify.mutationThreshold>35</verify.mutationThreshold>
-		<verify.totalBranchRate>66</verify.totalBranchRate>
-		<verify.totalLineRate>60</verify.totalLineRate>
+		<verify.totalBranchRate>40</verify.totalBranchRate>
+		<verify.totalLineRate>20</verify.totalLineRate>
 	</properties>
 
 	<dependencies>

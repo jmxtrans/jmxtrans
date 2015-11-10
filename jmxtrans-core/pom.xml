@@ -40,8 +40,8 @@
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
 		<verify.mutationThreshold>26</verify.mutationThreshold>
-		<verify.totalBranchRate>42</verify.totalBranchRate>
-		<verify.totalLineRate>40</verify.totalLineRate>
+		<verify.totalBranchRate>12</verify.totalBranchRate>
+		<verify.totalLineRate>10</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -148,11 +148,13 @@
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
+<!-- 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<scope>test</scope>
 		</dependency>
+-->
 	</dependencies>
 
 	<build>
