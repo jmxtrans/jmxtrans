@@ -40,8 +40,8 @@
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
 		<verify.mutationThreshold>26</verify.mutationThreshold>
-		<verify.totalBranchRate>12</verify.totalBranchRate>
-		<verify.totalLineRate>10</verify.totalLineRate>
+		<verify.totalBranchRate>42</verify.totalBranchRate>
+		<verify.totalLineRate>40</verify.totalLineRate>
 	</properties>
 
 	<dependencies>

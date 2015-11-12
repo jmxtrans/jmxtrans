@@ -57,14 +57,6 @@
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-utils</artifactId>
 		</dependency>
-		<!--  Binding for org.apache.kafka:kafka_2.10  -->
-<!-- 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-			<optional>true</optional>
-		</dependency>
--->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

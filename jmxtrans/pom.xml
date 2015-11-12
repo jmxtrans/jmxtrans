@@ -48,13 +48,6 @@
 	</properties>
 
 	<dependencies>
-<!-- 
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>runtime</scope>
-		</dependency>
--->
 		<dependency>
 			<!--
 				There is no compile time dependency on acplt. There might be a runtime dependency that I did not
