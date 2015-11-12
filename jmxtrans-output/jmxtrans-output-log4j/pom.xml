@@ -47,10 +47,12 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -63,6 +65,7 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
