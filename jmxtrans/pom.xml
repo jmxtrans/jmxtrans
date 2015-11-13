@@ -49,6 +49,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>apache-log4j-extras</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<!--
 				There is no compile time dependency on acplt. There might be a runtime dependency that I did not
 				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
