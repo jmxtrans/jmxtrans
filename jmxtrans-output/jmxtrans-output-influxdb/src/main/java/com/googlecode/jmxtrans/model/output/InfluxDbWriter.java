@@ -24,7 +24,12 @@ package com.googlecode.jmxtrans.model.output;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
@@ -65,6 +70,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	 * {@link Result} that will be written as {@link Point} tags
 	 */
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
+
+	// Logging
+	private static final Logger log = LoggerFactory.getLogger(InfluxDbWriter.class);
 
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
@@ -134,13 +142,32 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		// Creates only if it doesn't already exist
 		influxDB.createDatabase(database);
 
+		// use alias if provided, otherwise hostname
+		String source = getSource(server);
+
 		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
-				.tag(TAG_HOSTNAME, server.getHost()).consistency(writeConsistency).build();
+				.tag(TAG_HOSTNAME, source).consistency(writeConsistency).build();
+
 		for (Result result : results) {
-			Map<String, String> resultTagsToApply = buildResultTagMap(result);
-			Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
-					.tag(resultTagsToApply).fields(result.getValues()).build();
-			batchPoints.point(point);
+			// we'll create a copy of result values here
+			Map<String, Object> fixedValues = new HashMap<String,Object>();
+			// clean up an NaN values in values
+			Map<String, Object> resultValues = result.getValues();
+			if (resultValues != null) {
+				for (Entry<String, Object> entry : resultValues.entrySet()) {
+					// we want to ignore NaN's
+					if (!entry.getValue().toString().equals("NaN")) {
+						fixedValues.put(entry.getKey(), entry.getValue());
+					}
+				}
+			}
+			// send the point if fixedValues isn't empty
+			if (fixedValues.size() > 0) {
+				Map<String, String> resultTagsToApply = buildResultTagMap(result);
+				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
+						.tag(resultTagsToApply).fields(fixedValues).build();
+				batchPoints.point(point);
+			}
 		}
 		influxDB.write(batchPoints);
 	}
@@ -151,5 +178,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}
 		return resultTagMap;
+	}
+
+	private String getSource(Server server) {
+		if (server.getAlias() != null) {
+			return server.getAlias();
+		} else {
+			return server.getHost();
+		}
 	}
 }
