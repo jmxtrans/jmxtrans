@@ -151,6 +151,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		for (Result result : results) {
 			// we'll create a copy of result values here
 			Map<String, Object> fixedValues = new HashMap<String,Object>();
+			// _jmx_port as a field so we can filter on it in influx
+			fixedValues.put("_jmx_port", Integer.parseInt(server.getPort()));
 			// clean up an NaN values in values
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
@@ -162,7 +164,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 				}
 			}
 			// send the point if fixedValues isn't empty
-			if (fixedValues.size() > 0) {
+			if (fixedValues.size() > 1) {
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
 				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
 						.tag(resultTagsToApply).fields(fixedValues).build();
