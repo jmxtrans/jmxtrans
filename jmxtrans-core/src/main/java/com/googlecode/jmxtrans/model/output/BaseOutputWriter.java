@@ -1,20 +1,43 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
+import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -36,7 +59,7 @@ import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
  * @author jon
  */
 @NotThreadSafe
-public abstract class BaseOutputWriter implements OutputWriter {
+public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFactory {
 
 	public static final String HOST = "host";
 	public static final String PORT = "port";
@@ -47,8 +70,8 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	public static final String TYPE_NAMES = "typeNames";
 	public static final String BOOLEAN_AS_NUMBER = "booleanAsNumber";
 
-	private ImmutableList<String> typeNames;
-	private boolean debugEnabled;
+	@Getter private ImmutableList<String> typeNames;
+	@Getter	private boolean debugEnabled;
 	private Map<String, Object> settings;
 	private final ValueTransformer valueTransformer;
 
@@ -109,14 +132,6 @@ public abstract class BaseOutputWriter implements OutputWriter {
 		}
 	}
 
-	public boolean isDebugEnabled() {
-		return debugEnabled;
-	}
-
-	public List<String> getTypeNames() {
-		return typeNames;
-	}
-
 	/**
 	 * Given a typeName string, get the first match from the typeNames setting.
 	 * In other words, suppose you have:
@@ -127,20 +142,14 @@ public abstract class BaseOutputWriter implements OutputWriter {
 	 * string
 	 */
 	protected String getConcatedTypeNameValues(String typeNameStr) {
-		return KeyUtils.getConcatedTypeNameValues(this.getTypeNames(), typeNameStr);
+		return TypeNameValuesStringBuilder.getDefaultBuilder().build(this.getTypeNames(), typeNameStr);
 	}
 
-	/**
-	 * A do nothing method.
-	 */
 	@Override
 	public void start() throws LifecycleException {
 		// Do nothing.
 	}
 
-	/**
-	 * A do nothing method.
-	 */
 	@Override
 	public void stop() throws LifecycleException {
 		// Do nothing.
@@ -153,29 +162,9 @@ public abstract class BaseOutputWriter implements OutputWriter {
 
 	protected abstract void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
 
-	private static final class ResultValuesTransformer implements Function<Result, Result> {
-
-		private final ValueTransformer valueTransformer;
-
-		private ResultValuesTransformer(ValueTransformer valueTransformer) {
-			this.valueTransformer = valueTransformer;
-		}
-
-		@Nullable
-		@Override
-		public Result apply(@Nullable Result input) {
-			if (input == null) {
-				return null;
-			}
-			return new Result(
-					input.getEpoch(),
-					input.getAttributeName(),
-					input.getClassName(),
-					input.getObjDomain(),
-					input.getKeyAlias(),
-					input.getTypeName(),
-					Maps.transformValues(input.getValues(), valueTransformer)
-			);
-		}
+	@Override
+	public OutputWriter create() {
+		return this;
 	}
+
 }

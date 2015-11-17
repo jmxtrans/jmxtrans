@@ -1,3 +1,25 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -29,7 +51,6 @@ import java.util.Map.Entry;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
-
 import static com.fasterxml.jackson.core.JsonEncoding.UTF8;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
@@ -77,7 +98,7 @@ public class KafkaWriter extends BaseOutputWriter {
 		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
 		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
 		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
-		this.topics = asList(topics.split(","));
+		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
 		jsonFactory = new JsonFactory();
 	}
 	

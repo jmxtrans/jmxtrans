@@ -1,3 +1,25 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans;
 
 import com.google.common.collect.ImmutableList;
@@ -39,6 +61,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.google.common.base.MoreObjects.firstNonNull;
 
 /**
  * Main() class that takes an argument which is the directory to look in for
@@ -224,7 +248,7 @@ public class JmxTransformer implements WatchedCallback {
 	private void stopWriterAndClearMasterServerList() {
 		for (Server server : this.masterServersList) {
 			for (Query query : server.getQueries()) {
-				for (OutputWriter writer : query.getOutputWriters()) {
+				for (OutputWriter writer : query.getOutputWriterInstances()) {
 					try {
 						writer.stop();
 						log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
@@ -287,8 +311,7 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	private void validateSetup(Server server, Query query) throws ValidationException {
-		List<OutputWriter> writers = query.getOutputWriters();
-		for (OutputWriter w : writers) {
+		for (OutputWriter w : (List<OutputWriter>) query.getOutputWriterInstances()) {
 			injector.injectMembers(w);
 			w.validateSetup(server, query);
 		}
@@ -321,7 +344,7 @@ public class JmxTransformer implements WatchedCallback {
 
 				// need to inject the poolMap
 				for (Query query : server.getQueries()) {
-					for (OutputWriter writer : query.getOutputWriters()) {
+					for (OutputWriter writer : query.getOutputWriterInstances()) {
 						writer.start();
 					}
 				}
@@ -405,11 +428,15 @@ public class JmxTransformer implements WatchedCallback {
 	private List<File> getJsonFiles() {
 		// TODO : should use a FileVisitor (Once we update to Java 7)
 		File[] files;
-		if ((this.configuration.getJsonDirOrFile() != null) && this.configuration.getJsonDirOrFile().isFile()) {
+		File jsonDirOrFile = configuration.getJsonDirOrFile();
+		if (jsonDirOrFile == null) {
+			throw new IllegalStateException("Configuration should specify configuration directory or file, with -j of -f option");
+		}
+		if (jsonDirOrFile.isFile()) {
 			files = new File[1];
-			files[0] = this.configuration.getJsonDirOrFile();
+			files[0] = jsonDirOrFile;
 		} else {
-			files = this.configuration.getJsonDirOrFile().listFiles();
+			files = firstNonNull(jsonDirOrFile.listFiles(), new File[0]);
 		}
 
 		List<File> result = new ArrayList<File>();

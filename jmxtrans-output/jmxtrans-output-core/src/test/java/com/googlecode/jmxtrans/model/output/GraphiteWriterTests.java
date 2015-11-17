@@ -1,3 +1,25 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
@@ -7,9 +29,12 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.test.RequiresIO;
+import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
@@ -24,6 +49,8 @@ import java.util.List;
 
 import static com.google.common.collect.ImmutableList.of;
 
+@Category(RequiresIO.class)
+@AllowDNSResolution
 public class GraphiteWriterTests {
 
 	@Test(expected = NullPointerException.class)
@@ -71,19 +98,22 @@ public class GraphiteWriterTests {
 		return writer;
 	}
 
+	private static String getOutput(Server server, Query query, Result result) throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		GraphiteWriter writer = getGraphiteWriter(out);
+		writer.doWrite(server, query, of(result));
+		return out.toString();
+	}
+
 	@Test
 	public void writeSingleResult() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").build();
 		Query query = Query.builder().build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		GraphiteWriter writer = getGraphiteWriter(out);
-
-		writer.doWrite(server, query, of(result));
-
 		// check that Graphite format is respected
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.classNameAlias.attributeName_key 1 ");
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host_123.classNameAlias.attributeName_key 1 ");
 	}
 
 	@Test
@@ -93,31 +123,40 @@ public class GraphiteWriterTests {
 		Query query = Query.builder().setUseObjDomainAsKey(true).build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		GraphiteWriter writer = getGraphiteWriter(out);
-
-		writer.doWrite(server, query, of(result));
-
 		// check that Graphite format is respected
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName_key 1 ");
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host_123.objDomain.attributeName_key 1 ");
 	}
 	
 	@Test
 	public void allowDottedWorks() throws Exception {
 		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
+		// Set allowDottedKeys to true
 		Query query = Query.builder().setAllowDottedKeys(true).build();
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		
-		// Set useObjDomain to true
-		GraphiteWriter writer = getGraphiteWriter(out);
-
-		writer.doWrite(server, query, of(result));
-		System.out.println(out.toString());
 		// check that Graphite format is respected
-		Assertions.assertThat(out.toString()).startsWith("servers.host.className.attributeName.key 1 ");
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host.className.attributeName.key 1 ");
+	}
+
+	@Test
+	public void useAllTypeNamesWorks() throws Exception {
+		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
+		// Set useAllTypeNames to true
+		Query query = Query.builder().setUseAllTypeNames(true).build();
+		String typeName = "typeName,typeNameKey1=typeNameValue1,typeNameKey2=typeNameValue2";
+		String typeNameReordered = "typeNameKey2=typeNameValue2,typeName,typeNameKey1=typeNameValue1";
+		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null,
+				typeName, ImmutableMap.of("key", (Object)1));
+		Result resultWithTypeNameReordered = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null,
+				typeNameReordered, ImmutableMap.of("key", (Object)1));
+
+		// check that Graphite format is respected
+		Assertions.assertThat(getOutput(server, query, result))
+				.startsWith("servers.host.className.typeNameValue1_typeNameValue2.attributeName_key 1 ");
+		Assertions.assertThat(getOutput(server, query, resultWithTypeNameReordered))
+				.startsWith("servers.host.className.typeNameValue2_typeNameValue1.attributeName_key 1 ");
 	}
 
 	@Test

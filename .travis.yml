@@ -1,8 +1,14 @@
 language: java
+sudo: false
 before_install: "git clone -b travis `git config --get remote.origin.url` ${HOME}/travis"
+addons:
+  apt:
+    packages:
+    - rpm
+cache:
+  directories:
+  - $HOME/.m2
 install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y rpm
   - mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
 script: ./travis-script.sh
 after_success:

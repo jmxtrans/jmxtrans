@@ -1,3 +1,25 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -8,7 +30,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
+import com.googlecode.jmxtrans.util.OnlyOnceLogger;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +47,7 @@ import java.util.Map.Entry;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * This low latency and thread safe output writer sends data to a host/port combination
@@ -44,6 +67,8 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 	private final String rootPrefix;
 	private final InetSocketAddress address;
+
+	private final OnlyOnceLogger onlyOnceLogger = new OnlyOnceLogger(log);
 
 	@JsonCreator
 	public GraphiteWriter(
@@ -95,7 +120,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 				if (resultValues != null) {
 					for (Entry<String, Object> values : resultValues.entrySet()) {
 						Object value = values.getValue();
-						if (NumberUtils.isNumeric(value)) {
+						if (isNumeric(value)) {
 
 							String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 									.replaceAll("[()]", "_") + " " + value.toString() + " "
@@ -103,7 +128,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 							log.debug("Graphite Message: {}", line);
 							writer.write(line);
 						} else {
-							log.warn("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
+							onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 						}
 					}
 				}

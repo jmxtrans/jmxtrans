@@ -1,4 +1,27 @@
 #!/usr/bin/env python
+#
+# The MIT License
+# Copyright (c) 2010 JmxTrans team
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+
 # -*- coding: latin-1 -*-
 # vim:ai:expandtab:ts=4 sw=4
 
@@ -28,13 +51,16 @@ class Queries(object):
     """
     Generate query object snippets suitable for consumption by jmxtrans
     """
-    def __init__(self, queries, query_attributes, outputWriters, outputWriters_attributes, monitor_host, monitor_port):
+    def __init__(self, queries, query_attributes, query_defaults,
+            outputWriters, outputWriters_attributes, monitor_host,
+            monitor_port):
         """
         Initialize Queries configuration with data from YAML structure, making
         named queries accessible by name
         """
         self.queries = {}
         self.query_attributes = query_attributes
+        self.query_defaults = query_defaults
         self.outputWriters = []
         self.outputWriters_attributes = outputWriters_attributes
         self.monitor_host = monitor_host
@@ -45,6 +71,8 @@ class Queries(object):
             for attribute in query_attributes:
                 if attribute in query:
                     queryentry[attribute] = query[attribute]
+                elif attribute in query_defaults:
+                    queryentry[attribute] = query_defaults[attribute]
                 else:
                     queryentry[attribute] = None
             self.queries[query['name']] = queryentry
@@ -221,7 +249,10 @@ def usage():
 
 if __name__ == '__main__':
     # query attributes to copy
-    query_attributes = ["obj", "resultAlias", "attr", "typeName", "allowDottedKeys", "useObjDomainAsKey"]
+    query_attributes = [
+        "obj", "resultAlias", "attr", "typeName",
+        "allowDottedKeys", "useAllTypeNames", "useObjDomainAsKey",
+    ]
     outputWriters_attributes = ["settings", "@class"]
     
     if len(sys.argv) != 2:
@@ -239,7 +270,8 @@ if __name__ == '__main__':
     graphite_host = yf['graphite_host'] if ('graphite_host' in yf) else None
     graphite_port = yf['graphite_port'] if ('graphite_port' in yf) else None
 
-    q = Queries(yf['queries'], query_attributes, outputWriters, outputWriters_attributes, graphite_host, graphite_port)
+    q = Queries(yf['queries'], query_attributes, yf.get('query_defaults', {}),
+        outputWriters, outputWriters_attributes, graphite_host, graphite_port)
     h = HostSets(yf['sets'])
 
     for set_name in h.set_names():

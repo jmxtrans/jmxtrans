@@ -1,7 +1,30 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.connections;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import lombok.Getter;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -18,20 +41,12 @@ import static java.lang.reflect.Array.getLength;
  * probably a cleaner way to do this, but this will come later.
  */
 public class JMXConnectionParams {
-	private final JMXServiceURL url;
-	private final ImmutableMap<String, ?> environment;
+	@Getter private final JMXServiceURL url;
+	@Getter private final ImmutableMap<String, ?> environment;
 
 	public JMXConnectionParams(JMXServiceURL url, Map<String, ?> environment) {
 		this.url = url;
 		this.environment = ImmutableMap.copyOf(environment);
-	}
-
-	public JMXServiceURL getUrl() {
-		return url;
-	}
-
-	public ImmutableMap<String, ?> getEnvironment() {
-		return environment;
 	}
 
 	@Override

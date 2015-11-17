@@ -1,3 +1,25 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.model.naming;
 
 import java.util.regex.Pattern;
@@ -11,9 +33,6 @@ public final class StringUtils {
 
 	/**
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
-	 *
-	 * @param name the name
-	 * @return the string
 	 */
 	public static String cleanupStr(String name) {
 		return cleanupStr(name, false);
@@ -23,9 +42,7 @@ public final class StringUtils {
 	 * Replaces all . and / with _ and removes all spaces and double/single quotes.
 	 * Chomps any trailing . or _ character.
 	 *
-	 * @param name            the name
 	 * @param allowDottedKeys whether we remove the dots or not.
-	 * @return
 	 */
 	public static String cleanupStr(String name, boolean allowDottedKeys) {
 		if (name == null) {

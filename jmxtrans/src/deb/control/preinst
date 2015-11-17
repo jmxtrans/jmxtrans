@@ -5,7 +5,7 @@ set -e
 case "$1" in
     install)
         if ! id jmxtrans > /dev/null 2>&1 ; then
-            adduser --system --shell /bin/bash --home /home/jmxtrans --disabled-login --disabled-password --group jmxtrans
+            adduser --system --shell /bin/bash --home /usr/share/jmxtrans --disabled-login --disabled-password --group jmxtrans
         fi
     ;;
     upgrade|abort-upgrade)

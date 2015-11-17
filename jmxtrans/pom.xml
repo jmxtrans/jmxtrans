@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    The MIT License
+    Copyright (c) 2010 JmxTrans team
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -17,6 +41,7 @@
 		or other packaging.</description>
 
 	<properties>
+		<dollar.sign>$</dollar.sign>
 		<verify.mutationThreshold>0</verify.mutationThreshold>
 		<verify.totalBranchRate>0</verify.totalBranchRate>
 		<verify.totalLineRate>0</verify.totalLineRate>
@@ -74,7 +99,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-elastic</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-output-ganglia</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-influxdb</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -105,7 +140,7 @@
 			<resource>
 				<directory>src</directory>
 				<includes>
-					<include>log4j.xml</include>
+					<include>logback.xml</include>
 					<include>quartz.server.properties</include>
 				</includes>
 			</resource>
@@ -238,6 +273,8 @@
 									<extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
 									<extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
 									<extraArgument>-Dcom.sun.management.jmxremote.port=2101</extraArgument>
+									<extraArgument>-Djmxtrans.log.level=INFO</extraArgument>
+									<extraArgument>-Djmxtrans.log.dir=/var/log/${package.daemon.name}</extraArgument>
 								</extraArguments>
 							</jvmSettings>
 							<platforms>
@@ -314,12 +351,17 @@
 							</defineStatements>
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
-                  USER_ID=`id -u %{package.user} 2&gt;/dev/null`
-                    if [ -z "$USER_ID" ]; then
-									    /usr/sbin/useradd -c "${project.name}" -s /bin/sh -r -d \
-									    ${package.install.dir} -U ${package.user}
-                    fi
-									fi</script>
+									getent group ${package.user} &gt;/dev/null || groupadd -r ${package.user}
+									OS_RELEASE=${dollar.sign}(lsb_release -sd)
+									REDHAT_RELEASE=${dollar.sign}(lsb_release -sr|cut -d"." -f1)
+									if [[ ${dollar.sign}{OS_RELEASE} == *"Red Hat"* &amp;&amp; ${dollar.sign}{REDHAT_RELEASE} -le 5 ]]; then
+										getent passwd ${package.user} &gt;/dev/null || useradd -c "${project.name}" -s /bin/sh -r \
+										-d ${package.install.dir} -g ${package.user} \
+										${package.user}
+									else
+										getent passwd ${package.user} &gt;/dev/null || useradd -r -g ${package.user} -d ${package.install.dir} -s /bin/sh -c "${project.name}" ${package.user}
+									fi
+								fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
 								<script>/sbin/chkconfig --add ${package.daemon.name}</script>
@@ -333,6 +375,7 @@
 							</preremoveScriptlet>
 							<requires>
 								<require>java</require>
+								<require>/usr/bin/lsb_release</require>
 							</requires>
 							<mappings>
 								<mapping>

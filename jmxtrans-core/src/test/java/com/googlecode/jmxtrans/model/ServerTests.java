@@ -1,15 +1,43 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.model;
 
+import com.googlecode.jmxtrans.test.RequiresIO;
+import com.kaching.platform.testing.AllowDNSResolution;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author lanyonm
  */
+@Category(RequiresIO.class)
+@AllowDNSResolution
 public class ServerTests {
 
 	@Test
@@ -81,7 +109,17 @@ public class ServerTests {
 		assertFalse(s1.equals("hi"));
 		assertEquals(s1, s2);
 		assertTrue(s1.equals(s2));
-		assertNotSame(s1, s3);
+		assertNotEquals(s1, s3);
+	}
+
+	@Test
+	public void testEquals_forPid() {
+		Server s1 = Server.builder().setPid("1").build();
+		Server s2 = Server.builder().setPid("2").build();
+		Server s3 = Server.builder(s1).build();
+
+		assertEquals(s1, s3);
+		assertNotEquals(s1, s2);
 	}
 
 	@Test
@@ -90,6 +128,7 @@ public class ServerTests {
 			// we add some variables to the System.properties list 
 		
 			String alias = "somealias";
+			String pid = "123";
 			String port = "1234";
 			String host = "localhost.local";
 			String username = "acme";
@@ -97,6 +136,7 @@ public class ServerTests {
 			String url = "service:jmx:remoting-jms://amce.local:1234";
 			
 			System.setProperty("myalias", alias);
+			System.setProperty("mypid", pid);
 			System.setProperty("myport", port);
 			System.setProperty("myhost", host);
 			System.setProperty("myusername",username);
@@ -120,9 +160,16 @@ public class ServerTests {
 						.setUrl(url)
 						.build();
 			assertEquals(serverFromSystemProperties.hashCode(), serverFromDirectParameters.hashCode());
+
+			Server serverPid = Server.builder()
+				.setPid("${mypid}")
+				.build();
+
+			assertEquals("123", serverPid.getPid());
 			
 		}finally{
 			System.clearProperty("myalias");
+			System.clearProperty("mypid");
 			System.clearProperty("myport");
 			System.clearProperty("myhost");
 			System.clearProperty("myusername");
@@ -144,5 +191,42 @@ public class ServerTests {
 				.build();
 		assertEquals(s1.hashCode(), s2.hashCode());
 		assertFalse(s1.hashCode() == s3.hashCode());
+	}
+
+	@Test
+	public void testToString() {
+		Server s1 = Server.builder()
+				.setPid("123")
+				.setCronExpression("cron")
+				.setNumQueryThreads(2)
+				.build();
+
+		Server s2 = Server.builder()
+			.setHost("mydomain")
+			.setPort("1234")
+			.setUrl("service:jmx:remoting-jmx://mysys.mydomain:8004")
+			.setCronExpression("cron")
+			.setNumQueryThreads(2)
+			.build();
+
+		assertEquals("Server [pid=123, cronExpression=cron, numQueryThreads=2]", s1.toString());
+		assertEquals(
+			"Server [host=mydomain, port=1234, url=service:jmx:remoting-jmx://mysys.mydomain:8004, cronExpression=cron, numQueryThreads=2]",
+			s2.toString());
+	}
+
+	@Test
+	public void testIntegrity() {
+		try {
+			Server.builder().setPid("123").setUrl("aaa").build();
+			fail("Pid and Url should not be allowed at the same time");
+		}
+		catch(IllegalArgumentException e) {}
+
+		try {
+			Server.builder().build();
+			fail("No Pid or Url can't work");
+		}
+		catch(IllegalArgumentException e) {}
 	}
 }

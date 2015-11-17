@@ -1,18 +1,50 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
+import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -30,63 +62,16 @@ import static java.util.Arrays.asList;
  * @author jon
  */
 @JsonSerialize(include = NON_NULL)
-@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "outputWriters"})
+@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
 @ThreadSafe
 @Immutable // Note that outputWriters is neither thread safe nor immutable (yet)
 public class Query {
 
-	private final String obj;
-	private final ImmutableList<String> keys;
-	private final ImmutableList<String> attr;
-	private final ImmutableSet<String> typeNames;
-	private final String resultAlias;
-	private final boolean useObjDomainAsKey;
-	private final boolean allowDottedKeys;
-	private final ImmutableList<OutputWriter> outputWriters;
+	/** The JMX object representation: java.lang:type=Memory */
+	@Getter private final String obj;
+	@Nonnull @Getter private final ImmutableList<String> keys;
 
-	@JsonCreator
-	public Query(
-			@JsonProperty("obj") String obj,
-			@JsonProperty("keys") List<String> keys,
-			@JsonProperty("attr") List<String> attr,
-			@JsonProperty("typeNames") Set<String> typeNames,
-			@JsonProperty("resultAlias") String resultAlias,
-			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
-			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
-			@JsonProperty("outputWriters") List<OutputWriter> outputWriters
-	) {
-		this.obj = obj;
-		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
-		this.resultAlias = resultAlias;
-		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
-		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
-		this.allowDottedKeys = allowDottedKeys;
-		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, Collections.<OutputWriter>emptyList()));
-		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
-	}
-
-	/**
-	 * The JMX object representation: java.lang:type=Memory
-	 */
-	public String getObj() {
-		return obj;
-	}
-
-	/**
-	 * The alias allows you to specify what you would like the results of the
-	 * query to go into.
-	 */
-	public String getResultAlias() {
-		return resultAlias;
-	}
-
-	/**
-	 * The useObjDomainAsKey property allows you to specify the use of the Domain portion of the Object Name
-	 * as part of the output key instead of using the ClassName of the MBean which is the default behavior.
-	 */
-	public boolean isUseObjDomainAsKey() {
-		return useObjDomainAsKey;
-	}
+	@Nonnull @Getter private final ImmutableList<String> attr;
 
 	/**
 	 * The list of type names used in a JMX bean string when querying with a
@@ -98,27 +83,61 @@ public class Query {
 	 * If you add a typeName("name"), then it'll retrieve 'PS Eden Space' from
 	 * the string
 	 */
-	public ImmutableSet<String> getTypeNames() {
-		return typeNames;
+	@Getter private final ImmutableSet<String> typeNames;
+
+	/**
+	 * The alias allows you to specify what you would like the results of the
+	 * query to go into.
+	 */
+	@Getter private final String resultAlias;
+
+	/**
+	 * The useObjDomainAsKey property allows you to specify the use of the Domain portion of the Object Name
+	 * as part of the output key instead of using the ClassName of the MBean which is the default behavior.
+	 */
+	@Getter private final boolean useObjDomainAsKey;
+	@Getter private final boolean allowDottedKeys;
+	@Getter private final boolean useAllTypeNames;
+	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriters;
+	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
+
+	@JsonCreator
+	public Query(
+			@JsonProperty("obj") String obj,
+			@JsonProperty("keys") List<String> keys,
+			@JsonProperty("attr") List<String> attr,
+			@JsonProperty("typeNames") Set<String> typeNames,
+			@JsonProperty("resultAlias") String resultAlias,
+			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
+			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
+			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
+	) {
+		this.obj = obj;
+		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
+		this.resultAlias = resultAlias;
+		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
+		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
+		this.allowDottedKeys = allowDottedKeys;
+		this.useAllTypeNames = useAllTypeNames;
+		this.outputWriters = ImmutableList.copyOf(outputWriters);
+		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
+
+		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 	}
 
-	@Nonnull
-	public ImmutableList<String> getAttr() {
-		return attr;
+	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
+		return this.typeNameValuesStringBuilder.build(typeNames, typeNameStr);
 	}
 
-	@Nonnull
-	public ImmutableList<String> getKeys() {
-		return keys;
-	}
-
-	public boolean isAllowDottedKeys() {
-		return allowDottedKeys;
-	}
-
-	@Nonnull
-	public ImmutableList<OutputWriter> getOutputWriters() {
-		return outputWriters;
+	public Iterable<OutputWriter> getOutputWriterInstances() {
+		return FluentIterable.from(outputWriters).transform(new Function<OutputWriterFactory, OutputWriter>() {
+			@Nullable
+			@Override
+			public OutputWriter apply(OutputWriterFactory input) {
+				return input.create();
+			}
+		}).toList();
 	}
 
 	@Override
@@ -165,11 +184,23 @@ public class Query {
 				.toHashCode();
 	}
 
-	private static int sizeOf(List<OutputWriter> writers) {
+	private static int sizeOf(List<?> writers) {
 		if (writers == null) {
 			return 0;
 		}
 		return writers.size();
+	}
+
+	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {
+		String separator = isAllowDottedKeys() ? "." : TypeNameValuesStringBuilder.DEFAULT_SEPARATOR;
+		Set<String> typeNames = getTypeNames();
+		if (isUseAllTypeNames()) {
+			return new UseAllTypeNameValuesStringBuilder(separator);
+		} else if (typeNames != null && typeNames.size() > 0) {
+			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<String>(typeNames));
+		} else {
+			return new TypeNameValuesStringBuilder(separator);
+		}
 	}
 
 	public static Builder builder() {
@@ -177,36 +208,22 @@ public class Query {
 	}
 
 	@NotThreadSafe
+	@Accessors(chain = true)
 	public static final class Builder {
-
-		private String obj;
+		@Setter private String obj;
 		private final List<String> attr = newArrayList();
-		private String resultAlias;
+		@Setter private String resultAlias;
 		private final List<String> keys = newArrayList();
-		private boolean useObjDomainAsKey;
-		private boolean allowDottedKeys;
-		private final List<OutputWriter> outputWriters = newArrayList();
+		@Setter private boolean useObjDomainAsKey;
+		@Setter private boolean allowDottedKeys;
+		@Setter private boolean useAllTypeNames;
+		private final List<OutputWriterFactory> outputWriters = newArrayList();
 		private final Set<String> typeNames = newHashSet();
 
 		private Builder() {}
 
-		public Builder setObj(String obj) {
-			this.obj = obj;
-			return this;
-		}
-
 		public Builder addAttr(String... attr) {
 			this.attr.addAll(asList(attr));
-			return this;
-		}
-
-		public Builder setResultAlias(String resultAlias) {
-			this.resultAlias = resultAlias;
-			return this;
-		}
-		
-		public Builder setUseObjDomainAsKey(boolean useObjDomainAsKey) {
-			this.useObjDomainAsKey = useObjDomainAsKey;
 			return this;
 		}
 
@@ -219,16 +236,11 @@ public class Query {
 			return this;
 		}
 
-		public Builder setAllowDottedKeys(boolean allowDottedKeys) {
-			this.allowDottedKeys = allowDottedKeys;
-			return this;
-		}
-
-		public Builder addOutputWriter(OutputWriter outputWriter) {
+		public Builder addOutputWriter(OutputWriterFactory outputWriter) {
 			return addOutputWriters(outputWriter);
 		}
 
-		public Builder addOutputWriters(OutputWriter... outputWriters) {
+		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
 			this.outputWriters.addAll(asList(outputWriters));
 			return this;
 		}
@@ -247,6 +259,7 @@ public class Query {
 					this.resultAlias,
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
+					this.useAllTypeNames,
 					this.outputWriters
 			);
 		}

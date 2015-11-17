@@ -1,9 +1,35 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.connections;
 
 import com.google.common.io.Closer;
-import org.junit.After;
-import org.junit.Before;
+import com.googlecode.jmxtrans.test.RequiresIO;
+import com.googlecode.jmxtrans.test.TCPEchoServer;
+import com.kaching.platform.testing.AllowNetworkAccess;
+import com.kaching.platform.testing.AllowNetworkListen;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -11,25 +37,21 @@ import java.net.Socket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Category(RequiresIO.class)
+@AllowNetworkAccess(endpoints = "127.0.0.1:*")
+@AllowNetworkListen(ports = 0)
 public class SocketFactoryTests {
 
-	private TCPEchoServer echoServer;
-	private InetSocketAddress echoServerAddress;
-
-	@Before
-	public void startEchoServer() {
-		echoServer = new TCPEchoServer();
-		echoServer.start();
-		echoServerAddress = echoServer.getLocalSocketAddress();
-	}
+	@Rule
+	public TCPEchoServer echoServer = new TCPEchoServer();
 
 	@Test
 	public void createdSocketIsValid() throws IOException {
 		Closer closer = Closer.create();
 		try {
 			SocketFactory socketFactory = new SocketFactory();
-			Socket socket = closer.register(socketFactory.makeObject(echoServerAddress));
-			assertThat(socketFactory.validateObject(echoServerAddress, socket)).isTrue();
+			Socket socket = closer.register(socketFactory.makeObject(getServerAddress()));
+			assertThat(socketFactory.validateObject(getServerAddress(), socket)).isTrue();
 		} catch (Throwable t) {
 			throw closer.rethrow(t);
 		} finally {
@@ -39,7 +61,7 @@ public class SocketFactoryTests {
 
 	@Test
 	public void nullSocketIsInvalid() {
-		assertThat(new SocketFactory().validateObject(echoServerAddress, null)).isFalse();
+		assertThat(new SocketFactory().validateObject(getServerAddress(), null)).isFalse();
 	}
 
 	@Test
@@ -47,9 +69,9 @@ public class SocketFactoryTests {
 		Closer closer = Closer.create();
 		try {
 			SocketFactory socketFactory = new SocketFactory();
-			Socket socket = closer.register(socketFactory.makeObject(echoServerAddress));
+			Socket socket = closer.register(socketFactory.makeObject(getServerAddress()));
 			socket.close();
-			assertThat(socketFactory.validateObject(echoServerAddress, socket)).isFalse();
+			assertThat(socketFactory.validateObject(getServerAddress(), socket)).isFalse();
 		} catch (Throwable t) {
 			throw closer.rethrow(t);
 		} finally {
@@ -57,9 +79,8 @@ public class SocketFactoryTests {
 		}
 	}
 
-	@After
-	public void stopEchoServer() {
-		echoServer.stop();
+	private InetSocketAddress getServerAddress() {
+		return echoServer.getLocalSocketAddress();
 	}
 
 }
