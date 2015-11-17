@@ -24,7 +24,11 @@ package com.googlecode.jmxtrans.model.output;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
@@ -37,6 +41,8 @@ import org.influxdb.dto.Point;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -66,6 +72,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	 */
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
+	// Logging
+	private static final Logger log = LoggerFactory.getLogger(InfluxDbWriter.class);
+
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
 			@Nonnull String database,
@@ -78,6 +87,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.influxDB = influxDB;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 	}
+
+	Predicate<Object> isNotNaN = new Predicate<Object>() {
+		@Override
+		public boolean apply(Object input) {
+			return !input.toString().equals("NaN");
+		}
+	};
 
 	/**
 	 * <p>
@@ -135,21 +151,36 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		influxDB.createDatabase(database);
 
 		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
-				.tag(TAG_HOSTNAME, server.getHost()).consistency(writeConsistency).build();
+				.tag(TAG_HOSTNAME, server.getSource()).consistency(writeConsistency).build();
+
 		for (Result result : results) {
-			Map<String, String> resultTagsToApply = buildResultTagMap(result);
-			Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
-					.tag(resultTagsToApply).fields(result.getValues()).build();
-			batchPoints.point(point);
+
+			HashMap<String, Object> filteredValues = new HashMap(Maps.filterValues(result.getValues(), isNotNaN));
+
+			// send the point if filteredValues isn't empty
+			if (!filteredValues.isEmpty()) {
+				filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
+				Map<String, String> resultTagsToApply = buildResultTagMap(result);
+				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
+						.tag(resultTagsToApply).fields(filteredValues).build();
+				batchPoints.point(point);
+			}
+
 		}
+
 		influxDB.write(batchPoints);
+
 	}
 
 	private Map<String, String> buildResultTagMap(Result result) throws Exception {
+
 		Map<String, String> resultTagMap = new TreeMap<String, String>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}
+
 		return resultTagMap;
+
 	}
+
 }

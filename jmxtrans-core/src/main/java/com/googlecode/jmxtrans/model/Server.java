@@ -235,6 +235,14 @@ public class Server {
 		return url.substring(url.lastIndexOf("//") + 2, url.lastIndexOf(':'));
 	}
 
+	public String getSource() {
+		if (alias != null) {
+			return alias;
+		}
+
+		return this.getHost();
+	}
+
 	public String getPort() {
 		if (port == null && url == null) {
 			return null;
