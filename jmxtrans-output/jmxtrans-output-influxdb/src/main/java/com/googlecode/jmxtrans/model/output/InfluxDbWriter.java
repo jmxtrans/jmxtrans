@@ -156,10 +156,10 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		for (Result result : results) {
 
 			HashMap<String, Object> filteredValues = new HashMap(Maps.filterValues(result.getValues(), isNotNaN));
-			filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
 
 			// send the point if filteredValues isn't empty
-			if (filteredValues.size() > 1) {
+			if (!filteredValues.isEmpty()) {
+				filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
 				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
 						.tag(resultTagsToApply).fields(filteredValues).build();
