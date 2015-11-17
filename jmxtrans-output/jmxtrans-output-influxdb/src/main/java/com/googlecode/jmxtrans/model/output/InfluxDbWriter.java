@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
@@ -42,6 +41,8 @@ import org.influxdb.dto.Point;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -86,6 +87,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.influxDB = influxDB;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 	}
+
+	Predicate<Object> isNaN = new Predicate<Object>() {
+		@Override
+		public boolean apply(Object input) {
+			return !input.toString().equals("NaN");
+		}
+	};
 
 	/**
 	 * <p>
@@ -142,51 +150,37 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		// Creates only if it doesn't already exist
 		influxDB.createDatabase(database);
 
-		// use alias if provided, otherwise hostname
-		String source = getSource(server);
-
 		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
-				.tag(TAG_HOSTNAME, source).consistency(writeConsistency).build();
+				.tag(TAG_HOSTNAME, server.getSource()).consistency(writeConsistency).build();
 
 		for (Result result : results) {
-			// we'll create a copy of result values here
-			Map<String, Object> fixedValues = new HashMap<String,Object>();
-			// _jmx_port as a field so we can filter on it in influx
-			fixedValues.put("_jmx_port", Integer.parseInt(server.getPort()));
-			// clean up an NaN values in values
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Entry<String, Object> entry : resultValues.entrySet()) {
-					// we want to ignore NaN's
-					if (!entry.getValue().toString().equals("NaN")) {
-						fixedValues.put(entry.getKey(), entry.getValue());
-					}
-				}
-			}
-			// send the point if fixedValues isn't empty
-			if (fixedValues.size() > 1) {
+
+			HashMap<String, Object> filteredValues = new HashMap(Maps.filterValues(result.getValues(), isNaN));
+			filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
+
+			// send the point if filteredValues isn't empty
+			if (filteredValues.size() > 1) {
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
 				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
-						.tag(resultTagsToApply).fields(fixedValues).build();
+						.tag(resultTagsToApply).fields(filteredValues).build();
 				batchPoints.point(point);
 			}
+
 		}
+
 		influxDB.write(batchPoints);
+
 	}
 
 	private Map<String, String> buildResultTagMap(Result result) throws Exception {
+
 		Map<String, String> resultTagMap = new TreeMap<String, String>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}
+
 		return resultTagMap;
+
 	}
 
-	private String getSource(Server server) {
-		if (server.getAlias() != null) {
-			return server.getAlias();
-		} else {
-			return server.getHost();
-		}
-	}
 }
