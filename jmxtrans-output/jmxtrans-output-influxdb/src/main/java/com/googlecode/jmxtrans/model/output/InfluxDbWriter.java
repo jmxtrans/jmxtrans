@@ -88,7 +88,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 	}
 
-	Predicate<Object> isNaN = new Predicate<Object>() {
+	Predicate<Object> isNotNaN = new Predicate<Object>() {
 		@Override
 		public boolean apply(Object input) {
 			return !input.toString().equals("NaN");
@@ -155,7 +155,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 		for (Result result : results) {
 
-			HashMap<String, Object> filteredValues = new HashMap(Maps.filterValues(result.getValues(), isNaN));
+			HashMap<String, Object> filteredValues = new HashMap(Maps.filterValues(result.getValues(), isNotNaN));
 			filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
 
 			// send the point if filteredValues isn't empty
