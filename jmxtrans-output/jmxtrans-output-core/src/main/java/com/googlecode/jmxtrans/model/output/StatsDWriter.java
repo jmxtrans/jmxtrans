@@ -35,11 +35,11 @@ import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
 import com.googlecode.jmxtrans.util.NumberUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.management.MBeanServer;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -71,7 +71,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	private final InetSocketAddress address;
 	private final DatagramChannel channel;
 	private final Boolean stringsValuesAsKey;
-	private final Long stringValueDefaultCount;
+	@Nonnull private final Long stringValueDefaultCount;
 
 	private static final String BUCKET_TYPE = "bucketType";
 	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
@@ -167,37 +167,41 @@ public class StatsDWriter extends BaseOutputWriter {
 		List<String> typeNames = this.getTypeNames();
 
 		for (Result result : results) {
-			if (isDebugEnabled()) {
-				log.debug(result.toString());
-			}
+			log.debug(result.toString());
 
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					String line = null;
 
-					if (NumberUtils.isNumeric(values.getValue())) {
-						line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-								+ ":" + values.getValue().toString() + "|" + bucketType + "\n";
-					} else if (stringsValuesAsKey) {
-						line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-								+ "." + values.getValue().toString() + ":" + stringValueDefaultCount.toString()
-								+ "|" + bucketType + "\n";
+					if (isNotValidValue(values.getValue())) {
+						log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
+						continue;
 					}
 
-					if (StringUtils.isNotBlank(line)) {
-						doSend(line.trim());
-					}
+					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+							+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
+
+					doSend(line.trim());
 				}
 			}
 		}
 	}
 
+	private boolean isNotValidValue(Object value){
+		return ! (NumberUtils.isNumeric(value) || stringsValuesAsKey);
+	}
+
+	private String computeActualValue(Object value){
+		if(NumberUtils.isNumeric(value)){
+			return ":" + value.toString();
+		}
+
+		return "." + value.toString() + ":" + stringValueDefaultCount.toString();
+	}
+
 	private synchronized boolean doSend(String stat) {
 		try {
-			if (isDebugEnabled()) {
-				log.debug("StatsD Message: " + stat);
-			}
+			log.debug("StatsD Message: " + stat);
 
 			final byte[] data = stat.getBytes("utf-8");
 
