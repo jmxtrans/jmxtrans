@@ -35,6 +35,7 @@ import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
 import com.googlecode.jmxtrans.util.NumberUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +70,12 @@ public class StatsDWriter extends BaseOutputWriter {
 	private final String rootPrefix;
 	private final InetSocketAddress address;
 	private final DatagramChannel channel;
+	private final Boolean stringsValuesAsKey;
+	private final Long stringValueDefaultCount;
 
 	private static final String BUCKET_TYPE = "bucketType";
+	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
+	private static final String STRING_VALUE_DEFAULT_COUNTER = "stringValueDefaultCount";
 
 	private GenericKeyedObjectPool<SocketAddress, DatagramSocket> pool;
 	private ManagedObject mbean;
@@ -90,6 +95,8 @@ public class StatsDWriter extends BaseOutputWriter {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("bucketType") String bucketType,
 			@JsonProperty("rootPrefix") String rootPrefix,
+			@JsonProperty(STRING_VALUE_AS_KEY) Boolean stringsValuesAsKey,
+			@JsonProperty(STRING_VALUE_DEFAULT_COUNTER) Long stringValueDefaultCount,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		channel = DatagramChannel.open();
@@ -98,6 +105,11 @@ public class StatsDWriter extends BaseOutputWriter {
 		// bucketType defaults to c == counter
 		this.bucketType = firstNonNull(bucketType, (String) getSettings().get(BUCKET_TYPE), "c");
 		this.rootPrefix = firstNonNull(rootPrefix, (String) getSettings().get(ROOT_PREFIX), "servers");
+		// treat string attributes as key
+		this.stringsValuesAsKey = firstNonNull(stringsValuesAsKey,
+				(Boolean) getSettings().get(STRING_VALUE_AS_KEY), false);
+		this.stringValueDefaultCount = firstNonNull(stringValueDefaultCount,
+				(Long) getSettings().get(STRING_VALUE_DEFAULT_COUNTER), 1L);
 
 		if (host == null) {
 			host = (String) getSettings().get(HOST);
@@ -162,15 +174,18 @@ public class StatsDWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
+					String line = null;
+
 					if (NumberUtils.isNumeric(values.getValue())) {
-
-						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+						line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 								+ ":" + values.getValue().toString() + "|" + bucketType + "\n";
+					} else if (stringsValuesAsKey) {
+						line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+								+ "." + values.getValue().toString() + ":" + stringValueDefaultCount.toString()
+								+ "|" + bucketType + "\n";
+					}
 
-						if (isDebugEnabled()) {
-							log.debug("StatsD Message: " + line.trim());
-						}
-
+					if (StringUtils.isNotBlank(line)) {
 						doSend(line.trim());
 					}
 				}
@@ -180,6 +195,10 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private synchronized boolean doSend(String stat) {
 		try {
+			if (isDebugEnabled()) {
+				log.debug("StatsD Message: " + stat);
+			}
+
 			final byte[] data = stat.getBytes("utf-8");
 
 			// If we're going to go past the threshold of the buffer then flush.
