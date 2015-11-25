@@ -255,6 +255,11 @@
 			</dependency>
 			<dependency>
 				<groupId>log4j</groupId>
+				<artifactId>apache-log4j-extras</artifactId>
+				<version>1.2.17</version>
+			</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
 				<version>1.2.17</version>
 			</dependency>
