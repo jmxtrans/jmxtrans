@@ -27,14 +27,15 @@ import stormpot.Slot;
 
 import javax.annotation.Nonnull;
 import java.io.Writer;
-import java.net.Socket;
+import java.nio.channels.DatagramChannel;
 
-public class SocketPoolable extends WriterPoolable {
-	@Nonnull @Getter private final Socket socket;
+public class DatagramChannelPoolable extends WriterPoolable {
 
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
+	@Nonnull @Getter private final DatagramChannel channel;
+
+	public DatagramChannelPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull DatagramChannel channel) {
 		super(slot, writer);
-		this.socket = socket;
+		this.channel = channel;
 	}
 
 }

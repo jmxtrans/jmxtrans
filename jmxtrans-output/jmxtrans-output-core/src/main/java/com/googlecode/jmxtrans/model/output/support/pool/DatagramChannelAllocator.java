@@ -27,44 +27,39 @@ import stormpot.Allocator;
 import stormpot.Slot;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.nio.channels.DatagramChannel;
 import java.nio.charset.Charset;
 
-public class SocketAllocator implements Allocator<SocketPoolable> {
+public class DatagramChannelAllocator implements Allocator<DatagramChannelPoolable> {
 
 	@Nonnull private final InetSocketAddress server;
-	private final int socketTimeoutMillis;
+	@Nonnull private final int bufferSize;
 	@Nonnull private final Charset charset;
 
-	public SocketAllocator(@Nonnull InetSocketAddress server, int socketTimeoutMillis, @Nonnull Charset charset) {
+	public DatagramChannelAllocator(@Nonnull InetSocketAddress server, @Nonnull int bufferSize, @Nonnull Charset charset) {
 		this.server = server;
-		this.socketTimeoutMillis = socketTimeoutMillis;
+		this.bufferSize = bufferSize;
 		this.charset = charset;
 	}
 
 	@Override
-	public SocketPoolable allocate(Slot slot) throws Exception {
-		// create new InetSocketAddress to ensure name resolution is done again
-		SocketAddress serverAddress = new InetSocketAddress(server.getHostName(), server.getPort());
-		Socket socket = new Socket();
-		socket.setKeepAlive(false);
-		socket.connect(serverAddress, socketTimeoutMillis);
-
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), charset));
-
-		return new SocketPoolable(slot, socket, writer);
+	public DatagramChannelPoolable allocate(Slot slot) throws Exception {
+		DatagramChannel channel = DatagramChannel.open();
+		channel.connect(new InetSocketAddress(server.getHostName(), server.getPort()));
+		ChannelWriter writer = new ChannelWriter(bufferSize, charset, channel);
+		return new DatagramChannelPoolable(slot, writer, channel);
 	}
 
 	@Override
-	public void deallocate(SocketPoolable poolable) throws Exception {
+	public void deallocate(DatagramChannelPoolable poolable) throws Exception {
 		Closer closer = Closer.create();
 		try {
-			closer.register(poolable.getSocket());
-			closer.register(poolable.getWriter());
+			DatagramChannel channel = closer.register(poolable.getChannel());
+			Writer writer = closer.register(poolable.getWriter());
+			writer.flush();
+			channel.disconnect();
 		} catch (Throwable t) {
 			closer.rethrow(t);
 		} finally {

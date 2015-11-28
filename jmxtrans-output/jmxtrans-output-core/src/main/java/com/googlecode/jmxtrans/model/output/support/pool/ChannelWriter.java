@@ -22,19 +22,58 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
-import stormpot.Slot;
-
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
+import java.io.IOException;
 import java.io.Writer;
-import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 
-public class SocketPoolable extends WriterPoolable {
-	@Nonnull @Getter private final Socket socket;
+@ThreadSafe
+class ChannelWriter extends Writer {
+	@Nonnull private final Charset charset;
+	@Nonnull private final ByteBuffer buffer;
+	@Nonnull private final WritableByteChannel channel;
 
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
-		super(slot, writer);
-		this.socket = socket;
+	public ChannelWriter(
+			int bufferSize,
+			@Nonnull Charset charset,
+			@Nonnull WritableByteChannel channel) {
+		this.charset = charset;
+		this.channel = channel;
+		buffer = ByteBuffer.allocate(bufferSize);
 	}
 
+	@Override
+	public void write(char[] cbuf, int off, int len) throws IOException {
+		synchronized (lock) {
+			byte[] bytes = new String(cbuf, off, len).getBytes(charset);
+
+			if (buffer.remaining() < (bytes.length + 1)) flush();
+
+			buffer.put(bytes, off, len);
+		}
+	}
+
+	@Override
+	public void flush() throws IOException {
+		synchronized (lock) {
+			final int sizeOfBuffer = buffer.position();
+
+			// empty buffer
+			if (sizeOfBuffer <= 0) return;
+
+			// send and reset the buffer
+			buffer.flip();
+			channel.write(buffer);
+			buffer.limit(buffer.capacity());
+			buffer.rewind();
+		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		flush();
+	}
 }

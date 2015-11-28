@@ -23,50 +23,51 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
-import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
-import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
+import com.googlecode.jmxtrans.model.output.support.UdpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public class SensuWriterFactory implements OutputWriterFactory {
+public class StatsDWriterFactory implements OutputWriterFactory {
 
-	private final boolean booleanAsNumber;
-	@Nonnull private final InetSocketAddress server;
 	@Nonnull private final ImmutableList<String> typeNames;
-	@Nullable private final String rootPrefix;
+	@Nonnull private final String rootPrefix;
+	private final boolean stringsValuesAsKey;
+	@Nonnull private final String bucketType;
+	@Nonnull private final Long stringValueDefaultCount;
+	@Nonnull private final InetSocketAddress server;
 
-	public SensuWriterFactory(
+	public StatsDWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
+			@JsonProperty("rootPrefix") String rootPrefix,
+			@JsonProperty("bucketType") String bucketType,
+			@JsonProperty("stringValuesAsKey") boolean stringsValuesAsKey,
+			@JsonProperty("stringValueDefaultCount") Long stringValueDefaultCount,
 			@JsonProperty("host") String host,
-			@JsonProperty("port") Integer port,
-			@JsonProperty("rootPrefix") String rootPrefix) {
-		this.rootPrefix = rootPrefix;
+			@JsonProperty("port") Integer port) {
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
-		this.booleanAsNumber = booleanAsNumber;
+		this.rootPrefix = firstNonNull(rootPrefix, "servers");
+		this.stringsValuesAsKey = stringsValuesAsKey;
+		this.bucketType = firstNonNull(bucketType, "c");
+		this.stringValueDefaultCount = firstNonNull(stringValueDefaultCount, 1L);
 		this.server = new InetSocketAddress(
-				firstNonNull(host, "localhost"),
-				firstNonNull(port, 3030));
+				checkNotNull(host, "Host cannot be null."),
+				checkNotNull(port, "Port cannot be null."));
 	}
 
 	@Override
-	public ResultTransformerOutputWriter<WriterPoolOutputWriter<SensuWriter2>> create() {
-		return ResultTransformerOutputWriter.booleanToNumber(
-				booleanAsNumber,
-				TcpOutputWriterBuilder.builder(
-						server,
-						new SensuWriter2(
-								new GraphiteWriter2(typeNames, rootPrefix),
-								new JsonFactory()))
-						.build());
+	public WriterPoolOutputWriter<StatsDWriter2> create() {
+		return UdpOutputWriterBuilder.builder(
+				server,
+				new StatsDWriter2(typeNames, rootPrefix, bucketType, stringsValuesAsKey, stringValueDefaultCount))
+				.setCharset(UTF_8)
+				.build();
 	}
-
 }
