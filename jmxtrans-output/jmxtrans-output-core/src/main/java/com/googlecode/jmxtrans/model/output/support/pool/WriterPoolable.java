@@ -23,18 +23,29 @@
 package com.googlecode.jmxtrans.model.output.support.pool;
 
 import lombok.Getter;
+import stormpot.Poolable;
 import stormpot.Slot;
 
 import javax.annotation.Nonnull;
 import java.io.Writer;
-import java.net.Socket;
 
-public class SocketPoolable extends WriterPoolable {
-	@Nonnull @Getter private final Socket socket;
+public class WriterPoolable implements Poolable {
 
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
-		super(slot, writer);
-		this.socket = socket;
+	@Nonnull private final Slot slot;
+
+	@Nonnull @Getter private final Writer writer;
+
+	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer) {
+		this.slot = slot;
+		this.writer = writer;
 	}
 
+	@Override
+	public void release() {
+		slot.release(this);
+	}
+
+	public void invalidate() {
+		slot.expire(this);
+	}
 }

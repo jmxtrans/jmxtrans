@@ -23,19 +23,12 @@
 package com.googlecode.jmxtrans.model.output.support;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -49,6 +42,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.google.common.base.Charsets.UTF_8;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
@@ -72,7 +66,7 @@ public class HttpOutputWriterIT {
 
 		verify(
 				postRequestedFor(urlEqualTo(ENDPOINT))
-						.withRequestBody(equalTo("body"))
+						.withRequestBody(equalTo("message"))
 						.withHeader("User-Agent", containing("jmxtrans")));
 	}
 
@@ -89,7 +83,7 @@ public class HttpOutputWriterIT {
 		} finally {
 			verify(
 					postRequestedFor(urlEqualTo(ENDPOINT))
-							.withRequestBody(equalTo("body"))
+							.withRequestBody(equalTo("message"))
 							.withHeader("User-Agent", containing("jmxtrans")));
 		}
 	}
@@ -108,16 +102,12 @@ public class HttpOutputWriterIT {
 
 	private HttpOutputWriter simpleOutputWriter() throws MalformedURLException {
 		return new HttpOutputWriter(
-				new WriterBasedOutputWriter() {
-					@Override
-					public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull ImmutableList<Result> results) throws IOException {
-						writer.write("body");
-					}
-				},
+				new DummyWriterBasedOutputWriter("message"),
 				new URL("http://localhost:" + WIREMOCK_PORT + ENDPOINT),
 				null,
 				HttpUrlConnectionConfigurer.builder("POST").build(),
-				Charsets.UTF_8
+				UTF_8
 		);
 	}
+
 }

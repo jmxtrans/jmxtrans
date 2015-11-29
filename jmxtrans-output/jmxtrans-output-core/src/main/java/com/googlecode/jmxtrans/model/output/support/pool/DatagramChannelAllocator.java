@@ -22,19 +22,46 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
+import com.google.common.io.Closer;
+import stormpot.Allocator;
 import stormpot.Slot;
 
 import javax.annotation.Nonnull;
 import java.io.Writer;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.nio.channels.DatagramChannel;
+import java.nio.charset.Charset;
 
-public class SocketPoolable extends WriterPoolable {
-	@Nonnull @Getter private final Socket socket;
+public class DatagramChannelAllocator implements Allocator<DatagramChannelPoolable> {
 
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
-		super(slot, writer);
-		this.socket = socket;
+	@Nonnull private final InetSocketAddress server;
+	@Nonnull private final int bufferSize;
+	@Nonnull private final Charset charset;
+
+	public DatagramChannelAllocator(@Nonnull InetSocketAddress server, @Nonnull int bufferSize, @Nonnull Charset charset) {
+		this.server = server;
+		this.bufferSize = bufferSize;
+		this.charset = charset;
 	}
 
+	@Override
+	public DatagramChannelPoolable allocate(Slot slot) throws Exception {
+		DatagramChannel channel = DatagramChannel.open();
+		channel.connect(new InetSocketAddress(server.getHostName(), server.getPort()));
+		ChannelWriter writer = new ChannelWriter(bufferSize, charset, channel);
+		return new DatagramChannelPoolable(slot, writer, channel);
+	}
+
+	@Override
+	public void deallocate(DatagramChannelPoolable poolable) throws Exception {
+		Closer closer = Closer.create();
+		try {
+			Writer writer = closer.register(poolable.getWriter());
+			writer.flush();
+		} catch (Throwable t) {
+			closer.rethrow(t);
+		} finally {
+			closer.close();
+		}
+	}
 }

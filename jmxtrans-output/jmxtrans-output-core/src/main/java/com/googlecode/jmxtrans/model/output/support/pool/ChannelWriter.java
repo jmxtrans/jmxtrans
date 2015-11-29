@@ -23,48 +23,63 @@
 package com.googlecode.jmxtrans.model.output.support.pool;
 
 import com.google.common.io.Closer;
-import stormpot.Allocator;
-import stormpot.Slot;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
+import javax.annotation.concurrent.ThreadSafe;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 
-public class SocketAllocator implements Allocator<SocketPoolable> {
-
-	@Nonnull private final InetSocketAddress server;
-	private final int socketTimeoutMillis;
+@ThreadSafe
+class ChannelWriter extends Writer {
 	@Nonnull private final Charset charset;
+	@Nonnull private final ByteBuffer buffer;
+	@Nonnull private final WritableByteChannel channel;
 
-	public SocketAllocator(@Nonnull InetSocketAddress server, int socketTimeoutMillis, @Nonnull Charset charset) {
-		this.server = server;
-		this.socketTimeoutMillis = socketTimeoutMillis;
+	public ChannelWriter(
+			int bufferSize,
+			@Nonnull Charset charset,
+			@Nonnull WritableByteChannel channel) {
 		this.charset = charset;
+		this.channel = channel;
+		buffer = ByteBuffer.allocate(bufferSize);
 	}
 
 	@Override
-	public SocketPoolable allocate(Slot slot) throws Exception {
-		// create new InetSocketAddress to ensure name resolution is done again
-		SocketAddress serverAddress = new InetSocketAddress(server.getHostName(), server.getPort());
-		Socket socket = new Socket();
-		socket.setKeepAlive(false);
-		socket.connect(serverAddress, socketTimeoutMillis);
+	public void write(char[] cbuf, int off, int len) throws IOException {
+		synchronized (lock) {
+			byte[] bytes = new String(cbuf, off, len).getBytes(charset);
 
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), charset));
+			if (buffer.remaining() < (bytes.length + 1)) flush();
 
-		return new SocketPoolable(slot, socket, writer);
+			buffer.put(bytes, off, len);
+		}
 	}
 
 	@Override
-	public void deallocate(SocketPoolable poolable) throws Exception {
+	public void flush() throws IOException {
+		synchronized (lock) {
+			final int sizeOfBuffer = buffer.position();
+
+			// empty buffer
+			if (sizeOfBuffer <= 0) return;
+
+			// send and reset the buffer
+			buffer.flip();
+			channel.write(buffer);
+			buffer.limit(buffer.capacity());
+			buffer.rewind();
+		}
+	}
+
+	@Override
+	public void close() throws IOException {
 		Closer closer = Closer.create();
 		try {
-			closer.register(poolable.getSocket());
-			closer.register(poolable.getWriter());
+			closer.register(channel);
+			flush();
 		} catch (Throwable t) {
 			closer.rethrow(t);
 		} finally {

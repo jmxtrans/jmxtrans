@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.googlecode.jmxtrans.model.Result;
 
 public final class ResultFixtures {
 	private ResultFixtures() {}
@@ -68,6 +67,10 @@ public final class ResultFixtures {
 
 	public static ImmutableList<Result> singleFalseResult() {
 		return ImmutableList.of(booleanFalseResult());
+	}
+
+	public static ImmutableList<Result> singleNumericResult() {
+		return ImmutableList.of(numericResult());
 	}
 
 	public static ImmutableList<Result> dummyResults() {
