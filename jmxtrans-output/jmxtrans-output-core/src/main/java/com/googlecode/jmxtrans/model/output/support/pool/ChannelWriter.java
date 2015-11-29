@@ -22,6 +22,8 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
+import com.google.common.io.Closer;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
@@ -74,6 +76,14 @@ class ChannelWriter extends Writer {
 
 	@Override
 	public void close() throws IOException {
-		flush();
+		Closer closer = Closer.create();
+		try {
+			closer.register(channel);
+			flush();
+		} catch (Throwable t) {
+			closer.rethrow(t);
+		} finally {
+			closer.close();
+		}
 	}
 }

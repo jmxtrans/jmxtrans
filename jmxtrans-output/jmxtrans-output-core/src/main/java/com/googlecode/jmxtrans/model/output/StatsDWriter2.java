@@ -41,7 +41,7 @@ import java.util.Map;
 public class StatsDWriter2 implements WriterBasedOutputWriter {
 
 	@Nonnull
-	private final Logger log = LoggerFactory.getLogger(getClass());
+	private static final Logger log = LoggerFactory.getLogger(StatsDWriter2.class);
 
 	@Nonnull
 	private final List<String> typeNames;

@@ -56,10 +56,8 @@ public class DatagramChannelAllocator implements Allocator<DatagramChannelPoolab
 	public void deallocate(DatagramChannelPoolable poolable) throws Exception {
 		Closer closer = Closer.create();
 		try {
-			DatagramChannel channel = closer.register(poolable.getChannel());
 			Writer writer = closer.register(poolable.getWriter());
 			writer.flush();
-			channel.disconnect();
 		} catch (Throwable t) {
 			closer.rethrow(t);
 		} finally {
