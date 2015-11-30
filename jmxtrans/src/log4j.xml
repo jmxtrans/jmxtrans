@@ -42,10 +42,11 @@
     </appender>
 
     <appender name="fileAppender" class="org.apache.log4j.rolling.RollingFileAppender">
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${jmxtrans.log.dir}/jmxtrans-%d{yyyyMMdd.kk}.log.gz"/>
-        </rollingPolicy>
         <param name="Append" value="true"/>
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="ActiveFileName" value="${jmxtrans.log.dir}/jmxtrans.log"/>
+            <param name="FileNamePattern" value="${jmxtrans.log.dir}/jmxtrans-%d{yyyyMMdd}.log.gz"/>
+        </rollingPolicy>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="[%d{dd MMM yyyy HH:mm:ss}] [%t] %-6r %-5p (%C:%L) - %m\n"/>
         </layout>
