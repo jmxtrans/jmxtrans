@@ -22,19 +22,16 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
-import stormpot.Slot;
+import stormpot.Expiration;
+import stormpot.SlotInfo;
 
-import javax.annotation.Nonnull;
-import java.io.Writer;
-import java.net.Socket;
+import java.nio.channels.DatagramChannel;
 
-public class SocketPoolable extends WriterPoolable {
-	@Nonnull @Getter private final Socket socket;
-
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
-		super(slot, writer);
-		this.socket = socket;
+public class DatagramChannelExpiration implements Expiration<DatagramChannelPoolable> {
+	@Override
+	public boolean hasExpired(SlotInfo<? extends DatagramChannelPoolable> info) throws Exception {
+		DatagramChannel channel = info.getPoolable().getChannel();
+		return !channel.isConnected()
+				|| !channel.isOpen();
 	}
-
 }

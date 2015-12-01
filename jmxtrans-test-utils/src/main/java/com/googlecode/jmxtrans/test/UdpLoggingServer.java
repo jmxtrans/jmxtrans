@@ -28,41 +28,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
+import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
 
-public class TCPEchoServer extends ExternalResource {
-
+public class UdpLoggingServer extends ExternalResource {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	private Thread thread = null;
-	private volatile ServerSocket server;
+	@Nullable private Thread thread = null;
 
 	private final Object startSynchro = new Object();
+	private volatile DatagramSocket socket;
+
 	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<String>();
+	private final Charset charset;
 
-	@Override
-	public void before() {
-		start();
+	public UdpLoggingServer(@Nonnull Charset charset) {
+		this.charset = charset;
 	}
 
-	@Override
-	protected void after() {
-		stop();
-	}
-
-	public void start() {
-		checkState(thread == null, "Server already started");
+	private void start() {
+		checkState(thread == null, "UDP Server already started");
 
 		thread = new Thread(new Runnable() {
 			@Override
@@ -70,64 +62,63 @@ public class TCPEchoServer extends ExternalResource {
 				Closer closer = Closer.create();
 				try {
 					try {
-						server = closer.register(new ServerSocket(0));
+						socket = closer.register(new DatagramSocket());
 						while (true) {
-							processRequests(server);
+							processRequests(socket);
 						}
 					} catch (Throwable t) {
 						throw closer.rethrow(t);
 					} finally {
 						closer.close();
-						server = null;
+						socket = null;
 					}
 				} catch (IOException ioe) {
 					log.error("Exception in TCP echo server", ioe);
 				}
-
 			}
 		});
 		thread.start();
+
 		try {
 			synchronized (startSynchro) {
 				startSynchro.wait(1000);
 			}
 		} catch (InterruptedException interrupted) {
-			log.error("TCP Echo server seems to take too long to start", interrupted);
+			log.error("UDP server seems to take too long to start", interrupted);
 		}
 	}
 
-	private void processRequests(ServerSocket server) throws IOException {
-		Closer closer = Closer.create();
-		try {
-			Socket socket = server.accept();
-			synchronized (startSynchro) {
-				startSynchro.notifyAll();
-			}
-			BufferedReader in = closer.register(new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8)));
-			PrintWriter out = closer.register(new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8)));
-			String line;
-			while ((line = in.readLine()) != null) {
-				receivedMessages.add(line);
-				out.print(line);
-			}
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
-		}
-	}
-
-	public void stop() {
-		checkState(thread != null, "Server not started");
-		thread.interrupt();
+	private void processRequests(DatagramSocket socket) throws IOException {
+		byte[] buffer = new byte[1024];
+		DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+		socket.receive(packet);
+		String messageReceived = new String(packet.getData(), 0, packet.getLength(), charset);
+		log.debug("Message received: {}", messageReceived);
+		receivedMessages.add(messageReceived);
 	}
 
 	public boolean messageReceived(@Nonnull String message) {
 		return receivedMessages.contains(message);
 	}
 
+	private void stop() {
+		checkState(thread != null, "UDP server not started");
+		thread.interrupt();
+	}
+
+	@Nonnull
 	public InetSocketAddress getLocalSocketAddress()  {
-		checkState(server != null, "Server not started");
-		return new InetSocketAddress("localhost", server.getLocalPort());
+		checkState(socket != null, "Server not started");
+		return new InetSocketAddress("localhost", socket.getLocalPort());
+	}
+
+	@Override
+	protected void before() throws Throwable {
+		start();
+	}
+
+	@Override
+	protected void after() {
+		stop();
 	}
 }

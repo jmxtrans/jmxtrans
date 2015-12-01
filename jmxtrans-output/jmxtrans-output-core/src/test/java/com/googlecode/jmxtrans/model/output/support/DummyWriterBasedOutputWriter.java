@@ -20,21 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.support.pool;
+package com.googlecode.jmxtrans.model.output.support;
 
-import lombok.Getter;
-import stormpot.Slot;
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.io.Writer;
-import java.net.Socket;
 
-public class SocketPoolable extends WriterPoolable {
-	@Nonnull @Getter private final Socket socket;
+public class DummyWriterBasedOutputWriter implements WriterBasedOutputWriter {
 
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
-		super(slot, writer);
-		this.socket = socket;
+	private final String message;
+
+	public DummyWriterBasedOutputWriter(String message) {
+		this.message = message;
 	}
 
+	@Override
+	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull ImmutableList<Result> results) throws IOException {
+		writer.write(message);
+	}
 }

@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -41,6 +42,7 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 @JsonSerialize(include = NON_NULL)
 @ThreadSafe
 @Immutable
+@EqualsAndHashCode
 public class Result {
 	@Getter private final String attributeName;
 	@Getter private final String className;

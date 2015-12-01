@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>252-SNAPSHOT</version>
+		<version>253-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-core</artifactId>
@@ -39,8 +39,8 @@
 
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-		<verify.mutationThreshold>26</verify.mutationThreshold>
-		<verify.totalBranchRate>42</verify.totalBranchRate>
+		<verify.mutationThreshold>25</verify.mutationThreshold>
+		<verify.totalBranchRate>38</verify.totalBranchRate>
 		<verify.totalLineRate>40</verify.totalLineRate>
 	</properties>
 

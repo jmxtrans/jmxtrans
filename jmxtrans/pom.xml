@@ -29,7 +29,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>252-SNAPSHOT</version>
+		<version>253-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans</artifactId>
@@ -145,7 +145,7 @@
 			<resource>
 				<directory>src</directory>
 				<includes>
-					<include>log4j.xml</include>
+					<include>logback.xml</include>
 					<include>quartz.server.properties</include>
 				</includes>
 			</resource>

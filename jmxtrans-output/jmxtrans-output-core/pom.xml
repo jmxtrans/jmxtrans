@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-output</artifactId>
-		<version>252-SNAPSHOT</version>
+		<version>253-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-output-core</artifactId>
@@ -38,9 +38,9 @@
 	<description>This module contains output writers that do not have any special dependencies.</description>
 
 	<properties>
-		<verify.mutationThreshold>13</verify.mutationThreshold>
-		<verify.totalBranchRate>25</verify.totalBranchRate>
-		<verify.totalLineRate>35</verify.totalLineRate>
+		<verify.mutationThreshold>16</verify.mutationThreshold>
+		<verify.totalBranchRate>27</verify.totalBranchRate>
+		<verify.totalLineRate>36</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -110,6 +110,11 @@
 		<dependency>
 			<groupId>com.github.tomakehurst</groupId>
 			<artifactId>wiremock</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

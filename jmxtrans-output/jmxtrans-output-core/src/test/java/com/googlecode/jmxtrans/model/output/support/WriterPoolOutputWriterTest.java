@@ -26,8 +26,11 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
+import com.googlecode.jmxtrans.model.output.support.pool.WriterPoolable;
+import com.googlecode.jmxtrans.test.IntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -39,6 +42,7 @@ import stormpot.BlazePool;
 import stormpot.Config;
 import stormpot.LifecycledPool;
 import stormpot.Slot;
+import stormpot.Timeout;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -50,15 +54,16 @@ import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TcpOutputWriterTest {
+public class WriterPoolOutputWriterTest {
 
-	private LifecycledPool<SocketPoolable> pool;
+	private LifecycledPool<WriterPoolable> pool;
 	@Spy private DummyAllocator allocator = new DummyAllocator();
 	@Mock private WriterBasedOutputWriter target;
 	private Writer writer = new StringWriter();
@@ -66,14 +71,14 @@ public class TcpOutputWriterTest {
 
 	@Before
 	public void setupPool() {
-		Config<SocketPoolable> config = new Config<SocketPoolable>()
+		Config<WriterPoolable> config = new Config<WriterPoolable>()
 				.setAllocator(allocator);
-		pool = new BlazePool<SocketPoolable>(config);
+		pool = new BlazePool<WriterPoolable>(config);
 	}
 
 	@Test
 	public void writerIsPassedToTargetOutputWriter() throws Exception {
-		TcpOutputWriter<WriterBasedOutputWriter> outputWriter = new TcpOutputWriter<WriterBasedOutputWriter>(target, pool);
+		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<WriterBasedOutputWriter>(target, pool, new Timeout(1, SECONDS));
 
 		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
 
@@ -83,25 +88,26 @@ public class TcpOutputWriterTest {
 	}
 
 	@Test(expected = IOException.class)
-	public void socketIsReleasedOnIOException() throws Exception {
+	@Category(IntegrationTest.class)
+	public void poolableIsReleasedOnIOException() throws Exception {
 		doThrow(IOException.class).when(target).write(any(Writer.class), any(Server.class), any(Query.class), any(ImmutableList.class));
 
-		TcpOutputWriter<WriterBasedOutputWriter> outputWriter = new TcpOutputWriter<WriterBasedOutputWriter>(target, pool);
+		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<WriterBasedOutputWriter>(target, pool, new Timeout(1, SECONDS));
 		try {
 			outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		} finally {
 			await()
 					.atMost(500, MILLISECONDS)
-					.until(socketDeallocated());
+					.until(poolableDeallocated());
 		}
 	}
 
-	private Callable<Boolean> socketDeallocated() {
+	private Callable<Boolean> poolableDeallocated() {
 		return new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
 				try {
-					verify(allocator).deallocate(any(SocketPoolable.class));
+					verify(allocator).deallocate(any(WriterPoolable.class));
 				} catch (IOException e) {
 					return false;
 				}
@@ -111,14 +117,14 @@ public class TcpOutputWriterTest {
 	}
 
 
-	private class DummyAllocator implements Allocator<SocketPoolable> {
+	private class DummyAllocator implements Allocator<WriterPoolable> {
 		@Override
-		public SocketPoolable allocate(Slot slot) throws Exception {
+		public WriterPoolable allocate(Slot slot) throws Exception {
 			return new SocketPoolable(slot, null, writer);
 		}
 
 		@Override
-		public void deallocate(SocketPoolable poolable) throws Exception {
+		public void deallocate(WriterPoolable poolable) throws Exception {
 		}
 	}
 }

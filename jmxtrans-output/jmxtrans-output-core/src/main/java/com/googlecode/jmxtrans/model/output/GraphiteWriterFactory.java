@@ -27,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
-import com.googlecode.jmxtrans.model.output.support.TcpOutputWriter;
+import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
+import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.net.InetSocketAddress;
@@ -69,10 +70,10 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 	}
 
 	@Override
-	public ResultTransformerOutputWriter<TcpOutputWriter<GraphiteWriter2>> create() {
+	public ResultTransformerOutputWriter<WriterPoolOutputWriter<GraphiteWriter2>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
-				TcpOutputWriter.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
+				TcpOutputWriterBuilder.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
 						.setCharset(UTF_8)
 						.build()
 		);

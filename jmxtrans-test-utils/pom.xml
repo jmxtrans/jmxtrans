@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>252-SNAPSHOT</version>
+		<version>253-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-test-utils</artifactId>
@@ -56,6 +56,11 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
