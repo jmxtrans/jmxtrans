@@ -54,10 +54,12 @@
 
     <logger name="com.googlecode.jmxtrans">
         <level value="${jmxtrans.log.level}"/>
+        <appender-ref ref="asyncAppender"/>
     </logger>
 
     <logger name="org.quartz">
         <level value="warn"/>
+        <appender-ref ref="asyncAppender"/>
     </logger>
 
     <root>
