@@ -42,6 +42,7 @@ import com.googlecode.jmxtrans.util.NumberUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,7 +87,7 @@ public class LibratoWriter extends BaseOutputWriter {
 	public static final String DEFAULT_LIBRATO_API_URL = "https://metrics-api.librato.com/v1/metrics";
 	public static final String SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS = "libratoApiTimeoutInMillis";
 
-	private final org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final JsonFactory jsonFactory = new JsonFactory();
 	/**
