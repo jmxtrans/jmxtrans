@@ -145,7 +145,7 @@
 			<resource>
 				<directory>src</directory>
 				<includes>
-					<include>logback.xml</include>
+					<include>log4j.xml</include>
 					<include>quartz.server.properties</include>
 				</includes>
 			</resource>
