@@ -22,20 +22,15 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import static com.google.common.collect.Sets.immutableEnumSet;
-import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_HOSTNAME;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.googlecode.jmxtrans.model.JmxProcess;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.ResultAttribute;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.util.JsonUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.influxdb.InfluxDB;
@@ -49,15 +44,21 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.ResultAttribute;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static com.google.common.collect.Sets.immutableEnumSet;
+import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_HOSTNAME;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link InfluxDbWriter}.
@@ -148,6 +149,22 @@ public class InfluxDbWriterTests {
 	}
 
 	@Test
+	public void databaseIsCreated() throws Exception {
+		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
+		writer.doWrite(server, query, results);
+
+		verify(influxDB).createDatabase(DATABASE_NAME);
+	}
+
+	@Test
+	public void databaseIsNotCreated() throws Exception {
+		InfluxDbWriter writer = getTestInfluxDbWriterNoDatabaseCreation();
+		writer.doWrite(server, query, results);
+
+		verify(influxDB, never()).createDatabase(anyString());
+	}
+
+	@Test
 	public void loadingFromFile() throws URISyntaxException, IOException {
 		File input = new File(InfluxDbWriterTests.class.getResource("/influxDB.json").toURI());
 		JmxProcess process = JsonUtils.getJmxProcess(input);
@@ -169,20 +186,24 @@ public class InfluxDbWriterTests {
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL,DEFAULT_RETENTION_POLICY,DEFAULT_RESULT_ATTRIBUTES);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_RESULT_ATTRIBUTES, true);
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithResultTags(ImmutableSet<ResultAttribute> resultTags) {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL,DEFAULT_RETENTION_POLICY, resultTags);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, resultTags, true);
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
-		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY,DEFAULT_RESULT_ATTRIBUTES);
+		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY, DEFAULT_RESULT_ATTRIBUTES, true);
+	}
+
+	private InfluxDbWriter getTestInfluxDbWriterNoDatabaseCreation() {
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_RESULT_ATTRIBUTES, false);
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy,
-			ImmutableSet<ResultAttribute> resultTags) {
-		return new InfluxDbWriter(influxDB,DATABASE_NAME, consistencyLevel, retentionPolicy, resultTags);
+												 ImmutableSet<ResultAttribute> resultTags, boolean createDatabase) {
+		return new InfluxDbWriter(influxDB, DATABASE_NAME, consistencyLevel, retentionPolicy, resultTags, createDatabase);
 	}
 	
 	private String enumValueToAttribute(ResultAttribute attribute) {

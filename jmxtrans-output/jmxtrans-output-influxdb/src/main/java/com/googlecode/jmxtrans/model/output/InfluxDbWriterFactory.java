@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
 import java.util.EnumSet;
 import java.util.List;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.Sets.immutableEnumSet;
+import static java.lang.Boolean.TRUE;
 
 public class InfluxDbWriterFactory implements OutputWriterFactory {
 
@@ -59,11 +61,9 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final InfluxDB influxDB;
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 	private final boolean booleanAsNumber;
+	private final boolean createDatabase;
 
 	/**
-	 * @param typeNames
-	 * @param booleanAsNumber
-	 * @param debugEnabled
 	 * @param url
 	 *            - The url e.g http://localhost:8086 to InfluxDB
 	 * @param username
@@ -72,18 +72,22 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	 *            - The password for InfluxDB
 	 * @param database
 	 *            - The name of the database (created if does not exist) on
-	 *            InfluxDB to write the measurements to
 	 */
 	@JsonCreator
-	public InfluxDbWriterFactory(@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber, @JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("url") String url, @JsonProperty("username") String username,
-			@JsonProperty("password") String password, @JsonProperty("database") String database,
+	public InfluxDbWriterFactory(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
+			@JsonProperty("url") String url,
+			@JsonProperty("username") String username,
+			@JsonProperty("password") String password,
+			@JsonProperty("database") String database,
 			@JsonProperty("writeConsistency") String writeConsistency,
 			@JsonProperty("retentionPolicy") String retentionPolicy,
-			@JsonProperty("resultTags") List<String> resultTags) {
+			@JsonProperty("resultTags") List<String> resultTags,
+			@JsonProperty("createDatabase") Boolean createDatabase) {
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
+		this.createDatabase = firstNonNull(createDatabase, TRUE);
 
 		this.writeConsistency = StringUtils.isNotBlank(writeConsistency)
 				? InfluxDB.ConsistencyLevel.valueOf(writeConsistency) : InfluxDB.ConsistencyLevel.ALL;
@@ -115,6 +119,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, resultAttributesToWriteAsTags));
+				writeConsistency, retentionPolicy, resultAttributesToWriteAsTags, createDatabase));
 	}
 }
