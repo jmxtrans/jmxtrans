@@ -25,6 +25,10 @@ package com.googlecode.jmxtrans.model.output;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
@@ -63,9 +67,28 @@ public class CloudWatchWriterTests {
 	private Query query;
 	private ImmutableList<Result> results;
 
+	private Map<String, Object> createValidDimension(String name, Object value) {
+		Map<String, Object> returnValue = new HashMap<String, Object>();
+		returnValue.put("name", name);
+		returnValue.put("value", value);
+		return returnValue;
+	}
+
+	private Map<String, Object> createInvalidDimension(String name, Object value) {
+		Map<String, Object> returnValue = new HashMap<String, Object>();
+		returnValue.put("key", name);
+		returnValue.put("val", value);
+		return returnValue;
+	}
+
 	@Before
 	public void createCloudWatchWriter() {
-		writer = CloudWatchWriter.builder().setNamespace("testNS").build();
+		Collection<Map<String, Object>> dimensions = new ArrayList<Map<String,Object>>();
+		dimensions.add(createValidDimension("SomeKey", "SomeValue"));
+		dimensions.add(createValidDimension("InstanceId", "$InstanceId"));
+		dimensions.add(createInvalidDimension("Other", "thing"));
+
+		writer = CloudWatchWriter.builder().setNamespace("testNS").setDimensions(dimensions).build();
 		writer.setCloudWatchClient(cloudWatchClient);
 	}
 
@@ -93,6 +116,9 @@ public class CloudWatchWriterTests {
 		MetricDatum metricDatum = request.getMetricData().get(0);
 		assertThat(metricDatum.getMetricName()).isEqualTo("attributeName_key");
 		assertThat(metricDatum.getValue()).isEqualTo(1);
+		assertThat(metricDatum.getDimensions().size()).isEqualTo(2);
+		assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
+		assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
 	}
 
 	@Test

@@ -26,8 +26,10 @@ import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
+import com.amazonaws.util.EC2MetadataUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,7 +44,11 @@ import com.googlecode.jmxtrans.util.ObjectToDouble;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +61,13 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
 public class CloudWatchWriter extends BaseOutputWriter {
-
+	private static final String NAME = "name";
+	private static final String VALUE = "value";
 	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
 
 	private AmazonCloudWatchClient cloudWatchClient;
 	private String namespace;
+	private Collection<Dimension> dimensions = new ArrayList<Dimension>();
 
 	private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
 
@@ -69,9 +77,16 @@ public class CloudWatchWriter extends BaseOutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("namespace") String namespace,
+			@JsonProperty("dimensions") Collection<Map<String,Object>> dimensions,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.namespace = MoreObjects.firstNonNull(namespace, (String) getSettings().get("namespace"));
+
+		dimensions = MoreObjects.firstNonNull(dimensions, (Collection<Map<String,Object>>)settings.get("dimensions"));
+		if (dimensions != null) {
+			initDimensions(dimensions);
+		}
+
 		if (isNullOrEmpty(this.namespace)) throw new IllegalArgumentException("namespace cannot be null or empty");
 	}
 
@@ -120,6 +135,37 @@ public class CloudWatchWriter extends BaseOutputWriter {
 		cloudWatchClient.putMetricData(metricDataRequest);
 	}
 
+	private void initDimensions(Collection<Map<String,Object>> dimensions) {
+		for (Map<String, Object> dimension : dimensions) {
+			String name = null;
+			String value = null;
+
+			if (dimension.containsKey(NAME)) {
+				name = dimension.get(NAME).toString();
+			}
+			if (dimension.containsKey(VALUE)) {
+				value = dimension.get(VALUE).toString();
+			}
+			if (name != null && value != null) {
+				if (value.startsWith("$")) {
+					try {
+						Method m = EC2MetadataUtils.class.getMethod("get" + value.substring(1));
+						value = String.valueOf(m.invoke(null));
+					} catch (NoSuchMethodException e) {
+						log.warn("Could not resolve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+					} catch (IllegalAccessException e) {
+						log.warn("Could not load {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+					} catch (InvocationTargetException e) {
+						log.warn("Could not retrieve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+					}
+				}
+				this.dimensions.add(new Dimension().withName(name).withValue(value));
+			} else {
+				log.warn("Incomplete dimension: Missing non-null '{}' and '{}' in '{}'", NAME, VALUE, dimension);
+			}
+		}
+	}
+
 	private MetricDatum processResult(Result result, Map.Entry<String, Object> values) {
 		// Sometimes the attribute name and the key of the value are the same
 		MetricDatum metricDatum = new MetricDatum();
@@ -128,6 +174,8 @@ public class CloudWatchWriter extends BaseOutputWriter {
 		} else {
 			metricDatum.setMetricName(result.getAttributeName() + "_" + values.getKey());
 		}
+
+		metricDatum.setDimensions(dimensions);
 
 		// Converts the Objects to Double-values for CloudWatch
 		metricDatum.setValue(toDoubleConverter.apply(values.getValue()));
@@ -143,6 +191,7 @@ public class CloudWatchWriter extends BaseOutputWriter {
 		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
 		private boolean booleanAsNumber;
 		private Boolean debugEnabled;
+		private Collection<Map<String, Object>> dimensions;
 		private String namespace;
 
 		private Builder() {
@@ -167,9 +216,14 @@ public class CloudWatchWriter extends BaseOutputWriter {
 			this.debugEnabled = debugEnabled;
 			return this;
 		}
-		
+
 		public Builder setNamespace(String namespace) {
 			this.namespace = namespace;
+			return this;
+		}
+
+		public Builder setDimensions(Collection<Map<String, Object>> dimensions) {
+			this.dimensions = dimensions;
 			return this;
 		}
 
@@ -179,7 +233,8 @@ public class CloudWatchWriter extends BaseOutputWriter {
 					booleanAsNumber,
 					debugEnabled,
 					namespace,
-					null);
+					dimensions,
+					Collections.<String, Object>emptyMap());
 		}
 
 	}
