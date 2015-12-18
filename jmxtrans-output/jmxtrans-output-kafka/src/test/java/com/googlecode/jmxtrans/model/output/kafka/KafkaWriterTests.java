@@ -71,19 +71,21 @@ public class KafkaWriterTests {
 		assertThat(message.message())
 				.contains("\"keyspace\":\"rootPrefix.host_123.classNameAlias.attributeName_key\"")
 				.contains("\"value\":\"1\"")
-				.contains("\"timestamp\":0");
+				.contains("\"timestamp\":0")
+				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
 	}
 	
 	private static KafkaWriter getTestKafkaWriter() {
 		ImmutableList typenames = ImmutableList.of();
 		Map<String,Object> settings = new HashMap<String,Object>();
+		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1"); 
 		settings.put("zk.connect", "host:2181");
 		settings.put("metadata.broker.list", "10.231.1.1:9180");
 		settings.put("serializer.class", "kafka.serializer.StringEncoder");
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
 		settings.put("topics", "myTopic");
-		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", settings);
+		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings);
 	}
 	
 }
