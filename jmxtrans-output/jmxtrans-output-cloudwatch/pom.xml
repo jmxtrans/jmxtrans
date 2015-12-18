@@ -38,9 +38,9 @@
 	<description>This module contains output writers based on CloudWatch (AWS).</description>
 
 	<properties>
-		<verify.mutationThreshold>62</verify.mutationThreshold>
-		<verify.totalBranchRate>50</verify.totalBranchRate>
-		<verify.totalLineRate>67</verify.totalLineRate>
+		<verify.mutationThreshold>45</verify.mutationThreshold>
+		<verify.totalBranchRate>66</verify.totalBranchRate>
+		<verify.totalLineRate>80</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -96,6 +96,21 @@
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -113,6 +128,13 @@
 			<plugin>
 				<groupId>net.ju-n.maven.plugins</groupId>
 				<artifactId>checksum-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Dno.security.manager</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

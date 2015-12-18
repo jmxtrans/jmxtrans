@@ -23,30 +23,40 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
+import com.amazonaws.util.EC2MetadataUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterAdapter;
+import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.util.ObjectToDouble;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
@@ -54,14 +64,16 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
-public class CloudWatchWriter extends BaseOutputWriter {
-
+public class CloudWatchWriter implements OutputWriterFactory {
+	private static final String NAME = "name";
+	private static final String VALUE = "value";
 	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
 
-	private AmazonCloudWatchClient cloudWatchClient;
-	private String namespace;
+	private final AmazonCloudWatchClient cloudWatchClient;
+	private final String namespace;
+	private final ImmutableCollection<Dimension> dimensions;
 
-	private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
+	private final boolean booleanAsNumber;
 
 	@JsonCreator
 	public CloudWatchWriter(
@@ -69,118 +81,125 @@ public class CloudWatchWriter extends BaseOutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("namespace") String namespace,
+			@JsonProperty("dimensions") Collection<Map<String,Object>> dimensions,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.namespace = MoreObjects.firstNonNull(namespace, (String) getSettings().get("namespace"));
-		if (isNullOrEmpty(this.namespace)) throw new IllegalArgumentException("namespace cannot be null or empty");
+		this.booleanAsNumber = booleanAsNumber;
+		this.namespace = MoreObjects.firstNonNull(namespace, (String) settings.get("namespace"));
+		checkArgument(!isNullOrEmpty(this.namespace), "namespace cannot be null or empty");
+
+		dimensions = MoreObjects.firstNonNull(dimensions, (Collection<Map<String,Object>>)settings.get("dimensions"));
+		this.dimensions = initDimensions(dimensions);
+
+		// Configuring the CloudWatch client
+		// Credentials are loaded from the Amazon EC2 Instance Metadata Service
+		this.cloudWatchClient = initCloudWatchClient();
 	}
 
-	@JsonIgnore
-	@VisibleForTesting
-	void setCloudWatchClient(AmazonCloudWatchClient cloudWatchClient) {
-		this.cloudWatchClient = cloudWatchClient;
+	private AmazonCloudWatchClient initCloudWatchClient() {
+		AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
+		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));
+		return cloudWatchClient;
 	}
 
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
-		if (cloudWatchClient == null) {
+	private ImmutableList<Dimension> initDimensions(Collection<Map<String, Object>> dimensions) {
+		if (dimensions == null) return ImmutableList.of();
 
-			// Configuring the CloudWatch client
-			// Credentials are loaded from the Amazon EC2 Instance Metadata Service
+		ImmutableList.Builder<Dimension> builder = ImmutableList.builder();
+		for (Map<String, Object> dimension : dimensions) {
+			String name = null;
+			String value = null;
 
-			cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
-			Region awsRegion = Regions.getCurrentRegion();
-			if (awsRegion == null) throw new ValidationException("Problems getting metadata", query);
-			cloudWatchClient.setRegion(awsRegion);
-		}
-	}
-
-	@Override
-	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
-		metricDataRequest.setNamespace(namespace);
-		List<MetricDatum> metricDatumList = new ArrayList<MetricDatum>();
-
-		// Iterating through the list of query results
-
-		for (Result result : results) {
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+			if (dimension.containsKey(NAME)) {
+				name = dimension.get(NAME).toString();
+			}
+			if (dimension.containsKey(VALUE)) {
+				value = dimension.get(VALUE).toString();
+			}
+			if (name != null && value != null) {
+				if (value.startsWith("$")) {
 					try {
-						metricDatumList.add(processResult(result, values));
-					} catch (IllegalArgumentException iae) {
-						log.error("Could not convert result to double", iae);
+						Method m = EC2MetadataUtils.class.getMethod("get" + value.substring(1));
+						value = String.valueOf(m.invoke(null));
+					} catch (NoSuchMethodException e) {
+						log.warn("Could not resolve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+					} catch (IllegalAccessException e) {
+						log.warn("Could not load {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+					} catch (InvocationTargetException e) {
+						log.warn("Could not retrieve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+					}
+				}
+				builder.add(new Dimension().withName(name).withValue(value));
+			} else {
+				log.warn("Incomplete dimension: Missing non-null '{}' and '{}' in '{}'", NAME, VALUE, dimension);
+			}
+		}
+		return builder.build();
+	}
+
+	@Override
+	public OutputWriter create() {
+		return ResultTransformerOutputWriter.booleanToNumber(
+				booleanAsNumber,
+				new Writer(namespace, cloudWatchClient, dimensions)
+		);
+	}
+
+	public static class Writer extends OutputWriterAdapter {
+
+		@Nonnull private final String namespace;
+		@Nonnull private final AmazonCloudWatch cloudWatchClient;
+
+		@Nonnull private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
+		@Nonnull private final ImmutableCollection<Dimension> dimensions;
+
+		public Writer(@Nonnull String namespace, @Nonnull AmazonCloudWatch cloudWatchClient, @Nonnull ImmutableCollection<Dimension> dimensions) {
+			this.namespace = namespace;
+			this.cloudWatchClient = cloudWatchClient;
+			this.dimensions = dimensions;
+		}
+
+		@Override
+		public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+			PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
+			metricDataRequest.setNamespace(namespace);
+			List<MetricDatum> metricDatumList = new ArrayList<MetricDatum>();
+
+			// Iterating through the list of query results
+
+			for (Result result : results) {
+				Map<String, Object> resultValues = result.getValues();
+				if (resultValues != null) {
+					for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+						try {
+							metricDatumList.add(processResult(result, values));
+						} catch (IllegalArgumentException iae) {
+							log.error("Could not convert result to double", iae);
+						}
 					}
 				}
 			}
+
+			metricDataRequest.setMetricData(metricDatumList);
+			cloudWatchClient.putMetricData(metricDataRequest);
 		}
 
-		metricDataRequest.setMetricData(metricDatumList);
-		cloudWatchClient.putMetricData(metricDataRequest);
-	}
+		private MetricDatum processResult(Result result, Map.Entry<String, Object> values) {
+			// Sometimes the attribute name and the key of the value are the same
+			MetricDatum metricDatum = new MetricDatum();
+			if (result.getAttributeName().equals(values.getKey())) {
+				metricDatum.setMetricName(result.getAttributeName());
+			} else {
+				metricDatum.setMetricName(result.getAttributeName() + "_" + values.getKey());
+			}
 
-	private MetricDatum processResult(Result result, Map.Entry<String, Object> values) {
-		// Sometimes the attribute name and the key of the value are the same
-		MetricDatum metricDatum = new MetricDatum();
-		if (result.getAttributeName().equals(values.getKey())) {
-			metricDatum.setMetricName(result.getAttributeName());
-		} else {
-			metricDatum.setMetricName(result.getAttributeName() + "_" + values.getKey());
-		}
+			metricDatum.setDimensions(dimensions);
 
-		// Converts the Objects to Double-values for CloudWatch
-		metricDatum.setValue(toDoubleConverter.apply(values.getValue()));
-		metricDatum.setTimestamp(new Date());
-		return metricDatum;
-	}
-
-	public static Builder builder() {
-		return new Builder();
-	}
-
-	public static final class Builder {
-		private final ImmutableList.Builder<String> typeNames = ImmutableList.builder();
-		private boolean booleanAsNumber;
-		private Boolean debugEnabled;
-		private String namespace;
-
-		private Builder() {
-		}
-
-		public Builder addTypeNames(List<String> typeNames) {
-			this.typeNames.addAll(typeNames);
-			return this;
-		}
-
-		public Builder addTypeName(String typeName) {
-			typeNames.add(typeName);
-			return this;
-		}
-
-		public Builder setBooleanAsNumber(boolean booleanAsNumber) {
-			this.booleanAsNumber = booleanAsNumber;
-			return this;
-		}
-
-		public Builder setDebugEnabled(boolean debugEnabled) {
-			this.debugEnabled = debugEnabled;
-			return this;
-		}
-		
-		public Builder setNamespace(String namespace) {
-			this.namespace = namespace;
-			return this;
-		}
-
-		public CloudWatchWriter build() {
-			return new CloudWatchWriter(
-					typeNames.build(),
-					booleanAsNumber,
-					debugEnabled,
-					namespace,
-					null);
+			// Converts the Objects to Double-values for CloudWatch
+			metricDatum.setValue(toDoubleConverter.apply(values.getValue()));
+			metricDatum.setTimestamp(new Date());
+			return metricDatum;
 		}
 
 	}
+
 }
