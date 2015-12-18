@@ -156,8 +156,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 			// send the point if filteredValues isn't empty
 			if (!filteredValues.isEmpty()) {
+				filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
-				resultTagsToApply.put("_jmx_port", server.getPort());
 				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
 						.tag(resultTagsToApply).fields(filteredValues).build();
 				batchPoints.point(point);
