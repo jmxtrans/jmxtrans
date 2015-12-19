@@ -31,7 +31,7 @@ public class EqualsTests {
 	@Test
 	public void testQuery() {
 		Query q1 = Query.builder()
-				.setObj("obj")
+				.setObj("obj:key=val")
 				.addKeys("key1", "key2")
 				.addAttr("foo", "bar")
 				.setResultAlias("alias")
@@ -39,7 +39,7 @@ public class EqualsTests {
 
 		// same as q1
 		Query q2 = Query.builder()
-				.setObj("obj")
+				.setObj("obj:key=val")
 				.addKeys("key1", "key2")
 				.addAttr("foo", "bar")
 				.setResultAlias("alias")
@@ -47,7 +47,7 @@ public class EqualsTests {
 
 		// different
 		Query q3 = Query.builder()
-				.setObj("obj3")
+				.setObj("obj3:key=val")
 				.addKeys("key1", "key2")
 				.addAttr("foo", "bar")
 				.setResultAlias("alias")
@@ -60,7 +60,7 @@ public class EqualsTests {
 	@Test
 	public void testQuery2() {
 		Query q1 = Query.builder()
-				.setObj("*")
+				.setObj("*:key=val")
 				.addKeys("key1", "key2")
 				.addAttr("foo", "bar")
 				.setResultAlias("alias")
@@ -68,7 +68,7 @@ public class EqualsTests {
 
 		// not same as q1
 		Query q2 = Query.builder()
-				.setObj("obj")
+				.setObj("obj:key=val")
 				.addKeys("key1", "key2")
 				.addAttr("foo", "bar")
 				.setResultAlias("alias")

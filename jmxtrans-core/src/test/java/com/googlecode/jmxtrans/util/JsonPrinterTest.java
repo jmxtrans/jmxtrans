@@ -77,7 +77,7 @@ public class JsonPrinterTest {
 				.setHost("example.org")
 				.setPort("123")
 				.addQuery(Query.builder()
-					.setObj("obj")
+					.setObj("obj:key=val")
 					.build())
 				.build();
 		return new JmxProcess(server);

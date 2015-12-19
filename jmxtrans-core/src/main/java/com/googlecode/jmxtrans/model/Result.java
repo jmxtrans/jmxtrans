@@ -33,6 +33,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+import static com.google.common.collect.ImmutableMap.copyOf;
 
 /**
  * Represents the result of a query.
@@ -57,7 +58,7 @@ public class Result {
 		this.className = className;
 		this.objDomain = objDomain;
 		this.typeName = typeName;
-		this.values = ImmutableMap.copyOf(values);
+		this.values = copyOf(values);
 		this.epoch = epoch;
 		this.attributeName = attributeName;
 		this.keyAlias = keyAlias;

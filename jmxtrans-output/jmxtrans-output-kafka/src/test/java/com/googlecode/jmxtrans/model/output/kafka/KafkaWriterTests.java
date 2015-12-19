@@ -22,24 +22,23 @@
  */
 package com.googlecode.jmxtrans.model.output.kafka;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
@@ -56,21 +55,17 @@ public class KafkaWriterTests {
 
 	@Test public void
 	messagesAreSentToKafka() throws Exception {
-		Server server = Server.builder().setHost("host").setPort("123").build();
-		Query query = Query.builder().build();
-		Result result = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
-
 		KafkaWriter writer = getTestKafkaWriter();
 		writer.setProducer(producer);
-		writer.doWrite(server, query, ImmutableList.of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 		verify(producer).send(messageCaptor.capture());
 		KeyedMessage<String, String> message = messageCaptor.getValue();
 
 		assertThat(message.topic()).isEqualTo("myTopic");
 		assertThat(message.message())
-				.contains("\"keyspace\":\"rootPrefix.host_123.classNameAlias.attributeName_key\"")
-				.contains("\"value\":\"1\"")
+				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount\"")
+				.contains("\"value\":\"10\"")
 				.contains("\"timestamp\":0")
 				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
 	}

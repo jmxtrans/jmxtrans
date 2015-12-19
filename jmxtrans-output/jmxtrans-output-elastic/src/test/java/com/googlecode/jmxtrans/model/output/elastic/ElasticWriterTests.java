@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import io.searchbox.action.Action;
@@ -36,21 +35,28 @@ import io.searchbox.core.DocumentResult;
 import io.searchbox.core.Index;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ElasticWriterTests {
@@ -67,16 +73,12 @@ public class ElasticWriterTests {
 	@InjectMocks
 	private ElasticWriter writer = createElasticWriter();
 
-	private Server server;
-	private Query query;
 	private Result result;
 
 	@Before
 	public void initializeMocks() throws IOException {
 		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
 		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
-		server = Server.builder().setHost("host").setPort("123").build();
-		query = Query.builder().build();
 		result = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
 	}
 
@@ -95,7 +97,7 @@ public class ElasticWriterTests {
         // creates the index if needed
         writer.start();
 
-        writer.doWrite(server, query, ImmutableList.of(result));
+        writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
 
         writer.stop();
 
@@ -107,7 +109,7 @@ public class ElasticWriterTests {
 	public void sendNonNumericMessageToElastic() throws Exception {
 		Result resultWithNonNumericValue = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)"abc"));
 
-		writer.doWrite(server, query, ImmutableList.of(resultWithNonNumericValue));
+		writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(resultWithNonNumericValue));
 
 		// only one call is expected: the index check. No write is being made with non-numeric values.
 		Mockito.verify(mockClient, times(0)).execute(Matchers.<Action<JestResult>>any());
@@ -119,7 +121,7 @@ public class ElasticWriterTests {
 		// return for call, is index created
 		when(mockClient.execute(isA(Action.class))).thenThrow(new IOException("Failed to add index entry to elastic."));
 
-		writer.doWrite(server, query, ImmutableList.of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
 
 		// only one call is expected: the insert index entry. No write is being made with non-numeric values.
 		Mockito.verify(mockClient, times(1)).execute(Matchers.<Action<JestResult>>any());
@@ -132,7 +134,7 @@ public class ElasticWriterTests {
 		when(mockClient.execute(isA(Action.class))).thenReturn(jestResultFalse);
 		when(jestResultFalse.getErrorMessage()).thenReturn("Failed to add index entry to elastic.");
 
-		writer.doWrite(server, query, ImmutableList.of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
 
 		// only one call is expected: the insert index entry.
 		Mockito.verify(mockClient, times(1)).execute(Matchers.<Action<JestResult>>any());
@@ -163,7 +165,7 @@ public class ElasticWriterTests {
 		// return for call, add index entry
 		when(mockClient.execute(isA(Index.class))).thenReturn(jestResultTrue);
 
-        writer.doWrite(serverWithKnownValues, query, ImmutableList.of(resultWithKnownValues));
+        writer.doWrite(serverWithKnownValues, dummyQuery(), ImmutableList.of(resultWithKnownValues));
 
         verify(mockClient).execute(argument.capture());
         assertEquals(PREFIX + "_jmx-entries", argument.getValue().getIndex());
@@ -224,7 +226,7 @@ public class ElasticWriterTests {
 
 	@Test
 	public void testValidateSetup() throws Exception {
-		writer.validateSetup(server, query);
+		writer.validateSetup(dummyServer(), dummyQuery());
 		// no exception expected
 	}
 

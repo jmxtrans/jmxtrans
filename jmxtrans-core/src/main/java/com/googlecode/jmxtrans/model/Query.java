@@ -35,15 +35,29 @@ import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder
 import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
+import javax.management.AttributeList;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import java.io.IOException;
+import java.rmi.UnmarshalException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,11 +78,13 @@ import static java.util.Arrays.asList;
 @JsonSerialize(include = NON_NULL)
 @JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
 @ThreadSafe
-@Immutable // Note that outputWriters is neither thread safe nor immutable (yet)
+@ToString(exclude = {"outputWriters"})
 public class Query {
 
+	private static final Logger logger = LoggerFactory.getLogger(Query.class);
+
 	/** The JMX object representation: java.lang:type=Memory */
-	@Getter private final String obj;
+	@Nonnull @Getter private final ObjectName objectName;
 	@Nonnull @Getter private final ImmutableList<String> keys;
 
 	@Nonnull @Getter private final ImmutableList<String> attr;
@@ -113,7 +129,11 @@ public class Query {
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
 	) {
-		this.obj = obj;
+		try {
+			this.objectName = new ObjectName(obj);
+		} catch (MalformedObjectNameException e) {
+			throw new IllegalArgumentException("Invalid object name: " + obj);
+		}
 		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
 		this.resultAlias = resultAlias;
 		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
@@ -140,11 +160,41 @@ public class Query {
 		}).toList();
 	}
 
-	@Override
-	public String toString() {
-		return "Query [obj=" + obj + ", useObjDomainAsKey:" + useObjDomainAsKey + 
-				", resultAlias=" + resultAlias + ", attr=" + attr + "]";
+	public Iterable<ObjectName> queryNames(MBeanServerConnection mbeanServer) throws IOException {
+		return mbeanServer.queryNames(objectName, null);
 	}
+
+	public ImmutableList<Result> fetchResults(MBeanServerConnection mbeanServer, ObjectName queryName) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+		MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
+		ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
+
+		List<String> attributes;
+		if (attr.isEmpty()) {
+			attributes = new ArrayList<String>();
+			for (MBeanAttributeInfo attrInfo : info.getAttributes()) {
+				attributes.add(attrInfo.getName());
+			}
+		} else {
+			attributes = attr;
+		}
+
+		try {
+			if (attributes.size() > 0) {
+				logger.debug("Executing queryName [{}] from query [{}]", queryName.getCanonicalName(), this);
+
+				AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
+
+				return new JmxResultProcessor(this, oi, al.asList(), info.getClassName(), queryName.getDomain()).getResults();
+			}
+		} catch (UnmarshalException ue) {
+			if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
+				logger.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: "
+						+ "http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
+			}
+		}
+		return ImmutableList.of();
+	}
+
 
 	@Override
 	public boolean equals(Object o) {
@@ -165,7 +215,7 @@ public class Query {
 		Query other = (Query) o;
 
 		return new EqualsBuilder()
-				.append(this.getObj(), other.getObj())
+				.append(this.getObjectName(), other.getObjectName())
 				.append(this.getKeys(), other.getKeys())
 				.append(this.getAttr(), other.getAttr())
 				.append(this.getResultAlias(), other.getResultAlias())
@@ -176,7 +226,7 @@ public class Query {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(41, 97)
-				.append(this.getObj())
+				.append(this.getObjectName())
 				.append(this.getKeys())
 				.append(this.getAttr())
 				.append(this.getResultAlias())

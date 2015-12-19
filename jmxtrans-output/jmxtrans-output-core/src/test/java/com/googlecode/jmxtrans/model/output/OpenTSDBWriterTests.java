@@ -25,7 +25,6 @@ package com.googlecode.jmxtrans.model.output;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -46,7 +45,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.collect.ImmutableList.of;
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -80,11 +82,6 @@ public class OpenTSDBWriterTests {
 	}
 	@Test
 	public void socketInvalidatedWhenError() throws Exception {
-		// a lot of setup for not much of a test ...
-		Server server = Server.builder().setHost("host").setPort("123").build();
-		Query query = Query.builder().build();
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
-
 		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = Mockito.mock(GenericKeyedObjectPool.class);
 		Socket socket = Mockito.mock(Socket.class);
 		Mockito.when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
@@ -97,7 +94,7 @@ public class OpenTSDBWriterTests {
 				.build();
 		writer.setPool(pool);
 
-		writer.doWrite(server, query, of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		Mockito.verify(pool).invalidateObject(Matchers.any(InetSocketAddress.class), Matchers.eq(socket));
 		Mockito.verify(pool, Mockito.never()).returnObject(Matchers.any(InetSocketAddress.class), Matchers.eq(socket));
 	}
@@ -126,18 +123,13 @@ public class OpenTSDBWriterTests {
 
 	@Test
 	public void writeSingleResult() throws Exception {
-		Server server = Server.builder().setPid("1").build();
-		Query query = Query.builder().build();
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
-
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		OpenTSDBWriter writer = getOpenTSDBWriter(out);
 
-		writer.doWrite(server, query, of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 		// check that OpenTSDB format is respected
-		assertThat(out.toString()).startsWith("put classNameAlias.attributeName ")
-			.contains("type=key")
+		assertThat(out.toString()).startsWith("put ObjectPendingFinalizationCount.ObjectPendingFinalizationCount ")
 			.contains("host=")  // hostname is added by default
 			.endsWith("\n");
 	}
