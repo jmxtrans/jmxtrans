@@ -23,34 +23,32 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.JmxAction;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import stormpot.Timeout;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 public class JmxQueryProcessor {
-	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Responsible for processing individual Queries.
 	 */
-	public void processQuery(MBeanServerConnection mbeanServer, Server server, Query query) throws Exception {
-		for (ObjectName queryName : query.queryNames(mbeanServer)) {
-			ImmutableList<Result> results = query.fetchResults(mbeanServer, queryName);
-			runOutputWritersForQuery(server, query, results);
-		}
-	}
-
-	private void runOutputWritersForQuery(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		for (OutputWriter writer : query.getOutputWriterInstances()) {
-			writer.doWrite(server, query, results);
-		}
-		log.debug("Finished running outputWriters for query: {}", query);
+	public void processQuery(final Server server, final Query query) throws Exception {
+		server.executeJmx(new JmxAction() {
+			@Override
+			public void execute(MBeanServerConnection connection) throws Exception {
+				for (ObjectName queryName : query.queryNames(connection)) {
+					ImmutableList<Result> results = query.fetchResults(connection, queryName);
+					query.runOutputWritersForQuery(server, results);
+				}
+			}
+		}, new Timeout(1, SECONDS));
 	}
 
 }

@@ -30,8 +30,6 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
-import com.googlecode.jmxtrans.connections.JMXConnectionParams;
-import com.googlecode.jmxtrans.connections.JmxConnectionFactory;
 import com.googlecode.jmxtrans.connections.SocketFactory;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
@@ -43,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.management.remote.JMXConnector;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,8 +64,6 @@ public class JmxTransModule extends AbstractModule {
 	protected void configure() {
 		bind(new TypeLiteral<GenericKeyedObjectPool<InetSocketAddress, Socket>>(){})
 				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName()));
-		bind(new TypeLiteral<GenericKeyedObjectPool<JMXConnectionParams, JMXConnector>>(){})
-				.toInstance(getObjectPool(new JmxConnectionFactory(), JmxConnectionFactory.class.getSimpleName()));
 		bind(new TypeLiteral<GenericKeyedObjectPool<SocketAddress, DatagramSocket>>(){})
 				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName()));
 	}

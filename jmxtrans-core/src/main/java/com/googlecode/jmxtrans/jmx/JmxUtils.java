@@ -28,8 +28,6 @@ import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -49,15 +47,7 @@ public class JmxUtils {
 	/**
 	 * Does the work for processing a Server object.
 	 */
-	public void processServer(Server server, JMXConnector conn) throws Exception {
-
-		MBeanServerConnection mbeanServer;
-
-		if (server.isLocal()) {
-			mbeanServer = server.getLocalMBeanServer();
-		} else {
-			mbeanServer = conn.getMBeanServerConnection();
-		}
+	public void processServer(Server server) throws Exception {
 
 		if (server.isQueriesMultiThreaded()) {
 			ExecutorService service = null;
@@ -69,7 +59,7 @@ public class JmxUtils {
 
 				List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
 				for (Query query : server.getQueries()) {
-					ProcessQueryThread pqt = new ProcessQueryThread(mbeanServer, server, query);
+					ProcessQueryThread pqt = new ProcessQueryThread(server, query);
 					threads.add(Executors.callable(pqt));
 				}
 
@@ -82,7 +72,7 @@ public class JmxUtils {
 			}
 		} else {
 			for (Query query : server.getQueries()) {
-				new JmxQueryProcessor().processQuery(mbeanServer, server, query);
+				new JmxQueryProcessor().processQuery(server, query);
 			}
 		}
 	}
@@ -92,21 +82,12 @@ public class JmxUtils {
 	 * jmxProcess.getMultiThreaded()) or invokes them one at a time.
 	 */
 	public void execute(JmxProcess process) throws Exception {
-
-		List<JMXConnector> conns = new ArrayList<JMXConnector>();
-
 		if (process.isServersMultiThreaded()) {
 			ExecutorService service = null;
 			try {
 				service = Executors.newFixedThreadPool(process.getNumMultiThreadedServers());
 				for (Server server : process.getServers()) {
-					if (server.isLocal() && server.getLocalMBeanServer() != null) {
-						service.execute(new ProcessServerThread(server, null, this));
-					} else {
-						JMXConnector conn = server.getServerConnection();
-						conns.add(conn);
-						service.execute(new ProcessServerThread(server, conn, this));
-					}
+					service.execute(new ProcessServerThread(server, this));
 				}
 				service.shutdown();
 			} finally {
@@ -120,21 +101,7 @@ public class JmxUtils {
 			}
 		} else {
 			for (Server server : process.getServers()) {
-				if (server.getLocalMBeanServer() != null) {
-					this.processServer(server, null);
-				} else {
-					JMXConnector conn = server.getServerConnection();
-					conns.add(conn);
-					this.processServer(server, conn);
-				}
-			}
-		}
-
-		for (JMXConnector conn : conns) {
-			try {
-				conn.close();
-			} catch (Exception ex) {
-				log.error("Error closing connection.", ex);
+				this.processServer(server);
 			}
 		}
 	}

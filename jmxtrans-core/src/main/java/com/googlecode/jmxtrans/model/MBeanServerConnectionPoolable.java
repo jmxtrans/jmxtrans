@@ -20,27 +20,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.jmx;
+package com.googlecode.jmxtrans.model;
 
-import com.googlecode.jmxtrans.model.Server;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import stormpot.Poolable;
+import stormpot.Slot;
 
-/**
- * Executes either a getAttribute or getAttributes query.
- */
-public class ProcessServerThread implements Runnable {
-	private final Server server;
-	private final JmxUtils jmxUtils;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
 
-	public ProcessServerThread(Server server, JmxUtils jmxUtils) {
-		this.server = server;
-		this.jmxUtils = jmxUtils;
+public class MBeanServerConnectionPoolable implements Poolable {
+
+	private static final Logger logger = LoggerFactory.getLogger(MBeanServerConnectionPoolable.class);
+
+	@Nonnull private final Slot slot;
+
+	@Nullable @Getter private final JMXConnector jmxConnector;
+
+	@Nonnull @Getter private final MBeanServerConnection connection;
+
+	public MBeanServerConnectionPoolable(@Nonnull Slot slot, JMXConnector jmxConnector, @Nonnull MBeanServerConnection connection) {
+		this.slot = slot;
+		this.jmxConnector = jmxConnector;
+		this.connection = connection;
 	}
 
-	public void run() {
-		try {
-			jmxUtils.processServer(server);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	@Override
+	public void release() {
+		slot.release(this);
+	}
+
+	public void invalidate() {
+		slot.expire(this);
 	}
 }

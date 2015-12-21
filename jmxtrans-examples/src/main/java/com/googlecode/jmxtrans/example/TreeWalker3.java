@@ -106,7 +106,7 @@ public class TreeWalker3 {
 			Query query = queryBuilder.build();
 
 			try {
-				new JmxQueryProcessor().processQuery(connection, null, query);
+				new JmxQueryProcessor().processQuery(null, query);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}

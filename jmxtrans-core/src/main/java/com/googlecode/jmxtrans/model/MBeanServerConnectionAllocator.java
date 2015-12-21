@@ -20,48 +20,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.model;
 
-import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
+import stormpot.Allocator;
+import stormpot.Slot;
 
+import javax.annotation.Nonnull;
 import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import java.io.IOException;
 
-/**
- * Allows us to pool connections to remote jmx servers.
- */
-public class JmxConnectionFactory extends BaseKeyedPoolableObjectFactory<JMXConnectionParams, JMXConnector> {
+public class MBeanServerConnectionAllocator implements Allocator<MBeanServerConnectionPoolable> {
 
-	/**
-	 * Creates the connection.
-	 */
-	@Override
-	public JMXConnector makeObject(JMXConnectionParams params) throws Exception {
-		return JMXConnectorFactory.connect(params.getUrl(), params.getEnvironment());
+	@Nonnull private final Server server;
+
+	public MBeanServerConnectionAllocator(@Nonnull Server server) {
+		this.server = server;
 	}
 
-	/**
-	 * Closes the connection.
-	 */
 	@Override
-	public void destroyObject(JMXConnectionParams params, JMXConnector connector) throws Exception {
-		connector.close();
-	}
-
-	/**
-	 * Validates that the connection is good.
-	 */
-	@Override
-	public boolean validateObject(JMXConnectionParams params, JMXConnector connector) {
-		boolean result = false;
-		try {
-			connector.getConnectionId();
-			connector.getMBeanServerConnection().getMBeanCount();
-			result = true;
-		} catch (IOException ex) {
-			// ignored
+	public MBeanServerConnectionPoolable allocate(Slot slot) throws Exception {
+		if (server.isLocal()) {
+			return new MBeanServerConnectionPoolable(slot, null, server.getLocalMBeanServer());
+		} else {
+			JMXConnector connection = server.getServerConnection();
+			return new MBeanServerConnectionPoolable(slot, connection, connection.getMBeanServerConnection());
 		}
-		return result;
+	}
+
+	@Override
+	public void deallocate(MBeanServerConnectionPoolable poolable) throws Exception {
+		JMXConnector connector = poolable.getJmxConnector();
+		if (connector != null) connector.close();
 	}
 }

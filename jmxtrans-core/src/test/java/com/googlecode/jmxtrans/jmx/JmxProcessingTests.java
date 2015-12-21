@@ -84,7 +84,7 @@ public class JmxProcessingTests {
 				.addOutputWriter(outputWriterFactory)
 				.build();
 
-		new JmxQueryProcessor().processQuery(server, null, query);
+		new JmxQueryProcessor().processQuery(null, query);
 
 		verify(outputWriter).doWrite(any(Server.class), queryCaptor.capture(), resultsCaptor.capture());
 

@@ -20,27 +20,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.jmx;
+package com.googlecode.jmxtrans.model;
 
-import com.googlecode.jmxtrans.model.Server;
-
-/**
- * Executes either a getAttribute or getAttributes query.
- */
-public class ProcessServerThread implements Runnable {
-	private final Server server;
-	private final JmxUtils jmxUtils;
-
-	public ProcessServerThread(Server server, JmxUtils jmxUtils) {
-		this.server = server;
-		this.jmxUtils = jmxUtils;
-	}
-
-	public void run() {
-		try {
-			jmxUtils.processServer(server);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+public interface LifecycleAware {
+	void shutdown();
 }

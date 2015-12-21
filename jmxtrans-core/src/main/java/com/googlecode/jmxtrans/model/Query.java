@@ -115,6 +115,7 @@ public class Query {
 	@Getter private final boolean allowDottedKeys;
 	@Getter private final boolean useAllTypeNames;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriters;
+	@Nonnull @Getter private final Iterable<OutputWriter> outputWriterInstances;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
 
 	@JsonCreator
@@ -144,20 +145,25 @@ public class Query {
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
+
+		this.outputWriterInstances = createOutputWriters(outputWriters);
+	}
+
+	private ImmutableList<OutputWriter> createOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
+		return FluentIterable
+				.from(outputWriters)
+				.transform(new Function<OutputWriterFactory, OutputWriter>() {
+					@Nullable
+					@Override
+					public OutputWriter apply(OutputWriterFactory input) {
+						return input.create();
+					}
+				})
+				.toList();
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
 		return this.typeNameValuesStringBuilder.build(typeNames, typeNameStr);
-	}
-
-	public Iterable<OutputWriter> getOutputWriterInstances() {
-		return FluentIterable.from(outputWriters).transform(new Function<OutputWriterFactory, OutputWriter>() {
-			@Nullable
-			@Override
-			public OutputWriter apply(OutputWriterFactory input) {
-				return input.create();
-			}
-		}).toList();
 	}
 
 	public Iterable<ObjectName> queryNames(MBeanServerConnection mbeanServer) throws IOException {
@@ -255,6 +261,13 @@ public class Query {
 
 	public static Builder builder() {
 		return new Builder();
+	}
+
+	public void runOutputWritersForQuery(Server server, ImmutableList<Result> results) throws Exception {
+		for (OutputWriter writer : getOutputWriterInstances()) {
+			writer.doWrite(server, this, results);
+		}
+		logger.debug("Finished running outputWriters for query: {}", this);
 	}
 
 	@NotThreadSafe
