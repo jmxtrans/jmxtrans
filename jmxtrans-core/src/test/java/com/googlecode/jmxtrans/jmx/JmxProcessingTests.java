@@ -28,15 +28,13 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.test.RequiresIO;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.runners.MockitoJUnitRunner;
+import stormpot.Timeout;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -47,14 +45,15 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import java.util.List;
 
+import static com.googlecode.jmxtrans.model.ServerFixtures.localServer;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
-@Category(RequiresIO.class)
-@RunWith(MockitoJUnitRunner.class)
 @Ignore("Incompatibility with LessIOSecurityManager")
 public class JmxProcessingTests {
 
@@ -65,6 +64,11 @@ public class JmxProcessingTests {
 	private ArgumentCaptor<Query> queryCaptor;
 	@Captor
 	private ArgumentCaptor<ImmutableList<Result>> resultsCaptor;
+
+	@Before
+	public void initCaptors() {
+		initMocks(this);
+	}
 
 	@Before
 	public void startMBeanServer() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
@@ -84,7 +88,10 @@ public class JmxProcessingTests {
 				.addOutputWriter(outputWriterFactory)
 				.build();
 
-		new JmxQueryProcessor().processQuery(null, query);
+		Server server = localServer();
+
+		Iterable<Result> results1 = server.execute(query, new Timeout(1, SECONDS));
+		query.runOutputWritersForQuery(server, results1);
 
 		verify(outputWriter).doWrite(any(Server.class), queryCaptor.capture(), resultsCaptor.capture());
 

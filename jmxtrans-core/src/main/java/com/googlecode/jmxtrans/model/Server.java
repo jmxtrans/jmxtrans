@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.connections.JMXConnectionParams;
@@ -46,6 +47,8 @@ import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -197,25 +200,19 @@ public class Server implements LifecycleAware {
 		return new BlazePool<MBeanServerConnectionPoolable>(config);
 	}
 
-	public void executeJmx(JmxAction call, Timeout timeout) throws Exception {
+	public Iterable<Result> execute(Query query, Timeout timeout) throws Exception {
 		MBeanServerConnectionPoolable poolable = pool.claim(timeout);
 		try {
-			call.execute(poolable.getConnection());
-		} catch (Exception ioe) {
-			poolable.invalidate();
-			throw ioe;
-		} finally {
-			poolable.release();
-		}
-	}
+			ImmutableList.Builder<Result> results = ImmutableList.builder();
+			MBeanServerConnection connection = poolable.getConnection();
 
-	public <T> T callJmx(JmxCall action, Timeout timeout) throws Exception {
-		MBeanServerConnectionPoolable poolable = pool.claim(timeout);
-		try {
-			return action.execute(poolable.getConnection());
-		} catch (Exception ioe) {
+			for (ObjectName queryName : query.queryNames(connection)) {
+				results.addAll(query.fetchResults(connection, queryName));
+			}
+			return results.build();
+		} catch (Exception e) {
 			poolable.invalidate();
-			throw ioe;
+			throw e;
 		} finally {
 			poolable.release();
 		}

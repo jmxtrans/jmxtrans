@@ -22,8 +22,9 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import javax.annotation.Nonnull;
 import javax.management.MBeanServerConnection;
 
 public interface JmxAction {
-	void execute(MBeanServerConnection connection) throws Exception;
+	void execute(@Nonnull MBeanServerConnection connection) throws Exception;
 }

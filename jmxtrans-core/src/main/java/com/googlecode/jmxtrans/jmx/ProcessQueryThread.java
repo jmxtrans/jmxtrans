@@ -23,9 +23,13 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import stormpot.Timeout;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Executes either a getAttribute or getAttributes query.
@@ -44,7 +48,8 @@ public class ProcessQueryThread implements Runnable {
 
 	public void run() {
 		try {
-			new JmxQueryProcessor().processQuery(this.server, this.query);
+			Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
+			query.runOutputWritersForQuery(server, results);
 		} catch (Exception e) {
 			log.error("Error executing query: " + query, e);
 			throw new RuntimeException(e);

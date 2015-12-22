@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output.support;
 
-import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -36,5 +35,5 @@ public interface WriterBasedOutputWriter {
 			@Nonnull Writer writer,
 			@Nonnull Server server,
 			@Nonnull Query query,
-			@Nonnull ImmutableList<Result> results) throws IOException;
+			@Nonnull Iterable<Result> results) throws IOException;
 }

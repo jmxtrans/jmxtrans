@@ -23,12 +23,13 @@
 package com.googlecode.jmxtrans.example;
 
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.jmx.JmxQueryProcessor;
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import stormpot.Timeout;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -39,6 +40,8 @@ import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Walks a JMX tree and prints out all of the attribute values actually using
@@ -63,7 +66,7 @@ public class TreeWalker2 {
 			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
 			TreeWalker2 tw = new TreeWalker2();
-			tw.walkTree(mbeanServer);
+			tw.walkTree(mbeanServer, server);
 		} catch (IOException e) {
 			log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
 		} finally {
@@ -73,8 +76,7 @@ public class TreeWalker2 {
 		}
 	}
 
-	/** */
-	public void walkTree(MBeanServerConnection connection) throws Exception {
+	public void walkTree(MBeanServerConnection connection, Server server) throws Exception {
 
 		// key here is null, null returns everything!
 		Set<ObjectName> mbeans = connection.queryNames(null, null);
@@ -82,16 +84,19 @@ public class TreeWalker2 {
 			MBeanInfo info = connection.getMBeanInfo(name);
 			MBeanAttributeInfo[] attrs = info.getAttributes();
 
-			Query.Builder query = Query.builder()
+			Query.Builder queryBuilder = Query.builder()
 					.setObj(name.getCanonicalName())
 					.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()));
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
-				query.addAttr(attrInfo.getName());
+				queryBuilder.addAttr(attrInfo.getName());
 			}
 
+			Query query = queryBuilder.build();
+
 			try {
-				new JmxQueryProcessor().processQuery(null, query.build());
+				Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
+				query.runOutputWritersForQuery(server, results);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);
 			}

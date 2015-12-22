@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
@@ -143,7 +142,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	 *
 	 */
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
 		if (createDatabase) influxDB.createDatabase(database);
 

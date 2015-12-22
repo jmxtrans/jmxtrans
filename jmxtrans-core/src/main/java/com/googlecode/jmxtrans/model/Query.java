@@ -170,7 +170,7 @@ public class Query {
 		return mbeanServer.queryNames(objectName, null);
 	}
 
-	public ImmutableList<Result> fetchResults(MBeanServerConnection mbeanServer, ObjectName queryName) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+	public Iterable<Result> fetchResults(MBeanServerConnection mbeanServer, ObjectName queryName) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 		MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
 		ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
 
@@ -196,6 +196,8 @@ public class Query {
 			if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
 				logger.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: "
 						+ "http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
+			} else {
+				throw ue;
 			}
 		}
 		return ImmutableList.of();
@@ -263,7 +265,7 @@ public class Query {
 		return new Builder();
 	}
 
-	public void runOutputWritersForQuery(Server server, ImmutableList<Result> results) throws Exception {
+	public void runOutputWritersForQuery(Server server, Iterable<Result> results) throws Exception {
 		for (OutputWriter writer : getOutputWriterInstances()) {
 			writer.doWrite(server, this, results);
 		}

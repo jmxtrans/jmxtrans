@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 import java.util.Map;
@@ -50,7 +49,7 @@ public interface OutputWriter {
 
 	void stop() throws LifecycleException;
 
-	void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;
+	void doWrite(Server server, Query query, Iterable<Result> results) throws Exception;
 
 	/**
 	 * Settings allow you to configure your Writers with whatever they might
