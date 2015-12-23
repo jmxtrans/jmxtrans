@@ -99,6 +99,7 @@ public class StatsDWriter extends BaseOutputWriter {
 			@JsonProperty(STRING_VALUE_DEFAULT_COUNTER) Long stringValueDefaultCount,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		log.warn("StatsDWriter is deprecated. Please use StatsDWriterFactory instead.");
 		channel = DatagramChannel.open();
 		sendBuffer = ByteBuffer.allocate((short) 1500);
 

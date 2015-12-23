@@ -82,6 +82,7 @@ public class SensuWriter extends BaseOutputWriter {
 			@JsonProperty("handler") String handler,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		logger.warn("SensuWriter is deprecated. Please use SensuWriterFactory instead.");
 		this.host = firstNonNull(host, (String) getSettings().get(HOST), DEFAULT_SENSU_HOST);
 		this.handler = firstNonNull(handler, (String) getSettings().get(SETTING_HANDLER), DEFAULT_SENSU_HANDLER);
 	}
