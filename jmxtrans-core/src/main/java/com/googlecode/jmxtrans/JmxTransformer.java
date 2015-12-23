@@ -375,7 +375,10 @@ public class JmxTransformer implements WatchedCallback {
 			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			trigger.setStartTime(new Date());
 		} else {
-			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(configuration.getRunPeriod());
+			int runPeriod = configuration.getRunPeriod();
+			if (server.getRunPeriodSeconds() != null) runPeriod = server.getRunPeriodSeconds();
+
+			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			minuteTrigger.setStartTime(new Date());
 

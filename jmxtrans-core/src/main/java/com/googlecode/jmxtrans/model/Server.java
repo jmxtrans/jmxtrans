@@ -37,12 +37,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import stormpot.BlazePool;
 import stormpot.Config;
 import stormpot.LifecycledPool;
 import stormpot.TimeSpreadExpiration;
 import stormpot.Timeout;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
@@ -64,6 +67,7 @@ import java.util.Set;
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static java.lang.Math.max;
@@ -102,6 +106,8 @@ public class Server implements LifecycleAware {
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
 
+	private static final Logger logger = LoggerFactory.getLogger(Server.class);
+
 	/**
 	 * Some writers (GraphiteWriter) use the alias in generation of the unique
 	 * key which references this server.
@@ -130,7 +136,8 @@ public class Server implements LifecycleAware {
 	 * Otherwise, it is added to the scheduler for immediate execution and run
 	 * according to the cronExpression.
 	 */
-	@Getter private final String cronExpression;
+	@Getter @Nullable private final String cronExpression;
+	@Getter @Nullable private final Integer runPeriodSeconds;
 	/** The number of query threads for this server. */
 	@Getter private final int numQueryThreads;
 
@@ -156,6 +163,7 @@ public class Server implements LifecycleAware {
 			@JsonProperty("protocolProviderPackages") String protocolProviderPackages,
 			@JsonProperty("url") String url,
 			@JsonProperty("cronExpression") String cronExpression,
+			@JsonProperty("runPeriodSeconds") Integer runPeriodSeconds,
 			@JsonProperty("numQueryThreads") Integer numQueryThreads,
 			@JsonProperty("local") boolean local,
 			@JsonProperty("queries") List<Query> queries) {
@@ -173,6 +181,11 @@ public class Server implements LifecycleAware {
 		this.protocolProviderPackages = protocolProviderPackages;
 		this.url = resolveProps(url);
 		this.cronExpression = cronExpression;
+		if (!isNullOrEmpty(cronExpression)) {
+			logger.warn("cronExpression is deprecated, please use runPeriodSeconds instead.");
+		}
+
+		this.runPeriodSeconds = runPeriodSeconds;
 		this.numQueryThreads = firstNonNull(numQueryThreads, 0);
 		this.local = local;
 		this.queries = copyOf(queries);
@@ -396,6 +409,7 @@ public class Server implements LifecycleAware {
 		@Setter private String protocolProviderPackages;
 		@Setter private String url;
 		@Setter private String cronExpression;
+		@Setter private Integer runPeriodSeconds;
 		@Setter private Integer numQueryThreads;
 		@Setter private boolean local;
 		private final List<Query> queries = new ArrayList<Query>();
@@ -412,6 +426,7 @@ public class Server implements LifecycleAware {
 			this.protocolProviderPackages = server.protocolProviderPackages;
 			this.url = server.url;
 			this.cronExpression = server.cronExpression;
+			this.runPeriodSeconds = server.runPeriodSeconds;
 			this.numQueryThreads = server.numQueryThreads;
 			this.local = server.local;
 			this.queries.addAll(server.queries);
@@ -468,6 +483,7 @@ public class Server implements LifecycleAware {
 					protocolProviderPackages,
 					url,
 					cronExpression,
+					runPeriodSeconds,
 					numQueryThreads,
 					local,
 					queries);

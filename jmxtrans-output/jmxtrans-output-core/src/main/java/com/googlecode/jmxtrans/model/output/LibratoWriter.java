@@ -124,6 +124,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			@JsonProperty("proxyPort") Integer proxyPort,
 			@JsonProperty("settings") Map<String, Object> settings) throws MalformedURLException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		logger.warn("LibratoWriter is deprecated. Please use LibratoWriterFactory instead.");
 		this.url = MoreObjects.firstNonNull(
 				url,
 				new URL(MoreObjects.firstNonNull(

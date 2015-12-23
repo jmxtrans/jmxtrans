@@ -31,9 +31,6 @@ import stormpot.Timeout;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-/**
- * Executes either a getAttribute or getAttributes query.
- */
 public class ProcessQueryThread implements Runnable {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());

@@ -80,6 +80,7 @@ public class GraphiteWriter extends BaseOutputWriter {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		log.warn("GraphiteWriter is deprecated. Please use GraphiteWriterFactory instead.");
 		this.rootPrefix = resolveProps(
 				firstNonNull(
 						rootPrefix,
