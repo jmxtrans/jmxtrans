@@ -26,8 +26,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
-import com.googlecode.jmxtrans.cli.CliArgumentParser;
+import com.googlecode.jmxtrans.cli.JCommanderArgumentParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
@@ -37,6 +38,7 @@ import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.monitoring.ManagedThreadPoolExecutor;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -53,6 +55,7 @@ import org.quartz.TriggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.management.MBeanServer;
 import java.io.File;
@@ -61,8 +64,11 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Main() class that takes an argument which is the directory to look in for
@@ -90,17 +96,27 @@ public class JmxTransformer implements WatchedCallback {
 	private Thread shutdownHook = new ShutdownHook();
 
 	private volatile boolean isRunning = false;
+	@Nonnull private final ThreadPoolExecutor queryProcessorExecutor;
+	@Nonnull private final ThreadPoolExecutor resultProcessorExecutor;
 
 	@Inject
-	public JmxTransformer(Scheduler serverScheduler, JmxTransConfiguration configuration, ConfigurationParser configurationParser, Injector injector) {
+	public JmxTransformer(
+			Scheduler serverScheduler,
+			JmxTransConfiguration configuration,
+			ConfigurationParser configurationParser,
+			Injector injector,
+			@Nonnull @Named("queryProcessorExecutor") ThreadPoolExecutor queryProcessorExecutor,
+			@Nonnull @Named("resultProcessorExecutor") ThreadPoolExecutor resultProcessorExecutor) {
 		this.serverScheduler = serverScheduler;
 		this.configuration = configuration;
 		this.configurationParser = configurationParser;
 		this.injector = injector;
+		this.queryProcessorExecutor = queryProcessorExecutor;
+		this.resultProcessorExecutor = resultProcessorExecutor;
 	}
 
 	public static void main(String[] args) throws Exception {
-		JmxTransConfiguration configuration = new CliArgumentParser().parseOptions(args);
+		JmxTransConfiguration configuration = new JCommanderArgumentParser().parseOptions(args);
 		if (configuration.isHelp()) {
 			return;
 		}
@@ -122,9 +138,16 @@ public class JmxTransformer implements WatchedCallback {
 	 * The real main method.
 	 */
 	private void doMain() throws Exception {
+		MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+
 		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this, configuration);
-		ManagementFactory.getPlatformMBeanServer()
-				.registerMBean(mbean, mbean.getObjectName());
+		platformMBeanServer.registerMBean(mbean, mbean.getObjectName());
+
+		ManagedThreadPoolExecutor queryExecutorMBean = new ManagedThreadPoolExecutor(queryProcessorExecutor, "queryProcessorExecutor");
+		platformMBeanServer.registerMBean(queryExecutorMBean, queryExecutorMBean.getObjectName());
+
+		ManagedThreadPoolExecutor resultExecutorMBean = new ManagedThreadPoolExecutor(resultProcessorExecutor, "resultProcessorExecutor");
+		platformMBeanServer.registerMBean(resultExecutorMBean, resultExecutorMBean.getObjectName());
 
 		// Start the process
 		this.start();
@@ -141,8 +164,9 @@ public class JmxTransformer implements WatchedCallback {
 			}
 		}
 
-		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		mbs.unregisterMBean(mbean.getObjectName());
+		platformMBeanServer.unregisterMBean(mbean.getObjectName());
+		platformMBeanServer.unregisterMBean(queryExecutorMBean.getObjectName());
+		platformMBeanServer.unregisterMBean(resultExecutorMBean.getObjectName());
 	}
 
 	public synchronized void start() throws LifecycleException {
@@ -206,6 +230,9 @@ public class JmxTransformer implements WatchedCallback {
 					log.error(e.getMessage(), e);
 				}
 			}
+
+			shutdownAndAwaitTermination(queryProcessorExecutor, 10, SECONDS);
+			shutdownAndAwaitTermination(resultProcessorExecutor, 10, SECONDS);
 
 			// Shutdown the file watch service
 			if (watcher != null) {

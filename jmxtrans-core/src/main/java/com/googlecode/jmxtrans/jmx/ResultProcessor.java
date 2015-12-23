@@ -22,38 +22,44 @@
  */
 package com.googlecode.jmxtrans.jmx;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stormpot.Timeout;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.ExecutorService;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static com.google.common.collect.Iterables.concat;
 
-public class ProcessQueryThread implements Runnable {
+public class ResultProcessor {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
+	private final Logger logger = LoggerFactory.getLogger(ResultProcessor.class);
 
-	@Nonnull private final Server server;
-	@Nonnull private final Query query;
-	@Nonnull private final ResultProcessor resultProcessor;
+	@Nonnull private final ExecutorService executorService;
 
-	public ProcessQueryThread(@Nonnull ResultProcessor resultProcessor, @Nonnull Server server, @Nonnull Query query) {
-		this.resultProcessor = resultProcessor;
-		this.server = server;
-		this.query = query;
+	@Inject
+	public ResultProcessor(@Named("resultProcessorExecutor") @Nonnull ExecutorService executorService) {
+		this.executorService = executorService;
 	}
 
-	public void run() {
-		try {
-			Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
-			resultProcessor.submit(server, query, results);
-		} catch (Exception e) {
-			log.error("Error executing query {} on server {}", query, server, e);
-			throw new RuntimeException(e);
+	public void submit(@Nonnull final Server server, @Nonnull final Query query, @Nonnull final Iterable<Result> results) {
+
+		for (final OutputWriter writer : concat(query.getOutputWriterInstances(), server.getOutputWriters())) {
+			executorService.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						writer.doWrite(server, query, results);
+					} catch (Exception e) {
+						logger.warn("Could not write result {} of query {} to output writer {}", results, query, writer);
+					}
+				}
+			});
 		}
 	}
 }

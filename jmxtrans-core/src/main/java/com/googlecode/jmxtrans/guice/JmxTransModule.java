@@ -24,10 +24,12 @@ package com.googlecode.jmxtrans.guice;
 
 
 import com.google.common.io.Closer;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
 import com.googlecode.jmxtrans.connections.SocketFactory;
@@ -49,6 +51,13 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class JmxTransModule extends AbstractModule {
 
@@ -94,6 +103,37 @@ public class JmxTransModule extends AbstractModule {
 		Scheduler scheduler = serverSchedFact.getScheduler();
 		scheduler.setJobFactory(jobFactory);
 		return scheduler;
+	}
+
+	@Provides
+	@Named("queryProcessorExecutor")
+	ExecutorService queryProcessorExecutor() {
+		int poolSize = configuration.getQueryProcessorExecutorPoolSize();
+		int workQueueCapacity = configuration.getQueryProcessorExecutorWorkQueueCapacity();
+		String componentName = "query";
+		return createExecutorService(poolSize, workQueueCapacity, componentName);
+	}
+
+	@Provides
+	@Named("resultProcessorExecutor")
+	ExecutorService resultProcessorExecutor() {
+		int poolSize = configuration.getResultProcessorExecutorPoolSize();
+		int workQueueCapacity = configuration.getResultProcessorExecutorWorkQueueCapacity();
+		String componentName = "result";
+		return createExecutorService(poolSize, workQueueCapacity, componentName);
+	}
+
+	private ExecutorService createExecutorService(int poolSize, int workQueueCapacity, String componentName) {
+		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(workQueueCapacity);
+		ThreadFactory threadFactory = threadFactory(componentName);
+		return new ThreadPoolExecutor(poolSize, poolSize, 0L, MILLISECONDS, workQueue, threadFactory);
+	}
+
+	private ThreadFactory threadFactory(String componentName) {
+		return new ThreadFactoryBuilder()
+				.setDaemon(true)
+				.setNameFormat("jmxtrans-" + componentName + "-%d")
+				.build();
 	}
 
 	private <K, V> GenericKeyedObjectPool getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName) {

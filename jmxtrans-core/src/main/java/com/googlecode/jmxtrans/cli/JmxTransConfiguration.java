@@ -22,47 +22,119 @@
  */
 package com.googlecode.jmxtrans.cli;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.validators.PositiveInteger;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 
 public class JmxTransConfiguration {
-	/**
-	 * If it is false, then JmxTrans will stop when one of the JSON
-	 * configuration file is invalid. Otherwise, it will just print an error
-	 * and continue processing.
-	 */
+	@Parameter(
+			names = {"-c", "--continue-on-error"},
+			description = "If it is false, then JmxTrans will stop when one of the JSON configuration file is invalid. " +
+					"Otherwise, it will just print an error and continue processing.",
+			arity = 1
+	)
 	@Getter @Setter
 	private boolean continueOnJsonError = false;
 
-	@Getter @Setter
-	private File jsonDirOrFile;
+	@Parameter(names = {"-j", "--json-directory"}, validateValueWith = ExistingDirectoryValidator.class)
+	@Setter private File jsonDir;
+	@Parameter(names = {"-f", "--json-file"}, validateValueWith = ExistingFileValidator.class)
+	@Setter private File jsonFile;
 
-	/**
-	 * If this is true, then this class will execute the main() loop and then
-	 * wait 60 seconds until running again.
-	 */
+	public File getJsonDirOrFile() {
+		if (jsonDir != null) return jsonDir;
+		return jsonFile;
+	}
+
+	@Parameter(
+			names = {"-e", "--run-endlessly"},
+			description = "If this is set, then this class will execute the main() loop and then wait 60 seconds until running again."
+	)
 	@Getter @Setter
 	private boolean runEndlessly = false;
 	/**
 	 * The Quartz server properties.
 	 */
+	@Parameter(
+			names = {"-q", "--quartz-properties-file"},
+			description = "The Quartz server properties.",
+			validateValueWith = ExistingFileValidator.class
+	)
 	@Getter @Setter
-	private String quartzPropertiesFile = null;
+	private File quartzPropertiesFile = null;
 
 	/**
 	 * The seconds between server job runs.
 	 */
+	@Parameter(
+			names = {"-s", "--run-period-in-seconds"},
+			description = "The seconds between server job runs.",
+			validateWith = PositiveInteger.class
+	)
 	@Getter @Setter
 	private int runPeriod = 60;
 
+	@Parameter(names = {"-h", "--help"}, help = true)
 	@Getter @Setter
 	private boolean help = false;
 
+	@Parameter(
+			names = {"-a", "--additional-jars"},
+			validateWith = ExistingFilenameValidator.class,
+			variableArity = true
+	)
+	@Setter
+	private List<String> additionalJars = ImmutableList.of();
+	public Iterable<File> getAdditionalJars() {
+		return FluentIterable.from(additionalJars)
+				.transform(new Function<String, File>() {
+					@Nullable
+					@Override
+					public File apply(String input) {
+						return new File(input);
+					}
+				})
+				.toList();
+	}
+
+	@Parameter(
+			names = {"--query-processor-executor-pool-size"},
+			description = "Number of threads used to process queries.",
+			validateWith = PositiveInteger.class
+	)
 	@Getter @Setter
-	private List<File> additionalJars = ImmutableList.of();
+	private int queryProcessorExecutorPoolSize = 10;
+
+	@Parameter(
+			names = {"--query-processor-executor-work-queue-capacity."},
+			description = "Size of the query work queue",
+			validateWith = PositiveInteger.class
+	)
+	@Getter @Setter
+	private int queryProcessorExecutorWorkQueueCapacity = 1000;
+
+	@Parameter(
+			names = {"--result-processor-executor-pool-size"},
+			description = "Number of threads used to process results",
+			validateWith = PositiveInteger.class
+	)
+	@Getter @Setter
+	private int resultProcessorExecutorPoolSize = 10;
+
+	@Parameter(
+			names = {"--result-processor-executor-work-queue-capacity."},
+			description = "Size of the result work queue",
+			validateWith = PositiveInteger.class
+	)
+	@Getter @Setter
+	private int resultProcessorExecutorWorkQueueCapacity = 1000;
 
 }

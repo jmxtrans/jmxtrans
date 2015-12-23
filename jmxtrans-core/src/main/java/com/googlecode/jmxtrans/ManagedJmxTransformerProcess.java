@@ -83,7 +83,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public String getQuartPropertiesFile() {
-		return configuration.getQuartzPropertiesFile();
+		return configuration.getQuartzPropertiesFile().getAbsolutePath();
 	}
 
 	/* (non-Javadoc)
@@ -91,7 +91,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setQuartPropertiesFile(String quartPropertiesFile) {
-		configuration.setQuartzPropertiesFile(quartPropertiesFile);
+		configuration.setQuartzPropertiesFile(new File(quartPropertiesFile));
 	}
 
 	/* (non-Javadoc)
@@ -115,7 +115,9 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public void setJsonDirOrFile(String jsonDirOrFile) {
-		configuration.setJsonDirOrFile(new File(jsonDirOrFile));
+		File file = new File(jsonDirOrFile);
+		if (file.isDirectory()) configuration.setJsonDir(file);
+		else configuration.setJsonFile(file);
 	}
 
 	/* (non-Javadoc)

@@ -31,6 +31,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import lombok.ToString;
 
 import java.util.Map;
 
@@ -40,13 +41,13 @@ import java.util.Map;
  * 
  * @author jon
  */
+@ToString
 public class StdOutWriter implements OutputWriterFactory {
 
 	private final ImmutableList<String> typeNames;
 	private final  boolean booleanAsNumber;
 	private final  Boolean debugEnabled;
 	private final  Map<String, Object> settings;
-
 
 	@JsonCreator
 	public StdOutWriter(

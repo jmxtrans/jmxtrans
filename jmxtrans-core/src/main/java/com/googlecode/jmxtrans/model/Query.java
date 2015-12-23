@@ -78,7 +78,7 @@ import static java.util.Arrays.asList;
 @JsonSerialize(include = NON_NULL)
 @JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
 @ThreadSafe
-@ToString(exclude = {"outputWriters"})
+@ToString(exclude = {"outputWriters", "typeNameValuesStringBuilder"})
 public class Query {
 
 	private static final Logger logger = LoggerFactory.getLogger(Query.class);

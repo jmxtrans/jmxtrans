@@ -22,9 +22,25 @@
  */
 package com.googlecode.jmxtrans.cli;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+
 import javax.annotation.Nonnull;
 
-public interface CliArgumentParser {
+public class JCommanderArgumentParser implements CliArgumentParser {
 	@Nonnull
-	JmxTransConfiguration parseOptions(@Nonnull String[] args) throws OptionsException, org.apache.commons.cli.ParseException;
+	@Override
+	public JmxTransConfiguration parseOptions(@Nonnull String[] args) {
+		JmxTransConfiguration configuration = new JmxTransConfiguration();
+		JCommander jCommander = new JCommander(configuration, args);
+
+		if (configuration.isHelp()) jCommander.usage();
+		else validate(configuration);
+
+		return configuration;
+	}
+
+	private void validate(JmxTransConfiguration configuration) {
+		if (configuration.getJsonDirOrFile() == null) throw new ParameterException("Please specify either the -f or -j option.");
+	}
 }

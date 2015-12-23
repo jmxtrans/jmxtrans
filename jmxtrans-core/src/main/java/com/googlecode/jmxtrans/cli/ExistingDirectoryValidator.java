@@ -22,9 +22,18 @@
  */
 package com.googlecode.jmxtrans.cli;
 
-import javax.annotation.Nonnull;
+import com.beust.jcommander.IValueValidator;
+import com.beust.jcommander.ParameterException;
 
-public interface CliArgumentParser {
-	@Nonnull
-	JmxTransConfiguration parseOptions(@Nonnull String[] args) throws OptionsException, org.apache.commons.cli.ParseException;
+import java.io.File;
+
+import static java.lang.String.format;
+
+public class ExistingDirectoryValidator implements IValueValidator<File> {
+	@Override
+	public void validate(String name, File value) throws ParameterException {
+		if (value == null) throw new ParameterException(format("Parameter %s cannot be null.", name));
+		if (!value.exists()) throw new ParameterException(format("File %s does not exist.", value));
+		if (!value.isDirectory()) throw new ParameterException(format("File %s is a file, it should be a directory.", value));
+	}
 }

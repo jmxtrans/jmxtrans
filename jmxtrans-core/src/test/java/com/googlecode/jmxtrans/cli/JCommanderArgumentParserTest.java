@@ -22,9 +22,13 @@
  */
 package com.googlecode.jmxtrans.cli;
 
-import javax.annotation.Nonnull;
+import org.apache.commons.cli.ParseException;
 
-public interface CliArgumentParser {
-	@Nonnull
-	JmxTransConfiguration parseOptions(@Nonnull String[] args) throws OptionsException, org.apache.commons.cli.ParseException;
+public class JCommanderArgumentParserTest extends CliArgumentParserBase {
+
+	@Override
+	protected JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException {
+		return new JCommanderArgumentParser().parseOptions(args);
+	}
+
 }

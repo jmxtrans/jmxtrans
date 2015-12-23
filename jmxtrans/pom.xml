@@ -140,17 +140,6 @@
 	</dependencies>
 
 	<build>
-
-		<resources>
-			<resource>
-				<directory>src</directory>
-				<includes>
-					<include>log4j.xml</include>
-					<include>quartz.server.properties</include>
-				</includes>
-			</resource>
-		</resources>
-
 		<pluginManagement>
 			<plugins>
 				<plugin>

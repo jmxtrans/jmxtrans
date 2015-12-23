@@ -22,9 +22,12 @@
  */
 package com.googlecode.jmxtrans.model.naming.typename;
 
+import lombok.ToString;
+
 import java.util.List;
 import java.util.Map;
 
+@ToString
 public class TypeNameValuesStringBuilder {
 
 	public static final String DEFAULT_SEPARATOR = "_";

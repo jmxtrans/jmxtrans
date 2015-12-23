@@ -20,11 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.cli;
+package com.googlecode.jmxtrans.monitoring;
 
-import javax.annotation.Nonnull;
-
-public interface CliArgumentParser {
-	@Nonnull
-	JmxTransConfiguration parseOptions(@Nonnull String[] args) throws OptionsException, org.apache.commons.cli.ParseException;
+public interface ThreadPoolExecutorMXBean {
 }
