@@ -159,7 +159,7 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		}
 
 		@Override
-		public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+		public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 			PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
 			metricDataRequest.setNamespace(namespace);
 			List<MetricDatum> metricDatumList = new ArrayList<MetricDatum>();

@@ -27,20 +27,28 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.googlecode.jmxtrans.connections.JMXConnectionParams;
 import com.sun.tools.attach.VirtualMachine;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import stormpot.BlazePool;
+import stormpot.Config;
+import stormpot.LifecycledPool;
+import stormpot.TimeSpreadExpiration;
+import stormpot.Timeout;
 
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -54,9 +62,13 @@ import java.util.List;
 import java.util.Set;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
+import static java.lang.Math.max;
 import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
 import static javax.naming.Context.SECURITY_PRINCIPAL;
@@ -82,7 +94,9 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 })
 @Immutable
 @ThreadSafe
-public class Server {
+@EqualsAndHashCode(exclude = {"queries", "pool"})
+@ToString(of = {"pid", "host", "port", "url", "cronExpression", "numQueryThreads"})
+public class Server implements LifecycleAware {
 
 	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
@@ -118,7 +132,7 @@ public class Server {
 	 */
 	@Getter private final String cronExpression;
 	/** The number of query threads for this server. */
-	@Getter private final Integer numQueryThreads;
+	@Getter private final int numQueryThreads;
 
 	/**
 	 * Whether the current local Java process should be used or not (useful for
@@ -128,6 +142,8 @@ public class Server {
 	@Getter private final boolean local;
 
 	@Getter private final ImmutableSet<Query> queries;
+
+	private final LifecycledPool<MBeanServerConnectionPoolable> pool;
 
 	@JsonCreator
 	public Server(
@@ -144,10 +160,10 @@ public class Server {
 			@JsonProperty("local") boolean local,
 			@JsonProperty("queries") List<Query> queries) {
 
-		Preconditions.checkArgument(pid != null || url != null || host != null,
-			"You must provide the pid or the [url|host and port]");
-		Preconditions.checkArgument(!(pid != null && (url != null || host != null)),
-			"You must provide the pid OR the url, not both");
+		checkArgument(pid != null || url != null || host != null,
+				"You must provide the pid or the [url|host and port]");
+		checkArgument(!(pid != null && (url != null || host != null)),
+				"You must provide the pid OR the url, not both");
 
 		this.alias = resolveProps(alias);
 		this.pid = resolveProps(pid);
@@ -157,7 +173,7 @@ public class Server {
 		this.protocolProviderPackages = protocolProviderPackages;
 		this.url = resolveProps(url);
 		this.cronExpression = cronExpression;
-		this.numQueryThreads = numQueryThreads;
+		this.numQueryThreads = firstNonNull(numQueryThreads, 0);
 		this.local = local;
 		this.queries = copyOf(queries);
 
@@ -172,6 +188,33 @@ public class Server {
 		}
 		else {
 			this.host = resolveProps(host);
+		}
+		pool = createPool(this.numQueryThreads);
+	}
+
+	private LifecycledPool<MBeanServerConnectionPoolable> createPool(int numQueryThreads) {
+		Config<MBeanServerConnectionPoolable> config = new Config<MBeanServerConnectionPoolable>()
+				.setAllocator(new MBeanServerConnectionAllocator(this))
+				.setExpiration(new TimeSpreadExpiration<MBeanServerConnectionPoolable>(30, 60, MINUTES))
+				.setSize(max(numQueryThreads, 1));
+		return new BlazePool<MBeanServerConnectionPoolable>(config);
+	}
+
+	public Iterable<Result> execute(Query query, Timeout timeout) throws Exception {
+		MBeanServerConnectionPoolable poolable = pool.claim(timeout);
+		try {
+			ImmutableList.Builder<Result> results = ImmutableList.builder();
+			MBeanServerConnection connection = poolable.getConnection();
+
+			for (ObjectName queryName : query.queryNames(connection)) {
+				results.addAll(query.fetchResults(connection, queryName));
+			}
+			return results.build();
+		} catch (Exception e) {
+			poolable.invalidate();
+			throw e;
+		} finally {
+			poolable.release();
 		}
 	}
 
@@ -286,64 +329,17 @@ public class Server {
 
 	@JsonIgnore
 	public boolean isQueriesMultiThreaded() {
-		return (this.numQueryThreads != null) && (this.numQueryThreads > 0);
+		return numQueryThreads > 0;
+	}
+
+	@JsonIgnore
+	public JMXConnectionParams getJmxConnectionParams() throws IOException {
+		return new JMXConnectionParams(getJmxServiceURL(), getEnvironment());
 	}
 
 	@Override
-	public String toString() {
-		String msg;
-		if(pid != null) {
-			msg = "pid=" + pid;
-		}
-		else {
-			msg = "host=" + this.host + ", port=" + this.port + ", url=" + this.url;
-		}
-		return "Server [" + msg + ", cronExpression=" + this.cronExpression
-				+ ", numQueryThreads=" + this.numQueryThreads + "]";
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (o == null) {
-			return false;
-		}
-		if (o == this) {
-			return true;
-		}
-		if (o.getClass() != this.getClass()) {
-			return false;
-		}
-
-		if (!(o instanceof Server)) {
-			return false;
-		}
-
-		Server other = (Server) o;
-
-		return new EqualsBuilder()
-				.append(this.getHost(), other.getHost())
-				.append(this.getPort(), other.getPort())
-				.append(this.getPid(), other.getPid())
-				.append(this.getNumQueryThreads(), other.getNumQueryThreads())
-				.append(this.getCronExpression(), other.getCronExpression())
-				.append(this.getAlias(), other.getAlias())
-				.append(this.getUsername(), other.getUsername())
-				.append(this.getPassword(), other.getPassword())
-				.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(13, 21)
-				.append(this.getHost())
-				.append(this.getPort())
-				.append(this.getPid())
-				.append(this.getNumQueryThreads())
-				.append(this.getCronExpression())
-				.append(this.getAlias())
-				.append(this.getUsername())
-				.append(this.getPassword())
-				.toHashCode();
+	public void shutdown() {
+		pool.shutdown();
 	}
 
 	/**

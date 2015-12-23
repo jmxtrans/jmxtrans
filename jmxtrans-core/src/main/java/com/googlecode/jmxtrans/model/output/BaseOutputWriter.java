@@ -156,7 +156,7 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 	}
 
 	@Override
-	public final void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public final void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		internalWrite(server, query, from(results).transform(new ResultValuesTransformer(valueTransformer)).toList());
 	}
 

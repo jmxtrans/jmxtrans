@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output.support;
 
-import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
@@ -58,7 +57,7 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> implements Ou
 	}
 
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		target.doWrite(
 				server,
 				query,

@@ -27,6 +27,7 @@ import com.kaching.platform.testing.AllowDNSResolution;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -209,10 +210,16 @@ public class ServerTests {
 			.setNumQueryThreads(2)
 			.build();
 
-		assertEquals("Server [pid=123, cronExpression=cron, numQueryThreads=2]", s1.toString());
-		assertEquals(
-			"Server [host=mydomain, port=1234, url=service:jmx:remoting-jmx://mysys.mydomain:8004, cronExpression=cron, numQueryThreads=2]",
-			s2.toString());
+		assertThat(s1.toString())
+				.contains("pid=123")
+				.contains("cronExpression=cron")
+				.contains("numQueryThreads=2");
+		assertThat(s2.toString())
+				.contains("host=mydomain")
+				.contains("port=1234")
+				.contains("url=service:jmx:remoting-jmx://mysys.mydomain:8004")
+				.contains("cronExpression=cron")
+				.contains("numQueryThreads=2");
 	}
 
 	@Test

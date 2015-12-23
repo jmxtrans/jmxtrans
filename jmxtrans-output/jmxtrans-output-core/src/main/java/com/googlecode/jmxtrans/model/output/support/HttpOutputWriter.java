@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output.support;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
@@ -71,7 +70,7 @@ public class HttpOutputWriter<T extends WriterBasedOutputWriter> extends OutputW
 	}
 
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws IOException {
+	public void doWrite(Server server, Query query, Iterable<Result> results) throws IOException {
 		HttpURLConnection httpURLConnection = createHttpURLConnection();
 		try {
 			configurer.configure(httpURLConnection);
@@ -106,7 +105,7 @@ public class HttpOutputWriter<T extends WriterBasedOutputWriter> extends OutputW
 		}
 	}
 
-	private void writeResults(Server server, Query query, ImmutableList<Result> results, HttpURLConnection httpURLConnection) throws IOException {
+	private void writeResults(Server server, Query query, Iterable<Result> results, HttpURLConnection httpURLConnection) throws IOException {
 		Closer closer = Closer.create();
 		try {
 			OutputStreamWriter outputStream = closer.register(new OutputStreamWriter(httpURLConnection.getOutputStream(), charset));

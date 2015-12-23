@@ -32,7 +32,6 @@ import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.Matchers;
@@ -48,6 +47,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.collect.ImmutableList.of;
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.QueryFixtures.queryAllowingDottedKeys;
+import static com.googlecode.jmxtrans.model.QueryFixtures.queryUsingDomainAsKey;
+import static com.googlecode.jmxtrans.model.QueryFixtures.queryWithAllTypeNames;
+import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.numericResultWithTypenames;
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Category(RequiresIO.class)
 @AllowDNSResolution
@@ -60,7 +68,7 @@ public class GraphiteWriterTests {
 					.setPort(123)
 					.build();
 		} catch (NullPointerException npe) {
-			Assertions.assertThat(npe).hasMessage("Host cannot be null.");
+			assertThat(npe).hasMessage("Host cannot be null.");
 			throw npe;
 		}
 	}
@@ -72,7 +80,7 @@ public class GraphiteWriterTests {
 					.setHost("localhost")
 					.build();
 		} catch (NullPointerException npe) {
-			Assertions.assertThat(npe).hasMessage("Port cannot be null.");
+			assertThat(npe).hasMessage("Port cannot be null.");
 			throw npe;
 		}
 	}
@@ -107,56 +115,36 @@ public class GraphiteWriterTests {
 
 	@Test
 	public void writeSingleResult() throws Exception {
-		Server server = Server.builder().setHost("host").setPort("123").build();
-		Query query = Query.builder().build();
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
-
 		// check that Graphite format is respected
-		Assertions.assertThat(getOutput(server, query, result))
-				.startsWith("servers.host_123.classNameAlias.attributeName_key 1 ");
+		assertThat(getOutput(dummyServer(), dummyQuery(), numericResult()))
+				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10");
 	}
 
 	@Test
 	public void useObjDomainWorks() throws Exception {
-		Server server = Server.builder().setHost("host").setPort("123").build();
-		// Set useObjDomain to true
-		Query query = Query.builder().setUseObjDomainAsKey(true).build();
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
-
 		// check that Graphite format is respected
-		Assertions.assertThat(getOutput(server, query, result))
-				.startsWith("servers.host_123.objDomain.attributeName_key 1 ");
+		assertThat(getOutput(dummyServer(), queryUsingDomainAsKey(), numericResult()))
+				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0");
 	}
 	
 	@Test
 	public void allowDottedWorks() throws Exception {
-		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
-		// Set allowDottedKeys to true
-		Query query = Query.builder().setAllowDottedKeys(true).build();
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)1));
-
 		// check that Graphite format is respected
-		Assertions.assertThat(getOutput(server, query, result))
-				.startsWith("servers.host.className.attributeName.key 1 ");
+		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), numericResult()))
+				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0");
 	}
 
 	@Test
 	public void useAllTypeNamesWorks() throws Exception {
-		Server server = Server.builder().setHost("host").setPort("123").setAlias("host").build();
 		// Set useAllTypeNames to true
-		Query query = Query.builder().setUseAllTypeNames(true).build();
 		String typeName = "typeName,typeNameKey1=typeNameValue1,typeNameKey2=typeNameValue2";
 		String typeNameReordered = "typeNameKey2=typeNameValue2,typeName,typeNameKey1=typeNameValue1";
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null,
-				typeName, ImmutableMap.of("key", (Object)1));
-		Result resultWithTypeNameReordered = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null,
-				typeNameReordered, ImmutableMap.of("key", (Object)1));
 
 		// check that Graphite format is respected
-		Assertions.assertThat(getOutput(server, query, result))
-				.startsWith("servers.host.className.typeNameValue1_typeNameValue2.attributeName_key 1 ");
-		Assertions.assertThat(getOutput(server, query, resultWithTypeNameReordered))
-				.startsWith("servers.host.className.typeNameValue2_typeNameValue1.attributeName_key 1 ");
+		assertThat(getOutput(dummyServer(), queryWithAllTypeNames(), numericResultWithTypenames(typeName)))
+				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.typeNameValue1_typeNameValue2.ObjectPendingFinalizationCount 10 0");
+		assertThat(getOutput(dummyServer(), queryWithAllTypeNames(), numericResultWithTypenames(typeNameReordered)))
+				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.typeNameValue2_typeNameValue1.ObjectPendingFinalizationCount 10 0");
 	}
 
 	@Test
@@ -185,7 +173,7 @@ public class GraphiteWriterTests {
 		writer.doWrite(server, query, of(result));
 
 		// check that the booleanAsNumber property was picked up from the JSON
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName.key 1");
+		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName.key 1");
 	}
 	
 	@Test
@@ -215,7 +203,7 @@ public class GraphiteWriterTests {
 		writer.doWrite(server, query, of(result));
 
 		// check that the empty type "type" is ignored when allowDottedKeys is true
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
+		assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
 		
 		// check that this also works when literal " characters aren't included in the JMX ObjectName
 		query = Query.builder()
@@ -227,7 +215,7 @@ public class GraphiteWriterTests {
 		writer = getGraphiteWriter(out, typeNames);
 		
 		writer.doWrite(server, query, of(result));
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
+		assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
 		
 		// check that the empty type "type" is ignored when allowDottedKeys is false
 		query = Query.builder()
@@ -239,16 +227,11 @@ public class GraphiteWriterTests {
 		writer = getGraphiteWriter(out, typeNames);
 		
 		writer.doWrite(server, query, of(result));
-		Assertions.assertThat(out.toString()).startsWith("servers.host_123.yammer_metrics.uniqueName.Attribute 0 ");
+		assertThat(out.toString()).startsWith("servers.host_123.yammer_metrics.uniqueName.Attribute 0 ");
 	}
 
 	@Test
 	public void socketInvalidatedWhenError() throws Exception {
-		// a lot of setup for not much of a test ...
-		Server server = Server.builder().setHost("host").setPort("123").build();
-		Query query = Query.builder().build();
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
-
 		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = Mockito.mock(GenericKeyedObjectPool.class);
 		Socket socket = Mockito.mock(Socket.class);
 		Mockito.when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
@@ -261,7 +244,7 @@ public class GraphiteWriterTests {
 				.build();
 		writer.setPool(pool);
 
-		writer.doWrite(server, query, of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		Mockito.verify(pool).invalidateObject(Matchers.any(InetSocketAddress.class), Matchers.eq(socket));
 		Mockito.verify(pool, Mockito.never()).returnObject(Matchers.any(InetSocketAddress.class), Matchers.eq(socket));
 	}

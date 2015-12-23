@@ -22,9 +22,6 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
-
 public final class ServerFixtures {
 	private ServerFixtures() {}
 
@@ -39,6 +36,14 @@ public final class ServerFixtures {
 	}
 
 	public static Server dummyServer() {
-		return createServerWithOneQuery("host.example.net", "4321", "myQuery");
+		return createServerWithOneQuery("host.example.net", "4321", "myQuery:key=val");
+	}
+
+	public static Server localServer() {
+		return Server.builder()
+				.setHost("host.example.net")
+				.setPort("4321")
+				.setLocal(true)
+				.build();
 	}
 }

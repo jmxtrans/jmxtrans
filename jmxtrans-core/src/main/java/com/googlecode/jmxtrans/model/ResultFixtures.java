@@ -65,6 +65,17 @@ public final class ResultFixtures {
 				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", 10));
 	}
 
+	public static Result numericResultWithTypenames(String typeName) {
+		return new Result(
+				0,
+				"ObjectPendingFinalizationCount",
+				"sun.management.MemoryImpl",
+				"ObjectDomainName",
+				"ObjectPendingFinalizationCount",
+				typeName,
+				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", 10));
+	}
+
 	public static ImmutableList<Result> singleFalseResult() {
 		return ImmutableList.of(booleanFalseResult());
 	}

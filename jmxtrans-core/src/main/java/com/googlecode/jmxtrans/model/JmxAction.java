@@ -20,20 +20,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.support;
-
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
+package com.googlecode.jmxtrans.model;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.Writer;
+import javax.management.MBeanServerConnection;
 
-public interface WriterBasedOutputWriter {
-	void write(
-			@Nonnull Writer writer,
-			@Nonnull Server server,
-			@Nonnull Query query,
-			@Nonnull Iterable<Result> results) throws IOException;
+public interface JmxAction {
+	void execute(@Nonnull MBeanServerConnection connection) throws Exception;
 }

@@ -20,20 +20,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.support;
+package com.googlecode.jmxtrans.model;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import stormpot.Poolable;
+import stormpot.Slot;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.Writer;
+import javax.annotation.Nullable;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
 
-public interface WriterBasedOutputWriter {
-	void write(
-			@Nonnull Writer writer,
-			@Nonnull Server server,
-			@Nonnull Query query,
-			@Nonnull Iterable<Result> results) throws IOException;
+public class MBeanServerConnectionPoolable implements Poolable {
+
+	private static final Logger logger = LoggerFactory.getLogger(MBeanServerConnectionPoolable.class);
+
+	@Nonnull private final Slot slot;
+
+	@Nullable @Getter private final JMXConnector jmxConnector;
+
+	@Nonnull @Getter private final MBeanServerConnection connection;
+
+	public MBeanServerConnectionPoolable(@Nonnull Slot slot, JMXConnector jmxConnector, @Nonnull MBeanServerConnection connection) {
+		this.slot = slot;
+		this.jmxConnector = jmxConnector;
+		this.connection = connection;
+	}
+
+	@Override
+	public void release() {
+		slot.release(this);
+	}
+
+	public void invalidate() {
+		slot.expire(this);
+	}
 }
