@@ -39,6 +39,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.management.MBeanServer;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -69,8 +70,12 @@ public class StatsDWriter extends BaseOutputWriter {
 	private final String rootPrefix;
 	private final InetSocketAddress address;
 	private final DatagramChannel channel;
+	private final Boolean stringsValuesAsKey;
+	@Nonnull private final Long stringValueDefaultCount;
 
 	private static final String BUCKET_TYPE = "bucketType";
+	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
+	private static final String STRING_VALUE_DEFAULT_COUNTER = "stringValueDefaultCount";
 
 	private GenericKeyedObjectPool<SocketAddress, DatagramSocket> pool;
 	private ManagedObject mbean;
@@ -90,14 +95,22 @@ public class StatsDWriter extends BaseOutputWriter {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("bucketType") String bucketType,
 			@JsonProperty("rootPrefix") String rootPrefix,
+			@JsonProperty(STRING_VALUE_AS_KEY) Boolean stringsValuesAsKey,
+			@JsonProperty(STRING_VALUE_DEFAULT_COUNTER) Long stringValueDefaultCount,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		log.warn("StatsDWriter is deprecated. Please use StatsDWriterFactory instead.");
 		channel = DatagramChannel.open();
 		sendBuffer = ByteBuffer.allocate((short) 1500);
 
 		// bucketType defaults to c == counter
 		this.bucketType = firstNonNull(bucketType, (String) getSettings().get(BUCKET_TYPE), "c");
 		this.rootPrefix = firstNonNull(rootPrefix, (String) getSettings().get(ROOT_PREFIX), "servers");
+		// treat string attributes as key
+		this.stringsValuesAsKey = firstNonNull(stringsValuesAsKey,
+				(Boolean) getSettings().get(STRING_VALUE_AS_KEY), false);
+		this.stringValueDefaultCount = firstNonNull(stringValueDefaultCount,
+				(Long) getSettings().get(STRING_VALUE_DEFAULT_COUNTER), 1L);
 
 		if (host == null) {
 			host = (String) getSettings().get(HOST);
@@ -155,31 +168,42 @@ public class StatsDWriter extends BaseOutputWriter {
 		List<String> typeNames = this.getTypeNames();
 
 		for (Result result : results) {
-			if (isDebugEnabled()) {
-				log.debug(result.toString());
-			}
+			log.debug(result.toString());
 
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					if (NumberUtils.isNumeric(values.getValue())) {
 
-						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-								+ ":" + values.getValue().toString() + "|" + bucketType + "\n";
-
-						if (isDebugEnabled()) {
-							log.debug("StatsD Message: " + line.trim());
-						}
-
-						doSend(line.trim());
+					if (isNotValidValue(values.getValue())) {
+						log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
+						continue;
 					}
+
+					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+							+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
+
+					doSend(line.trim());
 				}
 			}
 		}
 	}
 
+	private boolean isNotValidValue(Object value){
+		return ! (NumberUtils.isNumeric(value) || stringsValuesAsKey);
+	}
+
+	private String computeActualValue(Object value){
+		if(NumberUtils.isNumeric(value)){
+			return ":" + value.toString();
+		}
+
+		return "." + value.toString() + ":" + stringValueDefaultCount.toString();
+	}
+
 	private synchronized boolean doSend(String stat) {
 		try {
+			log.debug("StatsD Message: " + stat);
+
 			final byte[] data = stat.getBytes("utf-8");
 
 			// If we're going to go past the threshold of the buffer then flush.

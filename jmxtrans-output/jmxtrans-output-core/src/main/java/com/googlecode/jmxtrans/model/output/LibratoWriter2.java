@@ -53,7 +53,7 @@ public class LibratoWriter2 implements WriterBasedOutputWriter {
 	}
 
 	@Override
-	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull ImmutableList<Result> results) throws IOException {
+	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 		Closer closer = Closer.create();
 		try {
 			JsonGenerator g = closer.register(jsonFactory.createGenerator(writer));

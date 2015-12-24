@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
 
     The MIT License
@@ -23,51 +23,24 @@
     THE SOFTWARE.
 
 -->
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration debug="true"
+					 xmlns:log4j='http://jakarta.apache.org/log4j/'>
 
-<configuration>
-	<contextName>jmxtrans</contextName>
-
-	<appender name="file"
-			  class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>${jmxtrans.log.dir}/jmxtrans.log</File>
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>[%d{dd MMM yyyy HH:mm:ss}] %-5p %c{10} - %m%n</Pattern>
-		</layout>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<FileNamePattern>${jmxtrans.log.dir}/%d{MM-dd-yyyy}.jmxtrans.log.gz
-			</FileNamePattern>
-			<MaxHistory>15</MaxHistory>
-		</rollingPolicy>
-	</appender>
-
-
-	<appender name="file_async" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1028</queueSize>
-		<discardingThreshold>0</discardingThreshold>
-		<appender-ref ref="file" />
-	</appender>
-
-	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>WARN</level>
-		</filter>
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>[%d{dd MMM yyyy HH:mm:ss}] %-5p %c{10} - %m%n</Pattern>
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				   value="%d{yyyy-MM-dd HH:mm:ss} %p %c - %m%n" />
 		</layout>
 	</appender>
 
 	<logger name="com.googlecode.jmxtrans">
-		<level value="${jmxtrans.log.level}" />
+		<level value="debug"/>
 	</logger>
 
-	<logger name="org.quartz">
-		<level value="warn" />
-	</logger>
-
-	<root level="ERROR">
+	<root>
+		<level value="info" />
 		<appender-ref ref="console" />
-		<appender-ref ref="file_async" />
 	</root>
 
-
-</configuration>
+</log4j:configuration>

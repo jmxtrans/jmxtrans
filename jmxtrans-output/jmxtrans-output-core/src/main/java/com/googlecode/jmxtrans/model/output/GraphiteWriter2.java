@@ -61,7 +61,7 @@ public class GraphiteWriter2 implements WriterBasedOutputWriter {
 			@Nonnull Writer writer,
 			@Nonnull Server server,
 			@Nonnull Query query,
-			@Nonnull ImmutableList<Result> results) throws IOException {
+			@Nonnull Iterable<Result> results) throws IOException {
 
 		for (Result result : results) {
 			log.debug("Query result: {}", result);

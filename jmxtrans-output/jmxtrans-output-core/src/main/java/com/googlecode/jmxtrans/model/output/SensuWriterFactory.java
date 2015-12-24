@@ -27,7 +27,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
-import com.googlecode.jmxtrans.model.output.support.TcpOutputWriter;
+import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
+import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,10 +58,10 @@ public class SensuWriterFactory implements OutputWriterFactory {
 	}
 
 	@Override
-	public ResultTransformerOutputWriter<TcpOutputWriter<SensuWriter2>> create() {
+	public ResultTransformerOutputWriter<WriterPoolOutputWriter<SensuWriter2>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
-				TcpOutputWriter.builder(
+				TcpOutputWriterBuilder.builder(
 						server,
 						new SensuWriter2(
 								new GraphiteWriter2(typeNames, rootPrefix),

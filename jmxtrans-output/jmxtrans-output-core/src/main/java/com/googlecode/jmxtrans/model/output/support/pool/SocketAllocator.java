@@ -26,6 +26,7 @@ import com.google.common.io.Closer;
 import stormpot.Allocator;
 import stormpot.Slot;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
@@ -35,11 +36,11 @@ import java.nio.charset.Charset;
 
 public class SocketAllocator implements Allocator<SocketPoolable> {
 
-	private final InetSocketAddress server;
+	@Nonnull private final InetSocketAddress server;
 	private final int socketTimeoutMillis;
-	private final Charset charset;
+	@Nonnull private final Charset charset;
 
-	public SocketAllocator(InetSocketAddress server, int socketTimeoutMillis, Charset charset) {
+	public SocketAllocator(@Nonnull InetSocketAddress server, int socketTimeoutMillis, @Nonnull Charset charset) {
 		this.server = server;
 		this.socketTimeoutMillis = socketTimeoutMillis;
 		this.charset = charset;

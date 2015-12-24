@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.googlecode.jmxtrans.model.Result;
 
 public final class ResultFixtures {
 	private ResultFixtures() {}
@@ -66,8 +65,23 @@ public final class ResultFixtures {
 				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", 10));
 	}
 
+	public static Result numericResultWithTypenames(String typeName) {
+		return new Result(
+				0,
+				"ObjectPendingFinalizationCount",
+				"sun.management.MemoryImpl",
+				"ObjectDomainName",
+				"ObjectPendingFinalizationCount",
+				typeName,
+				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", 10));
+	}
+
 	public static ImmutableList<Result> singleFalseResult() {
 		return ImmutableList.of(booleanFalseResult());
+	}
+
+	public static ImmutableList<Result> singleNumericResult() {
+		return ImmutableList.of(numericResult());
 	}
 
 	public static ImmutableList<Result> dummyResults() {

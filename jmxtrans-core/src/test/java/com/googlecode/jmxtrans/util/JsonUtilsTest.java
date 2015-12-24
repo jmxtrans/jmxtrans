@@ -33,6 +33,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import javax.annotation.Nullable;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -45,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JsonUtilsTest {
 
 	@Test
-	public void loadingFromFile() throws URISyntaxException, IOException {
+	public void loadingFromFile() throws URISyntaxException, IOException, MalformedObjectNameException {
 		File input = new File(JsonUtilsTest.class.getResource("/example.json").toURI());
 
 		JmxProcess process = JsonUtils.getJmxProcess(input);
@@ -61,15 +63,14 @@ public class JsonUtilsTest {
 
 	private static class ByObj implements Predicate<Query> {
 
-		private final String obj;
+		private final ObjectName obj;
 
-		private ByObj(String obj) {
-			this.obj = obj;
+		private ByObj(String obj) throws MalformedObjectNameException {
+			this.obj = new ObjectName(obj);
 		}
 
 		@Override
 		public boolean apply(@Nullable Query query) {
-			return query.getObj().equals(this.obj);
-		}
+			return query.getObjectName().equals(this.obj);}
 	}
 }

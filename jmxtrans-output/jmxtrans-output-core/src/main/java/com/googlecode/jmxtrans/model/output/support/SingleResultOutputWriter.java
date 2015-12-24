@@ -20,48 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.model.output.support;
 
-import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
-/**
- * Allows us to pool connections to remote jmx servers.
- */
-public class JmxConnectionFactory extends BaseKeyedPoolableObjectFactory<JMXConnectionParams, JMXConnector> {
-
-	/**
-	 * Creates the connection.
-	 */
-	@Override
-	public JMXConnector makeObject(JMXConnectionParams params) throws Exception {
-		return JMXConnectorFactory.connect(params.getUrl(), params.getEnvironment());
-	}
-
-	/**
-	 * Closes the connection.
-	 */
-	@Override
-	public void destroyObject(JMXConnectionParams params, JMXConnector connector) throws Exception {
-		connector.close();
-	}
-
-	/**
-	 * Validates that the connection is good.
-	 */
-	@Override
-	public boolean validateObject(JMXConnectionParams params, JMXConnector connector) {
-		boolean result = false;
-		try {
-			connector.getConnectionId();
-			connector.getMBeanServerConnection().getMBeanCount();
-			result = true;
-		} catch (IOException ex) {
-			// ignored
-		}
-		return result;
-	}
+public interface SingleResultOutputWriter {
+	void doWrite(@Nonnull Server server, @Nonnull Query query, @Nonnull Result result) throws IOException;
 }

@@ -22,8 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
@@ -32,6 +30,9 @@ import info.ganglia.gmetric4j.gmetric.GMetricSlope;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 
 /**
  * Tests for {@link GangliaWriter}.
@@ -53,11 +54,7 @@ public class GangliaWriterTests {
     @Test
     public void testValidationMinimalSettings() throws ValidationException {
 		GangliaWriter writer = GangliaWriter.builder().setHost("192.168.1.144").build();
-        Query test = Query.builder()
-				.setObj("test")
-				.build();
-		Server server = Server.builder().setHost("localhost").setPort("123").build();
-		writer.validateSetup(server, test);
+        writer.validateSetup(dummyServer(), dummyQuery());
         Assert.assertEquals("192.168.1.144", writer.getHost());
         Assert.assertEquals(GangliaWriter.DEFAULT_PORT, writer.getPort());
         Assert.assertEquals(GangliaWriter.DEFAULT_ADDRESSING_MODE.name(), writer.getAddressingMode());
@@ -86,11 +83,7 @@ public class GangliaWriterTests {
 				.setGroupName("dummy")
 				.build();
 
-        Query test = Query.builder()
-				.setObj("test")
-				.build();
-		Server server = Server.builder().setHost("localhost").setPort("123").build();
-		writer.validateSetup(server, test);
+        writer.validateSetup(dummyServer(), dummyQuery());
         Assert.assertEquals("192.168.1.144", writer.getHost());
         Assert.assertEquals(25654, writer.getPort());
         Assert.assertEquals(GMetric.UDPAddressingMode.MULTICAST.name(), writer.getAddressingMode());

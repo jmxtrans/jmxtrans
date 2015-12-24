@@ -87,9 +87,6 @@ public class JmxTransformer implements WatchedCallback {
 
 	private ImmutableList<Server> masterServersList = ImmutableList.of();
 
-	/**
-	 * The shutdown hook.
-	 */
 	private Thread shutdownHook = new ShutdownHook();
 
 	private volatile boolean isRunning = false;
@@ -148,11 +145,6 @@ public class JmxTransformer implements WatchedCallback {
 		mbs.unregisterMBean(mbean.getObjectName());
 	}
 
-	/**
-	 * Start.
-	 *
-	 * @throws LifecycleException the lifecycle exception
-	 */
 	public synchronized void start() throws LifecycleException {
 		if (isRunning) {
 			throw new LifecycleException("Process already started");
@@ -176,14 +168,9 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	/**
-	 * Stop.
-	 *
-	 * @throws LifecycleException the lifecycle exception
-	 */
 	public synchronized void stop() throws LifecycleException {
 		if (!isRunning) {
-			throw new LifecycleException("Process already stoped");
+			throw new LifecycleException("Process already stopped");
 		} else {
 			try {
 				log.info("Stopping Jmxtrans");
@@ -202,11 +189,6 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	/**
-	 * Stop services.
-	 *
-	 * @throws LifecycleException the lifecycle exception
-	 */
 	// There is a sleep to work around a Quartz issue. The issue is marked to be
 	// fixed, but will require further analysis. This should not be reported by
 	// Findbugs, but as a more complex issue.
@@ -214,8 +196,8 @@ public class JmxTransformer implements WatchedCallback {
 	private synchronized void stopServices() throws LifecycleException {
 		try {
 			// Shutdown the scheduler
-			if (this.serverScheduler.isStarted()) {
-				this.serverScheduler.shutdown(true);
+			if (serverScheduler.isStarted()) {
+				serverScheduler.shutdown(true);
 				log.debug("Shutdown server scheduler");
 				try {
 					// FIXME: Quartz issue, need to sleep
@@ -226,18 +208,26 @@ public class JmxTransformer implements WatchedCallback {
 			}
 
 			// Shutdown the file watch service
-			if (this.watcher != null) {
-				this.watcher.stopService();
-				this.watcher = null;
+			if (watcher != null) {
+				watcher.stopService();
+				watcher = null;
 				log.debug("Shutdown watch service");
 			}
 
+			stopServers();
+
 			// Shutdown the outputwriters
-			this.stopWriterAndClearMasterServerList();
+			stopWriterAndClearMasterServerList();
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new LifecycleException(e);
+		}
+	}
+
+	private void stopServers() {
+		for (Server server : masterServersList) {
+			server.shutdown();
 		}
 	}
 
@@ -311,7 +301,7 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	private void validateSetup(Server server, Query query) throws ValidationException {
-		for (OutputWriter w : (List<OutputWriter>) query.getOutputWriterInstances()) {
+		for (OutputWriter w : query.getOutputWriterInstances()) {
 			injector.injectMembers(w);
 			w.validateSetup(server, query);
 		}
@@ -385,7 +375,10 @@ public class JmxTransformer implements WatchedCallback {
 			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			trigger.setStartTime(new Date());
 		} else {
-			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(configuration.getRunPeriod());
+			int runPeriod = configuration.getRunPeriod();
+			if (server.getRunPeriodSeconds() != null) runPeriod = server.getRunPeriodSeconds();
+
+			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
 			minuteTrigger.setStartTime(new Date());
 

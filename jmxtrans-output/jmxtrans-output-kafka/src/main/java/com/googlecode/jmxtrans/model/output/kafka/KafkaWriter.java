@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -68,15 +69,16 @@ import static java.util.Arrays.asList;
 
 @NotThreadSafe
 public class KafkaWriter extends BaseOutputWriter {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(KafkaWriter.class);
-	
+
 	private static final String DEFAULT_ROOT_PREFIX = "servers";
 	private final JsonFactory jsonFactory;
 
 	private Producer<String,String> producer;
 	private final Iterable<String> topics;
 	private final String rootPrefix;
+	private final ImmutableMap<String, String> tags;
 
 	@JsonCreator
 	public KafkaWriter(
@@ -85,13 +87,14 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("topics") String topics,
+			@JsonProperty("tags") Map<String, String> tags,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.rootPrefix = resolveProps(
 				firstNonNull(
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX));		
+						DEFAULT_ROOT_PREFIX));
 		// Setting all the required Kafka Properties
 		Properties kafkaProperties =  new Properties();
 		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));
@@ -99,9 +102,10 @@ public class KafkaWriter extends BaseOutputWriter {
 		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
 		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
 		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
+		this.tags = ImmutableMap.copyOf(firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of()));
 		jsonFactory = new JsonFactory();
 	}
-	
+
 	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
@@ -138,6 +142,11 @@ public class KafkaWriter extends BaseOutputWriter {
 			generator.writeStringField("keyspace", cleanKeyString);
 			generator.writeStringField("value", value.toString());
 			generator.writeNumberField("timestamp", result.getEpoch() / 1000);
+			generator.writeObjectFieldStart("tags");
+			for (String tag_key : this.tags.keySet()) {
+				generator.writeStringField(tag_key, this.tags.get(tag_key));
+			}
+			generator.writeEndObject();
 			generator.writeEndObject();
 			generator.close();
 			return out.toString("UTF-8");

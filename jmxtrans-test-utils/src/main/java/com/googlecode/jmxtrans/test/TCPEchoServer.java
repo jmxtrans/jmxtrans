@@ -27,6 +27,7 @@ import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,6 +36,7 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
@@ -47,6 +49,7 @@ public class TCPEchoServer extends ExternalResource {
 	private volatile ServerSocket server;
 
 	private final Object startSynchro = new Object();
+	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<String>();
 
 	@Override
 	public void before() {
@@ -59,9 +62,8 @@ public class TCPEchoServer extends ExternalResource {
 	}
 
 	public void start() {
-		if (thread != null) {
-			throw new IllegalStateException("Server already started");
-		}
+		checkState(thread == null, "Server already started");
+
 		thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -105,6 +107,7 @@ public class TCPEchoServer extends ExternalResource {
 			PrintWriter out = closer.register(new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8)));
 			String line;
 			while ((line = in.readLine()) != null) {
+				receivedMessages.add(line);
 				out.print(line);
 			}
 		} catch (Throwable t) {
@@ -117,6 +120,10 @@ public class TCPEchoServer extends ExternalResource {
 	public void stop() {
 		checkState(thread != null, "Server not started");
 		thread.interrupt();
+	}
+
+	public boolean messageReceived(@Nonnull String message) {
+		return receivedMessages.contains(message);
 	}
 
 	public InetSocketAddress getLocalSocketAddress()  {

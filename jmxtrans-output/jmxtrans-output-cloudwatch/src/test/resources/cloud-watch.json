@@ -15,7 +15,15 @@
                   {
                      "@class":"com.googlecode.jmxtrans.model.output.CloudWatchWriter",
                      "settings":{
-                        "namespace":"jmx"
+                        "namespace":"jmx",
+                        "dimensions":[
+                           {
+                              "name":"InstanceId",
+                              "value":"$InstanceId"
+                           },{
+                              "name":"SomeKey",
+                              "value":"SomeValue"
+                           }]
                      }
                   }
                ]

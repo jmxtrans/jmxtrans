@@ -22,32 +22,27 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.ThreadSafe;
-
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDB.ConsistencyLevel;
-import org.influxdb.dto.BatchPoints;
-import org.influxdb.dto.Point;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDB.ConsistencyLevel;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * {@link com.googlecode.jmxtrans.model.OutputWriter} for
@@ -72,20 +67,21 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	 */
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
-	// Logging
-	private static final Logger log = LoggerFactory.getLogger(InfluxDbWriter.class);
+	private final boolean createDatabase;
 
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
 			@Nonnull String database,
 			@Nonnull ConsistencyLevel writeConsistency,
 			@Nonnull String retentionPolicy,
-			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags) {
+			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
+			boolean createDatabase) {
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
+		this.createDatabase = createDatabase;
 	}
 
 	Predicate<Object> isNotNaN = new Predicate<Object>() {
@@ -146,16 +142,16 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	 *
 	 */
 	@Override
-	public void doWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
-		influxDB.createDatabase(database);
+		if (createDatabase) influxDB.createDatabase(database);
 
 		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
 				.tag(TAG_HOSTNAME, server.getSource()).consistency(writeConsistency).build();
 
 		for (Result result : results) {
 
-			HashMap<String, Object> filteredValues = new HashMap(Maps.filterValues(result.getValues(), isNotNaN));
+			HashMap<String, Object> filteredValues = newHashMap(Maps.filterValues(result.getValues(), isNotNaN));
 
 			// send the point if filteredValues isn't empty
 			if (!filteredValues.isEmpty()) {
@@ -169,7 +165,6 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		influxDB.write(batchPoints);
-
 	}
 
 	private Map<String, String> buildResultTagMap(Result result) throws Exception {

@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -32,6 +33,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+import static com.google.common.collect.ImmutableMap.copyOf;
 
 /**
  * Represents the result of a query.
@@ -41,6 +43,7 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 @JsonSerialize(include = NON_NULL)
 @ThreadSafe
 @Immutable
+@EqualsAndHashCode
 public class Result {
 	@Getter private final String attributeName;
 	@Getter private final String className;
@@ -55,7 +58,7 @@ public class Result {
 		this.className = className;
 		this.objDomain = objDomain;
 		this.typeName = typeName;
-		this.values = ImmutableMap.copyOf(values);
+		this.values = copyOf(values);
 		this.epoch = epoch;
 		this.attributeName = attributeName;
 		this.keyAlias = keyAlias;

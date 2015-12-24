@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -47,7 +46,7 @@ public class SensuWriter2 implements WriterBasedOutputWriter {
 	}
 
 	@Override
-	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull ImmutableList<Result> results) throws IOException {
+	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 		Closer closer = Closer.create();
 		try {
 			JsonGenerator g = closer.register(jsonFactory.createGenerator(writer));

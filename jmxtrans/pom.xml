@@ -49,8 +49,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
+			<groupId>log4j</groupId>
+			<artifactId>apache-log4j-extras</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -132,6 +132,11 @@
 			<artifactId>jmxtrans-output-velocity</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -140,7 +145,7 @@
 			<resource>
 				<directory>src</directory>
 				<includes>
-					<include>logback.xml</include>
+					<include>log4j.xml</include>
 					<include>quartz.server.properties</include>
 				</includes>
 			</resource>

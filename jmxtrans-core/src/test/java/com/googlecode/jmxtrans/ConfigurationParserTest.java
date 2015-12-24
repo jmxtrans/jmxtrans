@@ -70,10 +70,10 @@ public class ConfigurationParserTest {
 	@Test
 	public void mergeAlreadyExistingServerDoesNotModifyList() throws ValidationException {
 		List<Server> existingServers = new ArrayList<Server>();
-		existingServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto"));
+		existingServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto:key=val"));
 
 		List<Server> newServers = new ArrayList<Server>();
-		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto"));
+		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto:key=val"));
 
 		List<Server> merged = new ConfigurationParser().mergeServerLists(existingServers, newServers);
 
@@ -86,10 +86,10 @@ public class ConfigurationParserTest {
 	@Test
 	public void sameServerWithTwoDifferentQueriesMergesQueries() throws ValidationException {
 		List<Server> existingServers = new ArrayList<Server>();
-		existingServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto"));
+		existingServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto:key=val"));
 
 		List<Server> newServers = new ArrayList<Server>();
-		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "tutu"));
+		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "tutu:key=val"));
 
 		List<Server> merged = new ConfigurationParser().mergeServerLists(existingServers, newServers);
 
@@ -102,7 +102,7 @@ public class ConfigurationParserTest {
 	@Test
 	public void testMerge() throws Exception {
 		Query q1 = Query.builder()
-				.setObj("obj")
+				.setObj("obj:key=val")
 				.addAttr("foo")
 				.addAttr("bar")
 				.addKey("key1")
@@ -112,7 +112,7 @@ public class ConfigurationParserTest {
 
 		// same as q1
 		Query q2 = Query.builder()
-				.setObj("obj")
+				.setObj("obj:key=val")
 				.addAttr("foo")
 				.addAttr("bar")
 				.addKey("key1")
@@ -122,7 +122,7 @@ public class ConfigurationParserTest {
 
 		// different than q1 and q2
 		Query q3 = Query.builder()
-				.setObj("obj3")
+				.setObj("obj3:key=val")
 				.addAttr("foo")
 				.addAttr("bar")
 				.addKey("key1")

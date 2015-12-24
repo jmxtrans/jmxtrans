@@ -22,15 +22,34 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import com.googlecode.jmxtrans.model.Query;
-
 public final class QueryFixtures {
 
 	private QueryFixtures() {}
 
 	public static Query dummyQuery() {
 		return Query.builder()
-				.setObj("myQuery")
+				.setObj("myQuery:key=val")
+				.build();
+	}
+
+	public static Query queryWithAllTypeNames() {
+		return Query.builder()
+				.setObj("myQuery:key=val")
+				.setUseAllTypeNames(true)
+				.build();
+	}
+
+	public static Query queryAllowingDottedKeys() {
+		return Query.builder()
+				.setObj("myQuery:key=val")
+				.setAllowDottedKeys(true)
+				.build();
+	}
+
+	public static Query queryUsingDomainAsKey() {
+		return Query.builder()
+				.setObj("myQuery:key=val")
+				.setUseObjDomainAsKey(true)
 				.build();
 	}
 }

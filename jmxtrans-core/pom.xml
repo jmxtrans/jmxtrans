@@ -39,8 +39,8 @@
 
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-		<verify.mutationThreshold>26</verify.mutationThreshold>
-		<verify.totalBranchRate>42</verify.totalBranchRate>
+		<verify.mutationThreshold>23</verify.mutationThreshold>
+		<verify.totalBranchRate>38</verify.totalBranchRate>
 		<verify.totalLineRate>40</verify.totalLineRate>
 	</properties>
 
@@ -56,6 +56,10 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.chrisvest</groupId>
+			<artifactId>stormpot</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
