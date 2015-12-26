@@ -209,10 +209,11 @@ public class Server implements LifecycleAware {
 			this.host = resolveProps(host);
 		}
 		pool = createPool(this.numQueryThreads);
-		this.outputWriters = createOutputWriters(outputWriters);
+		this.outputWriters = createOutputWriters(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));
 	}
 
-	private ImmutableList<OutputWriter> createOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
+	@Nonnull
+	private ImmutableList<OutputWriter> createOutputWriters(@Nonnull Iterable<OutputWriterFactory> outputWriters) {
 		return FluentIterable
 				.from(outputWriters)
 				.transform(new Function<OutputWriterFactory, OutputWriter>() {
