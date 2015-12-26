@@ -47,6 +47,7 @@ public class ProcessQueryThread implements Runnable {
 		try {
 			Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
 			query.runOutputWritersForQuery(server, results);
+			server.runOutputWriters(query, results);
 		} catch (Exception e) {
 			log.error("Error executing query: " + query, e);
 			throw new RuntimeException(e);

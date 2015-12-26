@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -45,6 +47,7 @@ import stormpot.LifecycledPool;
 import stormpot.TimeSpreadExpiration;
 import stormpot.Timeout;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -150,6 +153,8 @@ public class Server implements LifecycleAware {
 
 	@Getter private final ImmutableSet<Query> queries;
 
+	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
+
 	private final LifecycledPool<MBeanServerConnectionPoolable> pool;
 
 	@JsonCreator
@@ -166,7 +171,8 @@ public class Server implements LifecycleAware {
 			@JsonProperty("runPeriodSeconds") Integer runPeriodSeconds,
 			@JsonProperty("numQueryThreads") Integer numQueryThreads,
 			@JsonProperty("local") boolean local,
-			@JsonProperty("queries") List<Query> queries) {
+			@JsonProperty("queries") List<Query> queries,
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters) {
 
 		checkArgument(pid != null || url != null || host != null,
 				"You must provide the pid or the [url|host and port]");
@@ -203,6 +209,20 @@ public class Server implements LifecycleAware {
 			this.host = resolveProps(host);
 		}
 		pool = createPool(this.numQueryThreads);
+		this.outputWriters = createOutputWriters(outputWriters);
+	}
+
+	private ImmutableList<OutputWriter> createOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
+		return FluentIterable
+				.from(outputWriters)
+				.transform(new Function<OutputWriterFactory, OutputWriter>() {
+					@Nullable
+					@Override
+					public OutputWriter apply(OutputWriterFactory input) {
+						return input.create();
+					}
+				})
+				.toList();
 	}
 
 	private LifecycledPool<MBeanServerConnectionPoolable> createPool(int numQueryThreads) {
@@ -355,6 +375,13 @@ public class Server implements LifecycleAware {
 		pool.shutdown();
 	}
 
+	public void runOutputWriters(Query query, Iterable<Result> results) throws Exception {
+		for (OutputWriter writer : outputWriters) {
+			writer.doWrite(this, query, results);
+		}
+		logger.debug("Finished running outputWriters for query: {}", query);
+	}
+
 	/**
 	 * Factory to create a JMXServiceURL from a pid. Inner class to prevent class
 	 * loader issues when tools.jar isn't present.
@@ -412,6 +439,7 @@ public class Server implements LifecycleAware {
 		@Setter private Integer runPeriodSeconds;
 		@Setter private Integer numQueryThreads;
 		@Setter private boolean local;
+		private final List<OutputWriterFactory> outputWriters = new ArrayList<OutputWriterFactory>();
 		private final List<Query> queries = new ArrayList<Query>();
 
 		private Builder() {}
@@ -432,31 +460,6 @@ public class Server implements LifecycleAware {
 			this.queries.addAll(server.queries);
 		}
 
-		public Builder setProtocolProviderPackages(String protocolProviderPackages) {
-			this.protocolProviderPackages = protocolProviderPackages;
-			return this;
-		}
-
-		public Builder setUrl(String url) {
-			this.url = url;
-			return this;
-		}
-
-		public Builder setCronExpression(String cronExpression) {
-			this.cronExpression = cronExpression;
-			return this;
-		}
-
-		public Builder setNumQueryThreads(Integer numQueryThreads) {
-			this.numQueryThreads = numQueryThreads;
-			return this;
-		}
-
-		public Builder setLocal(boolean local) {
-			this.local = local;
-			return this;
-		}
-
 		public Builder addQuery(Query query) {
 			this.queries.add(query);
 			return this;
@@ -469,6 +472,21 @@ public class Server implements LifecycleAware {
 
 		public Builder addQueries(Set<Query> queries) {
 			this.queries.addAll(queries);
+			return this;
+		}
+
+		public Builder addOutputWriter(OutputWriterFactory outputWriter) {
+			this.outputWriters.add(outputWriter);
+			return this;
+		}
+
+		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
+			this.outputWriters.addAll(asList(outputWriters));
+			return this;
+		}
+
+		public Builder addOutputWriters(Set<OutputWriterFactory> outputWriters) {
+			this.outputWriters.addAll(outputWriters);
 			return this;
 		}
 
@@ -486,7 +504,8 @@ public class Server implements LifecycleAware {
 					runPeriodSeconds,
 					numQueryThreads,
 					local,
-					queries);
+					queries,
+					outputWriters);
 		}
 	}
 

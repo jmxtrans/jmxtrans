@@ -77,6 +77,7 @@ public class JmxUtils {
 			for (Query query : server.getQueries()) {
 				Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
 				query.runOutputWritersForQuery(server, results);
+				server.runOutputWriters(query, results);
 			}
 		}
 	}
