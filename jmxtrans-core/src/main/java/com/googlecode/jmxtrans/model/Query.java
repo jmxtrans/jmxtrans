@@ -150,6 +150,7 @@ public class Query {
 	}
 
 	private ImmutableList<OutputWriter> createOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
+		if (outputWriters == null) return ImmutableList.of();
 		return FluentIterable
 				.from(outputWriters)
 				.transform(new Function<OutputWriterFactory, OutputWriter>() {
