@@ -23,24 +23,31 @@
 package com.googlecode.jmxtrans.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.inject.Inject;
 import com.googlecode.jmxtrans.model.JmxProcess;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 
-public final class JsonUtils {
+public class JsonUtils {
 
-	private JsonUtils() {}
+	@Nonnull private final ObjectMapper mapper;
+
+	@Inject
+	public JsonUtils(
+			@Nonnull ObjectMapper mapper,
+			@Nonnull PlaceholderResolverJsonNodeFactory placeholderResolverJsonNodeFactory) {
+		this.mapper = mapper;
+		// configuring mapper here is dead ugly, but I do not yet understand how ObjectMapperModule works to do it properly
+		this.mapper.setNodeFactory(placeholderResolverJsonNodeFactory);
+	}
 
 	/**
 	 * Uses jackson to load json configuration from a File into a full object
 	 * tree representation of that json.
 	 */
-	public static JmxProcess getJmxProcess(File file) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setNodeFactory(new PlaceholderResolverJsonNodeFactory());
-		mapper.registerModule(new GuavaModule());
+	public JmxProcess parseProcess(File file) throws IOException {
 		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
 		jmx.setName(file.getName());
 		return jmx;

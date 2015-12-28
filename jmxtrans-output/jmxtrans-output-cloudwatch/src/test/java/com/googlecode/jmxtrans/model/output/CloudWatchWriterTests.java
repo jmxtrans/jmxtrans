@@ -28,6 +28,7 @@ import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.util.JsonUtils;
 import com.kaching.platform.testing.AllowDNSResolution;
@@ -37,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -46,6 +48,7 @@ import java.net.URISyntaxException;
 
 import static com.amazonaws.regions.Region.getRegion;
 import static com.amazonaws.regions.Regions.AP_NORTHEAST_1;
+import static com.googlecode.jmxtrans.guice.JmxTransModule.createInjector;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
@@ -62,6 +65,7 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
  */
 @AllowDNSResolution
 @RunWith(PowerMockRunner.class)
+@PowerMockIgnore("javax.management.*")
 @PrepareForTest({CloudWatchWriter.class, Regions.class})
 public class CloudWatchWriterTests {
 
@@ -110,8 +114,9 @@ public class CloudWatchWriterTests {
 
 	@Test
 	public void loadingFromFile() throws URISyntaxException, IOException {
+		JsonUtils jsonUtils = createInjector(new JmxTransConfiguration()).getInstance(JsonUtils.class);
 		File input = new File(CloudWatchWriterTests.class.getResource("/cloud-watch.json").toURI());
-		JmxProcess process = JsonUtils.getJmxProcess(input);
+		JmxProcess process = jsonUtils.parseProcess(input);
 		assertThat(process.getName()).isEqualTo("cloud-watch.json");
 	}
 

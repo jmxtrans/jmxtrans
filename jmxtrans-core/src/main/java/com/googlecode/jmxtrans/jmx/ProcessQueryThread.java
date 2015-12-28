@@ -27,11 +27,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stormpot.Timeout;
 
 import javax.annotation.Nonnull;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class ProcessQueryThread implements Runnable {
 
@@ -49,7 +46,7 @@ public class ProcessQueryThread implements Runnable {
 
 	public void run() {
 		try {
-			Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
+			Iterable<Result> results = server.execute(query);
 			resultProcessor.submit(server, query, results);
 		} catch (Exception e) {
 			log.error("Error executing query {} on server {}", query, server, e);

@@ -31,7 +31,6 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stormpot.Timeout;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -48,7 +47,6 @@ import java.util.Set;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyMap;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Walks a JMX tree and prints out all of the unique typenames and their
@@ -106,7 +104,7 @@ public class TreeWalker3 {
 			Query query = queryBuilder.build();
 
 			try {
-				Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
+				Iterable<Result> results = server.execute(query);
 				query.runOutputWritersForQuery(server, results);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);

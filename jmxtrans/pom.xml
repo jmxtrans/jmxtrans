@@ -315,9 +315,6 @@
 				</executions>
 			</plugin>
 		</plugins>
-
-		<sourceDirectory>src</sourceDirectory>
-
 	</build>
 	<profiles>
 		<profile>

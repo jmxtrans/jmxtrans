@@ -22,6 +22,26 @@
  */
 package com.googlecode.jmxtrans.model;
 
-public interface LifecycleAware {
-	void shutdown();
+import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
+
+import javax.annotation.Nonnull;
+import javax.management.remote.JMXConnector;
+import java.io.IOException;
+
+public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<Server, JMXConnection> {
+	@Override
+	@Nonnull
+	public JMXConnection makeObject(@Nonnull Server server) throws IOException {
+		if (server.isLocal()) {
+			return new JMXConnection(null, server.getLocalMBeanServer());
+		} else {
+			JMXConnector connection = server.getServerConnection();
+			return new JMXConnection(connection, connection.getMBeanServerConnection());
+		}
+	}
+
+	@Override
+	public void destroyObject(@Nonnull Server key, @Nonnull JMXConnection obj) throws IOException {
+		obj.close();
+	}
 }

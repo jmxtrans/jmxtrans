@@ -20,7 +20,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.model;
 
-public class JmxConnectionFactoryTests {
+import lombok.Getter;
+import lombok.ToString;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import java.io.Closeable;
+import java.io.IOException;
+
+@ToString
+@ThreadSafe
+public class JMXConnection implements Closeable {
+	@Nullable private final JMXConnector connector;
+	@Nonnull @Getter private final MBeanServerConnection mBeanServerConnection;
+
+	public JMXConnection(@Nullable JMXConnector connector, @Nonnull MBeanServerConnection mBeanServerConnection) {
+		this.connector = connector;
+		this.mBeanServerConnection = mBeanServerConnection;
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (connector != null) connector.close();
+	}
 }

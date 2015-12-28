@@ -23,13 +23,16 @@
 package com.googlecode.jmxtrans;
 
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
+import com.googlecode.jmxtrans.util.JsonUtils;
 import com.kaching.platform.testing.AllowLocalFileAccess;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -39,11 +42,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.collect.ImmutableList.of;
+import static com.googlecode.jmxtrans.guice.JmxTransModule.createInjector;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @AllowLocalFileAccess(paths = "*")
 @Category(RequiresIO.class)
 public class ConfigurationParserTest {
+
+	private ConfigurationParser configurationParser;
+
+	@Before
+	public void configureParser() {
+		JsonUtils jsonUtils = createInjector(new JmxTransConfiguration()).getInstance(JsonUtils.class);
+		configurationParser = new ConfigurationParser(jsonUtils);
+	}
 
 	@Test(expected = LifecycleException.class)
 	public void failParsingOnErrorIfRequested() throws URISyntaxException, LifecycleException {
@@ -52,7 +64,7 @@ public class ConfigurationParserTest {
 
 		boolean continueOnJsonError = false;
 
-		new ConfigurationParser().parseServers(of(validInput, invalidInput), continueOnJsonError);
+		configurationParser.parseServers(of(validInput, invalidInput), continueOnJsonError);
 	}
 
 	@Test
@@ -62,7 +74,7 @@ public class ConfigurationParserTest {
 
 		boolean continueOnJsonError = true;
 
-		ImmutableList servers = new ConfigurationParser().parseServers(of(validInput, invalidInput), continueOnJsonError);
+		ImmutableList servers = configurationParser.parseServers(of(validInput, invalidInput), continueOnJsonError);
 
 		assertThat(servers).hasSize(1);
 	}
@@ -75,7 +87,7 @@ public class ConfigurationParserTest {
 		List<Server> newServers = new ArrayList<Server>();
 		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "toto:key=val"));
 
-		List<Server> merged = new ConfigurationParser().mergeServerLists(existingServers, newServers);
+		List<Server> merged = configurationParser.mergeServerLists(existingServers, newServers);
 
 		assertThat(merged).hasSize(1);
 
@@ -91,7 +103,7 @@ public class ConfigurationParserTest {
 		List<Server> newServers = new ArrayList<Server>();
 		newServers.add(ServerFixtures.createServerWithOneQuery("example.net", "123", "tutu:key=val"));
 
-		List<Server> merged = new ConfigurationParser().mergeServerLists(existingServers, newServers);
+		List<Server> merged = configurationParser.mergeServerLists(existingServers, newServers);
 
 		assertThat(merged).hasSize(1);
 		Server mergedServer = merged.get(0);
@@ -174,7 +186,7 @@ public class ConfigurationParserTest {
 		List<Server> adding = new ArrayList<Server>();
 
 		adding.add(s2);
-		existing = new ConfigurationParser().mergeServerLists(existing, adding);
+		existing = configurationParser.mergeServerLists(existing, adding);
 
 		// should only have one server with 1 query since we just added the same
 		// server and same query.
@@ -182,7 +194,7 @@ public class ConfigurationParserTest {
 		assertThat(existing.get(0).getQueries()).hasSize(1);
 
 		adding.add(s3);
-		existing = new ConfigurationParser().mergeServerLists(existing, adding);
+		existing = configurationParser.mergeServerLists(existing, adding);
 
 		assertThat(existing).hasSize(2);
 		assertThat(existing.get(0).getQueries()).hasSize(1);

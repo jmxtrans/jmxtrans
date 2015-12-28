@@ -24,11 +24,15 @@ package com.googlecode.jmxtrans.util;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.inject.Injector;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowLocalFileAccess;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -46,11 +50,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AllowLocalFileAccess(paths = "*")
 public class JsonUtilsTest {
 
+	private JsonUtils jsonUtils;
+
+	@Before
+	public void setupJsonUtils() {
+		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
+		jsonUtils = injector.getInstance(JsonUtils.class);
+	}
+
 	@Test
 	public void loadingFromFile() throws URISyntaxException, IOException, MalformedObjectNameException {
 		File input = new File(JsonUtilsTest.class.getResource("/example.json").toURI());
 
-		JmxProcess process = JsonUtils.getJmxProcess(input);
+		JmxProcess process = jsonUtils.parseProcess(input);
 		assertThat(process.getName()).isEqualTo("example.json");
 
 		Server server = process.getServers().get(0);

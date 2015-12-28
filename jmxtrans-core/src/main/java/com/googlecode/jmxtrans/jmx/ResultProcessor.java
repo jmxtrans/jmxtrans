@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.collect.Iterables.concat;
 
@@ -40,10 +40,10 @@ public class ResultProcessor {
 
 	private final Logger logger = LoggerFactory.getLogger(ResultProcessor.class);
 
-	@Nonnull private final ExecutorService executorService;
+	@Nonnull private final ThreadPoolExecutor executorService;
 
 	@Inject
-	public ResultProcessor(@Named("resultProcessorExecutor") @Nonnull ExecutorService executorService) {
+	public ResultProcessor(@Named("resultProcessorExecutor") @Nonnull ThreadPoolExecutor executorService) {
 		this.executorService = executorService;
 	}
 

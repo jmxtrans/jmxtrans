@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
@@ -126,7 +125,7 @@ public class JmxTransformer implements WatchedCallback {
 			enricher.add(jar);
 		}
 
-		Injector injector = Guice.createInjector(new JmxTransModule(configuration));
+		Injector injector = JmxTransModule.createInjector(configuration);
 
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 
@@ -173,7 +172,7 @@ public class JmxTransformer implements WatchedCallback {
 		if (isRunning) {
 			throw new LifecycleException("Process already started");
 		} else {
-			log.info("Starting Jmxtrans on : " + this.configuration.getJsonDirOrFile().toString());
+			log.info("Starting Jmxtrans on : {}", configuration.getJsonDirOrFile());
 			try {
 				this.serverScheduler.start();
 
@@ -241,20 +240,12 @@ public class JmxTransformer implements WatchedCallback {
 				log.debug("Shutdown watch service");
 			}
 
-			stopServers();
-
 			// Shutdown the outputwriters
 			stopWriterAndClearMasterServerList();
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new LifecycleException(e);
-		}
-	}
-
-	private void stopServers() {
-		for (Server server : masterServersList) {
-			server.shutdown();
 		}
 	}
 
