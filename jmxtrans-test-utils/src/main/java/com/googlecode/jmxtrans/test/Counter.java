@@ -25,20 +25,20 @@ package com.googlecode.jmxtrans.test;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class Counter implements CounterMXBean {
-    private final AtomicInteger counter = new AtomicInteger();
-    private final String name;
+	private final AtomicInteger counter = new AtomicInteger();
+	private final String name;
 
-    public Counter(String name) {
-        this.name = name;
-    }
+	public Counter(String name) {
+		this.name = name;
+	}
 
-    @Override
-    public Integer getValue() {
-        return counter.getAndIncrement();
-    }
+	@Override
+	public Integer getValue() {
+		return counter.getAndIncrement();
+	}
 
-    @Override
-    public String getName() {
-        return name;
-    }
+	@Override
+	public String getName() {
+		return name;
+	}
 }

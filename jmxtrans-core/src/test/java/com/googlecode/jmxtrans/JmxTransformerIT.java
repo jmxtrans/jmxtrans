@@ -26,14 +26,17 @@ import com.google.inject.Injector;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
+import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.MonitorableApp;
 import com.googlecode.jmxtrans.test.OutputCapture;
+import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
 import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -43,6 +46,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @AllowDNSResolution
 @AllowLocalFileAccess(paths = "*")
+@Category({IntegrationTest.class, RequiresIO.class})
 public class JmxTransformerIT {
 	@Rule public OutputCapture output = new OutputCapture();
 	@Rule public MonitorableApp app = new MonitorableApp(12345);

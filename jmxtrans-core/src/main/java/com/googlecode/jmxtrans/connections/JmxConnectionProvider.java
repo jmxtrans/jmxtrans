@@ -20,28 +20,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.connections;
 
-import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.annotation.Nonnull;
+import javax.management.MBeanServer;
 import javax.management.remote.JMXConnector;
 import java.io.IOException;
 
-public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<Server, JMXConnection> {
-	@Override
-	@Nonnull
-	public JMXConnection makeObject(@Nonnull Server server) throws IOException {
-		if (server.isLocal()) {
-			return new JMXConnection(null, server.getLocalMBeanServer());
-		} else {
-			JMXConnector connection = server.getServerConnection();
-			return new JMXConnection(connection, connection.getMBeanServerConnection());
-		}
-	}
+/**
+ * Created by gehel on 29.12.15.
+ */
+public interface JmxConnectionProvider {
+	@JsonIgnore
+	JMXConnector getServerConnection() throws IOException;
 
-	@Override
-	public void destroyObject(@Nonnull Server key, @Nonnull JMXConnection obj) throws IOException {
-		obj.close();
-	}
+	@JsonIgnore
+	MBeanServer getLocalMBeanServer();
+
+	boolean isLocal();
 }

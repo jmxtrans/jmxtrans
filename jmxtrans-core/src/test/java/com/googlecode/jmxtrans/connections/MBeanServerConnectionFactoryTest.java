@@ -20,11 +20,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.connections;
 
-import com.googlecode.jmxtrans.model.JMXConnection;
-import com.googlecode.jmxtrans.model.MBeanServerConnectionFactory;
-import com.googlecode.jmxtrans.model.Server;
 import org.junit.Test;
 
 import javax.management.MBeanServer;
@@ -43,7 +40,7 @@ public class MBeanServerConnectionFactoryTest {
 
 	@Test
 	public void connectionIsCreatedForRemoteServer() throws IOException {
-		Server server = mock(Server.class);
+		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		JMXConnector jmxConnector = mock(JMXConnector.class);
 		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
 		when(server.isLocal()).thenReturn(false);
@@ -57,7 +54,7 @@ public class MBeanServerConnectionFactoryTest {
 
 	@Test
 	public void connectionIsCreatedForLocalServer() throws IOException {
-		Server server = mock(Server.class);
+		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		MBeanServer mBeanServerConnection = mock(MBeanServer.class);
 		when(server.isLocal()).thenReturn(true);
 		when(server.getLocalMBeanServer()).thenReturn(mBeanServerConnection);

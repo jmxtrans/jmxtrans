@@ -34,29 +34,29 @@ import java.util.Date;
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 
 public class DummyApp {
-    public static final String MOCK_MBEAN_NAME = "org.jmxtrans:type=Counter,name=myCounter";
+	public static final String MOCK_MBEAN_NAME = "org.jmxtrans:type=Counter,name=myCounter";
 
-    public static void main(String[] args) throws InterruptedException, MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
+	public static void main(String[] args) throws InterruptedException, MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
 
-        Counter mock = new Counter("myCounter");
-        ObjectName objectName = new ObjectName(MOCK_MBEAN_NAME);
+		Counter mock = new Counter("myCounter");
+		ObjectName objectName = new ObjectName(MOCK_MBEAN_NAME);
 
-        MBeanServer mBeanServer = getPlatformMBeanServer();
-        
-        // platform MBean server is global, mBean registration might persist between tests
-        if (mBeanServer.isRegistered(objectName)) {
-            mBeanServer.unregisterMBean(objectName);
-        }
-        mBeanServer.registerMBean(mock, objectName);
+		MBeanServer mBeanServer = getPlatformMBeanServer();
 
-        while (true) {
-            System.out.println("hello, it is: " + new Date());
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+		// platform MBean server is global, mBean registration might persist between tests
+		if (mBeanServer.isRegistered(objectName)) {
+			mBeanServer.unregisterMBean(objectName);
+		}
+		mBeanServer.registerMBean(mock, objectName);
+
+		while (true) {
+			System.out.println("hello, it is: " + new Date());
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 }

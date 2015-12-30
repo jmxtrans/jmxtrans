@@ -23,7 +23,7 @@
 package com.googlecode.jmxtrans.test;
 
 public interface CounterMXBean {
-    Integer getValue();
+	Integer getValue();
 
-    String getName();
+	String getName();
 }

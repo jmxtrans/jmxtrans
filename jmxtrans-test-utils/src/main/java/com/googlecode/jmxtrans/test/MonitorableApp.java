@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.test;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.kaching.platform.testing.AllowExternalProcess;
+import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 import org.junit.rules.ExternalResource;
 
 import javax.annotation.Nullable;
@@ -45,6 +46,7 @@ public class MonitorableApp extends ExternalResource {
 	}
 
 	@Override
+	@IgnoreJRERequirement // ProcessBuilder.inheritIO() was introduced in Java 7. As this is only used in test, let's ignore it.
 	protected void before() throws Throwable {
 		app = new ProcessBuilder().command(
 				"java", "-cp", getCurrentClasspath(),

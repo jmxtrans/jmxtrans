@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.googlecode.jmxtrans.connections.JMXConnection;
 import org.junit.Test;
 
 import javax.management.MBeanServerConnection;

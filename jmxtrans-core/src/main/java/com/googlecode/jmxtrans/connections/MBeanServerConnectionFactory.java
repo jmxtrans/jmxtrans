@@ -20,35 +20,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.connections;
 
-import stormpot.Allocator;
-import stormpot.Slot;
+import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
 import javax.annotation.Nonnull;
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
-public class MBeanServerConnectionAllocator implements Allocator<MBeanServerConnectionPoolable> {
-
-	@Nonnull private final Server server;
-
-	public MBeanServerConnectionAllocator(@Nonnull Server server) {
-		this.server = server;
-	}
-
+public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<JmxConnectionProvider, JMXConnection> {
 	@Override
-	public MBeanServerConnectionPoolable allocate(Slot slot) throws Exception {
+	@Nonnull
+	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws IOException {
 		if (server.isLocal()) {
-			return new MBeanServerConnectionPoolable(slot, null, server.getLocalMBeanServer());
+			return new JMXConnection(null, server.getLocalMBeanServer());
 		} else {
 			JMXConnector connection = server.getServerConnection();
-			return new MBeanServerConnectionPoolable(slot, connection, connection.getMBeanServerConnection());
+			return new JMXConnection(connection, connection.getMBeanServerConnection());
 		}
 	}
 
 	@Override
-	public void deallocate(MBeanServerConnectionPoolable poolable) throws Exception {
-		JMXConnector connector = poolable.getJmxConnector();
-		if (connector != null) connector.close();
+	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection obj) throws IOException {
+		obj.close();
 	}
 }

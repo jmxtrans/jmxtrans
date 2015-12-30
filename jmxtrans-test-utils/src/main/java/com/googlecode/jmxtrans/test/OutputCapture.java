@@ -42,9 +42,9 @@ public class OutputCapture extends ExternalResource {
 		originalOut = System.out;
 		originalErr = System.err;
 		out = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(out));
+		System.setOut(new PrintStream(out, false, UTF_8.toString()));
 		err = new ByteArrayOutputStream();
-		System.setErr(new PrintStream(err));
+		System.setErr(new PrintStream(err, false, UTF_8.toString()));
 	}
 
 	@Override

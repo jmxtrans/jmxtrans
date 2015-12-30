@@ -33,6 +33,8 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.sun.tools.attach.VirtualMachine;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -97,7 +99,7 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 @ThreadSafe
 @EqualsAndHashCode(exclude = {"queries", "pool"})
 @ToString(of = {"pid", "host", "port", "url", "cronExpression", "numQueryThreads"})
-public class Server {
+public class Server implements JmxConnectionProvider {
 
 	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
@@ -270,12 +272,14 @@ public class Server {
 	 * Helper method for connecting to a Server. You need to close the resulting
 	 * connection.
 	 */
+	@Override
 	@JsonIgnore
 	public JMXConnector getServerConnection() throws IOException {
 		JMXServiceURL url = new JMXServiceURL(getUrl());
 		return JMXConnectorFactory.connect(url, this.getEnvironment());
 	}
 
+	@Override
 	@JsonIgnore
 	public MBeanServer getLocalMBeanServer() {
 		// Getting the platform MBean server is cheap (expect for th first call) no need to cache it.
