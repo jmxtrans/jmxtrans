@@ -20,38 +20,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.jmx;
+package com.googlecode.jmxtrans.cli;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
+import com.beust.jcommander.IParameterValidator;
+import com.beust.jcommander.ParameterException;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.io.File;
 
-/**
- * The worker code.
- *
- * @author jon
- */
-public class JmxUtils {
+import static java.lang.String.format;
 
-	@Nonnull private final ThreadPoolExecutor executorService;
-	@Nonnull private final ResultProcessor resultProcessor;
-
-	@Inject
-	public JmxUtils(
-			@Named("queryProcessorExecutor") @Nonnull ThreadPoolExecutor executorService,
-			@Nonnull ResultProcessor resultProcessor) {
-		this.executorService = executorService;
-		this.resultProcessor = resultProcessor;
-	}
-
-	public void processServer(Server server) throws Exception {
-		for (Query query : server.getQueries()) {
-			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			executorService.submit(pqt);
-		}
+public class ExistingFilenameValidator implements IParameterValidator {
+	@Override
+	public void validate(String name, String value) throws ParameterException {
+		if (value == null) throw new ParameterException(format("Parameter %s cannot be null.", name));
+		File file = new File(value);
+		if (!file.exists()) throw new ParameterException(format("File %s does not exist.", value));
+		if (file.isDirectory()) throw new ParameterException(format("File %s is a directory, it should be a file.", value));
 	}
 }

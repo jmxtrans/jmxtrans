@@ -20,35 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.cli;
 
-import stormpot.Allocator;
-import stormpot.Slot;
+import org.apache.commons.cli.ParseException;
 
-import javax.annotation.Nonnull;
-import javax.management.remote.JMXConnector;
-
-public class MBeanServerConnectionAllocator implements Allocator<MBeanServerConnectionPoolable> {
-
-	@Nonnull private final Server server;
-
-	public MBeanServerConnectionAllocator(@Nonnull Server server) {
-		this.server = server;
-	}
+public class JCommanderArgumentParserTest extends CliArgumentParserBase {
 
 	@Override
-	public MBeanServerConnectionPoolable allocate(Slot slot) throws Exception {
-		if (server.isLocal()) {
-			return new MBeanServerConnectionPoolable(slot, null, server.getLocalMBeanServer());
-		} else {
-			JMXConnector connection = server.getServerConnection();
-			return new MBeanServerConnectionPoolable(slot, connection, connection.getMBeanServerConnection());
-		}
+	protected JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException {
+		return new JCommanderArgumentParser().parseOptions(args);
 	}
 
-	@Override
-	public void deallocate(MBeanServerConnectionPoolable poolable) throws Exception {
-		JMXConnector connector = poolable.getJmxConnector();
-		if (connector != null) connector.close();
-	}
 }

@@ -20,38 +20,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.jmx;
+package com.googlecode.jmxtrans.test;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.concurrent.ThreadPoolExecutor;
+class Counter implements CounterMXBean {
+	private final AtomicInteger counter = new AtomicInteger();
+	private final String name;
 
-/**
- * The worker code.
- *
- * @author jon
- */
-public class JmxUtils {
-
-	@Nonnull private final ThreadPoolExecutor executorService;
-	@Nonnull private final ResultProcessor resultProcessor;
-
-	@Inject
-	public JmxUtils(
-			@Named("queryProcessorExecutor") @Nonnull ThreadPoolExecutor executorService,
-			@Nonnull ResultProcessor resultProcessor) {
-		this.executorService = executorService;
-		this.resultProcessor = resultProcessor;
+	public Counter(String name) {
+		this.name = name;
 	}
 
-	public void processServer(Server server) throws Exception {
-		for (Query query : server.getQueries()) {
-			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			executorService.submit(pqt);
-		}
+	@Override
+	public Integer getValue() {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 }

@@ -38,6 +38,7 @@ import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
 import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import lombok.Getter;
+import lombok.ToString;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -59,6 +60,7 @@ import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
  * @author jon
  */
 @NotThreadSafe
+@ToString
 public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFactory {
 
 	public static final String HOST = "host";

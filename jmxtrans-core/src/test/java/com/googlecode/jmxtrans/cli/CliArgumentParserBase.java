@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.cli;
 
+import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.apache.commons.cli.ParseException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -39,8 +40,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 
-public class CliArgumentParserTest {
-
+@AllowLocalFileAccess(paths = "*")
+public abstract class CliArgumentParserBase {
 	@Rule
 	public TemporaryFolder mockConfigurationDirectory = new TemporaryFolder();
 	public File mockConfigurationFile;
@@ -55,7 +56,7 @@ public class CliArgumentParserTest {
 		parseConfiguration(new String[]{"-h"});
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void jsonDirectoryOrJsonFileIsRequired() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(new String[]{""});
@@ -65,7 +66,7 @@ public class CliArgumentParserTest {
 		}
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	@Ignore("Waiting for clarification of specs. Current behavior is to ignore the first option given, " +
 			"probably not what is expected by users.")
 	public void cannotGiveBothJsonFileAndJsonDir() throws OptionsException, ParseException {
@@ -95,7 +96,7 @@ public class CliArgumentParserTest {
 		assertThat(configuration.isContinueOnJsonError(), is(false));
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void jsonConfigDirectoryCannotBeAFile() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(new String[]{
@@ -107,7 +108,7 @@ public class CliArgumentParserTest {
 		}
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void jsonConfigDirectoryMustExist() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(new String[]{
@@ -119,7 +120,7 @@ public class CliArgumentParserTest {
 		}
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void jsonConfigFileCannotBeADirectory() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(new String[]{
@@ -131,7 +132,7 @@ public class CliArgumentParserTest {
 		}
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void jsonConfigFileMustExist() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(new String[]{
@@ -143,7 +144,7 @@ public class CliArgumentParserTest {
 		}
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void quartzConfigFileCannotBeADirectory() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(requiredOptionsAnd(
@@ -155,7 +156,7 @@ public class CliArgumentParserTest {
 		}
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void quartzConfigFileMustExist() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(requiredOptionsAnd(
@@ -175,7 +176,7 @@ public class CliArgumentParserTest {
 		assertThat(configuration.getRunPeriod(), is(20));
 	}
 
-	@Test(expected = OptionsException.class)
+	@Test(expected = Exception.class)
 	public void runIntervalMustBeInteger() throws OptionsException, ParseException {
 		try {
 			parseConfiguration(requiredOptionsAnd(
@@ -194,9 +195,7 @@ public class CliArgumentParserTest {
 		return arguments.toArray(new String[arguments.size()]);
 	}
 
-	private JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException {
-		return new CliArgumentParser().parseOptions(args);
-	}
+	protected abstract JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException;
 
 	private String[] requiredOptions() {
 		return new String[]{"-f", mockConfigurationFile.getAbsolutePath()};

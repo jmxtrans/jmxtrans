@@ -20,38 +20,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.jmx;
+package com.googlecode.jmxtrans.connections;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
+import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.concurrent.ThreadPoolExecutor;
+import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
-/**
- * The worker code.
- *
- * @author jon
- */
-public class JmxUtils {
-
-	@Nonnull private final ThreadPoolExecutor executorService;
-	@Nonnull private final ResultProcessor resultProcessor;
-
-	@Inject
-	public JmxUtils(
-			@Named("queryProcessorExecutor") @Nonnull ThreadPoolExecutor executorService,
-			@Nonnull ResultProcessor resultProcessor) {
-		this.executorService = executorService;
-		this.resultProcessor = resultProcessor;
+public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<JmxConnectionProvider, JMXConnection> {
+	@Override
+	@Nonnull
+	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws IOException {
+		if (server.isLocal()) {
+			return new JMXConnection(null, server.getLocalMBeanServer());
+		} else {
+			JMXConnector connection = server.getServerConnection();
+			return new JMXConnection(connection, connection.getMBeanServerConnection());
+		}
 	}
 
-	public void processServer(Server server) throws Exception {
-		for (Query query : server.getQueries()) {
-			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			executorService.submit(pqt);
-		}
+	@Override
+	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection obj) throws IOException {
+		obj.close();
 	}
 }

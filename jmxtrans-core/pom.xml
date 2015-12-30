@@ -39,12 +39,16 @@
 
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-		<verify.mutationThreshold>22</verify.mutationThreshold>
+		<verify.mutationThreshold>20</verify.mutationThreshold>
 		<verify.totalBranchRate>38</verify.totalBranchRate>
 		<verify.totalLineRate>40</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.beust</groupId>
+			<artifactId>jcommander</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
@@ -56,6 +60,10 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-guice</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.chrisvest</groupId>
@@ -121,6 +129,11 @@
 			<version>1.6.0</version>
 			<scope>system</scope>
 			<systemPath>${toolsjar}</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

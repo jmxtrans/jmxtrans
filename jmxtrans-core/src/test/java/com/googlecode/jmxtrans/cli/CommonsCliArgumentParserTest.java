@@ -20,8 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.cli;
 
-public interface LifecycleAware {
-	void shutdown();
+import org.apache.commons.cli.ParseException;
+
+public class CommonsCliArgumentParserTest extends CliArgumentParserBase {
+
+	@Override
+	protected JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException {
+		return new CommonsCliArgumentParser().parseOptions(args);
+	}
+
 }

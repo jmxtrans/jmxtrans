@@ -28,13 +28,11 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import stormpot.Timeout;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -46,7 +44,6 @@ import javax.management.ObjectName;
 import java.util.List;
 
 import static com.googlecode.jmxtrans.model.ServerFixtures.localServer;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -90,7 +87,7 @@ public class JmxProcessingTests {
 
 		Server server = localServer();
 
-		Iterable<Result> results1 = server.execute(query, new Timeout(1, SECONDS));
+		Iterable<Result> results1 = server.execute(query);
 		query.runOutputWritersForQuery(server, results1);
 
 		verify(outputWriter).doWrite(any(Server.class), queryCaptor.capture(), resultsCaptor.capture());

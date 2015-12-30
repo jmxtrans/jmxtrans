@@ -22,39 +22,44 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
-public class MBeanServerConnectionPoolable implements Poolable {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-	private static final Logger logger = LoggerFactory.getLogger(MBeanServerConnectionPoolable.class);
+public class JMXConnectionTest {
 
-	@Nonnull private final Slot slot;
+	@Test
+	public void serverConnectionIsExposed() {
+		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
 
-	@Nullable @Getter private final JMXConnector jmxConnector;
+		JMXConnection jmxConnection = new JMXConnection(null, mBeanServerConnection);
 
-	@Nonnull @Getter private final MBeanServerConnection connection;
-
-	public MBeanServerConnectionPoolable(@Nonnull Slot slot, JMXConnector jmxConnector, @Nonnull MBeanServerConnection connection) {
-		this.slot = slot;
-		this.jmxConnector = jmxConnector;
-		this.connection = connection;
+		assertThat(jmxConnection.getMBeanServerConnection()).isSameAs(mBeanServerConnection);
 	}
 
-	@Override
-	public void release() {
-		slot.release(this);
+	@Test
+	public void connectorIsClosed() throws IOException {
+		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
+		JMXConnector jmxConnector = mock(JMXConnector.class);
+		JMXConnection jmxConnection = new JMXConnection(jmxConnector, mBeanServerConnection);
+
+		jmxConnection.close();
+
+		verify(jmxConnector).close();
 	}
 
-	public void invalidate() {
-		slot.expire(this);
+	@Test
+	public void nullConnectorIsNotClosed() throws IOException {
+		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
+		JMXConnection jmxConnection = new JMXConnection(null, mBeanServerConnection);
+
+		jmxConnection.close();
 	}
 }

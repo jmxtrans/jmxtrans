@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.example;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
@@ -89,7 +88,7 @@ public class Hibernate {
 
 		printer.prettyPrint(process);
 
-		Injector injector = Guice.createInjector(new JmxTransModule(new JmxTransConfiguration()));
+		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);
 

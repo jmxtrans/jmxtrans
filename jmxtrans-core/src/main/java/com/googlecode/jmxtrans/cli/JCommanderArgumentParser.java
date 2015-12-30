@@ -20,38 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.jmx;
+package com.googlecode.jmxtrans.cli;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.concurrent.ThreadPoolExecutor;
 
-/**
- * The worker code.
- *
- * @author jon
- */
-public class JmxUtils {
+public class JCommanderArgumentParser implements CliArgumentParser {
+	@Nonnull
+	@Override
+	public JmxTransConfiguration parseOptions(@Nonnull String[] args) {
+		JmxTransConfiguration configuration = new JmxTransConfiguration();
+		JCommander jCommander = new JCommander(configuration, args);
 
-	@Nonnull private final ThreadPoolExecutor executorService;
-	@Nonnull private final ResultProcessor resultProcessor;
+		if (configuration.isHelp()) jCommander.usage();
+		else validate(configuration);
 
-	@Inject
-	public JmxUtils(
-			@Named("queryProcessorExecutor") @Nonnull ThreadPoolExecutor executorService,
-			@Nonnull ResultProcessor resultProcessor) {
-		this.executorService = executorService;
-		this.resultProcessor = resultProcessor;
+		return configuration;
 	}
 
-	public void processServer(Server server) throws Exception {
-		for (Query query : server.getQueries()) {
-			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			executorService.submit(pqt);
-		}
+	private void validate(JmxTransConfiguration configuration) {
+		if (configuration.getJsonDirOrFile() == null) throw new ParameterException("Please specify either the -f or -j option.");
 	}
 }

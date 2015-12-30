@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckReturnValue;
+import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +41,18 @@ public class ConfigurationParser {
 
 	private static final Logger log = LoggerFactory.getLogger(ConfigurationParser.class);
 
+	private final JsonUtils jsonUtils;
+
+	@Inject
+	public ConfigurationParser(JsonUtils jsonUtils) {
+		this.jsonUtils = jsonUtils;
+	}
+
 	public ImmutableList parseServers(Iterable<File> jsonFiles, boolean continueOnJsonError) throws LifecycleException {
 		ImmutableList serversList = ImmutableList.of();
 		for (File jsonFile : jsonFiles) {
 			try {
-				JmxProcess process = JsonUtils.getJmxProcess(jsonFile);
+				JmxProcess process = jsonUtils.parseProcess(jsonFile);
 				if (log.isDebugEnabled()) {
 					log.debug("Loaded file: " + jsonFile.getAbsolutePath());
 				}

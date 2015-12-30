@@ -22,36 +22,44 @@
  */
 package com.googlecode.jmxtrans.jmx;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.concurrent.ThreadPoolExecutor;
 
-/**
- * The worker code.
- *
- * @author jon
- */
-public class JmxUtils {
+import static com.google.common.collect.Iterables.concat;
+
+public class ResultProcessor {
+
+	private final Logger logger = LoggerFactory.getLogger(ResultProcessor.class);
 
 	@Nonnull private final ThreadPoolExecutor executorService;
-	@Nonnull private final ResultProcessor resultProcessor;
 
 	@Inject
-	public JmxUtils(
-			@Named("queryProcessorExecutor") @Nonnull ThreadPoolExecutor executorService,
-			@Nonnull ResultProcessor resultProcessor) {
+	public ResultProcessor(@Named("resultProcessorExecutor") @Nonnull ThreadPoolExecutor executorService) {
 		this.executorService = executorService;
-		this.resultProcessor = resultProcessor;
 	}
 
-	public void processServer(Server server) throws Exception {
-		for (Query query : server.getQueries()) {
-			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			executorService.submit(pqt);
+	public void submit(@Nonnull final Server server, @Nonnull final Query query, @Nonnull final Iterable<Result> results) {
+
+		for (final OutputWriter writer : concat(query.getOutputWriterInstances(), server.getOutputWriters())) {
+			executorService.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						writer.doWrite(server, query, results);
+					} catch (Exception e) {
+						logger.warn("Could not write result {} of query {} to output writer {}", results, query, writer);
+					}
+				}
+			});
 		}
 	}
 }

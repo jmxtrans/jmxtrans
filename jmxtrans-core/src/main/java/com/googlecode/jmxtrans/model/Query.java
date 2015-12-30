@@ -78,7 +78,7 @@ import static java.util.Arrays.asList;
 @JsonSerialize(include = NON_NULL)
 @JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
 @ThreadSafe
-@ToString(exclude = {"outputWriters"})
+@ToString(exclude = {"outputWriters", "typeNameValuesStringBuilder"})
 public class Query {
 
 	private static final Logger logger = LoggerFactory.getLogger(Query.class);
@@ -141,7 +141,7 @@ public class Query {
 		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
 		this.useAllTypeNames = useAllTypeNames;
-		this.outputWriters = ImmutableList.copyOf(outputWriters);
+		this.outputWriters = outputWriters == null ? ImmutableList.<OutputWriterFactory>of() : ImmutableList.copyOf(outputWriters);
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();

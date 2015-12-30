@@ -22,5 +22,21 @@
  */
 package com.googlecode.jmxtrans.connections;
 
-public class JmxConnectionFactoryTests {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.management.MBeanServer;
+import javax.management.remote.JMXConnector;
+import java.io.IOException;
+
+/**
+ * Created by gehel on 29.12.15.
+ */
+public interface JmxConnectionProvider {
+	@JsonIgnore
+	JMXConnector getServerConnection() throws IOException;
+
+	@JsonIgnore
+	MBeanServer getLocalMBeanServer();
+
+	boolean isLocal();
 }
