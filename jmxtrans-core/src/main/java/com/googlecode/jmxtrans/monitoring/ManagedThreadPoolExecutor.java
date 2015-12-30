@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class ManagedThreadPoolExecutor {
+public class ManagedThreadPoolExecutor implements ThreadPoolExecutorMXBean {
 
 	@Nonnull private final ThreadPoolExecutor executor;
 	private ObjectName objectName;
@@ -39,62 +39,77 @@ public class ManagedThreadPoolExecutor {
 		this.objectName = new ObjectName("com.googlecode.jmxtrans:Type=ThreadPoolExecutor,PoolName=" + name);
 	}
 
+	@Override
 	public boolean allowsCoreThreadTimeOut() {
 		return executor.allowsCoreThreadTimeOut();
 	}
 
+	@Override
 	public int getActiveCount() {
 		return executor.getActiveCount();
 	}
 
+	@Override
 	public long getCompletedTaskCount() {
 		return executor.getCompletedTaskCount();
 	}
 
+	@Override
 	public int getCorePoolSize() {
 		return executor.getCorePoolSize();
 	}
 
+	@Override
 	public long getKeepAliveTimeSeconds() {
 		return executor.getKeepAliveTime(SECONDS);
 	}
 
+	@Override
 	public int getLargestPoolSize() {
 		return executor.getLargestPoolSize();
 	}
 
+	@Override
 	public int getMaximumPoolSize() {
 		return executor.getMaximumPoolSize();
 	}
 
+	@Override
 	public int getPoolSize() {
 		return executor.getPoolSize();
 	}
 
+	@Override
 	public long getTaskCount() {
 		return executor.getTaskCount();
 	}
 
+	@Override
 	public boolean isShutdown() {
 		return executor.isShutdown();
 	}
 
+	@Override
 	public boolean isTerminated() {
 		return executor.isTerminated();
 	}
 
+	@Override
 	public boolean isTerminating() {
 		return executor.isTerminating();
 	}
 
+	@Override
 	public int workQueueRemainingCapacity() {
 		return executor.getQueue().remainingCapacity();
 	}
 
+	@Override
 	public int workQueueSize() {
 		return executor.getQueue().size();
 	}
 
+	@Override
 	public ObjectName getObjectName() {
 		return objectName;
 	}

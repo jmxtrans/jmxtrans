@@ -22,5 +22,36 @@
  */
 package com.googlecode.jmxtrans.monitoring;
 
+import javax.management.ObjectName;
+
 public interface ThreadPoolExecutorMXBean {
+	boolean allowsCoreThreadTimeOut();
+
+	int getActiveCount();
+
+	long getCompletedTaskCount();
+
+	int getCorePoolSize();
+
+	long getKeepAliveTimeSeconds();
+
+	int getLargestPoolSize();
+
+	int getMaximumPoolSize();
+
+	int getPoolSize();
+
+	long getTaskCount();
+
+	boolean isShutdown();
+
+	boolean isTerminated();
+
+	boolean isTerminating();
+
+	int workQueueRemainingCapacity();
+
+	int workQueueSize();
+
+	ObjectName getObjectName();
 }
