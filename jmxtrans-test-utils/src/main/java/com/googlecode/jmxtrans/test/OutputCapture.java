@@ -61,7 +61,7 @@ public class OutputCapture extends ExternalResource {
 		return hasLineContaining(err, content);
 	}
 
-	private Callable<Boolean> hasLineContaining(final ByteArrayOutputStream out, final String content) {
+	private static Callable<Boolean> hasLineContaining(final ByteArrayOutputStream out, final String content) {
 		return new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {

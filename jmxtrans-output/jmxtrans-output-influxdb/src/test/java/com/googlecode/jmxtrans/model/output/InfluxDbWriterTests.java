@@ -174,7 +174,7 @@ public class InfluxDbWriterTests {
 		assertThat(process.getName()).isEqualTo("influxDB.json");
 	}
 
-	private String buildLineProtocol(String measurement, Map<String, String> expectedTags) {
+	private static String buildLineProtocol(String measurement, Map<String, String> expectedTags) {
 		StringBuilder sb = new StringBuilder(measurement).append(",");
 		int loops = 0;
 		int tagCount = expectedTags.size();

@@ -65,7 +65,7 @@ public class HttpUrlConnectionConfigurer {
 		httpURLConnection.setRequestProperty("User-Agent", userAgent);
 	}
 
-	private boolean methodIsValid(String requestMethod) {
+	private static boolean methodIsValid(String requestMethod) {
 		return requestMethod != null
 				&& requestMethod.equals("POST");
 	}
