@@ -79,9 +79,9 @@ public class InfluxDbWriterTests {
 	@Captor
 	private ArgumentCaptor<BatchPoints> messageCaptor;
 	
-	private ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.ALL;
-	private String DEFAULT_RETENTION_POLICY = "default";
-	private ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = immutableEnumSet(EnumSet.allOf(ResultAttribute.class));
+	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.ALL;
+	private static final String DEFAULT_RETENTION_POLICY = "default";
+	private static final ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = immutableEnumSet(EnumSet.allOf(ResultAttribute.class));
 
 	Result result = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "typeName",
 			ImmutableMap.of("key", (Object) 1));
