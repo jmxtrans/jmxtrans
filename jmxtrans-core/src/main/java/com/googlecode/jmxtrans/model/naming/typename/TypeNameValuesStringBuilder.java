@@ -51,7 +51,7 @@ public class TypeNameValuesStringBuilder {
 	}
 
 	protected final String doBuild(List<String> typeNames, String typeNameStr) {
-		if ((typeNames == null) || (typeNames.size() == 0)) {
+		if ((typeNames == null) || (typeNames.isEmpty())) {
 			return null;
 		}
 		Map<String, String> typeNameValueMap = TypeNameValue.extractMap(typeNameStr);

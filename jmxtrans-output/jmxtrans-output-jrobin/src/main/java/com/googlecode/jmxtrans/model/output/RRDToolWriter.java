@@ -157,7 +157,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 
 		doGenerate(results);
 
-		if (dataMap.keySet().size() > 0 && dataMap.values().size() > 0) {
+		if (!dataMap.keySet().isEmpty() && !dataMap.values().isEmpty()) {
 			rrdToolUpdate(StringUtils.join(dataMap.keySet(), ':'), StringUtils.join(dataMap.values(), ':'));
 		} else {
 			log.error("Nothing was logged for query: " + query);
