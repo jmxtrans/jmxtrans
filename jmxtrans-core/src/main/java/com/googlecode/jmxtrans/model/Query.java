@@ -186,7 +186,7 @@ public class Query {
 		}
 
 		try {
-			if (attributes.size() > 0) {
+			if (!attributes.isEmpty()) {
 				logger.debug("Executing queryName [{}] from query [{}]", queryName.getCanonicalName(), this);
 
 				AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
@@ -255,7 +255,7 @@ public class Query {
 		Set<String> typeNames = getTypeNames();
 		if (isUseAllTypeNames()) {
 			return new UseAllTypeNameValuesStringBuilder(separator);
-		} else if (typeNames != null && typeNames.size() > 0) {
+		} else if (typeNames != null && !typeNames.isEmpty()) {
 			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<String>(typeNames));
 		} else {
 			return new TypeNameValuesStringBuilder(separator);
