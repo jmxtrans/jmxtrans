@@ -45,9 +45,9 @@ import static com.google.common.collect.Maps.transformValues;
  */
 public class PropertyResolver {
 
-	private static PropertyResolverFunc RESOLVE_PROPERTIES = new PropertyResolverFunc();
+	private static final PropertyResolverFunc RESOLVE_PROPERTIES = new PropertyResolverFunc();
 
-	private static ObjectPropertyResolverFunc RESOLVE_OBJECT_PROPERTIES = new ObjectPropertyResolverFunc();
+	private static final ObjectPropertyResolverFunc RESOLVE_OBJECT_PROPERTIES = new ObjectPropertyResolverFunc();
 
 	/**
 	 * Resolve a property from System Properties (aka ${key}) key:defval is
