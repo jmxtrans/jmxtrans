@@ -34,6 +34,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.Settings;
 
@@ -79,6 +80,7 @@ public class KafkaWriter extends BaseOutputWriter {
 	private final Iterable<String> topics;
 	private final String rootPrefix;
 	private final ImmutableMap<String, String> tags;
+	private final Boolean typeNamesAsTags;
 
 	@JsonCreator
 	public KafkaWriter(
@@ -87,6 +89,7 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("topics") String topics,
+			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
 			@JsonProperty("tags") Map<String, String> tags,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
@@ -103,6 +106,7 @@ public class KafkaWriter extends BaseOutputWriter {
 		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
 		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
 		this.tags = ImmutableMap.copyOf(firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of()));
+		this.typeNamesAsTags = Settings.getBooleanSetting(settings, "typeNamesAsTags", Boolean.FALSE);
 		jsonFactory = new JsonFactory();
 	}
 
@@ -131,7 +135,15 @@ public class KafkaWriter extends BaseOutputWriter {
 	}
 
 	private String createJsonMessage(Server server, Query query, List<String> typeNames, Result result, Entry<String, Object> values, Object value) throws IOException {
-		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
+
+    // embed type names into the metric name/keystring unless typeNamesAsTags is set
+		String keyString;
+		if (typeNamesAsTags) {
+			keyString = getKeyString(server, query, result, values, null, this.rootPrefix);
+		} else {
+			keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
+		}
+   
 		String cleanKeyString = keyString.replaceAll("[()]", "_");
 
 		Closer closer = Closer.create();
@@ -143,8 +155,19 @@ public class KafkaWriter extends BaseOutputWriter {
 			generator.writeStringField("value", value.toString());
 			generator.writeNumberField("timestamp", result.getEpoch() / 1000);
 			generator.writeObjectFieldStart("tags");
+			// static tags
 			for (String tag_key : this.tags.keySet()) {
 				generator.writeStringField(tag_key, this.tags.get(tag_key));
+			}
+			// typeNames tags
+			if (typeNamesAsTags) {
+				Map<String, String> typeNameMap = TypeNameValue.extractMap(result.getTypeName());
+				for (String oneTypeName : getTypeNames()) {
+					String oneTypeNameValue = typeNameMap.get(oneTypeName);
+					if (oneTypeNameValue == null)
+						oneTypeNameValue = "";
+					generator.writeStringField(oneTypeName, oneTypeNameValue);
+				}
 			}
 			generator.writeEndObject();
 			generator.writeEndObject();
