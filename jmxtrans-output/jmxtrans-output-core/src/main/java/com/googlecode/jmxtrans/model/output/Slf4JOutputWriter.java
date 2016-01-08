@@ -76,11 +76,8 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 		final List<String> typeNames = getTypeNames();
 
 		for (final Result result : results) {
-			final Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (final Map.Entry<String, Object> values : resultValues.entrySet()) {
-					logValue(server, query, typeNames, result, values);
-				}
+			for (final Map.Entry<String, Object> values : result.getValues().entrySet()) {
+				logValue(server, query, typeNames, result, values);
 			}
 		}
 	}

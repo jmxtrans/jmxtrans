@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -44,6 +45,7 @@ import static com.google.common.collect.ImmutableMap.copyOf;
 @ThreadSafe
 @Immutable
 @EqualsAndHashCode
+@ToString
 public class Result {
 	@Getter private final String attributeName;
 	@Getter private final String className;
@@ -64,9 +66,4 @@ public class Result {
 		this.keyAlias = keyAlias;
 	}
 
-	@Override
-	public String toString() {
-		return "Result [attributeName=" + attributeName + ", className=" + className + ", objDomain=" + objDomain + ", typeName=" + typeName + ", values=" + values + ", epoch="
-				+ epoch + "]";
-	}
 }
