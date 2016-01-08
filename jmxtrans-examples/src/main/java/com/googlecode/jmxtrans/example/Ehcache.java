@@ -30,7 +30,6 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
-import com.googlecode.jmxtrans.util.JsonPrinter;
 
 /**
  * This example shows how to query ehcache for its statistics information.

@@ -27,7 +27,6 @@ import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.util.JsonPrinter;
 import com.googlecode.jmxtrans.util.JsonUtils;
 
 import java.io.File;
