@@ -32,7 +32,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
-import com.googlecode.jmxtrans.util.JsonPrinter;
 
 import java.util.Collections;
 import java.util.Map;

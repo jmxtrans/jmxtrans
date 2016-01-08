@@ -664,23 +664,17 @@
 					<version>2.0.1</version>
 					<configuration>
 						<classesToIgnore>
-							<param>com.googlecode.jmxtrans.example.ActiveMQ</param>
-							<param>com.googlecode.jmxtrans.example.ActiveMQ2</param>
-							<param>com.googlecode.jmxtrans.example.Ehcache</param>
-							<param>com.googlecode.jmxtrans.example.Ganglia</param>
-							<param>com.googlecode.jmxtrans.example.Graphite</param>
-							<param>com.googlecode.jmxtrans.example.HeapMemory</param>
-							<param>com.googlecode.jmxtrans.example.Hibernate</param>
-							<param>com.googlecode.jmxtrans.example.InterestingInfo</param>
-							<param>com.googlecode.jmxtrans.example.MemoryPool</param>
-							<param>com.googlecode.jmxtrans.example.Tester</param>
-							<param>com.googlecode.jmxtrans.example.TreeWalker</param>
-							<param>com.googlecode.jmxtrans.example.TreeWalker2</param>
-							<param>com.googlecode.jmxtrans.example.TreeWalker3</param>
+							<param>com.googlecode.jmxtrans.model.QueryFixtures</param>
+							<param>com.googlecode.jmxtrans.model.ResultFixtures</param>
+							<param>com.googlecode.jmxtrans.model.ServerFixtures</param>
 						</classesToIgnore>
 						<interfacesMarkingLiveCode>
-							<param>com.googlecode.jmxtrans.model.OutputWriter</param>
+							<param>com.googlecode.jmxtrans.model.OutputWriterFactory</param>
 						</interfacesMarkingLiveCode>
+						<modulesToSkip>
+							<param>jmxtrans-examples</param>
+							<param>jmxtrans-test-utils</param>
+						</modulesToSkip>
 						<skipSendingUsageStatistics>false</skipSendingUsageStatistics>
 						<skipUpdateCheck>true</skipUpdateCheck>
 						<usageStatisticsComment>JmxTrans - https://github.com/jmxtrans/jmxtrans</usageStatisticsComment>
