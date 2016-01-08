@@ -39,6 +39,8 @@ import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import lombok.Getter;
 import lombok.ToString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -63,6 +65,8 @@ import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
 @ToString
 public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFactory {
 
+	private static final Logger logger = LoggerFactory.getLogger(BaseOutputWriter.class);
+
 	public static final String HOST = "host";
 	public static final String PORT = "port";
 	public static final String OUTPUT_FILE = "outputFile";
@@ -83,6 +87,11 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("settings") Map<String, Object> settings) {
+
+		if (settings != null && !settings.isEmpty()) {
+			logger.warn("Using 'settings' is deprecated, please pass attributes directly to the OutputWriter.");
+		}
+
 		// resolve and initialize settings first, so we can refer to them to initialize other fields
 		this.settings = resolveMap(MoreObjects.firstNonNull(
 				settings,
