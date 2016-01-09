@@ -39,6 +39,7 @@ import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.naming.StringUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:cleclerc@cloudbees.com">Cyrille Le Clerc</a>
  */
+@EqualsAndHashCode(exclude = {"jsonFactory"})
 public class LibratoWriter extends BaseOutputWriter {
 
 	public final static String SETTING_URL = "url";
@@ -87,7 +89,7 @@ public class LibratoWriter extends BaseOutputWriter {
 	public static final String DEFAULT_LIBRATO_API_URL = "https://metrics-api.librato.com/v1/metrics";
 	public static final String SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS = "libratoApiTimeoutInMillis";
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger logger = LoggerFactory.getLogger(LibratoWriter.class);
 
 	private final JsonFactory jsonFactory = new JsonFactory();
 	/**

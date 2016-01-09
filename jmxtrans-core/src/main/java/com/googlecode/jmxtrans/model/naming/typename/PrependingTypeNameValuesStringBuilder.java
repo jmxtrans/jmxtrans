@@ -22,16 +22,24 @@
  */
 package com.googlecode.jmxtrans.model.naming.typename;
 
+import com.google.common.collect.ImmutableList;
+import lombok.EqualsAndHashCode;
+
+import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.collect.ImmutableList.copyOf;
+
+@Immutable
+@EqualsAndHashCode
 public class PrependingTypeNameValuesStringBuilder extends TypeNameValuesStringBuilder {
 
-	private final List<String> prependedTypeNames;
+	private final ImmutableList<String> prependedTypeNames;
 
 	public PrependingTypeNameValuesStringBuilder(String separator, List<String> prependedTypeNames) {
 		super(separator);
-		this.prependedTypeNames = prependedTypeNames;
+		this.prependedTypeNames = copyOf(prependedTypeNames);
 	}
 
 	@Override

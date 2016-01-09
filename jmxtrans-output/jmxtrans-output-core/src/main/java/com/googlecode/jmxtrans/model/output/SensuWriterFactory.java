@@ -29,6 +29,8 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,6 +38,8 @@ import java.net.InetSocketAddress;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 
+@EqualsAndHashCode
+@ToString
 public class SensuWriterFactory implements OutputWriterFactory {
 
 	private final boolean booleanAsNumber;

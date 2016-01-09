@@ -49,25 +49,20 @@ public class ConfigurationParser {
 	}
 
 	public ImmutableList parseServers(Iterable<File> jsonFiles, boolean continueOnJsonError) throws LifecycleException {
-		ImmutableList serversList = ImmutableList.of();
+		ServerListBuilder serverListBuilder = new ServerListBuilder();
 		for (File jsonFile : jsonFiles) {
 			try {
 				JmxProcess process = jsonUtils.parseProcess(jsonFile);
-				if (log.isDebugEnabled()) {
-					log.debug("Loaded file: " + jsonFile.getAbsolutePath());
-				}
-				serversList = mergeServerLists(serversList, process.getServers());
+				log.debug("Loaded file: {}", jsonFile.getAbsolutePath());
+				serverListBuilder.add(process.getServers());
 			} catch (Exception ex) {
 				String message = "Error parsing json: " + jsonFile;
-				if (continueOnJsonError) {
-					// error parsing one file should not prevent the startup of JMXTrans
-					log.error(message, ex);
-				} else {
-					throw new LifecycleException(message, ex);
-				}
+				// error parsing one file should not prevent the startup of JMXTrans
+				if (continueOnJsonError) log.error(message, ex);
+				else throw new LifecycleException(message, ex);
 			}
 		}
-		return serversList;
+		return serverListBuilder.build();
 	}
 
 	/**

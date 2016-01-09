@@ -34,6 +34,8 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,19 +59,19 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:jhmartin@toger.us">Jason Martin</a>
  */
+@EqualsAndHashCode(exclude = "jsonFactory")
+@ToString
 public class SensuWriter extends BaseOutputWriter {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	private final JsonFactory jsonFactory = new JsonFactory();
+	private static final Logger logger = LoggerFactory.getLogger(SensuWriter.class);
 
 	public final static String SETTING_HANDLER = "handler";
 	public final static String DEFAULT_SENSU_HOST = "localhost";
 	public final static String DEFAULT_SENSU_HANDLER = "graphite";
 
-	/**
-	 * Sensu HTTP API URL
-	 */
+	private final JsonFactory jsonFactory = new JsonFactory();
+
+	/** Sensu HTTP API URL */
 	private final String host;
 	private final String handler;
 

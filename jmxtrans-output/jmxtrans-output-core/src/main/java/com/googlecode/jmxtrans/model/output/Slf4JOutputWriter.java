@@ -33,6 +33,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -46,6 +48,8 @@ import static com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static java.lang.String.valueOf;
 
+@EqualsAndHashCode
+@ToString
 public class Slf4JOutputWriter extends BaseOutputWriter {
 
 	private final Logger logger;

@@ -30,6 +30,8 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.HttpOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.HttpUrlConnectionConfigurer;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,6 +44,8 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@EqualsAndHashCode
+@ToString
 public class LibratoWriterFactory implements OutputWriterFactory {
 	private final boolean booleanAsNumber;
 	@Nonnull private final ImmutableList<String> typeNames;

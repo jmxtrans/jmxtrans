@@ -62,6 +62,7 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -97,7 +98,7 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 })
 @Immutable
 @ThreadSafe
-@EqualsAndHashCode(exclude = {"queries", "pool"})
+@EqualsAndHashCode(exclude = {"queries", "pool", "outputWriters", "outputWriterFactories"})
 @ToString(of = {"pid", "host", "port", "url", "cronExpression", "numQueryThreads"})
 public class Server implements JmxConnectionProvider {
 
@@ -134,6 +135,8 @@ public class Server implements JmxConnectionProvider {
 	 * cronExpression is null, then the job is run immediately and once.
 	 * Otherwise, it is added to the scheduler for immediate execution and run
 	 * according to the cronExpression.
+	 *
+	 * @deprecated use runPeriodSeconds instead
 	 */
 	@Getter @Nullable private final String cronExpression;
 	@Getter @Nullable private final Integer runPeriodSeconds;
@@ -152,6 +155,7 @@ public class Server implements JmxConnectionProvider {
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
 
 	private final GenericKeyedObjectPool<Server, JMXConnection> pool;
+	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
 
 	@JsonCreator
 	public Server(
@@ -206,6 +210,7 @@ public class Server implements JmxConnectionProvider {
 			this.host = resolveProps(host);
 		}
 		this.pool = pool;
+		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));
 		this.outputWriters = createOutputWriters(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));
 	}
 
@@ -444,6 +449,11 @@ public class Server implements JmxConnectionProvider {
 			this.pool = server.pool;
 		}
 
+		public Builder clearQueries() {
+			queries.clear();
+			return this;
+		}
+
 		public Builder addQuery(Query query) {
 			this.queries.add(query);
 			return this;
@@ -469,7 +479,7 @@ public class Server implements JmxConnectionProvider {
 			return this;
 		}
 
-		public Builder addOutputWriters(Set<OutputWriterFactory> outputWriters) {
+		public Builder addOutputWriters(Collection<OutputWriterFactory> outputWriters) {
 			this.outputWriters.addAll(outputWriters);
 			return this;
 		}
