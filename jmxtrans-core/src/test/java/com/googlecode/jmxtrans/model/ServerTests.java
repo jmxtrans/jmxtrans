@@ -22,10 +22,20 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import java.io.IOException;
+
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+
+import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
+
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.mockito.InOrder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -33,6 +43,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author lanyonm
@@ -235,5 +250,75 @@ public class ServerTests {
 			fail("No Pid or Url can't work");
 		}
 		catch(IllegalArgumentException e) {}
+	}
+
+	@Test
+	public void testConnectionRepoolingOk() throws Exception {
+		@SuppressWarnings("unchecked")
+		GenericKeyedObjectPool<Server, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+
+		Server server = Server.builder()
+				.setHost("host.example.net")
+				.setPort("4321")
+				.setLocal(true)
+				.setPool(pool)
+				.build();
+
+		MBeanServerConnection mBeanConn = mock(MBeanServerConnection.class);
+
+		JMXConnection conn = mock(JMXConnection.class);
+		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
+
+		when(pool.borrowObject(server)).thenReturn(conn);
+
+		Query query = mock(Query.class);
+		Iterable<ObjectName> objectNames = Lists.emptyList();
+		when(query.queryNames(mBeanConn)).thenReturn(objectNames);
+		server.execute(query);
+
+		verify(pool, never()).invalidateObject(server, conn);
+
+		InOrder orderVerifier = inOrder(pool);
+		orderVerifier.verify(pool).borrowObject(server);
+		orderVerifier.verify(pool).returnObject(server, conn);
+	}
+
+	@Test
+	public void testConnectionRepoolingSkippedOnError() throws Exception {
+		@SuppressWarnings("unchecked")
+		GenericKeyedObjectPool<Server, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+
+		Server server = Server.builder()
+				.setHost("host.example.net")
+				.setPort("4321")
+				.setLocal(true)
+				.setPool(pool)
+				.build();
+
+		MBeanServerConnection mBeanConn = mock(MBeanServerConnection.class);
+
+		JMXConnection conn = mock(JMXConnection.class);
+		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
+
+		when(pool.borrowObject(server)).thenReturn(conn);
+
+		Query query = mock(Query.class);
+		IOException e = mock(IOException.class);
+		when(query.queryNames(mBeanConn)).thenThrow(e);
+
+		try {
+			server.execute(query);
+			fail("No exception got throws");
+		} catch (IOException e2) {
+			if (e != e2) {
+				fail("Wrong exception thrown (" + e + " instead of mock");
+			}
+		}
+
+		verify(pool, never()).returnObject(server, conn);;
+
+		InOrder orderVerifier = inOrder(pool);
+		orderVerifier.verify(pool).borrowObject(server);
+		orderVerifier.verify(pool).invalidateObject(server, conn);
 	}
 }
