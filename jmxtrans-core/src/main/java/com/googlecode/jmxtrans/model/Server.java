@@ -232,12 +232,11 @@ public class Server implements JmxConnectionProvider {
 			for (ObjectName queryName : query.queryNames(connection)) {
 				results.addAll(query.fetchResults(connection, queryName));
 			}
+			pool.returnObject(this, jmxConnection);
 			return results.build();
 		} catch (Exception e) {
 			pool.invalidateObject(this, jmxConnection);
 			throw e;
-		} finally {
-			pool.returnObject(this, jmxConnection);
 		}
 	}
 
