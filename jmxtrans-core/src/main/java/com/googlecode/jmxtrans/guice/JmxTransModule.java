@@ -32,6 +32,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
@@ -115,6 +116,7 @@ public class JmxTransModule extends AbstractModule {
 	}
 
 	@Provides
+	@Singleton
 	@Named("queryProcessorExecutor")
 	ThreadPoolExecutor queryProcessorExecutor() {
 		int poolSize = configuration.getQueryProcessorExecutorPoolSize();
@@ -124,6 +126,7 @@ public class JmxTransModule extends AbstractModule {
 	}
 
 	@Provides
+	@Singleton
 	@Named("resultProcessorExecutor")
 	ThreadPoolExecutor resultProcessorExecutor() {
 		int poolSize = configuration.getResultProcessorExecutorPoolSize();
