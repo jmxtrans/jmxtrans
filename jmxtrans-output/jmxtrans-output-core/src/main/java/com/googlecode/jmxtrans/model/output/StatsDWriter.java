@@ -35,6 +35,8 @@ import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
 import com.googlecode.jmxtrans.util.NumberUtils;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +62,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author neilh
  */
+@EqualsAndHashCode(exclude = {"pool", "mbean"})
+@ToString
 public class StatsDWriter extends BaseOutputWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(StatsDWriter.class);
 	public static final String ROOT_PREFIX = "rootPrefix";
+	private static final String BUCKET_TYPE = "bucketType";
+	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
+	private static final String STRING_VALUE_DEFAULT_COUNTER = "stringValueDefaultCount";
+
 	private final ByteBuffer sendBuffer;
 
 	private final String bucketType;
@@ -72,10 +80,6 @@ public class StatsDWriter extends BaseOutputWriter {
 	private final DatagramChannel channel;
 	private final Boolean stringsValuesAsKey;
 	@Nonnull private final Long stringValueDefaultCount;
-
-	private static final String BUCKET_TYPE = "bucketType";
-	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
-	private static final String STRING_VALUE_DEFAULT_COUNTER = "stringValueDefaultCount";
 
 	private GenericKeyedObjectPool<SocketAddress, DatagramSocket> pool;
 	private ManagedObject mbean;

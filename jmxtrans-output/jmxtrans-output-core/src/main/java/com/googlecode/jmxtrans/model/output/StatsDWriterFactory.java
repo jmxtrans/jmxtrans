@@ -27,6 +27,8 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.UdpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
@@ -35,6 +37,8 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@EqualsAndHashCode
+@ToString
 public class StatsDWriterFactory implements OutputWriterFactory {
 
 	@Nonnull private final ImmutableList<String> typeNames;

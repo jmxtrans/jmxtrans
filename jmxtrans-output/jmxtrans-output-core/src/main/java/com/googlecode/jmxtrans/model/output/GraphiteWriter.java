@@ -31,6 +31,8 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.OnlyOnceLogger;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,8 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
  * @author jon
  */
 @NotThreadSafe
+@EqualsAndHashCode(exclude = "pool")
+@ToString
 public class GraphiteWriter extends BaseOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
 

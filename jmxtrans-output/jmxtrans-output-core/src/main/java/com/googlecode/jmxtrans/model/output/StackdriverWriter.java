@@ -35,6 +35,8 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.util.NumberUtils;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,33 +82,27 @@ import static org.apache.commons.lang.StringUtils.isAlphanumeric;
  * 
  * @author <a href="mailto:eric@stackdriver.com">Eric Kilby</a>
  */
+@EqualsAndHashCode(exclude = "jsonFactory")
+@ToString
 public class StackdriverWriter extends BaseOutputWriter {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger logger = LoggerFactory.getLogger(StackdriverWriter.class);
 	
 	// constant protocol version, this can be updated in future versions for protocol changes
 	public static final int STACKDRIVER_PROTOCOL_VERSION = 1;
 	
 	// defaults for values that can be overridden in settings
 	public static final int DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS = 1000;
-	
 	public static final String DEFAULT_STACKDRIVER_API_URL = "https://custom-gateway.stackdriver.com/v1/custom";
 	
 	// names of settings
 	public static final String SETTING_STACKDRIVER_API_URL = "url";
-	
 	public final static String SETTING_PROXY_PORT = "proxyPort";
-	
 	public final static String SETTING_PROXY_HOST = "proxyHost";
-	
 	public static final String SETTING_STACKDRIVER_API_KEY = "token";
-	
 	public static final String SETTING_SOURCE_INSTANCE = "source";
-	
 	public static final String SETTING_DETECT_INSTANCE = "detectInstance";
-	
 	public static final String SETTING_STACKDRIVER_API_TIMEOUT_IN_MILLIS = "stackdriverApiTimeoutInMillis";
-	
 	public static final String SETTING_PREFIX = "prefix";
 	
 	/**

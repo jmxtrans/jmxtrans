@@ -22,17 +22,23 @@
  */
 package com.googlecode.jmxtrans.model.naming.typename;
 
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang.StringUtils.chomp;
+
+@Immutable
+@EqualsAndHashCode
 @ToString
 public class TypeNameValuesStringBuilder {
 
 	public static final String DEFAULT_SEPARATOR = "_";
 	private static final TypeNameValuesStringBuilder defaultBuilder = new TypeNameValuesStringBuilder();
-	private String separator;
+	private final String separator;
 
 	public TypeNameValuesStringBuilder() {
 		this(DEFAULT_SEPARATOR);
@@ -63,7 +69,7 @@ public class TypeNameValuesStringBuilder {
 				sb.append(separator);
 			}
 		}
-		return org.apache.commons.lang.StringUtils.chomp(sb.toString(), separator);
+		return chomp(sb.toString(), separator);
 	}
 
 }

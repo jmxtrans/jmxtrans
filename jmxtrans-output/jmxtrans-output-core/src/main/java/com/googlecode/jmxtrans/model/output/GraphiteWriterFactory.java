@@ -29,6 +29,8 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.net.InetSocketAddress;
@@ -44,6 +46,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see <a href="http://graphite.wikidot.com/getting-your-data-into-graphite">Getting your data into Graphite</a>
  */
 @ThreadSafe
+@EqualsAndHashCode
+@ToString
 public class GraphiteWriterFactory implements OutputWriterFactory {
 
 	private static final String DEFAULT_ROOT_PREFIX = "servers";

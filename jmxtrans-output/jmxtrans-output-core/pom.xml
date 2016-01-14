@@ -38,8 +38,8 @@
 	<description>This module contains output writers that do not have any special dependencies.</description>
 
 	<properties>
-		<verify.mutationThreshold>16</verify.mutationThreshold>
-		<verify.totalBranchRate>27</verify.totalBranchRate>
+		<verify.mutationThreshold>9</verify.mutationThreshold>
+		<verify.totalBranchRate>12</verify.totalBranchRate>
 		<verify.totalLineRate>36</verify.totalLineRate>
 	</properties>
 
