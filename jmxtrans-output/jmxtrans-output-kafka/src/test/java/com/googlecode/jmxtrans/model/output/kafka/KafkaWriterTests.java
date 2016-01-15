@@ -64,7 +64,7 @@ public class KafkaWriterTests {
 
 		assertThat(message.topic()).isEqualTo("myTopic");
 		assertThat(message.message())
-				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount\"")
+				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.ObjectPendingFinalizationCount\"")
 				.contains("\"value\":\"10\"")
 				.contains("\"timestamp\":0")
 				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
@@ -80,7 +80,7 @@ public class KafkaWriterTests {
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
 		settings.put("topics", "myTopic");
-		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings);
+		settings.put("typeNamesAsTags", true);
+		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", Boolean.FALSE, tags, settings);
 	}
-	
 }
