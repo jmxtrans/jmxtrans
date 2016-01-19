@@ -27,7 +27,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +35,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 public class StatsDWriter2 implements WriterBasedOutputWriter {
 
@@ -87,11 +88,11 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	}
 
 	private boolean isNotValidValue(Object value) {
-		return !(NumberUtils.isNumeric(value) || stringsValuesAsKey);
+		return !(isNumeric(value) || stringsValuesAsKey);
 	}
 
 	private String computeActualValue(Object value) {
-		if (NumberUtils.isNumeric(value)) {
+		if (isNumeric(value)) {
 			return ":" + value.toString();
 		}
 

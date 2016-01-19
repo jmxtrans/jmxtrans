@@ -22,32 +22,31 @@
  */
 package com.googlecode.jmxtrans.util;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static java.lang.Boolean.FALSE;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NumberUtilsTest {
 	@Test
 	public void testIsNumeric() {
-		Assert.assertFalse(isNumeric(null));
-		Assert.assertTrue(isNumeric("")); // this is "true" for historical
+		assertThat(isNumeric(null)).isFalse();
+		assertThat(isNumeric("")).isTrue(); // this is "true" for historical
 		// reasons
-		Assert.assertFalse(isNumeric("  "));
-		Assert.assertTrue(isNumeric("123"));
-		Assert.assertFalse(isNumeric("12 3"));
-		Assert.assertFalse(isNumeric("ab2c"));
-		Assert.assertFalse(isNumeric("12-3"));
-		Assert.assertTrue(isNumeric("12.3"));
-		Assert.assertFalse(isNumeric("12.3.3.3"));
-		Assert.assertTrue(isNumeric(".2"));
-		Assert.assertFalse(isNumeric("."));
-		Assert.assertFalse(isNumeric("3."));
-		Assert.assertTrue(isNumeric(1L));
-		Assert.assertTrue(isNumeric(2));
-		Assert.assertTrue(isNumeric((Object) "3.2"));
-		Assert.assertFalse(isNumeric((Object) "abc"));
-		Assert.assertFalse(isNumeric(FALSE));
+		assertThat(isNumeric("  ")).isFalse();
+		assertThat(isNumeric("123")).isTrue();
+		assertThat(isNumeric("12 3")).isFalse();
+		assertThat(isNumeric("ab2c")).isFalse();
+		assertThat(isNumeric("12-3")).isFalse();
+		assertThat(isNumeric("12.3")).isTrue();
+		assertThat(isNumeric("12.3.3.3")).isFalse();
+		assertThat(isNumeric(".2")).isTrue();
+		assertThat(isNumeric(".")).isFalse();
+		assertThat(isNumeric(1L)).isTrue();
+		assertThat(isNumeric(2)).isTrue();
+		assertThat(isNumeric((Object) "3.2")).isTrue();
+		assertThat(isNumeric((Object) "abc")).isFalse();
+		assertThat(isNumeric(FALSE)).isFalse();
 	}
 }

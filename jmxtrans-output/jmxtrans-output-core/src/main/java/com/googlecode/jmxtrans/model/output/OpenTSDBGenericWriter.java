@@ -36,7 +36,6 @@ import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -50,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * Originally written by Balazs Kossovics <bko@witbe.net>.  Common base class for OpenTSDBWriter and TCollectorWriter.
@@ -243,7 +243,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 		//
 		// Skip any non-numeric values since OpenTSDB only supports numeric metrics.
 		//
-		if (NumberUtils.isNumeric(value)) {
+		if (isNumeric(value)) {
 			StringBuilder resultString = new StringBuilder();
 
 			formatResultString(resultString, metricName, result.getEpoch() / 1000L, value);

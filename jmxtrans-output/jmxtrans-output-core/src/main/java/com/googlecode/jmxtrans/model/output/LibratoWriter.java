@@ -38,12 +38,11 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.naming.StringUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +55,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * This writer is a port of the LibratoWriter from the embedded-jmxtrans
@@ -181,7 +182,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-					if (NumberUtils.isNumeric(values.getValue())) {
+					if (isNumeric(values.getValue())) {
 						g.writeStartObject();
 						g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
 						if (source != null && !source.isEmpty()) {
