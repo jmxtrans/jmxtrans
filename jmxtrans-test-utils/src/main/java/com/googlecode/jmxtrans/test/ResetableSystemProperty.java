@@ -20,19 +20,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.test;
 
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
+import java.io.Closeable;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.TextNode;
+public class ResetableSystemProperty implements Closeable {
 
-public class PlaceholderResolverJsonNodeFactory extends JsonNodeFactory {
+	private final String key;
+	private final String oldValue;
 
-	@Override
-	public TextNode textNode(String text) {
-		return super.textNode(resolveProps(text));
+	private ResetableSystemProperty(String key, String newValue, String oldValue) {
+		this.key = key;
+		this.oldValue = oldValue;
+		System.setProperty(key, newValue);
 	}
 
+	@Override
+	public void close() {
+		if (oldValue != null) {
+			System.setProperty(key, oldValue);
+		} else {
+			System.clearProperty(key);
+		}
+	}
 
+	public static ResetableSystemProperty setSystemProperty(String key, String value) {
+		return new ResetableSystemProperty(key, value, System.getProperty(key));
+	}
 }
