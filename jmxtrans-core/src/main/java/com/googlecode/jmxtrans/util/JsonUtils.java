@@ -22,13 +22,15 @@
  */
 package com.googlecode.jmxtrans.util;
 
+import java.io.File;
+import java.io.IOException;
+
+import javax.annotation.Nonnull;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.googlecode.jmxtrans.model.JmxProcess;
-
-import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.IOException;
 
 public class JsonUtils {
 
@@ -48,7 +50,8 @@ public class JsonUtils {
 	 * tree representation of that json.
 	 */
 	public JmxProcess parseProcess(File file) throws IOException {
-		JmxProcess jmx = mapper.readValue(file, JmxProcess.class);
+		JsonNode jsonNode = mapper.readTree(file);
+		JmxProcess jmx = mapper.treeToValue(jsonNode, JmxProcess.class);
 		jmx.setName(file.getName());
 		return jmx;
 	}

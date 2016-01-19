@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.util;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.io.Closer;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
@@ -31,7 +32,10 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.test.RequiresIO;
+import com.googlecode.jmxtrans.test.ResetableSystemProperty;
 import com.kaching.platform.testing.AllowLocalFileAccess;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -39,6 +43,7 @@ import org.junit.experimental.categories.Category;
 import javax.annotation.Nullable;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -51,21 +56,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JsonUtilsTest {
 
 	private JsonUtils jsonUtils;
+	private Closer closer = Closer.create();
 
 	@Before
 	public void setupJsonUtils() {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 		jsonUtils = injector.getInstance(JsonUtils.class);
+
+		closer.register(ResetableSystemProperty.setSystemProperty("server.port", "1099"));
+		closer.register(ResetableSystemProperty.setSystemProperty("server.attribute", "HeapMemoryUsage"));
+		closer.register(ResetableSystemProperty.setSystemProperty("server.thread", "2"));
+	}
+
+	@After
+	public void cleanUpVariables() throws IOException {
+		closer.close();
 	}
 
 	@Test
-	public void loadingFromFile() throws URISyntaxException, IOException, MalformedObjectNameException {
-		File input = new File(JsonUtilsTest.class.getResource("/example.json").toURI());
+	public void loadingFromSimpleFile() throws URISyntaxException, IOException, MalformedObjectNameException {
+		loadFromFile("example.json");
+	}
+
+	@Test
+	public void loadingFromFileWithVariables() throws Exception {
+		loadFromFile("exampleWithVariables.json");
+	}
+
+	private void loadFromFile(String file) throws URISyntaxException, IOException, MalformedObjectNameException {
+		File input = new File(JsonUtilsTest.class.getResource("/" + file).toURI());
 
 		JmxProcess process = jsonUtils.parseProcess(input);
-		assertThat(process.getName()).isEqualTo("example.json");
+		assertThat(process.getName()).isEqualTo(file);
 
 		Server server = process.getServers().get(0);
+		assertThat(server.getPort()).isEqualTo("1099");
 		assertThat(server.getNumQueryThreads()).isEqualTo(2);
 
 		Optional<Query> queryOptional = from(server.getQueries()).firstMatch(new ByObj("java.lang:type=Memory"));

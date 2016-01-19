@@ -1,0 +1,16 @@
+{
+  "servers" : [ {
+    "port" : "${server.port}",
+    "host" : "w2",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter",
+        "settings" : {
+        }
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "attr" : [ "${server.attribute}", "NonHeapMemoryUsage"]
+    } ],
+    "numQueryThreads" : "${server.thread}"
+  } ]
+}
