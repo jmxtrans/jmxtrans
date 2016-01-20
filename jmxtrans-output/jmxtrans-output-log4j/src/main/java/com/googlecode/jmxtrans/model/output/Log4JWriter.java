@@ -31,13 +31,14 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.naming.StringUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 
 /**
@@ -77,7 +78,7 @@ public class Log4JWriter extends BaseOutputWriter {
 			final Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (final Entry<String, Object> values : resultValues.entrySet()) {
-					if (NumberUtils.isNumeric(values.getValue())) {
+					if (isNumeric(values.getValue())) {
 						String alias;
 						if (server.getAlias() != null) {
 							alias = server.getAlias();

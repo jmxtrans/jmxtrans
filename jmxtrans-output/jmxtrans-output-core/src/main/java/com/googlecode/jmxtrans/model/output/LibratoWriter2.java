@@ -31,7 +31,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
-import com.googlecode.jmxtrans.util.NumberUtils;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -39,6 +38,7 @@ import java.io.Writer;
 import java.util.Map;
 
 import static com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -68,7 +68,7 @@ public class LibratoWriter2 implements WriterBasedOutputWriter {
 				Map<String, Object> resultValues = result.getValues();
 				if (resultValues != null) {
 					for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-						if (NumberUtils.isNumeric(values.getValue())) {
+						if (isNumeric(values.getValue())) {
 							g.writeStartObject();
 							g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
 							if (source != null && !source.isEmpty()) {

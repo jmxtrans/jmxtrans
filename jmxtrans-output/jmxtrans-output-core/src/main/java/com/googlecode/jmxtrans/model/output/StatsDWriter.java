@@ -34,7 +34,6 @@ import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -55,6 +54,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * This output writer sends data to a host/port combination in the StatsD
@@ -193,11 +193,11 @@ public class StatsDWriter extends BaseOutputWriter {
 	}
 
 	private boolean isNotValidValue(Object value){
-		return ! (NumberUtils.isNumeric(value) || stringsValuesAsKey);
+		return ! (isNumeric(value) || stringsValuesAsKey);
 	}
 
 	private String computeActualValue(Object value){
-		if(NumberUtils.isNumeric(value)){
+		if(isNumeric(value)){
 			return ":" + value.toString();
 		}
 

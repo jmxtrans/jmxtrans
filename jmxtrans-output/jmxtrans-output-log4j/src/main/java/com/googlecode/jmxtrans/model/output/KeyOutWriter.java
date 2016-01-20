@@ -31,7 +31,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PatternLayout;
@@ -45,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * Writes out data in the same format as the GraphiteWriter, except to a file
@@ -136,7 +137,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					if (NumberUtils.isNumeric(values.getValue())) {
+					if (isNumeric(values.getValue())) {
 
 						logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
 								+ values.getValue().toString() + delimiter + result.getEpoch());

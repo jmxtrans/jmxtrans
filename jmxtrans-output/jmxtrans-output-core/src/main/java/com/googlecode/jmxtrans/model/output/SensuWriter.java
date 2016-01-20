@@ -33,7 +33,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.slf4j.Logger;
@@ -45,6 +44,8 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * <a href="http://sensuapp.org/docs/0.12/events">Sensu Event Data</a>
@@ -112,7 +113,7 @@ public class SensuWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-					if (NumberUtils.isNumeric(values.getValue())) {
+					if (isNumeric(values.getValue())) {
 						Object value = values.getValue();
 						jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, null)).append(" ")
 								.append(value).append(" ")

@@ -31,7 +31,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -47,6 +46,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 
 /**
@@ -173,7 +173,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					String[] str_array = KeyUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
-					if (NumberUtils.isNumeric(values.getValue()) && filters.contains(str_array[2])) {
+					if (isNumeric(values.getValue()) && filters.contains(str_array[2])) {
 						int threshold_pos = filters.indexOf(str_array[2]);
 						StringBuilder sb = new StringBuilder();
 

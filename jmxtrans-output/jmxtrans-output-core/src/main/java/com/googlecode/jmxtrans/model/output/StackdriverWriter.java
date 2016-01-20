@@ -34,7 +34,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.slf4j.Logger;
@@ -58,6 +57,7 @@ import java.util.Map.Entry;
 
 import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static org.apache.commons.lang.StringUtils.isAlphanumeric;
 
 /**
@@ -291,7 +291,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			Map<String, Object> values = metric.getValues();
 			if (values != null) {
 				for (Entry<String, Object> entry : values.entrySet()) {
-					if (NumberUtils.isNumeric(entry.getValue())) {
+					if (isNumeric(entry.getValue())) {
 						// we have a numeric value, write a value into the message
 						
 						StringBuilder nameBuilder = new StringBuilder();
