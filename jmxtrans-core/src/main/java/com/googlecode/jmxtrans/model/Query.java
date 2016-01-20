@@ -135,7 +135,7 @@ public class Query {
 		try {
 			this.objectName = new ObjectName(obj);
 		} catch (MalformedObjectNameException e) {
-			throw new IllegalArgumentException("Invalid object name: " + obj);
+			throw new IllegalArgumentException("Invalid object name: " + obj, e);
 		}
 		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
 		this.resultAlias = resultAlias;

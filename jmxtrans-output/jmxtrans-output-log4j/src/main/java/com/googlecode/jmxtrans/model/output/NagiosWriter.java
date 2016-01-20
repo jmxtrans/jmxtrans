@@ -137,7 +137,7 @@ public class NagiosWriter extends BaseOutputWriter {
 					logger = initLogger("/dev/null");
 					loggers.put("/dev/null", logger);
 				} catch (IOException e) {
-					throw new ValidationException("Failed to setup log4j", query);
+					throw new ValidationException("Failed to setup log4j", query, e);
 				}
 			}
 
@@ -154,7 +154,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			logger = initLogger(outputFile.getAbsolutePath());
 			loggers.put(outputFile.getAbsolutePath(), logger);
 		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query);
+			throw new ValidationException("Failed to setup log4j", query, e);
 
 		}
 	}

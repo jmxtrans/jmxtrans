@@ -140,7 +140,7 @@ public final class Settings {
 			try {
 				return Integer.parseInt(value);
 			} catch (Exception e) {
-				throw new IllegalArgumentException("Setting '" + key + "=" + value + "' is not an integer");
+				throw new IllegalArgumentException("Setting '" + key + "=" + value + "' is not an integer", e);
 			}
 		} else {
 			return defaultVal;

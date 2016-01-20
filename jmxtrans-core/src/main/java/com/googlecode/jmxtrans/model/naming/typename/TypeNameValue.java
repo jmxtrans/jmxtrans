@@ -110,6 +110,7 @@ public class TypeNameValue {
 			return result;
 		}
 
+		@Override
 		public void remove() {
 			throw new UnsupportedOperationException("remove");
 		}

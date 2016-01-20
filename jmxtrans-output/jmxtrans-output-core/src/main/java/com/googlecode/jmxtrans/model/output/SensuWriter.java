@@ -90,10 +90,12 @@ public class SensuWriter extends BaseOutputWriter {
 		this.handler = firstNonNull(handler, (String) getSettings().get(SETTING_HANDLER), DEFAULT_SENSU_HANDLER);
 	}
 
+	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		logger.info("Start Sensu writer connected to '{}' with handler {}", host, handler);
 	}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', metrics {}", host, query);
 		writeToSensu(server, query, results);

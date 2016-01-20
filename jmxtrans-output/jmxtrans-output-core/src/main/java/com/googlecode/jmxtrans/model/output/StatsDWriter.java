@@ -128,8 +128,8 @@ public class StatsDWriter extends BaseOutputWriter {
 		this.address = new InetSocketAddress(host, port);
 	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
 
 
 	@Override
@@ -167,6 +167,7 @@ public class StatsDWriter extends BaseOutputWriter {
 		}
 	}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 
 		List<String> typeNames = this.getTypeNames();
@@ -227,7 +228,7 @@ public class StatsDWriter extends BaseOutputWriter {
 			return true;
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Could not send metrics to Statsd", e);
 			return false;
 		}
 	}
@@ -249,7 +250,7 @@ public class StatsDWriter extends BaseOutputWriter {
 			return sizeOfBuffer == nbSentBytes;
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Could not send metrics to Statsd", e);
 			return false;
 		}
 	}

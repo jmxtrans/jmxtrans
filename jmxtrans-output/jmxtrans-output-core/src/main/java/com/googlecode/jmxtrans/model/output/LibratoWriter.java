@@ -159,10 +159,12 @@ public class LibratoWriter extends BaseOutputWriter {
 						+ ")";
 	}
 
+	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		logger.info("Start Librato writer connected to '{}', proxy {} with username '{}' ...", url, proxy, username);
 	}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', proxy {} metrics {}", url, proxy, query);
 		writeToLibrato(server, query, results);

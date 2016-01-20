@@ -122,7 +122,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 			logger = initLogger(outputFile);
 			loggers.put(outputFile, logger);
 		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query);
+			throw new ValidationException("Failed to setup log4j", query, e);
 		}
 	}
 

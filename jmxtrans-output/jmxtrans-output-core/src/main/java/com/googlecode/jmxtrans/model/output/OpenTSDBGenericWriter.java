@@ -253,7 +253,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 				addTag(resultString, addTagName, addTagValue);
 			}
 
-			if (getTypeNames().size() > 0) {
+			if (!getTypeNames().isEmpty()) {
 				this.addTypeNamesTags(resultString, result);
 			}
 
@@ -297,9 +297,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 		this.startOutput();
 		for (Result result : results) {
 			for (String resultString : resultParser(result)) {
-				if (isDebugEnabled())
-					System.out.println(resultString);
-
+				log.debug("Sending result: {}", resultString);
 				this.sendOutput(resultString);
 			}
 		}

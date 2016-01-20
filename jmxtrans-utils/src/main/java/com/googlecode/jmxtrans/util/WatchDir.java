@@ -76,7 +76,7 @@ public class WatchDir extends Thread {
 				continue;
 			} catch (ClosedWatchServiceException cwse) {
 				// other thread closed watch service
-				log.debug("Watch service closed, terminating.");
+				log.debug("Watch service closed, terminating.", cwse);
 				break;
 			}
 

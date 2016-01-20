@@ -121,11 +121,11 @@ public class CloudWatchWriter implements OutputWriterFactory {
 						Method m = EC2MetadataUtils.class.getMethod("get" + value.substring(1));
 						value = String.valueOf(m.invoke(null));
 					} catch (NoSuchMethodException e) {
-						log.warn("Could not resolve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+						log.warn("Could not resolve {} via a getters on {}!", value, EC2MetadataUtils.class.getName(), e);
 					} catch (IllegalAccessException e) {
-						log.warn("Could not load {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+						log.warn("Could not load {} via a getters on {}!", value, EC2MetadataUtils.class.getName(), e);
 					} catch (InvocationTargetException e) {
-						log.warn("Could not retrieve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
+						log.warn("Could not retrieve {} via a getters on {}!", value, EC2MetadataUtils.class.getName(), e);
 					}
 				}
 				builder.add(new Dimension().withName(name).withValue(value));
