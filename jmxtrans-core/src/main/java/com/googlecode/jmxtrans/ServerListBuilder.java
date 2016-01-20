@@ -91,9 +91,9 @@ public class ServerListBuilder {
 		private void addQuery(Query query) {
 			if (!queries.containsKey(query)) queries.put(query, new HashSet<OutputWriterFactory>());
 
-			Set<OutputWriterFactory> outputWriters = queries.get(query);
+			Set<OutputWriterFactory> outputWritersForThisQuery = queries.get(query);
 			for (OutputWriterFactory outputWriter : query.getOutputWriters()) {
-				outputWriters.add(singleton(outputWriter));
+				outputWritersForThisQuery.add(singleton(outputWriter));
 			}
 		}
 

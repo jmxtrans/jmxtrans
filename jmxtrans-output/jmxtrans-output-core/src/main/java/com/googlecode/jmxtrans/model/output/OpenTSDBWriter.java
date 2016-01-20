@@ -126,7 +126,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		}
 
 	} catch (ConnectException e) {
-		log.error("Error while connecting to OpenTSDB");
+		log.error("Error while connecting to OpenTSDB", e);
 	} finally {
 		if (writer != null && writer.checkError()) {
 			log.error("Error writing to OpenTSDB, clearing OpenTSDB socket pool");

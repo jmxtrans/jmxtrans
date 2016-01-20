@@ -57,7 +57,7 @@ public class ResultProcessor {
 						try {
 							writer.doWrite(server, query, results);
 						} catch (Exception e) {
-							logger.warn("Could not write results {} of query {} to output writer {}", results, query, writer);
+							logger.warn("Could not write results {} of query {} to output writer {}", results, query, writer, e);
 						}
 					}
 				});

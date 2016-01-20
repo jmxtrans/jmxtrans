@@ -76,9 +76,10 @@ public class RRDWriter extends BaseOutputWriter {
 		checkState(this.templateFile.exists(), "Template file must exist");
 	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDb db = null;
 		try {

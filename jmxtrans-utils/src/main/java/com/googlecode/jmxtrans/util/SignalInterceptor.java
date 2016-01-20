@@ -106,7 +106,7 @@ public abstract class SignalInterceptor {
 			oldHandler = Signal.handle(signal, this);
 		}
 
-		@IgnoreJRERequirement
+		@Override @IgnoreJRERequirement
 		public void handle(Signal sig) {
 			if (interceptor.handle(sig.getName()) && (oldHandler != null)) {
 				oldHandler.handle(sig);

@@ -138,6 +138,7 @@ public class Server implements JmxConnectionProvider {
 	 *
 	 * @deprecated use runPeriodSeconds instead
 	 */
+	@Deprecated
 	@Getter @Nullable private final String cronExpression;
 	@Getter @Nullable private final Integer runPeriodSeconds;
 	/** The number of query threads for this server. */

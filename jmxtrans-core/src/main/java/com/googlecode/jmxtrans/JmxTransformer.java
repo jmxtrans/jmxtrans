@@ -159,6 +159,7 @@ public class JmxTransformer implements WatchedCallback {
 			try {
 				Thread.sleep(5);
 			} catch (Exception e) {
+				log.info("shutting down", e);
 				break;
 			}
 		}
@@ -259,9 +260,9 @@ public class JmxTransformer implements WatchedCallback {
 				for (OutputWriter writer : query.getOutputWriterInstances()) {
 					try {
 						writer.stop();
-						log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
+						log.debug("Stopped writer: {} for query: {}", writer, query);
 					} catch (LifecycleException ex) {
-						log.error("Error stopping writer: " + writer.getClass().getSimpleName() + " for query: " + query);
+						log.error("Error stopping writer: {} for query: {}", writer, query, ex);
 					}
 				}
 			}
@@ -390,14 +391,14 @@ public class JmxTransformer implements WatchedCallback {
 		if ((server.getCronExpression() != null) && CronExpression.isValidExpression(server.getCronExpression())) {
 			trigger = new CronTrigger();
 			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
-			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
 			trigger.setStartTime(new Date());
 		} else {
 			int runPeriod = configuration.getRunPeriod();
 			if (server.getRunPeriodSeconds() != null) runPeriod = server.getRunPeriodSeconds();
 
 			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
-			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
 			minuteTrigger.setStartTime(new Date());
 
 			trigger = minuteTrigger;
@@ -499,6 +500,7 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	protected class ShutdownHook extends Thread {
+		@Override
 		public void run() {
 			try {
 				JmxTransformer.this.stopServices();

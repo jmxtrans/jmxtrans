@@ -66,11 +66,13 @@ public class Log4JWriter extends BaseOutputWriter {
 		this.log = Logger.getLogger("Log4JWriter." + this.logger);
 	}
 
+	@Override
 	public void validateSetup(Server server, final Query query) throws ValidationException {}
 
 	/**
 	 * Set the log context and log
 	 */
+	@Override
 	public void internalWrite(Server server, final Query query, ImmutableList<Result> results) throws Exception {
 		final List<String> typeNames = getTypeNames();
 

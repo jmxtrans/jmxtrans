@@ -48,6 +48,7 @@ public class ProcessQueryThread implements Runnable {
 		this.query = query;
 	}
 
+	@Override
 	public void run() {
 		try {
 			Iterable<Result> results = server.execute(query);

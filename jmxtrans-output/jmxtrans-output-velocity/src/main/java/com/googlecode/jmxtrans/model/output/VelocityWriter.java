@@ -53,10 +53,12 @@ public class VelocityWriter extends BaseOutputWriter {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 	}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		// TODO
 	}

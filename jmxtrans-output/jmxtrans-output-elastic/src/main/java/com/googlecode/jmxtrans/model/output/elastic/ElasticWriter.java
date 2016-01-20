@@ -32,7 +32,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.StringUtils;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
@@ -145,18 +144,6 @@ public class ElasticWriter extends BaseOutputWriter {
 			}
 		}
 	}
-
-	private String createAlias(Server server) {
-		String alias;
-		if (server.getAlias() != null) {
-			alias = server.getAlias();
-		} else {
-			alias = server.getHost() + "_" + server.getPort();
-			alias = StringUtils.cleanupStr(alias);
-		}
-		return alias;
-	}
-
 
 	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws ElasticWriterException, IOException {
 		synchronized (CREATE_MAPPING_LOCK) {

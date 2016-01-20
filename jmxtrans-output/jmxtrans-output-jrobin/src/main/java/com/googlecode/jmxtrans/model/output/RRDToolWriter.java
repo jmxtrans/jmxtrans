@@ -100,8 +100,8 @@ public class RRDToolWriter extends BaseOutputWriter {
 		checkState(this.binaryPath.exists(), "RRD Binary must exist");
 	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
 
 	/**
 	 * rrd datasources must be less than 21 characters in length, so work to
@@ -127,6 +127,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 		return result;
 	}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDef def = getDatabaseTemplateSpec();
 

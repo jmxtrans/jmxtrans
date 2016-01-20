@@ -106,9 +106,10 @@ public class GraphiteWriter extends BaseOutputWriter {
 		this.address = new InetSocketAddress(host, port);
 	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
 		PrintWriter writer = null;
