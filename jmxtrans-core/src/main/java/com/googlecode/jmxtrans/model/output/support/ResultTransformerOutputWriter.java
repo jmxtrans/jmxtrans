@@ -70,10 +70,6 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> implements Ou
 	}
 
 	@Override
-	public void setSettings(Map<String, Object> settings) {
-	}
-
-	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 

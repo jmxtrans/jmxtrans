@@ -51,7 +51,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.ImmutableList.copyOf;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveMap;
+import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
 
 /**
@@ -93,7 +93,7 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 		}
 
 		// resolve and initialize settings first, so we can refer to them to initialize other fields
-		this.settings = resolveMap(MoreObjects.firstNonNull(
+		this.settings = copyOf(MoreObjects.firstNonNull(
 				settings,
 				Collections.<String, Object>emptyMap()));
 
@@ -127,20 +127,6 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 	@Deprecated
 	public Map<String, Object> getSettings() {
 		return settings;
-	}
-
-	/**
-	 * @deprecated Initialize settings in constructor only please.
-	 */
-	@Deprecated
-	public void setSettings(Map<String, Object> settings) {
-		this.settings = resolveMap(settings);
-		if (settings.containsKey(DEBUG)) {
-			this.debugEnabled = getBooleanSetting(settings, DEBUG);
-		}
-		if (settings.containsKey(TYPE_NAMES)) {
-			this.typeNames = copyOf((List<String>) settings.get(TYPE_NAMES));
-		}
 	}
 
 	/**

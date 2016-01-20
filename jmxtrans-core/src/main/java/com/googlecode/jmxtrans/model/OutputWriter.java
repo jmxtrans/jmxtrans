@@ -58,12 +58,6 @@ public interface OutputWriter {
 	Map<String, Object> getSettings();
 
 	/**
-	 * Settings allow you to configure your Writers with whatever they might
-	 * need.
-	 */
-	void setSettings(Map<String, Object> settings);
-
-	/**
 	 * This is run when the object is instantiated. You want to get the settings
 	 * and validate them.
 	 */

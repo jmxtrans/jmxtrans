@@ -48,7 +48,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
@@ -87,7 +86,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.host = resolveProps(MoreObjects.firstNonNull(host, (String) getSettings().get(HOST)));
+		this.host = MoreObjects.firstNonNull(host, (String) getSettings().get(HOST));
 		this.port = MoreObjects.firstNonNull(port, Settings.getIntegerSetting(getSettings(), PORT, null));
 		this.tags = ImmutableMap.copyOf(firstNonNull(
 				tags,

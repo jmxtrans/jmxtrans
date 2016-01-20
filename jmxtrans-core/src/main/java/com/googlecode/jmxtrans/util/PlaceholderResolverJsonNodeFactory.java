@@ -22,16 +22,22 @@
  */
 package com.googlecode.jmxtrans.util;
 
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
-
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.google.inject.Inject;
 
 public class PlaceholderResolverJsonNodeFactory extends JsonNodeFactory {
 
+	private PropertyResolver propertyResolver;
+
+	@Inject
+	public PlaceholderResolverJsonNodeFactory(PropertyResolver propertyResolver) {
+		this.propertyResolver = propertyResolver;
+	}
+
 	@Override
 	public TextNode textNode(String text) {
-		return super.textNode(resolveProps(text));
+		return super.textNode(propertyResolver.resolveProps(text));
 	}
 
 

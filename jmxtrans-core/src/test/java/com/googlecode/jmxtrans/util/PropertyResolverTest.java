@@ -20,35 +20,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.util;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-
-import java.util.Map;
-
-import static java.util.Collections.emptyMap;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
- * 
- * @author Simon Hutchinson <a href="https://github.com/sihutch">github.com/sihutch</a>
- *
- * NO-OP writer
- * 
+ * @author lanyonm
  */
-public abstract class OutputWriterAdapter implements OutputWriter {
+public class PropertyResolverTest {
 
-	@Override
-	public void start() throws LifecycleException {}
+	private PropertyResolver propertyResolver;
 
-	@Override
-	public void stop() throws LifecycleException {}
+	@Before
+	public void setSomeProperties() {
+		System.setProperty("myhost", "w2");
+		System.setProperty("myport", "1099");
 
-	@Override
-	public Map<String, Object> getSettings() {
-		return emptyMap();
+		propertyResolver = new PropertyResolver();
 	}
 
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {}
+	@Test
+	public void testProps() {
+		String s1 = "${xxx} : ${yyy}";
+		String s2 = propertyResolver.resolveProps(s1);
+		Assert.assertEquals(s1, s2);
+
+		s1 = "${myhost} : ${myport}";
+		s2 = propertyResolver.resolveProps(s1);
+		Assert.assertEquals("w2 : 1099", s2);
+
+		s1 = "${myhost} : ${myaltport:2099}";
+		s2 = propertyResolver.resolveProps(s1);
+		Assert.assertEquals("w2 : 2099", s2);
+		s1 = "${myhost}:2099";
+		s2 = propertyResolver.resolveProps(s1);
+		Assert.assertEquals("w2:2099", s2);
+
+	}
+
+	@After
+	public void removeSystemProperties() {
+		System.clearProperty("myhost");
+		System.clearProperty("myport");
+	}
 
 }

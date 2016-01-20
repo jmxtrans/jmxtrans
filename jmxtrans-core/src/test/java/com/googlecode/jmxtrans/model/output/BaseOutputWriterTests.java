@@ -36,12 +36,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static com.googlecode.jmxtrans.model.output.Settings.getIntSetting;
-import static com.googlecode.jmxtrans.model.output.Settings.getIntegerSetting;
-import static com.googlecode.jmxtrans.model.output.Settings.getStringSetting;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -53,46 +48,6 @@ public class BaseOutputWriterTests {
 	public void setUpOutputWriter() {
 		System.setProperty("myHost", "w2");
 		System.setProperty("myPort", "123");
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void cannotHaveNullValueInSettings() {
-		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		Map<String, Object> settings = newHashMap();
-		settings.put("null", null);
-		outputWriter.setSettings(settings);
-	}
-
-	@Test
-	public void propertyResolvedIntegerSettings() {
-		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		Map<String, Object> settings = newHashMap();
-		settings.put("resolvedPort", "${myPort}");
-		outputWriter.setSettings(settings);
-
-		assertThat(getIntegerSetting(outputWriter.getSettings(), "resolvedPort", 0)).isEqualTo(123);
-	}
-
-	@Test
-	public void propertyResolvedIntSettings() {
-		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		Map<String, Object> settings = newHashMap();
-		settings.put("resolvedPort", "${myPort}");
-		outputWriter.setSettings(settings);
-
-		assertThat(getIntSetting(outputWriter.getSettings(), "resolvedPort", 0)).isEqualTo(123);
-	}
-
-	@Test
-	public void propertyResolvedStringSettings() {
-		BaseOutputWriter outputWriter = new TestBaseOuputWriter();
-		Map<String, Object> settings = newHashMap();
-		settings.put("resolvedHost", "${myHost}");
-		settings.put("resolvedPort", "${myPort}");
-		outputWriter.setSettings(settings);
-
-		assertThat(getStringSetting(outputWriter.getSettings(), "resolvedHost", "")).isEqualTo("w2");
-		assertThat(getStringSetting(outputWriter.getSettings(), "resolvedPort", "")).isEqualTo("123");
 	}
 
 	@Test

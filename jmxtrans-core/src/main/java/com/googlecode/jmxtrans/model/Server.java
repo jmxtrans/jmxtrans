@@ -71,7 +71,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static java.util.Arrays.asList;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
@@ -181,13 +180,13 @@ public class Server implements JmxConnectionProvider {
 		checkArgument(!(pid != null && (url != null || host != null)),
 				"You must provide the pid OR the url, not both");
 
-		this.alias = resolveProps(alias);
-		this.pid = resolveProps(pid);
-		this.port = resolveProps(port);
-		this.username = resolveProps(username);
-		this.password = resolveProps(password);
+		this.alias = alias;
+		this.pid = pid;
+		this.port = port;
+		this.username = username;
+		this.password = password;
 		this.protocolProviderPackages = protocolProviderPackages;
-		this.url = resolveProps(url);
+		this.url = url;
 		this.cronExpression = cronExpression;
 		if (!isNullOrEmpty(cronExpression)) {
 			logger.warn("cronExpression is deprecated, please use runPeriodSeconds instead.");
@@ -208,7 +207,7 @@ public class Server implements JmxConnectionProvider {
 			}
 		}
 		else {
-			this.host = resolveProps(host);
+			this.host = host;
 		}
 		this.pool = pool;
 		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));

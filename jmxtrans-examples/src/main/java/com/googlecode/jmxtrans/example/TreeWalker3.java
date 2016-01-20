@@ -143,9 +143,6 @@ public class TreeWalker3 {
 		}
 
 		@Override
-		public void setSettings(Map<String, Object> settings) {}
-
-		@Override
 		public void validateSetup(Server server, Query query) throws ValidationException {}
 
 		@Override

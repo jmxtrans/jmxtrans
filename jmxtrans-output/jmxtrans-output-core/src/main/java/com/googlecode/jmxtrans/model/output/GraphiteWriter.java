@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
@@ -85,12 +84,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		log.warn("GraphiteWriter is deprecated. Please use GraphiteWriterFactory instead.");
-		this.rootPrefix = resolveProps(
+		this.rootPrefix =
 				firstNonNull(
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX));
-		host = resolveProps(host);
+						DEFAULT_ROOT_PREFIX);
 		if (host == null) {
 			host = (String) getSettings().get(HOST);
 		}
