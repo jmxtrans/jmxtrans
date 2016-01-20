@@ -22,32 +22,22 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import java.io.IOException;
-
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
-
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InOrder;
 
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author lanyonm
@@ -138,62 +128,6 @@ public class ServerTests {
 		assertNotEquals(s1, s2);
 	}
 
-	@Test
-	public void testServerVariableHandling() {
-		try{
-			// we add some variables to the System.properties list 
-		
-			String alias = "somealias";
-			String pid = "123";
-			String port = "1234";
-			String host = "localhost.local";
-			String username = "acme";
-			String password = "password";
-			String url = "service:jmx:remoting-jms://amce.local:1234";
-			
-			System.setProperty("myalias", alias);
-			System.setProperty("mypid", pid);
-			System.setProperty("myport", port);
-			System.setProperty("myhost", host);
-			System.setProperty("myusername",username);
-			System.setProperty("mypassword", password);
-			System.setProperty("myurl", url);
-			
-			Server serverFromSystemProperties = Server.builder()
-						.setAlias("${myalias}")
-						.setPort("${myport}")
-						.setHost("${myhost}")
-						.setUsername("${myusername}")
-						.setPassword("${mypassword}")
-						.setUrl("${myurl}")
-						.build();
-			Server serverFromDirectParameters = Server.builder()
-						.setAlias(alias)
-						.setPort(port)
-						.setHost(host)
-						.setUsername(username)
-						.setPassword(password)
-						.setUrl(url)
-						.build();
-			assertEquals(serverFromSystemProperties.hashCode(), serverFromDirectParameters.hashCode());
-
-			Server serverPid = Server.builder()
-				.setPid("${mypid}")
-				.build();
-
-			assertEquals("123", serverPid.getPid());
-			
-		}finally{
-			System.clearProperty("myalias");
-			System.clearProperty("mypid");
-			System.clearProperty("myport");
-			System.clearProperty("myhost");
-			System.clearProperty("myusername");
-			System.clearProperty("myusername");
-			System.clearProperty("myurl");
-		}
-	}
-	
 	@Test
 	public void testHashCode() {
 		Server s1 = Server.builder()

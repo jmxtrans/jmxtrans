@@ -68,7 +68,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
 import static java.util.Arrays.asList;
 
 /**
@@ -137,10 +136,10 @@ public class Query {
 		} catch (MalformedObjectNameException e) {
 			throw new IllegalArgumentException("Invalid object name: " + obj, e);
 		}
-		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
+		this.attr = copyOf(firstNonNull(attr, Collections.<String>emptyList()));
 		this.resultAlias = resultAlias;
 		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
-		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
+		this.keys = copyOf(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
 		this.useAllTypeNames = useAllTypeNames;
 		this.outputWriters = outputWriters == null ? ImmutableList.<OutputWriterFactory>of() : copyOf(outputWriters);

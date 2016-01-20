@@ -45,8 +45,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+import static com.google.common.collect.ImmutableList.copyOf;
 
 
 /**
@@ -88,11 +88,11 @@ public class NagiosWriter extends BaseOutputWriter {
 			@JsonProperty("suffix") String suffix,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.filters = resolveList(firstNonNull(
+		this.filters = copyOf(firstNonNull(
 				filters,
 				(List<String>) getSettings().get(FILTERS),
 				ImmutableList.<String>of()));
-		this.thresholds = resolveList(firstNonNull(
+		this.thresholds = copyOf(firstNonNull(
 				thresholds,
 				(List<String>) getSettings().get(THRESHOLDS),
 				ImmutableList.<String>of()));

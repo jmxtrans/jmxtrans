@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
@@ -88,11 +87,10 @@ public class ElasticWriter extends BaseOutputWriter {
 
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 
-		this.rootPrefix = resolveProps(
-				firstNonNull(
+		this.rootPrefix = firstNonNull(
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX));		
+						DEFAULT_ROOT_PREFIX);
 
 		this.connectionUrl = connectionUrl;
 		this.indexName = this.rootPrefix + "_jmx-entries";

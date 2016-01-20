@@ -51,7 +51,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import static com.fasterxml.jackson.core.JsonEncoding.UTF8;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static java.util.Arrays.asList;
@@ -88,11 +87,10 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("tags") Map<String, String> tags,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.rootPrefix = resolveProps(
-				firstNonNull(
+		this.rootPrefix = firstNonNull(
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX));
+						DEFAULT_ROOT_PREFIX);
 		// Setting all the required Kafka Properties
 		Properties kafkaProperties =  new Properties();
 		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));

@@ -26,10 +26,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +38,14 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 
 /**
  * OpenTSDBWriter which directly sends
@@ -75,7 +74,6 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
 		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
-		host = resolveProps(host);
 		if (host == null) {
 			host = (String) getSettings().get(HOST);
 		}
