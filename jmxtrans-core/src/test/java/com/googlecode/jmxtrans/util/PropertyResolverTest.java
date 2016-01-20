@@ -22,10 +22,14 @@
  */
 package com.googlecode.jmxtrans.util;
 
+import com.google.common.io.Closer;
+import com.googlecode.jmxtrans.test.ResetableSystemProperty;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
 
 /**
  * @author lanyonm
@@ -34,10 +38,13 @@ public class PropertyResolverTest {
 
 	private PropertyResolver propertyResolver;
 
+	private Closer closer = Closer.create();
+
 	@Before
 	public void setSomeProperties() {
-		System.setProperty("myhost", "w2");
-		System.setProperty("myport", "1099");
+
+		closer.register(ResetableSystemProperty.setSystemProperty("myhost", "w2"));
+		closer.register(ResetableSystemProperty.setSystemProperty("myport", "1099"));
 
 		propertyResolver = new PropertyResolver();
 	}
@@ -62,9 +69,8 @@ public class PropertyResolverTest {
 	}
 
 	@After
-	public void removeSystemProperties() {
-		System.clearProperty("myhost");
-		System.clearProperty("myport");
+	public void removeSystemProperties() throws IOException {
+		closer.close();
 	}
 
 }
