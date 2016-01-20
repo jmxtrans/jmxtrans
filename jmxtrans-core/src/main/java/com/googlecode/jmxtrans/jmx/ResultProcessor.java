@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.collect.Iterables.concat;
@@ -48,18 +49,21 @@ public class ResultProcessor {
 	}
 
 	public void submit(@Nonnull final Server server, @Nonnull final Query query, @Nonnull final Iterable<Result> results) {
-
 		for (final OutputWriter writer : concat(query.getOutputWriterInstances(), server.getOutputWriters())) {
-			executorService.submit(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						writer.doWrite(server, query, results);
-					} catch (Exception e) {
-						logger.warn("Could not write result {} of query {} to output writer {}", results, query, writer);
+			try {
+				executorService.submit(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							writer.doWrite(server, query, results);
+						} catch (Exception e) {
+							logger.warn("Could not write results {} of query {} to output writer {}", results, query, writer);
+						}
 					}
-				}
-			});
+				});
+			} catch (RejectedExecutionException ree) {
+				logger.error("Could not submit results {} of query {} to output writer {}. You could try to size the 'resultProcessorExecutor' to a larger size.", results, query, writer, ree);
+			}
 		}
 	}
 }

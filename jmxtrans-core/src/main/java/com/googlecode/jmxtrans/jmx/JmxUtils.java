@@ -24,10 +24,13 @@ package com.googlecode.jmxtrans.jmx;
 
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -36,6 +39,8 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author jon
  */
 public class JmxUtils {
+
+	@Nonnull private static final Logger logger = LoggerFactory.getLogger(JmxUtils.class);
 
 	@Nonnull private final ThreadPoolExecutor executorService;
 	@Nonnull private final ResultProcessor resultProcessor;
@@ -51,7 +56,11 @@ public class JmxUtils {
 	public void processServer(Server server) throws Exception {
 		for (Query query : server.getQueries()) {
 			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			executorService.submit(pqt);
+			try {
+				executorService.submit(pqt);
+			} catch (RejectedExecutionException ree) {
+				logger.error("Could not submit query {}. You could try to size the 'queryProcessorExecutor' to a larger size.", pqt, ree);
+			}
 		}
 	}
 }

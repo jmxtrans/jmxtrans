@@ -25,11 +25,15 @@ package com.googlecode.jmxtrans.jmx;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
 
+@ThreadSafe
+@ToString(exclude = {"resultProcessor"})
 public class ProcessQueryThread implements Runnable {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
