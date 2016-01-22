@@ -20,35 +20,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.naming;
+package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.NamingStrategy;
+import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
+import com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatter;
 
-/**
- * Strategy for naming metrics, tags, and the like given a result.
- */
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
+import java.io.IOException;
+import java.io.Writer;
 
-@EqualsAndHashCode
-public class ClassAttributeNamingStrategy implements NamingStrategy {
-	@Getter @Setter protected String delimiter = ".";
+@ThreadSafe
+public class OpenTSDBWriter2 implements WriterBasedOutputWriter {
+
+	private final OpenTSDBMessageFormatter messageFormatter;
+
+	public OpenTSDBWriter2(OpenTSDBMessageFormatter messageFormatter) {
+		this.messageFormatter = messageFormatter;
+	}
 
 	@Override
-	public String formatName(Result result) {
-		StringBuilder formatted = new StringBuilder();
-		String attName = result.getAttributeName();
-		String className = result.getKeyAlias();
+	public void write(@Nonnull final Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 
-		if (className == null)
-			className = result.getClassName();
-
-		formatted.append(className);
-		formatted.append(delimiter);
-		formatted.append(attName);
-
-		return formatted.toString();
+		for(String resultString : messageFormatter.formatResults(results)) {
+			writer.write("put " + resultString + "\n");
+		}
 	}
+
+
 }

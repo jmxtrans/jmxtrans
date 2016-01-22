@@ -74,6 +74,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
 		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
+		log.warn("OpenTSDBWriter is deprecated. Please use OpenTSDBWriterFactory instead.");
 		if (host == null) {
 			host = (String) getSettings().get(HOST);
 		}
@@ -112,15 +113,9 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		socket = pool.borrowObject(address);
 		writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
 
-		for (Result result : results) {
-			log.debug("Query result: {}", result);
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (String resultString : resultParser(result)) {
-					log.debug("OpenTSDB Message: {}", resultString);
-					writer.write("put " + resultString + "\n");
-				}
-			}
+		for (String formattedResult : messageFormatter.formatResults(results)) {
+			log.debug("OpenTSDB Message: {}", formattedResult);
+			writer.write("put " + formattedResult + "\n");
 		}
 
 	} catch (ConnectException e) {
