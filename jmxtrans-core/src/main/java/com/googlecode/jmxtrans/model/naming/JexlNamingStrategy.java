@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model.naming;
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
@@ -55,6 +56,8 @@ import java.util.Map;
  * <dd>the full Result object.</dd>
  * </dl>
  */
+
+@EqualsAndHashCode
 public class JexlNamingStrategy implements NamingStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(JexlNamingStrategy.class);
 
