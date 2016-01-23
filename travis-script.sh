@@ -28,6 +28,17 @@ MVN_SETTINGS=${HOME}/travis/settings.xml
 
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   if [ "$TRAVIS_BRANCH" == "master" ]; then
+    # decrypt SSH key so we can push maven to gh-pages
+    gpg --homedir ${HOME}/travis \
+        --output ${HOME}/.ssh/id_rsa \
+        --passphrase ${GPG_PASSPHRASE} \
+        --decrypt ${HOME}/travis/id_rsa.gpg
+    chmod 600 ${HOME}/.ssh/id_rsa
+
+    # configure our git identity
+    git config --global user.email "travis@jmxtrans.org"
+    git config --global user.name "JmxTrans travis build"
+
     echo "Building master"
     mvn deploy --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb
   elif [ "$TRAVIS_BRANCH" == "release" ]; then
