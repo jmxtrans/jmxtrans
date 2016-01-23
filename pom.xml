@@ -834,6 +834,10 @@
 					<configuration>
 						<checkoutDirectory>${session.executionRootDirectory}/target/scmpublish-checkout/</checkoutDirectory>
 						<content>${session.executionRootDirectory}/target/staging/</content>
+						<skipDeletedFiles>true</skipDeletedFiles>
+						<ignorePathsToDelete>
+							<ignorePathsToDelete>%regex[.*]</ignorePathsToDelete>
+						</ignorePathsToDelete>
 						<providerImplementations>
 							<git>jgit</git>
 						</providerImplementations>
