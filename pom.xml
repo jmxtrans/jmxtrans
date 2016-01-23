@@ -124,7 +124,7 @@
 		</snapshotRepository>
 		<site>
 			<id>github</id>
-			<url>scm:git:https://github.com/jmxtrans/jmxtrans</url>
+			<url>scm:git:git@github.com:jmxtrans/jmxtrans.git</url>
 		</site>
 	</distributionManagement>
 	<properties>
