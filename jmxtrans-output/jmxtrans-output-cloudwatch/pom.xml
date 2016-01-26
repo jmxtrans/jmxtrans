@@ -38,9 +38,9 @@
 	<description>This module contains output writers based on CloudWatch (AWS).</description>
 
 	<properties>
-		<verify.mutationThreshold>45</verify.mutationThreshold>
-		<verify.totalBranchRate>66</verify.totalBranchRate>
-		<verify.totalLineRate>80</verify.totalLineRate>
+		<verify.mutationThreshold>49</verify.mutationThreshold>
+		<verify.totalBranchRate>68</verify.totalBranchRate>
+		<verify.totalLineRate>63</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -89,6 +89,11 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-test-utils</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
