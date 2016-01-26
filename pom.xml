@@ -598,7 +598,8 @@
 				<plugin>
 					<groupId>com.github.ekryd.sortpom</groupId>
 					<artifactId>sortpom-maven-plugin</artifactId>
-					<version>2.5.0</version>
+					<!-- version 2.5.0 is compiled with Java 8 as target class format -->
+					<version>2.4.0</version>
 					<configuration>
 						<predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
 						<sortDependencies>scope,groupId,artifactId</sortDependencies>
