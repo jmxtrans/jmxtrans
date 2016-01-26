@@ -104,7 +104,7 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 
 				logger.info("");
 			} catch (Throwable t) {
-				closer.rethrow(t);
+				throw closer.rethrow(t);
 			} finally {
 				closer.close();
 			}

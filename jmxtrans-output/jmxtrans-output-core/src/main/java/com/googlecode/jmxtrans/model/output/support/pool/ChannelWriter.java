@@ -33,7 +33,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 
 @ThreadSafe
-class ChannelWriter extends Writer {
+public class ChannelWriter extends Writer {
 	@Nonnull private final Charset charset;
 	@Nonnull private final ByteBuffer buffer;
 	@Nonnull private final WritableByteChannel channel;
@@ -81,7 +81,7 @@ class ChannelWriter extends Writer {
 			closer.register(channel);
 			flush();
 		} catch (Throwable t) {
-			closer.rethrow(t);
+			throw closer.rethrow(t);
 		} finally {
 			closer.close();
 		}
