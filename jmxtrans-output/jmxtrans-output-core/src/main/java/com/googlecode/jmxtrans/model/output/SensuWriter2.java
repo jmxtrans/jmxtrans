@@ -63,7 +63,7 @@ public class SensuWriter2 implements WriterBasedOutputWriter {
 			g.writeEndObject();
 			g.flush();
 		} catch (Throwable t) {
-			closer.rethrow(t);
+			throw closer.rethrow(t);
 		} finally {
 			closer.close();
 		}

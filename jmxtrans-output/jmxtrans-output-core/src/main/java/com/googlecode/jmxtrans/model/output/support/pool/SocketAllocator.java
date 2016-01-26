@@ -66,7 +66,7 @@ public class SocketAllocator implements Allocator<SocketPoolable> {
 			closer.register(poolable.getSocket());
 			closer.register(poolable.getWriter());
 		} catch (Throwable t) {
-			closer.rethrow(t);
+			throw closer.rethrow(t);
 		} finally {
 			closer.close();
 		}

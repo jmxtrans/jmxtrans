@@ -28,7 +28,7 @@ class Counter implements CounterMXBean {
 	private final AtomicInteger counter = new AtomicInteger();
 	private final String name;
 
-	public Counter(String name) {
+	Counter(String name) {
 		this.name = name;
 	}
 

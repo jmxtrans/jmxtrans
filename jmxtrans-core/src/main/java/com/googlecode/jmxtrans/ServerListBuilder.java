@@ -78,7 +78,7 @@ public class ServerListBuilder {
 		@Nonnull private final Map<Query, Set<OutputWriterFactory>> queries = newHashMap();
 		@Nonnull private final Set<OutputWriterFactory> temporaryOutputWriters = newHashSet();
 
-		public TemporaryServer(Server server) {
+		TemporaryServer(Server server) {
 			this.server = server;
 		}
 

@@ -70,7 +70,6 @@
 			-->
 			<groupId>org.jboss.remoting3</groupId>
 			<artifactId>remoting-jmx</artifactId>
-			<version>1.0.1.Final</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -457,7 +456,6 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.4</version>
 						<executions>
 							<execution>
 								<goals>
