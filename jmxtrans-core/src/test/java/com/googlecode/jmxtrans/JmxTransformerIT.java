@@ -46,8 +46,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @AllowDNSResolution
 @AllowLocalFileAccess(paths = "*")
-@Category({RequiresIO.class})
-public class JmxTransformerTest {
+@Category({IntegrationTest.class, RequiresIO.class})
+public class JmxTransformerIT {
 	@Rule public OutputCapture output = new OutputCapture();
 	@Rule public MonitorableApp app = new MonitorableApp(12345);
 	private JmxTransformer jmxTransformer;
