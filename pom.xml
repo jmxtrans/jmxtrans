@@ -783,7 +783,6 @@
 					<version>2.19.1</version>
 					<configuration>
 						<groups>com.googlecode.jmxtrans.test.IntegrationTest</groups>
-						<argLine>-Djava.security.manager=com.kaching.platform.testing.LessIOSecurityManager</argLine>
 					</configuration>
 					<executions>
 						<execution>
