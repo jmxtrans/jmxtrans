@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.model;
 
 import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -189,7 +190,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingOk() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<Server, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")
@@ -220,7 +221,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingSkippedOnError() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<Server, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")

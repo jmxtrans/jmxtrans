@@ -46,8 +46,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @AllowDNSResolution
 @AllowLocalFileAccess(paths = "*")
-@Category({IntegrationTest.class, RequiresIO.class})
-public class JmxTransformerIT {
+@Category({RequiresIO.class})
+public class JmxTransformerTest {
 	@Rule public OutputCapture output = new OutputCapture();
 	@Rule public MonitorableApp app = new MonitorableApp(12345);
 	private JmxTransformer jmxTransformer;
@@ -68,8 +68,8 @@ public class JmxTransformerIT {
 
 	@Test
 	public void metricsAreSentToStdout() throws Exception {
-		await().atMost(2, SECONDS).until(output.stdoutHasLineContaining("Value=1"));
-		await().atMost(2, SECONDS).until(output.stdoutHasLineContaining("Value=2"));
+		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=1"));
+		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=2"));
 	}
 
 	@After
