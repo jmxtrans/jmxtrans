@@ -461,12 +461,6 @@
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.jboss.remoting3</groupId>
-				<artifactId>remoting-jmx</artifactId>
-				<version>1.0.1.Final</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
 				<!--
 					There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
 					identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
@@ -785,6 +779,22 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.19.1</version>
+					<configuration>
+						<groups>com.googlecode.jmxtrans.test.IntegrationTest</groups>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>integration-test</goal>
+								<goal>verify</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
 					<version>1.6</version>
 					<executions>
@@ -1071,6 +1081,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

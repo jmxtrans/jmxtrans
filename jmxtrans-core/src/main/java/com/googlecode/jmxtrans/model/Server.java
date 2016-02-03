@@ -33,6 +33,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.sun.tools.attach.VirtualMachine;
@@ -41,7 +42,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,7 +155,7 @@ public class Server implements JmxConnectionProvider {
 
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
 
-	private final GenericKeyedObjectPool<Server, JMXConnection> pool;
+	private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
 
 	@JsonCreator
@@ -173,7 +174,7 @@ public class Server implements JmxConnectionProvider {
 			@JsonProperty("local") boolean local,
 			@JsonProperty("queries") List<Query> queries,
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
-			@JacksonInject GenericKeyedObjectPool<Server, JMXConnection> pool) {
+			@JacksonInject @Named("mbeanPool") KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
 
 		checkArgument(pid != null || url != null || host != null,
 				"You must provide the pid or the [url|host and port]");
@@ -427,7 +428,7 @@ public class Server implements JmxConnectionProvider {
 		@Setter private boolean local;
 		private final List<OutputWriterFactory> outputWriters = new ArrayList<OutputWriterFactory>();
 		private final List<Query> queries = new ArrayList<Query>();
-		@Setter private GenericKeyedObjectPool<Server, JMXConnection> pool;
+		@Setter private KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 
 		private Builder() {}
 

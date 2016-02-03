@@ -35,13 +35,13 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
 import com.googlecode.jmxtrans.connections.SocketFactory;
-import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
-import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.quartz.Scheduler;
@@ -83,7 +83,7 @@ public class JmxTransModule extends AbstractModule {
 				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName()));
 		bind(new TypeLiteral<GenericKeyedObjectPool<SocketAddress, DatagramSocket>>(){})
 				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName()));
-		bind(new TypeLiteral<GenericKeyedObjectPool<Server, JMXConnection>>(){})
+		bind(KeyedObjectPool.class).annotatedWith(Names.named("mbeanPool"))
 				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName()));
 	}
 
@@ -148,7 +148,7 @@ public class JmxTransModule extends AbstractModule {
 				.build();
 	}
 
-	private <K, V> GenericKeyedObjectPool getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName) {
+	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName) {
 		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<K, V>(factory);
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);

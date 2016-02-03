@@ -68,8 +68,8 @@ public class JmxTransformerIT {
 
 	@Test
 	public void metricsAreSentToStdout() throws Exception {
-		await().atMost(2, SECONDS).until(output.stdoutHasLineContaining("Value=1"));
-		await().atMost(2, SECONDS).until(output.stdoutHasLineContaining("Value=2"));
+		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=1"));
+		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=2"));
 	}
 
 	@After
