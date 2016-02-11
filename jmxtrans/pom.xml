@@ -332,15 +332,9 @@
 							<preinstallScriptlet>
 								<script>if [ $1 = 1 ]; then
 									getent group ${package.user} &gt;/dev/null || groupadd -r ${package.user}
-									OS_RELEASE=${dollar.sign}(lsb_release -sd)
-									REDHAT_RELEASE=${dollar.sign}(lsb_release -sr|cut -d"." -f1)
-									if [[ ${dollar.sign}{OS_RELEASE} == *"Red Hat"* &amp;&amp; ${dollar.sign}{REDHAT_RELEASE} -le 5 ]]; then
-										getent passwd ${package.user} &gt;/dev/null || useradd -c "${project.name}" -s /bin/sh -r \
-										-d ${package.install.dir} -g ${package.user} \
-										${package.user}
-									else
-										getent passwd ${package.user} &gt;/dev/null || useradd -r -g ${package.user} -d ${package.install.dir} -s /bin/sh -c "${project.name}" ${package.user}
-									fi
+									getent passwd ${package.user} &gt;/dev/null || useradd -c "${project.name}" -s /bin/sh -r \
+									-d ${package.install.dir} -g ${package.user} \
+									${package.user}
 								fi</script>
 							</preinstallScriptlet>
 							<postinstallScriptlet>
@@ -354,8 +348,7 @@
 									fi</script>
 							</preremoveScriptlet>
 							<requires>
-								<require>java</require>
-								<require>/usr/bin/lsb_release</require>
+								<require>java >= 1.7</require>
 							</requires>
 							<mappings>
 								<mapping>
