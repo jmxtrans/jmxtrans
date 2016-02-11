@@ -320,6 +320,8 @@
 						<artifactId>rpm-maven-plugin</artifactId>
 						<configuration>
 							<group>Applications/Communications</group>
+							<needarch>noarch</needarch>
+							<targetOS>linux</targetOS>
 							<defineStatements>
 								<!--
 									The package contains Tanukisoft libs for multiple architectures. Multi-arch package
@@ -362,6 +364,8 @@
 								<mapping>
 									<directory>${package.install.dir}/bin</directory>
 									<filemode>755</filemode>
+									<username>${package.user}</username>
+									<groupname>${package.group}</groupname>
 									<sources>
 										<source>
 											<location>${jsw.dir}/bin</location>
@@ -391,6 +395,8 @@
 									<directory>/usr/bin</directory>
 									<directoryIncluded>false</directoryIncluded>
 									<filemode>755</filemode>
+									<username>${package.user}</username>
+									<groupname>${package.group}</groupname>
 									<sources>
 										<source>
 											<location>${project.basedir}/bin/</location>
