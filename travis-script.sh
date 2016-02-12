@@ -74,9 +74,9 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     fi
   else
     echo "Building feature branch"
-    mvn verify --settings ${MVN_SETTINGS} -e -B -V -PwithMutationTests,rpm,deb,\!gpg
+    mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb
   fi
 else
   echo "Building pull request"
-  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests
+  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb
 fi
