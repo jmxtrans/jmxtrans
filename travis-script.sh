@@ -78,5 +78,5 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   fi
 else
   echo "Building pull request"
-  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb
+  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb,\!gpg -Dgpg.passphraseServerId=
 fi
