@@ -45,7 +45,7 @@
             <plugin>
                 <groupId>org.jolokia</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.13.8</version>
+                <version>0.14.0-SNAPSHOT</version>
                 <configuration>
                     <showLogs>true</showLogs>
                     <images/>
