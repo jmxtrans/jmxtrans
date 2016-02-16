@@ -108,6 +108,7 @@
 
                                         <from>ubuntu:14.04.3</from>
                                         <runCmds>
+                                            <run>apt-get clean</run>
                                             <run>apt-get update</run>
                                             <run>apt-get -y install openjdk-7-jre</run>
                                         </runCmds>
@@ -137,6 +138,7 @@
 
                                         <from>ubuntu:12.04.5</from>
                                         <runCmds>
+                                            <run>apt-get clean</run>
                                             <run>apt-get update</run>
                                             <run>apt-get -y install openjdk-7-jre</run>
                                         </runCmds>
@@ -166,6 +168,7 @@
 
                                         <from>debian:8.3</from>
                                         <runCmds>
+                                            <run>apt-get clean</run>
                                             <run>apt-get update</run>
                                             <run>apt-get -y install openjdk-7-jre</run>
                                         </runCmds>
@@ -195,6 +198,7 @@
 
                                         <from>debian:7.9</from>
                                         <runCmds>
+                                            <run>apt-get clean</run>
                                             <run>apt-get update</run>
                                             <run>apt-get -y install openjdk-7-jre</run>
                                         </runCmds>
