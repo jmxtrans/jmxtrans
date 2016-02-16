@@ -68,6 +68,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <!-- There is no Java code in this project, let's skip PIT -->
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
