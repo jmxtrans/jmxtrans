@@ -35,6 +35,7 @@
     <artifactId>jmxtrans-docker-test</artifactId>
 
     <properties>
+        <docker.skip>true</docker.skip>
         <docker.verbose>true</docker.verbose>
         <verification.message>installation verified</verification.message>
         <verification.wait.time>30000</verification.wait.time>
