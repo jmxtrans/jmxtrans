@@ -123,7 +123,7 @@
                                         </runCmds>
                                     </build>
                                     <run>
-                                Move         <cmd>
+                                        <cmd>
                                             <exec>
                                                 <arg>/bin/bash</arg>
                                                 <arg>-c</arg>
