@@ -198,12 +198,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>debian:8.3</from>
-                                        <runCmds>
-                                            <run>apt-get clean</run>
-                                            <run>apt-get update</run>
-                                            <run>apt-get -y install openjdk-7-jre</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:debian8.3-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -228,12 +223,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>debian:7.9</from>
-                                        <runCmds>
-                                            <run>apt-get clean</run>
-                                            <run>apt-get update</run>
-                                            <run>apt-get -y install openjdk-7-jre</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:debian7.9-0</from>
                                     </build>
                                     <run>
                                         <cmd>
