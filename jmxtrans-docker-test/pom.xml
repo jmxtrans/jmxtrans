@@ -44,9 +44,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.jolokia</groupId>
+                <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.14.0-SNAPSHOT</version>
                 <configuration>
                     <showLogs>true</showLogs>
                     <images/>
@@ -102,7 +101,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.jolokia</groupId>
+                        <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
 
                         <configuration>
@@ -115,12 +114,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>ubuntu:14.04.3</from>
-                                        <runCmds>
-                                            <run>apt-get clean</run>
-                                            <run>apt-get update</run>
-                                            <run>apt-get -y install openjdk-7-jre</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:ubuntu14.04.3-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -145,12 +139,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>ubuntu:12.04.5</from>
-                                        <runCmds>
-                                            <run>apt-get clean</run>
-                                            <run>apt-get update</run>
-                                            <run>apt-get -y install openjdk-7-jre</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:ubuntu12.04.5-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -195,7 +184,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.jolokia</groupId>
+                        <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
 
                         <configuration>
@@ -288,7 +277,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.jolokia</groupId>
+                        <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
 
                         <configuration>
@@ -302,10 +291,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>centos:7</from>
-                                        <runCmds>
-                                            <run>yum -y install java</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:centos7-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -330,10 +316,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>centos:6.7</from>
-                                        <runCmds>
-                                            <run>yum -y install java</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:centos6.7-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -358,10 +341,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>centos:6.6</from>
-                                        <runCmds>
-                                            <run>yum -y install java</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:centos6.6-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -386,10 +366,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>centos:5.11</from>
-                                        <runCmds>
-                                            <run>yum -y install java7</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:centos5.11-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -414,10 +391,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>opensuse:42.1</from>
-                                        <runCmds>
-                                            <run>zypper install -ly java-1_8_0-openjdk</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:opensuse42.1-0</from>
                                     </build>
                                     <run>
                                         <cmd>
@@ -434,7 +408,7 @@
                                     </run>
                                 </image>
 
-                                <image>
+                                <image  >
                                     <name>opensuse13.2/${project.artifactId}:${project.version}</name>
                                     <build>
                                         <assembly>
@@ -442,10 +416,7 @@
                                             <basedir>/</basedir>
                                         </assembly>
 
-                                        <from>opensuse:13.2</from>
-                                        <runCmds>
-                                            <run>zypper install -ly java-1_8_0-openjdk</run>
-                                        </runCmds>
+                                        <from>jmxtrans/testing:opensuse13.2-0</from>
                                     </build>
                                     <run>
                                         <cmd>
