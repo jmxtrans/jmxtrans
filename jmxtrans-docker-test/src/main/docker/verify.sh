@@ -22,8 +22,16 @@
 # THE SOFTWARE.
 #
 
-until grep -q "SpecName=Java Virtual Machine Specification" /var/log/jmxtrans/jmxtrans.log; do
+LOGFILE=/var/log/jmxtrans/jmxtrans.log
+
+echo "$(date) - Looking for log message..."
+
+until grep -q "SpecName=Java Virtual Machine Specification" $LOGFILE; do
+  echo "$(date) - Log contents:"
+  cat $LOGFILE
+  echo "----"
   sleep 1
 done
 
+echo "$(date) - Found log message"
 echo "${verification.message}"
