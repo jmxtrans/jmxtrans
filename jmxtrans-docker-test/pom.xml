@@ -35,10 +35,19 @@
     <artifactId>jmxtrans-docker-test</artifactId>
 
     <properties>
+        <deb.install.artifact>org.jmxtrans:jmxtrans:deb</deb.install.artifact>
+        <deb.install.file>jmxtrans.deb</deb.install.file>
+        <deb.run.cmd>debconf-set-selections &lt;&lt;&lt; "jmxtrans jmxtrans/jvm_heap_size string 512"; dpkg -i /maven/${deb.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</deb.run.cmd>
+
         <docker.skip>true</docker.skip>
         <docker.verbose>true</docker.verbose>
+
+        <rpm.install.artifact>org.jmxtrans:jmxtrans:rpm</rpm.install.artifact>
+        <rpm.install.file>jmxtrans.rpm</rpm.install.file>
+        <rpm.run.cmd>rpm -ivh --nosignature --nodeps /maven/${rpm.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</rpm.run.cmd>
+
         <verification.message>installation verified</verification.message>
-        <verification.wait.time>30000</verification.wait.time>
+        <verification.wait.time>60000</verification.wait.time>
     </properties>
 
     <build>
@@ -82,12 +91,6 @@
     <profiles>
         <profile>
             <id>deb</id>
-
-            <properties>
-                <deb.install.artifact>org.jmxtrans:jmxtrans:deb</deb.install.artifact>
-                <deb.install.file>jmxtrans.deb</deb.install.file>
-                <deb.run.cmd>dpkg -i /maven/${deb.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</deb.run.cmd>
-            </properties>
 
             <dependencies>
                 <dependency>
@@ -166,12 +169,6 @@
         <profile>
             <id>docker.debian</id>
 
-            <properties>
-                <deb.install.artifact>org.jmxtrans:jmxtrans:deb</deb.install.artifact>
-                <deb.install.file>jmxtrans.deb</deb.install.file>
-                <deb.run.cmd>dpkg -i /maven/${deb.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</deb.run.cmd>
-            </properties>
-
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
@@ -248,12 +245,6 @@
 
         <profile>
             <id>rpm</id>
-
-            <properties>
-                <rpm.install.artifact>org.jmxtrans:jmxtrans:rpm</rpm.install.artifact>
-                <rpm.install.file>jmxtrans.rpm</rpm.install.file>
-                <rpm.run.cmd>rpm -ivh --nosignature --nodeps /maven/${rpm.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</rpm.run.cmd>
-            </properties>
 
             <dependencies>
                 <dependency>
