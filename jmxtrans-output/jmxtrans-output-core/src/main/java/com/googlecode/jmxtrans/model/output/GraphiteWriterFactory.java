@@ -34,6 +34,7 @@ import lombok.ToString;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -63,10 +64,25 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("host") String host,
-			@JsonProperty("port") Integer port) {
+			@JsonProperty("port") Integer port,
+			@JsonProperty("settings") Map<String, Object> settings) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
-		this.rootPrefix = firstNonNull(rootPrefix, DEFAULT_ROOT_PREFIX);
+
+    if (rootPrefix != null) {
+      this.rootPrefix = rootPrefix;
+    } else if (settings.containsKey("rootPrefix")) {
+      this.rootPrefix = (String) settings.get("rootPrefix");
+    } else {
+      this.rootPrefix = DEFAULT_ROOT_PREFIX;
+    }
+
+		if (host == null) {
+			host = (String) settings.get("host");
+		}
+		if (port == null) {
+			port = Settings.getIntegerSetting(settings, "port", null);
+		}
 
 		this.graphiteServer = new InetSocketAddress(
 				checkNotNull(host, "Host cannot be null."),
