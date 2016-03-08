@@ -128,7 +128,7 @@ public class ElasticWriter extends BaseOutputWriter {
 					map.put("key", values.getKey());
 					map.put("keyAlias", result.getKeyAlias());
 					map.put("value", Double.parseDouble(value.toString()));
-					map.put("timestamp", result.getEpoch());
+					map.put("timestamp", java.util.Date(result.getEpoch()));
 
 					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, ELASTIC_TYPE_NAME, map);
 					Index index = new Index.Builder(map).index(indexName).type(ELASTIC_TYPE_NAME).build();
