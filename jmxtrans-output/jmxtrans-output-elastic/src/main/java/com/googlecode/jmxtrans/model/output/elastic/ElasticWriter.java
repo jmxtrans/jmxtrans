@@ -22,6 +22,21 @@
  */
 package com.googlecode.jmxtrans.model.output.elastic;
 
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.annotation.concurrent.NotThreadSafe;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
@@ -33,6 +48,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
+
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
 import io.searchbox.client.JestResult;
@@ -41,17 +57,6 @@ import io.searchbox.core.Index;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * Feed data directly into elastic.
@@ -61,9 +66,9 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 @NotThreadSafe
 public class ElasticWriter extends BaseOutputWriter {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(ElasticWriter.class);
-	
+
 	private static final String DEFAULT_ROOT_PREFIX = "jmxtrans";
 	private static final String ELASTIC_TYPE_NAME = "jmx-entry";
 
@@ -74,42 +79,40 @@ public class ElasticWriter extends BaseOutputWriter {
 
 	private final String rootPrefix;
 	private final String connectionUrl;
-	private final String indexName;
+	private String indexName;
+	private String lastIndexName;
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
 
 	@JsonCreator
-	public ElasticWriter(
-			@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
-			@JsonProperty("rootPrefix") String rootPrefix,
-			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("connectionUrl") String connectionUrl,
+	public ElasticWriter(@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber, @JsonProperty("rootPrefix") String rootPrefix,
+			@JsonProperty("debug") Boolean debugEnabled, @JsonProperty("connectionUrl") String connectionUrl,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 
-		this.rootPrefix = firstNonNull(
-						rootPrefix,
-						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX);
+		this.rootPrefix = firstNonNull(rootPrefix, (String) getSettings().get("rootPrefix"), DEFAULT_ROOT_PREFIX);
 
 		this.connectionUrl = connectionUrl;
-		this.indexName = this.rootPrefix + "_jmx-entries";
+		this.indexName = this.rootPrefix + "_jmx-entries" + sdf.format(new Date());
 		this.jestClient = createJestClient(connectionUrl);
+		this.lastIndexName = indexName;
 	}
 
 	private JestClient createJestClient(String connectionUrl) {
 		log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
 		JestClientFactory factory = new JestClientFactory();
-		factory.setHttpClientConfig(
-				new HttpClientConfig.Builder(connectionUrl)
-						.multiThreaded(true)
-						.build());
+		factory.setHttpClientConfig(new HttpClientConfig.Builder(connectionUrl).multiThreaded(true).build());
 		return factory.getObject();
 	}
 
 	@Override
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-
+		//FIXME lmx compare date if not equals reset the indexName
+		if (!sdf.format(new Date()).equals(lastIndexName)) {
+			this.indexName = this.rootPrefix + "_jmx-entries" + sdf.format(new Date());
+			this.lastIndexName = indexName;
+		}
 		for (Result result : results) {
 			log.debug("Query result: [{}]", result);
 			Map<String, Object> resultValues = result.getValues();
@@ -129,12 +132,15 @@ public class ElasticWriter extends BaseOutputWriter {
 					map.put("keyAlias", result.getKeyAlias());
 					map.put("value", Double.parseDouble(value.toString()));
 					map.put("timestamp", result.getEpoch());
-
-					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, ELASTIC_TYPE_NAME, map);
+					// map.put("timestamp", sdf.format(new
+					// Date(result.getEpoch())));
+					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, ELASTIC_TYPE_NAME,
+							map);
 					Index index = new Index.Builder(map).index(indexName).type(ELASTIC_TYPE_NAME).build();
 					JestResult addToIndex = jestClient.execute(index);
 					if (!addToIndex.isSucceeded()) {
-						throw new ElasticWriterException(String.format("Unable to write entry to elastic: %s", addToIndex.getErrorMessage()));
+						throw new ElasticWriterException(
+								String.format("Unable to write entry to elastic: %s", addToIndex.getErrorMessage()));
 					}
 				} else {
 					log.warn("Unable to submit non-numeric value to Elastic: [{}] from result [{}]", value, result);
@@ -143,7 +149,8 @@ public class ElasticWriter extends BaseOutputWriter {
 		}
 	}
 
-	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws ElasticWriterException, IOException {
+	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName)
+			throws ElasticWriterException, IOException {
 		synchronized (CREATE_MAPPING_LOCK) {
 			IndicesExists indicesExists = new IndicesExists.Builder(indexName).build();
 			boolean indexExists = jestClient.execute(indicesExists).isSucceeded();
@@ -156,13 +163,13 @@ public class ElasticWriter extends BaseOutputWriter {
 				URL url = ElasticWriter.class.getResource("/elastic-mapping.json");
 				String mapping = Resources.toString(url, Charsets.UTF_8);
 
-				PutMapping putMapping = new PutMapping.Builder(indexName, typeName,mapping).build();
+				PutMapping putMapping = new PutMapping.Builder(indexName, typeName, mapping).build();
 
 				JestResult result = jestClient.execute(putMapping);
 				if (!result.isSucceeded()) {
-					throw new ElasticWriterException(String.format("Failed to create mapping: %s", result.getErrorMessage()));
-				}
-				else {
+					throw new ElasticWriterException(
+							String.format("Failed to create mapping: %s", result.getErrorMessage()));
+				} else {
 					log.info("Created mapping for index {}", indexName);
 				}
 			}
