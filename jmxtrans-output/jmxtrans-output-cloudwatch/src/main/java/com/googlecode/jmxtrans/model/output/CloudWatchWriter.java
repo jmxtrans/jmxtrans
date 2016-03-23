@@ -29,10 +29,9 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
-import com.amazonaws.util.EC2MetadataUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriter;
@@ -47,14 +46,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -65,13 +63,12 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
 public class CloudWatchWriter implements OutputWriterFactory {
-	private static final String NAME = "name";
-	private static final String VALUE = "value";
 	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
+	public static final MapEntryToDimension MAP_ENTRY_TO_DIMENSION = new MapEntryToDimension();
 
 	private final AmazonCloudWatchClient cloudWatchClient;
 	private final String namespace;
-	private final ImmutableCollection<Dimension> dimensions;
+	private final Iterable<Map<String, Object>> dimensions;
 
 	private final boolean booleanAsNumber;
 
@@ -84,63 +81,36 @@ public class CloudWatchWriter implements OutputWriterFactory {
 			@JsonProperty("dimensions") Collection<Map<String,Object>> dimensions,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		this.booleanAsNumber = booleanAsNumber;
-		this.namespace = MoreObjects.firstNonNull(namespace, (String) settings.get("namespace"));
+		this.namespace = firstNonNull(namespace, (String) settings.get("namespace"));
 		checkArgument(!isNullOrEmpty(this.namespace), "namespace cannot be null or empty");
 
-		dimensions = MoreObjects.firstNonNull(dimensions, (Collection<Map<String,Object>>)settings.get("dimensions"));
-		this.dimensions = initDimensions(dimensions);
+		this.dimensions = firstNonNull(dimensions, (Collection<Map<String, Object>>) settings.get("dimensions"));
 
-		// Configuring the CloudWatch client
-		// Credentials are loaded from the Amazon EC2 Instance Metadata Service
-		this.cloudWatchClient = initCloudWatchClient();
+		this.cloudWatchClient = createCloudWatchClient();
 	}
 
-	private AmazonCloudWatchClient initCloudWatchClient() {
+	/**
+	 * Configuring the CloudWatch client.
+	 *
+	 * Credentials are loaded from the Amazon EC2 Instance Metadata Service
+	 */
+	private AmazonCloudWatchClient createCloudWatchClient() {
 		AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
 		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));
 		return cloudWatchClient;
 	}
 
-	private ImmutableList<Dimension> initDimensions(Collection<Map<String, Object>> dimensions) {
+	private ImmutableList<Dimension> createDimensions(Iterable<Map<String, Object>> dimensions) {
 		if (dimensions == null) return ImmutableList.of();
 
-		ImmutableList.Builder<Dimension> builder = ImmutableList.builder();
-		for (Map<String, Object> dimension : dimensions) {
-			String name = null;
-			String value = null;
-
-			if (dimension.containsKey(NAME)) {
-				name = dimension.get(NAME).toString();
-			}
-			if (dimension.containsKey(VALUE)) {
-				value = dimension.get(VALUE).toString();
-			}
-			if (name != null && value != null) {
-				if (value.startsWith("$")) {
-					try {
-						Method m = EC2MetadataUtils.class.getMethod("get" + value.substring(1));
-						value = String.valueOf(m.invoke(null));
-					} catch (NoSuchMethodException e) {
-						log.warn("Could not resolve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
-					} catch (IllegalAccessException e) {
-						log.warn("Could not load {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
-					} catch (InvocationTargetException e) {
-						log.warn("Could not retrieve {} via a getters on {}!", value, EC2MetadataUtils.class.getName());
-					}
-				}
-				builder.add(new Dimension().withName(name).withValue(value));
-			} else {
-				log.warn("Incomplete dimension: Missing non-null '{}' and '{}' in '{}'", NAME, VALUE, dimension);
-			}
-		}
-		return builder.build();
+		return FluentIterable.from(dimensions).transform(MAP_ENTRY_TO_DIMENSION).toList();
 	}
 
 	@Override
 	public OutputWriter create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
-				new Writer(namespace, cloudWatchClient, dimensions)
+				new Writer(namespace, createCloudWatchClient(), createDimensions(dimensions))
 		);
 	}
 

@@ -1,6 +1,8 @@
 language: java
 sudo: false
 before_install: "git clone -b travis `git config --get remote.origin.url` ${HOME}/travis"
+services:
+  - docker
 addons:
   apt:
     packages:
@@ -10,9 +12,9 @@ cache:
   - $HOME/.m2
 install:
   - mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
-script: ./travis-script.sh
+script: travis_wait 120 ./travis-script.sh
 after_success:
-  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site --settings ${HOME}/travis/settings.xml -B -V
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site site:stage scm-publish:publish-scm --settings ${HOME}/travis/settings.xml -B -V
 branches:
   except:
     - travis

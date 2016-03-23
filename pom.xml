@@ -104,6 +104,7 @@
 		<module>jmxtrans-examples</module>
 		<module>jmxtrans-core</module>
 		<module>jmxtrans-test-utils</module>
+		<module>jmxtrans-docker-test</module>
 	</modules>
 
 	<scm>
@@ -122,9 +123,13 @@
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
+		<site>
+			<id>github</id>
+			<url>scm:git:git@github.com:jmxtrans/jmxtrans.git</url>
+		</site>
 	</distributionManagement>
-
 	<properties>
+		<aws.java.sdk.version>1.10.49</aws.java.sdk.version>
 		<!--
 			Maximum number of checkstyle violations allowed. Build will fail
 			if there are more than this number of violations. Feel free to
@@ -134,7 +139,7 @@
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
 		<!-- some versions used by multiple dependencies -->
-		<jackson.version>2.6.2</jackson.version>
+		<jackson.version>2.7.0</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
@@ -143,8 +148,9 @@
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
 		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
+		<powermock.version>1.6.4</powermock.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j.version>1.7.12</slf4j.version>
+		<slf4j.version>1.7.14</slf4j.version>
 		<verify.mutationThreshold>100</verify.mutationThreshold>
 		<verify.totalBranchRate>100</verify.totalBranchRate>
 		<verify.totalLineRate>100</verify.totalLineRate>
@@ -171,12 +177,17 @@
 			<dependency>
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-cloudwatch</artifactId>
-				<version>1.10.20</version>
+				<version>${aws.java.sdk.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-core</artifactId>
-				<version>1.10.20</version>
+				<version>${aws.java.sdk.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.beust</groupId>
+				<artifactId>jcommander</artifactId>
+				<version>1.48</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -199,6 +210,11 @@
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.fasterxml.jackson.module</groupId>
+				<artifactId>jackson-module-guice</artifactId>
+				<version>2.7.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.github.chrisvest</groupId>
 				<artifactId>stormpot</artifactId>
 				<version>2.4</version>
@@ -206,7 +222,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>19.0-rc2</version>
+				<version>19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.inject</groupId>
@@ -246,7 +262,7 @@
 			<dependency>
 				<groupId>io.searchbox</groupId>
 				<artifactId>jest</artifactId>
-				<version>0.1.7</version>
+				<version>2.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.inject</groupId>
@@ -276,7 +292,7 @@
 			<dependency>
 				<groupId>org.apache.kafka</groupId>
 				<artifactId>kafka_2.10</artifactId>
-				<version>0.8.2.2</version>
+				<version>0.9.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -292,7 +308,7 @@
 			<dependency>
 				<groupId>org.influxdb</groupId>
 				<artifactId>influxdb-java</artifactId>
-				<version>2.0</version>
+				<version>2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jmxtrans</groupId>
@@ -397,7 +413,7 @@
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
 				<artifactId>annotations</artifactId>
-				<version>3.0.0</version>
+				<version>3.0.1u2</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -458,13 +474,13 @@
 			<dependency>
 				<groupId>com.github.tomakehurst</groupId>
 				<artifactId>wiremock</artifactId>
-				<version>2.0.6-beta</version>
+				<version>2.0.7-beta</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.jayway.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
-				<version>1.6.5</version>
+				<version>1.7.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -482,7 +498,7 @@
 			<dependency>
 				<groupId>net.javacrumbs.json-unit</groupId>
 				<artifactId>json-unit-fluent</artifactId>
-				<version>1.6.1</version>
+				<version>1.9.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -527,31 +543,31 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.0.5-beta</version>
+				<version>2.0.2-beta</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-api-mockito</artifactId>
-				<version>1.6.2</version>
+				<version>${powermock.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-core</artifactId>
-				<version>1.6.2</version>
+				<version>${powermock.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-module-junit4</artifactId>
-				<version>1.6.2</version>
+				<version>${powermock.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-reflect</artifactId>
-				<version>1.6.2</version>
+				<version>${powermock.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -577,6 +593,7 @@
 				<plugin>
 					<groupId>com.github.ekryd.sortpom</groupId>
 					<artifactId>sortpom-maven-plugin</artifactId>
+					<!-- version 2.5.0 is compiled with Java 8 as target class format -->
 					<version>2.4.0</version>
 					<configuration>
 						<predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
@@ -595,26 +612,6 @@
 								<goal>verify</goal>
 							</goals>
 							<phase>verify</phase>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>com.github.github</groupId>
-					<artifactId>site-maven-plugin</artifactId>
-					<!--
-						version 0.11 seem to have some problem to publish, let's wait until 0.12 to upgrade
-					-->
-					<version>0.10</version>
-					<configuration>
-						<message>Creating site for ${project.name}
-							${project.version}</message>
-					</configuration>
-					<executions>
-						<execution>
-							<goals>
-								<goal>site</goal>
-							</goals>
-							<phase>site</phase>
 						</execution>
 					</executions>
 				</plugin>
@@ -654,27 +651,26 @@
 					<version>2.0.1</version>
 					<configuration>
 						<classesToIgnore>
-							<param>com.googlecode.jmxtrans.example.ActiveMQ</param>
-							<param>com.googlecode.jmxtrans.example.ActiveMQ2</param>
-							<param>com.googlecode.jmxtrans.example.Ehcache</param>
-							<param>com.googlecode.jmxtrans.example.Ganglia</param>
-							<param>com.googlecode.jmxtrans.example.Graphite</param>
-							<param>com.googlecode.jmxtrans.example.HeapMemory</param>
-							<param>com.googlecode.jmxtrans.example.Hibernate</param>
-							<param>com.googlecode.jmxtrans.example.InterestingInfo</param>
-							<param>com.googlecode.jmxtrans.example.MemoryPool</param>
-							<param>com.googlecode.jmxtrans.example.Tester</param>
-							<param>com.googlecode.jmxtrans.example.TreeWalker</param>
-							<param>com.googlecode.jmxtrans.example.TreeWalker2</param>
-							<param>com.googlecode.jmxtrans.example.TreeWalker3</param>
+							<param>com.googlecode.jmxtrans.model.QueryFixtures</param>
+							<param>com.googlecode.jmxtrans.model.ResultFixtures</param>
+							<param>com.googlecode.jmxtrans.model.ServerFixtures</param>
 						</classesToIgnore>
 						<interfacesMarkingLiveCode>
-							<param>com.googlecode.jmxtrans.model.OutputWriter</param>
+							<param>com.googlecode.jmxtrans.model.OutputWriterFactory</param>
 						</interfacesMarkingLiveCode>
+						<modulesToSkip>
+							<param>jmxtrans-examples</param>
+							<param>jmxtrans-test-utils</param>
+						</modulesToSkip>
 						<skipSendingUsageStatistics>false</skipSendingUsageStatistics>
 						<skipUpdateCheck>true</skipUpdateCheck>
 						<usageStatisticsComment>JmxTrans - https://github.com/jmxtrans/jmxtrans</usageStatisticsComment>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>io.fabric8</groupId>
+					<artifactId>docker-maven-plugin</artifactId>
+					<version>0.14.0</version>
 				</plugin>
 				<plugin>
 					<groupId>net.ju-n.maven.plugins</groupId>
@@ -703,12 +699,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>2.5.5</version>
+					<version>2.6</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.16</version>
+					<version>2.17</version>
 					<configuration>
 						<configLocation>src/etc/checkstyle.xml</configLocation>
 						<consoleOutput>true</consoleOutput>
@@ -740,15 +736,15 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>2.6.1</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.3</version>
+					<version>3.5</version>
 					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
+						<source>1.7</source>
+						<target>1.7</target>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -781,9 +777,25 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
 								</rules>
 							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.19.1</version>
+					<configuration>
+						<groups>com.googlecode.jmxtrans.test.IntegrationTest</groups>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>integration-test</goal>
+								<goal>verify</goal>
+							</goals>
 						</execution>
 					</executions>
 				</plugin>
@@ -828,7 +840,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.5.2</version>
+					<version>2.5.3</version>
 					<configuration>
 						<preparationGoals>sortpom:sort clean verify</preparationGoals>
 						<goals>deploy</goals>
@@ -842,13 +854,65 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-scm-publish-plugin</artifactId>
+					<version>1.1</version>
+					<configuration>
+						<checkoutDirectory>${session.executionRootDirectory}/target/scmpublish-checkout/</checkoutDirectory>
+						<content>${session.executionRootDirectory}/target/staging/</content>
+						<skipDeletedFiles>true</skipDeletedFiles>
+						<ignorePathsToDelete>
+							<ignorePathsToDelete>%regex[.*]</ignorePathsToDelete>
+						</ignorePathsToDelete>
+						<providerImplementations>
+							<git>jgit</git>
+						</providerImplementations>
+						<scmBranch>gh-pages</scmBranch>
+						<serverId>github</serverId>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-api</artifactId>
+							<version>1.9.4</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-provider-jgit</artifactId>
+							<version>1.9.4</version>
+							<!-- required in order to hide password value in command logging on travis -->
+						</dependency>
+					</dependencies>
+					<executions>
+						<execution>
+							<id>sitestage</id>
+							<goals>
+								<goal>publish-scm</goal>
+							</goals>
+							<phase>site-deploy</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>2.4.1</version>
+					<version>2.4.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.4</version>
+					<configuration>
+						<skipDeploy>true</skipDeploy>
+					</configuration>
+					<executions>
+						<execution>
+							<id>stage-for-scm-publish</id>
+							<goals>
+								<goal>stage</goal>
+							</goals>
+							<phase>post-site</phase>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -866,7 +930,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.18.1</version>
+					<version>2.19.1</version>
 					<configuration>
 						<includes>
 							<include>**/Test*.java</include>
@@ -908,6 +972,7 @@
 					<artifactId>cobertura-maven-plugin</artifactId>
 					<version>2.7</version>
 					<configuration>
+						<aggregate>true</aggregate>
 						<check>
 							<branchRate>0</branchRate>
 							<lineRate>0</lineRate>
@@ -919,17 +984,25 @@
 					</configuration>
 					<executions>
 						<execution>
+							<id>cobertura-clean</id>
 							<goals>
 								<goal>clean</goal>
+							</goals>
+							<phase>clean</phase>
+						</execution>
+						<execution>
+							<id>cobertura-check</id>
+							<goals>
 								<goal>check</goal>
 							</goals>
+							<phase>verify</phase>
 						</execution>
 					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.0.3</version>
 					<configuration>
 						<effort>Max</effort>
 						<threshold>Default</threshold>
@@ -950,7 +1023,7 @@
 				<plugin>
 					<groupId>org.pitest</groupId>
 					<artifactId>pitest-maven</artifactId>
-					<version>1.1.7</version>
+					<version>1.1.9</version>
 					<configuration>
 						<mutators>
 							<mutator>DEFAULTS</mutator>
@@ -986,6 +1059,11 @@
 						<autoReleaseAfterClose>true</autoReleaseAfterClose>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.vafer</groupId>
+					<artifactId>jdeb</artifactId>
+					<version>1.4</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -993,10 +1071,6 @@
 			<plugin>
 				<groupId>com.github.ekryd.sortpom</groupId>
 				<artifactId>sortpom-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>com.mycila</groupId>
@@ -1013,6 +1087,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1050,7 +1128,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.16</version>
+				<version>2.17</version>
 				<configuration>
 					<configLocation>src/etc/checkstyle.xml</configLocation>
 				</configuration>
@@ -1078,7 +1156,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.5</version>
+				<version>3.6</version>
 				<configuration>
 					<sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
 					<targetJdk>1.6</targetJdk>
@@ -1104,17 +1182,25 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.18.1</version>
+				<version>2.19.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>2.7</version>
+				<inherited>true</inherited>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>cobertura</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.2</version>
+				<version>3.0.3</version>
 				<configuration>
 					<effort>Max</effort>
 					<threshold>Exp</threshold>

@@ -23,6 +23,10 @@
 package com.googlecode.jmxtrans.model;
 
 public final class ServerFixtures {
+
+	public static final String DEFAULT_HOST = "host.example.net";
+	public static final String DEFAULT_PORT = "4321";
+
 	private ServerFixtures() {}
 
 	public static Server createServerWithOneQuery(String host, String port, String queryObject) {
@@ -35,8 +39,15 @@ public final class ServerFixtures {
 				.build();
 	}
 
+	public static Server serverWithNoQuery() {
+		return Server.builder()
+				.setHost(DEFAULT_HOST)
+				.setPort(DEFAULT_PORT)
+				.build();
+	}
+
 	public static Server dummyServer() {
-		return createServerWithOneQuery("host.example.net", "4321", "myQuery:key=val");
+		return createServerWithOneQuery(DEFAULT_HOST, DEFAULT_PORT, "myQuery:key=val");
 	}
 
 	public static Server localServer() {

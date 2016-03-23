@@ -22,13 +22,11 @@
  */
 package com.googlecode.jmxtrans.example;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.util.JsonPrinter;
 import com.googlecode.jmxtrans.util.JsonUtils;
 
 import java.io.File;
@@ -40,23 +38,15 @@ import java.io.File;
  */
 public class HeapMemory {
 
-	/**
-     *
-     */
 	public static void main(String[] args) throws Exception {
+		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 
-		JmxProcess process = JsonUtils.getJmxProcess(new File("heapmemory.json"));
+		JsonUtils jsonUtils = injector.getInstance(JsonUtils.class);
+
+		JmxProcess process = jsonUtils.parseProcess(new File("heapmemory.json"));
 		new JsonPrinter(System.out).print(process);
 
-		Injector injector = Guice.createInjector(new JmxTransModule(new JmxTransConfiguration()));
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.execute(jmx);
-		// Thread.sleep(1000);
-		// }
-
-		System.out.println("done!");
 	}
 }

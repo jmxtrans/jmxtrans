@@ -38,7 +38,7 @@
 	<description>This module contains utilities that do not have direct dependencies on JmxTrans.</description>
 
 	<properties>
-		<verify.mutationThreshold>35</verify.mutationThreshold>
+		<verify.mutationThreshold>34</verify.mutationThreshold>
 		<verify.totalBranchRate>66</verify.totalBranchRate>
 		<verify.totalLineRate>60</verify.totalLineRate>
 	</properties>
@@ -99,16 +99,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<configuration>
-					<merge>true</merge>
-					<message>Creating site for ${project.name}
-						${project.version}</message>
-					<path>${project.artifactId}</path>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>net.ju-n.maven.plugins</groupId>
 				<artifactId>checksum-maven-plugin</artifactId>

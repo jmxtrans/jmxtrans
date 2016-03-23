@@ -22,17 +22,23 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.mockito.InOrder;
+
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author lanyonm
@@ -124,62 +130,6 @@ public class ServerTests {
 	}
 
 	@Test
-	public void testServerVariableHandling() {
-		try{
-			// we add some variables to the System.properties list 
-		
-			String alias = "somealias";
-			String pid = "123";
-			String port = "1234";
-			String host = "localhost.local";
-			String username = "acme";
-			String password = "password";
-			String url = "service:jmx:remoting-jms://amce.local:1234";
-			
-			System.setProperty("myalias", alias);
-			System.setProperty("mypid", pid);
-			System.setProperty("myport", port);
-			System.setProperty("myhost", host);
-			System.setProperty("myusername",username);
-			System.setProperty("mypassword", password);
-			System.setProperty("myurl", url);
-			
-			Server serverFromSystemProperties = Server.builder()
-						.setAlias("${myalias}")
-						.setPort("${myport}")
-						.setHost("${myhost}")
-						.setUsername("${myusername}")
-						.setPassword("${mypassword}")
-						.setUrl("${myurl}")
-						.build();
-			Server serverFromDirectParameters = Server.builder()
-						.setAlias(alias)
-						.setPort(port)
-						.setHost(host)
-						.setUsername(username)
-						.setPassword(password)
-						.setUrl(url)
-						.build();
-			assertEquals(serverFromSystemProperties.hashCode(), serverFromDirectParameters.hashCode());
-
-			Server serverPid = Server.builder()
-				.setPid("${mypid}")
-				.build();
-
-			assertEquals("123", serverPid.getPid());
-			
-		}finally{
-			System.clearProperty("myalias");
-			System.clearProperty("mypid");
-			System.clearProperty("myport");
-			System.clearProperty("myhost");
-			System.clearProperty("myusername");
-			System.clearProperty("myusername");
-			System.clearProperty("myurl");
-		}
-	}
-	
-	@Test
 	public void testHashCode() {
 		Server s1 = Server.builder()
 				.setUrl("service:jmx:remoting-jmx://mysys.mydomain:8004")
@@ -235,5 +185,75 @@ public class ServerTests {
 			fail("No Pid or Url can't work");
 		}
 		catch(IllegalArgumentException e) {}
+	}
+
+	@Test
+	public void testConnectionRepoolingOk() throws Exception {
+		@SuppressWarnings("unchecked")
+		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+
+		Server server = Server.builder()
+				.setHost("host.example.net")
+				.setPort("4321")
+				.setLocal(true)
+				.setPool(pool)
+				.build();
+
+		MBeanServerConnection mBeanConn = mock(MBeanServerConnection.class);
+
+		JMXConnection conn = mock(JMXConnection.class);
+		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
+
+		when(pool.borrowObject(server)).thenReturn(conn);
+
+		Query query = mock(Query.class);
+		Iterable<ObjectName> objectNames = Lists.emptyList();
+		when(query.queryNames(mBeanConn)).thenReturn(objectNames);
+		server.execute(query);
+
+		verify(pool, never()).invalidateObject(server, conn);
+
+		InOrder orderVerifier = inOrder(pool);
+		orderVerifier.verify(pool).borrowObject(server);
+		orderVerifier.verify(pool).returnObject(server, conn);
+	}
+
+	@Test
+	public void testConnectionRepoolingSkippedOnError() throws Exception {
+		@SuppressWarnings("unchecked")
+		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+
+		Server server = Server.builder()
+				.setHost("host.example.net")
+				.setPort("4321")
+				.setLocal(true)
+				.setPool(pool)
+				.build();
+
+		MBeanServerConnection mBeanConn = mock(MBeanServerConnection.class);
+
+		JMXConnection conn = mock(JMXConnection.class);
+		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
+
+		when(pool.borrowObject(server)).thenReturn(conn);
+
+		Query query = mock(Query.class);
+		IOException e = mock(IOException.class);
+		when(query.queryNames(mBeanConn)).thenThrow(e);
+
+		try {
+			server.execute(query);
+			fail("No exception got throws");
+		} catch (IOException e2) {
+			if (e != e2) {
+				fail("Wrong exception thrown (" + e + " instead of mock");
+			}
+		}
+
+		verify(pool, never()).returnObject(server, conn);;
+
+		InOrder orderVerifier = inOrder(pool);
+		orderVerifier.verify(pool).borrowObject(server);
+		orderVerifier.verify(pool).invalidateObject(server, conn);
 	}
 }

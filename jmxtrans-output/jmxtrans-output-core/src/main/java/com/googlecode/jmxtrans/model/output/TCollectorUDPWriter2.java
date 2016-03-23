@@ -20,11 +20,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.model.output;
+
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
+import com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatter;
 
 import javax.annotation.Nonnull;
-import javax.management.MBeanServerConnection;
+import javax.annotation.concurrent.ThreadSafe;
+import java.io.IOException;
+import java.io.Writer;
 
-public interface JmxAction {
-	void execute(@Nonnull MBeanServerConnection connection) throws Exception;
+@ThreadSafe
+public class TCollectorUDPWriter2 implements WriterBasedOutputWriter {
+
+	@Nonnull private final OpenTSDBMessageFormatter messageFormatter;
+
+	public TCollectorUDPWriter2(OpenTSDBMessageFormatter messageFormatter) {
+		this.messageFormatter = messageFormatter;
+	}
+
+
+	@Override
+	public void write(@Nonnull final Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
+
+		for(String resultString : messageFormatter.formatResults(results)) {
+			writer.write(resultString);
+		}
+	}
 }

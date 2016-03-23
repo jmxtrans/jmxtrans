@@ -32,7 +32,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.StringUtils;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
@@ -52,7 +51,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
@@ -89,11 +87,10 @@ public class ElasticWriter extends BaseOutputWriter {
 
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 
-		this.rootPrefix = resolveProps(
-				firstNonNull(
+		this.rootPrefix = firstNonNull(
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX));		
+						DEFAULT_ROOT_PREFIX);
 
 		this.connectionUrl = connectionUrl;
 		this.indexName = this.rootPrefix + "_jmx-entries";
@@ -145,18 +142,6 @@ public class ElasticWriter extends BaseOutputWriter {
 			}
 		}
 	}
-
-	private String createAlias(Server server) {
-		String alias;
-		if (server.getAlias() != null) {
-			alias = server.getAlias();
-		} else {
-			alias = server.getHost() + "_" + server.getPort();
-			alias = StringUtils.cleanupStr(alias);
-		}
-		return alias;
-	}
-
 
 	private static void createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) throws ElasticWriterException, IOException {
 		synchronized (CREATE_MAPPING_LOCK) {

@@ -26,10 +26,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +38,14 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 
 /**
  * OpenTSDBWriter which directly sends
@@ -75,7 +74,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
 		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
-		host = resolveProps(host);
+		log.warn("OpenTSDBWriter is deprecated. Please use OpenTSDBWriterFactory instead.");
 		if (host == null) {
 			host = (String) getSettings().get(HOST);
 		}
@@ -114,19 +113,13 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		socket = pool.borrowObject(address);
 		writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
 
-		for (Result result : results) {
-			log.debug("Query result: {}", result);
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (String resultString : resultParser(result)) {
-					log.debug("OpenTSDB Message: {}", resultString);
-					writer.write("put " + resultString + "\n");
-				}
-			}
+		for (String formattedResult : messageFormatter.formatResults(results)) {
+			log.debug("OpenTSDB Message: {}", formattedResult);
+			writer.write("put " + formattedResult + "\n");
 		}
 
 	} catch (ConnectException e) {
-		log.error("Error while connecting to OpenTSDB");
+		log.error("Error while connecting to OpenTSDB", e);
 	} finally {
 		if (writer != null && writer.checkError()) {
 			log.error("Error writing to OpenTSDB, clearing OpenTSDB socket pool");

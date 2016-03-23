@@ -29,7 +29,6 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.StdOutWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stormpot.Timeout;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -40,8 +39,6 @@ import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Walks a JMX tree and prints out all of the attribute values actually using
@@ -95,7 +92,7 @@ public class TreeWalker2 {
 			Query query = queryBuilder.build();
 
 			try {
-				Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
+				Iterable<Result> results = server.execute(query);
 				query.runOutputWritersForQuery(server, results);
 			} catch (AttributeNotFoundException anfe) {
 				log.error("Error", anfe);

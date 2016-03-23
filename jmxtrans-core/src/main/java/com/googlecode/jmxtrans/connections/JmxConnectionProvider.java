@@ -20,43 +20,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output;
+package com.googlecode.jmxtrans.connections;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.OutputWriter;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.Map;
+import javax.management.MBeanServer;
+import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
-import static java.util.Collections.emptyMap;
+/**
+ * Created by gehel on 29.12.15.
+ */
+public interface JmxConnectionProvider {
+	@JsonIgnore
+	JMXConnector getServerConnection() throws IOException;
 
-public class BooleanAsNumberOutputWriter implements OutputWriter {
-	@Override
-	public void start() throws LifecycleException {
-	}
+	@JsonIgnore
+	MBeanServer getLocalMBeanServer();
 
-	@Override
-	public void stop() throws LifecycleException {
-	}
-
-	@Override
-	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
-
-	}
-
-	@Override
-	public Map<String, Object> getSettings() {
-		return emptyMap();
-	}
-
-	@Override
-	public void setSettings(Map<String, Object> settings) {
-	}
-
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	boolean isLocal();
 }

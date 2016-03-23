@@ -22,14 +22,11 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.util.JsonUtils;
 import com.kaching.platform.testing.AllowDNSResolution;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,23 +34,13 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import static com.amazonaws.regions.Region.getRegion;
-import static com.amazonaws.regions.Regions.AP_NORTHEAST_1;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 /**
  * Tests for {@link com.googlecode.jmxtrans.model.output.CloudWatchWriter}.
@@ -61,23 +48,12 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
 @AllowDNSResolution
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({CloudWatchWriter.class, Regions.class})
+@RunWith(MockitoJUnitRunner.class)
 public class CloudWatchWriterTests {
 
 	@Mock private AmazonCloudWatchClient cloudWatchClient;
 	@Captor private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
 	private CloudWatchWriter.Writer writer;
-
-	@Before
-	public void mockAmazonAPI() throws Exception {
-		whenNew(AmazonCloudWatchClient.class)
-				.withAnyArguments()
-				.thenReturn(cloudWatchClient);
-
-		mockStatic(Regions.class);
-		when(Regions.getCurrentRegion()).thenReturn(getRegion(AP_NORTHEAST_1));
-	}
 
 	@Before
 	public void createCloudWatchWriter() {
@@ -106,13 +82,6 @@ public class CloudWatchWriterTests {
 		assertThat(metricDatum.getDimensions().size()).isEqualTo(2);
 		assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
 		assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
-	}
-
-	@Test
-	public void loadingFromFile() throws URISyntaxException, IOException {
-		File input = new File(CloudWatchWriterTests.class.getResource("/cloud-watch.json").toURI());
-		JmxProcess process = JsonUtils.getJmxProcess(input);
-		assertThat(process.getName()).isEqualTo("cloud-watch.json");
 	}
 
 }

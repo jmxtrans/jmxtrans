@@ -99,7 +99,7 @@ public class HttpOutputWriter<T extends WriterBasedOutputWriter> extends OutputW
 			copy(in, nullOutputStream());
 			if (err != null) copy(err, nullOutputStream());
 		} catch (Throwable t) {
-			closer.rethrow(t);
+			throw closer.rethrow(t);
 		} finally {
 			closer.close();
 		}
@@ -112,7 +112,7 @@ public class HttpOutputWriter<T extends WriterBasedOutputWriter> extends OutputW
 
 			target.write(outputStream, server, query, results);
 		} catch (Throwable t) {
-			closer.rethrow(t);
+			throw closer.rethrow(t);
 		} finally {
 			closer.close();
 		}

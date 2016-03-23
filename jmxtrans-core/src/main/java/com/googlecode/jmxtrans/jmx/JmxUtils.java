@@ -23,20 +23,15 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stormpot.Timeout;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * The worker code.
@@ -45,61 +40,27 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class JmxUtils {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
+	@Nonnull private static final Logger logger = LoggerFactory.getLogger(JmxUtils.class);
 
-	/**
-	 * Does the work for processing a Server object.
-	 */
-	public void processServer(Server server) throws Exception {
+	@Nonnull private final ThreadPoolExecutor executorService;
+	@Nonnull private final ResultProcessor resultProcessor;
 
-		if (server.isQueriesMultiThreaded()) {
-			ExecutorService service = null;
-			try {
-				service = Executors.newFixedThreadPool(server.getNumQueryThreads());
-				if (log.isDebugEnabled()) {
-					log.debug("----- Creating " + server.getQueries().size() + " query threads");
-				}
-
-				List<Callable<Object>> threads = new ArrayList<Callable<Object>>(server.getQueries().size());
-				for (Query query : server.getQueries()) {
-					ProcessQueryThread pqt = new ProcessQueryThread(server, query);
-					threads.add(Executors.callable(pqt));
-				}
-
-				service.invokeAll(threads);
-
-			} finally {
-				if (service != null) {
-					shutdownAndAwaitTermination(service);
-				}
-			}
-		} else {
-			for (Query query : server.getQueries()) {
-				Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
-				query.runOutputWritersForQuery(server, results);
-			}
-		}
+	@Inject
+	public JmxUtils(
+			@Named("queryProcessorExecutor") @Nonnull ThreadPoolExecutor executorService,
+			@Nonnull ResultProcessor resultProcessor) {
+		this.executorService = executorService;
+		this.resultProcessor = resultProcessor;
 	}
 
-	/**
-	 * Copied from the Executors javadoc.
-	 */
-	private void shutdownAndAwaitTermination(ExecutorService service) {
-		service.shutdown(); // Disable new tasks from being submitted
-		try {
-			// Wait a while for existing tasks to terminate
-			if (!service.awaitTermination(60, TimeUnit.SECONDS)) {
-				service.shutdownNow(); // Cancel currently executing tasks
-				// Wait a while for tasks to respond to being cancelled
-				if (!service.awaitTermination(60, TimeUnit.SECONDS)) {
-					log.error("Pool did not terminate");
-				}
+	public void processServer(Server server) throws Exception {
+		for (Query query : server.getQueries()) {
+			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
+			try {
+				executorService.submit(pqt);
+			} catch (RejectedExecutionException ree) {
+				logger.error("Could not submit query {}. You could try to size the 'queryProcessorExecutor' to a larger size.", pqt, ree);
 			}
-		} catch (InterruptedException ie) {
-			// (Re-)Cancel if current thread also interrupted
-			service.shutdownNow();
-			// Preserve interrupt status
-			Thread.currentThread().interrupt();
 		}
 	}
 }

@@ -85,7 +85,7 @@ public class TypeNameValue {
 		private String[] tokens;
 		private int iterator;
 
-		public TypeNameValuesIterator(String typeNameStr) {
+		TypeNameValuesIterator(String typeNameStr) {
 			this.tokens = typeNameStr.split(",");
 			this.iterator = 0;
 			skipEmpty();
@@ -110,6 +110,7 @@ public class TypeNameValue {
 			return result;
 		}
 
+		@Override
 		public void remove() {
 			throw new UnsupportedOperationException("remove");
 		}

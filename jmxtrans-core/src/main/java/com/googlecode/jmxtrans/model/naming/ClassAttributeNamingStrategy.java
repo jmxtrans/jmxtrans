@@ -24,12 +24,15 @@ package com.googlecode.jmxtrans.model.naming;
 
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Result;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * Strategy for naming metrics, tags, and the like given a result.
  */
+
+@EqualsAndHashCode
 public class ClassAttributeNamingStrategy implements NamingStrategy {
 	@Getter @Setter protected String delimiter = ".";
 

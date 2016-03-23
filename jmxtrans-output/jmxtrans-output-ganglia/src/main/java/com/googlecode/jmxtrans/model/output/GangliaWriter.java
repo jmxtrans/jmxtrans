@@ -173,11 +173,14 @@ public class GangliaWriter extends BaseOutputWriter {
 		try {
 			return UDPAddressingMode.valueOf(mode);
 		} catch (IllegalArgumentException iae) {
+			log.debug("Non existing UDP addressing mode {}.", mode, iae);
 			try {
 				return UDPAddressingMode.getModeForAddress(host);
 			} catch (UnknownHostException uhe) {
+				log.debug("Unknown host {}, falling back to default addressing mode.", host, uhe);
 				return DEFAULT_ADDRESSING_MODE;
 			} catch (IOException ioe) {
+				log.debug("Could not resolve host {}, falling back to default addressing mode.", host, ioe);
 				return DEFAULT_ADDRESSING_MODE;
 			}
 		}
@@ -232,13 +235,13 @@ public class GangliaWriter extends BaseOutputWriter {
 		try {
 			return InetAddress.getByName(spoofed).getHostAddress() + ":" + spoofed;
 		} catch (UnknownHostException e) {
-			// ignore failure to resolve spoofed host
+			log.debug("ignore failure to resolve spoofed host, continue host resolution", e);
 		}
 		// Attempt to return the local host IP with the spoofed host name
 		try {
 			return InetAddress.getLocalHost().getHostAddress() + ":" + spoofed;
 		} catch (UnknownHostException e) {
-			// ignore failure to resolve spoofed host
+			log.debug("ignore failure to resolve spoofed host, continue host resolution", e);
 		}
 		// We failed to resolve the spoofed host or our local host, return "x"
 		// for the IP

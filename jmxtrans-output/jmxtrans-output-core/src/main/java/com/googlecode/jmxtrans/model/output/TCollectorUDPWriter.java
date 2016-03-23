@@ -72,6 +72,7 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
 		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
+		log.warn("TCollectorUDPWriter is deprecated. Please use TCollectorUDPWriterFactory instead.");
 	}
 
 	/**
@@ -92,12 +93,9 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		this.startOutput();
-		for (Result result : results) {
-			for (String resultString : resultParser(result)) {
-				if (isDebugEnabled())
-				log.debug("TCollectorUDP Message: {}", resultString);
-				this.sendOutput(resultString);
-			}
+		for (String resultString : messageFormatter.formatResults(results)){
+			log.debug("TCollectorUDP Message: {}", resultString);
+			this.sendOutput(resultString);
 		}
 		this.finishOutput();
 	}

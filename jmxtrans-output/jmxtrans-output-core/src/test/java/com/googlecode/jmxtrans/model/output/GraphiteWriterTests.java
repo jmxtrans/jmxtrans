@@ -25,11 +25,14 @@ package com.googlecode.jmxtrans.model.output;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.ConfigurationParser;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
+import com.googlecode.jmxtrans.util.JsonUtils;
 import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
@@ -56,6 +59,8 @@ import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResultWithTypenames;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Category(RequiresIO.class)
 @AllowDNSResolution
@@ -90,11 +95,11 @@ public class GraphiteWriterTests {
 	}
 
 	private static GraphiteWriter getGraphiteWriter(OutputStream out, List<String> typeNames) throws Exception {
-		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = Mockito.mock(GenericKeyedObjectPool.class);
-		Socket socket = Mockito.mock(Socket.class);
-		Mockito.when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
+		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
+		Socket socket = mock(Socket.class);
+		when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
 
-		Mockito.when(socket.getOutputStream()).thenReturn(out);
+		when(socket.getOutputStream()).thenReturn(out);
 
 		GraphiteWriter writer = GraphiteWriter.builder()
 				.setHost("localhost")
@@ -153,17 +158,18 @@ public class GraphiteWriterTests {
 
 		boolean continueOnJsonError = true;
 
-		ImmutableList servers = new ConfigurationParser().parseServers(of(testInput), continueOnJsonError);
+		JsonUtils jsonUtils = JmxTransModule.createInjector(new JmxTransConfiguration()).getInstance(JsonUtils.class);
+		ImmutableList servers = new ConfigurationParser(jsonUtils).parseServers(of(testInput), continueOnJsonError);
 
 		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)true));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = Mockito.mock(GenericKeyedObjectPool.class);
-		Socket socket = Mockito.mock(Socket.class);
-		Mockito.when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
+		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
+		Socket socket = mock(Socket.class);
+		when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
 
-		Mockito.when(socket.getOutputStream()).thenReturn(out);
+		when(socket.getOutputStream()).thenReturn(out);
 
 		Server server = ((Server)servers.get(0));
 		Query query = server.getQueries().asList().get(0);
@@ -232,11 +238,11 @@ public class GraphiteWriterTests {
 
 	@Test
 	public void socketInvalidatedWhenError() throws Exception {
-		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = Mockito.mock(GenericKeyedObjectPool.class);
-		Socket socket = Mockito.mock(Socket.class);
-		Mockito.when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
+		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
+		Socket socket = mock(Socket.class);
+		when(pool.borrowObject(Matchers.any(InetSocketAddress.class))).thenReturn(socket);
 		UnflushableByteArrayOutputStream out = new UnflushableByteArrayOutputStream();
-		Mockito.when(socket.getOutputStream()).thenReturn(out);
+		when(socket.getOutputStream()).thenReturn(out);
 
 		GraphiteWriter writer = GraphiteWriter.builder()
 				.setHost("localhost")

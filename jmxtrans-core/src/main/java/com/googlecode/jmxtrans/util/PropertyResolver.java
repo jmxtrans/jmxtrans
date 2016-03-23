@@ -20,21 +20,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.util;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.collect.FluentIterable.from;
-import static com.google.common.collect.ImmutableMap.copyOf;
-import static com.google.common.collect.Maps.transformValues;
+import java.io.Serializable;
 
 /***
  *
@@ -43,11 +32,7 @@ import static com.google.common.collect.Maps.transformValues;
  * @author henri
  *
  */
-public class PropertyResolver {
-
-	private static PropertyResolverFunc RESOLVE_PROPERTIES = new PropertyResolverFunc();
-
-	private static ObjectPropertyResolverFunc RESOLVE_OBJECT_PROPERTIES = new ObjectPropertyResolverFunc();
+class PropertyResolver implements Serializable {
 
 	/**
 	 * Resolve a property from System Properties (aka ${key}) key:defval is
@@ -57,7 +42,7 @@ public class PropertyResolver {
 	 * @return resolved string or null if not found in System Properties and no
 	 *         defval
 	 */
-	private static String resolveString(String s) {
+	private String resolveString(String s) {
 
 		int pos = s.indexOf(":", 0);
 
@@ -84,7 +69,7 @@ public class PropertyResolver {
 	 * @param s
 	 * @return resolved String
 	 */
-	public static String resolveProps(@Nullable String s) {
+	public String resolveProps(@Nullable String s) {
 		if (s == null) {
 			return null;
 		}
@@ -114,7 +99,6 @@ public class PropertyResolver {
 				break;
 
 			int start = pos + 2;
-			pos = end + 1;
 
 			String key = s.substring(start, end);
 			String val = resolveString(key);
@@ -130,40 +114,4 @@ public class PropertyResolver {
 		return (sb.toString());
 	}
 
-	/**
-	 * Parse Map and resolve Strings value with resolveProps
-	 */
-	@CheckReturnValue
-	public static ImmutableMap<String, Object> resolveMap(@Nonnull Map<String, Object> map) {
-		return copyOf(transformValues(map, RESOLVE_OBJECT_PROPERTIES));
-	}
-
-	/**
-	 * Parse List and resolve Strings value with resolveProps
-	 */
-	@CheckReturnValue
-	public static ImmutableList<String> resolveList(@Nonnull List<String> list) {
-		return from(list)
-				.transform(RESOLVE_PROPERTIES)
-				.toList();
-	}
-
-	private static class PropertyResolverFunc implements Function<String, String> {
-		@Nullable
-		@Override
-		public String apply(@Nullable String input) {
-			return resolveProps(input);
-		}
-	}
-
-	private static class ObjectPropertyResolverFunc implements Function<Object, Object> {
-		@Nullable
-		@Override
-		public Object apply(@Nullable Object input) {
-			if (input instanceof String) {
-				return resolveProps((String) input);
-			}
-			return input;
-		}
-	}
 }

@@ -38,11 +38,11 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.naming.StringUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +55,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * This writer is a port of the LibratoWriter from the embedded-jmxtrans
@@ -77,6 +79,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:cleclerc@cloudbees.com">Cyrille Le Clerc</a>
  */
+@EqualsAndHashCode(exclude = {"jsonFactory"})
 public class LibratoWriter extends BaseOutputWriter {
 
 	public final static String SETTING_URL = "url";
@@ -87,7 +90,7 @@ public class LibratoWriter extends BaseOutputWriter {
 	public static final String DEFAULT_LIBRATO_API_URL = "https://metrics-api.librato.com/v1/metrics";
 	public static final String SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS = "libratoApiTimeoutInMillis";
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger logger = LoggerFactory.getLogger(LibratoWriter.class);
 
 	private final JsonFactory jsonFactory = new JsonFactory();
 	/**
@@ -156,10 +159,12 @@ public class LibratoWriter extends BaseOutputWriter {
 						+ ")";
 	}
 
+	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		logger.info("Start Librato writer connected to '{}', proxy {} with username '{}' ...", url, proxy, username);
 	}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', proxy {} metrics {}", url, proxy, query);
 		writeToLibrato(server, query, results);
@@ -179,7 +184,7 @@ public class LibratoWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-					if (NumberUtils.isNumeric(values.getValue())) {
+					if (isNumeric(values.getValue())) {
 						g.writeStartObject();
 						g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
 						if (source != null && !source.isEmpty()) {

@@ -24,10 +24,10 @@ package com.googlecode.jmxtrans;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
-import com.googlecode.jmxtrans.cli.CliArgumentParser;
+import com.googlecode.jmxtrans.cli.JCommanderArgumentParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
@@ -37,6 +37,7 @@ import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.monitoring.ManagedThreadPoolExecutor;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -53,6 +54,7 @@ import org.quartz.TriggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.management.MBeanServer;
 import java.io.File;
@@ -61,8 +63,11 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Main() class that takes an argument which is the directory to look in for
@@ -90,17 +95,27 @@ public class JmxTransformer implements WatchedCallback {
 	private Thread shutdownHook = new ShutdownHook();
 
 	private volatile boolean isRunning = false;
+	@Nonnull private final ThreadPoolExecutor queryProcessorExecutor;
+	@Nonnull private final ThreadPoolExecutor resultProcessorExecutor;
 
 	@Inject
-	public JmxTransformer(Scheduler serverScheduler, JmxTransConfiguration configuration, ConfigurationParser configurationParser, Injector injector) {
+	public JmxTransformer(
+			Scheduler serverScheduler,
+			JmxTransConfiguration configuration,
+			ConfigurationParser configurationParser,
+			Injector injector,
+			@Nonnull @Named("queryProcessorExecutor") ThreadPoolExecutor queryProcessorExecutor,
+			@Nonnull @Named("resultProcessorExecutor") ThreadPoolExecutor resultProcessorExecutor) {
 		this.serverScheduler = serverScheduler;
 		this.configuration = configuration;
 		this.configurationParser = configurationParser;
 		this.injector = injector;
+		this.queryProcessorExecutor = queryProcessorExecutor;
+		this.resultProcessorExecutor = resultProcessorExecutor;
 	}
 
 	public static void main(String[] args) throws Exception {
-		JmxTransConfiguration configuration = new CliArgumentParser().parseOptions(args);
+		JmxTransConfiguration configuration = new JCommanderArgumentParser().parseOptions(args);
 		if (configuration.isHelp()) {
 			return;
 		}
@@ -110,7 +125,7 @@ public class JmxTransformer implements WatchedCallback {
 			enricher.add(jar);
 		}
 
-		Injector injector = Guice.createInjector(new JmxTransModule(configuration));
+		Injector injector = JmxTransModule.createInjector(configuration);
 
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 
@@ -122,9 +137,16 @@ public class JmxTransformer implements WatchedCallback {
 	 * The real main method.
 	 */
 	private void doMain() throws Exception {
+		MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+
 		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this, configuration);
-		ManagementFactory.getPlatformMBeanServer()
-				.registerMBean(mbean, mbean.getObjectName());
+		platformMBeanServer.registerMBean(mbean, mbean.getObjectName());
+
+		ManagedThreadPoolExecutor queryExecutorMBean = new ManagedThreadPoolExecutor(queryProcessorExecutor, "queryProcessorExecutor");
+		platformMBeanServer.registerMBean(queryExecutorMBean, queryExecutorMBean.getObjectName());
+
+		ManagedThreadPoolExecutor resultExecutorMBean = new ManagedThreadPoolExecutor(resultProcessorExecutor, "resultProcessorExecutor");
+		platformMBeanServer.registerMBean(resultExecutorMBean, resultExecutorMBean.getObjectName());
 
 		// Start the process
 		this.start();
@@ -137,19 +159,21 @@ public class JmxTransformer implements WatchedCallback {
 			try {
 				Thread.sleep(5);
 			} catch (Exception e) {
+				log.info("shutting down", e);
 				break;
 			}
 		}
 
-		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		mbs.unregisterMBean(mbean.getObjectName());
+		platformMBeanServer.unregisterMBean(mbean.getObjectName());
+		platformMBeanServer.unregisterMBean(queryExecutorMBean.getObjectName());
+		platformMBeanServer.unregisterMBean(resultExecutorMBean.getObjectName());
 	}
 
 	public synchronized void start() throws LifecycleException {
 		if (isRunning) {
 			throw new LifecycleException("Process already started");
 		} else {
-			log.info("Starting Jmxtrans on : " + this.configuration.getJsonDirOrFile().toString());
+			log.info("Starting Jmxtrans on : {}", configuration.getJsonDirOrFile());
 			try {
 				this.serverScheduler.start();
 
@@ -207,6 +231,9 @@ public class JmxTransformer implements WatchedCallback {
 				}
 			}
 
+			shutdownAndAwaitTermination(queryProcessorExecutor, 10, SECONDS);
+			shutdownAndAwaitTermination(resultProcessorExecutor, 10, SECONDS);
+
 			// Shutdown the file watch service
 			if (watcher != null) {
 				watcher.stopService();
@@ -214,20 +241,12 @@ public class JmxTransformer implements WatchedCallback {
 				log.debug("Shutdown watch service");
 			}
 
-			stopServers();
-
 			// Shutdown the outputwriters
 			stopWriterAndClearMasterServerList();
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new LifecycleException(e);
-		}
-	}
-
-	private void stopServers() {
-		for (Server server : masterServersList) {
-			server.shutdown();
 		}
 	}
 
@@ -241,9 +260,9 @@ public class JmxTransformer implements WatchedCallback {
 				for (OutputWriter writer : query.getOutputWriterInstances()) {
 					try {
 						writer.stop();
-						log.debug("Stopped writer: " + writer.getClass().getSimpleName() + " for query: " + query);
+						log.debug("Stopped writer: {} for query: {}", writer, query);
 					} catch (LifecycleException ex) {
-						log.error("Error stopping writer: " + writer.getClass().getSimpleName() + " for query: " + query);
+						log.error("Error stopping writer: {} for query: {}", writer, query, ex);
 					}
 				}
 			}
@@ -372,14 +391,14 @@ public class JmxTransformer implements WatchedCallback {
 		if ((server.getCronExpression() != null) && CronExpression.isValidExpression(server.getCronExpression())) {
 			trigger = new CronTrigger();
 			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
-			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
 			trigger.setStartTime(new Date());
 		} else {
 			int runPeriod = configuration.getRunPeriod();
 			if (server.getRunPeriodSeconds() != null) runPeriod = server.getRunPeriodSeconds();
 
 			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
-			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.valueOf(System.currentTimeMillis()).toString());
+			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
 			minuteTrigger.setStartTime(new Date());
 
 			trigger = minuteTrigger;
@@ -481,6 +500,7 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	protected class ShutdownHook extends Thread {
+		@Override
 		public void run() {
 			try {
 				JmxTransformer.this.stopServices();

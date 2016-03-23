@@ -26,7 +26,6 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.GraphiteWriter;
-import com.googlecode.jmxtrans.util.JsonPrinter;
 
 /**
  * This class hits a Graphite server running on port 2003 and sends the memory

@@ -22,12 +22,16 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import stormpot.Expiration;
 import stormpot.SlotInfo;
 
 import java.net.Socket;
 
 public class SocketExpiration implements Expiration<SocketPoolable> {
+
+	private static final Logger log = LoggerFactory.getLogger(SocketExpiration.class);
 
 	@Override
 	public boolean hasExpired(SlotInfo<? extends SocketPoolable> info) throws Exception {
@@ -40,6 +44,7 @@ public class SocketExpiration implements Expiration<SocketPoolable> {
 					|| socket.isInputShutdown()
 					|| socket.isOutputShutdown();
 		} catch (Exception e) {
+			log.warn("Socket {} is expired", socket, e);
 			return true;
 		}
 	}

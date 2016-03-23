@@ -25,30 +25,36 @@ package com.googlecode.jmxtrans.jmx;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stormpot.Timeout;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
 
+@ThreadSafe
+@ToString(exclude = {"resultProcessor"})
 public class ProcessQueryThread implements Runnable {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	private final Server server;
-	private final Query query;
+	@Nonnull private final Server server;
+	@Nonnull private final Query query;
+	@Nonnull private final ResultProcessor resultProcessor;
 
-	public ProcessQueryThread(Server server, Query query) {
+	public ProcessQueryThread(@Nonnull ResultProcessor resultProcessor, @Nonnull Server server, @Nonnull Query query) {
+		this.resultProcessor = resultProcessor;
 		this.server = server;
 		this.query = query;
 	}
 
+	@Override
 	public void run() {
 		try {
-			Iterable<Result> results = server.execute(query, new Timeout(1, SECONDS));
-			query.runOutputWritersForQuery(server, results);
+			Iterable<Result> results = server.execute(query);
+			resultProcessor.submit(server, query, results);
 		} catch (Exception e) {
-			log.error("Error executing query: " + query, e);
+			log.error("Error executing query {} on server {}", query, server, e);
 			throw new RuntimeException(e);
 		}
 	}

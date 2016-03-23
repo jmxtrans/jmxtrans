@@ -22,11 +22,11 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import static java.util.Collections.emptyMap;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 import java.util.Map;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import static java.util.Collections.emptyMap;
 
 /**
  * 
@@ -37,18 +37,18 @@ import com.googlecode.jmxtrans.exceptions.LifecycleException;
  */
 public abstract class OutputWriterAdapter implements OutputWriter {
 
-	public void start() throws LifecycleException {
-	}
+	@Override
+	public void start() throws LifecycleException {}
 
-	public void stop() throws LifecycleException {
-	}
+	@Override
+	public void stop() throws LifecycleException {}
 
+	@Override
 	public Map<String, Object> getSettings() {
 		return emptyMap();
 	}
-	public void setSettings(Map<String, Object> settings) {		
-	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}	
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
+
 }

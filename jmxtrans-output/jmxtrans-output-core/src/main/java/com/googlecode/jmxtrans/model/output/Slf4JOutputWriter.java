@@ -33,6 +33,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -46,6 +48,8 @@ import static com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static java.lang.String.valueOf;
 
+@EqualsAndHashCode
+@ToString
 public class Slf4JOutputWriter extends BaseOutputWriter {
 
 	private final Logger logger;
@@ -76,11 +80,8 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 		final List<String> typeNames = getTypeNames();
 
 		for (final Result result : results) {
-			final Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (final Map.Entry<String, Object> values : resultValues.entrySet()) {
-					logValue(server, query, typeNames, result, values);
-				}
+			for (final Map.Entry<String, Object> values : result.getValues().entrySet()) {
+				logValue(server, query, typeNames, result, values);
 			}
 		}
 	}
@@ -103,7 +104,7 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 
 				logger.info("");
 			} catch (Throwable t) {
-				closer.rethrow(t);
+				throw closer.rethrow(t);
 			} finally {
 				closer.close();
 			}

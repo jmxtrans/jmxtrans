@@ -31,7 +31,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -46,7 +45,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+import static com.google.common.collect.ImmutableList.copyOf;
 
 
 /**
@@ -88,11 +88,11 @@ public class NagiosWriter extends BaseOutputWriter {
 			@JsonProperty("suffix") String suffix,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.filters = resolveList(firstNonNull(
+		this.filters = copyOf(firstNonNull(
 				filters,
 				(List<String>) getSettings().get(FILTERS),
 				ImmutableList.<String>of()));
-		this.thresholds = resolveList(firstNonNull(
+		this.thresholds = copyOf(firstNonNull(
 				thresholds,
 				(List<String>) getSettings().get(THRESHOLDS),
 				ImmutableList.<String>of()));
@@ -137,7 +137,7 @@ public class NagiosWriter extends BaseOutputWriter {
 					logger = initLogger("/dev/null");
 					loggers.put("/dev/null", logger);
 				} catch (IOException e) {
-					throw new ValidationException("Failed to setup log4j", query);
+					throw new ValidationException("Failed to setup log4j", query, e);
 				}
 			}
 
@@ -154,7 +154,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			logger = initLogger(outputFile.getAbsolutePath());
 			loggers.put(outputFile.getAbsolutePath(), logger);
 		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query);
+			throw new ValidationException("Failed to setup log4j", query, e);
 
 		}
 	}
@@ -173,7 +173,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
 					String[] str_array = KeyUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
-					if (NumberUtils.isNumeric(values.getValue()) && filters.contains(str_array[2])) {
+					if (isNumeric(values.getValue()) && filters.contains(str_array[2])) {
 						int threshold_pos = filters.indexOf(str_array[2]);
 						StringBuilder sb = new StringBuilder();
 

@@ -30,7 +30,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.util.NumberUtils;
 import org.apache.commons.io.FileUtils;
 import org.jrobin.core.RrdDb;
 import org.jrobin.core.RrdDef;
@@ -44,6 +43,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * This takes a JRobin template.xml file and then creates the database if it
@@ -76,9 +76,10 @@ public class RRDWriter extends BaseOutputWriter {
 		checkState(this.templateFile.exists(), "Template file must exist");
 	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		RrdDb db = null;
 		try {
@@ -92,7 +93,7 @@ public class RRDWriter extends BaseOutputWriter {
 				Map<String, Object> values = res.getValues();
 				if (values != null) {
 					for (Entry<String, Object> entry : values.entrySet()) {
-						if (dsNames.contains(entry.getKey()) && NumberUtils.isNumeric(entry.getValue())) {
+						if (dsNames.contains(entry.getKey()) && isNumeric(entry.getValue())) {
 							sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
 						}
 					}

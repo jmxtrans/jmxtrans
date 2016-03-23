@@ -20,20 +20,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.support;
+package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.model.Query;
+import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatter;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.Writer;
+import java.util.List;
 
-public interface SingleResultBufferBasedOutputWriter {
-	void write(
-			@Nonnull ByteBuffer buffer,
-			@Nonnull Server server,
-			@Nonnull Query query,
-			@Nonnull Result result) throws IOException;
+public class TCollectorUDPWriter2Test {
+
+	private OpenTSDBMessageFormatter openTSDBMessageFormatter;
+	private TCollectorUDPWriter2 writer;
+	private Writer outputWriter;
+	private Result result;
+
+	@Before
+	public void setup() {
+		openTSDBMessageFormatter = Mockito.mock(OpenTSDBMessageFormatter.class);
+		writer = new TCollectorUDPWriter2(openTSDBMessageFormatter);
+		outputWriter = Mockito.mock(Writer.class);
+		result = Mockito.mock(Result.class);
+	}
+
+	@Test
+	public void testMultipleSend() throws IOException {
+
+		ImmutableList<Result> results = ImmutableList.of(result, result);
+		List<String> resultsString = ImmutableList.of("Result1", "Result2");
+
+		Mockito.when(openTSDBMessageFormatter.formatResults(results)).thenReturn(resultsString);
+
+		writer.write(outputWriter, null, null, results);
+
+		Mockito.verify(outputWriter).write("Result1");
+		Mockito.verify(outputWriter).write("Result2");
+	}
 }

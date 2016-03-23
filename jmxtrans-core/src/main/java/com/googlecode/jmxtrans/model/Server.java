@@ -22,29 +22,31 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.googlecode.jmxtrans.connections.JMXConnectionParams;
+import com.google.inject.name.Named;
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.sun.tools.attach.VirtualMachine;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stormpot.BlazePool;
-import stormpot.Config;
-import stormpot.LifecycledPool;
-import stormpot.TimeSpreadExpiration;
-import stormpot.Timeout;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -61,6 +63,7 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -69,10 +72,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
-import static java.lang.Math.max;
 import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
 import static javax.naming.Context.SECURITY_PRINCIPAL;
@@ -98,9 +98,9 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 })
 @Immutable
 @ThreadSafe
-@EqualsAndHashCode(exclude = {"queries", "pool"})
+@EqualsAndHashCode(exclude = {"queries", "pool", "outputWriters", "outputWriterFactories"})
 @ToString(of = {"pid", "host", "port", "url", "cronExpression", "numQueryThreads"})
-public class Server implements LifecycleAware {
+public class Server implements JmxConnectionProvider {
 
 	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
@@ -135,7 +135,10 @@ public class Server implements LifecycleAware {
 	 * cronExpression is null, then the job is run immediately and once.
 	 * Otherwise, it is added to the scheduler for immediate execution and run
 	 * according to the cronExpression.
+	 *
+	 * @deprecated use runPeriodSeconds instead
 	 */
+	@Deprecated
 	@Getter @Nullable private final String cronExpression;
 	@Getter @Nullable private final Integer runPeriodSeconds;
 	/** The number of query threads for this server. */
@@ -150,7 +153,10 @@ public class Server implements LifecycleAware {
 
 	@Getter private final ImmutableSet<Query> queries;
 
-	private final LifecycledPool<MBeanServerConnectionPoolable> pool;
+	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
+
+	private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
+	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
 
 	@JsonCreator
 	public Server(
@@ -166,20 +172,22 @@ public class Server implements LifecycleAware {
 			@JsonProperty("runPeriodSeconds") Integer runPeriodSeconds,
 			@JsonProperty("numQueryThreads") Integer numQueryThreads,
 			@JsonProperty("local") boolean local,
-			@JsonProperty("queries") List<Query> queries) {
+			@JsonProperty("queries") List<Query> queries,
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
+			@JacksonInject @Named("mbeanPool") KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
 
 		checkArgument(pid != null || url != null || host != null,
 				"You must provide the pid or the [url|host and port]");
 		checkArgument(!(pid != null && (url != null || host != null)),
 				"You must provide the pid OR the url, not both");
 
-		this.alias = resolveProps(alias);
-		this.pid = resolveProps(pid);
-		this.port = resolveProps(port);
-		this.username = resolveProps(username);
-		this.password = resolveProps(password);
+		this.alias = alias;
+		this.pid = pid;
+		this.port = port;
+		this.username = username;
+		this.password = password;
 		this.protocolProviderPackages = protocolProviderPackages;
-		this.url = resolveProps(url);
+		this.url = url;
 		this.cronExpression = cronExpression;
 		if (!isNullOrEmpty(cronExpression)) {
 			logger.warn("cronExpression is deprecated, please use runPeriodSeconds instead.");
@@ -200,34 +208,41 @@ public class Server implements LifecycleAware {
 			}
 		}
 		else {
-			this.host = resolveProps(host);
+			this.host = host;
 		}
-		pool = createPool(this.numQueryThreads);
+		this.pool = pool;
+		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));
+		this.outputWriters = createOutputWriters(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));
 	}
 
-	private LifecycledPool<MBeanServerConnectionPoolable> createPool(int numQueryThreads) {
-		Config<MBeanServerConnectionPoolable> config = new Config<MBeanServerConnectionPoolable>()
-				.setAllocator(new MBeanServerConnectionAllocator(this))
-				.setExpiration(new TimeSpreadExpiration<MBeanServerConnectionPoolable>(30, 60, MINUTES))
-				.setSize(max(numQueryThreads, 1));
-		return new BlazePool<MBeanServerConnectionPoolable>(config);
+	@Nonnull
+	private ImmutableList<OutputWriter> createOutputWriters(@Nonnull Iterable<OutputWriterFactory> outputWriters) {
+		return FluentIterable
+				.from(outputWriters)
+				.transform(new Function<OutputWriterFactory, OutputWriter>() {
+					@Nullable
+					@Override
+					public OutputWriter apply(OutputWriterFactory input) {
+						return input.create();
+					}
+				})
+				.toList();
 	}
 
-	public Iterable<Result> execute(Query query, Timeout timeout) throws Exception {
-		MBeanServerConnectionPoolable poolable = pool.claim(timeout);
+	public Iterable<Result> execute(Query query) throws Exception {
+		JMXConnection jmxConnection = pool.borrowObject(this);
 		try {
 			ImmutableList.Builder<Result> results = ImmutableList.builder();
-			MBeanServerConnection connection = poolable.getConnection();
+			MBeanServerConnection connection = jmxConnection.getMBeanServerConnection();
 
 			for (ObjectName queryName : query.queryNames(connection)) {
 				results.addAll(query.fetchResults(connection, queryName));
 			}
+			pool.returnObject(this, jmxConnection);
 			return results.build();
 		} catch (Exception e) {
-			poolable.invalidate();
+			pool.invalidateObject(this, jmxConnection);
 			throw e;
-		} finally {
-			poolable.release();
 		}
 	}
 
@@ -262,12 +277,14 @@ public class Server implements LifecycleAware {
 	 * Helper method for connecting to a Server. You need to close the resulting
 	 * connection.
 	 */
+	@Override
 	@JsonIgnore
-	public JMXConnector getServerConnection() throws Exception {
+	public JMXConnector getServerConnection() throws IOException {
 		JMXServiceURL url = new JMXServiceURL(getUrl());
 		return JMXConnectorFactory.connect(url, this.getEnvironment());
 	}
 
+	@Override
 	@JsonIgnore
 	public MBeanServer getLocalMBeanServer() {
 		// Getting the platform MBean server is cheap (expect for th first call) no need to cache it.
@@ -345,14 +362,11 @@ public class Server implements LifecycleAware {
 		return numQueryThreads > 0;
 	}
 
-	@JsonIgnore
-	public JMXConnectionParams getJmxConnectionParams() throws IOException {
-		return new JMXConnectionParams(getJmxServiceURL(), getEnvironment());
-	}
-
-	@Override
-	public void shutdown() {
-		pool.shutdown();
+	public void runOutputWriters(Query query, Iterable<Result> results) throws Exception {
+		for (OutputWriter writer : outputWriters) {
+			writer.doWrite(this, query, results);
+		}
+		logger.debug("Finished running outputWriters for query: {}", query);
 	}
 
 	/**
@@ -412,7 +426,9 @@ public class Server implements LifecycleAware {
 		@Setter private Integer runPeriodSeconds;
 		@Setter private Integer numQueryThreads;
 		@Setter private boolean local;
+		private final List<OutputWriterFactory> outputWriters = new ArrayList<OutputWriterFactory>();
 		private final List<Query> queries = new ArrayList<Query>();
+		@Setter private KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 
 		private Builder() {}
 
@@ -430,30 +446,11 @@ public class Server implements LifecycleAware {
 			this.numQueryThreads = server.numQueryThreads;
 			this.local = server.local;
 			this.queries.addAll(server.queries);
+			this.pool = server.pool;
 		}
 
-		public Builder setProtocolProviderPackages(String protocolProviderPackages) {
-			this.protocolProviderPackages = protocolProviderPackages;
-			return this;
-		}
-
-		public Builder setUrl(String url) {
-			this.url = url;
-			return this;
-		}
-
-		public Builder setCronExpression(String cronExpression) {
-			this.cronExpression = cronExpression;
-			return this;
-		}
-
-		public Builder setNumQueryThreads(Integer numQueryThreads) {
-			this.numQueryThreads = numQueryThreads;
-			return this;
-		}
-
-		public Builder setLocal(boolean local) {
-			this.local = local;
+		public Builder clearQueries() {
+			queries.clear();
 			return this;
 		}
 
@@ -472,6 +469,21 @@ public class Server implements LifecycleAware {
 			return this;
 		}
 
+		public Builder addOutputWriter(OutputWriterFactory outputWriter) {
+			this.outputWriters.add(outputWriter);
+			return this;
+		}
+
+		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
+			this.outputWriters.addAll(asList(outputWriters));
+			return this;
+		}
+
+		public Builder addOutputWriters(Collection<OutputWriterFactory> outputWriters) {
+			this.outputWriters.addAll(outputWriters);
+			return this;
+		}
+
 		public Server build() {
 			return new Server(
 					alias,
@@ -486,7 +498,9 @@ public class Server implements LifecycleAware {
 					runPeriodSeconds,
 					numQueryThreads,
 					local,
-					queries);
+					queries,
+					outputWriters,
+					pool);
 		}
 	}
 

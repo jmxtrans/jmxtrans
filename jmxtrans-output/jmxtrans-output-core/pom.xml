@@ -38,8 +38,8 @@
 	<description>This module contains output writers that do not have any special dependencies.</description>
 
 	<properties>
-		<verify.mutationThreshold>16</verify.mutationThreshold>
-		<verify.totalBranchRate>27</verify.totalBranchRate>
+		<verify.mutationThreshold>9</verify.mutationThreshold>
+		<verify.totalBranchRate>12</verify.totalBranchRate>
 		<verify.totalLineRate>36</verify.totalLineRate>
 	</properties>
 
@@ -171,16 +171,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<configuration>
-					<merge>true</merge>
-					<message>Creating site for ${project.name}
-						${project.version}</message>
-					<path>jmxtrans-output/${project.artifactId}</path>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>net.ju-n.maven.plugins</groupId>
 				<artifactId>checksum-maven-plugin</artifactId>

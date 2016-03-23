@@ -22,33 +22,44 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import stormpot.Allocator;
-import stormpot.Slot;
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
+import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
-public class MBeanServerConnectionAllocator implements Allocator<MBeanServerConnectionPoolable> {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-	@Nonnull private final Server server;
+public class JMXConnectionTest {
 
-	public MBeanServerConnectionAllocator(@Nonnull Server server) {
-		this.server = server;
+	@Test
+	public void serverConnectionIsExposed() {
+		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
+
+		JMXConnection jmxConnection = new JMXConnection(null, mBeanServerConnection);
+
+		assertThat(jmxConnection.getMBeanServerConnection()).isSameAs(mBeanServerConnection);
 	}
 
-	@Override
-	public MBeanServerConnectionPoolable allocate(Slot slot) throws Exception {
-		if (server.isLocal()) {
-			return new MBeanServerConnectionPoolable(slot, null, server.getLocalMBeanServer());
-		} else {
-			JMXConnector connection = server.getServerConnection();
-			return new MBeanServerConnectionPoolable(slot, connection, connection.getMBeanServerConnection());
-		}
+	@Test
+	public void connectorIsClosed() throws IOException {
+		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
+		JMXConnector jmxConnector = mock(JMXConnector.class);
+		JMXConnection jmxConnection = new JMXConnection(jmxConnector, mBeanServerConnection);
+
+		jmxConnection.close();
+
+		verify(jmxConnector).close();
 	}
 
-	@Override
-	public void deallocate(MBeanServerConnectionPoolable poolable) throws Exception {
-		JMXConnector connector = poolable.getJmxConnector();
-		if (connector != null) connector.close();
+	@Test
+	public void nullConnectorIsNotClosed() throws IOException {
+		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
+		JMXConnection jmxConnection = new JMXConnection(null, mBeanServerConnection);
+
+		jmxConnection.close();
 	}
 }

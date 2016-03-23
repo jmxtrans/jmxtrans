@@ -22,17 +22,15 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import static org.apache.commons.lang.StringUtils.capitalize;
+import lombok.SneakyThrows;
+import lombok.ToString;
+import org.apache.commons.lang.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang.StringUtils;
-
-import lombok.SneakyThrows;
-import lombok.ToString;
+import static org.apache.commons.lang.StringUtils.capitalize;
 
 /**
  * Enumerates the attributes of {@link Result}
@@ -51,7 +49,7 @@ public enum ResultAttribute {
 	@Nonnull
 	private String accessorMethod;
 
-	private ResultAttribute(String attributeName) {
+	ResultAttribute(String attributeName) {
 		this.attributeName = attributeName;
 		this.accessorMethod = "get" + capitalize(attributeName);
 	}

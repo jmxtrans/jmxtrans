@@ -39,12 +39,16 @@
 
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-		<verify.mutationThreshold>23</verify.mutationThreshold>
+		<verify.mutationThreshold>18</verify.mutationThreshold>
 		<verify.totalBranchRate>38</verify.totalBranchRate>
 		<verify.totalLineRate>40</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.beust</groupId>
+			<artifactId>jcommander</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
@@ -56,6 +60,10 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-guice</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.chrisvest</groupId>
@@ -123,6 +131,11 @@
 			<systemPath>${toolsjar}</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>com.jayway.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
@@ -161,16 +174,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<configuration>
-					<merge>true</merge>
-					<message>Creating site for ${project.name}
-						${project.version}</message>
-					<path>${project.artifactId}</path>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>net.ju-n.maven.plugins</groupId>
 				<artifactId>checksum-maven-plugin</artifactId>

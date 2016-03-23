@@ -32,4 +32,8 @@ public class ValidationException extends Exception {
 		super(msg);
 		this.query = query;
 	}
+	public ValidationException(String msg, Query query, Throwable cause) {
+		super(msg, cause);
+		this.query = query;
+	}
 }

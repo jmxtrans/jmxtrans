@@ -20,15 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.support;
+package com.googlecode.jmxtrans.cli;
 
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
+import org.apache.commons.cli.ParseException;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
+public class CommonsCliArgumentParserTest extends CliArgumentParserBase {
 
-public interface SingleResultOutputWriter {
-	void doWrite(@Nonnull Server server, @Nonnull Query query, @Nonnull Result result) throws IOException;
+	@Override
+	protected JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException {
+		return new CommonsCliArgumentParser().parseOptions(args);
+	}
+
 }

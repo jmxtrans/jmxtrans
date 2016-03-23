@@ -33,7 +33,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.NumberUtils;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,8 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * <a href="http://sensuapp.org/docs/0.12/events">Sensu Event Data</a>
@@ -57,19 +60,19 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:jhmartin@toger.us">Jason Martin</a>
  */
+@EqualsAndHashCode(exclude = "jsonFactory")
+@ToString
 public class SensuWriter extends BaseOutputWriter {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	private final JsonFactory jsonFactory = new JsonFactory();
+	private static final Logger logger = LoggerFactory.getLogger(SensuWriter.class);
 
 	public final static String SETTING_HANDLER = "handler";
 	public final static String DEFAULT_SENSU_HOST = "localhost";
 	public final static String DEFAULT_SENSU_HANDLER = "graphite";
 
-	/**
-	 * Sensu HTTP API URL
-	 */
+	private final JsonFactory jsonFactory = new JsonFactory();
+
+	/** Sensu HTTP API URL */
 	private final String host;
 	private final String handler;
 
@@ -87,10 +90,12 @@ public class SensuWriter extends BaseOutputWriter {
 		this.handler = firstNonNull(handler, (String) getSettings().get(SETTING_HANDLER), DEFAULT_SENSU_HANDLER);
 	}
 
+	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		logger.info("Start Sensu writer connected to '{}' with handler {}", host, handler);
 	}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		logger.debug("Export to '{}', metrics {}", host, query);
 		writeToSensu(server, query, results);
@@ -110,7 +115,7 @@ public class SensuWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-					if (NumberUtils.isNumeric(values.getValue())) {
+					if (isNumeric(values.getValue())) {
 						Object value = values.getValue();
 						jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, null)).append(" ")
 								.append(value).append(" ")

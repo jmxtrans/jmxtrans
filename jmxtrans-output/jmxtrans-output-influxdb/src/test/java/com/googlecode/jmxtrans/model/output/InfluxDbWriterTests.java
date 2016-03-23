@@ -25,6 +25,9 @@ package com.googlecode.jmxtrans.model.output;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
+import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
@@ -76,9 +79,9 @@ public class InfluxDbWriterTests {
 	@Captor
 	private ArgumentCaptor<BatchPoints> messageCaptor;
 	
-	private ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.ALL;
-	private String DEFAULT_RETENTION_POLICY = "default";
-	private ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = immutableEnumSet(EnumSet.allOf(ResultAttribute.class));
+	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.ALL;
+	private static final String DEFAULT_RETENTION_POLICY = "default";
+	private static final ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = immutableEnumSet(EnumSet.allOf(ResultAttribute.class));
 
 	Result result = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "typeName",
 			ImmutableMap.of("key", (Object) 1));
@@ -165,7 +168,9 @@ public class InfluxDbWriterTests {
 	@Test
 	public void loadingFromFile() throws URISyntaxException, IOException {
 		File input = new File(InfluxDbWriterTests.class.getResource("/influxDB.json").toURI());
-		JmxProcess process = JsonUtils.getJmxProcess(input);
+		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
+		JsonUtils jsonUtils = injector.getInstance(JsonUtils.class);
+		JmxProcess process = jsonUtils.parseProcess(input);
 		assertThat(process.getName()).isEqualTo("influxDB.json");
 	}
 

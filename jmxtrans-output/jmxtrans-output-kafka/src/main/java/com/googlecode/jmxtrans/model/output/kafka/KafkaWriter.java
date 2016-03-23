@@ -36,24 +36,21 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.Settings;
-
+import kafka.javaapi.producer.Producer;
+import kafka.producer.KeyedMessage;
+import kafka.producer.ProducerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
-import kafka.javaapi.producer.Producer;
-import kafka.producer.KeyedMessage;
-import kafka.producer.ProducerConfig;
 import static com.fasterxml.jackson.core.JsonEncoding.UTF8;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static java.util.Arrays.asList;
@@ -90,11 +87,10 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("tags") Map<String, String> tags,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.rootPrefix = resolveProps(
-				firstNonNull(
+		this.rootPrefix = firstNonNull(
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX));
+						DEFAULT_ROOT_PREFIX);
 		// Setting all the required Kafka Properties
 		Properties kafkaProperties =  new Properties();
 		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));
@@ -106,10 +102,11 @@ public class KafkaWriter extends BaseOutputWriter {
 		jsonFactory = new JsonFactory();
 	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
 
-	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+	@Override
+	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		List<String> typeNames = this.getTypeNames();
 
 		for (Result result : results) {
@@ -143,9 +140,11 @@ public class KafkaWriter extends BaseOutputWriter {
 			generator.writeStringField("value", value.toString());
 			generator.writeNumberField("timestamp", result.getEpoch() / 1000);
 			generator.writeObjectFieldStart("tags");
-			for (String tag_key : this.tags.keySet()) {
-				generator.writeStringField(tag_key, this.tags.get(tag_key));
+
+			for (Entry<String, String> tag : this.tags.entrySet()) {
+				generator.writeStringField(tag.getKey(), tag.getValue());
 			}
+
 			generator.writeEndObject();
 			generator.writeEndObject();
 			generator.close();

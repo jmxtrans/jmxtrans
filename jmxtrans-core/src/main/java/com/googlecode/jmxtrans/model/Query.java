@@ -33,12 +33,11 @@ import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,15 +58,16 @@ import javax.management.ReflectionException;
 import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveList;
 import static java.util.Arrays.asList;
 
 /**
@@ -78,7 +78,8 @@ import static java.util.Arrays.asList;
 @JsonSerialize(include = NON_NULL)
 @JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
 @ThreadSafe
-@ToString(exclude = {"outputWriters"})
+@EqualsAndHashCode(exclude = {"outputWriters", "outputWriterInstances"})
+@ToString(exclude = {"outputWriters", "typeNameValuesStringBuilder"})
 public class Query {
 
 	private static final Logger logger = LoggerFactory.getLogger(Query.class);
@@ -133,15 +134,15 @@ public class Query {
 		try {
 			this.objectName = new ObjectName(obj);
 		} catch (MalformedObjectNameException e) {
-			throw new IllegalArgumentException("Invalid object name: " + obj);
+			throw new IllegalArgumentException("Invalid object name: " + obj, e);
 		}
-		this.attr = resolveList(firstNonNull(attr, Collections.<String>emptyList()));
+		this.attr = copyOf(firstNonNull(attr, Collections.<String>emptyList()));
 		this.resultAlias = resultAlias;
 		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
-		this.keys = resolveList(firstNonNull(keys, Collections.<String>emptyList()));
+		this.keys = copyOf(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
 		this.useAllTypeNames = useAllTypeNames;
-		this.outputWriters = ImmutableList.copyOf(outputWriters);
+		this.outputWriters = outputWriters == null ? ImmutableList.<OutputWriterFactory>of() : copyOf(outputWriters);
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
@@ -150,6 +151,7 @@ public class Query {
 	}
 
 	private ImmutableList<OutputWriter> createOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
+		if (outputWriters == null) return ImmutableList.of();
 		return FluentIterable
 				.from(outputWriters)
 				.transform(new Function<OutputWriterFactory, OutputWriter>() {
@@ -185,7 +187,7 @@ public class Query {
 		}
 
 		try {
-			if (attributes.size() > 0) {
+			if (!attributes.isEmpty()) {
 				logger.debug("Executing queryName [{}] from query [{}]", queryName.getCanonicalName(), this);
 
 				AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
@@ -203,58 +205,12 @@ public class Query {
 		return ImmutableList.of();
 	}
 
-
-	@Override
-	public boolean equals(Object o) {
-		if (o == null) {
-			return false;
-		}
-		if (o == this) {
-			return true;
-		}
-		if (o.getClass() != this.getClass()) {
-			return false;
-		}
-
-		if (!(o instanceof Query)) {
-			return false;
-		}
-
-		Query other = (Query) o;
-
-		return new EqualsBuilder()
-				.append(this.getObjectName(), other.getObjectName())
-				.append(this.getKeys(), other.getKeys())
-				.append(this.getAttr(), other.getAttr())
-				.append(this.getResultAlias(), other.getResultAlias())
-				.append(sizeOf(this.getOutputWriters()), sizeOf(other.getOutputWriters()))
-				.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(41, 97)
-				.append(this.getObjectName())
-				.append(this.getKeys())
-				.append(this.getAttr())
-				.append(this.getResultAlias())
-				.append(sizeOf(this.getOutputWriters()))
-				.toHashCode();
-	}
-
-	private static int sizeOf(List<?> writers) {
-		if (writers == null) {
-			return 0;
-		}
-		return writers.size();
-	}
-
 	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {
 		String separator = isAllowDottedKeys() ? "." : TypeNameValuesStringBuilder.DEFAULT_SEPARATOR;
 		Set<String> typeNames = getTypeNames();
 		if (isUseAllTypeNames()) {
 			return new UseAllTypeNameValuesStringBuilder(separator);
-		} else if (typeNames != null && typeNames.size() > 0) {
+		} else if (typeNames != null && !typeNames.isEmpty()) {
 			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<String>(typeNames));
 		} else {
 			return new TypeNameValuesStringBuilder(separator);
@@ -263,6 +219,10 @@ public class Query {
 
 	public static Builder builder() {
 		return new Builder();
+	}
+
+	public static Builder builder(Query query) {
+		return new Builder(query);
 	}
 
 	public void runOutputWritersForQuery(Server server, Iterable<Result> results) throws Exception {
@@ -287,6 +247,18 @@ public class Query {
 
 		private Builder() {}
 
+		/** This builder does NOT copy output writers from the given query. */
+		private Builder(Query query) {
+			this.obj = query.objectName.toString();
+			this.attr.addAll(query.attr);
+			this.resultAlias = query.resultAlias;
+			this.keys.addAll(query.keys);
+			this.useObjDomainAsKey = query.useObjDomainAsKey;
+			this.allowDottedKeys = query.allowDottedKeys;
+			this.useAllTypeNames = query.useAllTypeNames;
+			this.typeNames.addAll(query.typeNames);
+		}
+
 		public Builder addAttr(String... attr) {
 			this.attr.addAll(asList(attr));
 			return this;
@@ -307,6 +279,11 @@ public class Query {
 
 		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
 			this.outputWriters.addAll(asList(outputWriters));
+			return this;
+		}
+
+		public Builder addOutputWriters(Collection<OutputWriterFactory> outputWriters) {
+			this.outputWriters.addAll(outputWriters);
 			return this;
 		}
 

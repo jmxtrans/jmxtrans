@@ -23,9 +23,14 @@
 package com.googlecode.jmxtrans.model.naming.typename;
 
 
+import lombok.EqualsAndHashCode;
+
+import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Immutable
+@EqualsAndHashCode
 public class UseAllTypeNameValuesStringBuilder extends TypeNameValuesStringBuilder {
 
 	public UseAllTypeNameValuesStringBuilder(String separator) {

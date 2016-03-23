@@ -20,7 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.cli;
 
-public class JmxConnectionFactoryTests {
+import org.apache.commons.cli.ParseException;
+
+public class JCommanderArgumentParserTest extends CliArgumentParserBase {
+
+	@Override
+	protected JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException {
+		return new JCommanderArgumentParser().parseOptions(args);
+	}
+
 }

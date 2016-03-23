@@ -28,8 +28,19 @@ MVN_SETTINGS=${HOME}/travis/settings.xml
 
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   if [ "$TRAVIS_BRANCH" == "master" ]; then
+    # decrypt SSH key so we can push maven to gh-pages
+    gpg --homedir ${HOME}/travis \
+        --output ${HOME}/.ssh/id_rsa \
+        --passphrase ${GPG_PASSPHRASE} \
+        --decrypt ${HOME}/travis/id_rsa.gpg
+    chmod 600 ${HOME}/.ssh/id_rsa
+
+    # configure our git identity
+    git config --global user.email "travis@jmxtrans.org"
+    git config --global user.name "JmxTrans travis build"
+
     echo "Building master"
-    mvn deploy --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb
+    mvn deploy --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Ddocker.skip=false
   elif [ "$TRAVIS_BRANCH" == "release" ]; then
     if [[ `git log --format=%B -n 1` == *"[maven-release-plugin]"* ]]; then
       echo "Do not release commits created by maven release plugin"
@@ -63,9 +74,9 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     fi
   else
     echo "Building feature branch"
-    mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb
+    mvn verify --settings ${MVN_SETTINGS} -U -B -V -PwithMutationTests,rpm,deb,\!gpg -Dgpg.passphraseServerId=skip -Ddocker.skip=false
   fi
 else
   echo "Building pull request"
-  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests
+  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb,\!gpg -Dgpg.passphraseServerId=skip -Ddocker.skip=false
 fi

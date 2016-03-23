@@ -59,7 +59,7 @@ public class DatagramChannelAllocator implements Allocator<DatagramChannelPoolab
 			Writer writer = closer.register(poolable.getWriter());
 			writer.flush();
 		} catch (Throwable t) {
-			closer.rethrow(t);
+			throw closer.rethrow(t);
 		} finally {
 			closer.close();
 		}

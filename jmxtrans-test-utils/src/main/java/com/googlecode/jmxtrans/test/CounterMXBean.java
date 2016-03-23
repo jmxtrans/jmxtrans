@@ -20,41 +20,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.test;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+public interface CounterMXBean {
+	Integer getValue();
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
-
-public class MBeanServerConnectionPoolable implements Poolable {
-
-	private static final Logger logger = LoggerFactory.getLogger(MBeanServerConnectionPoolable.class);
-
-	@Nonnull private final Slot slot;
-
-	@Nullable @Getter private final JMXConnector jmxConnector;
-
-	@Nonnull @Getter private final MBeanServerConnection connection;
-
-	public MBeanServerConnectionPoolable(@Nonnull Slot slot, JMXConnector jmxConnector, @Nonnull MBeanServerConnection connection) {
-		this.slot = slot;
-		this.jmxConnector = jmxConnector;
-		this.connection = connection;
-	}
-
-	@Override
-	public void release() {
-		slot.release(this);
-	}
-
-	public void invalidate() {
-		slot.expire(this);
-	}
+	String getName();
 }

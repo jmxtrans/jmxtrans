@@ -31,6 +31,8 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.OnlyOnceLogger;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.googlecode.jmxtrans.model.PropertyResolver.resolveProps;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
@@ -58,6 +59,8 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
  * @author jon
  */
 @NotThreadSafe
+@EqualsAndHashCode(exclude = "pool")
+@ToString
 public class GraphiteWriter extends BaseOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(GraphiteWriter.class);
 
@@ -81,12 +84,11 @@ public class GraphiteWriter extends BaseOutputWriter {
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		log.warn("GraphiteWriter is deprecated. Please use GraphiteWriterFactory instead.");
-		this.rootPrefix = resolveProps(
+		this.rootPrefix =
 				firstNonNull(
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX));
-		host = resolveProps(host);
+						DEFAULT_ROOT_PREFIX);
 		if (host == null) {
 			host = (String) getSettings().get(HOST);
 		}
@@ -102,9 +104,10 @@ public class GraphiteWriter extends BaseOutputWriter {
 		this.address = new InetSocketAddress(host, port);
 	}
 
-	public void validateSetup(Server server, Query query) throws ValidationException {
-	}
+	@Override
+	public void validateSetup(Server server, Query query) throws ValidationException {}
 
+	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		Socket socket = null;
 		PrintWriter writer = null;
