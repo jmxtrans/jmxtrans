@@ -28,8 +28,11 @@ import com.googlecode.jmxtrans.ConfigurationParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.QueryFixtures;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.ResultFixtures;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.util.JsonUtils;
@@ -57,6 +60,7 @@ import static com.googlecode.jmxtrans.model.QueryFixtures.queryWithAllTypeNames;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResultWithTypenames;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleTrueResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -154,15 +158,6 @@ public class GraphiteWriterTests {
 
 	@Test
 	public void booleanAsNumberWorks() throws Exception {
-		File testInput = new File(GraphiteWriterTests.class.getResource("/booleanTest.json").toURI());
-
-		boolean continueOnJsonError = true;
-
-		JsonUtils jsonUtils = JmxTransModule.createInjector(new JmxTransConfiguration()).getInstance(JsonUtils.class);
-		ImmutableList servers = new ConfigurationParser(jsonUtils).parseServers(of(testInput), continueOnJsonError);
-
-		Result result = new Result(System.currentTimeMillis(), "attributeName", "className", "objDomain", null, "typeName", ImmutableMap.of("key", (Object)true));
-
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		GenericKeyedObjectPool<InetSocketAddress, Socket> pool = mock(GenericKeyedObjectPool.class);
@@ -171,15 +166,17 @@ public class GraphiteWriterTests {
 
 		when(socket.getOutputStream()).thenReturn(out);
 
-		Server server = ((Server)servers.get(0));
-		Query query = server.getQueries().asList().get(0);
-		GraphiteWriter writer = (GraphiteWriter) (query.getOutputWriters().get(0));
+		GraphiteWriter writer = GraphiteWriter.builder()
+				.setHost("localhost")
+				.setPort(123)
+				.setBooleanAsNumber(true)
+				.build();
 		writer.setPool(pool);
 
-		writer.doWrite(server, query, of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), singleTrueResult());
 
 		// check that the booleanAsNumber property was picked up from the JSON
-		assertThat(out.toString()).startsWith("servers.host_123.objDomain.attributeName.key 1");
+		assertThat(out.toString()).startsWith("servers.host_example_net_4321.VerboseMemory.Verbose 1 0");
 	}
 	
 	@Test

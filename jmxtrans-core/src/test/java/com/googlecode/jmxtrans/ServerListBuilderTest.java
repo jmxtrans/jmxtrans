@@ -42,6 +42,7 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.googlecode.jmxtrans.model.ServerFixtures.serverWithNoQuery;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ServerListBuilderTest {
 
@@ -71,6 +72,7 @@ public class ServerListBuilderTest {
 
 		Server createdServer = serverList.iterator().next();
 		assertThat(createdServer.getOutputWriterFactories()).hasSize(3);
+		assertThat(createdServer.getOutputWriters()).hasSize(3);
 	}
 
 	@Test
@@ -97,10 +99,14 @@ public class ServerListBuilderTest {
 		Query query2 = queryIterator.next();
 
 		assertThat(query1.getOutputWriters()).hasSize(1);
+		assertThat(query1.getOutputWriterInstances()).hasSize(1);
 		assertThat(query2.getOutputWriters()).hasSize(1);
+		assertThat(query2.getOutputWriterInstances()).hasSize(1);
 
 		assertThat(query1.getOutputWriters().iterator().next())
 				.isSameAs(query2.getOutputWriters().iterator().next());
+		assertThat(query1.getOutputWriterInstances().iterator().next())
+				.isSameAs(query2.getOutputWriterInstances().iterator().next());
 	}
 
 	@Test
@@ -122,6 +128,9 @@ public class ServerListBuilderTest {
 
 		assertThat(createdServer.getOutputWriterFactories().iterator().next())
 				.isSameAs(createdQuery.getOutputWriters().iterator().next());
+
+		assertThat(createdServer.getOutputWriters().iterator().next())
+				.isSameAs(createdQuery.getOutputWriterInstances().iterator().next());
 	}
 
 	@EqualsAndHashCode
