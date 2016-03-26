@@ -39,11 +39,17 @@ public class SocketAllocator implements Allocator<SocketPoolable> {
 	@Nonnull private final InetSocketAddress server;
 	private final int socketTimeoutMillis;
 	@Nonnull private final Charset charset;
+	@Nonnull private final FlushStrategy flushStrategy;
 
-	public SocketAllocator(@Nonnull InetSocketAddress server, int socketTimeoutMillis, @Nonnull Charset charset) {
+	public SocketAllocator(
+			@Nonnull InetSocketAddress server,
+			int socketTimeoutMillis,
+			@Nonnull Charset charset,
+			@Nonnull FlushStrategy flushStrategy) {
 		this.server = server;
 		this.socketTimeoutMillis = socketTimeoutMillis;
 		this.charset = charset;
+		this.flushStrategy = flushStrategy;
 	}
 
 	@Override
@@ -56,7 +62,7 @@ public class SocketAllocator implements Allocator<SocketPoolable> {
 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), charset));
 
-		return new SocketPoolable(slot, socket, writer);
+		return new SocketPoolable(slot, socket, writer, flushStrategy);
 	}
 
 	@Override

@@ -20,46 +20,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.support.pool;
+package com.googlecode.jmxtrans.util;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.Writer;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-public class WriterPoolable implements Poolable {
+public class ManualClock implements Clock {
 
-	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
+	private volatile AtomicLong currentTimeMillis = new AtomicLong(0l);
 
-	@Nonnull private final Slot slot;
+	public ManualClock() {
+		setTime(0L, MILLISECONDS);
+	}
 
-	@Nonnull @Getter private final Writer writer;
-
-	@Nonnull private final FlushStrategy flushStrategy;
-
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
-		this.slot = slot;
-		this.writer = writer;
-		this.flushStrategy = flushStrategy;
+	public ManualClock(long time, TimeUnit unit) {
+		setTime(time, unit);
 	}
 
 	@Override
-	public void release() {
-		try {
-			flushStrategy.flush(writer);
-			slot.release(this);
-		} catch (IOException ioe) {
-			logger.error("Could not flush writer", ioe);
-			invalidate();
-		}
+	public long currentTimeMillis() {
+		return currentTimeMillis.get();
 	}
 
-	public void invalidate() {
-		slot.expire(this);
+	public void setTime(long time, TimeUnit unit) {
+		currentTimeMillis.set(MILLISECONDS.convert(time, unit));
+	}
+
+	public void waitFor(long duration, TimeUnit unit) {
+		currentTimeMillis.addAndGet(MILLISECONDS.convert(duration, unit));
 	}
 }

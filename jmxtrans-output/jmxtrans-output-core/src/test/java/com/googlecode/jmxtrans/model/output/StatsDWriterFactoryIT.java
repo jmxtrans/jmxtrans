@@ -56,7 +56,8 @@ public class StatsDWriterFactoryIT {
 			ImmutableList.<String>of(),
 				null, null, false, null,
 				udpLoggingServer.getLocalSocketAddress().getHostName(),
-				udpLoggingServer.getLocalSocketAddress().getPort()
+				udpLoggingServer.getLocalSocketAddress().getPort(),
+				null, null
 		).create();
 
 		statsDWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());

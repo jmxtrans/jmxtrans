@@ -22,44 +22,44 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.Writer;
+import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.createFlushStrategy;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class WriterPoolable implements Poolable {
+public class FlushStrategyUtilsTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
-
-	@Nonnull private final Slot slot;
-
-	@Nonnull @Getter private final Writer writer;
-
-	@Nonnull private final FlushStrategy flushStrategy;
-
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
-		this.slot = slot;
-		this.writer = writer;
-		this.flushStrategy = flushStrategy;
+	@Test
+	public void defaultStrategyIsNeverFlush() {
+		FlushStrategy strategy = createFlushStrategy(null, null);
+		assertThat(strategy).isInstanceOf(NeverFlush.class);
 	}
 
-	@Override
-	public void release() {
-		try {
-			flushStrategy.flush(writer);
-			slot.release(this);
-		} catch (IOException ioe) {
-			logger.error("Could not flush writer", ioe);
-			invalidate();
-		}
+	@Test
+	public void createNeverFlush() {
+		FlushStrategy strategy = createFlushStrategy("never", null);
+		assertThat(strategy).isInstanceOf(NeverFlush.class);
 	}
 
-	public void invalidate() {
-		slot.expire(this);
+	@Test
+	public void createAlwaysFlush() {
+		FlushStrategy strategy = createFlushStrategy("always", null);
+		assertThat(strategy).isInstanceOf(AlwaysFlush.class);
+	}
+
+	@Test
+	public void createTimeBasedFlush() {
+		FlushStrategy strategy = createFlushStrategy("timeBased", 1);
+		assertThat(strategy).isInstanceOf(TimeBasedFlush.class);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void flushDelayIsRequiredForTimeBasedFlush() {
+		createFlushStrategy("timeBased", null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void unkownStrategyThrowsException() {
+		createFlushStrategy("unkown", null);
 	}
 }

@@ -23,6 +23,8 @@
 package com.googlecode.jmxtrans.model.output.support;
 
 import com.google.common.base.Charsets;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
+import com.googlecode.jmxtrans.model.output.support.pool.NeverFlush;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketExpiration;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
@@ -41,17 +43,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Accessors(chain = true)
 public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
-	@Nonnull
-	private final InetSocketAddress server;
-	@Nonnull
-	private final T target;
-	@Nonnull
-	@Setter
-	private Charset charset = Charsets.UTF_8;
-	@Setter
-	private int socketTimeoutMillis = 200;
-	@Setter
-	private int poolSize = 1;
+	@Nonnull private final InetSocketAddress server;
+	@Nonnull private final T target;
+	@Nonnull @Setter private Charset charset = Charsets.UTF_8;
+	@Setter private int socketTimeoutMillis = 200;
+	@Setter private int poolSize = 1;
+	@Nonnull @Setter private FlushStrategy flushStrategy = new NeverFlush();
 
 	private TcpOutputWriterBuilder(@Nonnull InetSocketAddress server, @Nonnull T target) {
 		this.server = server;
@@ -69,7 +66,8 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 				.setAllocator(new SocketAllocator(
 						server,
 						socketTimeoutMillis,
-						charset))
+						charset,
+						flushStrategy))
 				.setExpiration(new SocketExpiration())
 				.setSize(poolSize);
 		return new BlazePool<SocketPoolable>(config);

@@ -22,44 +22,25 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.annotation.Nonnull;
+import java.io.Flushable;
 import java.io.IOException;
-import java.io.Writer;
 
-public class WriterPoolable implements Poolable {
+import static org.mockito.Mockito.verifyZeroInteractions;
 
-	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
+@RunWith(MockitoJUnitRunner.class)
+public class NeverFlushTest {
 
-	@Nonnull private final Slot slot;
+	@Mock private Flushable flushable;
 
-	@Nonnull @Getter private final Writer writer;
-
-	@Nonnull private final FlushStrategy flushStrategy;
-
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
-		this.slot = slot;
-		this.writer = writer;
-		this.flushStrategy = flushStrategy;
+	@Test
+	public void argumentIsNeverFlushed() throws IOException {
+		new NeverFlush().flush(flushable);
+		verifyZeroInteractions(flushable);
 	}
 
-	@Override
-	public void release() {
-		try {
-			flushStrategy.flush(writer);
-			slot.release(this);
-		} catch (IOException ioe) {
-			logger.error("Could not flush writer", ioe);
-			invalidate();
-		}
-	}
-
-	public void invalidate() {
-		slot.expire(this);
-	}
 }

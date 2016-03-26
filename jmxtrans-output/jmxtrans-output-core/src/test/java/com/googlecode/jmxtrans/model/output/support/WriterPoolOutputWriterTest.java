@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model.output.support;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.support.pool.NeverFlush;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
 import com.googlecode.jmxtrans.model.output.support.pool.WriterPoolable;
 import com.googlecode.jmxtrans.test.IntegrationTest;
@@ -120,7 +121,7 @@ public class WriterPoolOutputWriterTest {
 	private class DummyAllocator implements Allocator<WriterPoolable> {
 		@Override
 		public WriterPoolable allocate(Slot slot) throws Exception {
-			return new SocketPoolable(slot, null, writer);
+			return new SocketPoolable(slot, null, writer, new NeverFlush());
 		}
 
 		@Override

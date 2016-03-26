@@ -32,8 +32,12 @@ import java.net.Socket;
 public class SocketPoolable extends WriterPoolable {
 	@Nonnull @Getter private final Socket socket;
 
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
-		super(slot, writer);
+	public SocketPoolable(
+			@Nonnull Slot slot,
+			@Nonnull Socket socket,
+			@Nonnull Writer writer,
+			@Nonnull FlushStrategy flushStrategy) {
+		super(slot, writer, flushStrategy);
 		this.socket = socket;
 	}
 

@@ -20,46 +20,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.support.pool;
+package com.googlecode.jmxtrans.util;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.Writer;
+import static java.lang.System.currentTimeMillis;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-public class WriterPoolable implements Poolable {
+public class SystemClockTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
-
-	@Nonnull private final Slot slot;
-
-	@Nonnull @Getter private final Writer writer;
-
-	@Nonnull private final FlushStrategy flushStrategy;
-
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
-		this.slot = slot;
-		this.writer = writer;
-		this.flushStrategy = flushStrategy;
+	@Test
+	public void correctTimeIsReturned() {
+		// pretty dumb test, I know...
+		assertThat(new SystemClock().currentTimeMillis()).isCloseTo(currentTimeMillis(), within(100L));
 	}
 
-	@Override
-	public void release() {
-		try {
-			flushStrategy.flush(writer);
-			slot.release(this);
-		} catch (IOException ioe) {
-			logger.error("Could not flush writer", ioe);
-			invalidate();
-		}
-	}
-
-	public void invalidate() {
-		slot.expire(this);
-	}
 }
