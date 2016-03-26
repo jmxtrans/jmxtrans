@@ -39,9 +39,9 @@
 
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-		<verify.mutationThreshold>18</verify.mutationThreshold>
-		<verify.totalBranchRate>38</verify.totalBranchRate>
-		<verify.totalLineRate>40</verify.totalLineRate>
+		<verify.mutationThreshold>25</verify.mutationThreshold>
+		<verify.totalBranchRate>41</verify.totalBranchRate>
+		<verify.totalLineRate>47</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
