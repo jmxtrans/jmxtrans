@@ -22,44 +22,40 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import com.googlecode.jmxtrans.util.Clock;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
+import java.io.Flushable;
 import java.io.IOException;
-import java.io.Writer;
+import java.util.concurrent.TimeUnit;
 
-public class WriterPoolable implements Poolable {
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
+@ThreadSafe
+public class TimeBasedFlush implements FlushStrategy {
 
-	@Nonnull private final Slot slot;
+	@Nonnull private long lastFlush;
+	@Nonnull private final Clock clock;
+	@Nonnull private final long flushPeriodMillisecond;
 
-	@Nonnull @Getter private final Writer writer;
-
-	@Nonnull private final FlushStrategy flushStrategy;
-
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
-		this.slot = slot;
-		this.writer = writer;
-		this.flushStrategy = flushStrategy;
+	public TimeBasedFlush(@Nonnull Clock clock, long flushPeriod, @Nonnull TimeUnit unit) {
+		this.clock = clock;
+		this.lastFlush = clock.currentTimeMillis();
+		this.flushPeriodMillisecond = MILLISECONDS.convert(flushPeriod, unit);
 	}
+
 
 	@Override
-	public void release() {
-		try {
-			flushStrategy.flush(writer);
-			slot.release(this);
-		} catch (IOException ioe) {
-			logger.error("Could not flush writer", ioe);
-			invalidate();
-		}
+	public void flush(@Nonnull Flushable flushable) throws IOException {
+		if (shouldFlush()) flushable.flush();
 	}
 
-	public void invalidate() {
-		slot.expire(this);
+	private synchronized boolean shouldFlush() {
+		if (lastFlush + flushPeriodMillisecond < clock.currentTimeMillis()) {
+			lastFlush = clock.currentTimeMillis();
+			return true;
+		}
+		return false;
 	}
 }

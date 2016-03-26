@@ -26,6 +26,8 @@ import com.google.common.base.Charsets;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelExpiration;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelPoolable;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
+import com.googlecode.jmxtrans.model.output.support.pool.NeverFlush;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import stormpot.BlazePool;
@@ -46,6 +48,7 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	@Nonnull @Setter private Charset charset = Charsets.UTF_8;
 	@Setter private int bufferSize = 1472;
 	@Setter private int poolSize = 1;
+	@Nonnull @Setter private FlushStrategy flushStrategy = new NeverFlush();
 
 	private UdpOutputWriterBuilder(@Nonnull InetSocketAddress server, @Nonnull T target) {
 		this.server = server;
@@ -63,7 +66,8 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 				.setAllocator(new DatagramChannelAllocator(
 						server,
 						bufferSize,
-						charset))
+						charset,
+						flushStrategy))
 				.setExpiration(new DatagramChannelExpiration())
 				.setSize(poolSize);
 		return new BlazePool<DatagramChannelPoolable>(config);

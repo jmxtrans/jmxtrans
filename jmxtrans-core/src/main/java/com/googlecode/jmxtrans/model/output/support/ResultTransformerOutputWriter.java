@@ -22,23 +22,20 @@
  */
 package com.googlecode.jmxtrans.model.output.support;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
 import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.Map;
 
 import static com.google.common.collect.FluentIterable.from;
 
-public class ResultTransformerOutputWriter<T extends OutputWriter> implements OutputWriter {
+public class ResultTransformerOutputWriter<T extends OutputWriter> extends OutputWriterAdapter {
 
 	@Nonnull private final ResultValuesTransformer resultValuesTransformer;
 	@Nonnull private final T target;
@@ -49,28 +46,11 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> implements Ou
 	}
 
 	@Override
-	public void start() throws LifecycleException {
-	}
-
-	@Override
-	public void stop() throws LifecycleException {
-	}
-
-	@Override
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		target.doWrite(
 				server,
 				query,
 				from(results).transform(resultValuesTransformer).toList());
-	}
-
-	@Override
-	public Map<String, Object> getSettings() {
-		return Collections.emptyMap();
-	}
-
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {
 	}
 
 	public static <T extends OutputWriter> ResultTransformerOutputWriter<T> booleanToNumber(boolean booleanToNumber, T target) {

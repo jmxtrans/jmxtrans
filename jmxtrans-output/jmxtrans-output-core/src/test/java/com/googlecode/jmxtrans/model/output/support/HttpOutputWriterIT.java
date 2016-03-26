@@ -24,6 +24,9 @@ package com.googlecode.jmxtrans.model.output.support;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.googlecode.jmxtrans.test.IntegrationTest;
+import com.kaching.platform.testing.AllowLocalFileAccess;
+import com.kaching.platform.testing.AllowNetworkAccess;
+import com.kaching.platform.testing.AllowNetworkListen;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

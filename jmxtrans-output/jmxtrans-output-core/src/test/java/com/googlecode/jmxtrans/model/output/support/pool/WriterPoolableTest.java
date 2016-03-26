@@ -22,44 +22,49 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import stormpot.*;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
+import java.util.concurrent.TimeUnit;
 
-public class WriterPoolable implements Poolable {
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.mockito.Mockito.verify;
 
-	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
+@RunWith(MockitoJUnitRunner.class)
+public class WriterPoolableTest {
 
-	@Nonnull private final Slot slot;
+	@Mock private Writer writer;
 
-	@Nonnull @Getter private final Writer writer;
+	@Test
+	public void writerIsFlushedIfStrategyRequiresIt() throws InterruptedException, IOException {
+		BlazePool<WriterPoolable> pool = createPool();
 
-	@Nonnull private final FlushStrategy flushStrategy;
+		WriterPoolable writerPoolable = pool.claim(new Timeout(1, SECONDS));
+		writerPoolable.getWriter().write("some message");
+		writerPoolable.release();
 
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
-		this.slot = slot;
-		this.writer = writer;
-		this.flushStrategy = flushStrategy;
+		verify(writer).flush();
 	}
 
-	@Override
-	public void release() {
-		try {
-			flushStrategy.flush(writer);
-			slot.release(this);
-		} catch (IOException ioe) {
-			logger.error("Could not flush writer", ioe);
-			invalidate();
-		}
+	private BlazePool<WriterPoolable> createPool() {
+		Config<WriterPoolable> config = new Config<>()
+				.setAllocator(new Allocator<WriterPoolable>() {
+					@Override
+					public WriterPoolable allocate(Slot slot) throws Exception {
+						return new WriterPoolable(slot, writer, new AlwaysFlush());
+					}
+
+					@Override
+					public void deallocate(WriterPoolable poolable) throws Exception {}
+				})
+				.setSize(1);
+		return new BlazePool<>(config);
 	}
 
-	public void invalidate() {
-		slot.expire(this);
-	}
 }

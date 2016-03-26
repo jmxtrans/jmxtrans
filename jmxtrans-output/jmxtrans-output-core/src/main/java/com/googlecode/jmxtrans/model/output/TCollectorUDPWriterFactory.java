@@ -32,6 +32,7 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.UdpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatter;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -43,6 +44,7 @@ import java.net.UnknownHostException;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.createFlushStrategy;
 
 @ThreadSafe
 @EqualsAndHashCode
@@ -52,6 +54,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 	@Nonnull private final boolean booleanAsNumber;
 	@Nonnull private final InetSocketAddress server;
 	@Nonnull private final OpenTSDBMessageFormatter messageFormatter;
+	@Nonnull private final FlushStrategy flushStrategy;
 
 	@JsonCreator
 	public TCollectorUDPWriterFactory(
@@ -63,7 +66,9 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 			@JsonProperty("tagName") String tagName,
 			@JsonProperty("mergeTypeNamesTags") Boolean mergeTypeNamesTags,
 			@JsonProperty("metricNamingExpression") String metricNamingExpression,
-			@JsonProperty("addHostnameTag") Boolean addHostnameTag) throws LifecycleException, UnknownHostException {
+			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
+			@JsonProperty("flushStrategy") String flushStrategy,
+			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds) throws LifecycleException, UnknownHostException {
 
 		this.booleanAsNumber = booleanAsNumber;
 		this.server = new InetSocketAddress(
@@ -76,6 +81,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 		messageFormatter = new OpenTSDBMessageFormatter(typeNames, immutableTags, tagName,
 				metricNamingExpression, mergeTypeNamesTags,
 				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
+		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 	}
 	@Override
 	public OutputWriter create() {
@@ -84,6 +90,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 				UdpOutputWriterBuilder.builder(
 						server,
 						new TCollectorUDPWriter2(messageFormatter))
+						.setFlushStrategy(flushStrategy)
 						.build());
 	}
 }

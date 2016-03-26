@@ -504,8 +504,8 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<!-- AssertJ > 3 does not support Java 7 anymore, let's stay with 2.0.0 for the moment -->
-				<version>2.0.0</version>
+				<!-- AssertJ > 3 does not support Java 7 anymore, let's stay with 2.X.X for the moment -->
+				<version>2.3.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -777,7 +777,7 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
 								</rules>
 							</configuration>
 						</execution>

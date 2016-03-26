@@ -22,44 +22,28 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import stormpot.Poolable;
-import stormpot.Slot;
+import com.googlecode.jmxtrans.util.SystemClock;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.Writer;
+import javax.annotation.Nullable;
 
-public class WriterPoolable implements Poolable {
+import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
-	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
+public final class FlushStrategyUtils {
+	private FlushStrategyUtils() {}
 
-	@Nonnull private final Slot slot;
-
-	@Nonnull @Getter private final Writer writer;
-
-	@Nonnull private final FlushStrategy flushStrategy;
-
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
-		this.slot = slot;
-		this.writer = writer;
-		this.flushStrategy = flushStrategy;
-	}
-
-	@Override
-	public void release() {
-		try {
-			flushStrategy.flush(writer);
-			slot.release(this);
-		} catch (IOException ioe) {
-			logger.error("Could not flush writer", ioe);
-			invalidate();
+	@Nonnull
+	public static FlushStrategy createFlushStrategy(@Nullable String strategy, @Nullable Integer flushDelayInSeconds) {
+		if (strategy == null) return new NeverFlush();
+		if (strategy.equals("never")) return new NeverFlush();
+		if (strategy.equals("always")) return new AlwaysFlush();
+		if (strategy.equals("timeBased")) {
+			if (flushDelayInSeconds == null) throw new IllegalArgumentException("flushDelayInSeconds cannot be null");
+			return new TimeBasedFlush(new SystemClock(), flushDelayInSeconds, SECONDS);
 		}
+		throw new IllegalArgumentException(
+				format("Strategy %s is not valid, supported values are 'never', 'always' and 'timeBased'", strategy));
 	}
 
-	public void invalidate() {
-		slot.expire(this);
-	}
 }

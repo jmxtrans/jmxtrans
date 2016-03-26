@@ -33,8 +33,12 @@ public class DatagramChannelPoolable extends WriterPoolable {
 
 	@Nonnull @Getter private final DatagramChannel channel;
 
-	public DatagramChannelPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull DatagramChannel channel) {
-		super(slot, writer);
+	public DatagramChannelPoolable(
+			@Nonnull Slot slot,
+			@Nonnull Writer writer,
+			@Nonnull DatagramChannel channel,
+			@Nonnull FlushStrategy flushStrategy) {
+		super(slot, writer, flushStrategy);
 		this.channel = channel;
 	}
 
