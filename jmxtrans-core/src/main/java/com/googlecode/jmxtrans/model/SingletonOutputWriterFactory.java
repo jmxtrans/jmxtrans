@@ -22,17 +22,26 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+@ToString
+@EqualsAndHashCode(of = "outputWriterFactory")
+public class SingletonOutputWriterFactory<T extends OutputWriter> implements OutputWriterFactory<T> {
 
-@JsonSerialize(include = NON_NULL)
-@JsonTypeInfo(use = Id.CLASS, include = As.PROPERTY, property = "@class")
-public interface OutputWriterFactory<T extends OutputWriter> {
-	@Nonnull T create();
+	@Nonnull private final T outputWriter;
+
+	@Nonnull private final OutputWriterFactory<T> outputWriterFactory;
+
+	public SingletonOutputWriterFactory(@Nonnull OutputWriterFactory<T> outputWriterFactory) {
+		this.outputWriterFactory = outputWriterFactory;
+		outputWriter = outputWriterFactory.create();
+	}
+
+	@Override
+	public T create() {
+		return outputWriter;
+	}
 }

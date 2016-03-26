@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.SingletonOutputWriterFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -61,6 +62,7 @@ public class ServerListBuilder {
 	}
 
 	private OutputWriterFactory singleton(OutputWriterFactory outputWriter) {
+		outputWriter = new SingletonOutputWriterFactory(outputWriter);
 		if (!outputWriters.containsKey(outputWriter)) outputWriters.put(outputWriter, outputWriter);
 		return outputWriters.get(outputWriter);
 	}
