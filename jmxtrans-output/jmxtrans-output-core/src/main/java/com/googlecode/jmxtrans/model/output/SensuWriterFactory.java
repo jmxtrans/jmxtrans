@@ -49,6 +49,7 @@ public class SensuWriterFactory implements OutputWriterFactory {
 	@Nonnull private final ImmutableList<String> typeNames;
 	@Nullable private final String rootPrefix;
 	@Nonnull private final FlushStrategy flushStrategy;
+	private final int poolSize;
 
 	public SensuWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
@@ -57,7 +58,8 @@ public class SensuWriterFactory implements OutputWriterFactory {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("flushStrategy") String flushStrategy,
-			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds) {
+			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+			@JsonProperty("poolSize") Integer poolSize) {
 		this.rootPrefix = rootPrefix;
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
 		this.booleanAsNumber = booleanAsNumber;
@@ -65,6 +67,7 @@ public class SensuWriterFactory implements OutputWriterFactory {
 				firstNonNull(host, "localhost"),
 				firstNonNull(port, 3030));
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
+		this.poolSize = firstNonNull(poolSize, 1);
 	}
 
 	@Override
@@ -77,6 +80,7 @@ public class SensuWriterFactory implements OutputWriterFactory {
 								new GraphiteWriter2(typeNames, rootPrefix),
 								new JsonFactory()))
 						.setFlushStrategy(flushStrategy)
+						.setPoolSize(poolSize)
 						.build());
 	}
 

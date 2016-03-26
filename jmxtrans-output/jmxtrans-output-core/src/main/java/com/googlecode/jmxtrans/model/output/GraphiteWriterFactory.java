@@ -60,6 +60,7 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 	@Nonnull private final ImmutableList<String> typeNames;
 	private final boolean booleanAsNumber;
 	@Nonnull private final FlushStrategy flushStrategy;
+	private final int poolSize;
 
 	@JsonCreator
 	public GraphiteWriterFactory(
@@ -69,7 +70,8 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
 			@JsonProperty("flushStrategy") String flushStrategy,
-			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds) {
+			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+			@JsonProperty("poolSize") Integer poolSize) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.rootPrefix = firstNonNull(rootPrefix, DEFAULT_ROOT_PREFIX);
@@ -78,6 +80,7 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 				checkNotNull(host, "Host cannot be null."),
 				checkNotNull(port, "Port cannot be null."));
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
+		this.poolSize = firstNonNull(poolSize, 1);
 	}
 
 	@Override
@@ -87,6 +90,7 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 				TcpOutputWriterBuilder.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
 						.setCharset(UTF_8)
 						.setFlushStrategy(flushStrategy)
+						.setPoolSize(poolSize)
 						.build()
 		);
 	}

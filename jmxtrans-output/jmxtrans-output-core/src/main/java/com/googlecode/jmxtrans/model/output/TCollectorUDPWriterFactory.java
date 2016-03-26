@@ -55,6 +55,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 	@Nonnull private final InetSocketAddress server;
 	@Nonnull private final OpenTSDBMessageFormatter messageFormatter;
 	@Nonnull private final FlushStrategy flushStrategy;
+	private final int poolSize;
 
 	@JsonCreator
 	public TCollectorUDPWriterFactory(
@@ -68,7 +69,8 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 			@JsonProperty("metricNamingExpression") String metricNamingExpression,
 			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
 			@JsonProperty("flushStrategy") String flushStrategy,
-			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds) throws LifecycleException, UnknownHostException {
+			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+			@JsonProperty("poolSize") Integer poolSize) throws LifecycleException, UnknownHostException {
 
 		this.booleanAsNumber = booleanAsNumber;
 		this.server = new InetSocketAddress(
@@ -82,6 +84,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 				metricNamingExpression, mergeTypeNamesTags,
 				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
+		this.poolSize = firstNonNull(poolSize, 1);
 	}
 	@Override
 	public OutputWriter create() {
@@ -91,6 +94,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 						server,
 						new TCollectorUDPWriter2(messageFormatter))
 						.setFlushStrategy(flushStrategy)
+						.setPoolSize(poolSize)
 						.build());
 	}
 }
