@@ -136,6 +136,11 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-test-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
