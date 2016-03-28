@@ -311,6 +311,11 @@
 				<version>2.1</version>
 			</dependency>
 			<dependency>
+				<groupId>org.jhades</groupId>
+				<artifactId>jhades</artifactId>
+				<version>1.0.4</version>
+			</dependency>
+			<dependency>
 				<groupId>org.jmxtrans</groupId>
 				<artifactId>jmxtrans</artifactId>
 				<version>${project.version}</version>
@@ -415,6 +420,16 @@
 				<artifactId>annotations</artifactId>
 				<version>3.0.1u2</version>
 				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>jsr305</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.jcip</groupId>
+						<artifactId>jcip-annotations</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -488,6 +503,28 @@
 				<artifactId>kawala-testing</artifactId>
 				<version>0.1.6</version>
 				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>jdepend</groupId>
+						<artifactId>jdepend</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jmock</groupId>
+						<artifactId>jmock</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jmock</groupId>
+						<artifactId>jmock-junit4</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jmock</groupId>
+						<artifactId>jmock-legacy</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm-all</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
@@ -581,7 +618,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
+			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
