@@ -69,20 +69,17 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	@Override
 	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 		for (Result result : results) {
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
 
-					if (isNotValidValue(values.getValue())) {
-						log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
-						continue;
-					}
-
-					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-							+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
-
-					writer.write(line);
+				if (isNotValidValue(values.getValue())) {
+					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
+					continue;
 				}
+
+				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+						+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
+
+				writer.write(line);
 			}
 		}
 	}

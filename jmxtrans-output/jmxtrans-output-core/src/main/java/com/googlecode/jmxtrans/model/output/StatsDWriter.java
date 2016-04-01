@@ -175,20 +175,17 @@ public class StatsDWriter extends BaseOutputWriter {
 		for (Result result : results) {
 			log.debug(result.toString());
 
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Entry<String, Object> values : resultValues.entrySet()) {
+			for (Entry<String, Object> values : result.getValues().entrySet()) {
 
-					if (isNotValidValue(values.getValue())) {
-						log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
-						continue;
-					}
-
-					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-							+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
-
-					doSend(line.trim());
+				if (isNotValidValue(values.getValue())) {
+					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
+					continue;
 				}
+
+				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+						+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
+
+				doSend(line.trim());
 			}
 		}
 	}

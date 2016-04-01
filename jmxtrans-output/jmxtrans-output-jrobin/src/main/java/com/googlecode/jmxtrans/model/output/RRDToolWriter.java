@@ -140,15 +140,13 @@ public class RRDToolWriter extends BaseOutputWriter {
 		for (Result res : results) {
 			log.debug(res.toString());
 			Map<String, Object> values = res.getValues();
-			if (values != null) {
-				for (Entry<String, Object> entry : values.entrySet()) {
-					String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
+			for (Entry<String, Object> entry : values.entrySet()) {
+				String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
 
-					if (isNumeric(entry.getValue())) {
-						log.debug("Generated DataSource name:value: {} : {}", key, entry.getValue());
-						if (dsNames.contains(key)) {
-							dataMap.put(key, entry.getValue().toString());
-						}
+				if (isNumeric(entry.getValue())) {
+					log.debug("Generated DataSource name:value: {} : {}", key, entry.getValue());
+					if (dsNames.contains(key)) {
+						dataMap.put(key, entry.getValue().toString());
 					}
 				}
 			}

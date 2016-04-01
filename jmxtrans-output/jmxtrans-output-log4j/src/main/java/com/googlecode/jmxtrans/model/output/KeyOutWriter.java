@@ -135,13 +135,11 @@ public class KeyOutWriter extends BaseOutputWriter {
 
 		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Entry<String, Object> values : resultValues.entrySet()) {
-					if (isNumeric(values.getValue())) {
+			for (Entry<String, Object> values : resultValues.entrySet()) {
+				if (isNumeric(values.getValue())) {
 
-						logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
-								+ values.getValue().toString() + delimiter + result.getEpoch());
-					}
+					logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
+							+ values.getValue().toString() + delimiter + result.getEpoch());
 				}
 			}
 		}

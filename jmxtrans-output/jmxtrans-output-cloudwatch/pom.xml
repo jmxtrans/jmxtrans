@@ -38,7 +38,7 @@
 	<description>This module contains output writers based on CloudWatch (AWS).</description>
 
 	<properties>
-		<verify.mutationThreshold>49</verify.mutationThreshold>
+		<verify.mutationThreshold>48</verify.mutationThreshold>
 		<verify.totalBranchRate>68</verify.totalBranchRate>
 		<verify.totalLineRate>63</verify.totalLineRate>
 	</properties>

@@ -138,13 +138,11 @@ public class CloudWatchWriter implements OutputWriterFactory {
 
 			for (Result result : results) {
 				Map<String, Object> resultValues = result.getValues();
-				if (resultValues != null) {
-					for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-						try {
-							metricDatumList.add(processResult(result, values));
-						} catch (IllegalArgumentException iae) {
-							log.error("Could not convert result to double", iae);
-						}
+				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+					try {
+						metricDatumList.add(processResult(result, values));
+					} catch (IllegalArgumentException iae) {
+						log.error("Could not convert result to double", iae);
 					}
 				}
 			}
