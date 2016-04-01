@@ -117,7 +117,7 @@ public class ElasticWriter extends BaseOutputWriter {
 				Object value = values.getValue();
 				if (isNumeric(value)) {
 
-					Map<String, Object> map = new HashMap<String, Object>();
+					Map<String, Object> map = new HashMap<>();
 					map.put("serverAlias", server.getAlias());
 					map.put("server", server.getHost());
 					map.put("port", server.getPort());

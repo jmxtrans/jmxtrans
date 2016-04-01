@@ -147,7 +147,7 @@ public class OpenTSDBMessageFormatter {
 	 * @return List<String> - the list of strings containing metric details ready for sending to OpenTSDB.
 	 */
 	private List<String> formatResult(Result result) {
-		List<String> resultStrings = new LinkedList<String>();
+		List<String> resultStrings = new LinkedList<>();
 		Map<String, Object> values = result.getValues();
 
 		String attributeName = result.getAttributeName();

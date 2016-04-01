@@ -49,7 +49,7 @@ public class TCPEchoServer extends ExternalResource {
 	private volatile ServerSocket server;
 
 	private final Object startSynchro = new Object();
-	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<String>();
+	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<>();
 
 	@Override
 	public void before() {

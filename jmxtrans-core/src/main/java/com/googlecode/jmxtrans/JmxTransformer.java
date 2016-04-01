@@ -415,7 +415,7 @@ public class JmxTransformer implements WatchedCallback {
 	 * Deletes all of the Jobs
 	 */
 	private void deleteAllJobs() throws Exception {
-		List<JobDetail> allJobs = new ArrayList<JobDetail>();
+		List<JobDetail> allJobs = new ArrayList<>();
 		String[] jobGroups = serverScheduler.getJobGroupNames();
 		for (String jobGroup : jobGroups) {
 			String[] jobNames = serverScheduler.getJobNames(jobGroup);
@@ -452,7 +452,7 @@ public class JmxTransformer implements WatchedCallback {
 			files = firstNonNull(jsonDirOrFile.listFiles(), new File[0]);
 		}
 
-		List<File> result = new ArrayList<File>();
+		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			if (this.isJsonFile(file)) {
 				result.add(file);

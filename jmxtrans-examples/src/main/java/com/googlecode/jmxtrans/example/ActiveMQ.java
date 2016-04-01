@@ -180,11 +180,5 @@ public class ActiveMQ {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.processServer(server);
-		// Thread.sleep(1000);
-		// }
-
 	}
 }

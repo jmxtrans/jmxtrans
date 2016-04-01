@@ -137,7 +137,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	@Override
 	public void start() throws LifecycleException {
 		try {
-			pool = new GenericKeyedObjectPool<SocketAddress, DatagramSocket>(new DatagramSocketFactory());
+			pool = new GenericKeyedObjectPool<>(new DatagramSocketFactory());
 			pool.setTestOnBorrow(true);
 			pool.setMaxActive(-1);
 			pool.setMaxIdle(-1);

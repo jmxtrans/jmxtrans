@@ -44,7 +44,7 @@ public class PrependingTypeNameValuesStringBuilder extends TypeNameValuesStringB
 
 	@Override
 	public String build(List<String> typeNames, String typeNameStr) {
-		List<String> resultingTypeNames = new ArrayList<String>(prependedTypeNames);
+		List<String> resultingTypeNames = new ArrayList<>(prependedTypeNames);
 		if (typeNames != null) {
 			for (String name : typeNames) {
 				if (!resultingTypeNames.contains(name)) {

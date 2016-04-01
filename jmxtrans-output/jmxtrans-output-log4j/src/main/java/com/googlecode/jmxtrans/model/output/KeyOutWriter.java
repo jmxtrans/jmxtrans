@@ -65,7 +65,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	protected static final String SETTING_DELIMITER = "delimiter";
 	protected static final String LOG_PATTERN = "%m%n";
 	protected static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
-	protected static final Map<String, Logger> loggers = new ConcurrentHashMap<String, Logger>();
+	protected static final Map<String, Logger> loggers = new ConcurrentHashMap<>();
 
 	protected static final int MAX_LOG_BACKUP_FILES = 200;
 	protected static final String MAX_LOG_FILE_SIZE = "10MB";

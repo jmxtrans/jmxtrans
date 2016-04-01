@@ -60,7 +60,7 @@ public class OnlyOnceLogger {
 	public static final int DEFAULT_HISTORY_SIZE = 32 * 1024;
 
 	@Nonnull private final Logger logger;
-	private final Set<LogEntry> alreadyLogged = new HashSet<LogEntry>();
+	private final Set<LogEntry> alreadyLogged = new HashSet<>();
 	private final int maxHistorySize;
 
 	public OnlyOnceLogger(Logger logger) {

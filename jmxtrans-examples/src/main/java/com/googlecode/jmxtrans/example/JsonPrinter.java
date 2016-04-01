@@ -39,7 +39,6 @@ public class JsonPrinter {
 		this.out = out;
 		mapper = new ObjectMapper();
 		mapper.getSerializationConfig().without(SerializationFeature.WRITE_NULL_MAP_VALUES);
-		//mapper.getSerializationConfig().set(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
 		prettyPrintingWriter = mapper.writerWithDefaultPrettyPrinter();
 	}
 

@@ -58,7 +58,7 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	public static <T extends WriterBasedOutputWriter> UdpOutputWriterBuilder<T> builder(
 			@Nonnull InetSocketAddress server,
 			@Nonnull T target) {
-		return new UdpOutputWriterBuilder<T>(server, target);
+		return new UdpOutputWriterBuilder<>(server, target);
 	}
 
 	private LifecycledPool<DatagramChannelPoolable> createPool() {
@@ -70,11 +70,11 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 						flushStrategy))
 				.setExpiration(new DatagramChannelExpiration())
 				.setSize(poolSize);
-		return new BlazePool<DatagramChannelPoolable>(config);
+		return new BlazePool<>(config);
 	}
 
 	public WriterPoolOutputWriter<T> build() {
 		LifecycledPool<DatagramChannelPoolable> pool = createPool();
-		return new WriterPoolOutputWriter<T>(target, pool, new Timeout(1, SECONDS));
+		return new WriterPoolOutputWriter<>(target, pool, new Timeout(1, SECONDS));
 	}
 }

@@ -133,7 +133,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 
 		List<String> dsNames = getDsNames(def.getDsDefs());
 
-		Map<String, String> dataMap = new TreeMap<String, String>();
+		Map<String, String> dataMap = new TreeMap<>();
 
 		// go over all the results and look for datasource names that map to
 		// keys from the result values
@@ -164,7 +164,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	private void doGenerate(List<Result> results) throws Exception {
 		if (isDebugEnabled() && generate) {
 			StringBuilder sb = new StringBuilder("\n");
-			List<String> keys = new ArrayList<String>();
+			List<String> keys = new ArrayList<>();
 
 			for (Result res : results) {
 				Map<String, Object> values = res.getValues();
@@ -194,7 +194,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 * Executes the rrdtool update command.
 	 */
 	protected void rrdToolUpdate(String template, String data) throws Exception {
-		List<String> commands = new ArrayList<String>();
+		List<String> commands = new ArrayList<>();
 		commands.add(binaryPath + "/rrdtool");
 		commands.add("update");
 		commands.add(outputFile.getCanonicalPath());
@@ -226,7 +226,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 * Calls out to the rrdtool binary with the 'create' command.
 	 */
 	protected void rrdToolCreateDatabase(RrdDef def) throws Exception {
-		List<String> commands = new ArrayList<String>();
+		List<String> commands = new ArrayList<>();
 		commands.add(this.binaryPath + "/rrdtool");
 		commands.add("create");
 		commands.add(this.outputFile.getCanonicalPath());
@@ -302,7 +302,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 * Get a list of DsNames used to create the datasource.
 	 */
 	private List<String> getDsNames(DsDef[] defs) {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 		for (DsDef def : defs) {
 			names.add(def.getDsName());
 		}

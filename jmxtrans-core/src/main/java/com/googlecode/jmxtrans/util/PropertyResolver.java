@@ -47,7 +47,7 @@ class PropertyResolver implements Serializable {
 		int pos = s.indexOf(":", 0);
 
 		if (pos == -1)
-			return (System.getProperty(s));
+			return System.getProperty(s);
 
 		String key = s.substring(0, pos);
 		String defval = s.substring(pos + 1);
@@ -111,7 +111,7 @@ class PropertyResolver implements Serializable {
 			ipos = end + 1;
 		}
 
-		return (sb.toString());
+		return sb.toString();
 	}
 
 }
