@@ -82,11 +82,11 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 @EqualsAndHashCode(exclude = {"jsonFactory"})
 public class LibratoWriter extends BaseOutputWriter {
 
-	public final static String SETTING_URL = "url";
-	public final static String SETTING_USERNAME = "username";
-	public final static String SETTING_TOKEN = "token";
-	public final static String SETTING_PROXY_HOST = "proxyHost";
-	public final static String SETTING_PROXY_PORT = "proxyPort";
+	public static final String SETTING_URL = "url";
+	public static final String SETTING_USERNAME = "username";
+	public static final String SETTING_TOKEN = "token";
+	public static final String SETTING_PROXY_HOST = "proxyHost";
+	public static final String SETTING_PROXY_PORT = "proxyPort";
 	public static final String DEFAULT_LIBRATO_API_URL = "https://metrics-api.librato.com/v1/metrics";
 	public static final String SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS = "libratoApiTimeoutInMillis";
 
