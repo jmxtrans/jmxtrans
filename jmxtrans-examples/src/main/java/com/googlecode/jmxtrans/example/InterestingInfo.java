@@ -47,7 +47,8 @@ public class InterestingInfo {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
-	public static void main(String[] args) throws Exception {
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make IP addresses configurable
+		public static void main(String[] args) throws Exception {
 		Server.Builder serverBuilder = Server.builder()
 				.setHost("w2")
 				.setPort("1099")

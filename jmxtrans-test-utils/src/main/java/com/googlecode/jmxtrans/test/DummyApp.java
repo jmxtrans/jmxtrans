@@ -51,11 +51,7 @@ public class DummyApp {
 
 		while (true) {
 			System.out.println("hello, it is: " + new Date());
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Thread.sleep(1000);
 		}
 	}
 

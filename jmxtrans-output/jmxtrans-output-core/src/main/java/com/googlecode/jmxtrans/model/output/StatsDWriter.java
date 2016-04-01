@@ -55,6 +55,8 @@ import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * This output writer sends data to a host/port combination in the StatsD
@@ -139,8 +141,8 @@ public class StatsDWriter extends BaseOutputWriter {
 			pool.setTestOnBorrow(true);
 			pool.setMaxActive(-1);
 			pool.setMaxIdle(-1);
-			pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
-			pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+			pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
+			pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
 
 			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, "StatsdConnectionPool");
 			ManagementFactory.getPlatformMBeanServer()

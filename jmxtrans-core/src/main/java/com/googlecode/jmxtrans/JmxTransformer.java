@@ -67,6 +67,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -299,7 +300,7 @@ public class JmxTransformer implements WatchedCallback {
 		// Sleep for 10 seconds to wait for jobs to complete.
 		// There should be a better way, but it seems that way isn't working
 		// right now.
-		Thread.sleep(10 * 1000);
+		Thread.sleep(MILLISECONDS.convert(10, SECONDS));
 	}
 
 	/**
