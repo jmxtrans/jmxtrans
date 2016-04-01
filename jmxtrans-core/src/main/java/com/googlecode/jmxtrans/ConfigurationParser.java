@@ -76,7 +76,7 @@ public class ConfigurationParser {
 	@VisibleForTesting
 	ImmutableList<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
 		ImmutableList.Builder<Server> results = ImmutableList.builder();
-		List<Server> toProcess = new ArrayList<Server>(secondList);
+		List<Server> toProcess = new ArrayList<>(secondList);
 		for (Server firstServer : firstList) {
 			if (toProcess.contains(firstServer)) {
 				Server found = toProcess.get(secondList.indexOf(firstServer));

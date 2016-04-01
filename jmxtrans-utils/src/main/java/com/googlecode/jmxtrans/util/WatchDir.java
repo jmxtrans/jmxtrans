@@ -50,9 +50,6 @@ public class WatchDir extends Thread {
 	private final WatchedCallback watched;
 	private final Map<WatchKey,Path> keys;
 
-	/**
-     * 
-     */
 	public WatchDir(File dir, WatchedCallback watched) throws IOException {
 		this.watched = watched;
 		this.keys = newHashMap();
@@ -63,7 +60,6 @@ public class WatchDir extends Thread {
 		keys.put(signalledKey, watchedPath);
 	}
 
-	/** */
 	@Override
 	public void run() {
 		for (;;) {
@@ -113,7 +109,6 @@ public class WatchDir extends Thread {
 		}
 	}
 
-	/** */
 	public void stopService() throws IOException {
 		watchService.close();
 	}

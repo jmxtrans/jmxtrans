@@ -132,19 +132,17 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 			PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
 			metricDataRequest.setNamespace(namespace);
-			List<MetricDatum> metricDatumList = new ArrayList<MetricDatum>();
+			List<MetricDatum> metricDatumList = new ArrayList<>();
 
 			// Iterating through the list of query results
 
 			for (Result result : results) {
 				Map<String, Object> resultValues = result.getValues();
-				if (resultValues != null) {
-					for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-						try {
-							metricDatumList.add(processResult(result, values));
-						} catch (IllegalArgumentException iae) {
-							log.error("Could not convert result to double", iae);
-						}
+				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+					try {
+						metricDatumList.add(processResult(result, values));
+					} catch (IllegalArgumentException iae) {
+						log.error("Could not convert result to double", iae);
 					}
 				}
 			}

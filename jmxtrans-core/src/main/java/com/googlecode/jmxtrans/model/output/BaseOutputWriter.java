@@ -124,7 +124,7 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 	/**
 	 * @deprecated Don't use the settings Map, please extract necessary bits at construction time.
 	 */
-	@Deprecated
+	@Deprecated @Override
 	public Map<String, Object> getSettings() {
 		return settings;
 	}

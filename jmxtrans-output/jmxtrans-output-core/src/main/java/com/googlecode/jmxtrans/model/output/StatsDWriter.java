@@ -55,6 +55,8 @@ import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * This output writer sends data to a host/port combination in the StatsD
@@ -135,12 +137,12 @@ public class StatsDWriter extends BaseOutputWriter {
 	@Override
 	public void start() throws LifecycleException {
 		try {
-			pool = new GenericKeyedObjectPool<SocketAddress, DatagramSocket>(new DatagramSocketFactory());
+			pool = new GenericKeyedObjectPool<>(new DatagramSocketFactory());
 			pool.setTestOnBorrow(true);
 			pool.setMaxActive(-1);
 			pool.setMaxIdle(-1);
-			pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
-			pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+			pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
+			pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
 
 			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, "StatsdConnectionPool");
 			ManagementFactory.getPlatformMBeanServer()
@@ -175,20 +177,17 @@ public class StatsDWriter extends BaseOutputWriter {
 		for (Result result : results) {
 			log.debug(result.toString());
 
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Entry<String, Object> values : resultValues.entrySet()) {
+			for (Entry<String, Object> values : result.getValues().entrySet()) {
 
-					if (isNotValidValue(values.getValue())) {
-						log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
-						continue;
-					}
-
-					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-							+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
-
-					doSend(line.trim());
+				if (isNotValidValue(values.getValue())) {
+					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
+					continue;
 				}
+
+				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+						+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
+
+				doSend(line.trim());
 			}
 		}
 	}

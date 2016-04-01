@@ -38,6 +38,7 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  */
 public class Ehcache {
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make it configurable
 	private static final String GW_HOST = "192.168.192.133";
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 

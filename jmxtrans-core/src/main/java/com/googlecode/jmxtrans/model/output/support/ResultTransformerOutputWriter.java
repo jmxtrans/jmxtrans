@@ -59,11 +59,11 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 	}
 
 	public static <T extends OutputWriter> ResultTransformerOutputWriter<T> booleanToNumber(T target) {
-		return new ResultTransformerOutputWriter<T>(new ResultValuesTransformer(new BooleanAsNumberValueTransformer(1, 0)), target);
+		return new ResultTransformerOutputWriter<>(new ResultValuesTransformer(new BooleanAsNumberValueTransformer(1, 0)), target);
 	}
 
 	public static <T extends OutputWriter> ResultTransformerOutputWriter<T> identity(T target) {
-		return new ResultTransformerOutputWriter<T>(new ResultValuesTransformer(new IdentityValueTransformer()), target);
+		return new ResultTransformerOutputWriter<>(new ResultValuesTransformer(new IdentityValueTransformer()), target);
 	}
 
 

@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 
+@SuppressWarnings("squid:S1213") // having instance variables close to their getters is more readable in this class
 public class JmxTransConfiguration {
 	@Parameter(
 			names = {"-c", "--continue-on-error"},

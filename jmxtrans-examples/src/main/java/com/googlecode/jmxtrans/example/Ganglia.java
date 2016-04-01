@@ -41,6 +41,7 @@ public class Ganglia {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make IP addresses configurable
 	public static void main(String[] args) throws Exception {
 		printer.prettyPrint(new JmxProcess(Server.builder()
 				.setHost("w2")

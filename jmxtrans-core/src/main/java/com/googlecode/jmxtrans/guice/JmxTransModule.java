@@ -136,7 +136,7 @@ public class JmxTransModule extends AbstractModule {
 	}
 
 	private ThreadPoolExecutor createExecutorService(int poolSize, int workQueueCapacity, String componentName) {
-		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(workQueueCapacity);
+		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(workQueueCapacity);
 		ThreadFactory threadFactory = threadFactory(componentName);
 		return new ThreadPoolExecutor(poolSize, poolSize, 0L, MILLISECONDS, workQueue, threadFactory);
 	}
@@ -149,7 +149,7 @@ public class JmxTransModule extends AbstractModule {
 	}
 
 	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName) {
-		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<K, V>(factory);
+		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<>(factory);
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);
 		pool.setMaxIdle(-1);

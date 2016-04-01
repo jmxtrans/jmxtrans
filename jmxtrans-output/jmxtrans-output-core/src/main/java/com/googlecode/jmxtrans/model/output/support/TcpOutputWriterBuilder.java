@@ -58,7 +58,7 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	public static <T extends WriterBasedOutputWriter> TcpOutputWriterBuilder<T> builder(
 			@Nonnull InetSocketAddress server,
 			@Nonnull T target) {
-		return new TcpOutputWriterBuilder<T>(server, target);
+		return new TcpOutputWriterBuilder<>(server, target);
 	}
 
 	private LifecycledPool<SocketPoolable> createPool() {
@@ -70,11 +70,11 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 						flushStrategy))
 				.setExpiration(new SocketExpiration())
 				.setSize(poolSize);
-		return new BlazePool<SocketPoolable>(config);
+		return new BlazePool<>(config);
 	}
 
 	public WriterPoolOutputWriter<T> build() {
 		LifecycledPool<SocketPoolable> pool = createPool();
-		return new WriterPoolOutputWriter<T>(target, pool, new Timeout(1, SECONDS));
+		return new WriterPoolOutputWriter<>(target, pool, new Timeout(1, SECONDS));
 	}
 }

@@ -426,8 +426,8 @@ public class Server implements JmxConnectionProvider {
 		@Setter private Integer runPeriodSeconds;
 		@Setter private Integer numQueryThreads;
 		@Setter private boolean local;
-		private final List<OutputWriterFactory> outputWriters = new ArrayList<OutputWriterFactory>();
-		private final List<Query> queries = new ArrayList<Query>();
+		private final List<OutputWriterFactory> outputWriters = new ArrayList<>();
+		private final List<Query> queries = new ArrayList<>();
 		@Setter private KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 
 		private Builder() {}
@@ -435,7 +435,7 @@ public class Server implements JmxConnectionProvider {
 		private Builder(Server server) {
 			this.alias = server.alias;
 			this.pid = server.pid;
-			this.host = (server.pid != null ? null : server.host); // let the host be deduced in the constructor
+			this.host = server.pid != null ? null : server.host; // let the host be deduced in the constructor
 			this.port = server.port;
 			this.username = server.username;
 			this.password = server.password;

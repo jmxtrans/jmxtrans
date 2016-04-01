@@ -33,6 +33,7 @@ import org.apache.commons.cli.Options;
 import javax.annotation.Nonnull;
 import java.io.File;
 
+@SuppressWarnings("squid:S1132") // string literals on the right side look just fine to me here
 public class CommonsCliArgumentParser implements CliArgumentParser {
 	/** Parse the options given on the command line. */
 	@Nonnull

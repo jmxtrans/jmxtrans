@@ -42,6 +42,7 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  */
 public class ActiveMQ {
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make it configurable
 	private static final String GW_HOST = "192.168.192.133";
 
 	public static void main(String[] args) throws Exception {
@@ -179,11 +180,5 @@ public class ActiveMQ {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.processServer(server);
-		// Thread.sleep(1000);
-		// }
-
 	}
 }

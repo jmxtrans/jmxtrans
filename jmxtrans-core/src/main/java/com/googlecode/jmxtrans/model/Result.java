@@ -56,7 +56,9 @@ public class Result {
 	/** Specified as part of the query. */
 	@Getter private final String keyAlias;
 
-	public Result(long epoch, String attributeName, String className, String objDomain, String keyAlias, String typeName, Map<String, Object> values) {
+	public Result(
+			long epoch, String attributeName, String className, String objDomain, String keyAlias, String typeName,
+			@Nonnull Map<String, Object> values) {
 		this.className = className;
 		this.objDomain = objDomain;
 		this.typeName = typeName;

@@ -37,6 +37,7 @@ public class Graphite {
 
 	private static JsonPrinter printer = new JsonPrinter(System.out);
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make IP addresses configurable
 	public static void main(String[] args) throws Exception {
 		printer.prettyPrint(new JmxProcess(Server.builder()
 				.setHost("w2")

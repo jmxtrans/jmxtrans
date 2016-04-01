@@ -67,6 +67,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -299,7 +300,7 @@ public class JmxTransformer implements WatchedCallback {
 		// Sleep for 10 seconds to wait for jobs to complete.
 		// There should be a better way, but it seems that way isn't working
 		// right now.
-		Thread.sleep(10 * 1000);
+		Thread.sleep(MILLISECONDS.convert(10, SECONDS));
 	}
 
 	/**
@@ -414,7 +415,7 @@ public class JmxTransformer implements WatchedCallback {
 	 * Deletes all of the Jobs
 	 */
 	private void deleteAllJobs() throws Exception {
-		List<JobDetail> allJobs = new ArrayList<JobDetail>();
+		List<JobDetail> allJobs = new ArrayList<>();
 		String[] jobGroups = serverScheduler.getJobGroupNames();
 		for (String jobGroup : jobGroups) {
 			String[] jobNames = serverScheduler.getJobNames(jobGroup);
@@ -451,7 +452,7 @@ public class JmxTransformer implements WatchedCallback {
 			files = firstNonNull(jsonDirOrFile.listFiles(), new File[0]);
 		}
 
-		List<File> result = new ArrayList<File>();
+		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			if (this.isJsonFile(file)) {
 				result.add(file);

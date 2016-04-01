@@ -96,7 +96,7 @@ public class KafkaWriter extends BaseOutputWriter {
 		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));
 		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
 		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
-		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
+		this.producer= new Producer<>(new ProducerConfig(kafkaProperties));
 		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
 		this.tags = ImmutableMap.copyOf(firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of()));
 		jsonFactory = new JsonFactory();

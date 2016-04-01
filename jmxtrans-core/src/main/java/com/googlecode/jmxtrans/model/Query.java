@@ -178,7 +178,7 @@ public class Query {
 
 		List<String> attributes;
 		if (attr.isEmpty()) {
-			attributes = new ArrayList<String>();
+			attributes = new ArrayList<>();
 			for (MBeanAttributeInfo attrInfo : info.getAttributes()) {
 				attributes.add(attrInfo.getName());
 			}
@@ -211,7 +211,7 @@ public class Query {
 		if (isUseAllTypeNames()) {
 			return new UseAllTypeNameValuesStringBuilder(separator);
 		} else if (typeNames != null && !typeNames.isEmpty()) {
-			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<String>(typeNames));
+			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<>(typeNames));
 		} else {
 			return new TypeNameValuesStringBuilder(separator);
 		}

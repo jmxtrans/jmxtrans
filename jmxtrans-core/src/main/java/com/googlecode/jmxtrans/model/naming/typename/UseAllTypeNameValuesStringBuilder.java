@@ -39,7 +39,7 @@ public class UseAllTypeNameValuesStringBuilder extends TypeNameValuesStringBuild
 
 	@Override
 	public String build(List<String> typeNames, String typeNameStr) {
-		List<String> allTypeNames = new ArrayList<String>();
+		List<String> allTypeNames = new ArrayList<>();
 		for (TypeNameValue typeNameValue : TypeNameValue.extract(typeNameStr)){
 			if (typeNameValue.getValue() != null && !typeNameValue.getValue().isEmpty()) {
 				allTypeNames.add(typeNameValue.getKey());
