@@ -87,6 +87,7 @@ public class StdOutWriter implements OutputWriterFactory {
 		}
 
 		@Override
+		@SuppressWarnings("squid:S106") // using StdOut is the goal of StdOutWriter
 		protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 			for (Result r : results) {
 				System.out.println(r);

@@ -33,6 +33,7 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  * 
  * @author jon
  */
+@SuppressWarnings("squid:S106") // using StdOut if fine in an example
 public class Graphite {
 
 	private static JsonPrinter printer = new JsonPrinter(System.out);

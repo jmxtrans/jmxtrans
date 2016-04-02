@@ -37,6 +37,7 @@ import com.googlecode.jmxtrans.model.output.GangliaWriter;
  * 
  * @author jon
  */
+@SuppressWarnings("squid:S106") // using StdOut if fine in an example
 public class Ganglia {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);

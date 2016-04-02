@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -233,7 +234,9 @@ public class LibratoWriter extends BaseOutputWriter {
 				logger.warn("Failure {}:'{}' to send result to Librato server '{}' with proxy {}, username {}", responseCode, urlConnection.getResponseMessage(), url, proxy, username);
 			}
 			if (logger.isTraceEnabled()) {
-				IOUtils.copy(urlConnection.getInputStream(), System.out);
+				StringWriter out = new StringWriter();
+				IOUtils.copy(urlConnection.getInputStream(), out);
+				logger.trace(out.toString());
 			}
 		} catch (Exception e) {
 			logger.warn("Failure to send result to Librato server '{}' with proxy {}, username {}", url, proxy, username, e);

@@ -36,6 +36,7 @@ import java.io.File;
  * 
  * @author henri
  */
+@SuppressWarnings("squid:S106") // using StdOut if fine in an example
 public class Local {
 
 	public static void main(String[] args) throws Exception {
