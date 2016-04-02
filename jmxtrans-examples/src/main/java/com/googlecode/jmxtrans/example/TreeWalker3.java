@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.example;
 
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
+import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -122,28 +123,14 @@ public class TreeWalker3 {
 		}
 	}
 
-	private static final class ResultCapture implements OutputWriter, OutputWriterFactory {
+	private static final class ResultCapture extends OutputWriterAdapter implements OutputWriterFactory {
 
 		private List<Result> results;
-
-		@Override
-		public void start() throws LifecycleException {}
-
-		@Override
-		public void stop() throws LifecycleException {}
 
 		@Override
 		public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 			this.results = copyOf(results);
 		}
-
-		@Override
-		public Map<String, Object> getSettings() {
-			return emptyMap();
-		}
-
-		@Override
-		public void validateSetup(Server server, Query query) throws ValidationException {}
 
 		@Override
 		public OutputWriter create() {
