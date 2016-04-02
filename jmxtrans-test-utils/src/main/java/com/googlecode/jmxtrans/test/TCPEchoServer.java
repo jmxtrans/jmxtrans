@@ -97,23 +97,19 @@ public class TCPEchoServer extends ExternalResource {
 	}
 
 	private void processRequests(ServerSocket server) throws IOException {
-		Closer closer = Closer.create();
-		try {
-			Socket socket = server.accept();
+		Socket socket = server.accept();
+		try (
+				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8));
+				PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8))
+		){
 			synchronized (startSynchro) {
 				startSynchro.notifyAll();
 			}
-			BufferedReader in = closer.register(new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8)));
-			PrintWriter out = closer.register(new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8)));
 			String line;
 			while ((line = in.readLine()) != null) {
 				receivedMessages.add(line);
 				out.print(line);
 			}
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 	}
 

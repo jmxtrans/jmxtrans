@@ -22,14 +22,12 @@
  */
 package com.googlecode.jmxtrans.example;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +45,6 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Collections.emptyMap;
 
 /**
  * Walks a JMX tree and prints out all of the unique typenames and their

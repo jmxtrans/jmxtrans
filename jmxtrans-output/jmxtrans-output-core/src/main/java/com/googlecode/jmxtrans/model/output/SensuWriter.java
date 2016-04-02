@@ -129,20 +129,10 @@ public class SensuWriter extends BaseOutputWriter {
 	}
 
 	private void writeToSensu(Server server, Query query, List<Result> results) {
-		Socket socketConnection = null;
-		try {
-			socketConnection = new Socket(host, 3030);
+		try (Socket socketConnection = new Socket(host, 3030)) {
 			serialize(server, query, results, socketConnection.getOutputStream());
 		} catch (Exception e) {
 			logger.warn("Failure to send result to Sensu server '{}'", host, e);
-		} finally {
-			if (socketConnection != null) {
-				try {
-					socketConnection.close();
-				} catch (IOException e) {
-					logger.warn("Exception closing Sensu connection", e);
-				}
-			}
 		}
 	}
 

@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -253,14 +252,14 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 * Check to see if there was an error processing an rrdtool command
 	 */
 	private void checkErrorStream(Process process) throws Exception {
-		Closer closer = Closer.create();
-		try {
-			InputStream is = closer.register(process.getErrorStream());
-			// rrdtool should use platform encoding (unless you did something
-			// very strange with your installation of rrdtool). So let's be
-			// explicit and use the presumed correct encoding to read errors.
-			InputStreamReader isr = closer.register(new InputStreamReader(is, Charset.defaultCharset()));
-			BufferedReader br = closer.register(new BufferedReader(isr));
+		// rrdtool should use platform encoding (unless you did something
+		// very strange with your installation of rrdtool). So let's be
+		// explicit and use the presumed correct encoding to read errors.
+		try (
+				InputStream is = process.getErrorStream();
+				InputStreamReader isr = new InputStreamReader(is, Charset.defaultCharset());
+				BufferedReader br = new BufferedReader(isr)
+		) {
 			StringBuilder sb = new StringBuilder();
 			String line;
 			while ((line = br.readLine()) != null) {
@@ -269,10 +268,6 @@ public class RRDToolWriter extends BaseOutputWriter {
 			if (sb.length() > 0) {
 				throw new RuntimeException(sb.toString());
 			}
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 	}
 
