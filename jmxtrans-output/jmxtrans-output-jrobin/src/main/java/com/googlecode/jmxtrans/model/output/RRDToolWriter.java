@@ -167,22 +167,19 @@ public class RRDToolWriter extends BaseOutputWriter {
 			List<String> keys = new ArrayList<>();
 
 			for (Result res : results) {
-				Map<String, Object> values = res.getValues();
-				if (values != null) {
-					for (Entry<String, Object> entry : values.entrySet()) {
-						if (isNumeric(entry.getValue())) {
-							String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
-							if (keys.contains(key)) {
-								throw new Exception("Duplicate datasource name found: '" + key
-										+ "'. Please try to add more typeName keys to the writer to make the name more unique. " + res.toString());
-							}
-							keys.add(key);
-
-							sb.append("<datasource><!-- ").append(res.getTypeName()).append(":")
-									.append(res.getAttributeName()).append(":").append(entry.getKey())
-									.append(" --><name>").append(key)
-									.append("</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+				for (Entry<String, Object> entry : res.getValues().entrySet()) {
+					if (isNumeric(entry.getValue())) {
+						String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
+						if (keys.contains(key)) {
+							throw new Exception("Duplicate datasource name found: '" + key
+									+ "'. Please try to add more typeName keys to the writer to make the name more unique. " + res.toString());
 						}
+						keys.add(key);
+
+						sb.append("<datasource><!-- ").append(res.getTypeName()).append(":")
+								.append(res.getAttributeName()).append(":").append(entry.getKey())
+								.append(" --><name>").append(key)
+								.append("</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
 					}
 				}
 			}
