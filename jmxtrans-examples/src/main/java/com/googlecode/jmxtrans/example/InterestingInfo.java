@@ -43,7 +43,7 @@ import static com.google.common.collect.Maps.newHashMap;
  * 
  * @author jon
  */
-@SuppressWarnings("squid:S106") // using StdOut if fine in an example
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class InterestingInfo {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);

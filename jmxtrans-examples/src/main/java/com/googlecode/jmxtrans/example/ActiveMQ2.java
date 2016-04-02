@@ -44,7 +44,7 @@ import java.io.IOException;
  * 
  * @author jon
  */
-@SuppressWarnings("squid:S106") // using StdOut if fine in an example
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class ActiveMQ2 {
 
 	private static final JsonPrinter jsonPrinter = new JsonPrinter(System.out);

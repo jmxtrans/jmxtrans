@@ -375,6 +375,8 @@ public class Server implements JmxConnectionProvider {
 	 */
 	private static class JMXServiceURLFactory {
 
+		private JMXServiceURLFactory() {}
+
 		public static JMXServiceURL extractJMXServiceURLFromPid(String pid) throws IOException {
 
 			try {

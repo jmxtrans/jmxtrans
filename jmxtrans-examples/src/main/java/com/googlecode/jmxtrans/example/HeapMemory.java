@@ -36,7 +36,7 @@ import java.io.File;
  * 
  * @author jon
  */
-@SuppressWarnings("squid:S106") // using StdOut if fine in an example
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class HeapMemory {
 
 	public static void main(String[] args) throws Exception {

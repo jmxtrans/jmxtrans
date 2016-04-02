@@ -37,6 +37,8 @@ import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 public class DummyApp {
 	public static final String MOCK_MBEAN_NAME = "org.jmxtrans:type=Counter,name=myCounter";
 
+	private DummyApp() {}
+
 	public static void main(String[] args) throws InterruptedException, MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
 
 		Counter mock = new Counter("myCounter");
