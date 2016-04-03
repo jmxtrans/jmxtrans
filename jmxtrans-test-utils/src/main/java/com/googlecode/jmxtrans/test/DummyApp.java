@@ -33,8 +33,11 @@ import java.util.Date;
 
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 
+@SuppressWarnings("squid:S106") // using StdOut if fine in an example
 public class DummyApp {
 	public static final String MOCK_MBEAN_NAME = "org.jmxtrans:type=Counter,name=myCounter";
+
+	private DummyApp() {}
 
 	public static void main(String[] args) throws InterruptedException, MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
 

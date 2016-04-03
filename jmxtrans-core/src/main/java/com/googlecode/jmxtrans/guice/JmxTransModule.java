@@ -25,7 +25,6 @@ package com.googlecode.jmxtrans.guice;
 
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.module.guice.ObjectMapperModule;
-import com.google.common.io.Closer;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -38,8 +37,8 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
-import com.googlecode.jmxtrans.connections.SocketFactory;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
+import com.googlecode.jmxtrans.connections.SocketFactory;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
@@ -52,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
@@ -96,23 +96,20 @@ public class JmxTransModule extends AbstractModule {
 	@Inject
 	Scheduler scheduler(JmxTransConfiguration configuration, GuiceJobFactory jobFactory) throws SchedulerException, IOException {
 		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
-		Closer closer = Closer.create();
-		try {
-			InputStream stream;
-			if (configuration.getQuartzPropertiesFile() == null) {
-				stream = closer.register(JmxTransModule.class.getResourceAsStream("/quartz.server.properties"));
-			} else {
-				stream = closer.register(new FileInputStream(configuration.getQuartzPropertiesFile()));
-			}
+		try (InputStream stream = openQuartzConfiguration(configuration)) {
 			serverSchedFact.initialize(stream);
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 		Scheduler scheduler = serverSchedFact.getScheduler();
 		scheduler.setJobFactory(jobFactory);
 		return scheduler;
+	}
+
+	private InputStream openQuartzConfiguration(JmxTransConfiguration configuration) throws FileNotFoundException {
+		if (configuration.getQuartzPropertiesFile() == null) {
+			return JmxTransModule.class.getResourceAsStream("/quartz.server.properties");
+		} else {
+			return new FileInputStream(configuration.getQuartzPropertiesFile());
+		}
 	}
 
 	@Provides

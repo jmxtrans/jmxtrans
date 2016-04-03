@@ -39,6 +39,7 @@ import java.util.Collections;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class Tester {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);

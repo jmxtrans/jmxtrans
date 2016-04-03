@@ -29,5 +29,6 @@ import java.io.IOException;
 public class NeverFlush implements FlushStrategy {
 	@Override
 	public void flush(@Nonnull Flushable flushable) throws IOException {
+		// NeverFlush never does anything
 	}
 }

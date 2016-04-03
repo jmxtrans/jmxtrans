@@ -40,6 +40,7 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class ActiveMQ {
 
 	@SuppressWarnings("squid:S1313") // this is an example, no need to make it configurable

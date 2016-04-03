@@ -38,6 +38,7 @@ public class OutputCapture extends ExternalResource {
 	private ByteArrayOutputStream err;
 
 	@Override
+	@SuppressWarnings("squid:S106") // capturing StdOut is the purpose of OutputCapture
 	protected void before() throws Throwable {
 		originalOut = System.out;
 		originalErr = System.err;
