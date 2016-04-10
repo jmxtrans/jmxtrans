@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
@@ -63,6 +64,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -98,6 +100,7 @@ public class JmxTransformer implements WatchedCallback {
 	private volatile boolean isRunning = false;
 	@Nonnull private final ThreadPoolExecutor queryProcessorExecutor;
 	@Nonnull private final ThreadPoolExecutor resultProcessorExecutor;
+	@Nonnull  private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
 	@Inject
 	public JmxTransformer(
@@ -375,9 +378,6 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	/**
-	 * Schedules an individual job.
-	 */
 	private void scheduleJob(Server server) throws ParseException, SchedulerException {
 
 		String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(10);
@@ -393,16 +393,17 @@ public class JmxTransformer implements WatchedCallback {
 			trigger = new CronTrigger();
 			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
 			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
-			trigger.setStartTime(new Date());
+			trigger.setStartTime(computeSpreadStartDate(configuration.getRunPeriod()));
 		} else {
 			int runPeriod = configuration.getRunPeriod();
 			if (server.getRunPeriodSeconds() != null) runPeriod = server.getRunPeriodSeconds();
-
 			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
-			minuteTrigger.setStartTime(new Date());
+			minuteTrigger.setStartTime(computeSpreadStartDate(runPeriod));
 
 			trigger = minuteTrigger;
+
+			// TODO replace Quartz with a ScheduledExecutorService
 		}
 
 		serverScheduler.scheduleJob(jd, trigger);
@@ -411,9 +412,12 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	/**
-	 * Deletes all of the Jobs
-	 */
+	@VisibleForTesting
+	Date computeSpreadStartDate(int runPeriod) {
+		long spread = random.nextLong(MILLISECONDS.convert(runPeriod, SECONDS));
+		return new Date(new Date().getTime() + spread);
+	}
+
 	private void deleteAllJobs() throws Exception {
 		List<JobDetail> allJobs = new ArrayList<>();
 		String[] jobGroups = serverScheduler.getJobGroupNames();

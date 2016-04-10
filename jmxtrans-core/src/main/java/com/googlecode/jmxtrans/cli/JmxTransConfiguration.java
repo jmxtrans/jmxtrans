@@ -120,7 +120,7 @@ public class JmxTransConfiguration {
 			validateWith = PositiveInteger.class
 	)
 	@Getter @Setter
-	private int queryProcessorExecutorWorkQueueCapacity = 1000;
+	private int queryProcessorExecutorWorkQueueCapacity = 100000;
 
 	@Parameter(
 			names = {"--result-processor-executor-pool-size"},
@@ -136,6 +136,6 @@ public class JmxTransConfiguration {
 			validateWith = PositiveInteger.class
 	)
 	@Getter @Setter
-	private int resultProcessorExecutorWorkQueueCapacity = 1000;
+	private int resultProcessorExecutorWorkQueueCapacity = 100000;
 
 }
