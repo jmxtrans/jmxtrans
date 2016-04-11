@@ -47,7 +47,7 @@
 		<rpm.run.cmd>rpm -ivh --nosignature --nodeps /maven/${rpm.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</rpm.run.cmd>
 
 		<verification.message>installation verified</verification.message>
-		<verification.wait.time>60000</verification.wait.time>
+		<verification.wait.time>120000</verification.wait.time>
 	</properties>
 
 	<build>
