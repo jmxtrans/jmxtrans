@@ -27,6 +27,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
+import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
+import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,9 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	private final String bucketType;
 	@Nonnull
 	private final String stringValueDefaultCount;
+
+	@Nonnull
+	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
 
 	public StatsDWriter2(
 			@Nonnull List<String> typeNames,
@@ -89,10 +94,11 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	}
 
 	private String computeActualValue(Object value) {
-		if (isNumeric(value)) {
-			return ":" + value.toString();
+		Object transformedValue = valueTransformer.apply(value);
+		if (isNumeric(transformedValue)) {
+			return ":" + transformedValue.toString();
 		}
 
-		return "." + value.toString() + ":" + stringValueDefaultCount;
+		return "." + transformedValue.toString() + ":" + stringValueDefaultCount;
 	}
 }
