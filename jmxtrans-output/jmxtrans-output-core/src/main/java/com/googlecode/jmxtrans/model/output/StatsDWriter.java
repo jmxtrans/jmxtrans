@@ -32,6 +32,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
+import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
 import lombok.EqualsAndHashCode;
@@ -85,6 +87,8 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private GenericKeyedObjectPool<SocketAddress, DatagramSocket> pool;
 	private ManagedObject mbean;
+
+	@Nonnull private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
 
 
 	/**
@@ -197,11 +201,12 @@ public class StatsDWriter extends BaseOutputWriter {
 	}
 
 	private String computeActualValue(Object value){
-		if(isNumeric(value)){
-			return ":" + value.toString();
+		Object transformedValue = valueTransformer.apply(value);
+		if(isNumeric(transformedValue)){
+			return ":" + transformedValue.toString();
 		}
 
-		return "." + value.toString() + ":" + stringValueDefaultCount.toString();
+		return "." + transformedValue.toString() + ":" + stringValueDefaultCount.toString();
 	}
 
 	private synchronized boolean doSend(String stat) {

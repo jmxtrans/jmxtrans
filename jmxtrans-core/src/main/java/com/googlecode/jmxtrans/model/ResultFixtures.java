@@ -65,6 +65,21 @@ public final class ResultFixtures {
 				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", 10));
 	}
 
+	public static Result numericBelowCPrecisionResult() {
+		return new Result(
+				0,
+				"ObjectPendingFinalizationCount",
+				"sun.management.MemoryImpl",
+				"ObjectDomainName",
+				"ObjectPendingFinalizationCount",
+				"type=Memory",
+				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", Double.MIN_VALUE));
+	}
+
+	public static Iterable<Result> singleNumericBelowCPrecisionResult() {
+		return ImmutableList.of(numericBelowCPrecisionResult());
+	}
+
 	public static Result numericResultWithTypenames(String typeName) {
 		return new Result(
 				0,
