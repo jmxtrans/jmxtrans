@@ -40,7 +40,11 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     git config --global user.name "JmxTrans travis build"
 
     echo "Building master"
-    mvn deploy --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,gpg,rpm,deb -Ddocker.skip=false
+    mvn package sonar:sonar deploy \
+      --settings ${MVN_SETTINGS} -B -V \
+      -PwithMutationTests,gpg,rpm,deb \
+      -Ddocker.skip=false \
+      -Dsonar.host.url=https://nemo.sonarqube.org -Dsonar.login=$SONAR_TOKEN
   elif [ "$TRAVIS_BRANCH" == "release" ]; then
     if [[ `git log --format=%B -n 1` == *"[maven-release-plugin]"* ]]; then
       echo "Do not release commits created by maven release plugin"
