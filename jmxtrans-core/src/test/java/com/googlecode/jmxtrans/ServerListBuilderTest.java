@@ -42,7 +42,6 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.googlecode.jmxtrans.model.ServerFixtures.serverWithNoQuery;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ServerListBuilderTest {
 
@@ -57,12 +56,12 @@ public class ServerListBuilderTest {
 	@Test
 	public void outputWritersAreReusedOnServers() {
 		Server server1 = Server.builder(dummyServer())
-				.addOutputWriter(new DummyOutputWriterFactory("output 1"))
-				.addOutputWriter(new DummyOutputWriterFactory("output 2"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output 1"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output 2"))
 				.build();
 		Server server2 = Server.builder(dummyServer())
-				.addOutputWriter(new DummyOutputWriterFactory("output 1"))
-				.addOutputWriter(new DummyOutputWriterFactory("output 3"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output 1"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output 3"))
 				.build();
 
 		ImmutableList<Server> serverList = new ServerListBuilder()
@@ -71,17 +70,16 @@ public class ServerListBuilderTest {
 		assertThat(serverList).hasSize(1);
 
 		Server createdServer = serverList.iterator().next();
-		assertThat(createdServer.getOutputWriterFactories()).hasSize(3);
 		assertThat(createdServer.getOutputWriters()).hasSize(3);
 	}
 
 	@Test
 	public void outputWritersAreReusedOnQueries() {
 		Query q1 = Query.builder(dummyQuery())
-				.addOutputWriter(new DummyOutputWriterFactory("output1"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output1"))
 				.build();
 		Query q2 = Query.builder(queryWithAllTypeNames())
-				.addOutputWriter(new DummyOutputWriterFactory("output1"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output1"))
 				.build();
 		Server server = Server.builder(serverWithNoQuery())
 				.addQuery(q1)
@@ -98,13 +96,9 @@ public class ServerListBuilderTest {
 		Query query1 = queryIterator.next();
 		Query query2 = queryIterator.next();
 
-		assertThat(query1.getOutputWriters()).hasSize(1);
 		assertThat(query1.getOutputWriterInstances()).hasSize(1);
-		assertThat(query2.getOutputWriters()).hasSize(1);
 		assertThat(query2.getOutputWriterInstances()).hasSize(1);
 
-		assertThat(query1.getOutputWriters().iterator().next())
-				.isSameAs(query2.getOutputWriters().iterator().next());
 		assertThat(query1.getOutputWriterInstances().iterator().next())
 				.isSameAs(query2.getOutputWriterInstances().iterator().next());
 	}
@@ -112,9 +106,9 @@ public class ServerListBuilderTest {
 	@Test
 	public void outputWritersAreReusedOnServersAndQueries() {
 		Server server = Server.builder(serverWithNoQuery())
-				.addOutputWriter(new DummyOutputWriterFactory("output1"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output1"))
 				.addQuery(Query.builder(dummyQuery())
-						.addOutputWriter(new DummyOutputWriterFactory("output1"))
+						.addOutputWriterFactory(new DummyOutputWriterFactory("output1"))
 						.build())
 				.build();
 
@@ -123,11 +117,7 @@ public class ServerListBuilderTest {
 		Server createdServer = servers.iterator().next();
 		Query createdQuery = createdServer.getQueries().iterator().next();
 
-		assertThat(createdServer.getOutputWriterFactories()).hasSize(1);
-		assertThat(createdQuery.getOutputWriters()).hasSize(1);
-
-		assertThat(createdServer.getOutputWriterFactories().iterator().next())
-				.isSameAs(createdQuery.getOutputWriters().iterator().next());
+		assertThat(createdQuery.getOutputWriterInstances()).hasSize(1);
 
 		assertThat(createdServer.getOutputWriters().iterator().next())
 				.isSameAs(createdQuery.getOutputWriterInstances().iterator().next());

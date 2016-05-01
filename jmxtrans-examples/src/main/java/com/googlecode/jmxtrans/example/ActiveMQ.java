@@ -69,7 +69,7 @@ public class ActiveMQ {
 				.addAttr("DequeueCounter")
 				.addAttr("MessageCountAwaitingAcknowledge")
 				.addAttr("DispachedCounter")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q);
 
@@ -86,7 +86,7 @@ public class ActiveMQ {
 				.addAttr("DequeueCount")
 				.addAttr("EnqueueCount")
 				.addAttr("Subscriptions")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q2);
 
@@ -103,7 +103,7 @@ public class ActiveMQ {
 				.addAttr("DequeueCount")
 				.addAttr("EnqueueCount")
 				.addAttr("Subscriptions")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q3);
 
@@ -120,13 +120,13 @@ public class ActiveMQ {
 				.addAttr("DequeueCount")
 				.addAttr("EnqueueCount")
 				.addAttr("Subscriptions")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q4);
 
 		Query q5 = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q5);
 
@@ -134,7 +134,7 @@ public class ActiveMQ {
 				.setObj("java.lang:type=Memory")
 				.addAttr("HeapMemoryUsage")
 				.addAttr("NonHeapMemoryUsage")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q6);
 
@@ -146,7 +146,7 @@ public class ActiveMQ {
 				.addAttr("CurrentThreadCpuTime")
 				.addAttr("CurrentThreadUserTime")
 				.addAttr("TotalStartedThreadCount")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q7);
 
@@ -159,14 +159,14 @@ public class ActiveMQ {
 				.addKey("duration")
 				.addKey("CollectionCount")
 				.addKey("CollectionTime")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q8);
 
 
 		Query q9 = Query.builder()
 				.setObj("java.lang:type=MemoryPool,name=*")
-				.addOutputWriter(GraphiteWriter.builder()
+				.addOutputWriterFactory(GraphiteWriter.builder()
 						.addTypeName("name")
 						.setDebugEnabled(true)
 						.setHost(GW_HOST)

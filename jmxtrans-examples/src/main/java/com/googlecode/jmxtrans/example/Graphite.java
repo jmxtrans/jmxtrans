@@ -45,7 +45,7 @@ public class Graphite {
 				.setPort("1099")
 				.addQuery(Query.builder()
 						.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
-						.addOutputWriter(GraphiteWriter.builder()
+						.addOutputWriterFactory(GraphiteWriter.builder()
 								.setHost("192.168.192.133")
 								.setPort(2003)
 								.setDebugEnabled(true)

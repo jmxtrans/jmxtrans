@@ -22,18 +22,23 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.SingletonOutputWriterFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -107,16 +112,27 @@ public class ServerListBuilder {
 
 		public Server build() {
 			Server.Builder builder = Server.builder(server)
-					.addOutputWriters(temporaryOutputWriters)
+					.addOutputWriters(createOutputWriters(temporaryOutputWriters))
 					.clearQueries();
 			for (Map.Entry<Query, Set<OutputWriterFactory>> queryEntry : queries.entrySet()) {
 				builder.addQuery(
 						Query.builder(queryEntry.getKey())
-								.addOutputWriters(queryEntry.getValue())
+								.addOutputWriters(createOutputWriters(queryEntry.getValue()))
 								.build());
 			}
 			return builder.build();
 		}
 
+	}
+
+	private Collection<OutputWriter> createOutputWriters(Set<OutputWriterFactory> outputWriterFactories) {
+		return from(outputWriterFactories)
+				.transform(new Function<OutputWriterFactory, OutputWriter>() {
+			@Nullable
+			@Override
+			public OutputWriter apply(OutputWriterFactory input) {
+				return input.create();
+			}
+		}).toList();
 	}
 }

@@ -59,7 +59,7 @@ public class Ehcache {
 						.addAttr("ObjectCount")
 						.addAttr("MemoryStoreObjectCount")
 						.addAttr("DiskStoreObjectCount")
-						.addOutputWriter(GraphiteWriter.builder()
+						.addOutputWriterFactory(GraphiteWriter.builder()
 								.addTypeName("name")
 								.setDebugEnabled(true)
 								.setHost(GW_HOST)
