@@ -26,8 +26,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
@@ -42,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.AttributeList;
@@ -131,6 +128,37 @@ public class Query {
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
 	) {
+		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of());
+	}
+
+	public Query(
+			String obj,
+			List<String> keys,
+			List<String> attr,
+			Set<String> typeNames,
+			String resultAlias,
+			boolean useObjDomainAsKey,
+			boolean allowDottedKeys,
+			boolean useAllTypeNames,
+			ImmutableList<OutputWriter> outputWriters
+	) {
+		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				ImmutableList.<OutputWriterFactory>of(), outputWriters);
+	}
+
+	private Query(
+			String obj,
+			List<String> keys,
+			List<String> attr,
+			Set<String> typeNames,
+			String resultAlias,
+			boolean useObjDomainAsKey,
+			boolean allowDottedKeys,
+			boolean useAllTypeNames,
+			List<OutputWriterFactory> outputWriterFactories,
+			List<OutputWriter> outputWriters
+	) {
 		try {
 			this.objectName = new ObjectName(obj);
 		} catch (MalformedObjectNameException e) {
@@ -142,26 +170,12 @@ public class Query {
 		this.keys = copyOf(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
 		this.useAllTypeNames = useAllTypeNames;
-		this.outputWriters = outputWriters == null ? ImmutableList.<OutputWriterFactory>of() : copyOf(outputWriters);
+		this.outputWriters = copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 
-		this.outputWriterInstances = createOutputWriters(outputWriters);
-	}
-
-	private ImmutableList<OutputWriter> createOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
-		if (outputWriters == null) return ImmutableList.of();
-		return FluentIterable
-				.from(outputWriters)
-				.transform(new Function<OutputWriterFactory, OutputWriter>() {
-					@Nullable
-					@Override
-					public OutputWriter apply(OutputWriterFactory input) {
-						return input.create();
-					}
-				})
-				.toList();
+		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -242,7 +256,8 @@ public class Query {
 		@Setter private boolean useObjDomainAsKey;
 		@Setter private boolean allowDottedKeys;
 		@Setter private boolean useAllTypeNames;
-		private final List<OutputWriterFactory> outputWriters = newArrayList();
+		private final List<OutputWriterFactory> outputWriterFactories = newArrayList();
+		private final List<OutputWriter> outputWriters = newArrayList();
 		private final Set<String> typeNames = newHashSet();
 
 		private Builder() {}
@@ -273,16 +288,16 @@ public class Query {
 			return this;
 		}
 
-		public Builder addOutputWriter(OutputWriterFactory outputWriter) {
-			return addOutputWriters(outputWriter);
+		public Builder addOutputWriterFactory(OutputWriterFactory outputWriterFactory) {
+			return addOutputWriterFactories(outputWriterFactory);
 		}
 
-		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
-			this.outputWriters.addAll(asList(outputWriters));
+		public Builder addOutputWriterFactories(OutputWriterFactory... outputWriterFactories) {
+			this.outputWriterFactories.addAll(asList(outputWriterFactories));
 			return this;
 		}
 
-		public Builder addOutputWriters(Collection<OutputWriterFactory> outputWriters) {
+		public Builder addOutputWriters(Collection<OutputWriter> outputWriters) {
 			this.outputWriters.addAll(outputWriters);
 			return this;
 		}
@@ -293,6 +308,19 @@ public class Query {
 		}
 
 		public Query build() {
+			if (!outputWriterFactories.isEmpty()) {
+				return new Query(
+						this.obj,
+						this.keys,
+						this.attr,
+						this.typeNames,
+						this.resultAlias,
+						this.useObjDomainAsKey,
+						this.allowDottedKeys,
+						this.useAllTypeNames,
+						this.outputWriterFactories
+				);
+			}
 			return new Query(
 					this.obj,
 					this.keys,
@@ -302,7 +330,7 @@ public class Query {
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
 					this.useAllTypeNames,
-					this.outputWriters
+					copyOf(this.outputWriters)
 			);
 		}
 

@@ -28,8 +28,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -72,7 +70,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static java.util.Arrays.asList;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
 import static javax.naming.Context.SECURITY_PRINCIPAL;
@@ -176,6 +173,51 @@ public class Server implements JmxConnectionProvider {
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
 			@JacksonInject @Named("mbeanPool") KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
 
+		this(alias, pid, host, port, username, password, protocolProviderPackages, url, cronExpression,
+				runPeriodSeconds, numQueryThreads, local, queries, outputWriters, ImmutableList.<OutputWriter>of(),
+				pool);
+	}
+
+	public Server(
+			String alias,
+			String pid,
+			String host,
+			String port,
+			String username,
+			String password,
+			String protocolProviderPackages,
+			String url,
+			String cronExpression,
+			Integer runPeriodSeconds,
+			Integer numQueryThreads,
+			boolean local,
+			List<Query> queries,
+			ImmutableList<OutputWriter> outputWriters,
+			KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
+
+		this(alias, pid, host, port, username, password, protocolProviderPackages, url, cronExpression,
+				runPeriodSeconds, numQueryThreads, local, queries, ImmutableList.<OutputWriterFactory>of(),
+				outputWriters, pool);
+	}
+
+	private Server(
+			String alias,
+			String pid,
+			String host,
+			String port,
+			String username,
+			String password,
+			String protocolProviderPackages,
+			String url,
+			String cronExpression,
+			Integer runPeriodSeconds,
+			Integer numQueryThreads,
+			boolean local,
+			List<Query> queries,
+			List<OutputWriterFactory> outputWriterFactories,
+			List<OutputWriter> outputWriters,
+			KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
+
 		checkArgument(pid != null || url != null || host != null,
 				"You must provide the pid or the [url|host and port]");
 		checkArgument(!(pid != null && (url != null || host != null)),
@@ -211,22 +253,8 @@ public class Server implements JmxConnectionProvider {
 			this.host = host;
 		}
 		this.pool = pool;
-		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));
-		this.outputWriters = createOutputWriters(firstNonNull(outputWriters, ImmutableList.<OutputWriterFactory>of()));
-	}
-
-	@Nonnull
-	private ImmutableList<OutputWriter> createOutputWriters(@Nonnull Iterable<OutputWriterFactory> outputWriters) {
-		return FluentIterable
-				.from(outputWriters)
-				.transform(new Function<OutputWriterFactory, OutputWriter>() {
-					@Nullable
-					@Override
-					public OutputWriter apply(OutputWriterFactory input) {
-						return input.create();
-					}
-				})
-				.toList();
+		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
+		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
 	}
 
 	public Iterable<Result> execute(Query query) throws Exception {
@@ -428,7 +456,8 @@ public class Server implements JmxConnectionProvider {
 		@Setter private Integer runPeriodSeconds;
 		@Setter private Integer numQueryThreads;
 		@Setter private boolean local;
-		private final List<OutputWriterFactory> outputWriters = new ArrayList<>();
+		private final List<OutputWriterFactory> outputWriterFactories = new ArrayList<>();
+		private final List<OutputWriter> outputWriters = new ArrayList<>();
 		private final List<Query> queries = new ArrayList<>();
 		@Setter private KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 
@@ -461,32 +490,40 @@ public class Server implements JmxConnectionProvider {
 			return this;
 		}
 
-		public Builder addQueries(Query... queries) {
-			this.queries.addAll(asList(queries));
-			return this;
-		}
-
 		public Builder addQueries(Set<Query> queries) {
 			this.queries.addAll(queries);
 			return this;
 		}
 
-		public Builder addOutputWriter(OutputWriterFactory outputWriter) {
-			this.outputWriters.add(outputWriter);
+		public Builder addOutputWriterFactory(OutputWriterFactory outputWriterFactory) {
+			this.outputWriterFactories.add(outputWriterFactory);
 			return this;
 		}
 
-		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
-			this.outputWriters.addAll(asList(outputWriters));
-			return this;
-		}
-
-		public Builder addOutputWriters(Collection<OutputWriterFactory> outputWriters) {
+		public Builder addOutputWriters(Collection<OutputWriter> outputWriters) {
 			this.outputWriters.addAll(outputWriters);
 			return this;
 		}
 
 		public Server build() {
+			if (!outputWriterFactories.isEmpty()) {
+				return new Server(
+						alias,
+						pid,
+						host,
+						port,
+						username,
+						password,
+						protocolProviderPackages,
+						url,
+						cronExpression,
+						runPeriodSeconds,
+						numQueryThreads,
+						local,
+						queries,
+						outputWriterFactories,
+						pool);
+			}
 			return new Server(
 					alias,
 					pid,
@@ -501,8 +538,9 @@ public class Server implements JmxConnectionProvider {
 					numQueryThreads,
 					local,
 					queries,
-					outputWriters,
+					ImmutableList.copyOf(outputWriters),
 					pool);
+
 		}
 	}
 

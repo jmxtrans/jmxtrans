@@ -82,7 +82,7 @@ public class JmxProcessingTests {
 		Query query = Query.builder()
 				.setObj(MBEAN_NAME)
 				.addAttr("DummyValue")
-				.addOutputWriter(outputWriterFactory)
+				.addOutputWriterFactory(outputWriterFactory)
 				.build();
 
 		Server server = localServer();

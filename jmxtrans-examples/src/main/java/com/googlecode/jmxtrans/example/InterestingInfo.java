@@ -70,7 +70,7 @@ public class InterestingInfo {
 				.setObj("java.lang:type=Memory")
 				.addAttr("HeapMemoryUsage")
 				.addAttr("NonHeapMemoryUsage")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q);
 
@@ -79,21 +79,21 @@ public class InterestingInfo {
 				.addAttr("DaemonThreadCount")
 				.addAttr("PeakThreadCount")
 				.addAttr("ThreadCount")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q2);
 
 		Query q3 = Query.builder()
 				.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector")
 				.addAttr("LastGcInfo")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q3);
 
 		Query q4 = Query.builder()
 				.setObj("java.lang:name=ParNew,type=GarbageCollector")
 				.addAttr("LastGcInfo")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q4);
 

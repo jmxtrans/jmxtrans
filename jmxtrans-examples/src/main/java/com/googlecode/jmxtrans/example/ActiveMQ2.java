@@ -82,7 +82,7 @@ public class ActiveMQ2 {
 						.addAttr("DispatchCount")
 						.addAttr("DequeueCount")
 						.addAttr("EnqueueCount")
-						.addOutputWriter(gw)
+						.addOutputWriterFactory(gw)
 						.build())
 				.addQuery(Query.builder()
 						.setObj("org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*")
@@ -96,7 +96,7 @@ public class ActiveMQ2 {
 						.addAttr("DispatchCount")
 						.addAttr("DequeueCount")
 						.addAttr("EnqueueCount")
-						.addOutputWriter(gw)
+						.addOutputWriterFactory(gw)
 						.build()).build());
 		jsonPrinter.prettyPrint(process);
 

@@ -78,7 +78,7 @@ public class Hibernate {
 					.addAttr("CloseStatementCount")
 					.addAttr("PrepareStatementCount")
 					.addAttr("OptimisticFailureCount")
-					.addOutputWriter(GraphiteWriter.builder()
+					.addOutputWriterFactory(GraphiteWriter.builder()
 							.addTypeName("name")
 							.setDebugEnabled(true)
 							.setHost(GW_HOST)

@@ -93,7 +93,7 @@ public class TreeWalker3 {
 			Query.Builder queryBuilder = Query.builder()
 					.setObj(name.getCanonicalName());
 			ResultCapture resultCapture = new ResultCapture();
-			queryBuilder.addOutputWriter(resultCapture);
+			queryBuilder.addOutputWriterFactory(resultCapture);
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
 				queryBuilder.addAttr(attrInfo.getName());
