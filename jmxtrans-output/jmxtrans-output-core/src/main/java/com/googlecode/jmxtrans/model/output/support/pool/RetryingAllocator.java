@@ -61,8 +61,8 @@ public class RetryingAllocator<V extends Poolable> implements Allocator<V> {
 
 	/**
 	 * @param allocator Allocator
-	 * @param waitInterval Wait time between reallocation attempts (ms)
-	 * @param maxWaitInterval Max time to wait for a reallocation (ms)
+	 * @param waitInterval Wait time between allocation attempts (ms)
+	 * @param maxWaitInterval Max time to wait for an allocation (ms)
 	 */
 	public RetryingAllocator(Allocator<V> allocator, long waitInterval, long maxWaitInterval) {
 		this.allocator = allocator;
