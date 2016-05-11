@@ -37,16 +37,24 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.when;
 
-public class RetryingReallocatorTest {
+public class RetryingAllocatorTest {
 
 	private Allocator<TestPoolable> allocator;
-	private RetryingReallocator<TestPoolable> retryingReallocator;
+	private RetryingAllocator<TestPoolable> retryingAllocator;
 
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setUp() {
 		allocator = (Allocator<TestPoolable>) Mockito.mock(Allocator.class);
-		retryingReallocator = new RetryingReallocator<TestPoolable>(allocator, 100, 5000);
+		retryingAllocator = new RetryingAllocator<TestPoolable>(allocator, 100, 5000);
+	}
+
+	@Test
+	public void testDeallocate() throws Exception {
+		TestPoolable value = new TestPoolable("value");
+
+		retryingAllocator.deallocate(value);
+		Mockito.verify(allocator).deallocate(value);
 	}
 
 	@Test
@@ -54,29 +62,11 @@ public class RetryingReallocatorTest {
 		TestPoolable value = new TestPoolable("value");
 		when(allocator.allocate(any(Slot.class))).thenReturn(value);
 
-		Assert.assertSame(value, retryingReallocator.allocate(null));
+		Assert.assertSame(value, retryingAllocator.allocate(null));
 	}
 
 	@Test
-	public void testDellocate() throws Exception {
-		TestPoolable value = new TestPoolable("value");
-
-		retryingReallocator.deallocate(value);
-		Mockito.verify(allocator).deallocate(value);
-	}
-
-	@Test
-	public void testReallocate() throws Exception {
-		TestPoolable original = new TestPoolable("original");
-		TestPoolable value = new TestPoolable("value");
-		when(allocator.allocate(any(Slot.class))).thenReturn(value);
-
-		Assert.assertSame(value, retryingReallocator.reallocate(null, original));
-	}
-
-	@Test
-	public void testReallocate_FailThenSucceed() throws Exception {
-		TestPoolable original = new TestPoolable("original");
+	public void testAllocate_FailThenSucceed() throws Exception {
 		TestPoolable value = new TestPoolable("value");
 
 		when(allocator.allocate(any(Slot.class)))
@@ -85,17 +75,15 @@ public class RetryingReallocatorTest {
 			.thenThrow(new IOException())
 			.thenReturn(value);
 
-		Assert.assertSame(value, retryingReallocator.reallocate(null, original));
+		Assert.assertSame(value, retryingAllocator.allocate(null));
 		Mockito.verify(allocator, atLeast(2)).allocate(any(Slot.class));
 	}
 
 	@Test(expected = RetryException.class)
-	public void testReallocate_Fail() throws Exception {
-		TestPoolable original = new TestPoolable("original");
-
+	public void testAllocate_Fail() throws Exception {
 		when(allocator.allocate(any(Slot.class))).thenThrow(new IOException());
 
-		retryingReallocator.reallocate(null, original);
+		retryingAllocator.allocate(null);
 	}
 
 	private static class TestPoolable implements Poolable {

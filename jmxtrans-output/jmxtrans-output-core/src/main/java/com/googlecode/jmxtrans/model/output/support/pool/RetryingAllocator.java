@@ -32,31 +32,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import stormpot.Allocator;
 import stormpot.Poolable;
-import stormpot.Reallocator;
 import stormpot.Slot;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public class RetryingReallocator<V extends Poolable> implements Reallocator<V> {
+public class RetryingAllocator<V extends Poolable> implements Allocator<V> {
 
-	private static final Logger log = LoggerFactory.getLogger(RetryingReallocator.class);
+	private static final Logger log = LoggerFactory.getLogger(RetryingAllocator.class);
 
 	/**
-	 * Interval to wait between reallocation attempts
+	 * Interval to wait between allocation attempts
 	 */
 	private static final long WAIT_INTERVAL_MS = 100;
 
 	/**
-	 * Max time to wait when attempting to reallocate a slot
+	 * Max time to wait when attempting to allocate a slot
 	 */
 	private static final long MAX_WAIT_MS = TimeUnit.SECONDS.toMillis(60);
 
 	@Nonnull private final Allocator<V> allocator;
 	@Nonnull private final Retryer<V> retryer;
 
-	public RetryingReallocator(Allocator<V> allocator) {
+	public RetryingAllocator(Allocator<V> allocator) {
 		this(allocator, WAIT_INTERVAL_MS, MAX_WAIT_MS);
 	}
 
@@ -65,7 +64,7 @@ public class RetryingReallocator<V extends Poolable> implements Reallocator<V> {
 	 * @param waitInterval Wait time between reallocation attempts (ms)
 	 * @param maxWaitInterval Max time to wait for a reallocation (ms)
 	 */
-	public RetryingReallocator(Allocator<V> allocator, long waitInterval, long maxWaitInterval) {
+	public RetryingAllocator(Allocator<V> allocator, long waitInterval, long maxWaitInterval) {
 		this.allocator = allocator;
 		this.retryer = RetryerBuilder.<V>newBuilder()
 			.retryIfException()
@@ -83,24 +82,13 @@ public class RetryingReallocator<V extends Poolable> implements Reallocator<V> {
 	}
 
 	@Override
-	public V reallocate(final Slot slot, V poolable) throws Exception {
-		try {
-			deallocate(poolable);
-		} catch (Throwable ignore) { // NOPMD
-			// ignored as per specification
-		}
-
+	public V allocate(final Slot slot) throws Exception {
 		return retryer.call(new Callable<V>() {
 			@Override
 			public V call() throws Exception {
-				return allocate(slot);
+				return allocator.allocate(slot);
 			}
 		});
-	}
-
-	@Override
-	public V allocate(Slot slot) throws Exception {
-		return allocator.allocate(slot);
 	}
 
 	@Override
