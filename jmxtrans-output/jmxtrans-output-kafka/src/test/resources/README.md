@@ -1,5 +1,6 @@
 Here is a commented version the config.json file
 
+```json
 {
    "servers" : [ {
       "host" : "9999", # JMX port to connect to to gather metrics
@@ -26,16 +27,19 @@ Here is a commented version the config.json file
       } ]
    } ]
 }
+```
 
 The above file with generate kafka messages written to the kafka topic
 "myTopic". The HeapMemoryUsage metric has 4 parts to it (init,
 commited, max, and used) and so 4 messages will be written to the
 topic that look like:
 
+```
 {"keyspace":"myPrefix.localhost_9999.sun_management_MemoryImpl.HeapMemoryUsage_init","value":"536870912","timestamp":1462947750,"tags":{}}
 {"keyspace":"myPrefix.localhost_9999.sun_management_MemoryImpl.HeapMemoryUsage_committed","value":"536870912","timestamp":1462947750,"tags":{}}
 {"keyspace":"myPrefix.localhost_9999.sun_management_MemoryImpl.HeapMemoryUsage_max","value":"536870912","timestamp":1462947750,"tags":{}}
 {"keyspace":"myPrefix.localhost_9999.sun_management_MemoryImpl.HeapMemoryUsage_used","value":"22020096","timestamp":1462947750,"tags":{}}
+```
 
 FYI, the keyspace is a period-delimited string that consists of the
 following parts:
