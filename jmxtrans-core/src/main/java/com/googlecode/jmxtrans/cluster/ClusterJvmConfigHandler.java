@@ -1,10 +1,8 @@
 package com.googlecode.jmxtrans.cluster;
 
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.cache.PathChildrenCache;
-import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
-import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
-import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.framework.recipes.cache.*;
+import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.apache.curator.utils.ZKPaths;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
@@ -21,49 +19,60 @@ public class ClusterJvmConfigHandler{
 
     private static final Logger log = LoggerFactory.getLogger(ClusterJvmConfigHandler.class);
 
+    private static final String OWNER_NODE_NAME  = "owner";
+    private static final String AFFINITY_NODE_NAME = "affinity";
+    private static final String CONFIG_NODE_NAME = "config";
+    private static final String REQUEST_NODE_NAME = "request";
+
+    private String heartbeatPath;
+    private String jvmRootPath;
+
     private String jvmAlias;
     private String workerAlias;
     private String affinity = "";
     private String config = "";
 
-    private Boolean isOwner = false;
+    PathChildrenCache jvmConfigCache = null;
 
-    PathChildrenCache configPathCache = null;
-    PathChildrenCache ownerPathCache  = null;
-    InterProcessMutex lock = null;
+    TreeCache jvmOwnershipCache = null;
+
+    InterProcessSemaphoreMutex lock = null;
 
     private ClusterConfigChangeListener changeListener;
 
     private CuratorFramework clClient;
 
-    public ClusterJvmConfigHandler(String jvmAlias, String workerAlias, CuratorFramework clClient, ClusterConfigChangeListener changeListener){
+    public ClusterJvmConfigHandler(String heartbeatPath, String configPath, String jvmAlias, String workerAlias, CuratorFramework clClient, ClusterConfigChangeListener changeListener){
         this.jvmAlias = jvmAlias;
         this.workerAlias = workerAlias;
         this.clClient = clClient;
         this.changeListener = changeListener;
-        log.debug("JVM handler " + this.jvmAlias + " initiated!");
+        this.heartbeatPath = heartbeatPath;
+        this.jvmRootPath = configPath + "/" + jvmAlias;
+        log.debug("JVM handler " + this.workerAlias + " - " +this.jvmAlias + " initiated!");
     }
 
     public void initialize() throws Exception{
         try {
-            lock  = new InterProcessMutex(clClient, "/jmxtrans/jvms/" + this.jvmAlias + "/owner" );
-            configPathCache = new PathChildrenCache(clClient, "/jmxtrans/jvms/" + this.jvmAlias, false);
-            ownerPathCache  = new PathChildrenCache(clClient, "/jmxtrans/jvms/" + this.jvmAlias + "/owner", false);
+            lock = new InterProcessSemaphoreMutex(clClient,this.jvmRootPath + "/" + OWNER_NODE_NAME);
+            jvmConfigCache = new PathChildrenCache(clClient, this.jvmRootPath, false);
+            jvmOwnershipCache = new TreeCache(clClient, this.jvmRootPath + "/" + OWNER_NODE_NAME);
 
-            if (null == this.clClient.checkExists().forPath("/jmxtrans/jvms/" + this.jvmAlias)) {
+            if (null == this.clClient.checkExists().forPath(this.jvmRootPath)) {
                 throw new ClusterJvmHandlerException("The JVM config does not exists in Zookeeper");
             }
-            if(null == this.clClient.checkExists().forPath("/jmxtrans/jvms/" + this.jvmAlias + "/affinity")){
+            if(null == this.clClient.checkExists().forPath(this.jvmRootPath + "/" + AFFINITY_NODE_NAME)){
                 throw new ClusterJvmHandlerException("The affinity cannot be determinded");
             }
 
             getRequiredFields();
             runLeaderElection();
 
-            configPathCache.getListenable().addListener(new ConfigPathChangeListener());
-            ownerPathCache.getListenable().addListener(new OwnerShipPathChangeListener());
-            configPathCache.start();
-            ownerPathCache.start();
+            jvmConfigCache.getListenable().addListener(new ConfigPathChangeListener());
+            jvmConfigCache.start();
+
+            jvmOwnershipCache.getListenable().addListener(new OwnershipTreeChangeListener());
+            jvmOwnershipCache.start();
 
 
         } catch (Exception e) {
@@ -72,8 +81,21 @@ public class ClusterJvmConfigHandler{
     }
 
     private void getRequiredFields() throws Exception{
-        this.affinity = new String(this.clClient.getData().forPath("/jmxtrans/jvms/" + this.jvmAlias + "/affinity"));
+        getAffinmityFromZookeeper();
+    }
 
+    private void getAffinmityFromZookeeper() throws Exception{
+        this.affinity = new String(this.clClient.getData().forPath(this.jvmRootPath + "/"  + AFFINITY_NODE_NAME));
+    }
+
+    private void getConfigFromZookeeper() throws Exception{
+        if(this.lock.isAcquiredInThisProcess()){
+            this.config = new String(this.clClient.getData().forPath(this.jvmRootPath + "/"  + CONFIG_NODE_NAME));
+        }
+        else
+        {
+            this.config = null;
+        }
     }
 
     private void tryToTakeOwnership(Boolean sendRequestIfFailed){
@@ -95,14 +117,26 @@ public class ClusterJvmConfigHandler{
 
     private void setUpOwnershipRequest(){
         try{
-            Stat stat = this.clClient.checkExists().forPath("/jmxtrans/jvms/" + this.jvmAlias + "/request");
+            Stat stat = this.clClient.checkExists().forPath(this.jvmRootPath + "/"  + REQUEST_NODE_NAME);
             if(null == stat) {
-                this.clClient.create().withMode(CreateMode.EPHEMERAL).forPath("/jmxtrans/jvms/" + this.jvmAlias + "/request");
+                this.clClient.create().withMode(CreateMode.EPHEMERAL).forPath(this.jvmRootPath + "/"  + REQUEST_NODE_NAME,
+                        this.workerAlias.getBytes());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void releaseOwnership(){
+        try {
+            log.debug("Release " + this.workerAlias + " " + this.jvmAlias + " owner:" + lock.isAcquiredInThisProcess());
+            if(lock.isAcquiredInThisProcess()) {
+                lock.release();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void runLeaderElection(){
@@ -111,14 +145,14 @@ public class ClusterJvmConfigHandler{
             return;
         }
         if(hasAffinityForJvm()){
-            log.debug("Worker " + this.workerAlias + " tries to get the ownership to affinity jvm");
+            log.debug("Worker " + this.workerAlias + " tries to get the ownership to AFFINITY jvm " + this.jvmAlias);
             tryToTakeOwnership(true);
             return;
         }
 
         try {
-            if(null == this.clClient.checkExists().forPath("/jmxtrans/workers/" + this.affinity)){
-                log.debug("Worker " + this.workerAlias + " tries to get the ownership to REMOTE jvm");
+            if(null == this.clClient.checkExists().forPath(heartbeatPath + "/" + this.affinity)){
+                log.debug("Worker " + this.workerAlias + " tries to get the ownership to REMOTE jvm " + jvmAlias);
                 tryToTakeOwnership(false);
             }
         } catch (Exception e) {
@@ -127,24 +161,45 @@ public class ClusterJvmConfigHandler{
 
     }
 
-    public Boolean hasAffinityForJvm(){
+    private Boolean hasAffinityForJvm(){
         return this.workerAlias.equals(this.affinity);
     }
 
-    private class OwnerShipPathChangeListener implements PathChildrenCacheListener{
+    public void dipose(){
+
+    }
+
+    public void notifyWorkerpoolChange(){
+        runLeaderElection();
+    }
+
+    private class OwnershipTreeChangeListener implements TreeCacheListener{
 
         @Override
-        public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
-            if(!isOwner && lock.isAcquiredInThisProcess()){
-                log.debug("Worker " + workerAlias + " has taken the ownership of " + jvmAlias);
-                //config = new String(clClient.getData().forPath(""));
-                isOwner = true;
+        public void childEvent(CuratorFramework curatorFramework, TreeCacheEvent treeCacheEvent) throws Exception {
+            Boolean checkOwner = false;
+            switch (treeCacheEvent.getType()){
+                case NODE_ADDED:
+//                    log.debug(workerAlias + ": Tree node added: " + ZKPaths.getNodeFromPath(treeCacheEvent.getData().getPath()));
+                    checkOwner = true;
+                    break;
+                case NODE_UPDATED:
+//                    log.debug(workerAlias+ ": Tree node updated: " + ZKPaths.getNodeFromPath(treeCacheEvent.getData().getPath()));
+                    checkOwner = true;
+                    break;
+                case NODE_REMOVED:
+//                    log.debug(workerAlias+ ": Tree node removed: " + ZKPaths.getNodeFromPath(treeCacheEvent.getData().getPath()));
+                    checkOwner = true;
+                    break;
             }
-            else if(isOwner && ! lock.isAcquiredInThisProcess()){
-                log.debug("Worker " + workerAlias + " has lost the ownership of " + jvmAlias);
-                isOwner = false;
+            if(checkOwner && !lock.isAcquiredInThisProcess() && hasAffinityForJvm()){
+                if(lock.acquire(2, TimeUnit.SECONDS)){
+                    ClusterJvmConfigHandler.this.clClient.delete()
+                            .deletingChildrenIfNeeded()
+                            .forPath(ClusterJvmConfigHandler.this.jvmRootPath + "/" + REQUEST_NODE_NAME);
+                    log.debug(workerAlias + " Get the ownership of affinity jvm from remote worker");
+                }
             }
-
         }
     }
 
@@ -153,30 +208,44 @@ public class ClusterJvmConfigHandler{
         @Override
         public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
             getRequiredFields();
-            log.debug("JVM_" + jvmAlias + " affinity_" + affinity + " ownership:" + lock.isAcquiredInThisProcess());
 
             switch ( pathChildrenCacheEvent.getType() )
             {
-                /*case CHILD_ADDED:
-                {
-                    System.out.println("Node added: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+                case CHILD_ADDED:
+                    log.debug(workerAlias + " Node added: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+                    if(REQUEST_NODE_NAME.equals(ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()))
+                            && !hasAffinityForJvm()
+                            && lock.isAcquiredInThisProcess())
+                    {
+                        log.debug("Affinity worker arrived for " + jvmAlias);
+                        releaseOwnership();
+                    }
                     break;
-                }*/
 
                 case CHILD_UPDATED:
                 {
-                    System.out.println("Node changed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()) +
+                    log.debug(workerAlias + " Node changed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()) +
                             new String(clClient.getData().forPath(pathChildrenCacheEvent.getData().getPath())));
+
+
+                    if(ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()).equals(AFFINITY_NODE_NAME)){
+                        ClusterJvmConfigHandler.this.getAffinmityFromZookeeper();
+                        break;
+                    }
+
+                    if(ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()).equals(CONFIG_NODE_NAME)){
+                        ClusterJvmConfigHandler.this.getConfigFromZookeeper();
+                        break;
+                    }
                     break;
                 }
 
                 case CHILD_REMOVED:
                 {
-                    System.out.println("Node removed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+                    log.debug(workerAlias + " Node removed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
                     break;
                 }
             }
         }
     }
-
 }

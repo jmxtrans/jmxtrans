@@ -12,15 +12,12 @@ import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -82,6 +79,9 @@ public class ClusterConnectTest {
             clClient.create().creatingParentContainersIfNeeded()
                     .withMode(CreateMode.PERSISTENT)
                     .forPath("/jmxtrans/jvms/jvm_01/affinity", ("worker_01").getBytes());
+            clClient.create().creatingParentContainersIfNeeded()
+                    .withMode(CreateMode.PERSISTENT)
+                    .forPath("/jmxtrans/jvms/jvm_01/owner");
 
             clClient.create().creatingParentContainersIfNeeded()
                     .withMode(CreateMode.PERSISTENT)
@@ -89,15 +89,24 @@ public class ClusterConnectTest {
             clClient.create().creatingParentContainersIfNeeded()
                     .withMode(CreateMode.PERSISTENT)
                     .forPath("/jmxtrans/jvms/jvm_02/affinity", ("worker_02").getBytes());
+            clClient.create().creatingParentContainersIfNeeded()
+                    .withMode(CreateMode.PERSISTENT)
+                    .forPath("/jmxtrans/jvms/jvm_02/owner");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         ClusterConfigClient clusterConnect1 = new ClusterConfigClient();
-        clusterConnect1.initialize(file("cluster.properties"));
+        clusterConnect1.initialize(clConfig.getString("zookeeper.connectionstring"),
+                "worker_01",
+                clConfig.getString("zookeeper.heartbeatpath"),
+                clConfig.getString("zookeeper.configpath"));
 
         ClusterConfigClient clusterConnect2 = new ClusterConfigClient();
-        clusterConnect1.initialize(clConfig.getString("cluster.connectionstring"),"worker_02");
+        clusterConnect2.initialize(clConfig.getString("zookeeper.connectionstring"),
+                "worker_02",
+                clConfig.getString("zookeeper.heartbeatpath"),
+                clConfig.getString("zookeeper.configpath"));
 
 
 
@@ -174,7 +183,7 @@ public class ClusterConnectTest {
     private CuratorFramework setupClusterClient() {
         try {
             clConfig = new PropertiesConfiguration(file("cluster.properties"));
-            clClient = CuratorFrameworkFactory.newClient(clConfig.getString("cluster.connectionstring"), new ExponentialBackoffRetry(1000, 3));
+            clClient = CuratorFrameworkFactory.newClient(clConfig.getString("zookeeper.connectionstring"), new ExponentialBackoffRetry(1000, 3));
             clClient.start();
         } catch (ConfigurationException e) {
             e.printStackTrace();
