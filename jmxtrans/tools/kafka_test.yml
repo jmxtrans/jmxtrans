@@ -1,0 +1,36 @@
+
+## jmx port
+query_port:
+global_host_alias:
+
+
+# output settings
+outputWriters:
+  - "@class": "com.googlecode.jmxtrans.model.output.KeyOutWriter"
+    debug: true
+    outputFile : "/tmp/keyout1.txt"
+    maxLogFileSize : "10MB"
+    maxLogBackupFiles : 200
+  - "@class": "com.googlecode.jmxtrans.model.output.OpenFalconWriterFactory"
+    url: "http://127.0.0.1:1988/v1/push"
+    tags: "module=kafka"
+
+# queries
+queries:
+  - name: BrokerTopicMetrics
+    obj: "kafka.server:type=BrokerTopicMetrics,*"
+    resultAlias: "ByteInPerSec"
+    attr:
+      - "Count"
+      - "MeanRate"
+    typeName:
+      - "name"
+      - "topic"
+
+# sets of hosts that get the same queries
+sets:
+  - setname: kafka_metrics
+    query_names:
+      - BrokerTopicMetrics
+    hosts:
+      - localhost:9998
