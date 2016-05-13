@@ -30,7 +30,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
-import lombok.EqualsAndHashCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +42,8 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * @author Qiannan Lu
+ * Modifier: modeyang 2016/5/13
  */
-@EqualsAndHashCode(exclude = {"jsonFactory"})
 public class OpenFalconWriter implements WriterBasedOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(OpenFalconWriter.class);
 	private static final String ORIGIN = "GAUGE";

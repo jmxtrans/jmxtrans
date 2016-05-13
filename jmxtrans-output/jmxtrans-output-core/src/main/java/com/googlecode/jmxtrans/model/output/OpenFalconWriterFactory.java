@@ -29,8 +29,6 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.HttpOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.HttpUrlConnectionConfigurer;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import java.net.URL;
@@ -42,9 +40,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created: 2016/4/5.
  * Author: Qiannan Lu
+ * Modifier: modeyang 2016/5/13
  */
-@EqualsAndHashCode
-@ToString
 public class OpenFalconWriterFactory implements OutputWriterFactory {
 	private final boolean booleanAsNumber;
 	@Nonnull
