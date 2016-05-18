@@ -105,6 +105,7 @@
 		<module>jmxtrans-core</module>
 		<module>jmxtrans-test-utils</module>
 		<module>jmxtrans-docker-test</module>
+		<module>jmxtrans-cluster</module>
 	</modules>
 
 	<scm>

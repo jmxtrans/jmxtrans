@@ -4,12 +4,12 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |clConfig|
 
   # Share an additional folder where the full project is accessible
-  config.vm.synced_folder "..", "/jmxtrans_src"
+  clConfig.vm.synced_folder "..", "/jmxtrans_src"
 
-  config.vm.define "centos" do |centos|
+  clConfig.vm.define "centos" do |centos|
     # Every Vagrant virtual environment requires a box to build off of.
     centos.vm.box = "puppetlabs/centos-6.6-64-nocm"
 
@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     centos.vm.provision "shell", inline: "yum install /jmxtrans_src/target/rpm/jmxtrans/RPMS/noarch/jmxtrans-*.rpm"
   end
 
-  config.vm.define "ubuntu" do |ubuntu|
+  clConfig.vm.define "ubuntu" do |ubuntu|
     ubuntu.vm.box = "ubuntu/trusty64"
     ubuntu.vm.provider "virtualbox" do |v|
       v.memory = 1024
