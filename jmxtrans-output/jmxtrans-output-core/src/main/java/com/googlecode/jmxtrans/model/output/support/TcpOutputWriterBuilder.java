@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model.output.support;
 import com.google.common.base.Charsets;
 import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import com.googlecode.jmxtrans.model.output.support.pool.NeverFlush;
+import com.googlecode.jmxtrans.model.output.support.pool.RetryingAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketExpiration;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
@@ -63,11 +64,11 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 
 	private LifecycledPool<SocketPoolable> createPool() {
 		Config<SocketPoolable> config = new Config<SocketPoolable>()
-				.setAllocator(new SocketAllocator(
+				.setAllocator(new RetryingAllocator<SocketPoolable>(new SocketAllocator(
 						server,
 						socketTimeoutMillis,
 						charset,
-						flushStrategy))
+						flushStrategy)))
 				.setExpiration(new SocketExpiration())
 				.setSize(poolSize);
 		return new BlazePool<>(config);
