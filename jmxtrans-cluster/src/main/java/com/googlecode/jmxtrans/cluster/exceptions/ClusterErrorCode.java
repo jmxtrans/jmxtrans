@@ -2,10 +2,9 @@ package com.googlecode.jmxtrans.cluster.exceptions;
 
 public enum ClusterErrorCode implements ErrorCode {
 
-    SERVICE_TIMEOUT(101),
-    CREDIT_CARD_EXPIRED(102),
-    AMOUNT_TOO_HIGH(103),
-    INSUFFICIENT_FUNDS(104);
+    ZOKKEPER_NOR_AVAILABLE(101),
+    CONNECTION_TIMEOUT(102),
+    MISSING_CONFIGURATION(103);
 
     private final int number;
 

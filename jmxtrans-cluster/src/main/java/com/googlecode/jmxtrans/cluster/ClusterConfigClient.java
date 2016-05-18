@@ -26,6 +26,7 @@ import java.util.Map;
  * service. If the cluster connection is enabled, the configuration will
  * be queried from the cluster coordination service.
  */
+@Deprecated
 public class ClusterConfigClient extends Thread implements ClusterConfigChangeListener{
     private Configuration clConfiguration;
     private String clServiceConnectionString;

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
  * Created by kulcsart on 5/6/2016.
  *
  */
+@Deprecated
 public class ClusterJvmConfigHandler{
 
     private static final Logger log = LoggerFactory.getLogger(ClusterJvmConfigHandler.class);
