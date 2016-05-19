@@ -20,9 +20,8 @@ public class ClusterServiceModule extends AbstractModule {
     Configuration configuration;
 
     public ClusterServiceModule(Configuration configuration) throws ClassNotFoundException{
-        this.configuration = configuration;
-        checkNotNull(configuration);
-        implClass = getImplClassForName(configuration.getString("provider.classname"));
+        this.configuration = checkNotNull(configuration);
+        implClass = Class.forName(configuration.getString("provider.classname"));
     }
 
     @Override
@@ -31,10 +30,5 @@ public class ClusterServiceModule extends AbstractModule {
     }
 
     @Provides
-    Configuration clusterConfiguration(){return this.configuration;}
-
-    private Class getImplClassForName(String className) throws ClassNotFoundException{
-            return Class.forName(className);
-
-    }
+    Configuration getClusterConfiguration(){return this.configuration;}
 }

@@ -22,26 +22,22 @@ public class ZookeeperConfigBuilder {
     }
 
     public ZookeeperConfigBuilder withConnectionString(String connectionString){
-        checkNotNull(connectionString, "Connection String cannot be null!");
-        this.connectionString = connectionString;
+        this.connectionString = checkNotNull(connectionString, "Connection String cannot be null!");
         return this;
     }
 
     public ZookeeperConfigBuilder withWorkerAlias(String workerAlias){
-        checkNotNull(workerAlias, "Worker Alias cannot be null!");
-        this.workerAlias = workerAlias;
+        this.workerAlias = checkNotNull(workerAlias, "Worker Alias cannot be null!");
         return this;
     }
 
     public ZookeeperConfigBuilder withHeartBeatPath(String heartBeatPath){
-        checkNotNull(heartBeatPath, "Heart beating path cannot be null!");
-        this.heartBeatPath = heartBeatPath;
+        this.heartBeatPath = checkNotNull(heartBeatPath, "Heart beating path cannot be null!");
         return this;
     }
 
     public ZookeeperConfigBuilder withConfigPath(String configPath){
-        checkNotNull(configPath, "Configurtation path cannot be null!");
-        this.configPath = configPath;
+        this.configPath = checkNotNull(configPath, "Configurtation path cannot be null!");
         return this;
     }
 
@@ -59,12 +55,12 @@ public class ZookeeperConfigBuilder {
 
     public ZookeeperConfig build(){
         return new ZookeeperConfig(
-                this.workerAlias,
-                this.connectionString,
-                this.heartBeatPath,
-                this.configPath,
-                this.connectTimeout,
-                this.connectRetry
+                checkNotNull(this.workerAlias, "workerAlias cannot be null!"),
+                checkNotNull(this.connectionString, "connectionString string cannot be null!"),
+                checkNotNull(this.heartBeatPath, "heartBeatPath string cannot be null!"),
+                checkNotNull(this.configPath, "configPath string cannot be null!"),
+                checkNotNull(this.connectTimeout, "connectTimeout string cannot be null!"),
+                checkNotNull(this.connectRetry, "connectRetry string cannot be null!")
                 );
     }
 

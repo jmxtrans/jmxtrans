@@ -1,7 +1,10 @@
 package com.googlecode.jmxtrans.cluster;
 
 /**
- * Created by kulcsart on 5/14/2016.
+ * ClusterService. It should be implemeted by any cluster provider.
+ *
+ * @author Tibor Kulcsar
+ * @since <pre>May 17, 2016</pre>
  */
 public interface ClusterService {
 

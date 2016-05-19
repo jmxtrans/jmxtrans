@@ -5,6 +5,7 @@ import lombok.Setter;
 
 /**
  * Created by kulcsart on 5/17/2016.
+ *
  */
 public class ZookeeperConfig {
     public static final String OWNER_NODE_NAME  = "owner";

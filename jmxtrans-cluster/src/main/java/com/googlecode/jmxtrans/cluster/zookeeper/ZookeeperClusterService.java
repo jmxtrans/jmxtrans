@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.cluster.ClusterService;
+import com.googlecode.jmxtrans.cluster.ClusterStateChangeListener;
+import com.googlecode.jmxtrans.cluster.ConfigurationChangeListener;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.configuration.Configuration;
@@ -28,8 +30,12 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Created by kulcsart on 5/14/2016.
+ * ZookeeperClusterService. The zookeper based implementation of the ClusterService interface. Basically it is
+ * anm individual thread that manages the connection to a zookeeper instance or cluster.
  *
+ * @author Tibor Kulcsar
+ * @since <pre>May 17, 2016</pre>
+ * @see ClusterService
  */
 public class ZookeeperClusterService extends Thread implements ClusterService {
     private static final Logger log = LoggerFactory.getLogger(ZookeeperClusterService.class);
@@ -82,6 +88,7 @@ public class ZookeeperClusterService extends Thread implements ClusterService {
     public void stopService() {
         this.interrupt();
     }
+
 
     @Override
     public void run() {
