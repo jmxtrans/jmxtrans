@@ -47,9 +47,9 @@ public class ZookeeperClusterService extends Thread implements ClusterService {
 
     @Inject
     public ZookeeperClusterService(Injector injector, Configuration configuration) {
+        this.injector = injector;
+        this.configuration = configuration;
         log.info(this.getClass().getName() + " initiated");
-        checkNotNull(this.injector = injector, "Injector cannot be null");
-        checkNotNull(this.configuration = configuration, "Configuration cannnot be null");
     }
 
     private void initilaize() {

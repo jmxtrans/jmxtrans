@@ -9,23 +9,20 @@ import org.slf4j.LoggerFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Created by kulcsart on 5/14/2016.
+ * ClusterServiceModule. Google Guice dependency injection module.
  *
+ * @author Tibor Kulcsar
+ * @since <pre>May 17, 2016</pre>
  */
 public class ClusterServiceModule extends AbstractModule {
     private static final Logger log = LoggerFactory.getLogger(ClusterServiceModule.class);
     Class implClass;
     Configuration configuration;
 
-    public ClusterServiceModule(Configuration configuration){
+    public ClusterServiceModule(Configuration configuration) throws ClassNotFoundException{
         this.configuration = configuration;
-
         checkNotNull(configuration);
-        String className = configuration.getString("provider.classname");
-        checkNotNull(className);
-
-        implClass = getImplClassForName(className);
-        checkNotNull(implClass);
+        implClass = getImplClassForName(configuration.getString("provider.classname"));
     }
 
     @Override
@@ -36,12 +33,8 @@ public class ClusterServiceModule extends AbstractModule {
     @Provides
     Configuration clusterConfiguration(){return this.configuration;}
 
-    private Class getImplClassForName(String className){
-        try{
+    private Class getImplClassForName(String className) throws ClassNotFoundException{
             return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            log.error("ClusterService implementation {} cannot be found in classpath!", className );
-            return null;
-        }
+
     }
 }

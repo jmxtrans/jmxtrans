@@ -54,7 +54,7 @@ public class ClusterManagerTest {
         assertTrue(ZookeeperClusterService.class.getName().equals(manager.service.getClass().getName()));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = ClassNotFoundException.class)
     public void testMisstypedDependeny() throws Exception{
         Configuration configuration = createGoldenConfiguration(testingServer.getConnectString());
         configuration.setProperty("provider.classname", ZookeeperClusterService.class.getName().substring(1));

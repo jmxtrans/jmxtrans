@@ -57,19 +57,6 @@
 			<artifactId>commons-configuration</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jpathwatch</groupId>
-			<artifactId>jpathwatch</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>animal-sniffer-annotations</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
