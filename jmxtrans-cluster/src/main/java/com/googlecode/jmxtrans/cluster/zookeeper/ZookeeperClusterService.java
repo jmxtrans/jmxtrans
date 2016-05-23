@@ -1,13 +1,11 @@
 package com.googlecode.jmxtrans.cluster.zookeeper;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import com.googlecode.jmxtrans.cluster.ClusterService;
-import com.googlecode.jmxtrans.cluster.ClusterStateChangeListener;
-import com.googlecode.jmxtrans.cluster.ConfigurationChangeListener;
-import lombok.Getter;
-import lombok.Setter;
+import com.googlecode.jmxtrans.cluster.events.ClusterStateChangeListener;
+import com.googlecode.jmxtrans.cluster.events.ConfigurationChangeListener;
 import org.apache.commons.configuration.Configuration;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -23,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +44,13 @@ public class ZookeeperClusterService extends Thread implements ClusterService {
     private ZookeeperConfig clConfig;
     private CuratorFramework clClient;
 
-    PathChildrenCache jvmRootCache;
-    PathChildrenCache workerRootCache;
+    private PathChildrenCache jvmRootCache;
+    private PathChildrenCache workerRootCache;
 
-    Map<String, ZookeeperJvmHandler> jvmHandlers= ImmutableMap.of();
+    private List<ClusterStateChangeListener> clusterStateChangeListeners = ImmutableList.of();
+    private List<ConfigurationChangeListener> configurationChangeListeners = ImmutableList.of();
 
+    Map<String, ZookeeperJvmHandler> jvmHandlers= new HashMap<>();
 
     @Inject
     public ZookeeperClusterService(Injector injector, Configuration configuration) {
@@ -94,6 +95,8 @@ public class ZookeeperClusterService extends Thread implements ClusterService {
     public void run() {
         try {
             startHeartBeating();
+            queryConfigs();
+            startChangeListeners();
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
         }
@@ -121,12 +124,10 @@ public class ZookeeperClusterService extends Thread implements ClusterService {
     }
 
     private void startHeartBeating() throws Exception{
-        if(isConnected() && !isHeartBeating()){
-            this.clClient.create()
-                    .creatingParentContainersIfNeeded()
-                    .withMode(CreateMode.PERSISTENT)
-                    .forPath(clConfig.getWorkerNodePath());
-        }
+        this.clClient.create()
+                .creatingParentContainersIfNeeded()
+                .withMode(CreateMode.EPHEMERAL)
+                .forPath(clConfig.getWorkerNodePath());
     }
 
     private void stopHeartBeating() throws Exception{
@@ -155,6 +156,7 @@ public class ZookeeperClusterService extends Thread implements ClusterService {
         }
         List<String> jvms = this.clClient.getChildren().forPath(this.clConfig.getConfigPath());
         for (String i : jvms) {
+            System.out.println("Jvm: " + i);
             ZookeeperJvmHandler handler = new ZookeeperJvmHandler(i, this.clClient, clConfig);
             handler.initialize();
 
@@ -225,11 +227,16 @@ public class ZookeeperClusterService extends Thread implements ClusterService {
         }
     }
 
-
-
-
-
-
-
-
+    public void registerStateChangeListener(ClusterStateChangeListener stateChangeListener){
+        this.clusterStateChangeListeners.add(stateChangeListener);
+    }
+    public void unregisterStateChangeListener(ClusterStateChangeListener stateChangeListener){
+        this.clusterStateChangeListeners.remove(stateChangeListener);
+    }
+    public void registerConfigurationChangeListeners(ConfigurationChangeListener configurationChangeListener){
+        this.configurationChangeListeners.add(configurationChangeListener);
+    }
+    public void unregisterConfigurationChangeListeners(ConfigurationChangeListener configurationChangeListener){
+        this.configurationChangeListeners.remove(configurationChangeListener);
+    }
 }

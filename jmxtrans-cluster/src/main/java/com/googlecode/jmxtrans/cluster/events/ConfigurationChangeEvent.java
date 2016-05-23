@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.cluster;
+package com.googlecode.jmxtrans.cluster.events;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

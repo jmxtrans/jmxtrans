@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.cluster;
+package com.googlecode.jmxtrans.cluster.events;
 
 /**
  * ClusterStateChangeListener. This interface should be implemented by the client that is using the

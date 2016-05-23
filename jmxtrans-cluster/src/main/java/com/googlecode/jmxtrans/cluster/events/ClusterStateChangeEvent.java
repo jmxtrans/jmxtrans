@@ -1,4 +1,4 @@
-package com.googlecode.jmxtrans.cluster;
+package com.googlecode.jmxtrans.cluster.events;
 
 /**
  * Created by kulcsart on 5/19/2016.
