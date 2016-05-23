@@ -64,7 +64,7 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Arrays.asList;
 
 /**
@@ -95,7 +95,10 @@ public class Query {
 	 * typeName=name=PS Eden Space,type=MemoryPool
 	 * <p/>
 	 * If you add a typeName("name"), then it'll retrieve 'PS Eden Space' from
-	 * the string
+	 * the string.
+	 * <p>
+	 * The order of the elements of this set matches the order provided by the
+	 * user.
 	 */
 	@Getter private final ImmutableSet<String> typeNames;
 
@@ -121,12 +124,29 @@ public class Query {
 			@JsonProperty("obj") String obj,
 			@JsonProperty("keys") List<String> keys,
 			@JsonProperty("attr") List<String> attr,
-			@JsonProperty("typeNames") Set<String> typeNames,
+			@JsonProperty("typeNames") List<String> typeNames,
 			@JsonProperty("resultAlias") String resultAlias,
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
+	) {
+		// For typeName, note the using copyOf does not change the order of
+		// the elements.
+		this(obj, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of());
+	}
+
+	public Query(
+			String obj,
+			List<String> keys,
+			List<String> attr,
+			Set<String> typeNames,
+			String resultAlias,
+			boolean useObjDomainAsKey,
+			boolean allowDottedKeys,
+			boolean useAllTypeNames,
+			List<OutputWriterFactory> outputWriters
 	) {
 		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
 				outputWriters, ImmutableList.<OutputWriter>of());
@@ -171,6 +191,8 @@ public class Query {
 		this.allowDottedKeys = allowDottedKeys;
 		this.useAllTypeNames = useAllTypeNames;
 		this.outputWriters = copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
+		// We need to preserve the order of typeNames. So note that copyOf
+		// does not mess with the order. 
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
@@ -258,7 +280,9 @@ public class Query {
 		@Setter private boolean useAllTypeNames;
 		private final List<OutputWriterFactory> outputWriterFactories = newArrayList();
 		private final List<OutputWriter> outputWriters = newArrayList();
-		private final Set<String> typeNames = newHashSet();
+		// We need to pick an order preserving Set implementation here to
+		// avoid unpredictable ordering of typeNames.
+		private final Set<String> typeNames = newLinkedHashSet();
 
 		private Builder() {}
 
@@ -302,7 +326,7 @@ public class Query {
 			return this;
 		}
 
-		public Builder setTypeNames(Set<String> typeNames) {
+		public Builder setTypeNames(Collection<String> typeNames) {
 			this.typeNames.addAll(typeNames);
 			return this;
 		}
