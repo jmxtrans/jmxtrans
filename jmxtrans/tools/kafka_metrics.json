@@ -30,7 +30,8 @@
         "topic"
        ], 
        "@class": "com.googlecode.jmxtrans.model.output.OpenFalconWriterFactory", 
-       "tags": "module=kafka"
+       "tags": "module=kafka",
+			 "metricType": "COUNTER"
       }
      ], 
      "useObjDomainAsKey": null, 

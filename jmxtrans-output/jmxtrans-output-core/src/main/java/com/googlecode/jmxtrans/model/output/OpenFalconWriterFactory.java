@@ -53,6 +53,7 @@ public class OpenFalconWriterFactory implements OutputWriterFactory {
 
 	private final String endpoint;
 	private final String tags;
+	private final String metricType;
 
 	public OpenFalconWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
@@ -60,13 +61,15 @@ public class OpenFalconWriterFactory implements OutputWriterFactory {
 			@JsonProperty("url") URL url,
 			@JsonProperty("readTimeoutInMillis") Integer readTimeoutInMillis,
 			@JsonProperty("endpoint") String endpoint,
-			@JsonProperty("tags") String tags) {
+			@JsonProperty("tags") String tags,
+			@JsonProperty("metricType") String metricType) {
 		this.booleanAsNumber = booleanAsNumber;
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
 		this.url = checkNotNull(url);
 		this.readTimeoutInMillis = firstNonNull(readTimeoutInMillis, 0);
 		this.endpoint = endpoint;
 		this.tags = tags;
+		this.metricType = metricType;
 	}
 
 	@Override
@@ -79,7 +82,8 @@ public class OpenFalconWriterFactory implements OutputWriterFactory {
 								new JsonFactory(),
 								typeNames,
 								endpoint,
-								tags),
+								tags,
+								metricType),
 						url,
 						null,
 						new HttpUrlConnectionConfigurer(

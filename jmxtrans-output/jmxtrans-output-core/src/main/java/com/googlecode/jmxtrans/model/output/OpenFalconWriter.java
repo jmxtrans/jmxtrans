@@ -48,21 +48,31 @@ public class OpenFalconWriter implements WriterBasedOutputWriter {
 	private static final Logger log = LoggerFactory.getLogger(OpenFalconWriter.class);
 	private static final String ORIGIN = "GAUGE";
 	private static final String DELTA_PS = "COUNTER";
-	private static final String DELTA = "";
+	private static final Integer STEP = 60;
 
 	@Nonnull
 	private final JsonFactory jsonFactory;
 	@Nonnull
 	private final ImmutableList<String> typeNames;
 
-	private String endpoint;
-	private String tags;
+	private final String endpoint;
+	private final String tags;
+	private final String metricType;
 
-	public OpenFalconWriter(@Nonnull JsonFactory jsonFactory, @Nonnull ImmutableList<String> typeNames, String endpoint, String tags) {
+	public OpenFalconWriter(@Nonnull JsonFactory jsonFactory, @Nonnull ImmutableList<String> typeNames, String endpoint, String tags, String metricType) {
 		this.jsonFactory = jsonFactory;
 		this.typeNames = typeNames;
 		this.endpoint = endpoint;
 		this.tags = tags;
+		if (metricType.length() == 0) {
+			this.metricType = ORIGIN;
+		} else {
+			if (metricType.toUpperCase().equals(ORIGIN) || metricType.toUpperCase().equals(DELTA_PS)) {
+				log.error("metricType must in [" + ORIGIN + "," + DELTA_PS + "]" + ", not " + metricType.toUpperCase());
+				metricType = ORIGIN;
+			}
+			this.metricType = metricType;
+		}
 	}
 
 	@Override
@@ -80,13 +90,13 @@ public class OpenFalconWriter implements WriterBasedOutputWriter {
 						String tags = this.tags.trim();
 						if (tags.length() > 0) {
 							tags += ",";
-						} 
+						}
 						tags += "port=" + server.getPort().toString() + "," + result.getTypeName();
 						g.writeStringField("tags", tags);
 						g.writeStringField("endpoint", server.getHost());
-						g.writeStringField("counterType", ORIGIN);
+						g.writeStringField("counterType", this.metricType.toUpperCase());
 						g.writeNumberField("timestamp", System.currentTimeMillis() / 1000L);
-						g.writeNumberField("step", 60);
+						g.writeNumberField("step", STEP);
 						Object value = values.getValue();
 						if (value instanceof Integer) {
 							g.writeNumberField("value", (Integer) value);

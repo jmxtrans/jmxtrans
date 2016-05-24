@@ -41,7 +41,7 @@ public class OpenFalconWriterTest {
 
 	@Test
 	public void testWrite() throws Exception {
-		OpenFalconWriter openFalconWriter = new OpenFalconWriter(new JsonFactory(), ImmutableList.<String>of(), "localhost", "project=falcon,module=judge");
+		OpenFalconWriter openFalconWriter = new OpenFalconWriter(new JsonFactory(), ImmutableList.<String>of(), "localhost", "project=falcon,module=judge", "GAUGE");
 
 		StringWriter writer = new StringWriter();
 
