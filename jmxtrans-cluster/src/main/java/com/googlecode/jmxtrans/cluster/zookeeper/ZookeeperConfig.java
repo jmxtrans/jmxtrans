@@ -46,7 +46,7 @@ public class ZookeeperConfig {
         return configPath + "/" + jvmAlias + "/" + OWNER_NODE_NAME;
     }
 
-    public String getAffinityNodePath(String jvmAlias){
+    public String getJvmAffinityNodePath(String jvmAlias){
         return configPath + "/" + jvmAlias + "/" + AFFINITY_NODE_NAME;
     }
 
@@ -56,6 +56,10 @@ public class ZookeeperConfig {
 
     public String getRequestNodePath(String jvmAlias){
         return configPath + "/" + jvmAlias + "/" + REQUEST_NODE_NAME;
+    }
+
+    public String getAffinityWorkerPath(String affinity){
+        return this.heartBeatPath + "/" + affinity;
     }
 
 

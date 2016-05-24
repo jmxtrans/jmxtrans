@@ -54,7 +54,7 @@ public class ZookeeperJvmHandler {
 
             checkNotNull(this.clClient.checkExists().forPath(clConfig.getOwnerNodePath(this.jvmAlias)),
                     "The JVM - %s clConfig does not exists in Zookeeper!", this.jvmAlias);
-            checkNotNull(this.clClient.checkExists().forPath(clConfig.getAffinityNodePath(this.jvmAlias)),
+            checkNotNull(this.clClient.checkExists().forPath(clConfig.getJvmAffinityNodePath(this.jvmAlias)),
                     "The affinity of Jvm %s cannot be determinded!", this.jvmAlias);
 
             readAffinityFromZookeeper();
@@ -147,7 +147,7 @@ public class ZookeeperJvmHandler {
 
     private void readAffinityFromZookeeper() throws Exception{
         String newAffinity = new String(ZookeeperJvmHandler.this.clClient.getData().forPath(
-                clConfig.getAffinityNodePath(ZookeeperJvmHandler.this.jvmAlias)));
+                clConfig.getJvmAffinityNodePath(ZookeeperJvmHandler.this.jvmAlias)));
 
         if(newAffinity.length() > 0 && !newAffinity.equals(this.affinity)){
             this.affinity = newAffinity;

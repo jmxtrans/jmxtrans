@@ -12,12 +12,14 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.api.SyncBuilder;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
+import org.assertj.core.util.Compatibility;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,8 +49,8 @@ public class ClusterManagerTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
         testingServer = new TestingServer(2181,true);
-        client = CuratorFrameworkFactory.newClient("10.0.0.6:2181", new ExponentialBackoffRetry(1000,3));
-        //client = CuratorFrameworkFactory.newClient(testingServer.getConnectString(), new ExponentialBackoffRetry(1000,3));
+        //client = CuratorFrameworkFactory.newClient("10.0.0.6:2181", new ExponentialBackoffRetry(1000,3));
+        client = CuratorFrameworkFactory.newClient(testingServer.getConnectString(), new ExponentialBackoffRetry(1000,3));
         //client = CuratorFrameworkFactory.newClient("10.189.33.100:2181,10.189.33.101:2181,10.189.33.102:2181", new ExponentialBackoffRetry(1000,3));
         client.start();
     }
@@ -156,6 +158,18 @@ public class ClusterManagerTest {
         Thread.sleep(20000);
 
         client.close();
+
+    }
+
+    @Test
+    public void testEmptyNode() throws Exception{
+        client.create().creatingParentContainersIfNeeded().withMode(CreateMode.EPHEMERAL).forPath("/test/tnode", "Test data".getBytes());
+
+        Thread.sleep(1000);
+
+        byte[] data = client.getData().forPath("/test/tnode");
+        System.out.println(new String(data));
+        assertNotNull(data);
 
     }
 
