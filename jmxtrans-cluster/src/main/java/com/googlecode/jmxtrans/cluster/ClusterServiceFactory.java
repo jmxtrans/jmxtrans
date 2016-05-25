@@ -7,8 +7,11 @@ import org.apache.commons.configuration.Configuration;
 import javax.annotation.Nonnull;
 
 /**
- * Created by kulcsart on 5/20/2016.
+ * ClusterServiceFactory. This factory hides the guice dependecy injection. It creates a ClusterService based on the
+ * classname defined in the configuration.
  *
+ * @author Tibor Kulcsar
+ * @since <pre>May 17, 2016</pre>
  */
 public class ClusterServiceFactory {
 

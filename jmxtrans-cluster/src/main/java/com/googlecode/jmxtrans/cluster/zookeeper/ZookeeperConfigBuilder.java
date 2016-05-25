@@ -6,8 +6,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Created by kulcsart on 5/17/2016.
+ * ZookeeperConfigBuilder. The builder of ZookeeperConfig. It can build from code or from a Configuration object.
  *
+ * @author Tibor Kulcsar
+ * @since <pre>May 17, 2016</pre>
  */
 public class ZookeeperConfigBuilder {
     private String connectionString;

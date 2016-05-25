@@ -13,8 +13,8 @@ public interface ClusterService {
 
     void startService();
     void stopService();
-    public void registerStateChangeListener(ClusterStateChangeListener stateChangeListener);
-    public void unregisterStateChangeListener(ClusterStateChangeListener stateChangeListener);
-    public void registerConfigurationChangeListeners(ConfigurationChangeListener configurationChangeListener);
-    public void unregisterConfigurationChangeListeners(ConfigurationChangeListener configurationChangeListener);
+    void registerStateChangeListener(ClusterStateChangeListener stateChangeListener);
+    void unregisterStateChangeListener(ClusterStateChangeListener stateChangeListener);
+    void registerConfigurationChangeListener(ConfigurationChangeListener configurationChangeListener);
+    void unregisterConfigurationChangeListener(ConfigurationChangeListener configurationChangeListener);
 }

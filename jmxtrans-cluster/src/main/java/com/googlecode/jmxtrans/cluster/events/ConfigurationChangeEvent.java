@@ -12,10 +12,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ConfigurationChangeEvent {
     private final ConfigurationChangeEvent.Type type;
 
-    private final String configuration;
+    private final String[] configuration;
 
 
-    public ConfigurationChangeEvent(ConfigurationChangeEvent.Type type, String configuration) {
+    public ConfigurationChangeEvent(ConfigurationChangeEvent.Type type, String[] configuration) {
         this.type = checkNotNull(type, "The change type cannot be null!");
         this.configuration = checkNotNull(configuration, "The configuration cannot be null!");
     }

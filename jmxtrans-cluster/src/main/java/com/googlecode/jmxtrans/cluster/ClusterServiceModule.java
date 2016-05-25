@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * ClusterServiceModule. Google Guice dependency injection module.
+ * ClusterServiceModule. Google Guice dependency injection module. The injection is defined in the configuration.
  *
  * @author Tibor Kulcsar
  * @since <pre>May 17, 2016</pre>

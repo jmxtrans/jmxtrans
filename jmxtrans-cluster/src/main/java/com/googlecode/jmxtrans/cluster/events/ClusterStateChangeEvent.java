@@ -1,18 +1,23 @@
 package com.googlecode.jmxtrans.cluster.events;
 
+import org.apache.curator.framework.state.ConnectionState;
+
 /**
- * Created by kulcsart on 5/19/2016.
+ * ClusterStateChangeEvent. This class contains an event for the ClusterStateChangeListeners that are registered
+ * in the ClusterService
  *
+ * @author Tibor Kulcsar
+ * @since <pre>May 17, 2016</pre>
  */
 public class ClusterStateChangeEvent {
 
-    private final ClusterStateChangeEvent.Type type;
+    private final ConnectionState type;
 
-    public ClusterStateChangeEvent(ClusterStateChangeEvent.Type type) {
+    public ClusterStateChangeEvent(ConnectionState type) {
         this.type = type;
     }
 
-    public ClusterStateChangeEvent.Type getType() {
+    public ConnectionState getType() {
         return this.type;
     }
 
@@ -20,13 +25,4 @@ public class ClusterStateChangeEvent {
         return "PathChildrenCacheEvent{type=" + this.type + '}';
     }
 
-    public static enum Type {
-        CONNECTION_SUSPENDED,
-        CONNECTION_RECONNECTED,
-        CONNECTION_LOST,
-        INITIALIZED;
-
-        private Type() {
-        }
-    }
 }

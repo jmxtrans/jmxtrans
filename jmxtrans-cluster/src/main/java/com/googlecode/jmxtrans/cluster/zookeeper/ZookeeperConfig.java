@@ -1,11 +1,14 @@
 package com.googlecode.jmxtrans.cluster.zookeeper;
 
+import com.googlecode.jmxtrans.cluster.ClusterService;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Created by kulcsart on 5/17/2016.
+ * ZookeeperConfig. This class stores the Zookeeper related configuration parts.
  *
+ * @author Tibor Kulcsar
+ * @since <pre>May 17, 2016</pre>
  */
 public class ZookeeperConfig {
     public static final String OWNER_NODE_NAME  = "owner";
