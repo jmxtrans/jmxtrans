@@ -10,6 +10,8 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,7 +34,7 @@ public class ZookeeperJvmHandler  {
 
     private String jmxTransConfig;
     private Optional<String> affinity = Optional.<String>absent();
-    private AtomicReference<OwnerMode> ownerMode = new AtomicReference<OwnerMode>(OwnerMode.LEADER_ELECTION);
+    private AtomicReference<OwnerMode> ownerMode = new AtomicReference<OwnerMode>(OwnerMode.LATENT);
     private AtomicReference<OwnerState> ownerState = new AtomicReference<OwnerState>(OwnerState.NOT_OWNER);
 
     private PathChildrenCache   configPathCache;
@@ -66,6 +68,7 @@ public class ZookeeperJvmHandler  {
 
         affinityLock = new InterProcessSemaphoreMutex(clClient,clConfig.getJvmAffinityNodePath(jvmAlias));
 
+        configPathCache.start();
         configPathCache.getListenable().addListener(new PathChildrenCacheListener() {
             @Override
             public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
@@ -73,15 +76,17 @@ public class ZookeeperJvmHandler  {
             }
         });
 
-        configPathCache.start();
-        startAffinityWorkerCache();
         updateOwnership();
+        startAffinityWorkerCache();
     }
 
     protected void close() throws Exception{
+        ownerState.set(OwnerState.NOT_OWNER);
+        ownerMode.set(OwnerMode.LATENT);
+        configPathCache.close();
         stopAffinity();
         stopLeaderLatch();
-        configPathCache.close();
+        switchToLatent();
     }
 
     private void startAffinityWorkerCache() throws Exception{
@@ -97,32 +102,57 @@ public class ZookeeperJvmHandler  {
         }
     }
 
-    private void stopAffinityWorkerCache() throws Exception{
+    private void stopAffinityWorkerCache(){
         try{
             affinityWorkerCache.close();
-        }
-        finally{
+        } catch (IOException e) {
+        } catch (NullPointerException e){
+        } finally{
             affinityWorkerCache = null;
         }
     }
 
     private void startLeaderLatch() throws Exception{
+        log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " start leader lection process");
         if((null != leaderLatch) && (leaderLatch.getState() == LeaderLatch.State.STARTED)){ return; }
         stopLeaderLatch();
-        leaderLatch = new LeaderLatch(clClient,clConfig.getOwnerNodePath(jvmAlias));
+        leaderLatch = new LeaderLatch(clClient,clConfig.getOwnerNodePath(jvmAlias), clConfig.getWorkerAlias());
+
         leaderLatch.addListener(new LeaderLatchListener() {
             @Override
-            public void isLeader() { getOwnership(); }
+            public void isLeader() {
+                log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " win the leader election");
+                try {
+                    log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias + " Current leader is " + leaderLatch.getLeader());
+                }
+                catch (Exception e){
+                    log.error(e.getMessage());
+                }
+                getOwnership();
+            }
 
             @Override
-            public void notLeader() { lostOwnership(); }
+            public void notLeader() {
+                log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " lost the leader election");
+                try {
+                    log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias + " Current leader is " + leaderLatch.getLeader());
+                }
+                catch (Exception e){
+                    log.error(e.getMessage());
+                }
+
+                lostOwnership();
+            }
         });
         leaderLatch.start();
+        log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " started leader lection process");
     }
 
     private void stopLeaderLatch() throws Exception{
-        if((null != leaderLatch) && (leaderLatch.getState() != LeaderLatch.State.CLOSED)){
+        try{
             leaderLatch.close();
+        } catch (NullPointerException e ){
+            log.error(clConfig.getWorkerAlias() + "::" + jvmAlias + e.getMessage());
         }
     }
 
@@ -142,22 +172,39 @@ public class ZookeeperJvmHandler  {
     }
 
     private void switchToAffinity() throws Exception{
+        log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " switch to affinity");
         stopLeaderLatch();
+        if(ownerState.compareAndSet(OwnerState.OWNER, OwnerState.NOT_OWNER)){
+            notifyConfigRemoved();
+        }
         startAffinity();
     }
 
     private void switchToLeaderLatch() throws Exception{
+        log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " switch to leader election");
         stopAffinity();
+        if(ownerState.compareAndSet(OwnerState.OWNER, OwnerState.NOT_OWNER)){
+            notifyConfigRemoved();
+        }
         startLeaderLatch();
     }
 
+    private void switchToLatent() throws Exception{
+        log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " switch to latent");
+        stopAffinity();
+        stopLeaderLatch();
+        ownerState.compareAndSet(OwnerState.OWNER, OwnerState.NOT_OWNER);
+        notifyConfigRemoved();
+    }
+
     private void getOwnership(){
+        log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " get the ownership");
         ownerState.set(OwnerState.OWNER);
         notifyConfigChange();
-
     }
 
     private void lostOwnership(){
+        log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias+ " lost the ownership");
         ownerState.set(OwnerState.NOT_OWNER);
         notifyConfigRemoved();
     }
@@ -203,18 +250,23 @@ public class ZookeeperJvmHandler  {
                 clConfig.getJvmAffinityNodePath(jvmAlias)));
 
         if(newAffinity.length()>0) {
-            if(!affinity.isPresent() && !newAffinity.equals(affinity.get())) {
-                affinity = Optional.of(newAffinity);
-                affinityWorker = Optional.of(clClient.checkExists().forPath(clConfig.getAffinityWorkerPath(affinity.get())));
+            affinity = Optional.of(newAffinity);
+            if(affinity.isPresent() ){
+                Stat stat = clClient.checkExists().forPath(clConfig.getAffinityWorkerPath(affinity.get()));
+                affinityWorker = null != stat ? Optional.of(stat) : Optional.<Stat>absent();
             }
         }
 
-        if(affinityWorker.isPresent() && ownerMode.compareAndSet(OwnerMode.LEADER_ELECTION, OwnerMode.AFFINITY_WORKER)){
+        if(affinityWorker.isPresent() && (
+                        ownerMode.compareAndSet(OwnerMode.LEADER_ELECTION, OwnerMode.AFFINITY_WORKER) ||
+                        ownerMode.compareAndSet(OwnerMode.LATENT, OwnerMode.AFFINITY_WORKER))){
             switchToAffinity();
             return;
         }
 
-        if(!affinityWorker.isPresent() && ownerMode.compareAndSet(OwnerMode.AFFINITY_WORKER, OwnerMode.LEADER_ELECTION)){
+        if(!affinityWorker.isPresent() && (
+                        ownerMode.compareAndSet(OwnerMode.AFFINITY_WORKER, OwnerMode.LEADER_ELECTION) ||
+                        ownerMode.compareAndSet(OwnerMode.LATENT, OwnerMode.LEADER_ELECTION))){
             switchToLeaderLatch();
         }
     }
@@ -223,16 +275,25 @@ public class ZookeeperJvmHandler  {
         return (affinity.isPresent() && clConfig.getWorkerAlias().equals(affinity.get()));
     }
 
+    public OwnerMode getOwnerMode(){
+        return ownerMode.get();
+    }
+
+    public OwnerState getOwnerState(){
+        return ownerState.get();
+    }
+
     public void workerChanged() throws Exception{
         updateOwnership();
     }
 
-    private enum OwnerMode{
+    protected enum OwnerMode{
+        LATENT,
         AFFINITY_WORKER,
         LEADER_ELECTION
     }
 
-    private enum OwnerState{
+    protected enum OwnerState{
         OWNER,
         NOT_OWNER
     }

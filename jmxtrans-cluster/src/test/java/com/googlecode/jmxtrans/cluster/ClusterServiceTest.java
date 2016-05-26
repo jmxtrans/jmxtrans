@@ -27,10 +27,9 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
 /**
- * ClusterManager Tester.
+ * ClusterService Tester.
  *
- * @author <Authors name>
- * @version 1.0
+ * @author Tibor Kulcsar
  * @since <pre>May 14, 2016</pre>
  */
 @Category({IntegrationTest.class, RequiresIO.class})
@@ -38,7 +37,7 @@ import static org.junit.Assert.*;
 @AllowNetworkListen(ports = {0})
 @AllowNetworkAccess(endpoints = {"127.0.0.1:*"})
 @AllowLocalFileAccess(paths = {"*"})
-public class ClusterManagerTest {
+public class ClusterServiceTest {
 
     private static TestingServer testingServer;
     private static CuratorFramework client;
@@ -58,26 +57,9 @@ public class ClusterManagerTest {
     }
 
     @Test
-    public void testDependencyInjection() throws Exception {
-        ClusterService service = ClusterServiceFactory.createClusterService(
-                createGoldenConfiguration(testingServer.getConnectString()));
-
-        assertEquals(service.getClass(), ZookeeperClusterService.class);
-    }
-
-    @Test(expected = ClassNotFoundException.class)
-    public void testMisstypedDependeny() throws Exception{
-        Configuration configuration = createGoldenConfiguration(testingServer.getConnectString());
-        configuration.setProperty("provider.classname", ZookeeperClusterService.class.getName().substring(1));
-
-        ClusterService service = ClusterServiceFactory.createClusterService(configuration);
-        configuration.setProperty("provider.classname", ZookeeperClusterService.class.getName());
-    }
-
-    @Test
     public void testZookeeperConnectionStartup() throws Exception {
         ClusterService service = ClusterServiceFactory.createClusterService(
-                createGoldenConfiguration(testingServer.getConnectString()));
+                TestUtils.createGoldenConfiguration(testingServer.getConnectString()));
         service.startService();
 
         synchronized((ZookeeperClusterService)service){
@@ -118,7 +100,7 @@ public class ClusterManagerTest {
         Thread.sleep(3000);
 
         ClusterService service = ClusterServiceFactory.createClusterService(
-                createGoldenConfiguration(testingServer.getConnectString()));
+                TestUtils.createGoldenConfiguration(testingServer.getConnectString()));
 
         service.startService();
 
@@ -133,56 +115,4 @@ public class ClusterManagerTest {
         client.setData().forPath("/jmxtrans/jvms/jvm_01/config", "Config01 Update".getBytes());
         service.stopService();
     }
-
-    @Test
-    public void testNodeCache() throws Exception{
-        NodeCache cache= new NodeCache(client, "/test/node");
-        cache.start(true);
-
-        client.create().forPath("/test/node", "a".getBytes());
-        Thread.sleep(1000);
-        cache.getListenable().addListener (new NodeCacheListener()
-                {
-                    @Override
-                    public void nodeChanged() throws Exception
-                    {
-                        System.out.println("Node Changed" + client.checkExists().forPath("/test/node"));
-                    }
-                }
-        );
-
-        client.setData().forPath("/test/node", "b".getBytes());
-        Thread.sleep(20000);
-
-        client.close();
-
-    }
-
-    @Test
-    public void testEmptyNode() throws Exception{
-        client.create().creatingParentContainersIfNeeded().withMode(CreateMode.EPHEMERAL).forPath("/test/tnode", "Test data".getBytes());
-
-        Thread.sleep(1000);
-
-        byte[] data = client.getData().forPath("/test/tnode");
-        System.out.println(new String(data));
-        assertNotNull(data);
-
-    }
-
-    private Configuration createGoldenConfiguration(String connectionString){
-        Configuration configuration = new HierarchicalConfiguration();
-        configuration.addProperty("provider.classname", ZookeeperClusterService.class.getName());
-        configuration.addProperty("zookeeper.workeralias", "worker_01");
-        //configuration.addProperty("zookeeper.connectionstring", "10.189.33.100:2181\\,10.189.33.101:2181\\,10.189.33.102:2181");
-        configuration.addProperty("zookeeper.connectionstring", connectionString);
-        configuration.addProperty("zookeeper.timeout", 1000);
-        configuration.addProperty("zookeeper.retry", 3);
-        configuration.addProperty("zookeeper.heartbeatpath", "/jmxtrans/workers");
-        configuration.addProperty("zookeeper.configpath", "/jmxtrans/jvms");
-        return  configuration;
-    }
-
-
-
 }

@@ -63,7 +63,7 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
     }
 
     /**
-     * The main initialization method of the ClusterService. It is called from the constructor
+     * The main initialization method of the ClusterService.
      */
     private void initilaize() {
         clConfig = ZookeeperConfigBuilder.buildFromProperties(configuration);
