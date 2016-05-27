@@ -199,8 +199,9 @@ public class GangliaWriter extends BaseOutputWriter {
 
 				GMetricType dataType = getType(resultValue.getValue());
 				log.debug("Sending Ganglia metric {}={} [type={}]", name, transformedValue, dataType);
-				new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName)
-						.announce(name, transformedValue.toString(), dataType, units, slope, tmax, dmax, groupName);
+				GMetric	gm = new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName);
+				gm.announce(name, transformedValue.toString(), dataType, units, slope, tmax, dmax, groupName);
+				gm.close();
 			}
 		}
 	}
