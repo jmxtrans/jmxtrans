@@ -1,5 +1,8 @@
 package com.googlecode.jmxtrans.cluster.events;
 
+import lombok.Getter;
+import lombok.ToString;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -9,25 +12,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Tibor Kulcsar
  * @since <pre>May 17, 2016</pre>
  */
+@ToString(includeFieldNames=true, exclude = "configuration")
 public class ConfigurationChangeEvent {
+    @Getter
     private final ConfigurationChangeEvent.Type type;
 
+    @Getter
     private final String[] configuration;
-
 
     public ConfigurationChangeEvent(ConfigurationChangeEvent.Type type, String[] configuration) {
         this.type = checkNotNull(type, "The change type cannot be null!");
         this.configuration = checkNotNull(configuration, "The configuration cannot be null!");
     }
-
-    public ConfigurationChangeEvent.Type getType() {
-        return this.type;
-    }
-
-    public String toString() {
-        return "PathChildrenCacheEvent{type=" + this.type + '}';
-    }
-
+    
     public static enum Type {
         JVM_CONFIGURATION_ADDED,
         JVM_CONFIGURATION_REMOVED,

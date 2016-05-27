@@ -1,5 +1,6 @@
 package com.googlecode.jmxtrans.cluster.events;
 
+import lombok.ToString;
 import org.apache.curator.framework.state.ConnectionState;
 
 /**
@@ -9,6 +10,7 @@ import org.apache.curator.framework.state.ConnectionState;
  * @author Tibor Kulcsar
  * @since <pre>May 17, 2016</pre>
  */
+@ToString(includeFieldNames=true)
 public class ClusterStateChangeEvent {
 
     private final ConnectionState type;
@@ -20,9 +22,4 @@ public class ClusterStateChangeEvent {
     public ConnectionState getType() {
         return this.type;
     }
-
-    public String toString() {
-        return "PathChildrenCacheEvent{type=" + this.type + '}';
-    }
-
 }
