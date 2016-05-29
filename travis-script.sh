@@ -36,8 +36,8 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     chmod 600 ${HOME}/.ssh/id_rsa
 
     # configure our git identity
-    git clConfig --global user.email "travis@jmxtrans.org"
-    git clConfig --global user.name "JmxTrans travis build"
+    git config --global user.email "travis@jmxtrans.org"
+    git config --global user.name "JmxTrans travis build"
 
     echo "Building master"
     mvn package sonar:sonar deploy \
@@ -59,8 +59,8 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       chmod 600 ${HOME}/.ssh/id_rsa
 
       # configure our git identity
-      git clConfig --global user.email "travis@jmxtrans.org"
-      git clConfig --global user.name "JmxTrans travis build"
+      git config --global user.email "travis@jmxtrans.org"
+      git config --global user.name "JmxTrans travis build"
 
       # travis checkout the commit as detached head (which is normally what we
       # want) but maven release plugin does not like working in detached head

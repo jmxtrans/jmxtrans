@@ -20,25 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.cluster;
+package com.googlecode.jmxtrans.cluster.zookeeper;
 
-import com.googlecode.jmxtrans.cluster.events.ClusterStateChangeListener;
-import com.googlecode.jmxtrans.cluster.events.ConfigurationChangeListener;
-
-import javax.annotation.Nonnull;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 
 /**
- * ClusterService. It should be implemeted by any cluster provider.
- *
  * @author Tibor Kulcsar
- * @since <pre>May 17, 2016</pre>
+ * @since <pre>May 25, 2016</pre>
  */
-public interface ClusterService {
+public class ConfigurationFixtures {
 
-	void startService() throws Exception;
-	void stopService() throws Exception;
-	void registerStateChangeListener(@Nonnull ClusterStateChangeListener stateChangeListener);
-	void unregisterStateChangeListener(@Nonnull ClusterStateChangeListener stateChangeListener);
-	void registerConfigurationChangeListener(@Nonnull ConfigurationChangeListener configurationChangeListener);
-	void unregisterConfigurationChangeListener(@Nonnull ConfigurationChangeListener configurationChangeListener);
+	public static Configuration goldenConfiguration(String connectionString){
+		Configuration configuration = new HierarchicalConfiguration();
+		configuration.addProperty("provider.classname", ZookeeperClusterService.class.getName());
+		configuration.addProperty("zookeeper.workeralias", "worker_01");
+		//configuration.addProperty("zookeeper.connectionstring", "10.189.33.100:2181\\,10.189.33.101:2181\\,10.189.33.102:2181");
+		configuration.addProperty("zookeeper.connectionstring", connectionString);
+		configuration.addProperty("zookeeper.timeout", 1000);
+		configuration.addProperty("zookeeper.retry", 3);
+		configuration.addProperty("zookeeper.heartbeatpath", "/jmxtrans/workers");
+		configuration.addProperty("zookeeper.configpath", "/jmxtrans/jvms");
+		return  configuration;
+	}
 }

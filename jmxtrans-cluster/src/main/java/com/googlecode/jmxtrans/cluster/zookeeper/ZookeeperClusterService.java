@@ -1,8 +1,27 @@
+/**
+ * The MIT License
+ * Copyright (c) 2010 JmxTrans team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.googlecode.jmxtrans.cluster.zookeeper;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
 import com.googlecode.jmxtrans.cluster.ClusterService;
 import com.googlecode.jmxtrans.cluster.events.ClusterStateChangeEvent;
 import com.googlecode.jmxtrans.cluster.events.ClusterStateChangeListener;
@@ -22,299 +41,298 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.HashMap;
-import java.util.Iterator;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * ZookeeperClusterService. The zookeper based implementation of the ClusterService interface. Basically it is
+ * ZookeeperClusterService. The zookeeper based implementation of the ClusterService interface. Basically it is
  * anm individual thread that manages the connection to a zookeeper instance or cluster.
  *
  * @author Tibor Kulcsar
  * @since <pre>May 17, 2016</pre>
  * @see ClusterService
  */
-public class ZookeeperClusterService extends Thread implements ClusterService, JvmConfigChangeListener {
-    private static final Logger log = LoggerFactory.getLogger(ZookeeperClusterService.class);
-    private Configuration configuration;
-    private Injector injector;
+public class ZookeeperClusterService implements ClusterService, JvmConfigChangeListener {
+	private static final Logger log = LoggerFactory.getLogger(ZookeeperClusterService.class);
+	@Nonnull private final Configuration configuration;
 
-    private ZookeeperConfig clConfig;
-    private CuratorFramework clClient;
+	private ZookeeperConfig clConfig;
+	private CuratorFramework clClient;
 
-    private PathChildrenCache jvmRootCache;
-    private PathChildrenCache workerRootCache;
+	private PathChildrenCache jvmRootCache;
+	private PathChildrenCache workerRootCache;
 
-    private List<ClusterStateChangeListener> clusterStateChangeListeners = ImmutableList.of();
-    private List<ConfigurationChangeListener> configurationChangeListeners = ImmutableList.of();
+	private List<ClusterStateChangeListener> clusterStateChangeListeners = new CopyOnWriteArrayList<>();
+	private List<ConfigurationChangeListener> configurationChangeListeners = new CopyOnWriteArrayList<>();
 
-    Map<String, ZookeeperJvmHandler> jvmHandlers= new HashMap<>();
+	@Nonnull
+	private final ConcurrentHashMap<String, ZookeeperJvmHandler> jvmHandlers= new ConcurrentHashMap<>();
 
-    Map<String, String> jmxTransConfigs = new HashMap<>();
+	Map<String, String> jmxTransConfigs = new ConcurrentHashMap<>();
 
-    @Inject
-    public ZookeeperClusterService(Injector injector, Configuration configuration) {
-        this.injector = injector;
-        this.configuration = configuration;
-        log.info(this.getClass().getName() + " initiated");
-    }
+	@Inject
+	public ZookeeperClusterService(@Nonnull Configuration configuration) {
+		this.configuration = configuration;
+		log.debug(this.getClass().getName() + " initiated");
+	}
 
-    /**
-     * The main initialization method of the ClusterService.
-     */
-    private void initilaize() {
-        clConfig = ZookeeperConfigBuilder.buildFromProperties(configuration);
-        try {
-            startClusterConnection();
-            jvmRootCache    = new PathChildrenCache(clClient, clConfig.getConfigPath(), false);
-            workerRootCache = new PathChildrenCache(clClient, clConfig.getHeartBeatPath(),false);
-            jvmRootCache.getListenable().addListener(new JvmConfigPathChangeListener());
-            workerRootCache.getListenable().addListener(new WorkerPathChangeListener());
-        } catch (Exception e) {
-            log.error(Throwables.getStackTraceAsString(e));
-        }
-    }
+	/**
+	 * The main initialization method of the ClusterService.
+	 */
+	private void initialize() {
+		// TODO: externalize construction
+		clConfig = ZookeeperConfigBuilder.buildFromProperties(configuration);
+		try {
+			startClusterConnection();
+			jvmRootCache    = new PathChildrenCache(clClient, clConfig.getConfigPath(), false);
+			workerRootCache = new PathChildrenCache(clClient, clConfig.getHeartBeatPath(),false);
+			jvmRootCache.getListenable().addListener(new JvmConfigPathChangeListener(clConfig, jvmHandlers, clClient, this));
+			workerRootCache.getListenable().addListener(new WorkerPathChangeListener(clConfig, jvmHandlers));
+		} catch (Exception e) {
+			log.error("Error initializing ZookeeperClusterService", e);
+		}
+	}
 
-    /**
-     * Stat the CuratorFrameword client and add a listener that is listening for connection state changes.
-     * @throws Exception
-     */
-    private void startClusterConnection() throws Exception {
-        this.clClient = CuratorFrameworkFactory
-                .newClient(clConfig.getConnectionString(),
-                        new ExponentialBackoffRetry(clConfig.getConnectTimeout(), clConfig.getConnectRetry()));
-        clClient.start();
-        clClient.getConnectionStateListenable().addListener(new ConnectionStateListener() {
-            @Override
-            public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
-                notifyClusterChangeListeners(connectionState);
-            }
-        });
-    }
+	/**
+	 * Stat the CuratorFramework client and add a listener that is listening for connection state changes.
+	 */
+	private void startClusterConnection() throws Exception {
+		this.clClient = CuratorFrameworkFactory
+				.newClient(clConfig.getConnectionString(),
+						new ExponentialBackoffRetry(clConfig.getConnectTimeout(), clConfig.getConnectRetry()));
+		clClient.start();
+		clClient.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+			@Override
+			public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
+				notifyClusterChangeListeners(connectionState);
+			}
+		});
+	}
 
-    @Override
-    public void startService() {
-        initilaize();
-        this.start();
-    }
+	@Override
+	public void startService() throws Exception {
+		initialize();
+		startHeartBeating();
+		try {
+			queryConfigs();
+		} catch (IllegalStateException e) {
+			// TODO: make sure starting service does not throw exception in the nominal case and let exception
+			// bubble up if they happen.
+			// FIXME: queryConfigs() require the config path to be already created. This is not ensured at the moment.
+			log.error("Error while querying configs.", e);
+		}
+		startChangeListeners();
+	}
 
-    @Override
-    public void stopService() {
-        this.interrupt();
-    }
+	@Override
+	public void stopService() throws Exception {
+		stopHeartBeating();
+	}
 
-    @Override
-    public void run() {
-        try {
-            startHeartBeating();
-            queryConfigs();
-            startChangeListeners();
-        } catch (Exception e) {
-            log.error(Throwables.getStackTraceAsString(e));
-        }
-        synchronized (this) {
-            this.notifyAll();
-        }
+	/**
+	 * Determine if the underlying ZookeeperClient is connected.
+	 */
+	public boolean isConnected(){
+		return this.clClient.getZookeeperClient().isConnected();
+	}
 
-        while (!isInterrupted()) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error(Throwables.getStackTraceAsString(e));
-            }
-        }
+	/**
+	 * Create the heart beating Ephemeral node on the Zookeeper. This node is for heart beating and service discovery.
+	 */
+	private void startHeartBeating() throws Exception{
+		this.clClient.create()
+				.creatingParentContainersIfNeeded()
+				.withMode(CreateMode.EPHEMERAL)
+				.forPath(clConfig.getWorkerNodePath());
+	}
 
-        try {
-            stopHeartBeating();
-        } catch (Exception e) {
-            log.error(Throwables.getStackTraceAsString(e));
-        }
-    }
+	/**
+	 * Remove the heart beating node from the zookeeper.
+	 */
+	private void stopHeartBeating() throws Exception{
+		if(isConnected() && isHeartBeating()){
+			this.clClient.delete()
+					.deletingChildrenIfNeeded()
+					.forPath(clConfig.getWorkerNodePath());
+		}
+	}
 
-    /**
-     * Determine if the unerlaying ZookeeperClient is connected.
-     * @return
-     */
-    public boolean isConnected(){
-        return this.clClient.getZookeeperClient().isConnected();
-    }
+	/**
+	 * Start the path caches that detect if a worker or jvm added, removed or changed.
+	 */
+	private void startChangeListeners() throws Exception{
+		if(isConnected()){
+			jvmRootCache.start();
+			workerRootCache.start();
+		}
+	}
 
-    /**
-     * Create the heartbeating Ephemeral node on the Zookeeper. This node is for heartbeating and serveice discovery.
-     * @throws Exception
-     */
-    private void startHeartBeating() throws Exception{
-        this.clClient.create()
-                .creatingParentContainersIfNeeded()
-                .withMode(CreateMode.EPHEMERAL)
-                .forPath(clConfig.getWorkerNodePath());
-    }
+	/**
+	 * Check if the heartbeat node is present on the zookeeper.
+	 */
+	private boolean isHeartBeating() throws Exception {
+		Stat stat = this.clClient.checkExists().forPath(clConfig.getWorkerNodePath());
+		return (null != stat);
+	}
 
-    /**
-     * Remove the heartbeting node from the zookeeper.
-     * @throws Exception
-     */
-    private void stopHeartBeating() throws Exception{
-        if(isConnected() && isHeartBeating()){
-            this.clClient.delete()
-                    .deletingChildrenIfNeeded()
-                    .forPath(clConfig.getWorkerNodePath());
-        }
-    }
+	/**
+	 * List the jvm nodes on the zookeeper and create a unique handler for each instance.
+	 */
+	private void queryConfigs() throws Exception {
+		if (null == this.clClient.checkExists().forPath(this.clConfig.getConfigPath())) {
+			throw new IllegalStateException("Znode is missing! Have you started the cluster manager?");
+		}
+		List<String> jvms = this.clClient.getChildren().forPath(clConfig.getConfigPath());
+		for (String i : jvms) {
+			System.out.println("Jvm: " + i);
+			ZookeeperJvmHandler handler = new ZookeeperJvmHandler(i, clClient, clConfig, this);
 
-    /**
-     * Start the path caches that detect if a worker or jvm added, removed or changed.
-     * @throws Exception
-     */
-    private void startChangeListeners() throws Exception{
-        if(isConnected()){
-            jvmRootCache.start();
-            workerRootCache.start();
-        }
-    }
+			this.jvmHandlers.put(i, handler);
+		}
+	}
 
-    /**
-     * Check if the heartbeat node is present on the zookeeper.
-     * @return
-     * @throws Exception
-     */
-    private Boolean isHeartBeating() throws Exception {
-        Stat stat = this.clClient.checkExists().forPath(clConfig.getWorkerNodePath());
-        return (null != stat);
-    }
+	@Override
+	public void jvmConfigChanged(String jvmAlias, String jvmConfig) {
+		jmxTransConfigs.put(jvmAlias, jvmConfig);
+		notifyConfigurationChangeListeners();
+	}
 
-    /**
-     * List the jvm nodes on the zookeeper and creaet a unique handler for each instance.
-     * @throws Exception
-     */
-    private void queryConfigs() throws Exception {
-        if (null == this.clClient.checkExists().forPath(this.clConfig.getConfigPath())) {
-            throw new Exception("Znode is miissing! Have you started the cluster manager?");
-        }
-        List<String> jvms = this.clClient.getChildren().forPath(this.clConfig.getConfigPath());
-        for (String i : jvms) {
-            System.out.println("Jvm: " + i);
-            ZookeeperJvmHandler handler = new ZookeeperJvmHandler(i, this.clClient, clConfig, this);
+	@Override
+	public void jvmConfigRemoved(String jvmAlias) {
+		jmxTransConfigs.remove(jvmAlias);
+		notifyConfigurationChangeListeners();
+	}
 
-            this.jvmHandlers.put(i, handler);
-        }
-    }
+	@Override
+	public void registerStateChangeListener(ClusterStateChangeListener stateChangeListener){
+		this.clusterStateChangeListeners.add(stateChangeListener);
+	}
 
-    @Override
-    public void jvmConfigChanged(String jvmAlias, String jvmConfig) {
-        jmxTransConfigs.put(jvmAlias,jvmConfig);
-        notifyConfigurationChangeListeners();
-    }
+	@Override
+	public void unregisterStateChangeListener(ClusterStateChangeListener stateChangeListener){
+		this.clusterStateChangeListeners.remove(stateChangeListener);
+	}
 
-    @Override
-    public void jvmConfigRemoved(String jvmAlias) {
-        jmxTransConfigs.remove(jvmAlias);
-        notifyConfigurationChangeListeners();
-    }
+	@Override
+	public void registerConfigurationChangeListener(ConfigurationChangeListener configurationChangeListener){
+		this.configurationChangeListeners.add(configurationChangeListener);
+	}
 
-    private class JvmConfigPathChangeListener implements PathChildrenCacheListener {
+	@Override
+	public void unregisterConfigurationChangeListener(ConfigurationChangeListener configurationChangeListener){
+		this.configurationChangeListeners.remove(configurationChangeListener);
+	}
 
-        @Override
-        public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
-            String jvmAlias;
-            switch (pathChildrenCacheEvent.getType()) {
-                case CHILD_ADDED:
-                    log.debug(ZookeeperClusterService.this.clConfig.getWorkerAlias()
-                            + " Node added: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-                    jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
-                    if (!ZookeeperClusterService.this.jvmHandlers.containsKey(jvmAlias)) {
-                        ZookeeperJvmHandler handler = new ZookeeperJvmHandler(
-                                jvmAlias, ZookeeperClusterService.this.clClient, clConfig, ZookeeperClusterService.this);
-                        ZookeeperClusterService.this.jvmHandlers.put(jvmAlias, handler);
-                    }
-                    break;
+	/**
+	 * Notify the registered listeners that the configuration changed.
+	 */
+	private void notifyConfigurationChangeListeners(){
+		ConfigurationChangeEvent event = new ConfigurationChangeEvent(ConfigurationChangeEvent.Type.JVM_CONFIGURATION_CHANGED, jmxTransConfigs.values());
 
-                case CHILD_UPDATED:
-                    log.debug(clConfig.getWorkerAlias() + " Node upadet: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-                    break;
+		for (ConfigurationChangeListener listener : configurationChangeListeners) {
+			listener.configurationChanged(event);
+		}
+	}
 
-                case CHILD_REMOVED:
-                    jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
-                    if (ZookeeperClusterService.this.jvmHandlers.containsKey(jvmAlias)) {
-                        ZookeeperClusterService.this.jvmHandlers.get(jvmAlias).close();
-                        ZookeeperClusterService.this.jvmHandlers.remove(jvmAlias);
-                    }
-                    log.debug(clConfig.getWorkerAlias() + " Node removed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-                    break;
-            }
-        }
-    }
+	/**
+	 * Notify the registered listeners about the state change on the cluster connection.
+	 */
+	private void notifyClusterChangeListeners(ConnectionState state){
+		ClusterStateChangeEvent event = new ClusterStateChangeEvent(state);
 
-    private class WorkerPathChangeListener implements PathChildrenCacheListener {
+		for (ClusterStateChangeListener listener : clusterStateChangeListeners) {
+			listener.cluterStateChanged(event);
+		}
+	}
 
-        @Override
-        public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
-            switch (pathChildrenCacheEvent.getType()) {
-                case CHILD_ADDED:
-                    log.debug(clConfig.getWorkerAlias() + " Node added: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-                    break;
+	private static class JvmConfigPathChangeListener implements PathChildrenCacheListener {
 
-                case CHILD_UPDATED:
-                    log.debug(clConfig.getWorkerAlias() + " Node upadet: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-                    break;
+		@Nonnull private final ZookeeperConfig clConfig;
+		@Nonnull private final ConcurrentHashMap<String, ZookeeperJvmHandler> jvmHandlers;
+		@Nonnull private final CuratorFramework clClient;
+		@Nonnull private final ZookeeperClusterService zookeeperClusterService;
 
-                case CHILD_REMOVED:
-                    for(ZookeeperJvmHandler i : ZookeeperClusterService.this.jvmHandlers.values()){
-                        i.workerChanged();
-                    }
+		public JvmConfigPathChangeListener(
+				@Nonnull ZookeeperConfig clConfig,
+				@Nonnull ConcurrentHashMap<String, ZookeeperJvmHandler> jvmHandlers,
+				@Nonnull CuratorFramework clClient,
+				@Nonnull ZookeeperClusterService zookeeperClusterService) {
+			this.clConfig = clConfig;
+			this.jvmHandlers = jvmHandlers;
+			this.clClient = clClient;
+			this.zookeeperClusterService = zookeeperClusterService;
+		}
 
-                    log.debug(clConfig.getWorkerAlias() + " Node removed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-                    break;
-            }
-        }
-    }
+		@Override
+		public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
+			String jvmAlias;
+			switch (pathChildrenCacheEvent.getType()) {
+				case CHILD_ADDED:
+					log.debug("{} Node added: {}", clConfig.getWorkerAlias(),
+							ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
+					if (!this.jvmHandlers.containsKey(jvmAlias)) {
+						ZookeeperJvmHandler handler = new ZookeeperJvmHandler(
+								jvmAlias, clClient, clConfig, zookeeperClusterService);
+						jvmHandlers.put(jvmAlias, handler);
+					}
+					break;
 
-    @Override
-    public void registerStateChangeListener(ClusterStateChangeListener stateChangeListener){
-        this.clusterStateChangeListeners.add(stateChangeListener);
-    }
+				case CHILD_UPDATED:
+					log.debug(clConfig.getWorkerAlias() + " Node update: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
 
-    @Override
-    public void unregisterStateChangeListener(ClusterStateChangeListener stateChangeListener){
-        this.clusterStateChangeListeners.remove(stateChangeListener);
-    }
+				case CHILD_REMOVED:
+					jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
+					ZookeeperJvmHandler jvmHandler = jvmHandlers.remove(jvmAlias);
+					if (jvmHandler != null) jvmHandler.close();
+					log.debug("{} Node removed: {}", clConfig.getWorkerAlias(),
+							ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
 
-    @Override
-    public void registerConfigurationChangeListener(ConfigurationChangeListener configurationChangeListener){
-        this.configurationChangeListeners.add(configurationChangeListener);
-    }
+				default:
+					throw new IllegalArgumentException("Unknown event type: " + pathChildrenCacheEvent.getType());
+			}
+		}
+	}
 
-    @Override
-    public void unregisterConfigurationChangeListener(ConfigurationChangeListener configurationChangeListener){
-        this.configurationChangeListeners.remove(configurationChangeListener);
-    }
+	private static class WorkerPathChangeListener implements PathChildrenCacheListener {
+		@Nonnull private final Map<String, ZookeeperJvmHandler> jvmHandlers;
+		@Nonnull private final ZookeeperConfig clConfig;
 
-    /**
-     * Notify the registered listeners that the configaration changed.
-     */
-    private void notifyConfigurationChangeListeners(){
-        String[] configs = (String[])jmxTransConfigs.values().toArray();
+		public WorkerPathChangeListener(
+				@Nonnull ZookeeperConfig clConfig, @Nonnull Map<String, ZookeeperJvmHandler> jvmHandlers) {
+			this.jvmHandlers = jvmHandlers;
+			this.clConfig = clConfig;
+		}
 
-        Iterator<ConfigurationChangeListener> it = configurationChangeListeners.iterator();
-        ConfigurationChangeEvent event = new ConfigurationChangeEvent(ConfigurationChangeEvent.Type.JVM_CONFIGURATION_CHANGED, configs);
+		@Override
+		public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
+			switch (pathChildrenCacheEvent.getType()) {
+				case CHILD_ADDED:
+					log.debug(clConfig.getWorkerAlias() + " Node added: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
 
-        while (it.hasNext()){
-            it.next().configurationChanged(event);
-        }
-    }
+				case CHILD_UPDATED:
+					log.debug(clConfig.getWorkerAlias() + " Node updated: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
 
-    /**
-     * Notify the registered listeners about the state change on the cluster connction.
-     * @param state
-     */
-    private void notifyClusterChangeListeners(ConnectionState state){
-        Iterator<ClusterStateChangeListener> it = clusterStateChangeListeners.iterator();
-        ClusterStateChangeEvent event = new ClusterStateChangeEvent(state);
-        while (it.hasNext()){
-            it.next().cluterStateChanged(event);
-        }
-    }
+				case CHILD_REMOVED:
+					for(ZookeeperJvmHandler i : jvmHandlers.values()){
+						i.workerChanged();
+					}
+
+					log.debug(clConfig.getWorkerAlias() + " Node removed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
+
+				default:
+					throw new IllegalArgumentException("Unknown event type: " + pathChildrenCacheEvent.getType());
+			}
+		}
+	}
 }

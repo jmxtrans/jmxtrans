@@ -25,7 +25,7 @@
 # -*- coding: latin-1 -*-
 # vim:ai:expandtab:ts=4 sw=4
 
-# yaml2jmxtrans.py: Generate jmxtrans clConfig from YAML format
+# yaml2jmxtrans.py: Generate jmxtrans config from YAML format
 # Copyright 2012 Florian Thiel <f.thiel@tarent.de>, tarent solutions GmbH
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -183,7 +183,7 @@ class Queries(object):
         else:
         	typeNames = typeName
         	
-        #For compatibility, if no outputWriters were configured, use the deprecated Graphite-specific clConfig:
+        #For compatibility, if no outputWriters were configured, use the deprecated Graphite-specific config:
         if len(self.outputWriters) == 0:
             return [ {
             '@class' : 'com.googlecode.jmxtrans.model.output.GraphiteWriter',

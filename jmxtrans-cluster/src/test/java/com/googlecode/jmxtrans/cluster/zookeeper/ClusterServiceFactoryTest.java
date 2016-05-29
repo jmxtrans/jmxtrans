@@ -20,25 +20,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.cluster;
+package com.googlecode.jmxtrans.cluster.zookeeper;
 
-import com.googlecode.jmxtrans.cluster.events.ClusterStateChangeListener;
-import com.googlecode.jmxtrans.cluster.events.ConfigurationChangeListener;
+import com.googlecode.jmxtrans.cluster.ClusterService;
+import com.googlecode.jmxtrans.cluster.ClusterServiceFactory;
+import org.apache.commons.configuration.Configuration;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ClusterService. It should be implemeted by any cluster provider.
+ * ClusterServiceFactory Tester.
  *
  * @author Tibor Kulcsar
- * @since <pre>May 17, 2016</pre>
+ * @since <pre>May 25, 2016</pre>
  */
-public interface ClusterService {
+public class ClusterServiceFactoryTest {
 
-	void startService() throws Exception;
-	void stopService() throws Exception;
-	void registerStateChangeListener(@Nonnull ClusterStateChangeListener stateChangeListener);
-	void unregisterStateChangeListener(@Nonnull ClusterStateChangeListener stateChangeListener);
-	void registerConfigurationChangeListener(@Nonnull ConfigurationChangeListener configurationChangeListener);
-	void unregisterConfigurationChangeListener(@Nonnull ConfigurationChangeListener configurationChangeListener);
+	/**
+	 * Test the classname based dependency injection.
+	 * @throws Exception
+	 */
+	@Test
+	public void testDependencyInjection() throws Exception {
+		ClusterService service = ClusterServiceFactory.createClusterService(
+				ConfigurationFixtures.goldenConfiguration("127.0.0.1:2181"));
+
+		assertThat(service).isExactlyInstanceOf(ZookeeperClusterService.class);
+	}
+
+	@Test(expected = ClassNotFoundException.class)
+	public void nonExistentImplementationClassCausesException() throws Exception{
+		Configuration configuration =  ConfigurationFixtures.goldenConfiguration("127.0.0.1:2181");
+		configuration.setProperty("provider.classname", "non.existent.Clazz");
+
+		ClusterServiceFactory.createClusterService(configuration);
+	}
 }
