@@ -35,8 +35,8 @@ import javax.annotation.Nonnull;
  */
 public interface ClusterService {
 
-	void startService();
-	void stopService();
+	void startService() throws Exception;
+	void stopService() throws Exception;
 	void registerStateChangeListener(@Nonnull ClusterStateChangeListener stateChangeListener);
 	void unregisterStateChangeListener(@Nonnull ClusterStateChangeListener stateChangeListener);
 	void registerConfigurationChangeListener(@Nonnull ConfigurationChangeListener configurationChangeListener);

@@ -44,13 +44,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * ZookeeperClusterService. The zookeper based implementation of the ClusterService interface. Basically it is
+ * ZookeeperClusterService. The zookeeper based implementation of the ClusterService interface. Basically it is
  * anm individual thread that manages the connection to a zookeeper instance or cluster.
  *
  * @author Tibor Kulcsar
@@ -70,9 +70,10 @@ public class ZookeeperClusterService implements ClusterService, JvmConfigChangeL
 	private List<ClusterStateChangeListener> clusterStateChangeListeners = new CopyOnWriteArrayList<>();
 	private List<ConfigurationChangeListener> configurationChangeListeners = new CopyOnWriteArrayList<>();
 
-	Map<String, ZookeeperJvmHandler> jvmHandlers= new HashMap<>();
+	@Nonnull
+	private final ConcurrentHashMap<String, ZookeeperJvmHandler> jvmHandlers= new ConcurrentHashMap<>();
 
-	Map<String, String> jmxTransConfigs = new HashMap<>();
+	Map<String, String> jmxTransConfigs = new ConcurrentHashMap<>();
 
 	@Inject
 	public ZookeeperClusterService(@Nonnull Configuration configuration) {
@@ -90,8 +91,8 @@ public class ZookeeperClusterService implements ClusterService, JvmConfigChangeL
 			startClusterConnection();
 			jvmRootCache    = new PathChildrenCache(clClient, clConfig.getConfigPath(), false);
 			workerRootCache = new PathChildrenCache(clClient, clConfig.getHeartBeatPath(),false);
-			jvmRootCache.getListenable().addListener(new JvmConfigPathChangeListener());
-			workerRootCache.getListenable().addListener(new WorkerPathChangeListener());
+			jvmRootCache.getListenable().addListener(new JvmConfigPathChangeListener(clConfig, jvmHandlers, clClient, this));
+			workerRootCache.getListenable().addListener(new WorkerPathChangeListener(clConfig, jvmHandlers));
 		} catch (Exception e) {
 			log.error("Error initializing ZookeeperClusterService", e);
 		}
@@ -114,39 +115,34 @@ public class ZookeeperClusterService implements ClusterService, JvmConfigChangeL
 	}
 
 	@Override
-	public void startService() {
+	public void startService() throws Exception {
 		initialize();
+		startHeartBeating();
 		try {
-			startHeartBeating();
 			queryConfigs();
-			startChangeListeners();
-		} catch (Exception e) {
+		} catch (IllegalStateException e) {
 			// TODO: make sure starting service does not throw exception in the nominal case and let exception
-			// bubble up if they happen
-			log.error("Error while starting ZookeeperClusterService.", e);
+			// bubble up if they happen.
+			// FIXME: queryConfigs() require the config path to be already created. This is not ensured at the moment.
+			log.error("Error while querying configs.", e);
 		}
+		startChangeListeners();
 	}
 
 	@Override
-	public void stopService() {
-		try {
-			stopHeartBeating();
-		} catch (Exception e) {
-			// TODO: make sure stoping service does not throw exception in the nominal case and let exception
-			// bubble up if they happen
-			log.error("Error while stopping ZookeeperClusterService.", e);
-		}
+	public void stopService() throws Exception {
+		stopHeartBeating();
 	}
 
 	/**
-	 * Determine if the underlaying ZookeeperClient is connected.
+	 * Determine if the underlying ZookeeperClient is connected.
 	 */
 	public boolean isConnected(){
 		return this.clClient.getZookeeperClient().isConnected();
 	}
 
 	/**
-	 * Create the heartbeating Ephemeral node on the Zookeeper. This node is for heartbeating and serveice discovery.
+	 * Create the heart beating Ephemeral node on the Zookeeper. This node is for heart beating and service discovery.
 	 */
 	private void startHeartBeating() throws Exception{
 		this.clClient.create()
@@ -185,16 +181,16 @@ public class ZookeeperClusterService implements ClusterService, JvmConfigChangeL
 	}
 
 	/**
-	 * List the jvm nodes on the zookeeper and creaet a unique handler for each instance.
+	 * List the jvm nodes on the zookeeper and create a unique handler for each instance.
 	 */
 	private void queryConfigs() throws Exception {
 		if (null == this.clClient.checkExists().forPath(this.clConfig.getConfigPath())) {
-			throw new Exception("Znode is missing! Have you started the cluster manager?");
+			throw new IllegalStateException("Znode is missing! Have you started the cluster manager?");
 		}
-		List<String> jvms = this.clClient.getChildren().forPath(this.clConfig.getConfigPath());
+		List<String> jvms = this.clClient.getChildren().forPath(clConfig.getConfigPath());
 		for (String i : jvms) {
 			System.out.println("Jvm: " + i);
-			ZookeeperJvmHandler handler = new ZookeeperJvmHandler(i, this.clClient, clConfig, this);
+			ZookeeperJvmHandler handler = new ZookeeperJvmHandler(i, clClient, clConfig, this);
 
 			this.jvmHandlers.put(i, handler);
 		}
@@ -202,7 +198,7 @@ public class ZookeeperClusterService implements ClusterService, JvmConfigChangeL
 
 	@Override
 	public void jvmConfigChanged(String jvmAlias, String jvmConfig) {
-		jmxTransConfigs.put(jvmAlias,jvmConfig);
+		jmxTransConfigs.put(jvmAlias, jvmConfig);
 		notifyConfigurationChangeListeners();
 	}
 
@@ -210,70 +206,6 @@ public class ZookeeperClusterService implements ClusterService, JvmConfigChangeL
 	public void jvmConfigRemoved(String jvmAlias) {
 		jmxTransConfigs.remove(jvmAlias);
 		notifyConfigurationChangeListeners();
-	}
-
-	private class JvmConfigPathChangeListener implements PathChildrenCacheListener {
-
-		@Override
-		public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
-			String jvmAlias;
-			switch (pathChildrenCacheEvent.getType()) {
-				case CHILD_ADDED:
-					log.debug("{} Node added: {}", ZookeeperClusterService.this.clConfig.getWorkerAlias(),
-							ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-					jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
-					if (!ZookeeperClusterService.this.jvmHandlers.containsKey(jvmAlias)) {
-						ZookeeperJvmHandler handler = new ZookeeperJvmHandler(
-								jvmAlias, ZookeeperClusterService.this.clClient, clConfig, ZookeeperClusterService.this);
-						ZookeeperClusterService.this.jvmHandlers.put(jvmAlias, handler);
-					}
-					break;
-
-				case CHILD_UPDATED:
-					log.debug(clConfig.getWorkerAlias() + " Node upadet: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-					break;
-
-				case CHILD_REMOVED:
-					jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
-					if (ZookeeperClusterService.this.jvmHandlers.containsKey(jvmAlias)) {
-						ZookeeperClusterService.this.jvmHandlers.get(jvmAlias).close();
-						ZookeeperClusterService.this.jvmHandlers.remove(jvmAlias);
-					}
-					log.debug("{} Node removed: {}", clConfig.getWorkerAlias(),
-							ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-					break;
-
-				default:
-					throw new IllegalArgumentException("Unknown event type: " + pathChildrenCacheEvent.getType());
-			}
-		}
-	}
-
-	private class WorkerPathChangeListener implements PathChildrenCacheListener {
-
-		@Override
-		public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
-			switch (pathChildrenCacheEvent.getType()) {
-				case CHILD_ADDED:
-					log.debug(clConfig.getWorkerAlias() + " Node added: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-					break;
-
-				case CHILD_UPDATED:
-					log.debug(clConfig.getWorkerAlias() + " Node upadet: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-					break;
-
-				case CHILD_REMOVED:
-					for(ZookeeperJvmHandler i : ZookeeperClusterService.this.jvmHandlers.values()){
-						i.workerChanged();
-					}
-
-					log.debug(clConfig.getWorkerAlias() + " Node removed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
-					break;
-
-				default:
-					throw new IllegalArgumentException("Unknown event type: " + pathChildrenCacheEvent.getType());
-			}
-		}
 	}
 
 	@Override
@@ -315,6 +247,92 @@ public class ZookeeperClusterService implements ClusterService, JvmConfigChangeL
 
 		for (ClusterStateChangeListener listener : clusterStateChangeListeners) {
 			listener.cluterStateChanged(event);
+		}
+	}
+
+	private static class JvmConfigPathChangeListener implements PathChildrenCacheListener {
+
+		@Nonnull private final ZookeeperConfig clConfig;
+		@Nonnull private final ConcurrentHashMap<String, ZookeeperJvmHandler> jvmHandlers;
+		@Nonnull private final CuratorFramework clClient;
+		@Nonnull private final ZookeeperClusterService zookeeperClusterService;
+
+		public JvmConfigPathChangeListener(
+				@Nonnull ZookeeperConfig clConfig,
+				@Nonnull ConcurrentHashMap<String, ZookeeperJvmHandler> jvmHandlers,
+				@Nonnull CuratorFramework clClient,
+				@Nonnull ZookeeperClusterService zookeeperClusterService) {
+			this.clConfig = clConfig;
+			this.jvmHandlers = jvmHandlers;
+			this.clClient = clClient;
+			this.zookeeperClusterService = zookeeperClusterService;
+		}
+
+		@Override
+		public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
+			String jvmAlias;
+			switch (pathChildrenCacheEvent.getType()) {
+				case CHILD_ADDED:
+					log.debug("{} Node added: {}", clConfig.getWorkerAlias(),
+							ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
+					if (!this.jvmHandlers.containsKey(jvmAlias)) {
+						ZookeeperJvmHandler handler = new ZookeeperJvmHandler(
+								jvmAlias, clClient, clConfig, zookeeperClusterService);
+						jvmHandlers.put(jvmAlias, handler);
+					}
+					break;
+
+				case CHILD_UPDATED:
+					log.debug(clConfig.getWorkerAlias() + " Node update: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
+
+				case CHILD_REMOVED:
+					jvmAlias = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath());
+					ZookeeperJvmHandler jvmHandler = jvmHandlers.remove(jvmAlias);
+					if (jvmHandler != null) jvmHandler.close();
+					log.debug("{} Node removed: {}", clConfig.getWorkerAlias(),
+							ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
+
+				default:
+					throw new IllegalArgumentException("Unknown event type: " + pathChildrenCacheEvent.getType());
+			}
+		}
+	}
+
+	private static class WorkerPathChangeListener implements PathChildrenCacheListener {
+		@Nonnull private final Map<String, ZookeeperJvmHandler> jvmHandlers;
+		@Nonnull private final ZookeeperConfig clConfig;
+
+		public WorkerPathChangeListener(
+				@Nonnull ZookeeperConfig clConfig, @Nonnull Map<String, ZookeeperJvmHandler> jvmHandlers) {
+			this.jvmHandlers = jvmHandlers;
+			this.clConfig = clConfig;
+		}
+
+		@Override
+		public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
+			switch (pathChildrenCacheEvent.getType()) {
+				case CHILD_ADDED:
+					log.debug(clConfig.getWorkerAlias() + " Node added: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
+
+				case CHILD_UPDATED:
+					log.debug(clConfig.getWorkerAlias() + " Node updated: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
+
+				case CHILD_REMOVED:
+					for(ZookeeperJvmHandler i : jvmHandlers.values()){
+						i.workerChanged();
+					}
+
+					log.debug(clConfig.getWorkerAlias() + " Node removed: " + ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData().getPath()));
+					break;
+
+				default:
+					throw new IllegalArgumentException("Unknown event type: " + pathChildrenCacheEvent.getType());
+			}
 		}
 	}
 }
