@@ -32,7 +32,7 @@ if [ -z "$CONF_FILE" ]; then
     fi
 fi
 
-# Specify the commonly used configuration options below in a clConfig file.
+# Specify the commonly used configuration options below in a config file.
 CONF_FILE=${CONF_FILE:-"jmxtrans.conf"}
 if [ -e "$CONF_FILE" ]; then
     . "$CONF_FILE"

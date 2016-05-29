@@ -1,6 +1,6 @@
 language: java
 sudo: false
-before_install: git clone -b travis `git clConfig --get remote.origin.url` ${HOME}/travis
+before_install: git clone -b travis `git config --get remote.origin.url` ${HOME}/travis
 services:
 - docker
 addons:

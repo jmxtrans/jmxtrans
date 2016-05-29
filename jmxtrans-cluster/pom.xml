@@ -38,8 +38,8 @@
 	<description>This module contains the logic that make JmxTrans HA ready.</description>
 
 	<properties>
-		<verify.mutationThreshold>34</verify.mutationThreshold>
-		<verify.totalBranchRate>66</verify.totalBranchRate>
+		<verify.mutationThreshold>3</verify.mutationThreshold>
+		<verify.totalBranchRate>43</verify.totalBranchRate>
 		<verify.totalLineRate>60</verify.totalLineRate>
 	</properties>
 
@@ -57,10 +57,6 @@
 			<artifactId>commons-configuration</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.curator</groupId>
 			<artifactId>curator-framework</artifactId>
 		</dependency>
@@ -71,6 +67,10 @@
 		<dependency>
 			<groupId>org.apache.zookeeper</groupId>
 			<artifactId>zookeeper</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
