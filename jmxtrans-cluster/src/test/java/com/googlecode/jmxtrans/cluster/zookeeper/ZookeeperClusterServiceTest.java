@@ -79,14 +79,6 @@ public class ZookeeperClusterServiceTest {
 				ConfigurationFixtures.goldenConfiguration(testingServer.getConnectString()));
 		service.startService();
 
-		synchronized(service){
-			try{
-				service.wait();
-			}catch(InterruptedException e){
-				e.printStackTrace();
-			}
-		}
-
 		Stat stat = client.checkExists().forPath("/jmxtrans/workers/worker_01");
 		assertThat(stat).isNotEqualTo(null);
 
@@ -120,14 +112,6 @@ public class ZookeeperClusterServiceTest {
 				ConfigurationFixtures.goldenConfiguration(testingServer.getConnectString()));
 
 		service.startService();
-
-		synchronized(service){
-			try{
-				service.wait();
-			}catch(InterruptedException e){
-				e.printStackTrace();
-			}
-		}
 
 		client.setData().forPath("/jmxtrans/jvms/jvm_01/config", "Config01 Update".getBytes());
 		service.stopService();

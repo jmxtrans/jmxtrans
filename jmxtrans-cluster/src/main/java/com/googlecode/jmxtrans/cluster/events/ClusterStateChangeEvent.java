@@ -27,6 +27,7 @@ import lombok.ToString;
 import org.apache.curator.framework.state.ConnectionState;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * ClusterStateChangeEvent. This class contains an event for the ClusterStateChangeListeners that are registered
@@ -36,6 +37,7 @@ import javax.annotation.Nonnull;
  * @since <pre>May 17, 2016</pre>
  */
 @ToString
+@Immutable
 public class ClusterStateChangeEvent {
 
 	@Nonnull @Getter private final ConnectionState type;

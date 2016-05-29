@@ -22,13 +22,11 @@
  */
 package com.googlecode.jmxtrans.cluster.zookeeper;
 
-import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.cluster.ClusterService;
 import com.googlecode.jmxtrans.cluster.events.ClusterStateChangeEvent;
 import com.googlecode.jmxtrans.cluster.events.ClusterStateChangeListener;
 import com.googlecode.jmxtrans.cluster.events.ConfigurationChangeEvent;
 import com.googlecode.jmxtrans.cluster.events.ConfigurationChangeListener;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.configuration.Configuration;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -47,9 +45,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * ZookeeperClusterService. The zookeper based implementation of the ClusterService interface. Basically it is
@@ -59,7 +57,7 @@ import java.util.Map;
  * @since <pre>May 17, 2016</pre>
  * @see ClusterService
  */
-public class ZookeeperClusterService extends Thread implements ClusterService, JvmConfigChangeListener {
+public class ZookeeperClusterService implements ClusterService, JvmConfigChangeListener {
 	private static final Logger log = LoggerFactory.getLogger(ZookeeperClusterService.class);
 	@Nonnull private final Configuration configuration;
 
@@ -69,8 +67,8 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 	private PathChildrenCache jvmRootCache;
 	private PathChildrenCache workerRootCache;
 
-	private List<ClusterStateChangeListener> clusterStateChangeListeners = ImmutableList.of();
-	private List<ConfigurationChangeListener> configurationChangeListeners = ImmutableList.of();
+	private List<ClusterStateChangeListener> clusterStateChangeListeners = new CopyOnWriteArrayList<>();
+	private List<ConfigurationChangeListener> configurationChangeListeners = new CopyOnWriteArrayList<>();
 
 	Map<String, ZookeeperJvmHandler> jvmHandlers= new HashMap<>();
 
@@ -85,7 +83,7 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 	/**
 	 * The main initialization method of the ClusterService.
 	 */
-	private void initilaize() {
+	private void initialize() {
 		// TODO: externalize construction
 		clConfig = ZookeeperConfigBuilder.buildFromProperties(configuration);
 		try {
@@ -100,8 +98,7 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 	}
 
 	/**
-	 * Stat the CuratorFrameword client and add a listener that is listening for connection state changes.
-	 * @throws Exception
+	 * Stat the CuratorFramework client and add a listener that is listening for connection state changes.
 	 */
 	private void startClusterConnection() throws Exception {
 		this.clClient = CuratorFrameworkFactory
@@ -118,41 +115,25 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 
 	@Override
 	public void startService() {
-		initilaize();
-		this.start();
-	}
-
-	@Override
-	public void stopService() {
-		this.interrupt();
-	}
-
-	@Override
-	@SuppressFBWarnings(value = "NN_NAKED_NOTIFY", justification = "More refactoring needed here, ignoring this warning at the moemnt")
-	public void run() {
+		initialize();
 		try {
 			startHeartBeating();
 			queryConfigs();
 			startChangeListeners();
 		} catch (Exception e) {
+			// TODO: make sure starting service does not throw exception in the nominal case and let exception
+			// bubble up if they happen
 			log.error("Error while starting ZookeeperClusterService.", e);
 		}
+	}
 
-		synchronized (this) {
-			this.notifyAll();
-		}
-
-		while (!isInterrupted()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				log.error("ZookeeperClusterService interrupted.", e);
-			}
-		}
-
+	@Override
+	public void stopService() {
 		try {
 			stopHeartBeating();
 		} catch (Exception e) {
+			// TODO: make sure stoping service does not throw exception in the nominal case and let exception
+			// bubble up if they happen
 			log.error("Error while stopping ZookeeperClusterService.", e);
 		}
 	}
@@ -166,7 +147,6 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 
 	/**
 	 * Create the heartbeating Ephemeral node on the Zookeeper. This node is for heartbeating and serveice discovery.
-	 * @throws Exception
 	 */
 	private void startHeartBeating() throws Exception{
 		this.clClient.create()
@@ -176,8 +156,7 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 	}
 
 	/**
-	 * Remove the heartbeting node from the zookeeper.
-	 * @throws Exception
+	 * Remove the heart beating node from the zookeeper.
 	 */
 	private void stopHeartBeating() throws Exception{
 		if(isConnected() && isHeartBeating()){
@@ -189,7 +168,6 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 
 	/**
 	 * Start the path caches that detect if a worker or jvm added, removed or changed.
-	 * @throws Exception
 	 */
 	private void startChangeListeners() throws Exception{
 		if(isConnected()){
@@ -200,17 +178,14 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 
 	/**
 	 * Check if the heartbeat node is present on the zookeeper.
-	 * @return
-	 * @throws Exception
 	 */
-	private Boolean isHeartBeating() throws Exception {
+	private boolean isHeartBeating() throws Exception {
 		Stat stat = this.clClient.checkExists().forPath(clConfig.getWorkerNodePath());
 		return (null != stat);
 	}
 
 	/**
 	 * List the jvm nodes on the zookeeper and creaet a unique handler for each instance.
-	 * @throws Exception
 	 */
 	private void queryConfigs() throws Exception {
 		if (null == this.clClient.checkExists().forPath(this.clConfig.getConfigPath())) {
@@ -322,7 +297,7 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 	}
 
 	/**
-	 * Notify the registered listeners that the configaration changed.
+	 * Notify the registered listeners that the configuration changed.
 	 */
 	private void notifyConfigurationChangeListeners(){
 		ConfigurationChangeEvent event = new ConfigurationChangeEvent(ConfigurationChangeEvent.Type.JVM_CONFIGURATION_CHANGED, jmxTransConfigs.values());
@@ -333,14 +308,13 @@ public class ZookeeperClusterService extends Thread implements ClusterService, J
 	}
 
 	/**
-	 * Notify the registered listeners about the state change on the cluster connction.
-	 * @param state
+	 * Notify the registered listeners about the state change on the cluster connection.
 	 */
 	private void notifyClusterChangeListeners(ConnectionState state){
-		Iterator<ClusterStateChangeListener> it = clusterStateChangeListeners.iterator();
 		ClusterStateChangeEvent event = new ClusterStateChangeEvent(state);
-		while (it.hasNext()){
-			it.next().cluterStateChanged(event);
+
+		for (ClusterStateChangeListener listener : clusterStateChangeListeners) {
+			listener.cluterStateChanged(event);
 		}
 	}
 }
