@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,20 +24,15 @@ package com.googlecode.jmxtrans.model.output.support;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.googlecode.jmxtrans.test.IntegrationTest;
-import com.kaching.platform.testing.AllowLocalFileAccess;
-import com.kaching.platform.testing.AllowNetworkAccess;
-import com.kaching.platform.testing.AllowNetworkListen;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.addRequestProcessingDelay;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -89,18 +84,6 @@ public class HttpOutputWriterIT {
 							.withRequestBody(equalTo("message"))
 							.withHeader("User-Agent", containing("jmxtrans")));
 		}
-	}
-
-	@Test(expected = SocketTimeoutException.class)
-	public void socketTimeoutIsRespected() throws Exception {
-		addRequestProcessingDelay(200);
-		stubFor(
-				post(urlEqualTo(ENDPOINT))
-						.willReturn(aResponse()
-								.withBody("OK")
-								.withStatus(200)));
-
-		simpleOutputWriter().doWrite(dummyServer(), dummyQuery(), dummyResults());
 	}
 
 	private HttpOutputWriter simpleOutputWriter() throws MalformedURLException {

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # The MIT License
-# Copyright (c) 2010 JmxTrans team
+# Copyright © 2010 JmxTrans team
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
