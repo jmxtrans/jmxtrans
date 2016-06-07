@@ -42,6 +42,8 @@
 		<docker.skip>true</docker.skip>
 		<docker.verbose>true</docker.verbose>
 
+		<maven.deploy.skip>true</maven.deploy.skip>
+
 		<rpm.install.artifact>org.jmxtrans:jmxtrans:rpm</rpm.install.artifact>
 		<rpm.install.file>jmxtrans.rpm</rpm.install.file>
 		<rpm.run.cmd>rpm -ivh --nosignature --nodeps /maven/${rpm.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</rpm.run.cmd>
@@ -74,16 +76,6 @@
 							<goal>stop</goal>
 						</goals>
 						<phase>post-integration-test</phase>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>default-jar</id>
-						<phase>none</phase>
 					</execution>
 				</executions>
 			</plugin>
