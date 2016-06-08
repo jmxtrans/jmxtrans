@@ -715,7 +715,7 @@
 				<plugin>
 					<groupId>io.fabric8</groupId>
 					<artifactId>docker-maven-plugin</artifactId>
-					<version>0.15.4</version>
+					<version>0.15.5</version>
 				</plugin>
 				<plugin>
 					<groupId>net.ju-n.maven.plugins</groupId>
