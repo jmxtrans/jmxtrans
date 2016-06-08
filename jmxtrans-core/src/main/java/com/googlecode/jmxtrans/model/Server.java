@@ -24,9 +24,9 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -269,6 +269,13 @@ public class Server implements JmxConnectionProvider {
 			pool.returnObject(this, jmxConnection);
 			return results.build();
 		} catch (Exception e) {
+			// since we will invalidate the connection in the pool, prevent connection leaks
+			try {
+				jmxConnection.close();
+			} catch (IOException | RuntimeException re) {
+				// drop these, we don't really know what caused the original exception.
+				logger.warn("An error occurred trying to close a JMX Connection during error handling.", re);
+			}
 			pool.invalidateObject(this, jmxConnection);
 			throw e;
 		}
