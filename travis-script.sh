@@ -78,9 +78,18 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     fi
   else
     echo "Building feature branch"
-    mvn verify --settings ${MVN_SETTINGS} -U -B -V -PwithMutationTests,rpm,deb,\!gpg -Dgpg.passphraseServerId=skip -Ddocker.skip=false
+    mvn verify sonar:sonar \
+      --settings ${MVN_SETTINGS} -U -B -V \
+      -PwithMutationTests,rpm,deb,\!gpg \
+      -Dgpg.passphraseServerId=skip \
+      -Ddocker.skip=false \
+      -Dsonar.host.url=https://nemo.sonarqube.org -Dsonar.login=$SONAR_TOKEN
   fi
 else
   echo "Building pull request"
-  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb,\!gpg -Dgpg.passphraseServerId=skip -Ddocker.skip=false
+  mvn verify \
+    --settings ${MVN_SETTINGS} -B -V \
+    -PwithMutationTests,rpm,deb,\!gpg \
+    -Dgpg.passphraseServerId=skip \
+    -Ddocker.skip=false
 fi
