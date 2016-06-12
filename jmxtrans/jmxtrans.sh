@@ -42,7 +42,7 @@ JAVA_HOME=${JAVA_HOME:-"/usr"}
 LOG_DIR=${LOG_DIR:-"."}
 LOG_FILE=${LOG_FILE:-"/dev/null"}
 
-JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
+JAR_FILE=${JAR_FILE:-"lib/jmxtrans-all.jar"}
 ADDITIONAL_JARS=${ADDITIONAL_JARS:-""}
 JSON_DIR=${JSON_DIR:-"."}
 SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}
