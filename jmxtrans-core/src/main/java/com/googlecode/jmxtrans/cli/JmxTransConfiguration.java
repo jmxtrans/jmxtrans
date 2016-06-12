@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 
+@SuppressWarnings("squid:S1213") // having instance variables close to their getters is more readable in this class
 public class JmxTransConfiguration {
 	@Parameter(
 			names = {"-c", "--continue-on-error"},
@@ -119,7 +120,7 @@ public class JmxTransConfiguration {
 			validateWith = PositiveInteger.class
 	)
 	@Getter @Setter
-	private int queryProcessorExecutorWorkQueueCapacity = 1000;
+	private int queryProcessorExecutorWorkQueueCapacity = 100000;
 
 	@Parameter(
 			names = {"--result-processor-executor-pool-size"},
@@ -135,6 +136,6 @@ public class JmxTransConfiguration {
 			validateWith = PositiveInteger.class
 	)
 	@Getter @Setter
-	private int resultProcessorExecutorWorkQueueCapacity = 1000;
+	private int resultProcessorExecutorWorkQueueCapacity = 100000;
 
 }

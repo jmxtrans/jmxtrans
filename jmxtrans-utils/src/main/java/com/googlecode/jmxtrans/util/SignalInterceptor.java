@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,20 +59,6 @@ public abstract class SignalInterceptor {
 		} catch (Throwable e) {
 			throw new SignalInterceptorException(signame, e);
 		}
-	}
-
-	/**
-	 * A wrapper around <code>register(String)</code> which never throws an
-	 * exception. Instead, it returns <code>true</code> if registration
-	 * succeeded, and <code>false</code> if it failed.
-	 */
-	protected boolean registerQuietly(String signame) {
-		try {
-			register(signame);
-		} catch (Throwable e) {
-			return false;
-		}
-		return true;
 	}
 
 	/**

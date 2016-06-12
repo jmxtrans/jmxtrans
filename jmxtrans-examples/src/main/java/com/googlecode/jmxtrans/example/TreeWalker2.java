@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -83,7 +83,7 @@ public class TreeWalker2 {
 
 			Query.Builder queryBuilder = Query.builder()
 					.setObj(name.getCanonicalName())
-					.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()));
+					.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()));
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
 				queryBuilder.addAttr(attrInfo.getName());

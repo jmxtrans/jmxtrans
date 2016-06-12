@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -47,25 +46,21 @@ public class SensuWriter2 implements WriterBasedOutputWriter {
 
 	@Override
 	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
-		Closer closer = Closer.create();
-		try {
-			JsonGenerator g = closer.register(jsonFactory.createGenerator(writer));
+		try (
+				JsonGenerator g = jsonFactory.createGenerator(writer);
+				StringWriter temporaryWriter = new StringWriter()
+		) {
 			g.useDefaultPrettyPrinter();
 			g.writeStartObject();
 			g.writeStringField("name", "jmxtrans");
 			g.writeStringField("type", "metric");
 			g.writeStringField("handler", "graphite");
 
-			StringWriter temporaryWriter = closer.register(new StringWriter());
 			graphiteWriter.write(temporaryWriter, server, query, results);
 
 			g.writeStringField("output", temporaryWriter.toString());
 			g.writeEndObject();
 			g.flush();
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 	}
 }

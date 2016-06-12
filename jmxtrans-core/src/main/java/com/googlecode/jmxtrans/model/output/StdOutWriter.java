@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -87,6 +87,7 @@ public class StdOutWriter implements OutputWriterFactory {
 		}
 
 		@Override
+		@SuppressWarnings("squid:S106") // using StdOut is the goal of StdOutWriter
 		protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 			for (Result r : results) {
 				System.out.println(r);

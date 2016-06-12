@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
@@ -42,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.AttributeList;
@@ -67,7 +64,7 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Arrays.asList;
 
 /**
@@ -98,7 +95,10 @@ public class Query {
 	 * typeName=name=PS Eden Space,type=MemoryPool
 	 * <p/>
 	 * If you add a typeName("name"), then it'll retrieve 'PS Eden Space' from
-	 * the string
+	 * the string.
+	 * <p>
+	 * The order of the elements of this set matches the order provided by the
+	 * user.
 	 */
 	@Getter private final ImmutableSet<String> typeNames;
 
@@ -124,12 +124,60 @@ public class Query {
 			@JsonProperty("obj") String obj,
 			@JsonProperty("keys") List<String> keys,
 			@JsonProperty("attr") List<String> attr,
-			@JsonProperty("typeNames") Set<String> typeNames,
+			@JsonProperty("typeNames") List<String> typeNames,
 			@JsonProperty("resultAlias") String resultAlias,
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
+	) {
+		// For typeName, note the using copyOf does not change the order of
+		// the elements.
+		this(obj, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of());
+	}
+
+	public Query(
+			String obj,
+			List<String> keys,
+			List<String> attr,
+			Set<String> typeNames,
+			String resultAlias,
+			boolean useObjDomainAsKey,
+			boolean allowDottedKeys,
+			boolean useAllTypeNames,
+			List<OutputWriterFactory> outputWriters
+	) {
+		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of());
+	}
+
+	public Query(
+			String obj,
+			List<String> keys,
+			List<String> attr,
+			Set<String> typeNames,
+			String resultAlias,
+			boolean useObjDomainAsKey,
+			boolean allowDottedKeys,
+			boolean useAllTypeNames,
+			ImmutableList<OutputWriter> outputWriters
+	) {
+		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				ImmutableList.<OutputWriterFactory>of(), outputWriters);
+	}
+
+	private Query(
+			String obj,
+			List<String> keys,
+			List<String> attr,
+			Set<String> typeNames,
+			String resultAlias,
+			boolean useObjDomainAsKey,
+			boolean allowDottedKeys,
+			boolean useAllTypeNames,
+			List<OutputWriterFactory> outputWriterFactories,
+			List<OutputWriter> outputWriters
 	) {
 		try {
 			this.objectName = new ObjectName(obj);
@@ -142,26 +190,14 @@ public class Query {
 		this.keys = copyOf(firstNonNull(keys, Collections.<String>emptyList()));
 		this.allowDottedKeys = allowDottedKeys;
 		this.useAllTypeNames = useAllTypeNames;
-		this.outputWriters = outputWriters == null ? ImmutableList.<OutputWriterFactory>of() : copyOf(outputWriters);
+		this.outputWriters = copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
+		// We need to preserve the order of typeNames. So note that copyOf
+		// does not mess with the order. 
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 
-		this.outputWriterInstances = createOutputWriters(outputWriters);
-	}
-
-	private ImmutableList<OutputWriter> createOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
-		if (outputWriters == null) return ImmutableList.of();
-		return FluentIterable
-				.from(outputWriters)
-				.transform(new Function<OutputWriterFactory, OutputWriter>() {
-					@Nullable
-					@Override
-					public OutputWriter apply(OutputWriterFactory input) {
-						return input.create();
-					}
-				})
-				.toList();
+		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -178,7 +214,7 @@ public class Query {
 
 		List<String> attributes;
 		if (attr.isEmpty()) {
-			attributes = new ArrayList<String>();
+			attributes = new ArrayList<>();
 			for (MBeanAttributeInfo attrInfo : info.getAttributes()) {
 				attributes.add(attrInfo.getName());
 			}
@@ -211,7 +247,7 @@ public class Query {
 		if (isUseAllTypeNames()) {
 			return new UseAllTypeNameValuesStringBuilder(separator);
 		} else if (typeNames != null && !typeNames.isEmpty()) {
-			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<String>(typeNames));
+			return new PrependingTypeNameValuesStringBuilder(separator, new ArrayList<>(typeNames));
 		} else {
 			return new TypeNameValuesStringBuilder(separator);
 		}
@@ -242,8 +278,11 @@ public class Query {
 		@Setter private boolean useObjDomainAsKey;
 		@Setter private boolean allowDottedKeys;
 		@Setter private boolean useAllTypeNames;
-		private final List<OutputWriterFactory> outputWriters = newArrayList();
-		private final Set<String> typeNames = newHashSet();
+		private final List<OutputWriterFactory> outputWriterFactories = newArrayList();
+		private final List<OutputWriter> outputWriters = newArrayList();
+		// We need to pick an order preserving Set implementation here to
+		// avoid unpredictable ordering of typeNames.
+		private final Set<String> typeNames = newLinkedHashSet();
 
 		private Builder() {}
 
@@ -273,26 +312,39 @@ public class Query {
 			return this;
 		}
 
-		public Builder addOutputWriter(OutputWriterFactory outputWriter) {
-			return addOutputWriters(outputWriter);
+		public Builder addOutputWriterFactory(OutputWriterFactory outputWriterFactory) {
+			return addOutputWriterFactories(outputWriterFactory);
 		}
 
-		public Builder addOutputWriters(OutputWriterFactory... outputWriters) {
-			this.outputWriters.addAll(asList(outputWriters));
+		public Builder addOutputWriterFactories(OutputWriterFactory... outputWriterFactories) {
+			this.outputWriterFactories.addAll(asList(outputWriterFactories));
 			return this;
 		}
 
-		public Builder addOutputWriters(Collection<OutputWriterFactory> outputWriters) {
+		public Builder addOutputWriters(Collection<OutputWriter> outputWriters) {
 			this.outputWriters.addAll(outputWriters);
 			return this;
 		}
 
-		public Builder setTypeNames(Set<String> typeNames) {
+		public Builder setTypeNames(Collection<String> typeNames) {
 			this.typeNames.addAll(typeNames);
 			return this;
 		}
 
 		public Query build() {
+			if (!outputWriterFactories.isEmpty()) {
+				return new Query(
+						this.obj,
+						this.keys,
+						this.attr,
+						this.typeNames,
+						this.resultAlias,
+						this.useObjDomainAsKey,
+						this.allowDottedKeys,
+						this.useAllTypeNames,
+						this.outputWriterFactories
+				);
+			}
 			return new Query(
 					this.obj,
 					this.keys,
@@ -302,7 +354,7 @@ public class Query {
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
 					this.useAllTypeNames,
-					this.outputWriters
+					copyOf(this.outputWriters)
 			);
 		}
 

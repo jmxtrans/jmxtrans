@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,19 +66,17 @@ public class GraphiteWriter2 implements WriterBasedOutputWriter {
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
 			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-					Object value = values.getValue();
-					if (isNumeric(value)) {
+			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+				Object value = values.getValue();
+				if (isNumeric(value)) {
 
-						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-								.replaceAll("[()]", "_") + " " + value.toString() + " "
-								+ SECONDS.convert(result.getEpoch(), MILLISECONDS) + "\n";
-						log.debug("Graphite Message: {}", line);
-						writer.write(line);
-					} else {
-						onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
-					}
+					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+							.replaceAll("[()]", "_") + " " + value.toString() + " "
+							+ SECONDS.convert(result.getEpoch(), MILLISECONDS) + "\n";
+					log.debug("Graphite Message: {}", line);
+					writer.write(line);
+				} else {
+					onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 				}
 			}
 		}

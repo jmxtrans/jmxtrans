@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,27 +66,25 @@ public class LibratoWriter2 implements WriterBasedOutputWriter {
 			g.writeArrayFieldStart("gauges");
 			for (Result result : results) {
 				Map<String, Object> resultValues = result.getValues();
-				if (resultValues != null) {
-					for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-						if (isNumeric(values.getValue())) {
-							g.writeStartObject();
-							g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
-							if (source != null && !source.isEmpty()) {
-								g.writeStringField("source", source);
-							}
-							g.writeNumberField("measure_time", SECONDS.convert(result.getEpoch(), MILLISECONDS));
-							Object value = values.getValue();
-							if (value instanceof Integer) {
-								g.writeNumberField("value", (Integer) value);
-							} else if (value instanceof Long) {
-								g.writeNumberField("value", (Long) value);
-							} else if (value instanceof Float) {
-								g.writeNumberField("value", (Float) value);
-							} else if (value instanceof Double) {
-								g.writeNumberField("value", (Double) value);
-							}
-							g.writeEndObject();
+				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+					if (isNumeric(values.getValue())) {
+						g.writeStartObject();
+						g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
+						if (source != null && !source.isEmpty()) {
+							g.writeStringField("source", source);
 						}
+						g.writeNumberField("measure_time", SECONDS.convert(result.getEpoch(), MILLISECONDS));
+						Object value = values.getValue();
+						if (value instanceof Integer) {
+							g.writeNumberField("value", (Integer) value);
+						} else if (value instanceof Long) {
+							g.writeNumberField("value", (Long) value);
+						} else if (value instanceof Float) {
+							g.writeNumberField("value", (Float) value);
+						} else if (value instanceof Double) {
+							g.writeNumberField("value", (Double) value);
+						}
+						g.writeEndObject();
 					}
 				}
 			}

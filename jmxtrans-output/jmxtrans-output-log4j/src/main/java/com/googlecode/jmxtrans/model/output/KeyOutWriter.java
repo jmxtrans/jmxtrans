@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	protected static final String SETTING_DELIMITER = "delimiter";
 	protected static final String LOG_PATTERN = "%m%n";
 	protected static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
-	protected static final Map<String, Logger> loggers = new ConcurrentHashMap<String, Logger>();
+	protected static final Map<String, Logger> loggers = new ConcurrentHashMap<>();
 
 	protected static final int MAX_LOG_BACKUP_FILES = 200;
 	protected static final String MAX_LOG_FILE_SIZE = "10MB";
@@ -135,13 +135,11 @@ public class KeyOutWriter extends BaseOutputWriter {
 
 		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Entry<String, Object> values : resultValues.entrySet()) {
-					if (isNumeric(values.getValue())) {
+			for (Entry<String, Object> values : resultValues.entrySet()) {
+				if (isNumeric(values.getValue())) {
 
-						logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
-								+ values.getValue().toString() + delimiter + result.getEpoch());
-					}
+					logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
+							+ values.getValue().toString() + delimiter + result.getEpoch());
 				}
 			}
 		}

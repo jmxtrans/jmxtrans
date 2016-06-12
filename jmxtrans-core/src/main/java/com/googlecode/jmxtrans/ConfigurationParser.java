@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ public class ConfigurationParser {
 	@VisibleForTesting
 	ImmutableList<Server> mergeServerLists(List<Server> firstList, List<Server> secondList) {
 		ImmutableList.Builder<Server> results = ImmutableList.builder();
-		List<Server> toProcess = new ArrayList<Server>(secondList);
+		List<Server> toProcess = new ArrayList<>(secondList);
 		for (Server firstServer : firstList) {
 			if (toProcess.contains(firstServer)) {
 				Server found = toProcess.get(secondList.indexOf(firstServer));

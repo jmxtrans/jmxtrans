@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,7 @@ import java.util.Collections;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class Tester {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
@@ -52,17 +53,17 @@ public class Tester {
 				.addQuery(Query.builder()
 						.setObj("java.lang:type=Memory")
 						.addAttr("HeapMemoryUsage", "NonHeapMemoryUsage")
-						.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
+						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
 						.build())
 				.addQuery(Query.builder()
 						.setObj("java.lang:name=CMS Old Gen,type=MemoryPool")
 						.addAttr("Usage")
-						.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
+						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
 						.build())
 				.addQuery(Query.builder()
 						.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector")
 						.addAttr("LastGcInfo")
-						.addOutputWriter(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
+						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
 						.build())
 				.build();
 

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,12 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.googlecode.jmxtrans.model.QueryFixtures;
 import com.googlecode.jmxtrans.model.ResultFixtures;
 import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.test.IntegrationTest;
+import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -44,6 +46,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
 @Category(IntegrationTest.class)
+@AllowLocalFileAccess(paths = "*")
 public class LibratoWriterFactoryIT {
 	@Rule public WireMockRule wireMockRule = new WireMockRule(1234);
 

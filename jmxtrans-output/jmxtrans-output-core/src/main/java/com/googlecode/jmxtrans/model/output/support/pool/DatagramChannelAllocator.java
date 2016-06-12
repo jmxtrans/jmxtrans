@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,13 +35,19 @@ import java.nio.charset.Charset;
 public class DatagramChannelAllocator implements Allocator<DatagramChannelPoolable> {
 
 	@Nonnull private final InetSocketAddress server;
-	@Nonnull private final int bufferSize;
+	private final int bufferSize;
 	@Nonnull private final Charset charset;
+	@Nonnull private final FlushStrategy flushStrategy;
 
-	public DatagramChannelAllocator(@Nonnull InetSocketAddress server, @Nonnull int bufferSize, @Nonnull Charset charset) {
+	public DatagramChannelAllocator(
+			@Nonnull InetSocketAddress server,
+			int bufferSize,
+			@Nonnull Charset charset,
+			@Nonnull FlushStrategy flushStrategy) {
 		this.server = server;
 		this.bufferSize = bufferSize;
 		this.charset = charset;
+		this.flushStrategy = flushStrategy;
 	}
 
 	@Override
@@ -49,7 +55,7 @@ public class DatagramChannelAllocator implements Allocator<DatagramChannelPoolab
 		DatagramChannel channel = DatagramChannel.open();
 		channel.connect(new InetSocketAddress(server.getHostName(), server.getPort()));
 		ChannelWriter writer = new ChannelWriter(bufferSize, charset, channel);
-		return new DatagramChannelPoolable(slot, writer, channel);
+		return new DatagramChannelPoolable(slot, writer, channel, flushStrategy);
 	}
 
 	@Override

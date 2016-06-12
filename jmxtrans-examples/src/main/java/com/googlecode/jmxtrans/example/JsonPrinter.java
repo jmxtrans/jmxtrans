@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,6 @@ public class JsonPrinter {
 		this.out = out;
 		mapper = new ObjectMapper();
 		mapper.getSerializationConfig().without(SerializationFeature.WRITE_NULL_MAP_VALUES);
-		//mapper.getSerializationConfig().set(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
 		prettyPrintingWriter = mapper.writerWithDefaultPrettyPrinter();
 	}
 

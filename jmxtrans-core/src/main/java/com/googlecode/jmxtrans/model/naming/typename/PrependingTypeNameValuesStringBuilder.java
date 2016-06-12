@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ public class PrependingTypeNameValuesStringBuilder extends TypeNameValuesStringB
 
 	@Override
 	public String build(List<String> typeNames, String typeNameStr) {
-		List<String> resultingTypeNames = new ArrayList<String>(prependedTypeNames);
+		List<String> resultingTypeNames = new ArrayList<>(prependedTypeNames);
 		if (typeNames != null) {
 			for (String name : typeNames) {
 				if (!resultingTypeNames.contains(name)) {

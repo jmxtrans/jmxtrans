@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ public class SocketAllocatorTest {
 		try {
 			echoServer.start();
 
-			SocketAllocator socketAllocator = new SocketAllocator(echoServer.getLocalSocketAddress(), 100, UTF_8);
+			SocketAllocator socketAllocator = new SocketAllocator(echoServer.getLocalSocketAddress(), 100, UTF_8, new NeverFlush());
 			SocketPoolable socketPoolable = socketAllocator.allocate(mock(Slot.class));
 
 			try {
@@ -72,11 +72,11 @@ public class SocketAllocatorTest {
 
 	@Test
 	public void socketAndWritersAreClosed() throws Exception {
-		SocketAllocator socketAllocator = new SocketAllocator(new InetSocketAddress("localhost", 80), 100, UTF_8);
+		SocketAllocator socketAllocator = new SocketAllocator(new InetSocketAddress("localhost", 80), 100, UTF_8, new NeverFlush());
 
 		Socket socket = mock(Socket.class);
 		Writer writer = mock(Writer.class);
-		SocketPoolable socketPoolable = new SocketPoolable(null, socket, writer);
+		SocketPoolable socketPoolable = new SocketPoolable(null, socket, writer, new NeverFlush());
 		socketAllocator.deallocate(socketPoolable);
 
 		verify(socket).close();
@@ -85,14 +85,14 @@ public class SocketAllocatorTest {
 
 	@Test(expected = IOException.class)
 	public void socketAndWritersAreClosedEvenWhenExceptions() throws Exception {
-		SocketAllocator socketAllocator = new SocketAllocator(new InetSocketAddress("localhost", 80), 100, UTF_8);
+		SocketAllocator socketAllocator = new SocketAllocator(new InetSocketAddress("localhost", 80), 100, UTF_8, new NeverFlush());
 
 		Socket socket = mock(Socket.class);
 		doThrow(IOException.class).when(socket).close();
 		Writer writer = mock(Writer.class);
 		doThrow(IOException.class).when(writer).close();
 
-		SocketPoolable socketPoolable = new SocketPoolable(null, socket, writer);
+		SocketPoolable socketPoolable = new SocketPoolable(null, socket, writer, new NeverFlush());
 		socketAllocator.deallocate(socketPoolable);
 
 		verify(socket).close();

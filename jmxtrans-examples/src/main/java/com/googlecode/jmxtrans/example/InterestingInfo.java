@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,11 +43,13 @@ import static com.google.common.collect.Maps.newHashMap;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class InterestingInfo {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
-	public static void main(String[] args) throws Exception {
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make IP addresses configurable
+		public static void main(String[] args) throws Exception {
 		Server.Builder serverBuilder = Server.builder()
 				.setHost("w2")
 				.setPort("1099")
@@ -68,7 +70,7 @@ public class InterestingInfo {
 				.setObj("java.lang:type=Memory")
 				.addAttr("HeapMemoryUsage")
 				.addAttr("NonHeapMemoryUsage")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q);
 
@@ -77,21 +79,21 @@ public class InterestingInfo {
 				.addAttr("DaemonThreadCount")
 				.addAttr("PeakThreadCount")
 				.addAttr("ThreadCount")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q2);
 
 		Query q3 = Query.builder()
 				.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector")
 				.addAttr("LastGcInfo")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q3);
 
 		Query q4 = Query.builder()
 				.setObj("java.lang:name=ParNew,type=GarbageCollector")
 				.addAttr("LastGcInfo")
-				.addOutputWriters(gw, sw)
+				.addOutputWriterFactories(gw, sw)
 				.build();
 		serverBuilder.addQuery(q4);
 

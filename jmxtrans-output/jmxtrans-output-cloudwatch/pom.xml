@@ -2,7 +2,7 @@
 <!--
 
     The MIT License
-    Copyright (c) 2010 JmxTrans team
+    Copyright © 2010 JmxTrans team
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@
 	<description>This module contains output writers based on CloudWatch (AWS).</description>
 
 	<properties>
-		<verify.mutationThreshold>49</verify.mutationThreshold>
+		<verify.mutationThreshold>48</verify.mutationThreshold>
 		<verify.totalBranchRate>68</verify.totalBranchRate>
 		<verify.totalLineRate>63</verify.totalLineRate>
 	</properties>

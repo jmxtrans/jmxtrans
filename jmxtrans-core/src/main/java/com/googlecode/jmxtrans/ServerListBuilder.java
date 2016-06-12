@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,17 +22,23 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.SingletonOutputWriterFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -61,6 +67,7 @@ public class ServerListBuilder {
 	}
 
 	private OutputWriterFactory singleton(OutputWriterFactory outputWriter) {
+		outputWriter = new SingletonOutputWriterFactory(outputWriter);
 		if (!outputWriters.containsKey(outputWriter)) outputWriters.put(outputWriter, outputWriter);
 		return outputWriters.get(outputWriter);
 	}
@@ -78,17 +85,17 @@ public class ServerListBuilder {
 		@Nonnull private final Map<Query, Set<OutputWriterFactory>> queries = newHashMap();
 		@Nonnull private final Set<OutputWriterFactory> temporaryOutputWriters = newHashSet();
 
-		TemporaryServer(Server server) {
+		TemporaryServer(@Nonnull Server server) {
 			this.server = server;
 		}
 
-		public void addQueries(Iterable<Query> queries) {
+		public void addQueries(@Nonnull Iterable<Query> queries) {
 			for (Query query : queries) {
 				addQuery(query);
 			}
 		}
 
-		private void addQuery(Query query) {
+		private void addQuery(@Nonnull Query query) {
 			if (!queries.containsKey(query)) queries.put(query, new HashSet<OutputWriterFactory>());
 
 			Set<OutputWriterFactory> outputWritersForThisQuery = queries.get(query);
@@ -97,7 +104,7 @@ public class ServerListBuilder {
 			}
 		}
 
-		public void addOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
+		public void addOutputWriters(@Nonnull Iterable<OutputWriterFactory> outputWriters) {
 			for (OutputWriterFactory outputWriter : outputWriters) {
 				temporaryOutputWriters.add(singleton(outputWriter));
 			}
@@ -105,16 +112,27 @@ public class ServerListBuilder {
 
 		public Server build() {
 			Server.Builder builder = Server.builder(server)
-					.addOutputWriters(temporaryOutputWriters)
+					.addOutputWriters(createOutputWriters(temporaryOutputWriters))
 					.clearQueries();
 			for (Map.Entry<Query, Set<OutputWriterFactory>> queryEntry : queries.entrySet()) {
 				builder.addQuery(
 						Query.builder(queryEntry.getKey())
-								.addOutputWriters(queryEntry.getValue())
+								.addOutputWriters(createOutputWriters(queryEntry.getValue()))
 								.build());
 			}
 			return builder.build();
 		}
 
+	}
+
+	private Collection<OutputWriter> createOutputWriters(@Nonnull Set<OutputWriterFactory> outputWriterFactories) {
+		return from(outputWriterFactories)
+				.transform(new Function<OutputWriterFactory, OutputWriter>() {
+			@Nullable
+			@Override
+			public OutputWriter apply(OutputWriterFactory input) {
+				return input.create();
+			}
+		}).toList();
 	}
 }

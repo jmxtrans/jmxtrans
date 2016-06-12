@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ public class UseAllTypeNameValuesStringBuilder extends TypeNameValuesStringBuild
 
 	@Override
 	public String build(List<String> typeNames, String typeNameStr) {
-		List<String> allTypeNames = new ArrayList<String>();
+		List<String> allTypeNames = new ArrayList<>();
 		for (TypeNameValue typeNameValue : TypeNameValue.extract(typeNameStr)){
 			if (typeNameValue.getValue() != null && !typeNameValue.getValue().isEmpty()) {
 				allTypeNames.add(typeNameValue.getKey());

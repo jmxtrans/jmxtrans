@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,11 +26,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import javax.annotation.Nonnull;
+
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
 @JsonSerialize(include = NON_NULL)
 @JsonTypeInfo(use = Id.CLASS, include = As.PROPERTY, property = "@class")
-public interface OutputWriterFactory {
-	OutputWriter create();
+public interface OutputWriterFactory<T extends OutputWriter> {
+	@Nonnull T create();
 }

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,9 @@ public interface OutputWriter {
 	/**
 	 * Settings allow you to configure your Writers with whatever they might
 	 * need.
+	 * @deprecated Don't use the settings Map, please extract necessary bits at construction time.
 	 */
+	@Deprecated
 	Map<String, Object> getSettings();
 
 	/**

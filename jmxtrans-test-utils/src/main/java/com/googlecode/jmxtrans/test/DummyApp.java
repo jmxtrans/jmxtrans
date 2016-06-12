@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,12 +31,16 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import java.util.Date;
 
+import static java.lang.Thread.currentThread;
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 
+@SuppressWarnings("squid:S106") // using StdOut if fine in an example
 public class DummyApp {
 	public static final String MOCK_MBEAN_NAME = "org.jmxtrans:type=Counter,name=myCounter";
 
-	public static void main(String[] args) throws InterruptedException, MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
+	private DummyApp() {}
+
+	public static void main(String[] args) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
 
 		Counter mock = new Counter("myCounter");
 		ObjectName objectName = new ObjectName(MOCK_MBEAN_NAME);
@@ -54,7 +58,8 @@ public class DummyApp {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				currentThread().interrupt();
+				break;
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,9 @@
 package com.googlecode.jmxtrans.model.output.support;
 
 import com.google.common.base.Charsets;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
+import com.googlecode.jmxtrans.model.output.support.pool.NeverFlush;
+import com.googlecode.jmxtrans.model.output.support.pool.RetryingAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketExpiration;
 import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
@@ -41,17 +44,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Accessors(chain = true)
 public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
-	@Nonnull
-	private final InetSocketAddress server;
-	@Nonnull
-	private final T target;
-	@Nonnull
-	@Setter
-	private Charset charset = Charsets.UTF_8;
-	@Setter
-	private int socketTimeoutMillis = 200;
-	@Setter
-	private int poolSize = 1;
+	@Nonnull private final InetSocketAddress server;
+	@Nonnull private final T target;
+	@Nonnull @Setter private Charset charset = Charsets.UTF_8;
+	@Setter private int socketTimeoutMillis = 200;
+	@Setter private int poolSize = 1;
+	@Nonnull @Setter private FlushStrategy flushStrategy = new NeverFlush();
 
 	private TcpOutputWriterBuilder(@Nonnull InetSocketAddress server, @Nonnull T target) {
 		this.server = server;
@@ -61,22 +59,23 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	public static <T extends WriterBasedOutputWriter> TcpOutputWriterBuilder<T> builder(
 			@Nonnull InetSocketAddress server,
 			@Nonnull T target) {
-		return new TcpOutputWriterBuilder<T>(server, target);
+		return new TcpOutputWriterBuilder<>(server, target);
 	}
 
 	private LifecycledPool<SocketPoolable> createPool() {
 		Config<SocketPoolable> config = new Config<SocketPoolable>()
-				.setAllocator(new SocketAllocator(
+				.setAllocator(new RetryingAllocator<SocketPoolable>(new SocketAllocator(
 						server,
 						socketTimeoutMillis,
-						charset))
+						charset,
+						flushStrategy)))
 				.setExpiration(new SocketExpiration())
 				.setSize(poolSize);
-		return new BlazePool<SocketPoolable>(config);
+		return new BlazePool<>(config);
 	}
 
 	public WriterPoolOutputWriter<T> build() {
 		LifecycledPool<SocketPoolable> pool = createPool();
-		return new WriterPoolOutputWriter<T>(target, pool, new Timeout(1, SECONDS));
+		return new WriterPoolOutputWriter<>(target, pool, new Timeout(1, SECONDS));
 	}
 }

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +36,10 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class Ehcache {
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make it configurable
 	private static final String GW_HOST = "192.168.192.133";
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
@@ -57,7 +59,7 @@ public class Ehcache {
 						.addAttr("ObjectCount")
 						.addAttr("MemoryStoreObjectCount")
 						.addAttr("DiskStoreObjectCount")
-						.addOutputWriter(GraphiteWriter.builder()
+						.addOutputWriterFactory(GraphiteWriter.builder()
 								.addTypeName("name")
 								.setDebugEnabled(true)
 								.setHost(GW_HOST)

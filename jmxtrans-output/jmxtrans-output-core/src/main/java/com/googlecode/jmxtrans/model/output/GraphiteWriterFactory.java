@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,15 +29,18 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.net.InetSocketAddress;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.createFlushStrategy;
 
 /**
  * This low latency and thread safe output writer sends data to a host/port combination
@@ -52,10 +55,12 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 
 	private static final String DEFAULT_ROOT_PREFIX = "servers";
 
-	private final String rootPrefix;
-	private final InetSocketAddress graphiteServer;
-	private final ImmutableList<String> typeNames;
+	@Nonnull private final String rootPrefix;
+	@Nonnull private final InetSocketAddress graphiteServer;
+	@Nonnull private final ImmutableList<String> typeNames;
 	private final boolean booleanAsNumber;
+	@Nonnull private final FlushStrategy flushStrategy;
+	private final int poolSize;
 
 	@JsonCreator
 	public GraphiteWriterFactory(
@@ -63,7 +68,10 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("host") String host,
-			@JsonProperty("port") Integer port) {
+			@JsonProperty("port") Integer port,
+			@JsonProperty("flushStrategy") String flushStrategy,
+			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+			@JsonProperty("poolSize") Integer poolSize) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.rootPrefix = firstNonNull(rootPrefix, DEFAULT_ROOT_PREFIX);
@@ -71,6 +79,8 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 		this.graphiteServer = new InetSocketAddress(
 				checkNotNull(host, "Host cannot be null."),
 				checkNotNull(port, "Port cannot be null."));
+		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
+		this.poolSize = firstNonNull(poolSize, 1);
 	}
 
 	@Override
@@ -79,6 +89,8 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 				booleanAsNumber,
 				TcpOutputWriterBuilder.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
 						.setCharset(UTF_8)
+						.setFlushStrategy(flushStrategy)
+						.setPoolSize(poolSize)
 						.build()
 		);
 	}

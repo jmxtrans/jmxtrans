@@ -2,7 +2,7 @@
 <!--
 
     The MIT License
-    Copyright (c) 2010 JmxTrans team
+    Copyright © 2010 JmxTrans team
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@
 		<rpm.run.cmd>rpm -ivh --nosignature --nodeps /maven/${rpm.install.file}; /etc/init.d/jmxtrans start; /maven/verify.sh</rpm.run.cmd>
 
 		<verification.message>installation verified</verification.message>
-		<verification.wait.time>60000</verification.wait.time>
+		<verification.wait.time>120000</verification.wait.time>
 	</properties>
 
 	<build>
@@ -57,7 +57,7 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<configuration>
 					<showLogs>true</showLogs>
-					<images />
+					<images></images>
 				</configuration>
 				<executions>
 					<execution>

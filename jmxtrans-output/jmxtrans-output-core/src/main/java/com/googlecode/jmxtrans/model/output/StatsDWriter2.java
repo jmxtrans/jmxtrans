@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
+import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
+import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,9 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	@Nonnull
 	private final String stringValueDefaultCount;
 
+	@Nonnull
+	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
+
 	public StatsDWriter2(
 			@Nonnull List<String> typeNames,
 			@Nonnull String rootPrefix,
@@ -69,20 +74,17 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	@Override
 	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 		for (Result result : results) {
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
 
-					if (isNotValidValue(values.getValue())) {
-						log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
-						continue;
-					}
-
-					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-							+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
-
-					writer.write(line);
+				if (isNotValidValue(values.getValue())) {
+					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
+					continue;
 				}
+
+				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
+						+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
+
+				writer.write(line);
 			}
 		}
 	}
@@ -92,10 +94,11 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	}
 
 	private String computeActualValue(Object value) {
-		if (isNumeric(value)) {
-			return ":" + value.toString();
+		Object transformedValue = valueTransformer.apply(value);
+		if (isNumeric(transformedValue)) {
+			return ":" + transformedValue.toString();
 		}
 
-		return "." + value.toString() + ":" + stringValueDefaultCount;
+		return "." + transformedValue.toString() + ":" + stringValueDefaultCount;
 	}
 }

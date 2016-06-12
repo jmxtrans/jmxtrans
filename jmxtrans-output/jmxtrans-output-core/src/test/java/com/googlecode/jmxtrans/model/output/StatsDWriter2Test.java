@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ import java.io.StringWriter;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericBelowCPrecisionResult;
 import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
 import static com.googlecode.jmxtrans.model.ResultFixtures.singleTrueResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
@@ -46,6 +47,17 @@ public class StatsDWriter2Test {
 
 		assertThat(out.toString())
 				.isEqualTo("root.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:10|c\n");
+	}
+
+	@Test
+	public void valuesTruncatedToCPrecision() throws IOException {
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L);
+
+		StringWriter out = new StringWriter();
+		writer.write(out, dummyServer(), dummyQuery(), singleNumericBelowCPrecisionResult());
+
+		assertThat(out.toString())
+				.isEqualTo("root.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:0|c\n");
 	}
 
 	@Test

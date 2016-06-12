@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -147,7 +147,7 @@ public class OpenTSDBMessageFormatter {
 	 * @return List<String> - the list of strings containing metric details ready for sending to OpenTSDB.
 	 */
 	private List<String> formatResult(Result result) {
-		List<String> resultStrings = new LinkedList<String>();
+		List<String> resultStrings = new LinkedList<>();
 		Map<String, Object> values = result.getValues();
 
 		String attributeName = result.getAttributeName();

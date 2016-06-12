@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -82,11 +83,11 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 @EqualsAndHashCode(exclude = {"jsonFactory"})
 public class LibratoWriter extends BaseOutputWriter {
 
-	public final static String SETTING_URL = "url";
-	public final static String SETTING_USERNAME = "username";
-	public final static String SETTING_TOKEN = "token";
-	public final static String SETTING_PROXY_HOST = "proxyHost";
-	public final static String SETTING_PROXY_PORT = "proxyPort";
+	public static final String SETTING_URL = "url";
+	public static final String SETTING_USERNAME = "username";
+	public static final String SETTING_TOKEN = "token";
+	public static final String SETTING_PROXY_HOST = "proxyHost";
+	public static final String SETTING_PROXY_PORT = "proxyPort";
 	public static final String DEFAULT_LIBRATO_API_URL = "https://metrics-api.librato.com/v1/metrics";
 	public static final String SETTING_LIBRATO_API_TIMEOUT_IN_MILLIS = "libratoApiTimeoutInMillis";
 
@@ -182,27 +183,25 @@ public class LibratoWriter extends BaseOutputWriter {
 		List<String> typeNames = getTypeNames();
 		for (Result result : results) {
 			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-					if (isNumeric(values.getValue())) {
-						g.writeStartObject();
-						g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
-						if (source != null && !source.isEmpty()) {
-							g.writeStringField("source", source);
-						}
-						g.writeNumberField("measure_time", TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS));
-						Object value = values.getValue();
-						if (value instanceof Integer) {
-							g.writeNumberField("value", (Integer) value);
-						} else if (value instanceof Long) {
-							g.writeNumberField("value", (Long) value);
-						} else if (value instanceof Float) {
-							g.writeNumberField("value", (Float) value);
-						} else if (value instanceof Double) {
-							g.writeNumberField("value", (Double) value);
-						}
-						g.writeEndObject();
+			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+				if (isNumeric(values.getValue())) {
+					g.writeStartObject();
+					g.writeStringField("name", KeyUtils.getKeyString(query, result, values, typeNames));
+					if (source != null && !source.isEmpty()) {
+						g.writeStringField("source", source);
 					}
+					g.writeNumberField("measure_time", TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS));
+					Object value = values.getValue();
+					if (value instanceof Integer) {
+						g.writeNumberField("value", (Integer) value);
+					} else if (value instanceof Long) {
+						g.writeNumberField("value", (Long) value);
+					} else if (value instanceof Float) {
+						g.writeNumberField("value", (Float) value);
+					} else if (value instanceof Double) {
+						g.writeNumberField("value", (Double) value);
+					}
+					g.writeEndObject();
 				}
 			}
 		}
@@ -235,7 +234,9 @@ public class LibratoWriter extends BaseOutputWriter {
 				logger.warn("Failure {}:'{}' to send result to Librato server '{}' with proxy {}, username {}", responseCode, urlConnection.getResponseMessage(), url, proxy, username);
 			}
 			if (logger.isTraceEnabled()) {
-				IOUtils.copy(urlConnection.getInputStream(), System.out);
+				StringWriter out = new StringWriter();
+				IOUtils.copy(urlConnection.getInputStream(), out);
+				logger.trace(out.toString());
 			}
 		} catch (Exception e) {
 			logger.warn("Failure to send result to Librato server '{}' with proxy {}, username {}", url, proxy, username, e);

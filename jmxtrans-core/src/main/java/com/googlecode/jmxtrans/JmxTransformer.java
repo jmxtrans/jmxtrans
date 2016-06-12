@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
@@ -63,10 +64,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
+import static java.lang.Thread.currentThread;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -97,6 +101,7 @@ public class JmxTransformer implements WatchedCallback {
 	private volatile boolean isRunning = false;
 	@Nonnull private final ThreadPoolExecutor queryProcessorExecutor;
 	@Nonnull private final ThreadPoolExecutor resultProcessorExecutor;
+	@Nonnull private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
 	@Inject
 	public JmxTransformer(
@@ -228,6 +233,7 @@ public class JmxTransformer implements WatchedCallback {
 					Thread.sleep(1500);
 				} catch (InterruptedException e) {
 					log.error(e.getMessage(), e);
+					currentThread().interrupt();
 				}
 			}
 
@@ -245,7 +251,6 @@ public class JmxTransformer implements WatchedCallback {
 			stopWriterAndClearMasterServerList();
 
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			throw new LifecycleException(e);
 		}
 	}
@@ -299,7 +304,7 @@ public class JmxTransformer implements WatchedCallback {
 		// Sleep for 10 seconds to wait for jobs to complete.
 		// There should be a better way, but it seems that way isn't working
 		// right now.
-		Thread.sleep(10 * 1000);
+		Thread.sleep(MILLISECONDS.convert(10, SECONDS));
 	}
 
 	/**
@@ -374,9 +379,6 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	/**
-	 * Schedules an individual job.
-	 */
 	private void scheduleJob(Server server) throws ParseException, SchedulerException {
 
 		String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(10);
@@ -392,16 +394,17 @@ public class JmxTransformer implements WatchedCallback {
 			trigger = new CronTrigger();
 			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
 			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
-			trigger.setStartTime(new Date());
+			trigger.setStartTime(computeSpreadStartDate(configuration.getRunPeriod()));
 		} else {
 			int runPeriod = configuration.getRunPeriod();
 			if (server.getRunPeriodSeconds() != null) runPeriod = server.getRunPeriodSeconds();
-
 			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
-			minuteTrigger.setStartTime(new Date());
+			minuteTrigger.setStartTime(computeSpreadStartDate(runPeriod));
 
 			trigger = minuteTrigger;
+
+			// TODO replace Quartz with a ScheduledExecutorService
 		}
 
 		serverScheduler.scheduleJob(jd, trigger);
@@ -410,11 +413,14 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	/**
-	 * Deletes all of the Jobs
-	 */
+	@VisibleForTesting
+	Date computeSpreadStartDate(int runPeriod) {
+		long spread = random.nextLong(MILLISECONDS.convert(runPeriod, SECONDS));
+		return new Date(new Date().getTime() + spread);
+	}
+
 	private void deleteAllJobs() throws Exception {
-		List<JobDetail> allJobs = new ArrayList<JobDetail>();
+		List<JobDetail> allJobs = new ArrayList<>();
 		String[] jobGroups = serverScheduler.getJobGroupNames();
 		for (String jobGroup : jobGroups) {
 			String[] jobNames = serverScheduler.getJobNames(jobGroup);
@@ -451,7 +457,7 @@ public class JmxTransformer implements WatchedCallback {
 			files = firstNonNull(jsonDirOrFile.listFiles(), new File[0]);
 		}
 
-		List<File> result = new ArrayList<File>();
+		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			if (this.isJsonFile(file)) {
 				result.add(file);

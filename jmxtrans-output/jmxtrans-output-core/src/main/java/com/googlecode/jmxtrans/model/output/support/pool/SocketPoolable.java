@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,12 @@ import java.net.Socket;
 public class SocketPoolable extends WriterPoolable {
 	@Nonnull @Getter private final Socket socket;
 
-	public SocketPoolable(@Nonnull Slot slot, @Nonnull Socket socket, @Nonnull Writer writer) {
-		super(slot, writer);
+	public SocketPoolable(
+			@Nonnull Slot slot,
+			@Nonnull Socket socket,
+			@Nonnull Writer writer,
+			@Nonnull FlushStrategy flushStrategy) {
+		super(slot, writer, flushStrategy);
 		this.socket = socket;
 	}
 

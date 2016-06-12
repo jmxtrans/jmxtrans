@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -169,7 +169,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 	private Map<String, String> buildResultTagMap(Result result) throws Exception {
 
-		Map<String, String> resultTagMap = new TreeMap<String, String>();
+		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}

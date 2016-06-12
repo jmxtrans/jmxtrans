@@ -1,27 +1,30 @@
 language: java
 sudo: false
-before_install: "git clone -b travis `git config --get remote.origin.url` ${HOME}/travis"
+before_install: git clone -b travis `git config --get remote.origin.url` ${HOME}/travis
 services:
-  - docker
+- docker
 addons:
   apt:
     packages:
     - rpm
 cache:
   directories:
-  - $HOME/.m2
+  - "$HOME/.m2"
 install:
-  - mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B -V
+- mvn compile -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip=true -B
+  -V
 script: travis_wait 120 ./travis-script.sh
 after_success:
-  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site site:stage scm-publish:publish-scm --settings ${HOME}/travis/settings.xml -B -V
+- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && mvn site
+  site:stage scm-publish:publish-scm --settings ${HOME}/travis/settings.xml -B -V
 branches:
   except:
-    - travis
-    - gh-pages
+  - travis
+  - gh-pages
 env:
   global:
-    - secure: "J+lRFlE7ISkg362ROM7TeEg2+C8YGM0H4pimlEaf6g9e7QiT4zidpDxH6v9cOHl7B5hFiZ8K6CizfBpwq5AFrWfpPCO22VZMj4oX6tAKsD6AEeDt6x8dxcpx0aiRYrwnARKCucPnLCLWKSEor3BkO+v8LHAw9YMGOk770B64hIs="
-    - secure: "Z3Jt5wCnci0Tbd+9gf2upWgRcicaOEZKtZGRMz0ig6CwIhPJYvxizXfLPEW4UKTAtg52Vo+zl6zQmSiIOeEbzDlqd8QHWdkx9ViWiu5knOMVzn0K50UyZ0t71Jl2fwH+B/lm0tsH7Y0Z4KReQaWm1PfScVN84zsr3yMKFBxoflM="
-    - secure: "WLJ+rQHfCpRKNrK7ektVzxTk67cPJ3//9p7UVJhGQdcx1aTbIwcqiEUJCq84I+NIctx3Ks7madZbTIDJRX14uCOcFT2+9qjwc6S+ju3cxA+7t5R51fMk40DtQdOTyFtO9tHmX/jRKTLGMSigWObmChHyyvRUfMwXWQGdj/zr36s="
-    - secure: "F5dtEzxr/SpXui6DDqQVJkdOqt97TaLe9r39l0Bw2FM9yY1vUeIliMhYbMQgKUl5Kk2/G4MGSuNShcKis1u9HxRKOMWtkRXddhkqGoHPUbUoImV2SBwUu4Nw/We70dTAR+TQIZoYkcoRNKAHGPzlOhs3GUuyUglS1/CtrcbWb5Y="
+  - secure: J+lRFlE7ISkg362ROM7TeEg2+C8YGM0H4pimlEaf6g9e7QiT4zidpDxH6v9cOHl7B5hFiZ8K6CizfBpwq5AFrWfpPCO22VZMj4oX6tAKsD6AEeDt6x8dxcpx0aiRYrwnARKCucPnLCLWKSEor3BkO+v8LHAw9YMGOk770B64hIs=
+  - secure: F5dtEzxr/SpXui6DDqQVJkdOqt97TaLe9r39l0Bw2FM9yY1vUeIliMhYbMQgKUl5Kk2/G4MGSuNShcKis1u9HxRKOMWtkRXddhkqGoHPUbUoImV2SBwUu4Nw/We70dTAR+TQIZoYkcoRNKAHGPzlOhs3GUuyUglS1/CtrcbWb5Y=
+  - secure: ObJBI3RnSfv4ajoXqg2OPHg8TYDW0Y3vf2b2vVt4c6VUiFo4fzuTf/WcS5GwgIbNBnyIRcTmAxg6OFYfLiztyXWDyyhF+JekHd5lUTJqSpGU0p+s/otj83Rlp0YxFabyCx2DYjUIRB1EvGRp6zjcywi+J6e0MbvDCsQZ3p+0bGc=
+  - secure: W8MmwrVpkN+4D3XQwTPdgwCdHKR41U1KJxDgaGOTaWAK/QYPDI86mocegNI7idAPd3X+MeinO8mVKCF3iQw4n9F/x+C1Z5f8R+BDwPO8rP2mwcez7m7JUDInVpFRDfXyM9+cWYCLsUiT5w/pkOoQi0e2+M8+s5mP8fRZauDk6rQ=
+  - secure: NDtznKLgAjAGiNeMjReiD8Oaz1+p/erYIHBK/bFOGASH2MHljz2ozxKzMUhiJqx7VAR47M28jMZr38CRD+ATXDw5jbrki6CJqAujmi1afIK7hPQOU8E6jiDL0a/kVHQ402CySL+cF/PXhoNiNZbZlMpPcVUL8vCEBq9uzKx90CA=

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -96,7 +95,7 @@ public class KafkaWriter extends BaseOutputWriter {
 		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));
 		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
 		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
-		this.producer= new Producer<String,String>(new ProducerConfig(kafkaProperties));
+		this.producer= new Producer<>(new ProducerConfig(kafkaProperties));
 		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
 		this.tags = ImmutableMap.copyOf(firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of()));
 		jsonFactory = new JsonFactory();
@@ -131,10 +130,10 @@ public class KafkaWriter extends BaseOutputWriter {
 		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
 		String cleanKeyString = keyString.replaceAll("[()]", "_");
 
-		Closer closer = Closer.create();
-		try {
-			ByteArrayOutputStream out = closer.register(new ByteArrayOutputStream());
-			JsonGenerator generator = closer.register(jsonFactory.createGenerator(out, UTF8));
+		try (
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			JsonGenerator generator = jsonFactory.createGenerator(out, UTF8)
+		){
 			generator.writeStartObject();
 			generator.writeStringField("keyspace", cleanKeyString);
 			generator.writeStringField("value", value.toString());
@@ -149,10 +148,6 @@ public class KafkaWriter extends BaseOutputWriter {
 			generator.writeEndObject();
 			generator.close();
 			return out.toString("UTF-8");
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 	}
 

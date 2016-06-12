@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -112,16 +112,13 @@ public class SensuWriter extends BaseOutputWriter {
 		StringBuilder jsonoutput = new StringBuilder();
 		List<String> typeNames = getTypeNames();
 		for (Result result : results) {
-			Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-					if (isNumeric(values.getValue())) {
-						Object value = values.getValue();
-						jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, null)).append(" ")
-								.append(value).append(" ")
-								.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
-								.append(System.getProperty("line.separator"));
-					}
+			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
+				if (isNumeric(values.getValue())) {
+					Object value = values.getValue();
+					jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, null)).append(" ")
+							.append(value).append(" ")
+							.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
+							.append(System.getProperty("line.separator"));
 				}
 			}
 		}
@@ -132,20 +129,10 @@ public class SensuWriter extends BaseOutputWriter {
 	}
 
 	private void writeToSensu(Server server, Query query, List<Result> results) {
-		Socket socketConnection = null;
-		try {
-			socketConnection = new Socket(host, 3030);
+		try (Socket socketConnection = new Socket(host, 3030)) {
 			serialize(server, query, results, socketConnection.getOutputStream());
 		} catch (Exception e) {
 			logger.warn("Failure to send result to Sensu server '{}'", host, e);
-		} finally {
-			if (socketConnection != null) {
-				try {
-					socketConnection.close();
-				} catch (IOException e) {
-					logger.warn("Exception closing Sensu connection", e);
-				}
-			}
 		}
 	}
 

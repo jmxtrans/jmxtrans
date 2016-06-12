@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,26 +23,40 @@
 package com.googlecode.jmxtrans.model.output.support.pool;
 
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import stormpot.Poolable;
 import stormpot.Slot;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.io.Writer;
 
 public class WriterPoolable implements Poolable {
+
+	private static final Logger logger = LoggerFactory.getLogger(WriterPoolable.class);
 
 	@Nonnull private final Slot slot;
 
 	@Nonnull @Getter private final Writer writer;
 
-	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer) {
+	@Nonnull private final FlushStrategy flushStrategy;
+
+	public WriterPoolable(@Nonnull Slot slot, @Nonnull Writer writer, @Nonnull FlushStrategy flushStrategy) {
 		this.slot = slot;
 		this.writer = writer;
+		this.flushStrategy = flushStrategy;
 	}
 
 	@Override
 	public void release() {
-		slot.release(this);
+		try {
+			flushStrategy.flush(writer);
+			slot.release(this);
+		} catch (IOException ioe) {
+			logger.error("Could not flush writer", ioe);
+			invalidate();
+		}
 	}
 
 	public void invalidate() {

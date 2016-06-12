@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ public class TCPEchoServer extends ExternalResource {
 	private volatile ServerSocket server;
 
 	private final Object startSynchro = new Object();
-	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<String>();
+	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<>();
 
 	@Override
 	public void before() {
@@ -61,14 +61,15 @@ public class TCPEchoServer extends ExternalResource {
 		stop();
 	}
 
+	@SuppressWarnings("squid:S2189") // server is only stopped when interrupted. Might be ugly, but good enough for a test server.
 	public void start() {
 		checkState(thread == null, "Server already started");
 
 		thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Closer closer = Closer.create();
 				try {
+					Closer closer = Closer.create();
 					try {
 						server = closer.register(new ServerSocket(0));
 						while (true) {
@@ -97,23 +98,19 @@ public class TCPEchoServer extends ExternalResource {
 	}
 
 	private void processRequests(ServerSocket server) throws IOException {
-		Closer closer = Closer.create();
-		try {
-			Socket socket = server.accept();
+		Socket socket = server.accept();
+		try (
+				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8));
+				PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8))
+		){
 			synchronized (startSynchro) {
 				startSynchro.notifyAll();
 			}
-			BufferedReader in = closer.register(new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8)));
-			PrintWriter out = closer.register(new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8)));
 			String line;
 			while ((line = in.readLine()) != null) {
 				receivedMessages.add(line);
 				out.print(line);
 			}
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 	}
 

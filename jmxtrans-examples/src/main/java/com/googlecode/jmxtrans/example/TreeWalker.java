@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -98,7 +98,7 @@ public class TreeWalker {
 
 	public void output(String name, Object attr) {
 		CompositeDataSupport cds;
-		if ((attr instanceof CompositeDataSupport)) {
+		if (attr instanceof CompositeDataSupport) {
 			cds = (CompositeDataSupport) attr;
 			for (String key : cds.getCompositeType().keySet()) {
 				log.info(name + "." + key + ".value " + format(cds.get(key)));
@@ -111,14 +111,14 @@ public class TreeWalker {
 	public String format(Object value) {
 		if (value == null) {
 			return null;
-		} else if ((value instanceof String)) {
+		} else if (value instanceof String) {
 			return (String) value;
-		} else if ((value instanceof Number)) {
+		} else if (value instanceof Number) {
 			NumberFormat f = NumberFormat.getInstance();
 			f.setMaximumFractionDigits(2);
 			f.setGroupingUsed(false);
 			return f.format(value);
-		} else if ((value instanceof Object[])) {
+		} else if (value instanceof Object[]) {
 			return Integer.toString(Arrays.asList((Object[]) value).size());
 		}
 		return value.toString();

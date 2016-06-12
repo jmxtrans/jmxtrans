@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,6 @@ public class CloudWatchWriter implements OutputWriterFactory {
 	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
 	public static final MapEntryToDimension MAP_ENTRY_TO_DIMENSION = new MapEntryToDimension();
 
-	private final AmazonCloudWatchClient cloudWatchClient;
 	private final String namespace;
 	private final Iterable<Map<String, Object>> dimensions;
 
@@ -85,8 +84,6 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		checkArgument(!isNullOrEmpty(this.namespace), "namespace cannot be null or empty");
 
 		this.dimensions = firstNonNull(dimensions, (Collection<Map<String, Object>>) settings.get("dimensions"));
-
-		this.cloudWatchClient = createCloudWatchClient();
 	}
 
 	/**
@@ -132,19 +129,17 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 			PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
 			metricDataRequest.setNamespace(namespace);
-			List<MetricDatum> metricDatumList = new ArrayList<MetricDatum>();
+			List<MetricDatum> metricDatumList = new ArrayList<>();
 
 			// Iterating through the list of query results
 
 			for (Result result : results) {
 				Map<String, Object> resultValues = result.getValues();
-				if (resultValues != null) {
-					for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-						try {
-							metricDatumList.add(processResult(result, values));
-						} catch (IllegalArgumentException iae) {
-							log.error("Could not convert result to double", iae);
-						}
+				for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+					try {
+						metricDatumList.add(processResult(result, values));
+					} catch (IllegalArgumentException iae) {
+						log.error("Could not convert result to double", iae);
 					}
 				}
 			}

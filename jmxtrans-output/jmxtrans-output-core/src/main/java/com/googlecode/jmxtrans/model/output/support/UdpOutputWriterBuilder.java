@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@ import com.google.common.base.Charsets;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelExpiration;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelPoolable;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
+import com.googlecode.jmxtrans.model.output.support.pool.NeverFlush;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import stormpot.BlazePool;
@@ -46,6 +48,7 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	@Nonnull @Setter private Charset charset = Charsets.UTF_8;
 	@Setter private int bufferSize = 1472;
 	@Setter private int poolSize = 1;
+	@Nonnull @Setter private FlushStrategy flushStrategy = new NeverFlush();
 
 	private UdpOutputWriterBuilder(@Nonnull InetSocketAddress server, @Nonnull T target) {
 		this.server = server;
@@ -55,7 +58,7 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	public static <T extends WriterBasedOutputWriter> UdpOutputWriterBuilder<T> builder(
 			@Nonnull InetSocketAddress server,
 			@Nonnull T target) {
-		return new UdpOutputWriterBuilder<T>(server, target);
+		return new UdpOutputWriterBuilder<>(server, target);
 	}
 
 	private LifecycledPool<DatagramChannelPoolable> createPool() {
@@ -63,14 +66,15 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 				.setAllocator(new DatagramChannelAllocator(
 						server,
 						bufferSize,
-						charset))
+						charset,
+						flushStrategy))
 				.setExpiration(new DatagramChannelExpiration())
 				.setSize(poolSize);
-		return new BlazePool<DatagramChannelPoolable>(config);
+		return new BlazePool<>(config);
 	}
 
 	public WriterPoolOutputWriter<T> build() {
 		LifecycledPool<DatagramChannelPoolable> pool = createPool();
-		return new WriterPoolOutputWriter<T>(target, pool, new Timeout(1, SECONDS));
+		return new WriterPoolOutputWriter<>(target, pool, new Timeout(1, SECONDS));
 	}
 }

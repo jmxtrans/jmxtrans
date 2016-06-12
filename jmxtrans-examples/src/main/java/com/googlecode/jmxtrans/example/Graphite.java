@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,17 +33,19 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class Graphite {
 
 	private static JsonPrinter printer = new JsonPrinter(System.out);
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make IP addresses configurable
 	public static void main(String[] args) throws Exception {
 		printer.prettyPrint(new JmxProcess(Server.builder()
 				.setHost("w2")
 				.setPort("1099")
 				.addQuery(Query.builder()
 						.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
-						.addOutputWriter(GraphiteWriter.builder()
+						.addOutputWriterFactory(GraphiteWriter.builder()
 								.setHost("192.168.192.133")
 								.setPort(2003)
 								.setDebugEnabled(true)

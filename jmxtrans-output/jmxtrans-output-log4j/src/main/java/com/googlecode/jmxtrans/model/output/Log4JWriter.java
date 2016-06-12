@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -78,28 +78,26 @@ public class Log4JWriter extends BaseOutputWriter {
 
 		for (final Result result : results) {
 			final Map<String, Object> resultValues = result.getValues();
-			if (resultValues != null) {
-				for (final Entry<String, Object> values : resultValues.entrySet()) {
-					if (isNumeric(values.getValue())) {
-						String alias;
-						if (server.getAlias() != null) {
-							alias = server.getAlias();
-						} else {
-							alias = server.getHost() + "_" + server.getPort();
-							alias = StringUtils.cleanupStr(alias);
-						}
-
-						MDC.put("server", alias);
-						MDC.put("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null));
-						MDC.put("value", values.getValue());
-						if (result.getKeyAlias() != null) {
-							MDC.put("resultAlias", result.getKeyAlias());
-						}
-						MDC.put("attributeName", result.getAttributeName());
-						MDC.put("key", values.getKey());
-						MDC.put("Epoch", String.valueOf(result.getEpoch()));
-						log.info("");
+			for (final Entry<String, Object> values : resultValues.entrySet()) {
+				if (isNumeric(values.getValue())) {
+					String alias;
+					if (server.getAlias() != null) {
+						alias = server.getAlias();
+					} else {
+						alias = server.getHost() + "_" + server.getPort();
+						alias = StringUtils.cleanupStr(alias);
 					}
+
+					MDC.put("server", alias);
+					MDC.put("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null));
+					MDC.put("value", values.getValue());
+					if (result.getKeyAlias() != null) {
+						MDC.put("resultAlias", result.getKeyAlias());
+					}
+					MDC.put("attributeName", result.getAttributeName());
+					MDC.put("key", values.getKey());
+					MDC.put("Epoch", String.valueOf(result.getEpoch()));
+					log.info("");
 				}
 			}
 		}

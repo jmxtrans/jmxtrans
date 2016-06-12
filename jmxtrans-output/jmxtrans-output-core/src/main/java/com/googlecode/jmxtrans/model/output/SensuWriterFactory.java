@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -37,6 +38,7 @@ import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.createFlushStrategy;
 
 @EqualsAndHashCode
 @ToString
@@ -46,19 +48,26 @@ public class SensuWriterFactory implements OutputWriterFactory {
 	@Nonnull private final InetSocketAddress server;
 	@Nonnull private final ImmutableList<String> typeNames;
 	@Nullable private final String rootPrefix;
+	@Nonnull private final FlushStrategy flushStrategy;
+	private final int poolSize;
 
 	public SensuWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
-			@JsonProperty("rootPrefix") String rootPrefix) {
+			@JsonProperty("rootPrefix") String rootPrefix,
+			@JsonProperty("flushStrategy") String flushStrategy,
+			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+			@JsonProperty("poolSize") Integer poolSize) {
 		this.rootPrefix = rootPrefix;
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
 		this.booleanAsNumber = booleanAsNumber;
 		this.server = new InetSocketAddress(
 				firstNonNull(host, "localhost"),
 				firstNonNull(port, 3030));
+		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
+		this.poolSize = firstNonNull(poolSize, 1);
 	}
 
 	@Override
@@ -70,6 +79,8 @@ public class SensuWriterFactory implements OutputWriterFactory {
 						new SensuWriter2(
 								new GraphiteWriter2(typeNames, rootPrefix),
 								new JsonFactory()))
+						.setFlushStrategy(flushStrategy)
+						.setPoolSize(poolSize)
 						.build());
 	}
 

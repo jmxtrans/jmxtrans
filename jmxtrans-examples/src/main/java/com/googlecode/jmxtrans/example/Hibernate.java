@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +36,10 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class Hibernate {
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make IP addresses configurable
 	private static final String GW_HOST = "192.168.192.133";
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
@@ -76,7 +78,7 @@ public class Hibernate {
 					.addAttr("CloseStatementCount")
 					.addAttr("PrepareStatementCount")
 					.addAttr("OptimisticFailureCount")
-					.addOutputWriter(GraphiteWriter.builder()
+					.addOutputWriterFactory(GraphiteWriter.builder()
 							.addTypeName("name")
 							.setDebugEnabled(true)
 							.setHost(GW_HOST)
@@ -90,11 +92,5 @@ public class Hibernate {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.processServer(server);
-		// Thread.sleep(1000);
-		// }
-
 	}
 }

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,8 @@ public class StatsDWriterFactoryIT {
 			ImmutableList.<String>of(),
 				null, null, false, null,
 				udpLoggingServer.getLocalSocketAddress().getHostName(),
-				udpLoggingServer.getLocalSocketAddress().getPort()
+				udpLoggingServer.getLocalSocketAddress().getPort(),
+				null, null, null
 		).create();
 
 		statsDWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());

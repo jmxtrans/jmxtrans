@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,9 @@ public class Result {
 	/** Specified as part of the query. */
 	@Getter private final String keyAlias;
 
-	public Result(long epoch, String attributeName, String className, String objDomain, String keyAlias, String typeName, Map<String, Object> values) {
+	public Result(
+			long epoch, String attributeName, String className, String objDomain, String keyAlias, String typeName,
+			@Nonnull Map<String, Object> values) {
 		this.className = className;
 		this.objDomain = objDomain;
 		this.typeName = typeName;

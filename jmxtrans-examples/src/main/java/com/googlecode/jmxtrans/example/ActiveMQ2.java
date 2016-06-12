@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ import java.io.IOException;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class ActiveMQ2 {
 
 	private static final JsonPrinter jsonPrinter = new JsonPrinter(System.out);
@@ -81,7 +82,7 @@ public class ActiveMQ2 {
 						.addAttr("DispatchCount")
 						.addAttr("DequeueCount")
 						.addAttr("EnqueueCount")
-						.addOutputWriter(gw)
+						.addOutputWriterFactory(gw)
 						.build())
 				.addQuery(Query.builder()
 						.setObj("org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=*")
@@ -95,7 +96,7 @@ public class ActiveMQ2 {
 						.addAttr("DispatchCount")
 						.addAttr("DequeueCount")
 						.addAttr("EnqueueCount")
-						.addOutputWriter(gw)
+						.addOutputWriterFactory(gw)
 						.build()).build());
 		jsonPrinter.prettyPrint(process);
 

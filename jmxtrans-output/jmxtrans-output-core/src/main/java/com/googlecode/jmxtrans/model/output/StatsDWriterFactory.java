@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.UdpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
+import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -36,6 +37,7 @@ import java.net.InetSocketAddress;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.createFlushStrategy;
 
 @EqualsAndHashCode
 @ToString
@@ -47,6 +49,8 @@ public class StatsDWriterFactory implements OutputWriterFactory {
 	@Nonnull private final String bucketType;
 	@Nonnull private final Long stringValueDefaultCount;
 	@Nonnull private final InetSocketAddress server;
+	@Nonnull private final FlushStrategy flushStrategy;
+	private final int poolSize;
 
 	public StatsDWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
@@ -55,7 +59,10 @@ public class StatsDWriterFactory implements OutputWriterFactory {
 			@JsonProperty("stringValuesAsKey") boolean stringsValuesAsKey,
 			@JsonProperty("stringValueDefaultCount") Long stringValueDefaultCount,
 			@JsonProperty("host") String host,
-			@JsonProperty("port") Integer port) {
+			@JsonProperty("port") Integer port,
+			@JsonProperty("flushStrategy") String flushStrategy,
+			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+			@JsonProperty("poolSize") Integer poolSize) {
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
 		this.rootPrefix = firstNonNull(rootPrefix, "servers");
 		this.stringsValuesAsKey = stringsValuesAsKey;
@@ -64,6 +71,8 @@ public class StatsDWriterFactory implements OutputWriterFactory {
 		this.server = new InetSocketAddress(
 				checkNotNull(host, "Host cannot be null."),
 				checkNotNull(port, "Port cannot be null."));
+		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
+		this.poolSize = firstNonNull(poolSize, 1);
 	}
 
 	@Override
@@ -72,6 +81,8 @@ public class StatsDWriterFactory implements OutputWriterFactory {
 				server,
 				new StatsDWriter2(typeNames, rootPrefix, bucketType, stringsValuesAsKey, stringValueDefaultCount))
 				.setCharset(UTF_8)
+				.setFlushStrategy(flushStrategy)
+				.setPoolSize(poolSize)
 				.build();
 	}
 }

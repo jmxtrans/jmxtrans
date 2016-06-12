@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -106,15 +106,8 @@ public class HttpOutputWriter<T extends WriterBasedOutputWriter> extends OutputW
 	}
 
 	private void writeResults(Server server, Query query, Iterable<Result> results, HttpURLConnection httpURLConnection) throws IOException {
-		Closer closer = Closer.create();
-		try {
-			OutputStreamWriter outputStream = closer.register(new OutputStreamWriter(httpURLConnection.getOutputStream(), charset));
-
+		try (OutputStreamWriter outputStream = new OutputStreamWriter(httpURLConnection.getOutputStream(), charset)) {
 			target.write(outputStream, server, query, results);
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 	}
 

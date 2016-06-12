@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,10 @@ import com.googlecode.jmxtrans.model.output.GraphiteWriter;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class ActiveMQ {
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make it configurable
 	private static final String GW_HOST = "192.168.192.133";
 
 	public static void main(String[] args) throws Exception {
@@ -67,7 +69,7 @@ public class ActiveMQ {
 				.addAttr("DequeueCounter")
 				.addAttr("MessageCountAwaitingAcknowledge")
 				.addAttr("DispachedCounter")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q);
 
@@ -84,7 +86,7 @@ public class ActiveMQ {
 				.addAttr("DequeueCount")
 				.addAttr("EnqueueCount")
 				.addAttr("Subscriptions")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q2);
 
@@ -101,7 +103,7 @@ public class ActiveMQ {
 				.addAttr("DequeueCount")
 				.addAttr("EnqueueCount")
 				.addAttr("Subscriptions")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q3);
 
@@ -118,13 +120,13 @@ public class ActiveMQ {
 				.addAttr("DequeueCount")
 				.addAttr("EnqueueCount")
 				.addAttr("Subscriptions")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q4);
 
 		Query q5 = Query.builder()
 				.setObj("org.apache.activemq:BrokerName=localhost,Type=Broker")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q5);
 
@@ -132,7 +134,7 @@ public class ActiveMQ {
 				.setObj("java.lang:type=Memory")
 				.addAttr("HeapMemoryUsage")
 				.addAttr("NonHeapMemoryUsage")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q6);
 
@@ -144,7 +146,7 @@ public class ActiveMQ {
 				.addAttr("CurrentThreadCpuTime")
 				.addAttr("CurrentThreadUserTime")
 				.addAttr("TotalStartedThreadCount")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q7);
 
@@ -157,14 +159,14 @@ public class ActiveMQ {
 				.addKey("duration")
 				.addKey("CollectionCount")
 				.addKey("CollectionTime")
-				.addOutputWriter(gw)
+				.addOutputWriterFactory(gw)
 				.build();
 		serverBuilder.addQuery(q8);
 
 
 		Query q9 = Query.builder()
 				.setObj("java.lang:type=MemoryPool,name=*")
-				.addOutputWriter(GraphiteWriter.builder()
+				.addOutputWriterFactory(GraphiteWriter.builder()
 						.addTypeName("name")
 						.setDebugEnabled(true)
 						.setHost(GW_HOST)
@@ -179,11 +181,5 @@ public class ActiveMQ {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);
-
-		// for (int i = 0; i < 160; i++) {
-		// JmxUtils.processServer(server);
-		// Thread.sleep(1000);
-		// }
-
 	}
 }

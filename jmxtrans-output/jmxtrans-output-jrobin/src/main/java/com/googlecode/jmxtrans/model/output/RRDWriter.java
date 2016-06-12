@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -90,12 +90,9 @@ public class RRDWriter extends BaseOutputWriter {
 			// go over all the results and look for datasource names that map to
 			// keys from the result values
 			for (Result res : results) {
-				Map<String, Object> values = res.getValues();
-				if (values != null) {
-					for (Entry<String, Object> entry : values.entrySet()) {
-						if (dsNames.contains(entry.getKey()) && isNumeric(entry.getValue())) {
-							sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
-						}
+				for (Entry<String, Object> entry : res.getValues().entrySet()) {
+					if (dsNames.contains(entry.getKey()) && isNumeric(entry.getValue())) {
+						sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
 					}
 				}
 			}

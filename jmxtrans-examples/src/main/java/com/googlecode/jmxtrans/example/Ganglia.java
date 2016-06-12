@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,10 +37,12 @@ import com.googlecode.jmxtrans.model.output.GangliaWriter;
  * 
  * @author jon
  */
+@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
 public class Ganglia {
 
 	private static final JsonPrinter printer = new JsonPrinter(System.out);
 
+	@SuppressWarnings("squid:S1313") // this is an example, no need to make IP addresses configurable
 	public static void main(String[] args) throws Exception {
 		printer.prettyPrint(new JmxProcess(Server.builder()
 				.setHost("w2")
@@ -48,7 +50,7 @@ public class Ganglia {
 				.setAlias("fooalias")
 				.addQuery(Query.builder()
 						.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
-						.addOutputWriter(GangliaWriter.builder()
+						.addOutputWriterFactory(GangliaWriter.builder()
 							.setHost("10.0.3.16")
 							.setPort(8649)
 							.setDebugEnabled(true)
@@ -65,7 +67,7 @@ public class Ganglia {
 				.setAlias("fooalias")
 				.addQuery(Query.builder()
 						.setObj("java.lang:type=GarbageCollector,name=ConcurrentMarkSweep")
-						.addOutputWriter(GangliaWriter.builder()
+						.addOutputWriterFactory(GangliaWriter.builder()
 							.setHost("10.0.3.16")
 							.setPort(8649)
 							.setDebugEnabled(true)

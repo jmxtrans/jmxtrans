@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	private static final String FILTERS = "filters";
 	private static final String THRESHOLDS = "thresholds";
 
-	protected final Map<String, Logger> loggers = new ConcurrentHashMap<String, Logger>();
+	protected final Map<String, Logger> loggers = new ConcurrentHashMap<>();
 	private final ImmutableList<String> filters;
 	private final ImmutableList<String> thresholds;
 	private final String nagiosHost;

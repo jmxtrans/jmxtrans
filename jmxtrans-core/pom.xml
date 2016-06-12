@@ -2,7 +2,7 @@
 <!--
 
     The MIT License
-    Copyright (c) 2010 JmxTrans team
+    Copyright © 2010 JmxTrans team
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -39,9 +39,9 @@
 
 	<properties>
 		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-		<verify.mutationThreshold>18</verify.mutationThreshold>
+		<verify.mutationThreshold>25</verify.mutationThreshold>
 		<verify.totalBranchRate>38</verify.totalBranchRate>
-		<verify.totalLineRate>40</verify.totalLineRate>
+		<verify.totalLineRate>45</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -163,11 +163,6 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

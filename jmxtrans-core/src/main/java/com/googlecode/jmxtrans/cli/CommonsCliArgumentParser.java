@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@ import org.apache.commons.cli.Options;
 import javax.annotation.Nonnull;
 import java.io.File;
 
+@SuppressWarnings("squid:S1132") // string literals on the right side look just fine to me here
 public class CommonsCliArgumentParser implements CliArgumentParser {
 	/** Parse the options given on the command line. */
 	@Nonnull

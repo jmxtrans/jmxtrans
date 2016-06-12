@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -219,7 +219,7 @@ public class ServerTests {
 	}
 
 	@Test
-	public void testConnectionRepoolingSkippedOnError() throws Exception {
+	public void testConnectionRepoolingSkippedOnError_andConnectionIsClosed() throws Exception {
 		@SuppressWarnings("unchecked")
 		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
 
@@ -250,7 +250,51 @@ public class ServerTests {
 			}
 		}
 
-		verify(pool, never()).returnObject(server, conn);;
+		verify(conn).close();
+
+		verify(pool, never()).returnObject(server, conn);
+
+		InOrder orderVerifier = inOrder(pool);
+		orderVerifier.verify(pool).borrowObject(server);
+		orderVerifier.verify(pool).invalidateObject(server, conn);
+	}
+
+	@Test
+	public void testConnectionRepoolingSkippedOnError_andErrorClosingConnectionIsIgnored() throws Exception {
+		@SuppressWarnings("unchecked")
+		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+
+		Server server = Server.builder()
+				.setHost("host.example.net")
+				.setPort("4321")
+				.setLocal(true)
+				.setPool(pool)
+				.build();
+
+		MBeanServerConnection mBeanConn = mock(MBeanServerConnection.class);
+
+		JMXConnection conn = mock(JMXConnection.class);
+		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
+		doThrow(new IOException()).when(conn).close();
+
+		when(pool.borrowObject(server)).thenReturn(conn);
+
+		Query query = mock(Query.class);
+		IOException e = mock(IOException.class);
+		when(query.queryNames(mBeanConn)).thenThrow(e);
+
+		try {
+			server.execute(query);
+			fail("No exception got throws");
+		} catch (IOException e2) {
+			if (e != e2) {
+				fail("Wrong exception thrown (" + e + " instead of mock");
+			}
+		}
+
+		verify(conn).close();
+
+		verify(pool, never()).returnObject(server, conn);
 
 		InOrder orderVerifier = inOrder(pool);
 		orderVerifier.verify(pool).borrowObject(server);

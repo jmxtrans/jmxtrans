@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,7 @@ public class OutputCapture extends ExternalResource {
 	private ByteArrayOutputStream err;
 
 	@Override
+	@SuppressWarnings("squid:S106") // capturing StdOut is the purpose of OutputCapture
 	protected void before() throws Throwable {
 		originalOut = System.out;
 		originalErr = System.err;
