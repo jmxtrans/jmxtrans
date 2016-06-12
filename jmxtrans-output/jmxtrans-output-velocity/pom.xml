@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-output</artifactId>
-		<version>255-SNAPSHOT</version>
+		<version>255</version>
 	</parent>
 
 	<artifactId>jmxtrans-output-velocity</artifactId>
