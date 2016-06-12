@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model;
 
 import lombok.Getter;
 
+@SuppressWarnings("squid:S1948") // ValidationException is never serialized anyway.
 public class ValidationException extends Exception {
 
 	@Getter private final Query query;

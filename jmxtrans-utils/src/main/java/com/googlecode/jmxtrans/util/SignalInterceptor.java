@@ -62,20 +62,6 @@ public abstract class SignalInterceptor {
 	}
 
 	/**
-	 * A wrapper around <code>register(String)</code> which never throws an
-	 * exception. Instead, it returns <code>true</code> if registration
-	 * succeeded, and <code>false</code> if it failed.
-	 */
-	protected boolean registerQuietly(String signame) {
-		try {
-			register(signame);
-		} catch (Throwable e) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
 	 * Handle the given signal (which you had previously registered for). If
 	 * this method return false, or throws an exception, subsequent handlers in
 	 * the chain will <b>not</b> be called.
