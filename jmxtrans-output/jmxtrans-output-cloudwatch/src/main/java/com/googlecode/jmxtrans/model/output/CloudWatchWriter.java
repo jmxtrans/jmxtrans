@@ -66,7 +66,6 @@ public class CloudWatchWriter implements OutputWriterFactory {
 	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
 	public static final MapEntryToDimension MAP_ENTRY_TO_DIMENSION = new MapEntryToDimension();
 
-	private final AmazonCloudWatchClient cloudWatchClient;
 	private final String namespace;
 	private final Iterable<Map<String, Object>> dimensions;
 
@@ -85,8 +84,6 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		checkArgument(!isNullOrEmpty(this.namespace), "namespace cannot be null or empty");
 
 		this.dimensions = firstNonNull(dimensions, (Collection<Map<String, Object>>) settings.get("dimensions"));
-
-		this.cloudWatchClient = createCloudWatchClient();
 	}
 
 	/**
