@@ -1,17 +1,17 @@
 /**
  * The MIT License
  * Copyright © 2010 JmxTrans team
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -75,7 +75,8 @@ public class InfluxDbWriterTests {
 
 	private static final String DATABASE_NAME = "database";
 	private static final String HOST = "host.example.net";
-    private static final ImmutableMap<String,String> DEFAULT_CUSTOM_TAGS = ImmutableMap.of();
+	private static final ImmutableMap<String, String> DEFAULT_CUSTOM_TAGS = ImmutableMap.of();
+
 	@Mock
 	private InfluxDB influxDB;
 	@Captor
@@ -119,21 +120,21 @@ public class InfluxDbWriterTests {
 		assertThat(point.lineProtocol()).startsWith(lineProtocol);
 	}
 
-    @Test
-    public void emptyCustomTagsDoesntBotherWrite() throws Exception {
-        InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
-        writer.doWrite(dummyServer(), dummyQuery(), results);
-        verify(influxDB).write(messageCaptor.capture());
-        BatchPoints batchPoints = messageCaptor.getValue();
+	@Test
+	public void emptyCustomTagsDoesntBotherWrite() throws Exception {
+		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
+		writer.doWrite(dummyServer(), dummyQuery(), results);
+		verify(influxDB).write(messageCaptor.capture());
+		BatchPoints batchPoints = messageCaptor.getValue();
 
-        assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
-        List<Point> points = batchPoints.getPoints();
-        assertThat(points).hasSize(1);
-    }
+		assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
+		List<Point> points = batchPoints.getPoints();
+		assertThat(points).hasSize(1);
+	}
 
 	@Test
 	public void customTagsAreWrittenToDb() throws Exception {
-        ImmutableMap<String,String> tags = ImmutableMap.<String,String>builder().put("customTag","customValue").build();
+		ImmutableMap<String, String> tags = ImmutableMap.<String, String>builder().put("customTag", "customValue").build();
 		InfluxDbWriter writer = getTestInfluxDbWriterWithCustomTags(tags);
 		writer.doWrite(dummyServer(), dummyQuery(), results);
 
@@ -141,11 +142,11 @@ public class InfluxDbWriterTests {
 		BatchPoints batchPoints = messageCaptor.getValue();
 
 		assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
-        List<Point> points = batchPoints.getPoints();
-        assertThat(points).hasSize(1);
+		List<Point> points = batchPoints.getPoints();
+		assertThat(points).hasSize(1);
 
-        Point point = points.get(0);
-        assertThat(point.lineProtocol()).contains("customTag=customValue");
+		Point point = points.get(0);
+		assertThat(point.lineProtocol()).contains("customTag=customValue");
 	}
 
 	@Test
@@ -220,27 +221,29 @@ public class InfluxDbWriterTests {
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY,DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, true);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, true);
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithResultTags(ImmutableSet<ResultAttribute> resultTags) {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS,resultTags, true);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, resultTags, true);
 	}
-    private InfluxDbWriter getTestInfluxDbWriterWithCustomTags(ImmutableMap<String,String> tags) {
-        return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY,tags, DEFAULT_RESULT_ATTRIBUTES, true);
 
-    }
+	private InfluxDbWriter getTestInfluxDbWriterWithCustomTags(ImmutableMap<String, String> tags) {
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, tags, DEFAULT_RESULT_ATTRIBUTES, true);
+
+	}
+
 	private InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
-		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY,DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, true);
+		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, true);
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterNoDatabaseCreation() {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY,DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, false);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, false);
 	}
 
-	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy,ImmutableMap<String,String> tags,
-												 ImmutableSet<ResultAttribute> resultTags,boolean createDatabase) {
-		return new InfluxDbWriter(influxDB, DATABASE_NAME, consistencyLevel, retentionPolicy,tags, resultTags, createDatabase);
+	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy, ImmutableMap<String, String> tags,
+												 ImmutableSet<ResultAttribute> resultTags, boolean createDatabase) {
+		return new InfluxDbWriter(influxDB, DATABASE_NAME, consistencyLevel, retentionPolicy, tags, resultTags, createDatabase);
 	}
 
 	private String enumValueToAttribute(ResultAttribute attribute) {
