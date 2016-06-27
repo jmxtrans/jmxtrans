@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
@@ -60,7 +61,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final String database;
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
-	private final Map<String,String> tags = new HashMap<String,String>();
+	@Nonnull private final ImmutableMap<String,String> tags;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -75,16 +76,14 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull String database,
 			@Nonnull ConsistencyLevel writeConsistency,
 			@Nonnull String retentionPolicy,
-			Map<String,String> tags,
+			@Nonnull ImmutableMap<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			boolean createDatabase) {
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
-		if(tags != null) {
-			this.tags.putAll(tags);
-		}
+		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 		this.createDatabase = createDatabase;
 	}

@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model.output;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.ResultAttribute;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.Sets.immutableEnumSet;
@@ -57,8 +57,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 
 	private final String database;
 	private final InfluxDB.ConsistencyLevel writeConsistency;
-	private final Map<String, String> tags;
-
+	private final ImmutableMap<String, String> tags;
 	private final String retentionPolicy;
 	private final InfluxDB influxDB;
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
@@ -82,7 +81,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("username") String username,
 			@JsonProperty("password") String password,
 			@JsonProperty("database") String database,
-			@JsonProperty("tags") Map<String, String> tags,
+			@JsonProperty("tags") ImmutableMap<String, String> tags,
 			@JsonProperty("writeConsistency") String writeConsistency,
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
@@ -97,10 +96,19 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 		this.retentionPolicy = StringUtils.isNotBlank(retentionPolicy) ? retentionPolicy : DEFAULT_RETENTION_POLICY;
 
 		this.resultAttributesToWriteAsTags = initResultAttributesToWriteAsTags(resultTags);
-		this.tags = tags;
+		this.tags = initCustomTagsMap(tags);
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
 		influxDB = InfluxDBFactory.connect(url, username, password);
+	}
+
+
+	private ImmutableMap<String,String> initCustomTagsMap(ImmutableMap<String, String> tags) {
+		ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+		if (tags != null){
+			builder.putAll(tags);
+		}
+		return builder.build();
 	}
 
 	private ImmutableSet<ResultAttribute> initResultAttributesToWriteAsTags(List<String> resultTags) {
