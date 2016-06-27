@@ -60,6 +60,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final String database;
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
+	private final Map<String,String> tags = new HashMap<String,String>();
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -74,12 +75,16 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull String database,
 			@Nonnull ConsistencyLevel writeConsistency,
 			@Nonnull String retentionPolicy,
+			Map<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			boolean createDatabase) {
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
+		if(tags != null) {
+			this.tags.putAll(tags);
+		}
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 		this.createDatabase = createDatabase;
 	}
@@ -145,10 +150,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
 		if (createDatabase) influxDB.createDatabase(database);
+		BatchPoints.Builder batchPointsBuilder = BatchPoints.database(database).retentionPolicy(retentionPolicy)
+				.tag(TAG_HOSTNAME, server.getSource());
 
-		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
-				.tag(TAG_HOSTNAME, server.getSource()).consistency(writeConsistency).build();
-
+		for(Map.Entry<String,String> tag : tags.entrySet()) {
+			batchPointsBuilder.tag(tag.getKey(),tag.getValue());
+		}
+		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
 		for (Result result : results) {
 
 			HashMap<String, Object> filteredValues = newHashMap(Maps.filterValues(result.getValues(), isNotNaN));

@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.Sets.immutableEnumSet;
@@ -56,13 +57,13 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 
 	private final String database;
 	private final InfluxDB.ConsistencyLevel writeConsistency;
+	private final Map<String, String> tags;
 
 	private final String retentionPolicy;
 	private final InfluxDB influxDB;
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 	private final boolean booleanAsNumber;
 	private final boolean createDatabase;
-
 	/**
 	 * @param url
 	 *            - The url e.g http://localhost:8086 to InfluxDB
@@ -81,6 +82,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("username") String username,
 			@JsonProperty("password") String password,
 			@JsonProperty("database") String database,
+			@JsonProperty("tags") Map<String, String> tags,
 			@JsonProperty("writeConsistency") String writeConsistency,
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
@@ -95,7 +97,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 		this.retentionPolicy = StringUtils.isNotBlank(retentionPolicy) ? retentionPolicy : DEFAULT_RETENTION_POLICY;
 
 		this.resultAttributesToWriteAsTags = initResultAttributesToWriteAsTags(resultTags);
-
+		this.tags = tags;
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
 		influxDB = InfluxDBFactory.connect(url, username, password);
@@ -119,6 +121,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, resultAttributesToWriteAsTags, createDatabase));
+				writeConsistency, retentionPolicy, tags,resultAttributesToWriteAsTags, createDatabase));
 	}
 }
