@@ -134,7 +134,7 @@ public class InfluxDbWriterTests {
 
 	@Test
 	public void customTagsAreWrittenToDb() throws Exception {
-		ImmutableMap<String, String> tags = ImmutableMap.<String, String>builder().put("customTag", "customValue").build();
+		ImmutableMap<String, String> tags = ImmutableMap.of("customTag", "customValue");
 		InfluxDbWriter writer = getTestInfluxDbWriterWithCustomTags(tags);
 		writer.doWrite(dummyServer(), dummyQuery(), results);
 

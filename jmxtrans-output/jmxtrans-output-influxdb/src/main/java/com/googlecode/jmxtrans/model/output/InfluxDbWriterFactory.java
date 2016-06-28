@@ -36,6 +36,7 @@ import org.influxdb.InfluxDBFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -101,11 +102,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 
 
 	private ImmutableMap<String, String> initCustomTagsMap(ImmutableMap<String, String> tags) {
-		ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-		if (tags != null) {
-			builder.putAll(tags);
-		}
-		return builder.build();
+		return ImmutableMap.copyOf(firstNonNull(tags, Collections.<String,String>emptyMap()));
 	}
 
 	private ImmutableSet<ResultAttribute> initResultAttributesToWriteAsTags(List<String> resultTags) {
