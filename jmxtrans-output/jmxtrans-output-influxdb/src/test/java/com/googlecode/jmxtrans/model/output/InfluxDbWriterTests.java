@@ -31,6 +31,7 @@ import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
+
 import com.googlecode.jmxtrans.util.JsonUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -74,11 +75,13 @@ public class InfluxDbWriterTests {
 
 	private static final String DATABASE_NAME = "database";
 	private static final String HOST = "host.example.net";
+	private static final ImmutableMap<String, String> DEFAULT_CUSTOM_TAGS = ImmutableMap.of();
+
 	@Mock
 	private InfluxDB influxDB;
 	@Captor
 	private ArgumentCaptor<BatchPoints> messageCaptor;
-	
+
 	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.ALL;
 	private static final String DEFAULT_RETENTION_POLICY = "default";
 	private static final ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = immutableEnumSet(EnumSet.allOf(ResultAttribute.class));
@@ -118,13 +121,42 @@ public class InfluxDbWriterTests {
 	}
 
 	@Test
+	public void emptyCustomTagsDoesntBotherWrite() throws Exception {
+		InfluxDbWriter writer = getTestInfluxDbWriterWithDefaultSettings();
+		writer.doWrite(dummyServer(), dummyQuery(), results);
+		verify(influxDB).write(messageCaptor.capture());
+		BatchPoints batchPoints = messageCaptor.getValue();
+
+		assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
+		List<Point> points = batchPoints.getPoints();
+		assertThat(points).hasSize(1);
+	}
+
+	@Test
+	public void customTagsAreWrittenToDb() throws Exception {
+		ImmutableMap<String, String> tags = ImmutableMap.of("customTag", "customValue");
+		InfluxDbWriter writer = getTestInfluxDbWriterWithCustomTags(tags);
+		writer.doWrite(dummyServer(), dummyQuery(), results);
+
+		verify(influxDB).write(messageCaptor.capture());
+		BatchPoints batchPoints = messageCaptor.getValue();
+
+		assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
+		List<Point> points = batchPoints.getPoints();
+		assertThat(points).hasSize(1);
+
+		Point point = points.get(0);
+		assertThat(point.lineProtocol()).contains("customTag=customValue");
+	}
+
+	@Test
 	public void writeConsistencyLevelsAreAppliedToBatchPointsBeingWritten() throws Exception {
 		for (ConsistencyLevel consistencyLevel : ConsistencyLevel.values()) {
 			InfluxDbWriter writer = getTestInfluxDbWriterWithWriteConsistency(consistencyLevel);
 
 			writer.doWrite(dummyServer(), dummyQuery(), results);
 
-			verify(influxDB,atLeastOnce()).write(messageCaptor.capture());
+			verify(influxDB, atLeastOnce()).write(messageCaptor.capture());
 			BatchPoints batchPoints = messageCaptor.getValue();
 			assertThat(batchPoints.getConsistency()).isEqualTo(consistencyLevel);
 		}
@@ -189,26 +221,31 @@ public class InfluxDbWriterTests {
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_RESULT_ATTRIBUTES, true);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, true);
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithResultTags(ImmutableSet<ResultAttribute> resultTags) {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, resultTags, true);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, resultTags, true);
+	}
+
+	private InfluxDbWriter getTestInfluxDbWriterWithCustomTags(ImmutableMap<String, String> tags) {
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, tags, DEFAULT_RESULT_ATTRIBUTES, true);
+
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
-		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY, DEFAULT_RESULT_ATTRIBUTES, true);
+		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, true);
 	}
 
 	private InfluxDbWriter getTestInfluxDbWriterNoDatabaseCreation() {
-		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_RESULT_ATTRIBUTES, false);
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, false);
 	}
 
-	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy,
+	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy, ImmutableMap<String, String> tags,
 												 ImmutableSet<ResultAttribute> resultTags, boolean createDatabase) {
-		return new InfluxDbWriter(influxDB, DATABASE_NAME, consistencyLevel, retentionPolicy, resultTags, createDatabase);
+		return new InfluxDbWriter(influxDB, DATABASE_NAME, consistencyLevel, retentionPolicy, tags, resultTags, createDatabase);
 	}
-	
+
 	private String enumValueToAttribute(ResultAttribute attribute) {
 		String[] split = attribute.name().split("_");
 		return StringUtils.lowerCase(split[0]) + WordUtils.capitalizeFully(split[1]);

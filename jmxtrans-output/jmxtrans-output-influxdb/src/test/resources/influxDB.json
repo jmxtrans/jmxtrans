@@ -17,6 +17,10 @@
                      "username": "root",
               		 "password": "root",
               		 "database": "newDB",
+                     "tags" : {
+                       "custom":"tag1",
+                       "custom2":"tag2"
+                     },
               		 "url": "http://localhost:8086",
               		 "resultTags":["typeName","className"],
               		 "retentionPolicy":"default",
