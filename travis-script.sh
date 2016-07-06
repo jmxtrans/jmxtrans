@@ -68,7 +68,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       # to the release branch, but in that case we will have problem anyway.
       git checkout release
 
-      mvn release:prepare --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
+      mvn release:prepare -X -e --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
       mvn release:perform --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
 
       git fetch origin +master:master
