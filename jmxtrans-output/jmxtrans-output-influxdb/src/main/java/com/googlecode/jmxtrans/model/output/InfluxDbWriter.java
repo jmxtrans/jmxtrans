@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
@@ -60,6 +61,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final String database;
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
+	@Nonnull private final ImmutableMap<String,String> tags;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -74,12 +76,14 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull String database,
 			@Nonnull ConsistencyLevel writeConsistency,
 			@Nonnull String retentionPolicy,
+			@Nonnull ImmutableMap<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			boolean createDatabase) {
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
+		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 		this.createDatabase = createDatabase;
 	}
@@ -145,10 +149,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
 		if (createDatabase) influxDB.createDatabase(database);
+		BatchPoints.Builder batchPointsBuilder = BatchPoints.database(database).retentionPolicy(retentionPolicy)
+				.tag(TAG_HOSTNAME, server.getSource());
 
-		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
-				.tag(TAG_HOSTNAME, server.getSource()).consistency(writeConsistency).build();
-
+		for(Map.Entry<String,String> tag : tags.entrySet()) {
+			batchPointsBuilder.tag(tag.getKey(),tag.getValue());
+		}
+		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
 		for (Result result : results) {
 
 			HashMap<String, Object> filteredValues = newHashMap(Maps.filterValues(result.getValues(), isNotNaN));
