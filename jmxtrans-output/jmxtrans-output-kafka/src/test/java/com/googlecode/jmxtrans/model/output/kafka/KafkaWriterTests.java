@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -45,8 +47,8 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class KafkaWriterTests {
 
-	@Mock private Producer<String, String> producer;
-	@Captor private ArgumentCaptor<KeyedMessage<String, String>> messageCaptor;
+	@Mock private KafkaProducer<String, String> producer;
+	@Captor private ArgumentCaptor<ProducerRecord<String, String>> messageCaptor;
 
 	@Test public void
 	kafkaWriterNotNull() throws Exception {
@@ -60,10 +62,10 @@ public class KafkaWriterTests {
 		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 		verify(producer).send(messageCaptor.capture());
-		KeyedMessage<String, String> message = messageCaptor.getValue();
+		ProducerRecord<String, String> message = messageCaptor.getValue();
 
 		assertThat(message.topic()).isEqualTo("myTopic");
-		assertThat(message.message())
+		assertThat(message.value())
 				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount\"")
 				.contains("\"value\":\"10\"")
 				.contains("\"timestamp\":0")
@@ -74,13 +76,11 @@ public class KafkaWriterTests {
 		ImmutableList typenames = ImmutableList.of();
 		Map<String,Object> settings = new HashMap<String,Object>();
 		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1"); 
-		settings.put("zk.connect", "host:2181");
-		settings.put("metadata.broker.list", "10.231.1.1:9180");
-		settings.put("serializer.class", "kafka.serializer.StringEncoder");
+		settings.put("bootstrap.servers", "10.231.1.1:9180");
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
 		settings.put("topics", "myTopic");
-		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings);
+		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, null, settings);
 	}
 	
 }
