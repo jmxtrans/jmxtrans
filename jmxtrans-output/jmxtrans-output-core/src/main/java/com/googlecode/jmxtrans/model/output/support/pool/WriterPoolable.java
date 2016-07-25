@@ -52,10 +52,11 @@ public class WriterPoolable implements Poolable {
 	public void release() {
 		try {
 			flushStrategy.flush(writer);
-			slot.release(this);
 		} catch (IOException ioe) {
 			logger.error("Could not flush writer", ioe);
 			invalidate();
+		} finally {
+			slot.release(this);
 		}
 	}
 
