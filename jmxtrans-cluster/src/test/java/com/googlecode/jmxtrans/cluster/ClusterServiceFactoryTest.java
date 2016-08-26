@@ -21,7 +21,7 @@ public class ClusterServiceFactoryTest {
     @Test
     public void testDependencyInjection() throws Exception {
         ClusterService service = ClusterServiceFactory.createClusterService(
-                TestUtils.createGoldenConfiguration("127.0.0.1:2181"));
+                ConfigurationFixtures.createGoldenConfiguration("127.0.0.1:2181"));
 
         assertEquals(service.getClass(), ZookeeperClusterService.class);
     }
@@ -32,7 +32,7 @@ public class ClusterServiceFactoryTest {
      */
     @Test(expected = ClassNotFoundException.class)
     public void testMisstypedDependeny() throws Exception{
-        Configuration configuration =  TestUtils.createGoldenConfiguration("127.0.0.1:2181");
+        Configuration configuration =  ConfigurationFixtures.createGoldenConfiguration("127.0.0.1:2181");
         configuration.setProperty("provider.classname", ZookeeperClusterService.class.getName().substring(1));
 
         ClusterService service = ClusterServiceFactory.createClusterService(configuration);

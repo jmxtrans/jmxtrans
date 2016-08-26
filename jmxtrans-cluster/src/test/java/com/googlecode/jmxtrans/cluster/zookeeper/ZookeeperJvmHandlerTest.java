@@ -1,6 +1,6 @@
 package com.googlecode.jmxtrans.cluster.zookeeper;
 
-import com.googlecode.jmxtrans.cluster.TestUtils;
+import com.googlecode.jmxtrans.cluster.ConfigurationFixtures;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.kaching.platform.testing.AllowDNSResolution;
@@ -90,9 +90,9 @@ public class ZookeeperJvmHandlerTest {
                 .forPath("/jmxtrans/workers/worker_02");
 
 
-        Configuration config1 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config1 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config1.setProperty("zookeeper.workeralias", "worker_01");
-        Configuration config2 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config2 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config2.setProperty("zookeeper.workeralias", "worker_02");
 
         spyListener1 = Mockito.spy(JvmConfigChangeListener.class);
@@ -131,9 +131,9 @@ public class ZookeeperJvmHandlerTest {
                 .forPath("/jmxtrans/workers/worker_04");
 
 
-        Configuration config1 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config1 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config1.setProperty("zookeeper.workeralias", "worker_03");
-        Configuration config2 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config2 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config2.setProperty("zookeeper.workeralias", "worker_04");
 
         spyListener1 = Mockito.spy(JvmConfigChangeListener.class);
@@ -171,9 +171,9 @@ public class ZookeeperJvmHandlerTest {
                 .forPath("/jmxtrans/workers/worker_04");
 
 
-        Configuration config1 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config1 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config1.setProperty("zookeeper.workeralias", "worker_03");
-        Configuration config2 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config2 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config2.setProperty("zookeeper.workeralias", "worker_04");
 
         spyListener1 = Mockito.spy(JvmConfigChangeListener.class);
@@ -192,7 +192,7 @@ public class ZookeeperJvmHandlerTest {
         Thread.sleep(1000);
 
 
-        Configuration config3 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config3 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config3.setProperty("zookeeper.workeralias", "worker_01");
 
         client.create().creatingParentContainersIfNeeded()
@@ -233,9 +233,9 @@ public class ZookeeperJvmHandlerTest {
                 .forPath("/jmxtrans/workers/worker_02");
 
 
-        Configuration config1 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config1 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config1.setProperty("zookeeper.workeralias", "worker_01");
-        Configuration config2 = TestUtils.createGoldenConfiguration(testingServer.getConnectString());
+        Configuration config2 = ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString());
         config2.setProperty("zookeeper.workeralias", "worker_02");
 
         spyListener1 = Mockito.spy(JvmConfigChangeListener.class);

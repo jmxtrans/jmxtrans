@@ -1,6 +1,7 @@
 package com.googlecode.jmxtrans.cluster.zookeeper;
 
 import com.googlecode.jmxtrans.cluster.ClusterService;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,18 +11,19 @@ import lombok.Setter;
  * @author Tibor Kulcsar
  * @since <pre>May 17, 2016</pre>
  */
+@Immutable
 public class ZookeeperConfig {
     public static final String OWNER_NODE_NAME  = "owner";
     public static final String AFFINITY_NODE_NAME = "affinity";
     public static final String CONFIG_NODE_NAME = "config";
     public static final String REQUEST_NODE_NAME = "request";
 
-    @Getter @Setter private String connectionString;
-    @Getter @Setter private String workerAlias;
-    @Getter @Setter private String heartBeatPath;
-    @Getter @Setter private String configPath;
-    @Getter @Setter private int connectTimeout;
-    @Getter @Setter private int connectRetry;
+    @Getter private String connectionString;
+    @Getter private String workerAlias;
+    @Getter private String heartBeatPath;
+    @Getter private String configPath;
+    @Getter private int connectTimeout;
+    @Getter private int connectRetry;
 
     protected ZookeeperConfig(String workerAlias,
                               String connectionString,

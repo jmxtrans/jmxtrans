@@ -106,7 +106,9 @@ public class ZookeeperJvmHandler  {
         try{
             affinityWorkerCache.close();
         } catch (IOException e) {
+            log.warn("Affinity worker cache cannot be closed", e);
         } catch (NullPointerException e){
+            log.warn("Affinity worker cache in null", e);
         } finally{
             affinityWorkerCache = null;
         }
@@ -126,7 +128,7 @@ public class ZookeeperJvmHandler  {
                     log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias + " Current leader is " + leaderLatch.getLeader());
                 }
                 catch (Exception e){
-                    log.error(e.getMessage());
+                    log.error("Leader Latch is not available", e);
                 }
                 getOwnership();
             }
@@ -138,7 +140,7 @@ public class ZookeeperJvmHandler  {
                     log.debug(clConfig.getWorkerAlias() + "::" + jvmAlias + " Current leader is " + leaderLatch.getLeader());
                 }
                 catch (Exception e){
-                    log.error(e.getMessage());
+                    log.error("Leader Latch is not available", e);
                 }
 
                 lostOwnership();

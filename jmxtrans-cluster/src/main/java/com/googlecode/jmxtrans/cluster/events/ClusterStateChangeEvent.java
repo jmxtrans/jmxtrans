@@ -3,6 +3,8 @@ package com.googlecode.jmxtrans.cluster.events;
 import lombok.ToString;
 import org.apache.curator.framework.state.ConnectionState;
 
+import javax.annotation.Nonnull;
+
 /**
  * ClusterStateChangeEvent. This class contains an event for the ClusterStateChangeListeners that are registered
  * in the ClusterService
@@ -15,7 +17,7 @@ public class ClusterStateChangeEvent {
 
     private final ConnectionState type;
 
-    public ClusterStateChangeEvent(ConnectionState type) {
+    public ClusterStateChangeEvent(@Nonnull ConnectionState type) {
         this.type = type;
     }
 

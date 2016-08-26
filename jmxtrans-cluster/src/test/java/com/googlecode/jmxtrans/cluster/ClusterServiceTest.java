@@ -7,12 +7,8 @@ import com.kaching.platform.testing.AllowDNSResolution;
 import com.kaching.platform.testing.AllowLocalFileAccess;
 import com.kaching.platform.testing.AllowNetworkAccess;
 import com.kaching.platform.testing.AllowNetworkListen;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.recipes.cache.NodeCache;
-import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
@@ -23,8 +19,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import static org.assertj.core.api.Assertions.*;
-
-import static org.junit.Assert.*;
 
 /**
  * ClusterService Tester.
@@ -59,12 +53,12 @@ public class ClusterServiceTest {
     @Test
     public void testZookeeperConnectionStartup() throws Exception {
         ClusterService service = ClusterServiceFactory.createClusterService(
-                TestUtils.createGoldenConfiguration(testingServer.getConnectString()));
+                ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString()));
         service.startService();
 
-        synchronized((ZookeeperClusterService)service){
+        synchronized(service){
             try{
-                (service).wait();
+                service.wait();
             }catch(InterruptedException e){
                 e.printStackTrace();
             }
@@ -100,7 +94,7 @@ public class ClusterServiceTest {
         Thread.sleep(3000);
 
         ClusterService service = ClusterServiceFactory.createClusterService(
-                TestUtils.createGoldenConfiguration(testingServer.getConnectString()));
+                ConfigurationFixtures.createGoldenConfiguration(testingServer.getConnectString()));
 
         service.startService();
 
