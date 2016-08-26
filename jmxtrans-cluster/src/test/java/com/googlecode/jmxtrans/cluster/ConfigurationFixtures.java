@@ -5,12 +5,12 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 /**
- * TestUtils. The place of common routines for cluster testing.
+ * ConfigurationFixtures. The place of common routines for cluster testing.
  *
  * @author Tibor Kulcsar
  * @since <pre>May 25, 2016</pre>
  */
-public class TestUtils {
+public class ConfigurationFixtures {
 
     public static Configuration createGoldenConfiguration(String connectionString){
         Configuration configuration = new HierarchicalConfiguration();
