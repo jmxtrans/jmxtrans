@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model.output;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.ResultAttribute;
@@ -35,6 +36,7 @@ import org.influxdb.InfluxDBFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 
 	private final String database;
 	private final InfluxDB.ConsistencyLevel writeConsistency;
-
+	private final ImmutableMap<String, String> tags;
 	private final String retentionPolicy;
 	private final InfluxDB influxDB;
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
@@ -64,14 +66,10 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final boolean createDatabase;
 
 	/**
-	 * @param url
-	 *            - The url e.g http://localhost:8086 to InfluxDB
-	 * @param username
-	 *            - The username for InfluxDB
-	 * @param password
-	 *            - The password for InfluxDB
-	 * @param database
-	 *            - The name of the database (created if does not exist) on
+	 * @param url      - The url e.g http://localhost:8086 to InfluxDB
+	 * @param username - The username for InfluxDB
+	 * @param password - The password for InfluxDB
+	 * @param database - The name of the database (created if does not exist) on
 	 */
 	@JsonCreator
 	public InfluxDbWriterFactory(
@@ -81,6 +79,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("username") String username,
 			@JsonProperty("password") String password,
 			@JsonProperty("database") String database,
+			@JsonProperty("tags") ImmutableMap<String, String> tags,
 			@JsonProperty("writeConsistency") String writeConsistency,
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
@@ -95,10 +94,15 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 		this.retentionPolicy = StringUtils.isNotBlank(retentionPolicy) ? retentionPolicy : DEFAULT_RETENTION_POLICY;
 
 		this.resultAttributesToWriteAsTags = initResultAttributesToWriteAsTags(resultTags);
-
+		this.tags = initCustomTagsMap(tags);
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
 		influxDB = InfluxDBFactory.connect(url, username, password);
+	}
+
+
+	private ImmutableMap<String, String> initCustomTagsMap(ImmutableMap<String, String> tags) {
+		return ImmutableMap.copyOf(firstNonNull(tags, Collections.<String,String>emptyMap()));
 	}
 
 	private ImmutableSet<ResultAttribute> initResultAttributesToWriteAsTags(List<String> resultTags) {
@@ -119,6 +123,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, resultAttributesToWriteAsTags, createDatabase));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, createDatabase));
 	}
 }

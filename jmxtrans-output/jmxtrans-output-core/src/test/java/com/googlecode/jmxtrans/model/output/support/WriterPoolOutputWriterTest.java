@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,17 +48,15 @@ import stormpot.Timeout;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.concurrent.Callable;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
-import static com.jayway.awaitility.Awaitility.await;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -74,12 +72,12 @@ public class WriterPoolOutputWriterTest {
 	public void setupPool() {
 		Config<WriterPoolable> config = new Config<WriterPoolable>()
 				.setAllocator(allocator);
-		pool = new BlazePool<WriterPoolable>(config);
+		pool = new BlazePool<>(config);
 	}
 
 	@Test
 	public void writerIsPassedToTargetOutputWriter() throws Exception {
-		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<WriterBasedOutputWriter>(target, pool, new Timeout(1, SECONDS));
+		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<>(target, pool, new Timeout(1, SECONDS));
 
 		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
 
@@ -88,35 +86,32 @@ public class WriterPoolOutputWriterTest {
 		assertThat(writerCaptor.getValue()).isSameAs(writer);
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void claimTimeout() throws Exception {
+		Timeout sleepTime = new Timeout(10, SECONDS);
+		Timeout claimTime = new Timeout(1, SECONDS);
+
+		Config<WriterPoolable> config = new Config<WriterPoolable>()
+			.setAllocator(new TimeoutAllocator(sleepTime));
+		pool = new BlazePool<>(config);
+
+		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<>(target, pool, claimTime);
+
+		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
+	}
+
 	@Test(expected = IOException.class)
 	@Category(IntegrationTest.class)
 	public void poolableIsReleasedOnIOException() throws Exception {
 		doThrow(IOException.class).when(target).write(any(Writer.class), any(Server.class), any(Query.class), any(ImmutableList.class));
 
-		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<WriterBasedOutputWriter>(target, pool, new Timeout(1, SECONDS));
+		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<>(target, pool, new Timeout(1, SECONDS));
 		try {
 			outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		} finally {
-			await()
-					.atMost(500, MILLISECONDS)
-					.until(poolableDeallocated());
+			verify(allocator, timeout(500)).deallocate(any(WriterPoolable.class));
 		}
 	}
-
-	private Callable<Boolean> poolableDeallocated() {
-		return new Callable<Boolean>() {
-			@Override
-			public Boolean call() throws Exception {
-				try {
-					verify(allocator).deallocate(any(WriterPoolable.class));
-				} catch (IOException e) {
-					return false;
-				}
-				return true;
-			}
-		};
-	}
-
 
 	private class DummyAllocator implements Allocator<WriterPoolable> {
 		@Override
@@ -126,6 +121,32 @@ public class WriterPoolOutputWriterTest {
 
 		@Override
 		public void deallocate(WriterPoolable poolable) throws Exception {
+			poolable.release();
+		}
+	}
+
+	private class TimeoutAllocator implements Allocator<WriterPoolable> {
+
+		private Timeout timeout;
+
+		public TimeoutAllocator(Timeout timeout) {
+			this.timeout = timeout;
+		}
+
+		@Override
+		public WriterPoolable allocate(Slot slot) throws Exception {
+			try {
+				Thread.sleep(timeout.getUnit().toMillis(timeout.getTimeout()));
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+
+			return new SocketPoolable(slot, null, writer, new NeverFlush());
+		}
+
+		@Override
+		public void deallocate(WriterPoolable poolable) throws Exception {
+
 		}
 	}
 }

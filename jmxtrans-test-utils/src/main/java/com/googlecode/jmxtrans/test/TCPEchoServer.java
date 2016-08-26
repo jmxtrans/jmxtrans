@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,14 +61,15 @@ public class TCPEchoServer extends ExternalResource {
 		stop();
 	}
 
+	@SuppressWarnings("squid:S2189") // server is only stopped when interrupted. Might be ugly, but good enough for a test server.
 	public void start() {
 		checkState(thread == null, "Server already started");
 
 		thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Closer closer = Closer.create();
 				try {
+					Closer closer = Closer.create();
 					try {
 						server = closer.register(new ServerSocket(0));
 						while (true) {

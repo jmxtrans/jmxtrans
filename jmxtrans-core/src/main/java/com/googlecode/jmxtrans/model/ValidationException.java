@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model;
 
 import lombok.Getter;
 
+@SuppressWarnings("squid:S1948") // ValidationException is never serialized anyway.
 public class ValidationException extends Exception {
 
 	@Getter private final Query query;

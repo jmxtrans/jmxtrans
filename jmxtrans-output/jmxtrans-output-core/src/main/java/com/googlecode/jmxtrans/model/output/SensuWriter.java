@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,9 +66,9 @@ public class SensuWriter extends BaseOutputWriter {
 
 	private static final Logger logger = LoggerFactory.getLogger(SensuWriter.class);
 
-	public final static String SETTING_HANDLER = "handler";
-	public final static String DEFAULT_SENSU_HOST = "localhost";
-	public final static String DEFAULT_SENSU_HANDLER = "graphite";
+	public static final String SETTING_HANDLER = "handler";
+	public static final String DEFAULT_SENSU_HOST = "localhost";
+	public static final String DEFAULT_SENSU_HANDLER = "graphite";
 
 	private final JsonFactory jsonFactory = new JsonFactory();
 

@@ -2,7 +2,7 @@
 <!--
 
     The MIT License
-    Copyright (c) 2010 JmxTrans team
+    Copyright © 2010 JmxTrans team
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@
 
 	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans-parent</artifactId>
-	<version>255-SNAPSHOT</version>
+	<version>260-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>JmxTrans - parent project</name>
 	<description>JMX metrics exporter</description>
@@ -130,7 +130,8 @@
 		</site>
 	</distributionManagement>
 	<properties>
-		<aws.java.sdk.version>1.10.49</aws.java.sdk.version>
+		<animal-sniffer.version>1.15</animal-sniffer.version>
+		<aws.java.sdk.version>1.11.6</aws.java.sdk.version>
 		<!--
 			Maximum number of checkstyle violations allowed. Build will fail
 			if there are more than this number of violations. Feel free to
@@ -140,8 +141,9 @@
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
 		<!-- some versions used by multiple dependencies -->
-		<jackson.version>2.7.0</jackson.version>
+		<jackson.version>2.7.4</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
+		<logback.version>1.1.7</logback.version>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
 		<package.daemon.name>${project.artifactId}</package.daemon.name>
@@ -149,9 +151,10 @@
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
 		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
-		<powermock.version>1.6.4</powermock.version>
+		<powermock.version>1.6.5</powermock.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j.version>1.7.14</slf4j.version>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<slf4j.version>1.7.21</slf4j.version>
 		<verify.mutationThreshold>100</verify.mutationThreshold>
 		<verify.totalBranchRate>100</verify.totalBranchRate>
 		<verify.totalLineRate>100</verify.totalLineRate>
@@ -162,7 +165,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.1.3</version>
+				<version>${logback.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
@@ -173,7 +176,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
-				<version>1.1.3</version>
+				<version>${logback.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.amazonaws</groupId>
@@ -213,12 +216,12 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-guice</artifactId>
-				<version>2.7.0</version>
+				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.chrisvest</groupId>
 				<artifactId>stormpot</artifactId>
-				<version>2.4</version>
+				<version>2.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rholder</groupId>
@@ -253,7 +256,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.4</version>
+				<version>2.5</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-lang</groupId>
@@ -273,7 +276,7 @@
 			<dependency>
 				<groupId>io.searchbox</groupId>
 				<artifactId>jest</artifactId>
-				<version>2.0.0</version>
+				<version>2.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.inject</groupId>
@@ -313,7 +316,7 @@
 			<dependency>
 				<groupId>org.apache.kafka</groupId>
 				<artifactId>kafka_2.10</artifactId>
-				<version>0.9.0.0</version>
+				<version>0.10.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -328,13 +331,13 @@
 			<dependency>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>animal-sniffer-annotations</artifactId>
-				<version>1.14</version>
+				<version>${animal-sniffer.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.influxdb</groupId>
 				<artifactId>influxdb-java</artifactId>
-				<version>2.1</version>
+				<version>2.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jhades</groupId>
@@ -460,7 +463,7 @@
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.16.6</version>
+				<version>1.16.8</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -479,7 +482,7 @@
 				-->
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.1</version>
+				<version>4.5.2</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
@@ -515,7 +518,7 @@
 			<dependency>
 				<groupId>com.github.tomakehurst</groupId>
 				<artifactId>wiremock</artifactId>
-				<version>2.0.7-beta</version>
+				<version>2.0.10-beta</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -561,7 +564,7 @@
 			<dependency>
 				<groupId>net.javacrumbs.json-unit</groupId>
 				<artifactId>json-unit-fluent</artifactId>
-				<version>1.9.0</version>
+				<version>1.12.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -574,7 +577,7 @@
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
 				<!-- AssertJ > 3 does not support Java 7 anymore, let's stay with 2.X.X for the moment -->
-				<version>2.3.0</version>
+				<version>2.4.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -663,7 +666,7 @@
 					<groupId>com.github.ekryd.sortpom</groupId>
 					<artifactId>sortpom-maven-plugin</artifactId>
 					<!-- version 2.5.0 is compiled with Java 8 as target class format -->
-					<version>2.4.0</version>
+					<version>2.5.0</version>
 					<configuration>
 						<predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
 						<sortDependencies>scope,groupId,artifactId</sortDependencies>
@@ -687,7 +690,7 @@
 				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>2.11</version>
+					<version>3.0.rc1</version>
 					<configuration>
 						<header>com/mycila/maven/plugin/license/templates/MIT.txt</header>
 						<strictCheck>true</strictCheck>
@@ -717,7 +720,7 @@
 				<plugin>
 					<groupId>de.is24.mavenplugins</groupId>
 					<artifactId>deadcode4j-maven-plugin</artifactId>
-					<version>2.0.1</version>
+					<version>2.1.0</version>
 					<configuration>
 						<classesToIgnore>
 							<param>com.googlecode.jmxtrans.model.QueryFixtures</param>
@@ -739,12 +742,12 @@
 				<plugin>
 					<groupId>io.fabric8</groupId>
 					<artifactId>docker-maven-plugin</artifactId>
-					<version>0.14.0</version>
+					<version>0.15.5</version>
 				</plugin>
 				<plugin>
 					<groupId>net.ju-n.maven.plugins</groupId>
 					<artifactId>checksum-maven-plugin</artifactId>
-					<version>1.2</version>
+					<version>1.3</version>
 					<configuration>
 						<algorithms>
 							<algorithm>MD5</algorithm>
@@ -784,12 +787,12 @@
 						<dependency>
 							<groupId>org.slf4j</groupId>
 							<artifactId>jcl-over-slf4j</artifactId>
-							<version>1.7.5</version>
+							<version>${slf4j.version}</version>
 						</dependency>
 						<dependency>
 							<groupId>org.slf4j</groupId>
 							<artifactId>slf4j-jdk14</artifactId>
-							<version>1.7.5</version>
+							<version>${slf4j.version}</version>
 						</dependency>
 					</dependencies>
 					<executions>
@@ -810,7 +813,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.5</version>
+					<version>3.5.1</version>
 					<configuration>
 						<source>1.7</source>
 						<target>1.7</target>
@@ -846,7 +849,7 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
 								</rules>
 							</configuration>
 						</execution>
@@ -919,7 +922,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>2.7</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -969,7 +972,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.4</version>
+					<version>3.5.1</version>
 					<configuration>
 						<skipDeploy>true</skipDeploy>
 					</configuration>
@@ -986,7 +989,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.0.0</version>
 					<executions>
 						<execution>
 							<id>attach-sources</id>
@@ -1013,7 +1016,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.14</version>
+					<version>${animal-sniffer.version}</version>
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
@@ -1087,12 +1090,12 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>rpm-maven-plugin</artifactId>
-					<version>2.1.4</version>
+					<version>2.1.5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.pitest</groupId>
 					<artifactId>pitest-maven</artifactId>
-					<version>1.1.9</version>
+					<version>1.1.10</version>
 					<configuration>
 						<mutators>
 							<mutator>DEFAULTS</mutator>
@@ -1120,7 +1123,7 @@
 				<plugin>
 					<groupId>org.sonatype.plugins</groupId>
 					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.6.6</version>
+					<version>1.6.7</version>
 					<extensions>true</extensions>
 					<configuration>
 						<serverId>ossrh</serverId>
@@ -1131,7 +1134,7 @@
 				<plugin>
 					<groupId>org.vafer</groupId>
 					<artifactId>jdeb</artifactId>
-					<version>1.4</version>
+					<version>1.5</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -1234,7 +1237,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.8.1</version>
+				<version>2.9</version>
 				<reportSets>
 					<reportSet>
 						<reports>

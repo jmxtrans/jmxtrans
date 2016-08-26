@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,10 +52,11 @@ public class WriterPoolable implements Poolable {
 	public void release() {
 		try {
 			flushStrategy.flush(writer);
-			slot.release(this);
 		} catch (IOException ioe) {
 			logger.error("Could not flush writer", ioe);
 			invalidate();
+		} finally {
+			slot.release(this);
 		}
 	}
 

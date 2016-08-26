@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # The MIT License
-# Copyright (c) 2010 JmxTrans team
+# Copyright © 2010 JmxTrans team
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       --settings ${MVN_SETTINGS} -B -V \
       -PwithMutationTests,gpg,rpm,deb \
       -Ddocker.skip=false \
-      -Dsonar.host.url=https://nemo.sonarqube.org -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.host.url=https://sonarqube.com/ -Dsonar.login=$SONAR_TOKEN
   elif [ "$TRAVIS_BRANCH" == "release" ]; then
     if [[ `git log --format=%B -n 1` == *"[maven-release-plugin]"* ]]; then
       echo "Do not release commits created by maven release plugin"
@@ -68,7 +68,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       # to the release branch, but in that case we will have problem anyway.
       git checkout release
 
-      mvn release:prepare --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
+      mvn release:prepare -X -e --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
       mvn release:perform --settings ${MVN_SETTINGS} -B -V -Pgpg,rpm,deb -Darguments="--settings ${MVN_SETTINGS}"
 
       git fetch origin +master:master
@@ -78,9 +78,18 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     fi
   else
     echo "Building feature branch"
-    mvn verify --settings ${MVN_SETTINGS} -U -B -V -PwithMutationTests,rpm,deb,\!gpg -Dgpg.passphraseServerId=skip -Ddocker.skip=false
+    mvn verify sonar:sonar \
+      --settings ${MVN_SETTINGS} -U -B -V \
+      -PwithMutationTests,rpm,deb,\!gpg \
+      -Dgpg.passphraseServerId=skip \
+      -Ddocker.skip=false \
+      -Dsonar.host.url=https://sonarqube.com/ -Dsonar.login=$SONAR_TOKEN
   fi
 else
   echo "Building pull request"
-  mvn verify --settings ${MVN_SETTINGS} -B -V -PwithMutationTests,rpm,deb,\!gpg -Dgpg.passphraseServerId=skip -Ddocker.skip=false
+  mvn verify \
+    --settings ${MVN_SETTINGS} -B -V \
+    -PwithMutationTests,rpm,deb,\!gpg \
+    -Dgpg.passphraseServerId=skip \
+    -Ddocker.skip=false
 fi
