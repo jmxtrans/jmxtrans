@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # The MIT License
-# Copyright (c) 2010 JmxTrans team
+# Copyright © 2010 JmxTrans team
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ if [ -z "$CONF_FILE" ]; then
     fi
 fi
 
-# Specify the commonly used configuration options below in a clConfig file.
+# Specify the commonly used configuration options below in a config file.
 CONF_FILE=${CONF_FILE:-"jmxtrans.conf"}
 if [ -e "$CONF_FILE" ]; then
     . "$CONF_FILE"
@@ -42,7 +42,7 @@ JAVA_HOME=${JAVA_HOME:-"/usr"}
 LOG_DIR=${LOG_DIR:-"."}
 LOG_FILE=${LOG_FILE:-"/dev/null"}
 
-JAR_FILE=${JAR_FILE:-"jmxtrans-all.jar"}
+JAR_FILE=${JAR_FILE:-"lib/jmxtrans-all.jar"}
 ADDITIONAL_JARS=${ADDITIONAL_JARS:-""}
 JSON_DIR=${JSON_DIR:-"."}
 SECONDS_BETWEEN_RUNS=${SECONDS_BETWEEN_RUNS:-"60"}

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,17 +85,17 @@ public class ServerListBuilder {
 		@Nonnull private final Map<Query, Set<OutputWriterFactory>> queries = newHashMap();
 		@Nonnull private final Set<OutputWriterFactory> temporaryOutputWriters = newHashSet();
 
-		TemporaryServer(Server server) {
+		TemporaryServer(@Nonnull Server server) {
 			this.server = server;
 		}
 
-		public void addQueries(Iterable<Query> queries) {
+		public void addQueries(@Nonnull Iterable<Query> queries) {
 			for (Query query : queries) {
 				addQuery(query);
 			}
 		}
 
-		private void addQuery(Query query) {
+		private void addQuery(@Nonnull Query query) {
 			if (!queries.containsKey(query)) queries.put(query, new HashSet<OutputWriterFactory>());
 
 			Set<OutputWriterFactory> outputWritersForThisQuery = queries.get(query);
@@ -104,7 +104,7 @@ public class ServerListBuilder {
 			}
 		}
 
-		public void addOutputWriters(Iterable<OutputWriterFactory> outputWriters) {
+		public void addOutputWriters(@Nonnull Iterable<OutputWriterFactory> outputWriters) {
 			for (OutputWriterFactory outputWriter : outputWriters) {
 				temporaryOutputWriters.add(singleton(outputWriter));
 			}
@@ -125,7 +125,7 @@ public class ServerListBuilder {
 
 	}
 
-	private Collection<OutputWriter> createOutputWriters(Set<OutputWriterFactory> outputWriterFactories) {
+	private Collection<OutputWriter> createOutputWriters(@Nonnull Set<OutputWriterFactory> outputWriterFactories) {
 		return from(outputWriterFactories)
 				.transform(new Function<OutputWriterFactory, OutputWriter>() {
 			@Nullable

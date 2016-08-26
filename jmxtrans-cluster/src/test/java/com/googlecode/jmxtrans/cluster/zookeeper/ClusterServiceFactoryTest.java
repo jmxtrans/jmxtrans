@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright © 2010 JmxTrans team
+ * Copyright (c) 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.cluster.zookeeper;
 
+import com.googlecode.jmxtrans.cluster.ClusterService;
+import com.googlecode.jmxtrans.cluster.ClusterServiceFactory;
+import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ObjectToDoubleTest {
+/**
+ * ClusterServiceFactory Tester.
+ *
+ * @author Tibor Kulcsar
+ * @since <pre>May 25, 2016</pre>
+ */
+public class ClusterServiceFactoryTest {
 
-    private ObjectToDouble converter = new ObjectToDouble();
+	/**
+	 * Test the classname based dependency injection.
+	 * @throws Exception
+	 */
+	@Test
+	public void testDependencyInjection() throws Exception {
+		ClusterService service = ClusterServiceFactory.createClusterService(
+				ConfigurationFixtures.goldenConfiguration("127.0.0.1:2181"));
 
-    @Test
-    public void doubleReturnedAsItself() {
-        Double input = 0.1;
-        Double output = converter.apply(input);
+		assertThat(service).isExactlyInstanceOf(ZookeeperClusterService.class);
+	}
 
-        assertThat(output).isEqualTo(0.1);
-    }
+	@Test(expected = ClassNotFoundException.class)
+	public void nonExistentImplementationClassCausesException() throws Exception{
+		Configuration configuration =  ConfigurationFixtures.goldenConfiguration("127.0.0.1:2181");
+		configuration.setProperty("provider.classname", "non.existent.Clazz");
 
-    @Test
-    public void integerIsConvertedToDouble() {
-        Integer input = 1;
-        Double output = converter.apply(input);
-
-        assertThat(output).isEqualTo(1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void stringIsNotConverted() {
-        converter.apply("");
-    }
-
+		ClusterServiceFactory.createClusterService(configuration);
+	}
 }

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,14 +53,15 @@ public class UdpLoggingServer extends ExternalResource {
 		this.charset = charset;
 	}
 
+	@SuppressWarnings("squid:S2189") // server is only stopped when interrupted. Might be ugly, but good enough for a test server.
 	private void start() {
 		checkState(thread == null, "UDP Server already started");
 
 		thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Closer closer = Closer.create();
 				try {
+					Closer closer = Closer.create();
 					try {
 						socket = closer.register(new DatagramSocket());
 						while (true) {

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
@@ -60,6 +61,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final String database;
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
+	@Nonnull private final ImmutableMap<String,String> tags;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -69,27 +71,29 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 	private final boolean createDatabase;
 
+	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
+		@Override
+		public boolean apply(Object input) {
+			return !input.toString().equals("NaN");
+		}
+	};
+
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
 			@Nonnull String database,
 			@Nonnull ConsistencyLevel writeConsistency,
 			@Nonnull String retentionPolicy,
+			@Nonnull ImmutableMap<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			boolean createDatabase) {
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
+		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 		this.createDatabase = createDatabase;
 	}
-
-	Predicate<Object> isNotNaN = new Predicate<Object>() {
-		@Override
-		public boolean apply(Object input) {
-			return !input.toString().equals("NaN");
-		}
-	};
 
 	/**
 	 * <p>
@@ -145,10 +149,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		// Creates only if it doesn't already exist
 		if (createDatabase) influxDB.createDatabase(database);
+		BatchPoints.Builder batchPointsBuilder = BatchPoints.database(database).retentionPolicy(retentionPolicy)
+				.tag(TAG_HOSTNAME, server.getSource());
 
-		BatchPoints batchPoints = BatchPoints.database(database).retentionPolicy(retentionPolicy)
-				.tag(TAG_HOSTNAME, server.getSource()).consistency(writeConsistency).build();
-
+		for(Map.Entry<String,String> tag : tags.entrySet()) {
+			batchPointsBuilder.tag(tag.getKey(),tag.getValue());
+		}
+		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
 		for (Result result : results) {
 
 			HashMap<String, Object> filteredValues = newHashMap(Maps.filterValues(result.getValues(), isNotNaN));

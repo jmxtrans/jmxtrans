@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) 2010 JmxTrans team
+ * Copyright © 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,6 +69,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
+import static java.lang.Thread.currentThread;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -100,7 +101,7 @@ public class JmxTransformer implements WatchedCallback {
 	private volatile boolean isRunning = false;
 	@Nonnull private final ThreadPoolExecutor queryProcessorExecutor;
 	@Nonnull private final ThreadPoolExecutor resultProcessorExecutor;
-	@Nonnull  private final ThreadLocalRandom random = ThreadLocalRandom.current();
+	@Nonnull private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
 	@Inject
 	public JmxTransformer(
@@ -232,6 +233,7 @@ public class JmxTransformer implements WatchedCallback {
 					Thread.sleep(1500);
 				} catch (InterruptedException e) {
 					log.error(e.getMessage(), e);
+					currentThread().interrupt();
 				}
 			}
 
@@ -249,7 +251,6 @@ public class JmxTransformer implements WatchedCallback {
 			stopWriterAndClearMasterServerList();
 
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			throw new LifecycleException(e);
 		}
 	}

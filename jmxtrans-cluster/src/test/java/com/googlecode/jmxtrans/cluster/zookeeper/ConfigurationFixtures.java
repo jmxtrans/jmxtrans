@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright © 2010 JmxTrans team
+ * Copyright (c) 2010 JmxTrans team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.cluster.zookeeper;
 
-import org.junit.Test;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 
-import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * @author Tibor Kulcsar
+ * @since <pre>May 25, 2016</pre>
+ */
+public class ConfigurationFixtures {
 
-public class ObjectToDoubleTest {
-
-    private ObjectToDouble converter = new ObjectToDouble();
-
-    @Test
-    public void doubleReturnedAsItself() {
-        Double input = 0.1;
-        Double output = converter.apply(input);
-
-        assertThat(output).isEqualTo(0.1);
-    }
-
-    @Test
-    public void integerIsConvertedToDouble() {
-        Integer input = 1;
-        Double output = converter.apply(input);
-
-        assertThat(output).isEqualTo(1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void stringIsNotConverted() {
-        converter.apply("");
-    }
-
+	public static Configuration goldenConfiguration(String connectionString){
+		Configuration configuration = new HierarchicalConfiguration();
+		configuration.addProperty("provider.classname", ZookeeperClusterService.class.getName());
+		configuration.addProperty("zookeeper.workeralias", "worker_01");
+		//configuration.addProperty("zookeeper.connectionstring", "10.189.33.100:2181\\,10.189.33.101:2181\\,10.189.33.102:2181");
+		configuration.addProperty("zookeeper.connectionstring", connectionString);
+		configuration.addProperty("zookeeper.timeout", 1000);
+		configuration.addProperty("zookeeper.retry", 3);
+		configuration.addProperty("zookeeper.heartbeatpath", "/jmxtrans/workers");
+		configuration.addProperty("zookeeper.configpath", "/jmxtrans/jvms");
+		return  configuration;
+	}
 }
