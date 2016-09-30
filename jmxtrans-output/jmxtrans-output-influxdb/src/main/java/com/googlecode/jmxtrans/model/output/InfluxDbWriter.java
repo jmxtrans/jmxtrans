@@ -71,6 +71,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 	private final boolean createDatabase;
 
+	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
+		@Override
+		public boolean apply(Object input) {
+			return !input.toString().equals("NaN");
+		}
+	};
+
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
 			@Nonnull String database,
@@ -87,13 +94,6 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 		this.createDatabase = createDatabase;
 	}
-
-	Predicate<Object> isNotNaN = new Predicate<Object>() {
-		@Override
-		public boolean apply(Object input) {
-			return !input.toString().equals("NaN");
-		}
-	};
 
 	/**
 	 * <p>
