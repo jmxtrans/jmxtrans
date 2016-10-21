@@ -159,9 +159,6 @@ public class InfluxDBMessageFormatter {
 
 		String attributeName = result.getAttributeName();
 
-		// CWL debug
-		//String metricName = this.metricNameStrategy.formatName(result);
-
 		if (values.containsKey(attributeName) && values.size() == 1) {
 			processOneMetric(resultStrings, result, values.get(attributeName), null, null);
 		} else {
