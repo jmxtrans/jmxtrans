@@ -22,34 +22,17 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.QueryFixtures;
-import com.googlecode.jmxtrans.model.ResultFixtures;
-import com.googlecode.jmxtrans.model.ServerFixtures;
-import org.junit.Test;
+public enum StatsDMetricType {
 
-import java.io.IOException;
-import java.io.StringWriter;
+	COUNTER("c"), GAUGE("g"), SET("s"), TIMING_MS("ms");
 
-import static org.assertj.core.api.Assertions.assertThat;
+	private final String key;
 
-public class SensuWriter2Test {
-
-	@Test
-	public void metricsAreFormattedCorrectly() throws IOException {
-		StringWriter writer = new StringWriter();
-		SensuWriter2 sensuWriter = new SensuWriter2(new GraphiteWriter2(ImmutableList.<String>of(), null), new JsonFactory());
-
-		sensuWriter.write(writer, ServerFixtures.dummyServer(), QueryFixtures.dummyQuery(), ResultFixtures.dummyResults());
-
-		assertThat(writer.toString()).isEqualTo(
-				"{\n" +
-				"  \"name\" : \"jmxtrans\",\n" +
-				"  \"type\" : \"metric\",\n" +
-				"  \"handler\" : \"graphite\",\n" +
-				"  \"output\" : \"host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0\\n\"\n" +
-				"}");
+	StatsDMetricType(String key) {
+		this.key = key;
 	}
 
+	public String getKey() {
+		return key;
+	}
 }

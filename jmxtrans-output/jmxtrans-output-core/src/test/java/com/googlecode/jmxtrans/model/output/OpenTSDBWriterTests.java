@@ -127,7 +127,7 @@ public class OpenTSDBWriterTests {
 		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 		// check that OpenTSDB format is respected
-		assertThat(out.toString()).startsWith("put ObjectPendingFinalizationCount.ObjectPendingFinalizationCount ")
+		assertThat(out.toString()).startsWith("put MemoryAlias.ObjectPendingFinalizationCount ")
 			.contains("host=")  // hostname is added by default
 			.endsWith("\n");
 	}

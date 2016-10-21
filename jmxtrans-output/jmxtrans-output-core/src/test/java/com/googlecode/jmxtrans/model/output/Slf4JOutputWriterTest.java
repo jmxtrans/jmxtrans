@@ -56,7 +56,7 @@ public class Slf4JOutputWriterTest {
 			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
 				assertThat(MDC.get("server")).isEqualTo("host_example_net_4321");
-				assertThat(MDC.get("metric")).isEqualTo("host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount");
+				assertThat(MDC.get("metric")).isEqualTo("host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount");
 				assertThat(MDC.get("value")).isEqualTo("10");
 				assertThat(MDC.get("attributeName")).isEqualTo("ObjectPendingFinalizationCount");
 				assertThat(MDC.get("key")).isEqualTo("ObjectPendingFinalizationCount");
