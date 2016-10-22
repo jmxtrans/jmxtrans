@@ -261,6 +261,13 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void stopWriterAndClearMasterServerList() {
 		for (Server server : this.masterServersList) {
+			for (OutputWriter writer : server.getOutputWriters()) {
+				try {
+					writer.stop();
+				} catch (LifecycleException ex) {
+					log.error("Eror stopping writer: {}", writer);
+				}
+			}
 			for (Query query : server.getQueries()) {
 				for (OutputWriter writer : query.getOutputWriterInstances()) {
 					try {

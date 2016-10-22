@@ -33,10 +33,14 @@ import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static com.google.common.collect.FluentIterable.from;
 
 public class ResultTransformerOutputWriter<T extends OutputWriter> extends OutputWriterAdapter {
 
+	private static final Logger logger = LoggerFactory.getLogger(ResultTransformerOutputWriter.class);
 	@Nonnull private final ResultValuesTransformer resultValuesTransformer;
 	@Nonnull private final T target;
 
@@ -66,5 +70,12 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 		return new ResultTransformerOutputWriter<>(new ResultValuesTransformer(new IdentityValueTransformer()), target);
 	}
 
+	public void stop() {
+		try {
+			target.stop();
+		} catch (LifecycleException ex) {
+			logger.debug("error stopping writer");
+		}
+	}
 
 }
