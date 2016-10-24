@@ -48,13 +48,17 @@ public class StatsDTelegrafWriter implements WriterBasedOutputWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(StatsDTelegrafWriter.class);
 
+	@Nonnull
 	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
+	@Nonnull
 	private final String[] bucketTypes;
+	@Nonnull
 	private final ImmutableMap<String, String> tags;
+	@Nonnull
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
-	public StatsDTelegrafWriter(String bucketType, ImmutableMap<String, String> tags, ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags) {
-		this.bucketTypes = StringUtils.split(bucketType, ",");
+	public StatsDTelegrafWriter(String[] bucketTypes, ImmutableMap<String, String> tags, ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags) {
+		this.bucketTypes = bucketTypes;
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 	}
@@ -119,7 +123,7 @@ public class StatsDTelegrafWriter implements WriterBasedOutputWriter {
 	}
 
 	private boolean isNotValidValue(Object value) {
-		return !(isNumeric(value) /*|| stringsValuesAsKey*/);
+		return !isNumeric(value);
 	}
 
 	private Number computeActualValue(Object value) {
@@ -128,7 +132,7 @@ public class StatsDTelegrafWriter implements WriterBasedOutputWriter {
 			return transformedValue instanceof Number ?
 				(Number) transformedValue : Float.valueOf(transformedValue.toString());
 		}
-		return null;
+		throw new IllegalArgumentException("Only numeric values are supported, enable debug log level for more details.");
 	}
 
 }

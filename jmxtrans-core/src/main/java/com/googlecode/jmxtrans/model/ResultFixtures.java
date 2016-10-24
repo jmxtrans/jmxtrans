@@ -68,6 +68,17 @@ public final class ResultFixtures {
 				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", numericValue));
 	}
 
+	public static Result stringResult() {
+		return new Result(
+				0,
+				"NonHeapMemoryUsage",
+				"sun.management.MemoryImpl",
+				"ObjectDomainName",
+				"MemoryAlias",
+				"type=Memory",
+				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", "value is a string"));
+	}
+
 	public static Result hashResult() {
 		return new Result(
 				0,

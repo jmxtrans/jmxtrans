@@ -47,7 +47,7 @@ public class StatsDTelegrafWriterTest {
 
     @Test
     public void hashResultAttribues() throws IOException {
-        StatsDTelegrafWriter w = new StatsDTelegrafWriter(StatsDMetricType.COUNTER.getKey(), ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
+        StatsDTelegrafWriter w = new StatsDTelegrafWriter(new String[]{StatsDMetricType.COUNTER.getKey()}, ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
         w.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(hashResult()) );
         assertThat(writer.toString()).isEqualTo(
 			"MemoryAlias,jmxport=4321,attribute=NonHeapMemoryUsage,resultKey=committed:12345|c\n" +
@@ -57,32 +57,39 @@ public class StatsDTelegrafWriterTest {
 
     @Test
     public void countAttribute() throws IOException {
-        StatsDTelegrafWriter w = new StatsDTelegrafWriter(StatsDMetricType.COUNTER.getKey(), ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
+        StatsDTelegrafWriter w = new StatsDTelegrafWriter(new String[]{StatsDMetricType.COUNTER.getKey()}, ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
         w.write(writer, dummyServer(), dummyQuery(), singleNumericResult());
         assertThat(writer.toString()).isEqualTo(expectedMeasureAndTags + "10|c\n");
     }
 
     @Test
     public void countAttribute_negativeValueIsIgnored() throws IOException {
-        StatsDTelegrafWriter w = new StatsDTelegrafWriter(StatsDMetricType.COUNTER.getKey(), ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
+        StatsDTelegrafWriter w = new StatsDTelegrafWriter(new String[]{StatsDMetricType.COUNTER.getKey()}, ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
         w.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(numericResult(-10)));
         assertThat(writer.toString()).isEqualTo("");
     }
 
     @Test
     public void gaugeAttribute() throws IOException {
-        StatsDTelegrafWriter w = new StatsDTelegrafWriter(StatsDMetricType.GAUGE.getKey(), ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
+        StatsDTelegrafWriter w = new StatsDTelegrafWriter(new String[]{StatsDMetricType.GAUGE.getKey()}, ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
         w.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(numericResult(-10)));
         assertThat(writer.toString()).isEqualTo(expectedMeasureAndTags + "-10|g\n");
     }
 
     @Test
     public void multipleBucketTypes() throws IOException {
-        StatsDTelegrafWriter w = new StatsDTelegrafWriter("s,ms,g", ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
+        StatsDTelegrafWriter w = new StatsDTelegrafWriter(new String[]{"s","ms","g"}, ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
         w.write(writer, dummyServer(), dummyQuery(), ImmutableList.of( numericResult(5), numericResult(250), numericResult(10.5)));
         assertThat(writer.toString()).isEqualTo(
             expectedMeasureAndTags + "5|s\n" +
             expectedMeasureAndTags + "250|ms\n" +
             expectedMeasureAndTags + "10.5|g\n");
     }
+
+	@Test
+	public void nonNumericValue() throws IOException {
+		StatsDTelegrafWriter w = new StatsDTelegrafWriter(new String[]{StatsDMetricType.GAUGE.getKey()}, ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
+		w.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(stringResult()));
+		assertThat(writer.toString()).isEqualTo("");
+	}
 }

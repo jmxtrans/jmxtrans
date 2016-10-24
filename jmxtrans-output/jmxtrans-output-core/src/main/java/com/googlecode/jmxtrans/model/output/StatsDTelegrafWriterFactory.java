@@ -32,6 +32,7 @@ import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class StatsDTelegrafWriterFactory implements OutputWriterFactory {
 	private static final Logger LOG = LoggerFactory.getLogger(StatsDTelegrafWriterFactory.class);
 
 	@Nonnull
-	private final String bucketType;
+	private final String[] bucketTypes;
 	@Nonnull
 	private final InetSocketAddress server;
 	@Nonnull
@@ -72,7 +73,7 @@ public class StatsDTelegrafWriterFactory implements OutputWriterFactory {
 		@JsonProperty("flushStrategy") String flushStrategy,
 		@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
 		@JsonProperty("poolSize") Integer poolSize) {
-		this.bucketType = firstNonNull(bucketType, "c");
+		this.bucketTypes = StringUtils.split(firstNonNull(bucketType, "c"), ",");
 		this.server = new InetSocketAddress(
 			checkNotNull(host, "Host cannot be null."),
 			checkNotNull(port, "Port cannot be null."));
@@ -115,7 +116,7 @@ public class StatsDTelegrafWriterFactory implements OutputWriterFactory {
 	public WriterPoolOutputWriter<StatsDTelegrafWriter> create() {
 		return UdpOutputWriterBuilder.builder(
 			server,
-			new StatsDTelegrafWriter(bucketType, tags, resultAttributesToWriteAsTags))
+			new StatsDTelegrafWriter(bucketTypes, tags, resultAttributesToWriteAsTags))
 			.setCharset(UTF_8)
 			.setFlushStrategy(flushStrategy)
 			.setPoolSize(poolSize)
