@@ -143,4 +143,5 @@ public class SensuWriter extends BaseOutputWriter {
 	public String getHandler() {
 		return handler;
 	}
+
 }

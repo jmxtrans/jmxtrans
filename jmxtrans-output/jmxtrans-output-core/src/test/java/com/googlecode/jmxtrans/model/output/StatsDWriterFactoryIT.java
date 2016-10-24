@@ -57,7 +57,7 @@ public class StatsDWriterFactoryIT {
 		).create();
 
 		statsDWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
-		statsDWriter.stop();
+		statsDWriter.close();
 
 		await().atMost(200, MILLISECONDS)
 				.until(messageReceived("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:10|c\n"));

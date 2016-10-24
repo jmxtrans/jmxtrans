@@ -180,8 +180,8 @@ public class ElasticWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void stop() throws LifecycleException {
-		super.stop();
+	public void close() throws LifecycleException {
+		super.close();
 		jestClient.shutdownClient();
 	}
 

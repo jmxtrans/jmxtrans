@@ -68,9 +68,8 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 		return new ResultTransformerOutputWriter<>(new ResultValuesTransformer(new IdentityValueTransformer()), target);
 	}
 
-	public void stop() throws LifecycleException {
-		target.stop();
-
+	public void close() throws LifecycleException {
+		target.close();
 	}
 
 }

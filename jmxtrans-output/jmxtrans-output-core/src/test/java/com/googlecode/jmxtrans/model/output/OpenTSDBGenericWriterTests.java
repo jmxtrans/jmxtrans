@@ -102,7 +102,7 @@ public class OpenTSDBGenericWriterTests {
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-		writer.stop();
+		writer.close();
 
 		Assert.assertTrue(
 				this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
@@ -121,7 +121,7 @@ public class OpenTSDBGenericWriterTests {
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-		writer.stop();
+		writer.close();
 
 		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
 		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
@@ -163,7 +163,7 @@ public class OpenTSDBGenericWriterTests {
 		Assert.assertTrue(startOutputCalled);
 		Assert.assertTrue(finishOutputCalled);
 
-		writer.stop();
+		writer.close();
 		Assert.assertTrue(prepareSenderCalled);
 		Assert.assertTrue(shutdownSenderCalled);
 		Assert.assertTrue(startOutputCalled);

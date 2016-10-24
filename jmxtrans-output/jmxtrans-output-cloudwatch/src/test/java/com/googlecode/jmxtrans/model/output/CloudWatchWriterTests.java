@@ -27,6 +27,7 @@ import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,6 +81,12 @@ public class CloudWatchWriterTests {
 		assertThat(metricDatum.getDimensions().size()).isEqualTo(2);
 		assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
 		assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
+	}
+
+	@Test
+	public void cloudwatchClientIsClosed() throws LifecycleException {
+		writer.close();
+		verify(cloudWatchClient).shutdown();
 	}
 
 }

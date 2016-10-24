@@ -263,7 +263,7 @@ public class JmxTransformer implements WatchedCallback {
 		for (Server server : this.masterServersList) {
 			for (OutputWriter writer : server.getOutputWriters()) {
 				try {
-					writer.stop();
+					writer.close();
 				} catch (LifecycleException ex) {
 					log.error("Eror stopping writer: {}", writer);
 				}
@@ -271,7 +271,7 @@ public class JmxTransformer implements WatchedCallback {
 			for (Query query : server.getQueries()) {
 				for (OutputWriter writer : query.getOutputWriterInstances()) {
 					try {
-						writer.stop();
+						writer.close();
 						log.debug("Stopped writer: {} for query: {}", writer, query);
 					} catch (LifecycleException ex) {
 						log.error("Error stopping writer: {} for query: {}", writer, query, ex);

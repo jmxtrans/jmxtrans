@@ -148,7 +148,7 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 	}
 
 	@Override
-	public void stop() throws LifecycleException {
+	public void close() throws LifecycleException {
 		// Do nothing.
 	}
 

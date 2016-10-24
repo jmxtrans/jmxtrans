@@ -65,7 +65,7 @@ public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends O
 	}
 
 	@Override
-	public void stop() throws LifecycleException {
+	public void close() throws LifecycleException {
 		writerPool.shutdown();
 	}
 

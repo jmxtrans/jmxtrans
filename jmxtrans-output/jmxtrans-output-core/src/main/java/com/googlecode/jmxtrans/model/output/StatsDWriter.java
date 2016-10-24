@@ -157,7 +157,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void stop() throws LifecycleException {
+	public void close() throws LifecycleException {
 		try {
 			if (this.mbean != null) {
 				MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
