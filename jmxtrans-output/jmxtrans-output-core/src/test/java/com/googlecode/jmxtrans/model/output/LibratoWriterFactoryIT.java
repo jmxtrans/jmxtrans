@@ -24,12 +24,10 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableList;
-import com.google.common.eventbus.AllowConcurrentEvents;
 import com.googlecode.jmxtrans.model.QueryFixtures;
 import com.googlecode.jmxtrans.model.ResultFixtures;
 import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.test.IntegrationTest;
-import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -46,9 +44,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
 @Category(IntegrationTest.class)
-@AllowLocalFileAccess(paths = "*")
 public class LibratoWriterFactoryIT {
-	@Rule public WireMockRule wireMockRule = new WireMockRule(1234);
+	@Rule public WireMockRule wireMockRule = new WireMockRule(0);
 
 	@Test
 	public void metricsAreSentToServer() throws Exception {
@@ -58,11 +55,10 @@ public class LibratoWriterFactoryIT {
 								.withBody("OK")
 								.withStatus(200)));
 
-
 		new LibratoWriterFactory(
 				ImmutableList.<String>of(),
 				true,
-				new URL("http://localhost:1234/endpoint"),
+				new URL("http://localhost:" + wireMockRule.port() + "/endpoint"),
 				100,
 				"username",
 				"token",

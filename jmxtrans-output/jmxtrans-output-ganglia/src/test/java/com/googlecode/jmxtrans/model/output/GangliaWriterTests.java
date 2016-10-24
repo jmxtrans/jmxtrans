@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import com.kaching.platform.testing.AllowDNSResolution;
 import info.ganglia.gmetric4j.gmetric.GMetric;
 import info.ganglia.gmetric4j.gmetric.GMetricSlope;
 import org.junit.Assert;
@@ -41,7 +40,6 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
  * @author Julien Nicoulaud <http://github.com/nicoulaj>
  */
 @Category(RequiresIO.class)
-@AllowDNSResolution
 public class GangliaWriterTests {
 
     /** Test validation when no parameter is set. */

@@ -33,8 +33,6 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.test.ResetableSystemProperty;
-import com.kaching.platform.testing.AllowLocalFileAccess;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +41,6 @@ import org.junit.experimental.categories.Category;
 import javax.annotation.Nullable;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -52,7 +49,6 @@ import static com.google.common.collect.FluentIterable.from;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Category(RequiresIO.class)
-@AllowLocalFileAccess(paths = "*")
 public class JsonUtilsTest {
 
 	private JsonUtils jsonUtils;

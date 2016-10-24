@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.classloader;
 
 import com.googlecode.jmxtrans.test.IntegrationTest;
-import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -34,7 +33,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 @Category(IntegrationTest.class)
-@AllowLocalFileAccess(paths = "*")
 public class ClassLoadingTests {
 
 	@Test(expected = ClassNotFoundException.class)
