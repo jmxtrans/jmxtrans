@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import com.kaching.platform.testing.AllowDNSResolution;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,7 +50,6 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * Tests for {@link OpenTSDBGenericWriter}.
  */
-@AllowDNSResolution
 public class OpenTSDBGenericWriterTests {
 
 	protected Query mockQuery;

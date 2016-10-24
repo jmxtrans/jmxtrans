@@ -22,13 +22,11 @@
  */
 package com.googlecode.jmxtrans.test;
 
-import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.jhades.JHades;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 @Category({ IntegrationTest.class, RequiresIO.class })
-@AllowLocalFileAccess(paths = "*")
 public class JHadesBaseTest {
 
 	@Test

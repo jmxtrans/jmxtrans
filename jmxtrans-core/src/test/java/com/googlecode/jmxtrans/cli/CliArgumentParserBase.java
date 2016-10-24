@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.cli;
 
-import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.apache.commons.cli.ParseException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -40,7 +39,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 
-@AllowLocalFileAccess(paths = "*")
 public abstract class CliArgumentParserBase {
 	@Rule
 	public TemporaryFolder mockConfigurationDirectory = new TemporaryFolder();

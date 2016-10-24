@@ -68,6 +68,7 @@ import java.util.Set;
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
@@ -152,7 +153,7 @@ public class Server implements JmxConnectionProvider {
 
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
 
-	private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
+	@Nonnull private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
 
 	@JsonCreator
@@ -252,7 +253,7 @@ public class Server implements JmxConnectionProvider {
 		else {
 			this.host = host;
 		}
-		this.pool = pool;
+		this.pool = checkNotNull(pool);
 		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
 	}

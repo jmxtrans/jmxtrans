@@ -27,7 +27,6 @@ import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
-import com.kaching.platform.testing.AllowDNSResolution;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +46,6 @@ import static org.mockito.Mockito.verify;
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
-@AllowDNSResolution
 @RunWith(MockitoJUnitRunner.class)
 public class CloudWatchWriterTests {
 

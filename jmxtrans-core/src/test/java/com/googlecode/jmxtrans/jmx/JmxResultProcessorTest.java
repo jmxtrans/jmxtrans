@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.JmxResultProcessor;
 import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.QueryFixtures;
 import com.googlecode.jmxtrans.model.Result;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.FluentIterable.from;
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQueryWithResultAlias;
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,25 +60,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * that this test will fail on some JVMs or that it depends too much on
  * specific platform properties.
  */
-@Ignore("Incompatibility with LessIOSecurityManager")
 public class JmxResultProcessorTest {
 
-	private Query query;
 	private final static String TEST_DOMAIN_NAME = "ObjectDomainName";
-
-	@Before
-	public void initConfiguration() {
-		query = Query.builder()
-				.setResultAlias("resultAlias")
-				.build();
-	}
 
 	@Test
 	public void canCreateBasicResultData() throws MalformedObjectNameException, InstanceNotFoundException {
 		Attribute integerAttribute = new Attribute("StartTime", 51L);
 		ObjectInstance runtime = getRuntime();
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				runtime,
 				ImmutableList.of(integerAttribute),
 				runtime.getClassName(),
@@ -97,7 +90,7 @@ public class JmxResultProcessorTest {
 		String className = "java.lang.SomeClass";
 		String propertiesOutOfOrder = "z-key=z-value,a-key=a-value,k-key=k-value";
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				new ObjectInstance(className + ":" + propertiesOutOfOrder, className),
 				ImmutableList.of(new Attribute("SomeAttribute", 1)),
 				className,
@@ -114,7 +107,7 @@ public class JmxResultProcessorTest {
 		Attribute integerAttribute = new Attribute("CollectionCount", 51L);
 		ObjectInstance runtime = getRuntime();
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				runtime,
 				ImmutableList.of(integerAttribute),
 				runtime.getClassName(),
@@ -138,7 +131,7 @@ public class JmxResultProcessorTest {
 		Attribute booleanAttribute = new Attribute("BootClassPathSupported", true);
 		ObjectInstance runtime = getRuntime();
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				runtime,
 				ImmutableList.of(booleanAttribute),
 				runtime.getClassName(),
@@ -164,7 +157,7 @@ public class JmxResultProcessorTest {
 		AttributeList attr = ManagementFactory.getPlatformMBeanServer().getAttributes(
 				runtime.getObjectName(), new String[]{"SystemProperties"});
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				runtime,
 				attr.asList(),
 				runtime.getClassName(),
@@ -194,7 +187,7 @@ public class JmxResultProcessorTest {
 		AttributeList attr = ManagementFactory.getPlatformMBeanServer().getAttributes(
 				memory.getObjectName(), new String[]{"HeapMemoryUsage"});
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				memory,
 				attr.asList(),
 				memory.getClassName(),
@@ -219,7 +212,7 @@ public class JmxResultProcessorTest {
 		Attribute mapAttribute = new Attribute("map", ImmutableMap.of("key1", "value1", "key2", "value2"));
 
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				new ObjectInstance("java.lang:type=Memory", "java.lang.SomeClass"),
 				ImmutableList.of(mapAttribute),
 				"java.lang.SomeClass",
@@ -238,7 +231,7 @@ public class JmxResultProcessorTest {
 		Attribute mapAttribute = new Attribute("map", ImmutableMap.of(1, "value1", 2, "value2"));
 
 		List<Result> results = new JmxResultProcessor(
-				query,
+				dummyQueryWithResultAlias(),
 				new ObjectInstance("java.lang:type=Memory", "java.lang.SomeClass"),
 				ImmutableList.of(mapAttribute),
 				"java.lang.SomeClass",

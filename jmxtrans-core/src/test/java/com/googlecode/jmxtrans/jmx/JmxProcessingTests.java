@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@Ignore("Incompatibility with LessIOSecurityManager")
+@Ignore("Needs some refactoring")
 public class JmxProcessingTests {
 
 	public static final String MBEAN_NAME = "domain:type=SomeType";

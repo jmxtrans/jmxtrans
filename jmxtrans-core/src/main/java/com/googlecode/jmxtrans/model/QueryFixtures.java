@@ -32,6 +32,13 @@ public final class QueryFixtures {
 				.build();
 	}
 
+	public static Query dummyQueryWithResultAlias() {
+		return Query.builder()
+				.setObj("myQuery:key=val")
+				.setResultAlias("resultAlias")
+				.build();
+	}
+
 	public static Query queryWithAllTypeNames() {
 		return Query.builder()
 				.setObj("myQuery:key=val")

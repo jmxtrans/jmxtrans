@@ -22,11 +22,9 @@
  */
 package com.googlecode.jmxtrans.model.output.support.pool;
 
+import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.test.TCPEchoServer;
-import com.googlecode.jmxtrans.test.IntegrationTest;
-import com.kaching.platform.testing.AllowDNSResolution;
-import com.kaching.platform.testing.AllowNetworkAccess;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import stormpot.Slot;
@@ -43,8 +41,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @Category(RequiresIO.class)
-@AllowDNSResolution
-@AllowNetworkAccess(endpoints = "127.0.0.1:*")
 public class SocketAllocatorTest {
 
 	@Category(IntegrationTest.class)

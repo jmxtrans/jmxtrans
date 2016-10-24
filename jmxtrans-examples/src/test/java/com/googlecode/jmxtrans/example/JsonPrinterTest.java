@@ -26,11 +26,13 @@ import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class JsonPrinterTest {
@@ -45,7 +47,7 @@ public class JsonPrinterTest {
 			new JsonPrinter(out).print(standardProcess());
 			String result = new String(baos.toByteArray());
 
-			assertThat(result).contains("\"url\":\"service:jmx:rmi:///jndi/rmi://example.org:123/jmxrmi\"");
+			assertThat(result).contains("\"url\":\"service:jmx:rmi:///jndi/rmi://host.example.net:4321/jmxrmi\"");
 		} catch (Throwable t) {
 			throw closer.rethrow(t);
 		} finally {
@@ -63,7 +65,7 @@ public class JsonPrinterTest {
 			new JsonPrinter(out).prettyPrint(standardProcess());
 			String result = new String(baos.toByteArray());
 
-			assertThat(result).contains("\"url\" : \"service:jmx:rmi:///jndi/rmi://example.org:123/jmxrmi\"");
+			assertThat(result).contains("\"url\" : \"service:jmx:rmi:///jndi/rmi://host.example.net:4321/jmxrmi\"");
 		} catch (Throwable t) {
 			throw closer.rethrow(t);
 		} finally {
@@ -72,15 +74,7 @@ public class JsonPrinterTest {
 	}
 
 	private JmxProcess standardProcess() {
-		Server server = Server.builder()
-				.setAlias("alias")
-				.setHost("example.org")
-				.setPort("123")
-				.addQuery(Query.builder()
-					.setObj("obj:key=val")
-					.build())
-				.build();
-		return new JmxProcess(server);
+		return new JmxProcess(dummyServer());
 	}
 
 }

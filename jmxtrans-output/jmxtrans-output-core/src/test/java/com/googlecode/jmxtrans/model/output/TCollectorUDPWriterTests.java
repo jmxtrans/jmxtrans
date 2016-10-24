@@ -56,7 +56,6 @@ import static org.mockito.Matchers.eq;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TCollectorUDPWriter.class, DatagramSocket.class})
-@Ignore("Incompatible with LessIOSecurityManager, investigation required")
 public class TCollectorUDPWriterTests {
 	protected TCollectorUDPWriter writer;
 	protected Query mockQuery;
