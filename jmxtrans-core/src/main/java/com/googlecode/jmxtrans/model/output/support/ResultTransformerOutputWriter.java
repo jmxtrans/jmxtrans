@@ -69,11 +69,8 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 	}
 
 	public void stop() throws LifecycleException {
-		try {
-			target.stop();
-		} catch (LifecycleException ex) {
-			throw(ex);
-		}
+		target.stop();
+
 	}
 
 }
