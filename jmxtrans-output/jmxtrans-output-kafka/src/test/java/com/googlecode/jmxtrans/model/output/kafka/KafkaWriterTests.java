@@ -64,7 +64,7 @@ public class KafkaWriterTests {
 
 		assertThat(message.topic()).isEqualTo("myTopic");
 		assertThat(message.message())
-				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount\"")
+				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
 				.contains("\"value\":\"10\"")
 				.contains("\"timestamp\":0")
 				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
