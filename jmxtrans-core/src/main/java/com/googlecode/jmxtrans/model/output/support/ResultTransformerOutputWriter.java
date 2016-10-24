@@ -31,6 +31,8 @@ import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
 import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
@@ -70,11 +72,11 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 		return new ResultTransformerOutputWriter<>(new ResultValuesTransformer(new IdentityValueTransformer()), target);
 	}
 
-	public void stop() {
+	public void stop() throws LifecycleException {
 		try {
 			target.stop();
 		} catch (LifecycleException ex) {
-			logger.debug("error stopping writer");
+			throw(ex);
 		}
 	}
 
