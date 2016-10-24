@@ -60,7 +60,7 @@ public class StatsDWriterFactoryIT {
 		statsDWriter.close();
 
 		await().atMost(200, MILLISECONDS)
-				.until(messageReceived("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:10|c\n"));
+				.until(messageReceived("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:10|c\n"));
 	}
 
 	private Callable<Boolean> messageReceived(final String message) {
