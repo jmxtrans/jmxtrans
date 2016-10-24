@@ -175,7 +175,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void stop() throws LifecycleException {
+	public void close() throws LifecycleException {
 		this.shutdownSender();
 	}
 

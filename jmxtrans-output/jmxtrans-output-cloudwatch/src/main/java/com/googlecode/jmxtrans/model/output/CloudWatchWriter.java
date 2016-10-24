@@ -34,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
@@ -165,6 +166,10 @@ public class CloudWatchWriter implements OutputWriterFactory {
 			return metricDatum;
 		}
 
+		@Override
+		public void close() throws LifecycleException {
+			cloudWatchClient.shutdown();
+		}
 	}
 
 }

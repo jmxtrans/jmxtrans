@@ -51,7 +51,7 @@ public class UdpOutputWriterBuilderIT {
 				.build();
 
 		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
-		outputWriter.stop();
+		outputWriter.close();
 
 		await().atMost(200, MILLISECONDS).until(messageReceived("message"));
 	}

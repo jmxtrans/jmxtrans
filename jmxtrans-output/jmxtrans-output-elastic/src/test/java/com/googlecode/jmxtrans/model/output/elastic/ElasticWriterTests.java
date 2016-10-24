@@ -28,7 +28,6 @@ import com.google.gson.Gson;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ServerFixtures;
 import io.searchbox.action.Action;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
@@ -104,7 +103,7 @@ public class ElasticWriterTests {
 
         writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
 
-        writer.stop();
+        writer.close();
 
         Mockito.verify(mockClient, times(4)).execute(Matchers.<Action<JestResult>>any());
 

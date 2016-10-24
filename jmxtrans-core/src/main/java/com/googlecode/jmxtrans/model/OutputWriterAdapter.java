@@ -41,7 +41,7 @@ public abstract class OutputWriterAdapter implements OutputWriter {
 	public void start() throws LifecycleException {}
 
 	@Override
-	public void stop() throws LifecycleException {}
+	public void close() throws LifecycleException {}
 
 	@Override
 	public Map<String, Object> getSettings() {
