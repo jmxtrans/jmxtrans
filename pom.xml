@@ -137,7 +137,6 @@
 			increase this number if you have a reason. The goal is not to be
 			dogmatic, but to provide consistency in the code.
 		-->
-		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
 		<!-- some versions used by multiple dependencies -->
 		<jackson.version>2.7.4</jackson.version>
@@ -628,36 +627,6 @@
 					</executions>
 				</plugin>
 				<plugin>
-					<groupId>com.mycila</groupId>
-					<artifactId>license-maven-plugin</artifactId>
-					<version>3.0.rc1</version>
-					<configuration>
-						<header>com/mycila/maven/plugin/license/templates/MIT.txt</header>
-						<strictCheck>true</strictCheck>
-						<properties>
-							<year>2015</year>
-							<owner>${project.organization.name}</owner>
-						</properties>
-						<excludes>
-							<exclude>.gitignore</exclude>
-							<exclude>.idea/**</exclude>
-							<exclude>README.md</exclude>
-							<exclude>target/**</exclude>
-							<exclude>**/pitest-history.xml</exclude>
-							<exclude>*.bak</exclude>
-							<exclude>.puml</exclude>
-						</excludes>
-					</configuration>
-					<executions>
-						<execution>
-							<id>license-check</id>
-							<goals>
-								<goal>check</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
 					<groupId>de.is24.mavenplugins</groupId>
 					<artifactId>deadcode4j-maven-plugin</artifactId>
 					<version>2.1.0</version>
@@ -712,38 +681,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<version>2.6</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.17</version>
-					<configuration>
-						<configLocation>src/etc/checkstyle.xml</configLocation>
-						<consoleOutput>true</consoleOutput>
-						<maxAllowedViolations>${checkstyle.max.allowed.violations}</maxAllowedViolations>
-					</configuration>
-					<dependencies>
-						<!-- to workaround https://github.com/jcgay/maven-color/issues/8 -->
-						<dependency>
-							<groupId>org.slf4j</groupId>
-							<artifactId>jcl-over-slf4j</artifactId>
-							<version>${slf4j.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.slf4j</groupId>
-							<artifactId>slf4j-jdk14</artifactId>
-							<version>${slf4j.version}</version>
-						</dependency>
-					</dependencies>
-					<executions>
-						<execution>
-							<id>checkstyle-check</id>
-							<goals>
-								<goal>check</goal>
-							</goals>
-							<phase>verify</phase>
-						</execution>
-					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -980,38 +917,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.7</version>
-					<configuration>
-						<aggregate>true</aggregate>
-						<check>
-							<branchRate>0</branchRate>
-							<lineRate>0</lineRate>
-							<packageBranchRate>0</packageBranchRate>
-							<packageLineRate>0</packageLineRate>
-							<totalBranchRate>${verify.totalBranchRate}</totalBranchRate>
-							<totalLineRate>${verify.totalLineRate}</totalLineRate>
-						</check>
-					</configuration>
-					<executions>
-						<execution>
-							<id>cobertura-clean</id>
-							<goals>
-								<goal>clean</goal>
-							</goals>
-							<phase>clean</phase>
-						</execution>
-						<execution>
-							<id>cobertura-check</id>
-							<goals>
-								<goal>check</goal>
-							</goals>
-							<phase>verify</phase>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
 					<version>3.0.3</version>
 					<configuration>
@@ -1084,14 +989,6 @@
 				<artifactId>sortpom-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
@@ -1121,10 +1018,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
@@ -1136,14 +1029,6 @@
 
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.17</version>
-				<configuration>
-					<configLocation>src/etc/checkstyle.xml</configLocation>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -1194,19 +1079,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>2.19.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.7</version>
-				<inherited>true</inherited>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>cobertura</report>
-						</reports>
-					</reportSet>
-				</reportSets>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

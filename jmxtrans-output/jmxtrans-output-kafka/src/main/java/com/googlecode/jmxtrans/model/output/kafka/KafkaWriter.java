@@ -1,17 +1,17 @@
 /**
  * The MIT License
  * Copyright © 2010 JmxTrans team
- *
+ * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p/>
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,8 +24,6 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -36,22 +34,14 @@ import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.Settings;
 import kafka.javaapi.producer.Producer;
-import kafka.producer.KeyedMessage;
-import kafka.producer.ProducerConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.kafka.clients.producer.KafkaProducer;
+
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
-import static com.fasterxml.jackson.core.JsonEncoding.UTF8;
-import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;
-import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static java.util.Arrays.asList;
 
 /**
@@ -66,94 +56,85 @@ import static java.util.Arrays.asList;
 @NotThreadSafe
 public class KafkaWriter extends BaseOutputWriter {
 
-	private static final Logger log = LoggerFactory.getLogger(KafkaWriter.class);
+    private static final String DEFAULT_ROOT_PREFIX = "servers";
+    private static final String DEFAULT_FORMATTER = DefaultMessageFormatter.class.getName();
+    public static final String TYPE_NAMES_KEY = "typeNames";
+    public static final String ROOT_PREFIX_KEY = "rootPrefix";
+    public static final String TAGS_KEY = "tags";
+    public static final String TOPICS_KEY = "topics";
+    private final KafkaMessageFormatter formatter;
 
-	private static final String DEFAULT_ROOT_PREFIX = "servers";
-	private final JsonFactory jsonFactory;
+    private final Iterable<String> topics;
+    private final String rootPrefix;
+    private final ImmutableMap<String, String> tags;
 
-	private Producer<String,String> producer;
-	private final Iterable<String> topics;
-	private final String rootPrefix;
-	private final ImmutableMap<String, String> tags;
+    @JsonCreator
+    public KafkaWriter(
+            @JsonProperty("typeNames") ImmutableList<String> typeNames,
+            @JsonProperty("booleanAsNumber") boolean booleanAsNumber,
+            @JsonProperty("rootPrefix") String rootPrefix,
+            @JsonProperty("debug") Boolean debugEnabled,
+            @JsonProperty("topics") String topics,
+            @JsonProperty("tags") Map<String, String> tags,
+            @JsonProperty("formatter") String formatter,
+            @JsonProperty("settings") Map<String, Object> settings
+    ) {
+        super(typeNames, booleanAsNumber, debugEnabled, settings);
+        this.rootPrefix = firstNonNull(
+                rootPrefix,
+                (String) getSettings().get("rootPrefix"),
+                DEFAULT_ROOT_PREFIX);
+        this.tags = ImmutableMap.copyOf(firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of()));
+        this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
+        // Setting all the required Kafka Properties
+        Properties kafkaProperties = new Properties();
+        kafkaProperties.put("acks", "all");
+        kafkaProperties.put("retries", 0);
+        kafkaProperties.put("batch.size", 16384);
+        kafkaProperties.put("linger.ms", 1);
+        kafkaProperties.put("buffer.memory", 33554432);
+        kafkaProperties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        kafkaProperties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        for (Map.Entry<String, Object> stringObjectEntry : settings.entrySet()) {
+            kafkaProperties.put(stringObjectEntry.getKey(), stringObjectEntry.getValue());
+        }
 
-	@JsonCreator
-	public KafkaWriter(
-			@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
-			@JsonProperty("rootPrefix") String rootPrefix,
-			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("topics") String topics,
-			@JsonProperty("tags") Map<String, String> tags,
-			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.rootPrefix = firstNonNull(
-						rootPrefix,
-						(String) getSettings().get("rootPrefix"),
-						DEFAULT_ROOT_PREFIX);
-		// Setting all the required Kafka Properties
-		Properties kafkaProperties =  new Properties();
-		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));
-		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
-		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
-		this.producer= new Producer<>(new ProducerConfig(kafkaProperties));
-		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
-		this.tags = ImmutableMap.copyOf(firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of()));
-		jsonFactory = new JsonFactory();
-	}
+        Map<String, Object> formatterProperties = new HashMap<>();
+        formatterProperties.put(TYPE_NAMES_KEY, this.getTypeNames());
+        formatterProperties.put(ROOT_PREFIX_KEY, this.rootPrefix);
+        formatterProperties.put(TAGS_KEY, this.tags);
+        formatterProperties.put(TOPICS_KEY, this.topics);
 
-	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {}
+        KafkaProducer<String, String> producer;
 
-	@Override
-	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		List<String> typeNames = this.getTypeNames();
 
-		for (Result result : results) {
-			log.debug("Query result: [{}]", result);
-			Map<String, Object> resultValues = result.getValues();
-			for (Entry<String, Object> values : resultValues.entrySet()) {
-				Object value = values.getValue();
-				if (isNumeric(value)) {
-					String message = createJsonMessage(server, query, typeNames, result, values, value);
-					for(String topic : this.topics) {
-						log.debug("Topic: [{}] ; Kafka Message: [{}]", topic, message);
-						producer.send(new KeyedMessage<String, String>(topic, message));
-					}
-				} else {
-					log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
-				}
-			}
-		}
-	}
+        this.formatter = instanciateFormatter(formatter != null ? formatter : DEFAULT_FORMATTER, new KafkaProducer<String, String>(kafkaProperties), formatterProperties);
+    }
 
-	private String createJsonMessage(Server server, Query query, List<String> typeNames, Result result, Entry<String, Object> values, Object value) throws IOException {
-		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
-		String cleanKeyString = keyString.replaceAll("[()]", "_");
+    private KafkaMessageFormatter instanciateFormatter(String formatterClass, KafkaProducer<String, String> producer, Map<String, Object> formatterProperties) {
+        try {
+            Class<?> clazz = Class.forName(formatterClass);
+            Constructor<?> constructor = clazz.getConstructor(KafkaProducer.class, Map.class);
+            return (KafkaMessageFormatter) constructor.newInstance(producer, formatterProperties);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Unkown formatter class : " + formatterClass);
+        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            throw new KafkaMessageFormatterException("Unable to instanciate formatter", e);
+        }
+    }
 
-		try (
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			JsonGenerator generator = jsonFactory.createGenerator(out, UTF8)
-		){
-			generator.writeStartObject();
-			generator.writeStringField("keyspace", cleanKeyString);
-			generator.writeStringField("value", value.toString());
-			generator.writeNumberField("timestamp", result.getEpoch() / 1000);
-			generator.writeObjectFieldStart("tags");
+    @Override
+    public void validateSetup(Server server, Query query) throws ValidationException {
+    }
 
-			for (Entry<String, String> tag : this.tags.entrySet()) {
-				generator.writeStringField(tag.getKey(), tag.getValue());
-			}
+    @VisibleForTesting
+    void setProducer(KafkaProducer<String, String> producer) {
+        this.formatter.setProducer(producer);
+    }
 
-			generator.writeEndObject();
-			generator.writeEndObject();
-			generator.close();
-			return out.toString("UTF-8");
-		}
-	}
-
-	@VisibleForTesting
-	void setProducer(Producer<String, String> producer) {
-		this.producer = producer;
-	}
+    @Override
+    protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
+        formatter.write(server, query, results);
+    }
 
 }

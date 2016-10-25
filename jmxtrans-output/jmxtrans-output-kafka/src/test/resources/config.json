@@ -1,21 +1,18 @@
 {
    "servers" : [ {
-      "host" : "9999",
-      "port" : "localhost",
+      "host" : "localhost",
+      "port" : "9999",
       "queries" : [ {
          "outputWriters" : [ {
             "@class" : "com.googlecode.jmxtrans.model.output.kafka.KafkaWriter",
-            "typeNames" : [ "name" ],
             "booleanAsNumber" : false,
             "rootPrefix" : "myPrefix",
             "debug" : true,
-            "topics" : "topic",
+            "formatter": "com.googlecode.jmxtrans.model.output.kafka.DefaultMessageFormatter",
             "tags" : {
             } ,
             "settings" : {
-               "zk.connect" : "zookeeperHost:2181",
-               "metadata.broker.list" : "kafkaBrokerHost:9092",
-               "serializer.class" : "kafka.serializer.StringEncoder",
+               "bootstrap.servers": "kafkaBrokerHost:9092",
                "topics" : "myTopic"
             }
          } ],
