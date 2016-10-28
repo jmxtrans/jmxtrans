@@ -71,7 +71,7 @@ public class LibratoWriterFactoryIT {
 				postRequestedFor(urlEqualTo("/endpoint"))
 						.withHeader("User-Agent", containing("jmxtrans"))
 						.withHeader("Authorization", containing("Basic"))
-						.withRequestBody(matchingJsonPath("$.gauges[?(@.name == 'ObjectPendingFinalizationCount.ObjectPendingFinalizationCount')]")));
+						.withRequestBody(matchingJsonPath("$.gauges[?(@.name == 'MemoryAlias.ObjectPendingFinalizationCount')]")));
 
 	}
 }

@@ -51,7 +51,7 @@ public class LibratoWriter2Test {
 		assertThatJson(json)
 				.node("gauges").isArray().ofLength(1);
 		assertThatJson(json)
-				.node("gauges[0].name").isEqualTo("ObjectPendingFinalizationCount.ObjectPendingFinalizationCount")
+				.node("gauges[0].name").isEqualTo("MemoryAlias.ObjectPendingFinalizationCount")
 				.node("gauges[0].source").isEqualTo("host_example_net")
 				.node("gauges[0].measure_time").isEqualTo(0)
 				.node("gauges[0].value").isEqualTo(10);

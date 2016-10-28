@@ -117,21 +117,21 @@ public class GraphiteWriterTests {
 	public void writeSingleResult() throws Exception {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), dummyQuery(), numericResult()))
-				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10");
+				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10");
 	}
 
 	@Test
 	public void useObjDomainWorks() throws Exception {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), queryUsingDomainAsKey(), numericResult()))
-				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0");
+				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0");
 	}
 	
 	@Test
 	public void allowDottedWorks() throws Exception {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), numericResult()))
-				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0");
+				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0");
 	}
 
 	@Test

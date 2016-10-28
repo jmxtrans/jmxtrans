@@ -38,14 +38,17 @@ public final class ServerFixtures {
 	private ServerFixtures() {}
 
 	public static Server createServerWithOneQuery(String host, String port, String queryObject) {
+		return getBuilder(host, port, queryObject).build();
+	}
+
+	private static Server.Builder getBuilder(String host, String port, String queryObject) {
 		return Server.builder()
 				.setHost(host)
 				.setPort(port)
 				.setPool(createPool())
 				.addQuery(Query.builder()
 					.setObj(queryObject)
-					.build())
-				.build();
+					.build());
 	}
 
 	public static Server serverWithNoQuery() {
@@ -67,6 +70,10 @@ public final class ServerFixtures {
 
 	public static Server dummyServer() {
 		return createServerWithOneQuery(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_QUERY);
+	}
+
+	public static Server.Builder dummyServerBuilder() {
+		return getBuilder(DEFAULT_HOST, DEFAULT_PORT, "myQuery:key=val");
 	}
 
 	public static Server localServer() {

@@ -55,14 +55,39 @@ public final class ResultFixtures {
 	}
 
 	public static Result numericResult() {
+		return numericResult(10);
+	}
+	public static Result numericResult(Object numericValue) {
 		return new Result(
 				0,
 				"ObjectPendingFinalizationCount",
 				"sun.management.MemoryImpl",
 				"ObjectDomainName",
-				"ObjectPendingFinalizationCount",
+				"MemoryAlias",
 				"type=Memory",
-				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", 10));
+				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", numericValue));
+	}
+
+	public static Result stringResult() {
+		return new Result(
+				0,
+				"NonHeapMemoryUsage",
+				"sun.management.MemoryImpl",
+				"ObjectDomainName",
+				"MemoryAlias",
+				"type=Memory",
+				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", "value is a string"));
+	}
+
+	public static Result hashResult() {
+		return new Result(
+				0,
+				"NonHeapMemoryUsage",
+				"sun.management.MemoryImpl",
+				"ObjectDomainName",
+				"MemoryAlias",
+				"type=Memory",
+				ImmutableMap.<String, Object>of("committed", 12345, "init", 23456, "max", -1, "used", 45678));
 	}
 
 	public static Result numericBelowCPrecisionResult() {
@@ -71,7 +96,7 @@ public final class ResultFixtures {
 				"ObjectPendingFinalizationCount",
 				"sun.management.MemoryImpl",
 				"ObjectDomainName",
-				"ObjectPendingFinalizationCount",
+				"MemoryAlias",
 				"type=Memory",
 				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", Double.MIN_VALUE));
 	}
