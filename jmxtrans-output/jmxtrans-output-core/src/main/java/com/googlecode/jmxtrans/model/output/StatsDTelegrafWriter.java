@@ -22,8 +22,10 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
@@ -51,14 +53,14 @@ public class StatsDTelegrafWriter implements WriterBasedOutputWriter {
 	@Nonnull
 	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
 	@Nonnull
-	private final String[] bucketTypes;
+	private final ImmutableList<String> bucketTypes;
 	@Nonnull
 	private final ImmutableMap<String, String> tags;
 	@Nonnull
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	public StatsDTelegrafWriter(String[] bucketTypes, ImmutableMap<String, String> tags, ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags) {
-		this.bucketTypes = bucketTypes;
+		this.bucketTypes = ImmutableList.copyOf(bucketTypes);
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 	}
@@ -116,10 +118,10 @@ public class StatsDTelegrafWriter implements WriterBasedOutputWriter {
 	}
 
 	private String getBucketType(int resultIndex) {
-		if( this.bucketTypes.length > resultIndex ){
-			return bucketTypes[resultIndex];
+		if( this.bucketTypes.size() > resultIndex ){
+			return bucketTypes.get(resultIndex);
 		}
-		return bucketTypes[bucketTypes.length - 1];
+		return Iterables.getLast(bucketTypes);
 	}
 
 	private boolean isNotValidValue(Object value) {
