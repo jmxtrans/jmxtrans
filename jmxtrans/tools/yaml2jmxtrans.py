@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # The MIT License
 # Copyright © 2010 JmxTrans team
@@ -22,7 +23,6 @@
 # THE SOFTWARE.
 #
 
-# -*- coding: latin-1 -*-
 # vim:ai:expandtab:ts=4 sw=4
 
 # yaml2jmxtrans.py: Generate jmxtrans config from YAML format
