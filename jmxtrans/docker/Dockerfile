@@ -1,4 +1,4 @@
-FROM java:8u102-jdk
+FROM openjdk:8u102-jdk
 
 MAINTAINER Nicolas Muller <n.muller@treeptik.fr>
 
