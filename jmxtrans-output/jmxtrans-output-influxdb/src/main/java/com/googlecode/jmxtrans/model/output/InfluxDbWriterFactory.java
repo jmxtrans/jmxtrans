@@ -50,11 +50,11 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 
 	/**
 	 * The deault <a href=
-	 * "https://influxdb.com/docs/v0.9/concepts/key_concepts.html#retention-policy">
+	 * "https://influxdb.com/docs/v1.0/concepts/key_concepts.html#retention-policy">
 	 * The retention policy</a> for each measuremen where no retentionPolicy
 	 * setting is provided in the json config
 	 */
-	private static final String DEFAULT_RETENTION_POLICY = "default";
+	private static final String DEFAULT_RETENTION_POLICY = "autogen";
 
 	private final String database;
 	private final InfluxDB.ConsistencyLevel writeConsistency;
