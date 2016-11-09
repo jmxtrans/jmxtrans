@@ -22,7 +22,9 @@
  */
 package com.googlecode.jmxtrans.connections;
 
-import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
+import org.apache.commons.pool2.BaseKeyedPooledObjectFactory;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
 
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
@@ -30,31 +32,28 @@ import java.net.SocketAddress;
 /**
  * Allows us to pool socket connections.
  */
-public class DatagramSocketFactory extends BaseKeyedPoolableObjectFactory<SocketAddress, DatagramSocket> {
+public class DatagramSocketFactory extends BaseKeyedPooledObjectFactory<SocketAddress, DatagramSocket> {
 
-	/**
-	 * Creates the socket and the writer to go with it.
-	 */
 	@Override
-	public DatagramSocket makeObject(SocketAddress socketAddress) throws Exception {
+	public DatagramSocket create(SocketAddress socketAddress) throws Exception {
 		DatagramSocket datagramSocket = new DatagramSocket();
 		datagramSocket.connect(socketAddress);
 		return datagramSocket;
 	}
 
-	/**
-	 * Closes the socket.
-	 */
 	@Override
-	public void destroyObject(SocketAddress key, DatagramSocket socket) throws Exception {
-		socket.close();
+	public PooledObject<DatagramSocket> wrap(DatagramSocket socket) {
+		return new DefaultPooledObject<>(socket);
 	}
 
-	/**
-	 * Validates that the socket is good.
-	 */
 	@Override
-	public boolean validateObject(SocketAddress key, DatagramSocket socket) {
+	public boolean validateObject(SocketAddress key, PooledObject<DatagramSocket> p) {
+		DatagramSocket socket = p.getObject();
 		return socket.isBound() && !socket.isClosed() && socket.isConnected();
+	}
+
+	@Override
+	public void destroyObject(SocketAddress key, PooledObject<DatagramSocket> p) throws Exception {
+		p.getObject().close();
 	}
 }

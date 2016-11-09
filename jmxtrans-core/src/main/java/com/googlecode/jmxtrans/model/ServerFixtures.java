@@ -25,8 +25,8 @@ package com.googlecode.jmxtrans.model;
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
-import org.apache.commons.pool.KeyedObjectPool;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool2.KeyedObjectPool;
+import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 
 public final class ServerFixtures {
 

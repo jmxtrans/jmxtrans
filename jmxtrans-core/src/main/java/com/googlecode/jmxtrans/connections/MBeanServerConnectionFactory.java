@@ -22,16 +22,16 @@
  */
 package com.googlecode.jmxtrans.connections;
 
-import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
-import javax.annotation.Nonnull;
+import org.apache.commons.pool2.BaseKeyedPooledObjectFactory;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+
 import javax.management.remote.JMXConnector;
-import java.io.IOException;
 
-public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<JmxConnectionProvider, JMXConnection> {
+public class MBeanServerConnectionFactory extends BaseKeyedPooledObjectFactory<JmxConnectionProvider, JMXConnection> {
 	@Override
-	@Nonnull
-	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws IOException {
+	public JMXConnection create(JmxConnectionProvider server) throws Exception {
 		if (server.isLocal()) {
 			return new JMXConnection(null, server.getLocalMBeanServer());
 		} else {
@@ -41,7 +41,12 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 	}
 
 	@Override
-	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection obj) throws IOException {
-		obj.close();
+	public PooledObject<JMXConnection> wrap(JMXConnection value) {
+		return new DefaultPooledObject<>(value);
+	}
+
+	@Override
+	public void destroyObject(JmxConnectionProvider key, PooledObject<JMXConnection> p) throws Exception {
+		p.getObject().close();
 	}
 }

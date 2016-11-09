@@ -39,10 +39,10 @@ import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
 import com.googlecode.jmxtrans.connections.SocketFactory;
-import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
-import org.apache.commons.pool.KeyedObjectPool;
-import org.apache.commons.pool.KeyedPoolableObjectFactory;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool2.KeyedObjectPool;
+import org.apache.commons.pool2.KeyedPooledObjectFactory;
+import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool2.impl.GenericKeyedObjectPoolMXBean;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.management.ObjectName;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -145,21 +146,19 @@ public class JmxTransModule extends AbstractModule {
 				.build();
 	}
 
-	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName) {
+	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPooledObjectFactory<K, V> factory, String poolName) {
 		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<>(factory);
 		pool.setTestOnBorrow(true);
-		pool.setMaxActive(-1);
-		pool.setMaxIdle(-1);
+		pool.setMaxIdlePerKey(-1);
+		pool.setMaxTotalPerKey(-1);
 		pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
 		pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
 
 		try {
-			ManagedGenericKeyedObjectPool mbean =
-					new ManagedGenericKeyedObjectPool(
-							pool,
-							poolName);
+			GenericKeyedObjectPoolMXBean mbean = pool;
+			ObjectName objectName = new ObjectName("com.googlecode.jmxtrans:Type=GenericKeyedObjectPool,PoolName=" + poolName + ",Name=" + pool.getClass().getSimpleName() + "@" + pool.hashCode());
 			ManagementFactory.getPlatformMBeanServer()
-					.registerMBean(mbean, mbean.getObjectName());
+					.registerMBean(mbean, objectName);
 		} catch (Exception e) {
 			log.error("Could not register mbean for pool [{}]", poolName, e);
 		}

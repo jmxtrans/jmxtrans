@@ -44,7 +44,7 @@ public class DatagramSocketFactoryTest {
 
 		InetSocketAddress socketAddress = new InetSocketAddress(Inet4Address.getLocalHost(), PORT);
 
-		DatagramSocket socketObject = socketFactory.makeObject(socketAddress);
+		DatagramSocket socketObject = socketFactory.makeObject(socketAddress).getObject();
 
 		// Test if the remote address/port is the correct one.
 		assertThat(socketObject.getPort()).isEqualTo(PORT);

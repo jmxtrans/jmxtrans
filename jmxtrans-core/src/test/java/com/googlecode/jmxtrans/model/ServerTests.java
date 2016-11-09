@@ -25,7 +25,7 @@ package com.googlecode.jmxtrans.model;
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool2.KeyedObjectPool;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -227,7 +227,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingOk() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(KeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")
@@ -258,7 +258,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingSkippedOnError_andConnectionIsClosed() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(KeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")
@@ -299,7 +299,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingSkippedOnError_andErrorClosingConnectionIsIgnored() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(KeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")
