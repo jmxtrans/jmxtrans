@@ -29,7 +29,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>260</version>
+		<version>261-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-docker-test</artifactId>
@@ -57,7 +57,7 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<configuration>
 					<showLogs>true</showLogs>
-					<images></images>
+					<images />
 				</configuration>
 				<executions>
 					<execution>
