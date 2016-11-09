@@ -29,8 +29,6 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.util.JsonUtils;
-import com.kaching.platform.testing.AllowDNSResolution;
-import com.kaching.platform.testing.AllowLocalFileAccess;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -57,8 +55,6 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
-@AllowDNSResolution
-@AllowLocalFileAccess(paths = "*")
 @Category({RequiresIO.class, IntegrationTest.class})
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")

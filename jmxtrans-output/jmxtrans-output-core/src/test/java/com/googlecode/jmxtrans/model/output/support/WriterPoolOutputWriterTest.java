@@ -48,13 +48,10 @@ import stormpot.Timeout;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.concurrent.Callable;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
-import static com.jayway.awaitility.Awaitility.await;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -89,6 +86,20 @@ public class WriterPoolOutputWriterTest {
 		assertThat(writerCaptor.getValue()).isSameAs(writer);
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void claimTimeout() throws Exception {
+		Timeout sleepTime = new Timeout(10, SECONDS);
+		Timeout claimTime = new Timeout(1, SECONDS);
+
+		Config<WriterPoolable> config = new Config<WriterPoolable>()
+			.setAllocator(new TimeoutAllocator(sleepTime));
+		pool = new BlazePool<>(config);
+
+		WriterPoolOutputWriter<WriterBasedOutputWriter> outputWriter = new WriterPoolOutputWriter<>(target, pool, claimTime);
+
+		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
+	}
+
 	@Test(expected = IOException.class)
 	@Category(IntegrationTest.class)
 	public void poolableIsReleasedOnIOException() throws Exception {
@@ -111,6 +122,31 @@ public class WriterPoolOutputWriterTest {
 		@Override
 		public void deallocate(WriterPoolable poolable) throws Exception {
 			poolable.release();
+		}
+	}
+
+	private class TimeoutAllocator implements Allocator<WriterPoolable> {
+
+		private Timeout timeout;
+
+		public TimeoutAllocator(Timeout timeout) {
+			this.timeout = timeout;
+		}
+
+		@Override
+		public WriterPoolable allocate(Slot slot) throws Exception {
+			try {
+				Thread.sleep(timeout.getUnit().toMillis(timeout.getTimeout()));
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+
+			return new SocketPoolable(slot, null, writer, new NeverFlush());
+		}
+
+		@Override
+		public void deallocate(WriterPoolable poolable) throws Exception {
+
 		}
 	}
 }

@@ -28,6 +28,8 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.support.pool.WriterPoolable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import stormpot.LifecycledPool;
 import stormpot.Timeout;
 
@@ -35,6 +37,8 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends OutputWriterAdapter{
+
+	private static final Logger logger = LoggerFactory.getLogger(WriterPoolOutputWriter.class);
 
 	@Nonnull private final T target;
 	@Nonnull private final LifecycledPool<? extends WriterPoolable> writerPool;
@@ -48,24 +52,38 @@ public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends O
 
 	@Override
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
+		WriterPoolable writerPoolable = claimWriter();
 		try {
-			WriterPoolable writerPoolable = writerPool.claim(poolClaimTimeout);
-			try {
-				target.write(writerPoolable.getWriter(), server, query, results);
-			} catch (IOException ioe) {
-				writerPoolable.invalidate();
-				throw ioe;
-			} finally {
-				writerPoolable.release();
-			}
-		} catch (InterruptedException e) {
-			throw new IllegalStateException("Could not get writer from pool, please check if the server is available");
+			target.write(writerPoolable.getWriter(), server, query, results);
+		} catch (IOException ioe) {
+			writerPoolable.invalidate();
+			throw ioe;
+		} finally {
+			writerPoolable.release();
 		}
+
 	}
 
 	@Override
-	public void stop() throws LifecycleException {
+	public void close() throws LifecycleException {
 		writerPool.shutdown();
+	}
+
+	private WriterPoolable claimWriter() {
+		WriterPoolable result = null;
+
+		try {
+			result = writerPool.claim(poolClaimTimeout);
+		} catch (InterruptedException ex) {
+			logger.error("Interrupted while attempting to claim writer from pool", ex);
+			Thread.currentThread().interrupt();
+		}
+
+		if (result == null) {
+			throw new IllegalStateException("Could not get writer from pool, please check if the server is available");
+		}
+
+		return result;
 	}
 
 }

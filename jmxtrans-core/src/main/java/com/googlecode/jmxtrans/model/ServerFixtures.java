@@ -22,39 +22,71 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
+import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
+import org.apache.commons.pool.KeyedObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+
 public final class ServerFixtures {
 
 	public static final String DEFAULT_HOST = "host.example.net";
 	public static final String DEFAULT_PORT = "4321";
+	public static final String SERVER_ALIAS = "myAlias";
+	public static final String DEFAULT_QUERY = "myQuery:key=val";
 
 	private ServerFixtures() {}
 
 	public static Server createServerWithOneQuery(String host, String port, String queryObject) {
+		return getBuilder(host, port, queryObject).build();
+	}
+
+	private static Server.Builder getBuilder(String host, String port, String queryObject) {
 		return Server.builder()
 				.setHost(host)
 				.setPort(port)
+				.setPool(createPool())
 				.addQuery(Query.builder()
 					.setObj(queryObject)
-					.build())
-				.build();
+					.build());
 	}
 
 	public static Server serverWithNoQuery() {
 		return Server.builder()
 				.setHost(DEFAULT_HOST)
 				.setPort(DEFAULT_PORT)
+				.setPool(createPool())
+				.build();
+	}
+
+	public static Server serverWithAliasAndNoQuery() {
+		return Server.builder()
+				.setHost(DEFAULT_HOST)
+				.setPort(DEFAULT_PORT)
+				.setAlias(SERVER_ALIAS)
+				.setPool(createPool())
 				.build();
 	}
 
 	public static Server dummyServer() {
-		return createServerWithOneQuery(DEFAULT_HOST, DEFAULT_PORT, "myQuery:key=val");
+		return createServerWithOneQuery(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_QUERY);
+	}
+
+	public static Server.Builder dummyServerBuilder() {
+		return getBuilder(DEFAULT_HOST, DEFAULT_PORT, "myQuery:key=val");
 	}
 
 	public static Server localServer() {
 		return Server.builder()
-				.setHost("host.example.net")
-				.setPort("4321")
+				.setHost(DEFAULT_HOST)
+				.setPort(DEFAULT_PORT)
 				.setLocal(true)
+				.setPool(createPool())
 				.build();
 	}
+
+	public static KeyedObjectPool<JmxConnectionProvider, JMXConnection> createPool() {
+		return new GenericKeyedObjectPool<>(new MBeanServerConnectionFactory());
+	}
+
 }

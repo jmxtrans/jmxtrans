@@ -48,7 +48,7 @@ public class SensuWriter2Test {
 				"  \"name\" : \"jmxtrans\",\n" +
 				"  \"type\" : \"metric\",\n" +
 				"  \"handler\" : \"graphite\",\n" +
-				"  \"output\" : \"host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0\\n\"\n" +
+				"  \"output\" : \"host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0\\n\"\n" +
 				"}");
 	}
 

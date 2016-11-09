@@ -43,11 +43,12 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
  */
 @JsonSerialize(include = NON_NULL)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-public interface OutputWriter {
+public interface OutputWriter extends AutoCloseable {
 
 	void start() throws LifecycleException;
 
-	void stop() throws LifecycleException;
+	@Override
+	void close() throws LifecycleException;
 
 	void doWrite(Server server, Query query, Iterable<Result> results) throws Exception;
 

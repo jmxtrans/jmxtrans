@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import com.kaching.platform.testing.AllowDNSResolution;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,7 +50,6 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * Tests for {@link OpenTSDBGenericWriter}.
  */
-@AllowDNSResolution
 public class OpenTSDBGenericWriterTests {
 
 	protected Query mockQuery;
@@ -104,7 +102,7 @@ public class OpenTSDBGenericWriterTests {
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-		writer.stop();
+		writer.close();
 
 		Assert.assertTrue(
 				this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021 host=[^ ]*$"));
@@ -123,7 +121,7 @@ public class OpenTSDBGenericWriterTests {
 
 		writer.start();
 		writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-		writer.stop();
+		writer.close();
 
 		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
 		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches(".*\\bhost=.*"));
@@ -165,7 +163,7 @@ public class OpenTSDBGenericWriterTests {
 		Assert.assertTrue(startOutputCalled);
 		Assert.assertTrue(finishOutputCalled);
 
-		writer.stop();
+		writer.close();
 		Assert.assertTrue(prepareSenderCalled);
 		Assert.assertTrue(shutdownSenderCalled);
 		Assert.assertTrue(startOutputCalled);

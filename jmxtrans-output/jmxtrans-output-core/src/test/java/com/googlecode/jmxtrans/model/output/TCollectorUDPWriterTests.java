@@ -30,7 +30,6 @@ import com.googlecode.jmxtrans.model.Result;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -56,7 +55,6 @@ import static org.mockito.Matchers.eq;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TCollectorUDPWriter.class, DatagramSocket.class})
-@Ignore("Incompatible with LessIOSecurityManager, investigation required")
 public class TCollectorUDPWriterTests {
 	protected TCollectorUDPWriter writer;
 	protected Query mockQuery;
@@ -107,7 +105,7 @@ public class TCollectorUDPWriterTests {
 		// Execute
 		this.writer.start();
 		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
-		this.writer.stop();
+		this.writer.close();
 
 		// Verifications
 		Mockito.verify(this.mockDgSocket).send(packetCapture.capture());

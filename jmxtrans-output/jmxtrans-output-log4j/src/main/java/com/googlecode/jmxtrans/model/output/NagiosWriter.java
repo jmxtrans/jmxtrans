@@ -172,9 +172,9 @@ public class NagiosWriter extends BaseOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			if (resultValues != null) {
 				for (Entry<String, Object> values : resultValues.entrySet()) {
-					String[] str_array = KeyUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
-					if (isNumeric(values.getValue()) && filters.contains(str_array[2])) {
-						int threshold_pos = filters.indexOf(str_array[2]);
+					String[] keyString = KeyUtils.getKeyString(server, query, result, values, typeNames, null).split("\\.");
+					if (isNumeric(values.getValue()) && filters.contains(keyString[2])) {
+						int thresholdPos = filters.indexOf(keyString[2]);
 						StringBuilder sb = new StringBuilder();
 
 						sb.append("[");
@@ -185,12 +185,12 @@ public class NagiosWriter extends BaseOutputWriter {
 						if (prefix != null) {
 							sb.append(prefix);
 						}
-						sb.append(str_array[2]);
+						sb.append(keyString[2]);
 						if (suffix != null) {
 							sb.append(suffix);
 						}
 						sb.append(";");
-						sb.append(nagiosCheckValue(values.getValue().toString(), thresholds.get(threshold_pos)));
+						sb.append(nagiosCheckValue(values.getValue().toString(), thresholds.get(thresholdPos)));
 						sb.append(";");
 						//Missing the performance information
 
@@ -234,7 +234,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	 */
 	protected String nagiosCheckValue(String value, String composeRange) {
 		List<String> simpleRange = Arrays.asList(composeRange.split(","));
-		double value_d = Double.parseDouble(value);
+		double doubleValue = Double.parseDouble(value);
 
 		if (composeRange.isEmpty()) {
 			return "0";
@@ -242,12 +242,12 @@ public class NagiosWriter extends BaseOutputWriter {
 
 		if (simpleRange.size() == 1) {
 			if (composeRange.endsWith(",")) {
-				if (valueCheck(value_d, simpleRange.get(0))) {
+				if (valueCheck(doubleValue, simpleRange.get(0))) {
 					return "1";
 				} else {
 					return "0";
 				}
-			} else if (valueCheck(value_d, simpleRange.get(0))) {
+			} else if (valueCheck(doubleValue, simpleRange.get(0))) {
 				return "2";
 
 			} else {
@@ -255,11 +255,11 @@ public class NagiosWriter extends BaseOutputWriter {
 			}
 		}
 
-		if (valueCheck(value_d, simpleRange.get(1))) {
+		if (valueCheck(doubleValue, simpleRange.get(1))) {
 			return "2";
 		}
 
-		if (valueCheck(value_d, simpleRange.get(0))) {
+		if (valueCheck(doubleValue, simpleRange.get(0))) {
 			return "1";
 
 		}

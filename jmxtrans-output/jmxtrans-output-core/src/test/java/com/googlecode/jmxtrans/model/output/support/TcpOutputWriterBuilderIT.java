@@ -25,8 +25,6 @@ package com.googlecode.jmxtrans.model.output.support;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.test.TCPEchoServer;
-import com.kaching.platform.testing.AllowNetworkAccess;
-import com.kaching.platform.testing.AllowNetworkListen;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -40,8 +38,6 @@ import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Category({IntegrationTest.class, RequiresIO.class})
-@AllowNetworkAccess(endpoints = "127.0.0.1:*")
-@AllowNetworkListen(ports = 0)
 public class TcpOutputWriterBuilderIT {
 
 	@Rule public TCPEchoServer tcpEchoServer = new TCPEchoServer();
@@ -54,7 +50,7 @@ public class TcpOutputWriterBuilderIT {
 				.build();
 
 		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
-		outputWriter.stop();
+		outputWriter.close();
 
 		await().atMost(200, MILLISECONDS).until(messageReceived("message"));
 	}

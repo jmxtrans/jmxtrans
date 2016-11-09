@@ -62,12 +62,12 @@ public class JexlNamingStrategy implements NamingStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(JexlNamingStrategy.class);
 
 	public static final String DEFAULT_EXPRESSION = "class + \".\" + attribute";
-	public static final String VAR__CLASSNAME = "realclass";
-	public static final String VAR__ATTRIBUTE_NAME = "attribute";
-	public static final String VAR__CLASSNAME_ALIAS = "alias";
-	public static final String VAR__EFFECTIVE_CLASSNAME = "class";
-	public static final String VAR__TYPENAME = "typename";
-	public static final String VAR__RESULT = "result";
+	public static final String VAR_CLASSNAME = "realclass";
+	public static final String VAR_ATTRIBUTE_NAME = "attribute";
+	public static final String VAR_CLASSNAME_ALIAS = "alias";
+	public static final String VAR_EFFECTIVE_CLASSNAME = "class";
+	public static final String VAR_TYPENAME = "typename";
+	public static final String VAR_RESULT = "result";
 
 	protected JexlEngine jexl;
 	protected Expression parsedExpr;
@@ -124,19 +124,19 @@ public class JexlNamingStrategy implements NamingStrategy {
 	 * @param result  - the result of a JMX query.
 	 */
 	protected void populateContext(JexlContext context, Result result) {
-		context.set(VAR__CLASSNAME, result.getClassName());
-		context.set(VAR__ATTRIBUTE_NAME, result.getAttributeName());
-		context.set(VAR__CLASSNAME_ALIAS, result.getKeyAlias());
+		context.set(VAR_CLASSNAME, result.getClassName());
+		context.set(VAR_ATTRIBUTE_NAME, result.getAttributeName());
+		context.set(VAR_CLASSNAME_ALIAS, result.getKeyAlias());
 
 		Map<String, String> typeNameMap = TypeNameValue.extractMap(result.getTypeName());
-		context.set(VAR__TYPENAME, typeNameMap);
+		context.set(VAR_TYPENAME, typeNameMap);
 
 		String effectiveClassname = result.getKeyAlias();
 		if (effectiveClassname == null) {
 			effectiveClassname = result.getClassName();
 		}
-		context.set(VAR__EFFECTIVE_CLASSNAME, effectiveClassname);
+		context.set(VAR_EFFECTIVE_CLASSNAME, effectiveClassname);
 
-		context.set(VAR__RESULT, result);
+		context.set(VAR_RESULT, result);
 	}
 }

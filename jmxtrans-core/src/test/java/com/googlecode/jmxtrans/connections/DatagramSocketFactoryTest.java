@@ -23,8 +23,6 @@
 package com.googlecode.jmxtrans.connections;
 
 import com.googlecode.jmxtrans.test.RequiresIO;
-import com.kaching.platform.testing.AllowNetworkAccess;
-import com.kaching.platform.testing.AllowNetworkListen;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -35,8 +33,6 @@ import java.net.InetSocketAddress;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Category(RequiresIO.class)
-@AllowNetworkListen(ports = 0)
-@AllowNetworkAccess(endpoints = "*:" + DatagramSocketFactoryTest.PORT)
 public class DatagramSocketFactoryTest {
 
 	public static final int PORT = 50123;

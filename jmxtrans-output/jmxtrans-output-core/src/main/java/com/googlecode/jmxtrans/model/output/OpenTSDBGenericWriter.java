@@ -39,7 +39,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.Map;
+
+import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
  * Originally written by Balazs Kossovics <bko@witbe.net>.  Common base class for OpenTSDBWriter and TCollectorWriter.
@@ -85,7 +88,9 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 				Settings.getBooleanSetting(this.getSettings(), "addHostnameTag", this.getAddHostnameTagDefault()),
 				getAddHostnameTagDefault());
 
-		messageFormatter = new OpenTSDBMessageFormatter(typeNames, ImmutableMap.copyOf(
+		ImmutableList<String> nonNullTypeNames = copyOf(MoreObjects.firstNonNull(typeNames, Collections.<String>emptyList()));
+
+		messageFormatter = new OpenTSDBMessageFormatter(nonNullTypeNames, ImmutableMap.copyOf(
 				firstNonNull(
 						tags,
 						(Map<String, String>) getSettings().get("tags"),
@@ -170,7 +175,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void stop() throws LifecycleException {
+	public void close() throws LifecycleException {
 		this.shutdownSender();
 	}
 

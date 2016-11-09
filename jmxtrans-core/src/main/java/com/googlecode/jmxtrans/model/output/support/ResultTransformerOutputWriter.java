@@ -31,6 +31,8 @@ import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
 import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+
 import javax.annotation.Nonnull;
 
 import static com.google.common.collect.FluentIterable.from;
@@ -66,5 +68,8 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 		return new ResultTransformerOutputWriter<>(new ResultValuesTransformer(new IdentityValueTransformer()), target);
 	}
 
+	public void close() throws LifecycleException {
+		target.close();
+	}
 
 }

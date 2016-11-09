@@ -97,8 +97,8 @@ public class StackdriverWriter extends BaseOutputWriter {
 	
 	// names of settings
 	public static final String SETTING_STACKDRIVER_API_URL = "url";
-	public final static String SETTING_PROXY_PORT = "proxyPort";
-	public final static String SETTING_PROXY_HOST = "proxyHost";
+	public static final String SETTING_PROXY_PORT = "proxyPort";
+	public static final String SETTING_PROXY_HOST = "proxyHost";
 	public static final String SETTING_STACKDRIVER_API_KEY = "token";
 	public static final String SETTING_SOURCE_INSTANCE = "source";
 	public static final String SETTING_DETECT_INSTANCE = "detectInstance";

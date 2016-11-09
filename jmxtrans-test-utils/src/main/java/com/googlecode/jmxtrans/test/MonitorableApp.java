@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.test;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.kaching.platform.testing.AllowExternalProcess;
 import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 import org.junit.rules.ExternalResource;
 
@@ -35,7 +34,6 @@ import java.net.URLClassLoader;
 import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
 
-@AllowExternalProcess
 public class MonitorableApp extends ExternalResource {
 
 	private Process app;

@@ -50,7 +50,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.ServerFixtures.DEFAULT_HOST;
+import static com.googlecode.jmxtrans.model.ServerFixtures.DEFAULT_PORT;
+import static com.googlecode.jmxtrans.model.ServerFixtures.SERVER_ALIAS;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
+import static com.googlecode.jmxtrans.model.ServerFixtures.serverWithAliasAndNoQuery;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.isA;
@@ -99,7 +103,7 @@ public class ElasticWriterTests {
 
         writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
 
-        writer.stop();
+        writer.close();
 
         Mockito.verify(mockClient, times(4)).execute(Matchers.<Action<JestResult>>any());
 
@@ -143,11 +147,7 @@ public class ElasticWriterTests {
 	@Test
     public void sendMessageToElasticAndVerify() throws Exception {
 
-        String host = "myHost";
-        String port = "56677";
-
-		String serverAlias = "myAlias";
-		Server serverWithKnownValues = Server.builder().setHost(host).setPort(port).setAlias(serverAlias).build();
+		Server serverWithKnownValues = serverWithAliasAndNoQuery();
 
         int epoch = 1123455;
         String attributeName = "attributeName123";
@@ -172,8 +172,8 @@ public class ElasticWriterTests {
 
         Gson gson = new Gson();
         String data = argument.getValue().getData(gson);
-        assertTrue("Contains host", data.contains(host));
-        assertTrue("Contains port", data.contains(port));
+        assertTrue("Contains host", data.contains(DEFAULT_HOST));
+        assertTrue("Contains port", data.contains(DEFAULT_PORT));
         assertTrue("Contains attribute name", data.contains(attributeName));
         assertTrue("Contains class name", data.contains(className));
         assertTrue("Contains object domain", data.contains(objDomain));
@@ -182,7 +182,7 @@ public class ElasticWriterTests {
         assertTrue("Contains timestamp", data.contains(String.valueOf(epoch)));
         assertTrue("Contains key", data.contains(key));
         assertTrue("Contains value", data.contains(String.valueOf(value)));
-		assertTrue("Contains serverAlias", data.contains(serverAlias));
+		assertTrue("Contains serverAlias", data.contains(SERVER_ALIAS));
 
     }
 

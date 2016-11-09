@@ -22,21 +22,13 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.googlecode.jmxtrans.ConfigurationParser;
-import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.QueryFixtures;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.ResultFixtures;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import com.googlecode.jmxtrans.util.JsonUtils;
-import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -44,7 +36,6 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -62,12 +53,12 @@ import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResultWithTypenames;
 import static com.googlecode.jmxtrans.model.ResultFixtures.singleTrueResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
+import static com.googlecode.jmxtrans.model.ServerFixtures.serverWithNoQuery;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Category(RequiresIO.class)
-@AllowDNSResolution
 public class GraphiteWriterTests {
 
 	@Test(expected = NullPointerException.class)
@@ -126,21 +117,21 @@ public class GraphiteWriterTests {
 	public void writeSingleResult() throws Exception {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), dummyQuery(), numericResult()))
-				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10");
+				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10");
 	}
 
 	@Test
 	public void useObjDomainWorks() throws Exception {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), queryUsingDomainAsKey(), numericResult()))
-				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0");
+				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0");
 	}
 	
 	@Test
 	public void allowDottedWorks() throws Exception {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), numericResult()))
-				.startsWith("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount 10 0");
+				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0");
 	}
 
 	@Test
@@ -181,7 +172,7 @@ public class GraphiteWriterTests {
 	
 	@Test
 	public void checkEmptyTypeNamesAreIgnored() throws Exception {
-		Server server = Server.builder().setHost("host").setPort("123").build();
+		Server server = serverWithNoQuery();
 		// Set useObjDomain to true
 		Query query = Query.builder()
 				.setUseObjDomainAsKey(true)
@@ -206,7 +197,7 @@ public class GraphiteWriterTests {
 		writer.doWrite(server, query, of(result));
 
 		// check that the empty type "type" is ignored when allowDottedKeys is true
-		assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
+		assertThat(out.toString()).startsWith("servers.host_example_net_4321.yammer.metrics.uniqueName.Attribute 0 ");
 		
 		// check that this also works when literal " characters aren't included in the JMX ObjectName
 		query = Query.builder()
@@ -218,7 +209,7 @@ public class GraphiteWriterTests {
 		writer = getGraphiteWriter(out, typeNames);
 		
 		writer.doWrite(server, query, of(result));
-		assertThat(out.toString()).startsWith("servers.host_123.yammer.metrics.uniqueName.Attribute 0 ");
+		assertThat(out.toString()).startsWith("servers.host_example_net_4321.yammer.metrics.uniqueName.Attribute 0 ");
 		
 		// check that the empty type "type" is ignored when allowDottedKeys is false
 		query = Query.builder()
@@ -230,7 +221,7 @@ public class GraphiteWriterTests {
 		writer = getGraphiteWriter(out, typeNames);
 		
 		writer.doWrite(server, query, of(result));
-		assertThat(out.toString()).startsWith("servers.host_123.yammer_metrics.uniqueName.Attribute 0 ");
+		assertThat(out.toString()).startsWith("servers.host_example_net_4321.yammer_metrics.uniqueName.Attribute 0 ");
 	}
 
 	@Test

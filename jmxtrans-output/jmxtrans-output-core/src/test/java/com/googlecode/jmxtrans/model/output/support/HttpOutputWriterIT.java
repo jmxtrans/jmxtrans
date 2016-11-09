@@ -48,9 +48,8 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 @Category(IntegrationTest.class)
 public class HttpOutputWriterIT {
 
-	private static final int WIREMOCK_PORT = 1234;
 	public static final String ENDPOINT = "/endpoint";
-	@Rule public WireMockRule wireMockRule = new WireMockRule(WIREMOCK_PORT);
+	@Rule public WireMockRule wireMockRule = new WireMockRule(0);
 
 	@Test
 	public void messageIsSentOverHttp() throws Exception {
@@ -89,7 +88,7 @@ public class HttpOutputWriterIT {
 	private HttpOutputWriter simpleOutputWriter() throws MalformedURLException {
 		return new HttpOutputWriter(
 				new DummyWriterBasedOutputWriter("message"),
-				new URL("http://localhost:" + WIREMOCK_PORT + ENDPOINT),
+				new URL("http://localhost:" + wireMockRule.port() + ENDPOINT),
 				null,
 				HttpUrlConnectionConfigurer.builder("POST").build(),
 				UTF_8

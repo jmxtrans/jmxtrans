@@ -46,7 +46,7 @@ public class StatsDWriter2Test {
 		writer.write(out, dummyServer(), dummyQuery(), singleNumericResult());
 
 		assertThat(out.toString())
-				.isEqualTo("root.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:10|c\n");
+				.isEqualTo("root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:10|c\n");
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class StatsDWriter2Test {
 		writer.write(out, dummyServer(), dummyQuery(), singleNumericBelowCPrecisionResult());
 
 		assertThat(out.toString())
-				.isEqualTo("root.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:0|c\n");
+				.isEqualTo("root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:0|c\n");
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class StatsDWriter2Test {
 		writer.write(out, dummyServer(), dummyQuery(), dummyResults());
 
 		assertThat(out.toString())
-				.isEqualTo("root.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:10|g\n" +
+				.isEqualTo("root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:10|g\n" +
 						"root.host_example_net_4321.VerboseMemory.Verbose.true:1|g\n" +
 						"root.host_example_net_4321.VerboseMemory.Verbose.false:1|g\n");
 	}

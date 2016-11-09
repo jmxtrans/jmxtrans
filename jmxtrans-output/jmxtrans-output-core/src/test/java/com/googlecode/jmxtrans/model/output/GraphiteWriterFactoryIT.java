@@ -36,7 +36,6 @@ import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWrite
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.test.ResetableSystemProperty;
-import com.kaching.platform.testing.AllowDNSResolution;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +48,6 @@ import java.net.URISyntaxException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Category({IntegrationTest.class, RequiresIO.class})
-@AllowDNSResolution
 public class GraphiteWriterFactoryIT {
 
 	private ConfigurationParser configurationParser;

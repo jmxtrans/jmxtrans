@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import com.kaching.platform.testing.AllowDNSResolution;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -55,7 +54,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link OpenTSDBWriter}.
  */
 @Category(RequiresIO.class)
-@AllowDNSResolution
 public class OpenTSDBWriterTests {
 	protected OpenTSDBWriter writer;
 	protected Query mockQuery;
@@ -129,7 +127,7 @@ public class OpenTSDBWriterTests {
 		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 		// check that OpenTSDB format is respected
-		assertThat(out.toString()).startsWith("put ObjectPendingFinalizationCount.ObjectPendingFinalizationCount ")
+		assertThat(out.toString()).startsWith("put MemoryAlias.ObjectPendingFinalizationCount ")
 			.contains("host=")  // hostname is added by default
 			.endsWith("\n");
 	}

@@ -27,8 +27,6 @@ import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.test.UdpLoggingServer;
-import com.kaching.platform.testing.AllowNetworkAccess;
-import com.kaching.platform.testing.AllowNetworkListen;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -43,8 +41,6 @@ import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Category({IntegrationTest.class, RequiresIO.class})
-@AllowNetworkAccess(endpoints = "127.0.0.1:*")
-@AllowNetworkListen(ports = 0)
 public class StatsDWriterFactoryIT {
 
 	@Rule
@@ -61,10 +57,10 @@ public class StatsDWriterFactoryIT {
 		).create();
 
 		statsDWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
-		statsDWriter.stop();
+		statsDWriter.close();
 
 		await().atMost(200, MILLISECONDS)
-				.until(messageReceived("servers.host_example_net_4321.ObjectPendingFinalizationCount.ObjectPendingFinalizationCount:10|c\n"));
+				.until(messageReceived("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:10|c\n"));
 	}
 
 	private Callable<Boolean> messageReceived(final String message) {
