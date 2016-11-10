@@ -193,7 +193,7 @@ public class OpenTSDBMessageFormatter {
 				addTag(resultString, addTagName, addTagValue);
 			}
 
-			if (!typeNames.isEmpty()) {
+			if ((typeNames != null) && (!typeNames.isEmpty())) {
 				this.addTypeNamesTags(resultString, result);
 			}
 

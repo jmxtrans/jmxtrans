@@ -80,6 +80,8 @@ public class OpenTSDBWriterFactory implements OutputWriterFactory {
 		ImmutableMap<String, String> immutableTags =
 				tags == null ? ImmutableMap.<String, String>of() : ImmutableMap.copyOf(tags);
 
+		mergeTypeNamesTags = firstNonNull(mergeTypeNamesTags, true);
+
 		messageFormatter = new OpenTSDBMessageFormatter(typeNames, immutableTags, tagName,
 				metricNamingExpression, mergeTypeNamesTags,
 				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
