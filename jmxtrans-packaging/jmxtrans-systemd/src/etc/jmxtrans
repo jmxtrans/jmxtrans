@@ -9,4 +9,4 @@ if [ -z "$JAVACMD" ] ; then
   fi
 fi
 
-${JAVACMD} ${JAVA_OPTS} -jar /usr/share/java/jmxtrans-all.jar "$@"
+${JAVACMD} -Dlog4j.configuration=/etc/jmxtrans/log4j.xml ${JAVA_OPTS} -jar /usr/share/java/jmxtrans-all.jar "$@"

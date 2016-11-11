@@ -94,6 +94,12 @@
 								</data>
 								<data>
 									<type>file</type>
+									<src>${project.basedir}/src/etc/log4j.xml</src>
+									<dst>/etc/jmxtrans/log4j.xml</dst>
+									<conffile>true</conffile>
+								</data>
+								<data>
+									<type>file</type>
 									<src>${project.basedir}/src/etc/jmxtrans.service</src>
 									<dst>/lib/systemd/system/jmxtrans.service</dst>
 								</data>
