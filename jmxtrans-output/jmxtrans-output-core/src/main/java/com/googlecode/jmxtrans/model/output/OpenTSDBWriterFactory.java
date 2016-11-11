@@ -93,11 +93,11 @@ public class OpenTSDBWriterFactory implements OutputWriterFactory {
 	public ResultTransformerOutputWriter<WriterPoolOutputWriter<OpenTSDBWriter2>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
-				TcpOutputWriterBuilder.builder(
-						server,
-						new OpenTSDBWriter2(messageFormatter))
+				TcpOutputWriterBuilder
+						.builder(server, new OpenTSDBWriter2(messageFormatter))
 						.setFlushStrategy(flushStrategy)
 						.setPoolSize(poolSize)
-						.build());
+						.build()
+		);
 	}
 }

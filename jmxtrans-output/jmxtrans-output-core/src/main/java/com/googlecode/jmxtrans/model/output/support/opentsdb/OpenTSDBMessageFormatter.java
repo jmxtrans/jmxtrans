@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
@@ -46,6 +47,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.FluentIterable.from;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
@@ -64,6 +66,7 @@ public class OpenTSDBMessageFormatter {
 
 	private final boolean mergeTypeNamesTags;
 	private final String hostnameTag;
+	private Server server;
 
 	public OpenTSDBMessageFormatter(@Nonnull ImmutableList<String> typeNames,
 									@Nonnull ImmutableMap<String, String> tags) throws LifecycleException, UnknownHostException {
@@ -101,7 +104,13 @@ public class OpenTSDBMessageFormatter {
 	 */
 	void addTags(StringBuilder resultString) {
 		if (hostnameTag != null) {
-			addTag(resultString, "host", hostnameTag);
+			if (server != null) {
+				addTag(resultString, "host",
+						firstNonNull(server.getAlias(), server.getHost()));
+			}
+			else {
+				addTag(resultString, "host", hostnameTag);
+			}
 		}
 
 		// Add the constant tag names and values.
@@ -163,6 +172,10 @@ public class OpenTSDBMessageFormatter {
 	}
 
 	public Iterable<String> formatResults(Iterable<Result> results) {
+		return formatResults(results, null);
+	}
+	public Iterable<String> formatResults(Iterable<Result> results, Server server) {
+		this.server = server;
 		return from(results).transformAndConcat(new Function<Result, List<String>>() {
 
 			@Override
