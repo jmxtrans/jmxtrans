@@ -99,12 +99,13 @@
 
 	<modules>
 		<module>jmxtrans</module>
-		<module>jmxtrans-utils</module>
-		<module>jmxtrans-output</module>
-		<module>jmxtrans-examples</module>
 		<module>jmxtrans-core</module>
-		<module>jmxtrans-test-utils</module>
 		<module>jmxtrans-docker-test</module>
+		<module>jmxtrans-examples</module>
+		<module>jmxtrans-output</module>
+		<module>jmxtrans-packaging</module>
+		<module>jmxtrans-test-utils</module>
+		<module>jmxtrans-utils</module>
 	</modules>
 
 	<scm>
@@ -327,6 +328,12 @@
 				<groupId>org.jmxtrans</groupId>
 				<artifactId>jmxtrans</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jmxtrans</groupId>
+				<artifactId>jmxtrans</artifactId>
+				<version>${project.version}</version>
+				<classifier>all</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.jmxtrans</groupId>

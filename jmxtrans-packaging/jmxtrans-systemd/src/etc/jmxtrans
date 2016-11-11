@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# If a specific java binary isn't specified search for the standard 'java' binary
+if [ -z "$JAVACMD" ] ; then
+  if [ -n "$JAVA_HOME"  ] ; then
+    JAVACMD="$JAVA_HOME/bin/java"
+  else
+    JAVACMD=`which java`
+  fi
+fi
+
+${JAVACMD} ${JAVA_OPTS} -jar /usr/share/java/jmxtrans-all.jar "$@"

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    The MIT License
+    Copyright © 2010 JmxTrans team
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.jmxtrans</groupId>
+		<artifactId>jmxtrans-parent</artifactId>
+		<version>261-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jmxtrans-packaging</artifactId>
+	<packaging>pom</packaging>
+	<name>JmxTrans - packaging</name>
+	<description>Parent module of new jmxtrans packaging.</description>
+
+	<properties>
+		<verify.mutationThreshold>0</verify.mutationThreshold>
+		<verify.totalBranchRate>0</verify.totalBranchRate>
+		<verify.totalLineRate>0</verify.totalLineRate>
+	</properties>
+
+	<modules>
+		<module>jmxtrans-systemd</module>
+	</modules>
+
+	<build>
+
+		<plugins>
+			<plugin>
+				<groupId>net.ju-n.maven.plugins</groupId>
+				<artifactId>checksum-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<!-- There is no Java code in this project, let's skip animal-sniffer -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>animal-sniffer-check</id>
+						<phase>none</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- There is no Java code in this project, let's skip PIT -->
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

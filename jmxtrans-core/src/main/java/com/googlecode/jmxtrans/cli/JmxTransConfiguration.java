@@ -131,7 +131,7 @@ public class JmxTransConfiguration {
 	private int resultProcessorExecutorPoolSize = 10;
 
 	@Parameter(
-			names = {"--result-processor-executor-work-queue-capacity."},
+			names = {"--result-processor-executor-work-queue-capacity"},
 			description = "Size of the result work queue",
 			validateWith = PositiveInteger.class
 	)
