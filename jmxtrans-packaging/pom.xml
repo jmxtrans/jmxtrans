@@ -37,15 +37,15 @@
 	<name>JmxTrans - packaging</name>
 	<description>Parent module of new jmxtrans packaging.</description>
 
+	<modules>
+		<module>jmxtrans-systemd</module>
+	</modules>
+
 	<properties>
 		<verify.mutationThreshold>0</verify.mutationThreshold>
 		<verify.totalBranchRate>0</verify.totalBranchRate>
 		<verify.totalLineRate>0</verify.totalLineRate>
 	</properties>
-
-	<modules>
-		<module>jmxtrans-systemd</module>
-	</modules>
 
 	<build>
 
