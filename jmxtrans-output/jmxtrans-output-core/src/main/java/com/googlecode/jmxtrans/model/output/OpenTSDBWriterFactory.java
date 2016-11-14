@@ -82,8 +82,9 @@ public class OpenTSDBWriterFactory implements OutputWriterFactory {
 
 		mergeTypeNamesTags = firstNonNull(mergeTypeNamesTags, true);
 
-		messageFormatter = new OpenTSDBMessageFormatter(typeNames, immutableTags, tagName,
-				metricNamingExpression, mergeTypeNamesTags,
+		messageFormatter = new OpenTSDBMessageFormatter(
+				(typeNames == null) ? ImmutableList.<String>of() : typeNames,
+				immutableTags, tagName, metricNamingExpression, mergeTypeNamesTags,
 				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);

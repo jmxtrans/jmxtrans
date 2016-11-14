@@ -49,7 +49,7 @@ public class OpenTSDBWriter2 implements WriterBasedOutputWriter {
 	public void write(@Nonnull final Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 
 		for(String resultString : messageFormatter.formatResults(results, server)) {
-            logger.trace(resultString);
+			logger.trace(resultString);
 			writer.write("put " + resultString + "\n");
 		}
 	}
