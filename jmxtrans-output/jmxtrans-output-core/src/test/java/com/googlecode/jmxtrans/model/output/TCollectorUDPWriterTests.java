@@ -28,6 +28,7 @@ import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,7 +61,7 @@ public class TCollectorUDPWriterTests {
 	protected TCollectorUDPWriter writer;
 	protected Query mockQuery;
 	protected Result mockResult;
-	private Server mockServer;
+	private Server server;
 	protected DatagramSocket mockDgSocket;
 	protected Logger mockLog;
 	protected ImmutableMap<String, Object> testValues;
@@ -71,7 +72,7 @@ public class TCollectorUDPWriterTests {
 		this.mockResult = Mockito.mock(Result.class);
 		this.mockDgSocket = Mockito.mock(DatagramSocket.class);
 		this.mockLog = Mockito.mock(Logger.class);
-		this.mockServer = Mockito.mock(Server.class);
+		this.server = ServerFixtures.dummyServer();
 
 
 		// Setup common mock interactions.
@@ -83,7 +84,6 @@ public class TCollectorUDPWriterTests {
 		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
 		Mockito.when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");
-		Mockito.when(this.mockServer.getLabel()).thenReturn("myhostname");
 
 
 		// Prepare the object under test and test data.
@@ -108,7 +108,7 @@ public class TCollectorUDPWriterTests {
 
 		// Execute
 		this.writer.start();
-		this.writer.doWrite(mockServer, this.mockQuery, ImmutableList.of(this.mockResult));
+		this.writer.doWrite(server, this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.close();
 
 		// Verifications
