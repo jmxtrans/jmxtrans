@@ -66,7 +66,6 @@ public class OpenTSDBMessageFormatter {
 
 	private final boolean mergeTypeNamesTags;
 	private final boolean hostnameTag;
-	private final Server server = null;
 
 	public OpenTSDBMessageFormatter(@Nonnull ImmutableList<String> typeNames,
 									@Nonnull ImmutableMap<String, String> tags) throws LifecycleException {
