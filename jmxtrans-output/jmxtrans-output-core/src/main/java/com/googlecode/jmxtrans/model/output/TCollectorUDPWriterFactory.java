@@ -82,7 +82,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 
 		messageFormatter = new OpenTSDBMessageFormatter(typeNames, immutableTags, tagName,
 				metricNamingExpression, mergeTypeNamesTags,
-				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
+				addHostnameTag);
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
 	}

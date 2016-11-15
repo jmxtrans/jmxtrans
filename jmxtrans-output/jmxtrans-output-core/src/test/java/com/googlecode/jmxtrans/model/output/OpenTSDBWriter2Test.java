@@ -56,7 +56,7 @@ public class OpenTSDBWriter2Test {
 		ImmutableList<Result> results = ImmutableList.of(result, result);
 		List<String> resultsString = ImmutableList.of("Result1", "Result2");
 
-		Mockito.when(openTSDBMessageFormatter.formatResults(results)).thenReturn(resultsString);
+		Mockito.when(openTSDBMessageFormatter.formatResults(results, null)).thenReturn(resultsString);
 
 		writer.write(outputWriter, null, null, results);
 

@@ -113,7 +113,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		socket = pool.borrowObject(address);
 		writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
 
-		for (String formattedResult : messageFormatter.formatResults(results)) {
+		for (String formattedResult : messageFormatter.formatResults(results, server)) {
 			log.debug("OpenTSDB Message: {}", formattedResult);
 			writer.write("put " + formattedResult + "\n");
 		}

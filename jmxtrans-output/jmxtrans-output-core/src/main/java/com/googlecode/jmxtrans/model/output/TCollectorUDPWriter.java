@@ -68,7 +68,7 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 			@JsonProperty("tagName") String tagName,
 			@JsonProperty("mergeTypeNamesTags") Boolean mergeTypeNamesTags,
 			@JsonProperty("metricNamingExpression") String metricNamingExpression,
-			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
+			@JsonProperty("addHostnameTag") boolean addHostnameTag,
 			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
 		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
@@ -93,7 +93,7 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		this.startOutput();
-		for (String resultString : messageFormatter.formatResults(results)){
+		for (String resultString : messageFormatter.formatResults(results, server)){
 			log.debug("TCollectorUDP Message: {}", resultString);
 			this.sendOutput(resultString);
 		}
@@ -150,7 +150,7 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 		private String tagName;
 		private Boolean mergeTypeNamesTags;
 		private String metricNamingExpression;
-		private Boolean addHostnameTag;
+		private boolean addHostnameTag;
 
 		private Builder() {}
 

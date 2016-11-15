@@ -73,7 +73,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 			@JsonProperty("mergeTypeNamesTags") Boolean mergeTypeNamesTags,
 			@JsonProperty("metricNamingExpression") String metricNamingExpression,
 			@JsonProperty("addHostnameTag") Boolean addHostnameTag,
-			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException, UnknownHostException {
+			@JsonProperty("settings") Map<String, Object> settings) throws LifecycleException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 
 		this.host = MoreObjects.firstNonNull(host, (String) getSettings().get(HOST));
@@ -82,11 +82,6 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 		if (metricNamingExpression == null) {
 			metricNamingExpression = Settings.getStringSetting(this.getSettings(), "metricNamingExpression", null);
 		}
-
-		addHostnameTag = firstNonNull(
-				addHostnameTag,
-				Settings.getBooleanSetting(this.getSettings(), "addHostnameTag", this.getAddHostnameTagDefault()),
-				getAddHostnameTagDefault());
 
 		ImmutableList<String> nonNullTypeNames = copyOf(MoreObjects.firstNonNull(typeNames, Collections.<String>emptyList()));
 
@@ -100,7 +95,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 				MoreObjects.firstNonNull(
 						mergeTypeNamesTags,
 						Settings.getBooleanSetting(this.getSettings(), "mergeTypeNamesTags", DEFAULT_MERGE_TYPE_NAMES_TAGS)),
-				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
+				addHostnameTag);
 	}
 
 	/**
@@ -151,7 +146,7 @@ public abstract class OpenTSDBGenericWriter extends BaseOutputWriter {
 	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		this.startOutput();
-		for (String formattedResult : messageFormatter.formatResults(results)) {
+		for (String formattedResult : messageFormatter.formatResults(results, server)) {
 				log.debug("Sending result: {}", formattedResult);
 				this.sendOutput(formattedResult);
 		}
