@@ -60,7 +60,6 @@ public class OpenTSDBWriterTests {
 	protected Query mockQuery;
 	protected Result mockResult;
 	protected Socket mockSocket;
-	private Server mockServer;
 	protected DataOutputStream mockOut;
 	protected InputStreamReader mockInStreamRdr;
 	protected BufferedReader mockBufRdr;
