@@ -90,4 +90,4 @@ RUN ln -sf /dev/stdout ${LOG_DIR}/jmxtrans.log
 RUN ln -sf /dev/stderr ${LOG_DIR}/jmxtrans.log
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["start"]
+CMD ["start-with-jmx"]
