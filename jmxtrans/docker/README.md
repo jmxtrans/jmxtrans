@@ -12,16 +12,14 @@ This is a fully functional JmxTrans application instance, based on the last rele
 
 ```
 docker run -d -v `pwd`/json-files:/var/lib/jmxtrans jmxtrans/jmxtrans 
-docker run -d -v `pwd`/json-files:/var/lib/jmxtrans jmxtrans/jmxtrans  
-docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -P jmxtrans/jmxtrans 
-docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -p 9999:2101 jmxtrans/jmxtrans
+docker run -d -v `pwd`/json-files:/var/lib/jmxtrans jmxtrans/jmxtrans start 
+docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -P jmxtrans/jmxtrans jmx
+docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -p 9999:2101 jmxtrans/jmxtrans jmx
 ```
 
 You have two commands available :
-* start-with-jmx (default value)
-* start-without-jmx without jmx if you think there is an extra runtime cost (we don't think so)
-
-Example: ```docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -P jmxtrans/jmxtrans ```
+* start (default value)  
+* jmx to start the jvm with jmx debug mode
 
 This will automatically create a 'json-files' volume on docker host, that will survive container stop/restart/deletion. 
 
