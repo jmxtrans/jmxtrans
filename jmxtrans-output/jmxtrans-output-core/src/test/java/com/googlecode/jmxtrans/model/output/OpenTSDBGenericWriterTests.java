@@ -56,7 +56,6 @@ public class OpenTSDBGenericWriterTests {
 
 	protected Query mockQuery;
 	protected Result mockResult;
-	private Server server;
 
 	// Interactions with the custom, test subclass of OpenTSDBGenericWriter.
 	protected boolean tvAddHostnameTagDefault;
@@ -70,7 +69,6 @@ public class OpenTSDBGenericWriterTests {
 	public void setupTest() {
 		this.mockQuery = Mockito.mock(Query.class);
 		this.mockResult = Mockito.mock(Result.class);
-		this.server = ServerFixtures.dummyServer();
 
 		// Setup test data
 		tvAddHostnameTagDefault = true;
@@ -104,7 +102,7 @@ public class OpenTSDBGenericWriterTests {
 		Assertions.assertThat(writer.getTypeNames()).isEmpty();
 
 		writer.start();
-		writer.doWrite(server, this.mockQuery, ImmutableList.of(this.mockResult));
+		writer.doWrite(ServerFixtures.dummyServer(), this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.close();
 
 		Assert.assertTrue(
@@ -123,7 +121,7 @@ public class OpenTSDBGenericWriterTests {
 		OpenTSDBGenericWriter writer = createWriter("tags", tagMap);
 
 		writer.start();
-		writer.doWrite(server, this.mockQuery, ImmutableList.of(this.mockResult));
+		writer.doWrite(ServerFixtures.dummyServer(), this.mockQuery, ImmutableList.of(this.mockResult));
 		writer.close();
 
 		Assert.assertTrue(this.tvMetricLinesSent.get(0).matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
@@ -160,7 +158,7 @@ public class OpenTSDBGenericWriterTests {
 		Assert.assertFalse(startOutputCalled);
 		Assert.assertFalse(finishOutputCalled);
 
-		writer.doWrite(server, this.mockQuery, ImmutableList.of(this.mockResult));
+		writer.doWrite(ServerFixtures.dummyServer(), this.mockQuery, ImmutableList.of(this.mockResult));
 		Assert.assertTrue(prepareSenderCalled);
 		Assert.assertFalse(shutdownSenderCalled);
 		Assert.assertTrue(startOutputCalled);
@@ -180,7 +178,7 @@ public class OpenTSDBGenericWriterTests {
 
 		writer.start();
 		writer.validateSetup(null, this.mockQuery);
-		writer.doWrite(server, this.mockQuery, ImmutableList.of(this.mockResult));
+		writer.doWrite(ServerFixtures.dummyServer(), this.mockQuery, ImmutableList.of(this.mockResult));
 	}
 
 	@Test

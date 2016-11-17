@@ -24,6 +24,8 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatter;
 import org.junit.Before;
 import org.junit.Test;

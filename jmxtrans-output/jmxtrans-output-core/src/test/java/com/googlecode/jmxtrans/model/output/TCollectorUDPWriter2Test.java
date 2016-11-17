@@ -41,7 +41,6 @@ public class TCollectorUDPWriter2Test {
 	private TCollectorUDPWriter2 writer;
 	private Writer outputWriter;
 	private Result result;
-	private Server server;
 
 	@Before
 	public void setup() {
@@ -49,7 +48,6 @@ public class TCollectorUDPWriter2Test {
 		writer = new TCollectorUDPWriter2(openTSDBMessageFormatter);
 		outputWriter = Mockito.mock(Writer.class);
 		result = Mockito.mock(Result.class);
-		server = ServerFixtures.dummyServer();
 	}
 
 	@Test
@@ -58,9 +56,9 @@ public class TCollectorUDPWriter2Test {
 		ImmutableList<Result> results = ImmutableList.of(result, result);
 		List<String> resultsString = ImmutableList.of("Result1", "Result2");
 
-		Mockito.when(openTSDBMessageFormatter.formatResults(results, server)).thenReturn(resultsString);
+		Mockito.when(openTSDBMessageFormatter.formatResults(results, ServerFixtures.dummyServer())).thenReturn(resultsString);
 
-		writer.write(outputWriter, server, null, results);
+		writer.write(outputWriter, ServerFixtures.dummyServer(), null, results);
 
 		Mockito.verify(outputWriter).write("Result1");
 		Mockito.verify(outputWriter).write("Result2");

@@ -76,7 +76,7 @@ public class OpenTSDBMessageFormatter {
 									@Nonnull String tagName,
 									@Nullable String metricNamingExpression,
 									boolean mergeTypeNamesTags,
-									Boolean hostnameTag) throws LifecycleException {
+									boolean hostnameTag) throws LifecycleException {
 		this.typeNames = typeNames;
 		this.tags = tags;
 		this.tagName = tagName;
@@ -90,7 +90,7 @@ public class OpenTSDBMessageFormatter {
 			metricNameStrategy = new ClassAttributeNamingStrategy();
 		}
 		this.mergeTypeNamesTags = mergeTypeNamesTags;
-		this.hostnameTag = firstNonNull(hostnameTag, true);
+		this.hostnameTag = hostnameTag;
 	}
 
 

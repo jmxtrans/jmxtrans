@@ -61,7 +61,6 @@ public class TCollectorUDPWriterTests {
 	protected TCollectorUDPWriter writer;
 	protected Query mockQuery;
 	protected Result mockResult;
-	private Server server;
 	protected DatagramSocket mockDgSocket;
 	protected Logger mockLog;
 	protected ImmutableMap<String, Object> testValues;
@@ -72,7 +71,6 @@ public class TCollectorUDPWriterTests {
 		this.mockResult = Mockito.mock(Result.class);
 		this.mockDgSocket = Mockito.mock(DatagramSocket.class);
 		this.mockLog = Mockito.mock(Logger.class);
-		this.server = ServerFixtures.dummyServer();
 
 
 		// Setup common mock interactions.
@@ -108,7 +106,7 @@ public class TCollectorUDPWriterTests {
 
 		// Execute
 		this.writer.start();
-		this.writer.doWrite(server, this.mockQuery, ImmutableList.of(this.mockResult));
+		this.writer.doWrite(ServerFixtures.dummyServer(), this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.close();
 
 		// Verifications

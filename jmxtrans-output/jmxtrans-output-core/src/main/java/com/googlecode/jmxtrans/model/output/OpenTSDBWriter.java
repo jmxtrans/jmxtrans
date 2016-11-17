@@ -224,7 +224,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 					tagName,
 					mergeTypeNamesTags,
 					metricNamingExpression,
-					addHostnameTag,
+					(addHostnameTag == null) ? true : addHostnameTag,
 					null
 			);
 		}
