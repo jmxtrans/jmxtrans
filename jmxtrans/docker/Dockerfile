@@ -69,7 +69,7 @@ ENV SECONDS_BETWEEN_RUNS 60
 ENV CONTINUE_ON_ERROR false
 ENV JSON_DIR /var/lib/jmxtrans
 ENV GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}m -Xmx${HEAP_SIZE}m"}
-ENV JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL} -Dlog4j.configuration=file:///${JMXTRANS_HOME}/conf/log4j.xml"
+ENV JMXTRANS_OPTS="$JMXTRANS_OPTS -Dlog4j.configuration=file:///${JMXTRANS_HOME}/conf/log4j.xml"
 ENV MONITOR_OPTS=" -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=2101  -Dcom.sun.management.jmxremote.rmi.port=2101 "
 
 # Install jmxtrans

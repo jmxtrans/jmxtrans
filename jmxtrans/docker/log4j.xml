@@ -11,7 +11,7 @@
     </appender>
 
     <root>
-        <level value="INFO" />
+        <level value="$${env:LOG_LEVEL}" />
         <appender-ref ref="console" />
     </root>
 
