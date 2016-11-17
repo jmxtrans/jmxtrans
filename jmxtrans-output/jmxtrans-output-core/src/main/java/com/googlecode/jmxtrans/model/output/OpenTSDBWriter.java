@@ -149,7 +149,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		private String tagName;
 		private Boolean mergeTypeNamesTags;
 		private String metricNamingExpression;
-		private Boolean addHostnameTag;
+		private Boolean addHostnameTag = true;
 
 		private Builder() {}
 
@@ -224,7 +224,7 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 					tagName,
 					mergeTypeNamesTags,
 					metricNamingExpression,
-					(addHostnameTag == null) ? true : addHostnameTag,
+					addHostnameTag,
 					null
 			);
 		}
