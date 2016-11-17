@@ -46,7 +46,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.FluentIterable.from;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
