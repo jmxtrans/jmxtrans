@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.NamingStrategy;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
@@ -41,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -63,11 +63,11 @@ public class OpenTSDBMessageFormatter {
 
 
 	private final boolean mergeTypeNamesTags;
-	private final String hostnameTag;
+	private final boolean hostnameTag;
 
 	public OpenTSDBMessageFormatter(@Nonnull ImmutableList<String> typeNames,
-									@Nonnull ImmutableMap<String, String> tags) throws LifecycleException, UnknownHostException {
-		this(typeNames, tags, DEFAULT_TAG_NAME, null, true, "localhost");
+									@Nonnull ImmutableMap<String, String> tags) throws LifecycleException {
+		this(typeNames, tags, DEFAULT_TAG_NAME, null, true, true);
 	}
 
 	public OpenTSDBMessageFormatter(@Nonnull ImmutableList<String> typeNames,
@@ -75,7 +75,7 @@ public class OpenTSDBMessageFormatter {
 									@Nonnull String tagName,
 									@Nullable String metricNamingExpression,
 									boolean mergeTypeNamesTags,
-									@Nullable String hostnameTag) throws UnknownHostException, LifecycleException {
+									boolean hostnameTag) throws LifecycleException {
 		this.typeNames = typeNames;
 		this.tags = tags;
 		this.tagName = tagName;
@@ -99,9 +99,9 @@ public class OpenTSDBMessageFormatter {
 	 *
 	 * @param resultString - the string containing the metric name, timestamp, value, and possibly other content.
 	 */
-	void addTags(StringBuilder resultString) {
-		if (hostnameTag != null) {
-			addTag(resultString, "host", hostnameTag);
+	void addTags(StringBuilder resultString, Server server) {
+		if (hostnameTag) {
+			addTag(resultString, "host", server.getLabel());
 		}
 
 		// Add the constant tag names and values.
@@ -144,30 +144,36 @@ public class OpenTSDBMessageFormatter {
 	 * OpenTSDB.
 	 *
 	 * @param result - one results from the Query.
+	 * @param server - Server object for importing hostname
 	 * @return List<String> - the list of strings containing metric details ready for sending to OpenTSDB.
 	 */
+	/*
 	private List<String> formatResult(Result result) {
+		return this.formatResult(result, null);
+	}
+	*/
+	private List<String> formatResult(Result result, Server server) {
 		List<String> resultStrings = new LinkedList<>();
 		Map<String, Object> values = result.getValues();
 
 		String attributeName = result.getAttributeName();
 
 		if (values.containsKey(attributeName) && values.size() == 1) {
-			processOneMetric(resultStrings, result, values.get(attributeName), null, null);
+			processOneMetric(resultStrings, server, result, values.get(attributeName), null, null);
 		} else {
 			for (Map.Entry<String, Object> valueEntry : values.entrySet()) {
-				processOneMetric(resultStrings, result, valueEntry.getValue(), tagName, valueEntry.getKey());
+				processOneMetric(resultStrings, server, result, valueEntry.getValue(), tagName, valueEntry.getKey());
 			}
 		}
 		return resultStrings;
 	}
 
-	public Iterable<String> formatResults(Iterable<Result> results) {
+	public Iterable<String> formatResults(Iterable<Result> results, final Server server) {
 		return from(results).transformAndConcat(new Function<Result, List<String>>() {
 
 			@Override
 			public List<String> apply(Result input) {
-				return formatResult(input);
+				return formatResult(input, server);
 			}
 
 		}).toList();
@@ -176,7 +182,7 @@ public class OpenTSDBMessageFormatter {
 	/**
 	 * Process a single metric from the given JMX query result with the specified value.
 	 */
-	protected void processOneMetric(List<String> resultStrings, Result result, Object value, String addTagName,
+	protected void processOneMetric(List<String> resultStrings, Server server, Result result, Object value, String addTagName,
 									String addTagValue) {
 		String metricName = this.metricNameStrategy.formatName(result);
 
@@ -187,7 +193,7 @@ public class OpenTSDBMessageFormatter {
 			StringBuilder resultString = new StringBuilder();
 
 			formatResultString(resultString, metricName, result.getEpoch() / 1000L, value);
-			addTags(resultString);
+			addTags(resultString, server);
 
 			if (addTagName != null) {
 				addTag(resultString, addTagName, addTagValue);

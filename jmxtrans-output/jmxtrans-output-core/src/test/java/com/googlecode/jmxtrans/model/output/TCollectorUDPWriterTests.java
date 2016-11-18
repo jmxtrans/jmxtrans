@@ -27,6 +27,8 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -104,7 +106,7 @@ public class TCollectorUDPWriterTests {
 
 		// Execute
 		this.writer.start();
-		this.writer.doWrite(null, this.mockQuery, ImmutableList.of(this.mockResult));
+		this.writer.doWrite(ServerFixtures.dummyServer(), this.mockQuery, ImmutableList.of(this.mockResult));
 		this.writer.close();
 
 		// Verifications

@@ -27,6 +27,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
@@ -35,6 +37,7 @@ import java.io.Writer;
 
 @ThreadSafe
 public class OpenTSDBWriter2 implements WriterBasedOutputWriter {
+	private static final Logger logger = LoggerFactory.getLogger(OpenTSDBWriter2.class);
 
 	private final OpenTSDBMessageFormatter messageFormatter;
 
@@ -43,9 +46,14 @@ public class OpenTSDBWriter2 implements WriterBasedOutputWriter {
 	}
 
 	@Override
-	public void write(@Nonnull final Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
+	public void write(
+			@Nonnull Writer writer,
+			@Nonnull Server server,
+			@Nonnull Query query,
+			@Nonnull Iterable<Result> results) throws IOException {
 
-		for(String resultString : messageFormatter.formatResults(results)) {
+		for(String resultString : messageFormatter.formatResults(results, server)) {
+			logger.trace(resultString);
 			writer.write("put " + resultString + "\n");
 		}
 	}

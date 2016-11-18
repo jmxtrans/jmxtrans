@@ -38,7 +38,6 @@ import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -80,9 +79,12 @@ public class OpenTSDBWriterFactory implements OutputWriterFactory {
 		ImmutableMap<String, String> immutableTags =
 				tags == null ? ImmutableMap.<String, String>of() : ImmutableMap.copyOf(tags);
 
-		messageFormatter = new OpenTSDBMessageFormatter(typeNames, immutableTags, tagName,
-				metricNamingExpression, mergeTypeNamesTags,
-				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
+		mergeTypeNamesTags = firstNonNull(mergeTypeNamesTags, true);
+
+		messageFormatter = new OpenTSDBMessageFormatter(
+				(typeNames == null) ? ImmutableList.<String>of() : typeNames,
+				immutableTags, tagName, metricNamingExpression, mergeTypeNamesTags,
+				firstNonNull(addHostnameTag, false));
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
 	}
@@ -91,11 +93,11 @@ public class OpenTSDBWriterFactory implements OutputWriterFactory {
 	public ResultTransformerOutputWriter<WriterPoolOutputWriter<OpenTSDBWriter2>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
-				TcpOutputWriterBuilder.builder(
-						server,
-						new OpenTSDBWriter2(messageFormatter))
+				TcpOutputWriterBuilder
+						.builder(server, new OpenTSDBWriter2(messageFormatter))
 						.setFlushStrategy(flushStrategy)
 						.setPoolSize(poolSize)
-						.build());
+						.build()
+		);
 	}
 }

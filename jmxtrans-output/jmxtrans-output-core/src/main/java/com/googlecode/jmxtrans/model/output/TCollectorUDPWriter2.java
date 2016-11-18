@@ -46,7 +46,7 @@ public class TCollectorUDPWriter2 implements WriterBasedOutputWriter {
 	@Override
 	public void write(@Nonnull final Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 
-		for(String resultString : messageFormatter.formatResults(results)) {
+		for(String resultString : messageFormatter.formatResults(results, server)) {
 			writer.write(resultString);
 		}
 	}

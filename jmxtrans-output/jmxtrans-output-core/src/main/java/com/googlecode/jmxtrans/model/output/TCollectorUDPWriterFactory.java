@@ -38,7 +38,6 @@ import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -82,7 +81,7 @@ public class TCollectorUDPWriterFactory implements OutputWriterFactory {
 
 		messageFormatter = new OpenTSDBMessageFormatter(typeNames, immutableTags, tagName,
 				metricNamingExpression, mergeTypeNamesTags,
-				addHostnameTag ? InetAddress.getLocalHost().getHostName() : null);
+				addHostnameTag);
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
 	}

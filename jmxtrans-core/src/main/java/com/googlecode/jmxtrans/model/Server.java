@@ -327,6 +327,11 @@ public class Server implements JmxConnectionProvider {
 		return ManagementFactory.getPlatformMBeanServer();
 	}
 
+	@JsonIgnore
+	public String getLabel() {
+		return firstNonNull(alias, host);
+	}
+
 	public String getHost() {
 		if (host == null && url == null) {
 			return null;

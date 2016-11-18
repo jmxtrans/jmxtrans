@@ -96,6 +96,21 @@ public class ServerTests {
 	}
 
 	@Test
+	public void testGetLabel() {
+		Server server = Server.builder()
+				.setAlias("alias")
+				.setHost("host")
+				.setPool(createPool())
+				.build();
+		assertEquals("server label should be 'alias'", "alias", server.getLabel());
+		server = Server.builder()
+				.setHost("host")
+				.setPool(createPool())
+				.build();
+		assertEquals("server label should be 'host'", "host", server.getLabel());
+	}
+
+	@Test
 	public void testEquals() {
 		Server s1 = Server.builder()
 				.setAlias("alias")
