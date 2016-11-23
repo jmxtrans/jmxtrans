@@ -67,6 +67,7 @@ Or with more arguments for a special release :
 
 ```
 docker build -t jmxtrans/jmxtrans:256 --build-arg JMXTRANS_VERSION=256 .
+docker build -t jmxtrans/jmxtrans:259 --build-arg JMXTRANS_VERSION=259 .
 ```
 
 # Questions ?
