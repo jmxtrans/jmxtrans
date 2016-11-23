@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 #
 
-FROM openjdk:8u102-jdk
+FROM openjdk:8
 
 MAINTAINER Nicolas Muller <n.muller@treeptik.fr>
 
