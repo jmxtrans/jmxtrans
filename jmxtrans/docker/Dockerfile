@@ -67,9 +67,6 @@ ENV MAX_PERM_SIZE 384
 ENV SECONDS_BETWEEN_RUNS 60
 ENV CONTINUE_ON_ERROR false
 ENV JSON_DIR /var/lib/jmxtrans
-ENV GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}m -Xmx${HEAP_SIZE}m"}
-ENV JMXTRANS_OPTS="$JMXTRANS_OPTS -Dlog4j.configuration=file:///${JMXTRANS_HOME}/conf/log4j.xml"
-ENV MONITOR_OPTS=" -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=2101  -Dcom.sun.management.jmxremote.rmi.port=2101 "
 
 # Install jmxtrans
 RUN adduser --system --shell /bin/bash --home /usr/share/jmxtrans --disabled-login --disabled-password --group jmxtrans
@@ -89,7 +86,7 @@ COPY docker-entrypoint.sh /
 VOLUME ${JSON_DIR}
 
 # JMX PORT
-EXPOSE 2101
+EXPOSE 9999
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["start-with-jmx"]
