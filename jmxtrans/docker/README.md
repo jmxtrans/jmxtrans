@@ -12,7 +12,7 @@ This is a fully functional JmxTrans application instance, based on the last rele
 
 ```
 docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -P jmxtrans/jmxtrans 		 
-docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -P jmxtrans/jmxtrans jmx
+docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -P jmxtrans/jmxtrans start-without-jmx
 docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -p 9999:9999 jmxtrans/jmxtrans
 ```
 
@@ -84,15 +84,16 @@ docker build -t jmxtrans/jmxtrans:260 --build-arg JMXTRANS_VERSION=260 .
 # Monitor JMXTrans with JMX (aka Inception) 
 
 Make sure to publish JMX container’s port 9999 as the Docker host port 9999 when starting the Docker container.
-*PROXY_HOST* is the IP where is present the JMX client (examle jvisualvm). It is a mandatory parameter because 
-you need a remote access to jvm instance.
+**PROXY_HOST** is the IP where is present the JMX client (example jvisualvm). 
+It is a mandatory parameter for jmx because you need a remote access to jvm instance.
  
 Example with docker engine into a vagrantbox (static ip as 192.168.50.4)
 ```
 docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -p 9999:9999 --env PROXY_HOST=192.168.50.4 jmxtrans/jmxtrans
 ```
 
-Example with native docker MacOSX engine. It is tricky despite hidden vm into Mac, we need to use *localhost* and not 172.16.123.1
+Example with native docker MacOSX engine. 
+It is tricky despite the hidden virtualmachine (xhive) into Mac, we need to use *localhost* and not 172.16.123.1
 Docker for Mac is awesome but maybe hard to understand...
 ```
 docker run -d -v `pwd`/json-files:/var/lib/jmxtrans -p 9999:9999 --env PROXY_HOST=localhost jmxtrans/jmxtrans
