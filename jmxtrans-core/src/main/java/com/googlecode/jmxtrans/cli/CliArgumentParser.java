@@ -23,8 +23,9 @@
 package com.googlecode.jmxtrans.cli;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public interface CliArgumentParser {
 	@Nonnull
-	JmxTransConfiguration parseOptions(@Nonnull String[] args) throws OptionsException, org.apache.commons.cli.ParseException;
+	JmxTransConfiguration parseOptions(@Nonnull String[] args) throws OptionsException, org.apache.commons.cli.ParseException, IOException;
 }

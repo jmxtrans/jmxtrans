@@ -54,11 +54,6 @@
 	<build>
 
 		<plugins>
-
-			<plugin>
-				<groupId>net.ju-n.maven.plugins</groupId>
-				<artifactId>checksum-maven-plugin</artifactId>
-			</plugin>
 			<plugin>
 				<!-- There is no Java code in this module, let's skip animal-sniffer -->
 				<groupId>org.codehaus.mojo</groupId>

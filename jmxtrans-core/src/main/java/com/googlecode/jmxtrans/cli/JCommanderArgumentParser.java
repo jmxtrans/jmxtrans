@@ -26,13 +26,24 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class JCommanderArgumentParser implements CliArgumentParser {
 	@Nonnull
 	@Override
-	public JmxTransConfiguration parseOptions(@Nonnull String[] args) {
+	public JmxTransConfiguration parseOptions(@Nonnull String[] args) throws IOException {
+		JmxTransConfiguration tempConfig = new JmxTransConfiguration();
 		JmxTransConfiguration configuration = new JmxTransConfiguration();
-		JCommander jCommander = new JCommander(configuration, args);
+		new JCommander(tempConfig, args);
+
+		JCommander jCommander = new JCommander();
+		jCommander.setDefaultProvider(new FileConfiguration(localProperties(tempConfig.getConfigFile())));
+		jCommander.addObject(configuration);
+		jCommander.parse(args);
 
 		if (configuration.isHelp()) jCommander.usage();
 		else validate(configuration);
@@ -40,7 +51,33 @@ public class JCommanderArgumentParser implements CliArgumentParser {
 		return configuration;
 	}
 
+	private Properties localProperties(File configFile) throws IOException {
+		Properties properties = new Properties(defaultProperties());
+		File defaultSystemProperties = new File("/etc/jmxtrans/jmxtrans.properties");
+
+		if (configFile != null) {
+			try (InputStream in = new FileInputStream(configFile)) {
+				properties.load(in);
+			}
+		} else if (defaultSystemProperties.isFile()) {
+			try (InputStream in = new FileInputStream(defaultSystemProperties)) {
+				properties.load(in);
+			}
+		}
+
+		return properties;
+	}
+
+	private Properties defaultProperties() throws IOException {
+		try (InputStream in = this.getClass().getClassLoader().getResourceAsStream("jmxtrans.properties")) {
+			Properties properties = new Properties();
+			properties.load(in);
+			return properties;
+		}
+	}
+
 	private void validate(JmxTransConfiguration configuration) {
 		if (configuration.getJsonDirOrFile() == null) throw new ParameterException("Please specify either the -f or -j option.");
 	}
+
 }

@@ -24,10 +24,12 @@ package com.googlecode.jmxtrans.cli;
 
 import org.apache.commons.cli.ParseException;
 
+import java.io.IOException;
+
 public class JCommanderArgumentParserTest extends CliArgumentParserBase {
 
 	@Override
-	protected JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException {
+	protected JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException, IOException {
 		return new JCommanderArgumentParser().parseOptions(args);
 	}
 
