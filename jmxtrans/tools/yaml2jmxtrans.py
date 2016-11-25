@@ -183,7 +183,7 @@ class Queries(object):
         else:
         	typeNames = typeName
         	
-        #For compatibility, if no outputWriters were configured, use the deprecated Graphite-specific config: 
+        #For compatibility, if no outputWriters were configured, use the deprecated Graphite-specific config:
         if len(self.outputWriters) == 0:
             return [ {
             '@class' : 'com.googlecode.jmxtrans.model.output.GraphiteWriter',

@@ -105,6 +105,7 @@
 		<module>jmxtrans-core</module>
 		<module>jmxtrans-test-utils</module>
 		<module>jmxtrans-docker-test</module>
+		<module>jmxtrans-cluster</module>
 	</modules>
 
 	<scm>
@@ -248,6 +249,11 @@
 				<version>1.10</version>
 			</dependency>
 			<dependency>
+				<groupId>commons-configuration</groupId>
+				<artifactId>commons-configuration</artifactId>
+				<version>1.10</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>2.5</version>
@@ -298,6 +304,16 @@
 				<version>2.1.1</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-framework</artifactId>
+				<version>2.10.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-recipes</artifactId>
+				<version>2.10.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.kafka</groupId>
 				<artifactId>kafka_2.10</artifactId>
 				<version>0.10.0.0</version>
@@ -306,6 +322,11 @@
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity</artifactId>
 				<version>1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.zookeeper</groupId>
+				<artifactId>zookeeper</artifactId>
+				<version>3.4.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.mojo</groupId>
@@ -516,6 +537,12 @@
 				<groupId>net.javacrumbs.json-unit</groupId>
 				<artifactId>json-unit-fluent</artifactId>
 				<version>1.12.1</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-test</artifactId>
+				<version>2.10.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>

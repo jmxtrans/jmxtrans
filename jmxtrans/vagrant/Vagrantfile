@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     centos.vm.provision "shell", inline: "yum install /jmxtrans_src/target/rpm/jmxtrans/RPMS/noarch/jmxtrans-*.rpm"
   end
 
-  config.vm.define "ubuntu" do |ubuntu|
+  clConfig.vm.define "ubuntu" do |ubuntu|
     ubuntu.vm.box = "ubuntu/trusty64"
     ubuntu.vm.provider "virtualbox" do |v|
       v.memory = 1024
