@@ -52,8 +52,7 @@ class Queries(object):
     Generate query object snippets suitable for consumption by jmxtrans
     """
     def __init__(self, queries, query_attributes, query_defaults,
-            outputWriters, outputWriters_attributes, monitor_host,
-            monitor_port):
+            outputWriters, monitor_host, monitor_port):
         """
         Initialize Queries configuration with data from YAML structure, making
         named queries accessible by name
@@ -62,7 +61,6 @@ class Queries(object):
         self.query_attributes = query_attributes
         self.query_defaults = query_defaults
         self.outputWriters = []
-        self.outputWriters_attributes = outputWriters_attributes
         self.monitor_host = monitor_host
         self.monitor_port = monitor_port
 
@@ -81,13 +79,7 @@ class Queries(object):
         # (no outputWriters explicitly configured)
         if outputWriters != None:
             for outputWriter in outputWriters:
-                outputWriterEntry = {}
-                for attribute in outputWriters_attributes:
-                    if attribute in outputWriter:
-                      outputWriterEntry[attribute] = outputWriter[attribute]
-                    else:
-                      outputWriterEntry[attribute] = None
-                self.outputWriters.append(outputWriterEntry)
+                self.outputWriters.append(outputWriter)
 
     def create_query_entry(self, query_name, rootPrefix):
         """
@@ -197,7 +189,7 @@ class Queries(object):
         
         writer = copy.deepcopy(self.outputWriters)
         for iter in range(len(self.outputWriters)):
-            writer[iter]['settings']['typeNames'] = typeNames
+            writer[iter]['typeNames'] = typeNames
         return writer
 
 class HostSets(object):
@@ -253,7 +245,6 @@ if __name__ == '__main__':
         "obj", "resultAlias", "attr", "typeName",
         "allowDottedKeys", "useAllTypeNames", "useObjDomainAsKey",
     ]
-    outputWriters_attributes = ["settings", "@class"]
     
     if len(sys.argv) != 2:
         usage()
@@ -271,7 +262,7 @@ if __name__ == '__main__':
     graphite_port = yf['graphite_port'] if ('graphite_port' in yf) else None
 
     q = Queries(yf['queries'], query_attributes, yf.get('query_defaults', {}),
-        outputWriters, outputWriters_attributes, graphite_host, graphite_port)
+        outputWriters, graphite_host, graphite_port)
     h = HostSets(yf['sets'])
 
     for set_name in h.set_names():
