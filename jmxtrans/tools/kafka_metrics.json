@@ -1,0 +1,45 @@
+{
+ "servers": [
+  {
+   "numQueryThreads": 1, 
+   "host": "localhost", 
+   "port": "9998", 
+   "queries": [
+    {
+     "allowDottedKeys": null, 
+     "attr": [
+      "Count", 
+      "MeanRate"
+     ], 
+     "outputWriters": [
+      {
+       "outputFile": "/tmp/keyout1.txt", 
+       "maxLogFileSize": "10MB", 
+       "typeNames": [
+        "name", 
+        "topic"
+       ], 
+       "@class": "com.googlecode.jmxtrans.model.output.KeyOutWriter", 
+       "debug": true, 
+       "maxLogBackupFiles": 200
+      }, 
+      {
+       "url": "http://127.0.0.1:1988/v1/push", 
+       "typeNames": [
+        "name", 
+        "topic"
+       ], 
+       "@class": "com.googlecode.jmxtrans.model.output.OpenFalconWriterFactory", 
+       "tags": "module=kafka",
+			 "metricType": "COUNTER"
+      }
+     ], 
+     "useObjDomainAsKey": null, 
+     "resultAlias": "ByteInPerSec", 
+     "useAllTypeNames": null, 
+     "obj": "kafka.server:type=BrokerTopicMetrics,*"
+    }
+   ]
+  }
+ ]
+}
