@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    install)
+        if ! id jmxtrans > /dev/null 2>&1 ; then
+            adduser --system --shell /bin/bash --home /etc/jmxtrans --disabled-login --disabled-password --group jmxtrans
+        fi
+        if [ ! -d /var/log/jmxtrans ] ; then
+            mkdir /var/log/jmxtrans
+            chown jmxtrans: /var/log/jmxtrans
+        fi
+    ;;
+    upgrade|abort-upgrade)
+    ;;
+    *)
+        echo "preinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac

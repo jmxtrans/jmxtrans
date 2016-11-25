@@ -50,6 +50,12 @@ public class JmxTransConfiguration {
 	@Parameter(names = {"-f", "--json-file"}, validateValueWith = ExistingFileValidator.class)
 	@Setter private File jsonFile;
 
+	@Parameter(
+			names = {"--config"},
+			description = "global jmxtrans configuration file",
+			validateValueWith = ExistingFileValidator.class)
+	@Getter @Setter private File configFile;
+
 	public File getJsonDirOrFile() {
 		if (jsonDir != null) return jsonDir;
 		return jsonFile;
@@ -115,7 +121,7 @@ public class JmxTransConfiguration {
 	private int queryProcessorExecutorPoolSize = 10;
 
 	@Parameter(
-			names = {"--query-processor-executor-work-queue-capacity."},
+			names = {"--query-processor-executor-work-queue-capacity"},
 			description = "Size of the query work queue",
 			validateWith = PositiveInteger.class
 	)
@@ -131,7 +137,7 @@ public class JmxTransConfiguration {
 	private int resultProcessorExecutorPoolSize = 10;
 
 	@Parameter(
-			names = {"--result-processor-executor-work-queue-capacity."},
+			names = {"--result-processor-executor-work-queue-capacity"},
 			description = "Size of the result work queue",
 			validateWith = PositiveInteger.class
 	)
