@@ -68,4 +68,12 @@ public class CPrecisionValueTransformerTests {
 		assertThat(transformed).isNull();
 	}
 
+	@Test
+	public void nanIsReturnedNull() {
+		ValueTransformer transformer = new CPrecisionValueTransformer();
+		Object transformed = transformer.apply(Double.NaN);
+
+		assertThat(transformed).isNull();
+	}
+
 }
