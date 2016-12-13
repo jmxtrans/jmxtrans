@@ -35,6 +35,10 @@ public class CPrecisionValueTransformer implements ValueTransformer {
 		if (input == null) return null;
 		if (!Number.class.isAssignableFrom(input.getClass())) return input;
 
+		if (Double.isNaN(((Number) input).doubleValue())) {
+			return null;
+		}
+
 		BigDecimal inputNumber = new BigDecimal(input.toString());
 
 		if (inputNumber.abs().compareTo(C_PRECISION) < 0) return 0;
