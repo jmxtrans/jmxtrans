@@ -77,7 +77,7 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 		for (Result result : results) {
 			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
 
-				if (isNotValidValue(values.getValue()) || (values.getValue() instanceof TabularData)) {
+				if (isNotValidValue(values.getValue())) {
 					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
 					continue;
 				}
@@ -91,7 +91,8 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	}
 
 	private boolean isNotValidValue(Object value) {
-		return !(isNumeric(value) || stringsValuesAsKey);
+		return !(isNumeric(value) || stringsValuesAsKey) ||
+                (value instanceof TabularData);
 	}
 
 	private String computeActualValue(Object value) {
