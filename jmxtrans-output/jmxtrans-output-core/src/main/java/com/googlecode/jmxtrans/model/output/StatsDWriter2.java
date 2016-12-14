@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -76,7 +77,7 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 		for (Result result : results) {
 			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
 
-				if (isNotValidValue(values.getValue())) {
+				if (isNotValidValue(values.getValue()) || (values.getValue() instanceof TabularData)) {
 					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
 					continue;
 				}
