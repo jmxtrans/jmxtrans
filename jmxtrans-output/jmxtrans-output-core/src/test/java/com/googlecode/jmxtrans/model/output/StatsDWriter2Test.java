@@ -29,7 +29,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
-import static com.googlecode.jmxtrans.model.ResultFixtures.*;
+import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericBelowCPrecisionResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleTrueResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -89,21 +92,5 @@ public class StatsDWriter2Test {
 				.isEqualTo("root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:10|g\n" +
 						"root.host_example_net_4321.VerboseMemory.Verbose.true:1|g\n" +
 						"root.host_example_net_4321.VerboseMemory.Verbose.false:1|g\n");
-	}
-
-	@Test
-	public void tabularDataValuesAreSkipped() throws Exception {
-
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
-
-		StringWriter out = new StringWriter();
-		writer.write(out, dummyServer(), dummyQuery(), dummyTabularResults());
-
-		assertThat(out.toString())
-				.isEqualTo("root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:0|g\n" +
-						"root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:268435456|g\n" +
-						"root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:268435456|g\n" +
-						"root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:-1|g\n");
-
 	}
 }

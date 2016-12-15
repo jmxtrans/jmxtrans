@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -91,8 +90,7 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	}
 
 	private boolean isNotValidValue(Object value) {
-		return !(isNumeric(value) || stringsValuesAsKey) ||
-                (value instanceof TabularData);
+		return !(isNumeric(value) || stringsValuesAsKey);
 	}
 
 	private String computeActualValue(Object value) {

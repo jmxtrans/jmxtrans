@@ -25,14 +25,6 @@ package com.googlecode.jmxtrans.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
-
 public final class ResultFixtures {
 	private ResultFixtures() {}
 
@@ -137,51 +129,5 @@ public final class ResultFixtures {
 				numericResult(),
 				booleanTrueResult(),
 				booleanFalseResult());
-	}
-
-	public static ImmutableList<Result> dummyTabularResults() throws OpenDataException {
-
-		CompositeType memoryUsageType = new CompositeType("java.lang.management.MemoryUsage",
-				"java.lang.management.MemoryUsage",
-				new String[]{"init", "used", "committed", "max"},
-				new String[]{"init", "used", "committed", "max"},
-				new OpenType[]{SimpleType.LONG, SimpleType.LONG, SimpleType.LONG, SimpleType.LONG});
-
-		CompositeType rowType = new CompositeType("java.util.Map<java.lang.String,java.lang.management.MemoryUsage>",
-				"java.util.Map<java.lang.String,java.lang.management.MemoryUsage>",
-				new String[]{"key", "value"},
-				new String[]{"key", "value"},
-				new OpenType[]{SimpleType.STRING, memoryUsageType}
-				);
-
-		TabularType tabularType = new TabularType("java.util.Map<java.lang.String,java.lang.management.MemoryUsage>",
-				"java.util.Map<java.lang.String,java.lang.management.MemoryUsage>",
-				rowType,
-				new String[]{"key"});
-
-		CompositeDataSupport usage = new CompositeDataSupport(memoryUsageType,
-				new String[]{"init", "used", "committed", "max"},
-				new Long[]{0l, 268435456l, 268435456l, -1l});
-
-		TabularDataSupport tabularData = new TabularDataSupport(tabularType);
-		tabularData.put(new CompositeDataSupport(rowType,
-				new String[]{"key", "value"},
-				new Object[]{"G1 Survivor Space", usage}));
-
-		final Result tabularResult = new Result(
-				0,
-				"LastGcInfo",
-				"java.lang.management.MemoryUsage",
-				"ObjectDomainName",
-				"LastGcInfo",
-				"GarbageCollector",
-				ImmutableMap.<String, Object>of("LastGcInfo", tabularData));
-
-		return ImmutableList.of(
-				numericResult(0),
-				numericResult(268435456),
-				numericResult(268435456),
-				numericResult(-1),
-				tabularResult);
 	}
 }
