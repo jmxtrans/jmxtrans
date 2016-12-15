@@ -136,7 +136,7 @@ public class JmxResultProcessor {
 			if (value instanceof TabularDataSupport) {
 				TabularDataSupport tds = (TabularDataSupport) value;
 				processTabularDataSupport(accumulator, attributeName + "." + key, tds);
-				values.put(key, value);
+				// continue because we added tabular contents within above, but need primitives at this level
 			} else if (value instanceof CompositeDataSupport) {
 				// now recursively go through everything.
 				CompositeDataSupport cds2 = (CompositeDataSupport) value;
