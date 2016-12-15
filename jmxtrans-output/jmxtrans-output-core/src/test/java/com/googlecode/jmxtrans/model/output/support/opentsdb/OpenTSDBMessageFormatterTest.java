@@ -28,8 +28,11 @@ import com.google.common.collect.Iterables;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -38,15 +41,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.googlecode.jmxtrans.model.ServerFixtures.createPool;
 
 public class OpenTSDBMessageFormatterTest {
-
-	protected Query mockQuery;
-	protected Result mockResult;
+	private Result mockResult;
 
 	@Before
 	public void setupTest() {
-		this.mockQuery = Mockito.mock(Query.class);
 		this.mockResult = Mockito.mock(Result.class);
 
 		// Setup common mock interactions.
@@ -55,7 +56,6 @@ public class OpenTSDBMessageFormatterTest {
 		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
 		Mockito.when(this.mockResult.getTypeName()).
 				thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
-
 	}
 
 	private OpenTSDBMessageFormatter createDefaultFormatter() throws LifecycleException, UnknownHostException {
@@ -66,7 +66,9 @@ public class OpenTSDBMessageFormatterTest {
 	public void testMergedTypeNameValues() throws Exception {
 		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(1, Iterables.size(strings));
 		String resultString = strings.iterator().next();
@@ -75,14 +77,31 @@ public class OpenTSDBMessageFormatterTest {
 		Assert.assertTrue(resultString.matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
 	}
 
+	@Ignore
+	@Test
+	public void testHostLabel() throws Exception {
+		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
+
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
+
+		Assert.assertEquals(1, Iterables.size(strings));
+
+		String resultStr = strings.iterator().next();
+		Assert.assertTrue( resultStr.matches(".*\\bhost=" + ServerFixtures.DEFAULT_HOST + "\\b.*"));
+	}
+
 	@Test
 	public void testNonMergedTypeNameValues() throws Exception {
 
 		OpenTSDBMessageFormatter formatter =
 				new OpenTSDBMessageFormatter(ImmutableList.of("Type", "Group", "Name", "Missing"),
-						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, null, false, null);
+						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, null, false, true);
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(1, Iterables.size(strings));
 		String resultString = strings.iterator().next();
@@ -102,7 +121,9 @@ public class OpenTSDBMessageFormatterTest {
 
 		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(1, Iterables.size(strings));
 		Assert.assertTrue(
@@ -123,7 +144,9 @@ public class OpenTSDBMessageFormatterTest {
 		OpenTSDBMessageFormatter formatter =
 				new OpenTSDBMessageFormatter(ImmutableList.of("Type", "Group", "Name", "Missing"), ImmutableMap.copyOf(tagMap));
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(1, Iterables.size(strings));
 
@@ -141,7 +164,9 @@ public class OpenTSDBMessageFormatterTest {
 	public void testAddHostnameTag() throws Exception {
 
 		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(1, Iterables.size(strings));
 		Assert.assertTrue(strings.iterator().next().matches(".*host=.*"));
@@ -153,9 +178,11 @@ public class OpenTSDBMessageFormatterTest {
 
 		OpenTSDBMessageFormatter formatter =
 				new OpenTSDBMessageFormatter(ImmutableList.of("Type", "Group", "Name", "Missing"),
-						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, null, true, null);
+						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, null, true, false);
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(1, Iterables.size(strings));
 		Assert.assertFalse(strings.iterator().next().matches(".*host=.*"));
@@ -170,7 +197,9 @@ public class OpenTSDBMessageFormatterTest {
 		ImmutableMap<String, Object> values = ImmutableMap.of();
 		Mockito.when(this.mockResult.getValues()).thenReturn(values);
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(0, Iterables.size(strings));
 
@@ -183,7 +212,9 @@ public class OpenTSDBMessageFormatterTest {
 
 		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(1, Iterables.size(strings));
 		String resultString = strings.iterator().next();
@@ -202,7 +233,9 @@ public class OpenTSDBMessageFormatterTest {
 		Mockito.when(this.mockResult.getValues()).
 				thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021", "XX-ATT-XX", (Object) "210012"));
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(2, Iterables.size(strings));
 		Iterator<String> resultStringIterator = strings.iterator();
@@ -232,7 +265,9 @@ public class OpenTSDBMessageFormatterTest {
 
 		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
 		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "THIS-IS-NOT-A-NUMBER"));
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 		Assert.assertEquals(0, Iterables.size(strings));
 
 	}
@@ -242,10 +277,12 @@ public class OpenTSDBMessageFormatterTest {
 
 		OpenTSDBMessageFormatter formatter =
 				new OpenTSDBMessageFormatter(ImmutableList.of("Type", "Group", "Name", "Missing"),
-						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, "'xx-jexl-constant-name-xx'", true, null);
+						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, "'xx-jexl-constant-name-xx'", true, true);
 
 
-		Iterable<String> strings = formatter.formatResults(ImmutableList.of(this.mockResult));
+		Iterable<String> strings = formatter.formatResults(
+				ImmutableList.of(this.mockResult),
+				ServerFixtures.dummyServer());
 		Assert.assertEquals(1, Iterables.size(strings));
 		Assert.assertTrue(strings.iterator().next().matches("^xx-jexl-constant-name-xx 0 120021.*"));
 
@@ -255,7 +292,7 @@ public class OpenTSDBMessageFormatterTest {
 	public void testInvalidJexlNaming() throws Exception {
 
 		new OpenTSDBMessageFormatter(ImmutableList.of("Type", "Group", "Name", "Missing"),
-						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, "invalid expression here", true, null);
+						ImmutableMap.<String, String>of(), OpenTSDBMessageFormatter.DEFAULT_TAG_NAME, "invalid expression here", true, true);
 
 	}
 

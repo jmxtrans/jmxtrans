@@ -27,11 +27,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.JmxResultProcessor;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.QueryFixtures;
 import com.googlecode.jmxtrans.model.Result;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -45,6 +41,7 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.lang.management.ManagementFactory;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +49,7 @@ import static com.google.common.collect.FluentIterable.from;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQueryWithResultAlias;
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeNoException;
 
 /**
  * <b>Warning:</b> This test class relies on MBeans exposed by the JVM. As far
@@ -180,6 +178,49 @@ public class JmxResultProcessorTest {
 		assertThat(key).isEqualTo("java.version");
 	}
 
+	@Test(timeout = 1000)
+	public void canReadFieldsOfTabularData() throws MalformedObjectNameException, AttributeNotFoundException, MBeanException,
+			ReflectionException, InstanceNotFoundException {
+		// Need to induce a GC for the attribute below to be populated
+		Runtime.getRuntime().gc();
+
+		ObjectInstance runtime = null;
+		try {
+			runtime = getG1YoungGen();
+		} catch (InstanceNotFoundException e) {
+			// ignore test if G1 not enabled
+			assumeNoException("G1 GC in Java 7/8 needs to be enabled with -XX:+UseG1GC", e);
+		}
+
+		AttributeList attr;
+		// but takes a non-deterministic amount of time for LastGcInfo to get populated
+		while (true) { // but bounded by Test timeout
+			attr = ManagementFactory.getPlatformMBeanServer().getAttributes(
+					runtime.getObjectName(), new String[]{"LastGcInfo"});
+			if (((Attribute) attr.get(0)).getValue() != null) {
+				break;
+			}
+		}
+
+		List<Result> results = new JmxResultProcessor(
+				dummyQueryWithResultAlias(),
+				runtime,
+				attr.asList(),
+				runtime.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
+
+		assertThat(results.size()).isGreaterThan(2);
+
+		Optional<Result> result = from(results).firstMatch(new ByAttributeName("LastGcInfo"));
+		assertThat(result.isPresent()).isTrue();
+		// Should have primitive typed fields
+		assertThat(result.get().getValues().size()).isGreaterThan(0);
+		assertThat(result.get().getValues().get("duration")).isNotNull();
+		// assert tabular fields are excluded
+		assertThat(result.get().getValues().get("memoryUsageBeforeGc")).isNull();
+		assertThat(result.get().getValues().get("memoryUsageAfterGc")).isNull();
+	}
+
 	@Test
 	public void canReadCompositeData() throws MalformedObjectNameException, AttributeNotFoundException, MBeanException,
 			ReflectionException, InstanceNotFoundException {
@@ -253,6 +294,14 @@ public class JmxResultProcessorTest {
 	public ObjectInstance getMemory() throws MalformedObjectNameException, InstanceNotFoundException {
 		return ManagementFactory.getPlatformMBeanServer().getObjectInstance(
 				new ObjectName("java.lang", "type", "Memory"));
+	}
+
+	public ObjectInstance getG1YoungGen() throws MalformedObjectNameException, InstanceNotFoundException {
+		final Hashtable<String, String> keyProperties = new Hashtable<>();
+		keyProperties.put("type", "GarbageCollector");
+		keyProperties.put("name", "G1 Young Generation");
+		return ManagementFactory.getPlatformMBeanServer().getObjectInstance(
+				new ObjectName("java.lang", keyProperties));
 	}
 
 	private static class ByAttributeName implements Predicate<Result> {

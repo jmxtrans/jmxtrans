@@ -50,12 +50,12 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test
-	public void noExceptionThrownWhenHelpIsAsked() throws OptionsException, ParseException {
+	public void noExceptionThrownWhenHelpIsAsked() throws OptionsException, ParseException, IOException {
 		parseConfiguration(new String[]{"-h"});
 	}
 
 	@Test(expected = Exception.class)
-	public void jsonDirectoryOrJsonFileIsRequired() throws OptionsException, ParseException {
+	public void jsonDirectoryOrJsonFileIsRequired() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(new String[]{""});
 		} catch (OptionsException oe) {
@@ -67,7 +67,7 @@ public abstract class CliArgumentParserBase {
 	@Test(expected = Exception.class)
 	@Ignore("Waiting for clarification of specs. Current behavior is to ignore the first option given, " +
 			"probably not what is expected by users.")
-	public void cannotGiveBothJsonFileAndJsonDir() throws OptionsException, ParseException {
+	public void cannotGiveBothJsonFileAndJsonDir() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(new String[]{
 					"-f", mockConfigurationFile.getAbsolutePath(),
@@ -80,13 +80,13 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test
-	public void continueOnJsonErrorIsFalseByDefault() throws OptionsException, ParseException {
+	public void continueOnJsonErrorIsFalseByDefault() throws OptionsException, ParseException, IOException {
 		JmxTransConfiguration configuration = parseConfiguration(requiredOptions());
 		assertThat(configuration.isContinueOnJsonError(), is(false));
 	}
 
 	@Test
-	public void continueOnJsonErrorIsCanBeSetToTrueOrFalse() throws OptionsException, ParseException {
+	public void continueOnJsonErrorIsCanBeSetToTrueOrFalse() throws OptionsException, ParseException, IOException {
 		JmxTransConfiguration configuration = parseConfiguration(requiredOptionsAnd("-c", "true"));
 		assertThat(configuration.isContinueOnJsonError(), is(true));
 
@@ -95,7 +95,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test(expected = Exception.class)
-	public void jsonConfigDirectoryCannotBeAFile() throws OptionsException, ParseException {
+	public void jsonConfigDirectoryCannotBeAFile() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(new String[]{
 					"-j", mockConfigurationFile.getAbsolutePath()
@@ -107,7 +107,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test(expected = Exception.class)
-	public void jsonConfigDirectoryMustExist() throws OptionsException, ParseException {
+	public void jsonConfigDirectoryMustExist() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(new String[]{
 					"-j", new File(mockConfigurationDirectory.getRoot(), "non-existing").getAbsolutePath()
@@ -119,7 +119,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test(expected = Exception.class)
-	public void jsonConfigFileCannotBeADirectory() throws OptionsException, ParseException {
+	public void jsonConfigFileCannotBeADirectory() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(new String[]{
 					"-f", mockConfigurationDirectory.getRoot().getAbsolutePath()
@@ -131,7 +131,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test(expected = Exception.class)
-	public void jsonConfigFileMustExist() throws OptionsException, ParseException {
+	public void jsonConfigFileMustExist() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(new String[]{
 					"-f", new File(mockConfigurationDirectory.getRoot(), "non-existing").getAbsolutePath()
@@ -143,7 +143,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test(expected = Exception.class)
-	public void quartzConfigFileCannotBeADirectory() throws OptionsException, ParseException {
+	public void quartzConfigFileCannotBeADirectory() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(requiredOptionsAnd(
 					"-q", mockConfigurationDirectory.getRoot().getAbsolutePath()
@@ -155,7 +155,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test(expected = Exception.class)
-	public void quartzConfigFileMustExist() throws OptionsException, ParseException {
+	public void quartzConfigFileMustExist() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(requiredOptionsAnd(
 					"-q", new File(mockConfigurationDirectory.getRoot(), "non-existing").getAbsolutePath()
@@ -167,7 +167,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test
-	public void canParseRunInterval() throws OptionsException, ParseException {
+	public void canParseRunInterval() throws OptionsException, ParseException, IOException {
 		JmxTransConfiguration configuration = parseConfiguration(requiredOptionsAnd(
 				"-s", "20"
 		));
@@ -175,7 +175,7 @@ public abstract class CliArgumentParserBase {
 	}
 
 	@Test(expected = Exception.class)
-	public void runIntervalMustBeInteger() throws OptionsException, ParseException {
+	public void runIntervalMustBeInteger() throws OptionsException, ParseException, IOException {
 		try {
 			parseConfiguration(requiredOptionsAnd(
 					"-s", "abc"
@@ -193,7 +193,7 @@ public abstract class CliArgumentParserBase {
 		return arguments.toArray(new String[arguments.size()]);
 	}
 
-	protected abstract JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException;
+	protected abstract JmxTransConfiguration parseConfiguration(String[] args) throws OptionsException, ParseException, IOException;
 
 	private String[] requiredOptions() {
 		return new String[]{"-f", mockConfigurationFile.getAbsolutePath()};

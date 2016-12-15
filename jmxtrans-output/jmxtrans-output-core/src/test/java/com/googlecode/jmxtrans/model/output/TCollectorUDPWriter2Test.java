@@ -24,6 +24,8 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatter;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,9 +56,9 @@ public class TCollectorUDPWriter2Test {
 		ImmutableList<Result> results = ImmutableList.of(result, result);
 		List<String> resultsString = ImmutableList.of("Result1", "Result2");
 
-		Mockito.when(openTSDBMessageFormatter.formatResults(results)).thenReturn(resultsString);
+		Mockito.when(openTSDBMessageFormatter.formatResults(results, ServerFixtures.dummyServer())).thenReturn(resultsString);
 
-		writer.write(outputWriter, null, null, results);
+		writer.write(outputWriter, ServerFixtures.dummyServer(), null, results);
 
 		Mockito.verify(outputWriter).write("Result1");
 		Mockito.verify(outputWriter).write("Result2");
