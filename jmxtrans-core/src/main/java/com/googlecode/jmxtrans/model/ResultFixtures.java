@@ -25,11 +25,13 @@ package com.googlecode.jmxtrans.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import javax.management.openmbean.*;
-import java.lang.management.MemoryUsage;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 
 public final class ResultFixtures {
 	private ResultFixtures() {}
