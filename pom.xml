@@ -34,7 +34,7 @@
 
 	<groupId>org.jmxtrans</groupId>
 	<artifactId>jmxtrans-parent</artifactId>
-	<version>261-SNAPSHOT</version>
+	<version>262-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>JmxTrans - parent project</name>
 	<description>JMX metrics exporter</description>
@@ -796,7 +796,7 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
 								</rules>
 							</configuration>
 						</execution>
