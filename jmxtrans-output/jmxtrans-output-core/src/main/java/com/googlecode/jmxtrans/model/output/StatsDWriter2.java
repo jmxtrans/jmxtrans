@@ -97,6 +97,8 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 		Object transformedValue = valueTransformer.apply(value);
 		if (isNumeric(transformedValue)) {
 			return ":" + transformedValue.toString();
+		} else if (transformedValue == null) {
+			return ":";
 		}
 
 		return "." + transformedValue.toString() + ":" + stringValueDefaultCount;
