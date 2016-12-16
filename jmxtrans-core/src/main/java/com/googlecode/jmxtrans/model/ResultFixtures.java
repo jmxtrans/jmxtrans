@@ -130,4 +130,8 @@ public final class ResultFixtures {
 				booleanTrueResult(),
 				booleanFalseResult());
 	}
+
+	public static ImmutableList<Result> singleResult(Result result) {
+		return ImmutableList.of(result);
+	}
 }
