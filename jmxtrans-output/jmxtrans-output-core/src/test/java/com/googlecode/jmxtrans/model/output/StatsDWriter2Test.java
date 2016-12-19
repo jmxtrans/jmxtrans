@@ -29,10 +29,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
-import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
-import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericBelowCPrecisionResult;
-import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
-import static com.googlecode.jmxtrans.model.ResultFixtures.singleTrueResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.*;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,6 +65,17 @@ public class StatsDWriter2Test {
 		writer.write(out, dummyServer(), dummyQuery(), singleTrueResult());
 
 		assertThat(out.toString()).isEmpty();
+	}
+
+	@Test
+	public void handleNaNValues() throws IOException {
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
+
+		StringWriter out = new StringWriter();
+		writer.write(out, dummyServer(), dummyQuery(), singleResult(numericResult(Double.NaN)));
+
+		assertThat(out.toString())
+				.isEqualTo("root.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount:|g\n");
 	}
 
 	@Test
