@@ -43,4 +43,36 @@ public final class NumberUtils {
 		return false;
 	}
 
+	public static boolean isValidNumber(Object value) {
+		if (value == null) {
+			return false;
+		}
+
+		if (value instanceof Number) {
+			return isValidNumber((Number) value);
+		}
+
+		if (value instanceof String) {
+			return isNumeric(value);
+		}
+
+		return false;
+	}
+
+	public static boolean isValidNumber(Number number) {
+		if (number instanceof Double) {
+			if (Double.isNaN(number.doubleValue()) || Double.isInfinite(number.doubleValue())) {
+				return false;
+			}
+		}
+
+		if (number instanceof Float) {
+			if (Float.isNaN(number.floatValue()) || Float.isInfinite(number.floatValue())) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 }
