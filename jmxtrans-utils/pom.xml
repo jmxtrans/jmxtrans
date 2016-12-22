@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>263</version>
+		<version>264-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-utils</artifactId>
