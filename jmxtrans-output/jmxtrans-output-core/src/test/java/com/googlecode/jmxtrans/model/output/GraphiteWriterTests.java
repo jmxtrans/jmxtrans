@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -132,6 +131,13 @@ public class GraphiteWriterTests {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), numericResult()))
 				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0");
+	}
+
+	@Test
+	public void invalidNumbersFiltered() throws Exception {
+		// check that Graphite format is respected
+		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), numericResult(Double.NEGATIVE_INFINITY)))
+			.isEmpty();
 	}
 
 	@Test
