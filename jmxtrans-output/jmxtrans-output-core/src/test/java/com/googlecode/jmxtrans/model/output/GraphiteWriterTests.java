@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -52,6 +51,7 @@ import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResultWithTypenames;
 import static com.googlecode.jmxtrans.model.ResultFixtures.singleTrueResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.stringResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.googlecode.jmxtrans.model.ServerFixtures.serverWithNoQuery;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,6 +132,22 @@ public class GraphiteWriterTests {
 		// check that Graphite format is respected
 		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), numericResult()))
 				.startsWith("servers.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0");
+	}
+
+	@Test
+	public void stringNumericValue() throws Exception {
+		// check that Graphite format is respected
+		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), stringResult("10")))
+			.startsWith("servers.host_example_net_4321.MemoryAlias.NonHeapMemoryUsage.ObjectPendingFinalizationCount 10 0");
+	}
+
+	@Test
+	public void invalidNumbersFiltered() throws Exception {
+		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), numericResult(Double.NEGATIVE_INFINITY)))
+			.isEmpty();
+
+		assertThat(getOutput(dummyServer(), queryAllowingDottedKeys(), stringResult(String.valueOf(Double.NEGATIVE_INFINITY))))
+			.isEmpty();
 	}
 
 	@Test

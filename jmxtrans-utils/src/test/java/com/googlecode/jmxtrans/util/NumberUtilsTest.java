@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.util;
 import org.junit.Test;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+import static com.googlecode.jmxtrans.util.NumberUtils.isValidNumber;
 import static java.lang.Boolean.FALSE;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,5 +49,41 @@ public class NumberUtilsTest {
 		assertThat(isNumeric((Object) "3.2")).isTrue();
 		assertThat(isNumeric((Object) "abc")).isFalse();
 		assertThat(isNumeric(FALSE)).isFalse();
+
+		assertThat(isNumeric(String.valueOf(Double.NEGATIVE_INFINITY))).isFalse();
+	}
+
+	@Test
+	public void testIsValidNumber() {
+		assertThat(isValidNumber(Long.MAX_VALUE)).isTrue();
+		assertThat(isValidNumber(Long.MIN_VALUE)).isTrue();
+		assertThat(isValidNumber(Double.MIN_VALUE)).isTrue();
+		assertThat(isValidNumber(Double.MAX_VALUE)).isTrue();
+		assertThat(isValidNumber(Float.MAX_VALUE)).isTrue();
+		assertThat(isValidNumber(Float.MIN_VALUE)).isTrue();
+		assertThat(isValidNumber(0L)).isTrue();
+		assertThat(isValidNumber(0D)).isTrue();
+		assertThat(isValidNumber(0)).isTrue();
+		assertThat(isValidNumber(0x0F)).isTrue();
+		assertThat(isValidNumber("1")).isTrue();
+		assertThat(isValidNumber("1.00")).isTrue();
+		assertThat(isValidNumber("-1.00")).isTrue();
+		assertThat(isValidNumber("-1")).isTrue();
+
+		assertThat(isValidNumber(Double.NaN)).isFalse();
+		assertThat(isValidNumber(Double.POSITIVE_INFINITY)).isFalse();
+		assertThat(isValidNumber(Double.NEGATIVE_INFINITY)).isFalse();
+
+		assertThat(isValidNumber(String.valueOf(Double.NaN))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Double.POSITIVE_INFINITY))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Double.NEGATIVE_INFINITY))).isFalse();
+
+		assertThat(isValidNumber(Float.NaN)).isFalse();
+		assertThat(isValidNumber(Float.POSITIVE_INFINITY)).isFalse();
+		assertThat(isValidNumber(Float.NEGATIVE_INFINITY)).isFalse();
+
+		assertThat(isValidNumber(String.valueOf(Float.NaN))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Float.POSITIVE_INFINITY))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Float.NEGATIVE_INFINITY))).isFalse();
 	}
 }

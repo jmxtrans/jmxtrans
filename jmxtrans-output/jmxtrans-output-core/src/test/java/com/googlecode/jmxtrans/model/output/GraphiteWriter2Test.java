@@ -31,6 +31,8 @@ import java.io.StringWriter;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.stringResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,6 +51,37 @@ public class GraphiteWriter2Test {
 				.startsWith("servers")
 				.contains("example_net_4321")
 				.endsWith(" 10 0\n");
+	}
+
+	@Test
+	public void invalidNumbersFiltered() throws Exception {
+		WriterBasedOutputWriter outputWriter = new GraphiteWriter2(ImmutableList.<String>of(), "servers");
+		StringWriter writer = new StringWriter();
+
+		outputWriter.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(numericResult(Double.NEGATIVE_INFINITY)));
+
+		assertThat(writer.toString()).isEmpty();
+	}
+
+	@Test
+	public void invalidNumericStringFiltered() throws Exception {
+		WriterBasedOutputWriter outputWriter = new GraphiteWriter2(ImmutableList.<String>of(), "servers");
+		StringWriter writer = new StringWriter();
+
+		outputWriter.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(stringResult(String.valueOf(Double.NEGATIVE_INFINITY))));
+
+		assertThat(writer.toString()).isEmpty();
+	}
+
+	@Test
+	public void stringNumericValue() throws Exception {
+		WriterBasedOutputWriter outputWriter = new GraphiteWriter2(ImmutableList.<String>of(), "servers");
+		StringWriter writer = new StringWriter();
+
+		outputWriter.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(stringResult("10")));
+
+		assertThat(writer.toString())
+			.startsWith("servers.host_example_net_4321.MemoryAlias.NonHeapMemoryUsage_ObjectPendingFinalizationCount 10 0");
 	}
 
 }
