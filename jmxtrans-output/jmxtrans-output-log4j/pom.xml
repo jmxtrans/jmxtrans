@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-output</artifactId>
-		<version>263-SNAPSHOT</version>
+		<version>263</version>
 	</parent>
 
 	<artifactId>jmxtrans-output-log4j</artifactId>
