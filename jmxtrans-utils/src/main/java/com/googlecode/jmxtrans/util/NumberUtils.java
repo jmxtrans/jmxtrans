@@ -44,12 +44,22 @@ public final class NumberUtils {
 	}
 
 	public static boolean isValidNumber(Object value) {
-		if (!(value instanceof Number)) {
+		if (value == null) {
 			return false;
 		}
 
-		Number number = (Number) value;
+		if (value instanceof Number) {
+			return isValidNumber((Number) value);
+		}
 
+		if (value instanceof String) {
+			return isNumeric(value);
+		}
+
+		return false;
+	}
+
+	public static boolean isValidNumber(Number number) {
 		if (number instanceof Double) {
 			if (Double.isNaN(number.doubleValue()) || Double.isInfinite(number.doubleValue())) {
 				return false;

@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
-import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static com.googlecode.jmxtrans.util.NumberUtils.isValidNumber;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -69,7 +68,7 @@ public class GraphiteWriter2 implements WriterBasedOutputWriter {
 			Map<String, Object> resultValues = result.getValues();
 			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 				Object value = values.getValue();
-				if (isNumeric(value) && isValidNumber(value)) {
+				if (isValidNumber(value)) {
 
 					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
 							.replaceAll("[()]", "_") + " " + value.toString() + " "

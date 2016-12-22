@@ -49,6 +49,8 @@ public class NumberUtilsTest {
 		assertThat(isNumeric((Object) "3.2")).isTrue();
 		assertThat(isNumeric((Object) "abc")).isFalse();
 		assertThat(isNumeric(FALSE)).isFalse();
+
+		assertThat(isNumeric(String.valueOf(Double.NEGATIVE_INFINITY))).isFalse();
 	}
 
 	@Test
@@ -63,13 +65,25 @@ public class NumberUtilsTest {
 		assertThat(isValidNumber(0D)).isTrue();
 		assertThat(isValidNumber(0)).isTrue();
 		assertThat(isValidNumber(0x0F)).isTrue();
+		assertThat(isValidNumber("1")).isTrue();
+		assertThat(isValidNumber("1.00")).isTrue();
+		assertThat(isValidNumber("-1.00")).isTrue();
+		assertThat(isValidNumber("-1")).isTrue();
 
 		assertThat(isValidNumber(Double.NaN)).isFalse();
 		assertThat(isValidNumber(Double.POSITIVE_INFINITY)).isFalse();
 		assertThat(isValidNumber(Double.NEGATIVE_INFINITY)).isFalse();
 
+		assertThat(isValidNumber(String.valueOf(Double.NaN))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Double.POSITIVE_INFINITY))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Double.NEGATIVE_INFINITY))).isFalse();
+
 		assertThat(isValidNumber(Float.NaN)).isFalse();
 		assertThat(isValidNumber(Float.POSITIVE_INFINITY)).isFalse();
 		assertThat(isValidNumber(Float.NEGATIVE_INFINITY)).isFalse();
+
+		assertThat(isValidNumber(String.valueOf(Float.NaN))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Float.POSITIVE_INFINITY))).isFalse();
+		assertThat(isValidNumber(String.valueOf(Float.NEGATIVE_INFINITY))).isFalse();
 	}
 }
