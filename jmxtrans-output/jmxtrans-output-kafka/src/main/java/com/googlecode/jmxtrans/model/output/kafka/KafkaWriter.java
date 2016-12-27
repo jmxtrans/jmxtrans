@@ -118,6 +118,7 @@ public class KafkaWriter extends BaseOutputWriter {
 					for(String topic : this.topics) {
 						log.debug("Topic: [{}] ; Kafka Message: [{}]", topic, message);
 						producer.send(new KeyedMessage<String, String>(topic, message));
+						producer.close();
 					}
 				} else {
 					log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
