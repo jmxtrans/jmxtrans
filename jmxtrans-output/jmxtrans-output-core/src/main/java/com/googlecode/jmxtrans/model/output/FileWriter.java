@@ -37,9 +37,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
@@ -99,6 +97,6 @@ public class FileWriter extends BaseOutputWriter {
 				}
 			}
 		}
-		Files.move(this.outputTempFile.toPath(), this.outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		assert(this.outputTempFile.renameTo(this.outputFile));
 	}
 }
