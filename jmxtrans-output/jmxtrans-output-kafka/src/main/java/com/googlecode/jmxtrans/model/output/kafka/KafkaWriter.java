@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -107,6 +108,7 @@ public class KafkaWriter extends BaseOutputWriter {
 	@Override
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		List<String> typeNames = this.getTypeNames();
+		List<KeyedMessage<String,String>> messages = new ArrayList<KeyedMessage<String, String>>();
 
 		for (Result result : results) {
 			log.debug("Query result: [{}]", result);
@@ -117,14 +119,17 @@ public class KafkaWriter extends BaseOutputWriter {
 					String message = createJsonMessage(server, query, typeNames, result, values, value);
 					for(String topic : this.topics) {
 						log.debug("Topic: [{}] ; Kafka Message: [{}]", topic, message);
-						producer.send(new KeyedMessage<String, String>(topic, message));
-						producer.close();
+						messages.add(new KeyedMessage<String, String>(topic, message));
 					}
 				} else {
 					log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
 				}
 			}
 		}
+
+		// Batch them all
+		producer.send(messages);
+		producer.close();
 	}
 
 	private String createJsonMessage(Server server, Query query, List<String> typeNames, Result result, Entry<String, Object> values, Object value) throws IOException {
