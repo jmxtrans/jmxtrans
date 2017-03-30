@@ -387,37 +387,39 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	private void scheduleJob(Server server) throws ParseException, SchedulerException {
-
-		String name = server.getHost() + ":" + server.getPort() + "-" + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(10);
+		String name = server.getHost() + ":" + server.getPort() + "-" + System.nanoTime() + "-" + RandomStringUtils.randomNumeric(10);
 		JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
 
 		JobDataMap map = new JobDataMap();
 		map.put(Server.class.getName(), server);
 		jd.setJobDataMap(map);
 
-		Trigger trigger;
-
-		if ((server.getCronExpression() != null) && CronExpression.isValidExpression(server.getCronExpression())) {
-			trigger = new CronTrigger();
-			((CronTrigger) trigger).setCronExpression(server.getCronExpression());
-			trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
-			trigger.setStartTime(computeSpreadStartDate(configuration.getRunPeriod()));
-		} else {
-			int runPeriod = configuration.getRunPeriod();
-			if (server.getRunPeriodSeconds() != null) runPeriod = server.getRunPeriodSeconds();
-			Trigger minuteTrigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
-			minuteTrigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.currentTimeMillis()));
-			minuteTrigger.setStartTime(computeSpreadStartDate(runPeriod));
-
-			trigger = minuteTrigger;
-
-			// TODO replace Quartz with a ScheduledExecutorService
-		}
+		Trigger trigger = createTrigger(server);
 
 		serverScheduler.scheduleJob(jd, trigger);
 		if (log.isDebugEnabled()) {
 			log.debug("Scheduled job: " + jd.getName() + " for server: " + server);
 		}
+	}
+
+	private Trigger createTrigger(Server server) throws ParseException {
+		int runPeriod = configuration.getRunPeriod();
+		Trigger trigger;
+
+		if (server.getCronExpression() != null && CronExpression.isValidExpression(server.getCronExpression())) {
+			CronTrigger cTrigger = new CronTrigger();
+			cTrigger.setCronExpression(server.getCronExpression());
+			trigger = cTrigger;
+		} else {
+			trigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
+			if (server.getRunPeriodSeconds() != null) {
+				runPeriod = server.getRunPeriodSeconds();
+			}
+			// TODO replace Quartz with a ScheduledExecutorService
+		}
+		trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.nanoTime()));
+		trigger.setStartTime(computeSpreadStartDate(runPeriod));
+		return trigger;
 	}
 
 	@VisibleForTesting
