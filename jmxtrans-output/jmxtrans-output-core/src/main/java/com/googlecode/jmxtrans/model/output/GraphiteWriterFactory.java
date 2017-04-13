@@ -61,6 +61,8 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 	private final boolean booleanAsNumber;
 	@Nonnull private final FlushStrategy flushStrategy;
 	private final int poolSize;
+	private final int socketTimeoutMs;
+	private final Integer poolClaimTimeoutSeconds;
 
 	@JsonCreator
 	public GraphiteWriterFactory(
@@ -71,7 +73,10 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("flushStrategy") String flushStrategy,
 			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
-			@JsonProperty("poolSize") Integer poolSize) {
+			@JsonProperty("poolSize") Integer poolSize,
+			@JsonProperty("socketTimeoutMs") Integer socketTimeoutMs,
+			@JsonProperty("poolClaimTimeoutSeconds") Integer poolClaimTimeoutSeconds) {
+
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.rootPrefix = firstNonNull(rootPrefix, DEFAULT_ROOT_PREFIX);
@@ -81,6 +86,8 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 				checkNotNull(port, "Port cannot be null."));
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
+		this.socketTimeoutMs = firstNonNull(socketTimeoutMs, 200);
+		this.poolClaimTimeoutSeconds = firstNonNull(poolClaimTimeoutSeconds, 1);
 	}
 
 	@Override
@@ -91,6 +98,8 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 						.setCharset(UTF_8)
 						.setFlushStrategy(flushStrategy)
 						.setPoolSize(poolSize)
+						.setSocketTimeoutMillis(socketTimeoutMs)
+						.setPoolClaimTimeoutSeconds(poolClaimTimeoutSeconds)
 						.build()
 		);
 	}
