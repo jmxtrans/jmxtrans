@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model.output.support;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
@@ -72,4 +73,8 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 		target.close();
 	}
 
+	@VisibleForTesting
+	T getTarget() {
+		return target;
+	}
 }
