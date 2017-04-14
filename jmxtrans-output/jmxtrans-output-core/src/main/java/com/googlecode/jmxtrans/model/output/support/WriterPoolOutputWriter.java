@@ -107,4 +107,8 @@ public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends O
 		return poolClaimTimeout;
 	}
 
+	@VisibleForTesting
+	public LifecycledPool<? extends WriterPoolable> getWriterPool() {
+		return writerPool;
+	}
 }
