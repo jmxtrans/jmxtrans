@@ -1,0 +1,19 @@
+{
+  "servers" : [ {
+    "port" : "1099",
+    "host" : "w2",
+    "queries" : [ {
+      "obj" : "kafka.server:type=BrokerTopicMetrics,name=*",
+      "resultAlias" : "brokerTopic",
+      "attr" : ["Count","OneMinuteRate","FifteenMinuteRate"],
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+        "port" : 2003,
+        "host" : "192.168.192.133",
+        "typeNames" : ["name"],
+        "protocol" : "udp",
+        "poolClaimTimeoutSeconds" : 2
+      } ]
+    } ]
+  } ]
+}
