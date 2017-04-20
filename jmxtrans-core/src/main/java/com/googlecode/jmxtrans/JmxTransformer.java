@@ -411,10 +411,10 @@ public class JmxTransformer implements WatchedCallback {
 			cTrigger.setCronExpression(server.getCronExpression());
 			trigger = cTrigger;
 		} else {
-			trigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			if (server.getRunPeriodSeconds() != null) {
 				runPeriod = server.getRunPeriodSeconds();
 			}
+			trigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			// TODO replace Quartz with a ScheduledExecutorService
 		}
 		trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.nanoTime()));
