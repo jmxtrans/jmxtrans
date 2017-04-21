@@ -29,7 +29,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-packaging</artifactId>
-		<version>265-SNAPSHOT</version>
+		<version>266-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-systemd</artifactId>
