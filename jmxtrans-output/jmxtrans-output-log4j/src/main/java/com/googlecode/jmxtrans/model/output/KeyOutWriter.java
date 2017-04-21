@@ -85,7 +85,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("maxLogFileSize") String maxLogFileSize,
-			@JsonProperty("maxLogBackupFiles") int maxLogBackupFiles,
+			@JsonProperty("maxLogBackupFiles") Integer maxLogBackupFiles,
 			@JsonProperty("delimiter") String delimiter,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
