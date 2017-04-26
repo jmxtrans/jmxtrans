@@ -289,6 +289,11 @@
 				<version>1.2.17</version>
 			</dependency>
 			<dependency>
+				<groupId>net.jodah</groupId>
+				<artifactId>failsafe</artifactId>
+				<version>1.0.4</version>
+			</dependency>
+			<dependency>
 				<groupId>net.sf.jpathwatch</groupId>
 				<artifactId>jpathwatch</artifactId>
 				<version>0.95</version>
@@ -796,7 +801,7 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
 								</rules>
 							</configuration>
 						</execution>
