@@ -265,7 +265,7 @@ public class Server implements JmxConnectionProvider {
 		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
 		this.breaker = new CircuitBreaker()
-				.withFailureThreshold(2, 4)
+				.withFailureThreshold(3, 10)
 				.withSuccessThreshold(1)
 				.withDelay(1, MINUTES)
 				.withTimeout(250, MILLISECONDS)

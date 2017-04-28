@@ -43,7 +43,7 @@ public class CircuitBreakerOutputWriter<T extends OutputWriter> extends OutputWr
 	public CircuitBreakerOutputWriter(final T target) {
 		this.target = target;
 		this.breaker = new CircuitBreaker()
-				.withFailureThreshold(2, 4)
+				.withFailureThreshold(3, 10)
 				.withSuccessThreshold(1)
 				.withDelay(1, MINUTES)
 				.withTimeout(250, MILLISECONDS)

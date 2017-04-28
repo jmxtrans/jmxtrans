@@ -59,7 +59,7 @@ public class CircuitBreakerOutputWriterTest {
 
 		doThrow(new IllegalStateException("failing output writer")).when(target).doWrite(dummyServer(), dummyQuery(), dummyResults());
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 20; i++) {
 			try {
 				circuitBreaker.doWrite(dummyServer(), dummyQuery(), dummyResults());
 				fail("Exception should have been thrown");
@@ -68,7 +68,7 @@ public class CircuitBreakerOutputWriterTest {
 			} catch (CircuitBreakerOpenException ignore) {}
 		}
 
-		verify(target, times(4)).doWrite(dummyServer(), dummyQuery(), dummyResults());
+		verify(target, times(10)).doWrite(dummyServer(), dummyQuery(), dummyResults());
 	}
 
 	@Test
@@ -85,13 +85,13 @@ public class CircuitBreakerOutputWriterTest {
 			}
 		}).when(target).doWrite(dummyServer(), dummyQuery(), dummyResults());
 
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i < 20; i++) {
 			try {
 				circuitBreaker.doWrite(dummyServer(), dummyQuery(), dummyResults());
 			} catch (Exception ignore) {
 			}
 		}
 
-		verify(target, times(4)).doWrite(dummyServer(), dummyQuery(), dummyResults());
+		verify(target, times(10)).doWrite(dummyServer(), dummyQuery(), dummyResults());
 	}
 }
