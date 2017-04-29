@@ -74,6 +74,23 @@ public final class KeyUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Gets the key string, without rootPrefix or Alias
+	 *
+	 * @param query     the query
+	 * @param result    the result
+	 * @param values    the values
+	 * @param typeNames the type names
+	 * @param key       the base key name
+	 * @return the key string
+	 */
+	public static String getPrefixedKeyString(Query query, Result result, Map.Entry<String, Object> values, List<String> typeNames, String key) {
+		StringBuilder sb = new StringBuilder();
+		addTypeName(query, result, typeNames, sb);
+		sb.append(StringUtils.cleanupStr(key, query.isAllowDottedKeys()));
+		return sb.toString();
+	}
+
 	private static void addRootPrefix(String rootPrefix, StringBuilder sb) {
 		if (rootPrefix != null) {
 			sb.append(rootPrefix);
