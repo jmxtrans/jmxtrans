@@ -64,6 +64,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 	private final boolean booleanAsNumber;
 	private final boolean createDatabase;
+	private final ImmutableList<String> typeNames;
 
 	/**
 	 * @param url      - The url e.g http://localhost:8086 to InfluxDB
@@ -84,6 +85,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
 			@JsonProperty("createDatabase") Boolean createDatabase) {
+		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
 		this.createDatabase = firstNonNull(createDatabase, TRUE);
@@ -123,6 +125,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, createDatabase));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase));
 	}
 }
