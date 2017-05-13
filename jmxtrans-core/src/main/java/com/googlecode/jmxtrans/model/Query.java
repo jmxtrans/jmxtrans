@@ -209,12 +209,12 @@ public class Query {
 	}
 
 	public Iterable<Result> fetchResults(MBeanServerConnection mbeanServer, ObjectName queryName) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
-		MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
 		ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
 
 		List<String> attributes;
 		if (attr.isEmpty()) {
 			attributes = new ArrayList<>();
+			MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
 			for (MBeanAttributeInfo attrInfo : info.getAttributes()) {
 				attributes.add(attrInfo.getName());
 			}
@@ -228,7 +228,7 @@ public class Query {
 
 				AttributeList al = mbeanServer.getAttributes(queryName, attributes.toArray(new String[attributes.size()]));
 
-				return new JmxResultProcessor(this, oi, al.asList(), info.getClassName(), queryName.getDomain()).getResults();
+				return new JmxResultProcessor(this, oi, al.asList(), oi.getClassName(), queryName.getDomain()).getResults();
 			}
 		} catch (UnmarshalException ue) {
 			if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
