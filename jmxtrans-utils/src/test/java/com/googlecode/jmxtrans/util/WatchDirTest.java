@@ -107,7 +107,7 @@ public class WatchDirTest {
 		}
 	}
 
-	private void modifyFile(File toModify) throws IOException {
+	private static void modifyFile(File toModify) throws IOException {
 		OutputStream out = null;
 		try {
 			out = new FileOutputStream(toModify);

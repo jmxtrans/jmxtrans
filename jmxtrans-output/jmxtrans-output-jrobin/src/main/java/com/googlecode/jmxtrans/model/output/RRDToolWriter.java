@@ -304,7 +304,7 @@ public class RRDToolWriter extends BaseOutputWriter {
 	/**
 	 * If dbl is NaN, then return U
 	 */
-	private String formatDouble(double dbl) {
+	private static String formatDouble(double dbl) {
 		if (Double.isNaN(dbl)) {
 			return "U";
 		}
