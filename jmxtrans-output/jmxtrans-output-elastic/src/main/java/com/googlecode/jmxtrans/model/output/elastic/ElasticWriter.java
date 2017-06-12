@@ -75,8 +75,8 @@ public class ElasticWriter extends BaseOutputWriter {
 	private final String rootPrefix;
 	private final String connectionUrl;
 	private final String indexName;
-    private final String username;
-    private final String password;
+    	private final String username;
+    	private final String password;
 
 	@JsonCreator
 	public ElasticWriter(
@@ -97,8 +97,8 @@ public class ElasticWriter extends BaseOutputWriter {
 						DEFAULT_ROOT_PREFIX);
 
 		this.connectionUrl = connectionUrl;
-        this.username = username;
-        this.password = password;
+        	this.username = username;
+        	this.password = password;
 		this.indexName = this.rootPrefix + "_jmx-entries";
 		this.jestClient = createJestClient(connectionUrl, username, password);
 	}
@@ -202,7 +202,7 @@ public class ElasticWriter extends BaseOutputWriter {
 		final StringBuilder sb = new StringBuilder("ElasticWriter{");
 		sb.append("rootPrefix='").append(rootPrefix).append('\'');
 		sb.append(", connectionUrl='").append(connectionUrl).append('\'');
-        sb.append(", username='").append(username).append('\'');
+        	sb.append(", username='").append(username).append('\'');
 		sb.append(", indexName='").append(indexName).append('\'');
 		sb.append('}');
 		return sb.toString();
