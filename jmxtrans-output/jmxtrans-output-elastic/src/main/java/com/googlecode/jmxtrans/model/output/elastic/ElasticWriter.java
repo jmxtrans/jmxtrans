@@ -85,8 +85,8 @@ public class ElasticWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("connectionUrl") String connectionUrl,
-            @JsonProperty("username") String username,
-            @JsonProperty("password") String password,
+            		@JsonProperty("username") String username,
+            		@JsonProperty("password") String password,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
