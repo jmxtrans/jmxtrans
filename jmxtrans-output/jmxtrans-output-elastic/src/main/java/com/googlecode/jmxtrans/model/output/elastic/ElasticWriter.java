@@ -75,6 +75,8 @@ public class ElasticWriter extends BaseOutputWriter {
 	private final String rootPrefix;
 	private final String connectionUrl;
 	private final String indexName;
+    private final String username;
+    private final String password;
 
 	@JsonCreator
 	public ElasticWriter(
@@ -83,6 +85,8 @@ public class ElasticWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("connectionUrl") String connectionUrl,
+            @JsonProperty("username") String username,
+            @JsonProperty("password") String password,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
@@ -93,17 +97,20 @@ public class ElasticWriter extends BaseOutputWriter {
 						DEFAULT_ROOT_PREFIX);
 
 		this.connectionUrl = connectionUrl;
+        this.username = username;
+        this.password = password;
 		this.indexName = this.rootPrefix + "_jmx-entries";
-		this.jestClient = createJestClient(connectionUrl);
+		this.jestClient = createJestClient(connectionUrl, username, password);
 	}
 
-	private JestClient createJestClient(String connectionUrl) {
+	private JestClient createJestClient(String connectionUrl, String username, String password) {
 		log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
 		JestClientFactory factory = new JestClientFactory();
 		factory.setHttpClientConfig(
-				new HttpClientConfig.Builder(connectionUrl)
-						.multiThreaded(true)
-						.build());
+                new HttpClientConfig.Builder(connectionUrl)
+                        .defaultCredentials(username, password)
+                        .multiThreaded(true)
+                        .build());
 		return factory.getObject();
 	}
 
@@ -195,6 +202,7 @@ public class ElasticWriter extends BaseOutputWriter {
 		final StringBuilder sb = new StringBuilder("ElasticWriter{");
 		sb.append("rootPrefix='").append(rootPrefix).append('\'');
 		sb.append(", connectionUrl='").append(connectionUrl).append('\'');
+        sb.append(", username='").append(username).append('\'');
 		sb.append(", indexName='").append(indexName).append('\'');
 		sb.append('}');
 		return sb.toString();

@@ -208,11 +208,13 @@ public class ElasticWriterTests {
 		Map<String,Object> settings = new HashMap<String,Object>();
 
 		String connectionUrl = "http://localhost";
+        String username      = "elastic";
+        String password      = "changeme";
 
 		ElasticWriter writer;
 
 		try {
-			writer = new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, settings);
+			writer = new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, username, password, settings);
 		} catch (IOException e) {
 			throw new RuntimeException("Unexpected failure to creare elastic writer for test", e);
 		}

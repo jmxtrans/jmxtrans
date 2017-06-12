@@ -7,6 +7,8 @@
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.elastic.ElasticWriter",
         "connectionUrl" : "http://192.168.86.136:9200",
+        "username" : "elastic",
+        "password" : "changeme",
         "rootPrefix" : "test"
       } ],
       "obj" : "java.lang:type=Memory",
@@ -15,6 +17,8 @@
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.elastic.ElasticWriter",
         "connectionUrl" : "http://192.168.86.136:9200",
+        "username" : "elastic",
+        "password" : "changeme",
         "rootPrefix" : "test"
       } ],
       "obj" : "java.lang:name=CMS Old Gen,type=MemoryPool",
@@ -23,6 +27,8 @@
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.elastic.ElasticWriter",
         "connectionUrl" : "http://192.168.86.136:9200",
+        "username" : "elastic",
+        "password" : "changeme",
         "rootPrefix" : "test"
       } ],
       "obj" : "java.lang:name=ConcurrentMarkSweep,type=GarbageCollector",
