@@ -27,8 +27,8 @@ FILENAME=$2
 
 # If CONF_FILE not defined but /etc/sysconfig/jmxtrans found, use it (servicectl/initd)
 if [ -z "$CONF_FILE" ]; then
-    if [ -f /etc/sysconfig/jmxtrans ]; then
-       CONF_FILE=/etc/sysconfig/jmxtrans
+    if [ -f /etc/sysconfig/jmxtrans.conf ]; then
+       CONF_FILE=/etc/sysconfig/jmxtrans.conf
     fi
 fi
 
