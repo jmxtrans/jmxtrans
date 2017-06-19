@@ -72,7 +72,7 @@ case "$1" in
             echo "export SECONDS_BETWEEN_RUNS=60" >> "$CONFIG"
             echo "export JSON_DIR=\"/var/lib/jmxtrans\"" >> "$CONFIG"
             echo "export HEAP_SIZE=${HEAP_SIZE}" >> "$CONFIG"
-            echo "export LOG_LEVEL=debug" >> "$CONFIG"
+            echo "export LOG_LEVEL=info" >> "$CONFIG"
             echo "export JAR_FILE=/usr/share/jmxtrans/lib/jmxtrans-all.jar" >> "$CONFIG"
         fi
 
