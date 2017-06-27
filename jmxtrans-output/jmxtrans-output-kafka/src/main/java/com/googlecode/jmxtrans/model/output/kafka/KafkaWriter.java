@@ -35,9 +35,15 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.Settings;
-import kafka.javaapi.producer.Producer;
-import kafka.producer.KeyedMessage;
-import kafka.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+
+import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
+
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,10 +98,10 @@ public class KafkaWriter extends BaseOutputWriter {
 						DEFAULT_ROOT_PREFIX);
 		// Setting all the required Kafka Properties
 		Properties kafkaProperties =  new Properties();
-		kafkaProperties.setProperty("metadata.broker.list", Settings.getStringSetting(settings, "metadata.broker.list", null));
-		kafkaProperties.setProperty("zk.connect", Settings.getStringSetting(settings, "zk.connect", null));
-		kafkaProperties.setProperty("serializer.class", Settings.getStringSetting(settings, "serializer.class", null));
-		this.producer= new Producer<>(new ProducerConfig(kafkaProperties));
+		kafkaProperties.setProperty(BOOTSTRAP_SERVERS_CONFIG, Settings.getStringSetting(settings, BOOTSTRAP_SERVERS_CONFIG, null));
+		kafkaProperties.setProperty(KEY_SERIALIZER_CLASS_CONFIG, Settings.getStringSetting(settings, KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()));
+		kafkaProperties.setProperty(VALUE_SERIALIZER_CLASS_CONFIG, Settings.getStringSetting(settings, VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()));
+		this.producer= new KafkaProducer<>(kafkaProperties);
 		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
 		this.tags = ImmutableMap.copyOf(firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of()));
 		jsonFactory = new JsonFactory();
@@ -117,7 +123,7 @@ public class KafkaWriter extends BaseOutputWriter {
 					String message = createJsonMessage(server, query, typeNames, result, values, value);
 					for(String topic : this.topics) {
 						log.debug("Topic: [{}] ; Kafka Message: [{}]", topic, message);
-						producer.send(new KeyedMessage<String, String>(topic, message));
+						producer.send(new ProducerRecord<String, String>(topic, message));
 					}
 				} else {
 					log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
@@ -156,4 +162,8 @@ public class KafkaWriter extends BaseOutputWriter {
 		this.producer = producer;
 	}
 
+	@Override
+	public void close() {
+		producer.close();
+	}
 }
