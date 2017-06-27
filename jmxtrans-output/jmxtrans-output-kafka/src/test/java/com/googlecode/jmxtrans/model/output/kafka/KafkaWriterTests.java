@@ -24,8 +24,9 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import kafka.javaapi.producer.Producer;
-import kafka.producer.KeyedMessage;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -46,7 +47,7 @@ import static org.mockito.Mockito.verify;
 public class KafkaWriterTests {
 
 	@Mock private Producer<String, String> producer;
-	@Captor private ArgumentCaptor<KeyedMessage<String, String>> messageCaptor;
+	@Captor private ArgumentCaptor<ProducerRecord<String, String>> messageCaptor;
 
 	@Test public void
 	kafkaWriterNotNull() throws Exception {
@@ -60,10 +61,10 @@ public class KafkaWriterTests {
 		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 		verify(producer).send(messageCaptor.capture());
-		KeyedMessage<String, String> message = messageCaptor.getValue();
+		ProducerRecord<String, String> message = messageCaptor.getValue();
 
 		assertThat(message.topic()).isEqualTo("myTopic");
-		assertThat(message.message())
+		assertThat(message.value())
 				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
 				.contains("\"value\":\"10\"")
 				.contains("\"timestamp\":0")
@@ -74,9 +75,8 @@ public class KafkaWriterTests {
 		ImmutableList typenames = ImmutableList.of();
 		Map<String,Object> settings = new HashMap<String,Object>();
 		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1"); 
-		settings.put("zk.connect", "host:2181");
-		settings.put("metadata.broker.list", "10.231.1.1:9180");
-		settings.put("serializer.class", "kafka.serializer.StringEncoder");
+		settings.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		settings.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
 		settings.put("topics", "myTopic");
