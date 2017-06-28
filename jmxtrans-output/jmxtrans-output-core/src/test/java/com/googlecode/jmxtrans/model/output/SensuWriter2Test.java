@@ -42,13 +42,13 @@ public class SensuWriter2Test {
 		SensuWriter2 sensuWriter = new SensuWriter2(new GraphiteWriter2(ImmutableList.<String>of(), null), new JsonFactory());
 
 		sensuWriter.write(writer, ServerFixtures.dummyServer(), QueryFixtures.dummyQuery(), ResultFixtures.dummyResults());
-
+		String lineSep = System.lineSeparator();
 		assertThat(writer.toString()).isEqualTo(
-				"{\n" +
-				"  \"name\" : \"jmxtrans\",\n" +
-				"  \"type\" : \"metric\",\n" +
-				"  \"handler\" : \"graphite\",\n" +
-				"  \"output\" : \"host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0\\n\"\n" +
+				"{" + lineSep +
+				"  \"name\" : \"jmxtrans\"," + lineSep +
+				"  \"type\" : \"metric\"," + lineSep +
+				"  \"handler\" : \"graphite\"," + lineSep +
+				"  \"output\" : \"host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0\\n\"" + lineSep +
 				"}");
 	}
 
