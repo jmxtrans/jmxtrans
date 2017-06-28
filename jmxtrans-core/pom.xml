@@ -98,6 +98,10 @@
 			<artifactId>javax.inject</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.jodah</groupId>
+			<artifactId>failsafe</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-jexl</artifactId>
 		</dependency>

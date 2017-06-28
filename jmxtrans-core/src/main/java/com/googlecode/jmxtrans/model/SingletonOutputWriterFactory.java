@@ -29,19 +29,19 @@ import javax.annotation.Nonnull;
 
 @ToString
 @EqualsAndHashCode(of = "outputWriterFactory")
-public class SingletonOutputWriterFactory<T extends OutputWriter> implements OutputWriterFactory<T> {
+public class SingletonOutputWriterFactory<T extends OutputWriter> implements OutputWriterFactory<CircuitBreakerOutputWriter<T>> {
 
-	@Nonnull private final T outputWriter;
+	@Nonnull private final CircuitBreakerOutputWriter<T> outputWriter;
 
 	@Nonnull private final OutputWriterFactory<T> outputWriterFactory;
 
 	public SingletonOutputWriterFactory(@Nonnull OutputWriterFactory<T> outputWriterFactory) {
 		this.outputWriterFactory = outputWriterFactory;
-		outputWriter = outputWriterFactory.create();
+		outputWriter = new CircuitBreakerOutputWriter<>(outputWriterFactory.create());
 	}
 
 	@Override
-	public T create() {
+	public CircuitBreakerOutputWriter<T> create() {
 		return outputWriter;
 	}
 }

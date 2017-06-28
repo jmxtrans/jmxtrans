@@ -298,7 +298,7 @@ public class ServerTests {
 			fail("No exception got throws");
 		} catch (IOException e2) {
 			if (e != e2) {
-				fail("Wrong exception thrown (" + e + " instead of mock");
+				fail("Wrong exception thrown (" + e + ") instead of mock");
 			}
 		}
 

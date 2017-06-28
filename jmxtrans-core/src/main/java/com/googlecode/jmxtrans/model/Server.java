@@ -24,9 +24,9 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -40,6 +40,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import net.jodah.failsafe.CircuitBreaker;
+import net.jodah.failsafe.FailsafeException;
+import net.jodah.failsafe.function.CheckedRunnable;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -71,9 +75,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
 import static javax.naming.Context.SECURITY_PRINCIPAL;
+import static net.jodah.failsafe.Failsafe.with;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the
@@ -96,7 +103,7 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 })
 @Immutable
 @ThreadSafe
-@EqualsAndHashCode(exclude = {"queries", "pool", "outputWriters", "outputWriterFactories"})
+@EqualsAndHashCode(exclude = {"queries", "pool", "outputWriters", "outputWriterFactories", "breaker"})
 @ToString(of = {"pid", "host", "port", "url", "cronExpression", "numQueryThreads"})
 public class Server implements JmxConnectionProvider {
 
@@ -155,6 +162,7 @@ public class Server implements JmxConnectionProvider {
 
 	@Nonnull private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
+	private final CircuitBreaker breaker;
 
 	@JsonCreator
 	public Server(
@@ -256,9 +264,43 @@ public class Server implements JmxConnectionProvider {
 		this.pool = checkNotNull(pool);
 		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
+		this.breaker = new CircuitBreaker()
+				.withFailureThreshold(3, 10)
+				.withSuccessThreshold(1)
+				.withDelay(1, MINUTES)
+				.withTimeout(250, MILLISECONDS)
+				.onOpen(createLogger("Circuit breaker opened for server {}", this, false))
+				.onClose(createLogger("Circuit breaker closed for server {}", this, true))
+				.onHalfOpen(createLogger("Circuit breaker half opened for server {}", this, true));
 	}
 
-	public Iterable<Result> execute(Query query) throws Exception {
+	private CheckedRunnable createLogger(final String message, final Server server, final boolean isSuccess) {
+		return new CheckedRunnable() {
+			@Override
+			public void run() throws Exception {
+				if (isSuccess) logger.warn(message, server);
+				else logger.info(message, server);
+			}
+		};
+	}
+
+	public Iterable<Result> execute(final Query query) throws Exception {
+		try {
+			return with(breaker).get(new Callable<Iterable<Result>>() {
+				@Override
+				public Iterable<Result> call() throws Exception {
+					return doExecute(query);
+				}
+			});
+		} catch (FailsafeException fe) {
+			// Failsafe wraps non runtime exceptions, but we can unwrap them now
+			Throwable cause = fe.getCause();
+			if (cause != null && cause instanceof Exception) throw (Exception) cause;
+			throw fe;
+		}
+	}
+
+	private Iterable<Result> doExecute(Query query) throws Exception {
 		JMXConnection jmxConnection = pool.borrowObject(this);
 		try {
 			ImmutableList.Builder<Result> results = ImmutableList.builder();

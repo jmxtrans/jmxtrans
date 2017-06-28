@@ -29,6 +29,7 @@ import com.googlecode.jmxtrans.ConfigurationParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
+import com.googlecode.jmxtrans.model.CircuitBreakerOutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
@@ -88,7 +89,7 @@ public class GraphiteWriterFactoryIT {
 		assertThat(query.getOutputWriterInstances()).hasSize(1);
 		OutputWriter outputWriter = query.getOutputWriterInstances().iterator().next();
 
-		assertThat(outputWriter).isInstanceOf(ResultTransformerOutputWriter.class);
+		assertThat(outputWriter).isInstanceOf(CircuitBreakerOutputWriter.class);
 	}
 
 	private File file(String filename) throws URISyntaxException {
