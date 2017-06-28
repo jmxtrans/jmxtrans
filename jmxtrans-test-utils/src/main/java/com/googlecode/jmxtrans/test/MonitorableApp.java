@@ -28,6 +28,8 @@ import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 import org.junit.rules.ExternalResource;
 
 import javax.annotation.Nullable;
+import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -61,14 +63,18 @@ public class MonitorableApp extends ExternalResource {
 		ClassLoader cl = ClassLoader.getSystemClassLoader();
 		URL[] urls = ((URLClassLoader)cl).getURLs();
 
-		return  Joiner.on(":")
+		return  Joiner.on(File.pathSeparator)
 				.join(
 						from(asList(urls))
 								.transform(new Function<URL, String>() {
 									@Nullable
 									@Override
 									public String apply(URL input) {
-										return input.toString();
+										try {
+											return new File(input.toURI()).getPath();
+										} catch(URISyntaxException e) {
+											return input.getPath();
+										}
 									}
 								}));
 	}
