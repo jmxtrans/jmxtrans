@@ -22,34 +22,49 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.google.common.io.Files;
 import com.googlecode.jmxtrans.test.DummyApp;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.ExternalApp;
-import com.googlecode.jmxtrans.test.OutputCapture;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import java.io.File;
+import java.nio.charset.Charset;
+import java.util.concurrent.Callable;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Category({IntegrationTest.class, RequiresIO.class})
 public class SslJmxTransformerIT {
-    @Rule
-    public OutputCapture output = new OutputCapture();
+    private final File jmxTransAppStdOut = new File("target" + File.separator + "ssl-jmxtrans-out.log");
     @Rule
     public ExternalApp app = new ExternalApp(DummyApp.class).enableJmx(12346)
             .enableSsl("localhost.jks", "localhost");
     @Rule
-    public ExternalApp jmxTransDummyApp = new ExternalApp(JmxTransDummyApp.class, "ssl-integration-test.json", "5")
-            .enableSsl("localhost.jks", "localhost");
+    public ExternalApp jmxTransApp = new ExternalApp(JmxTransDummyApp.class, "ssl-integration-test.json", "5")
+            .enableSsl("localhost.jks", "localhost")
+            .redirectOutputToFile(jmxTransAppStdOut);
 
     @Test
     public void metricsAreSentToStdout() throws Exception {
-        await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=1"));
+        await().atMost(5, SECONDS).until(new JmxTransStdoutContains("Value=1"));
+        await().atMost(5, SECONDS).until(new JmxTransStdoutContains("Value=2"));
     }
 
+    private class JmxTransStdoutContains implements Callable<Boolean> {
+        private final String value;
 
+        public JmxTransStdoutContains(String value) {
+            this.value = value;
+        }
 
+        @Override
+        public Boolean call() throws Exception {
+            return Files.toString(jmxTransAppStdOut, Charset.forName("UTF-8")).contains(value);
+        }
+    }
 }

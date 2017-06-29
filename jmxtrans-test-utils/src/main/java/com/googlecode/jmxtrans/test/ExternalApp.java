@@ -30,7 +30,6 @@ import org.junit.rules.ExternalResource;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -48,7 +47,7 @@ public class ExternalApp extends ExternalResource {
 	private Process app;
 	private final Class<?> appClass;
 	private final Properties properties = new Properties();
-	private boolean inheritIO = true;
+	private File outputFile;
 
 	/**
 	 * @param appClass Main class to run
@@ -66,6 +65,11 @@ public class ExternalApp extends ExternalResource {
 		properties.put("com.sun.management.jmxremote.authenticate", "false");
 		properties.put("com.sun.management.jmxremote.ssl", "false");
 		properties.put("com.sun.management.jmxremote.port", Integer.toString(jmxPort));
+		return this;
+	}
+
+	public ExternalApp redirectOutputToFile(File outputFile) {
+		this.outputFile = outputFile;
 		return this;
 	}
 
@@ -92,11 +96,6 @@ public class ExternalApp extends ExternalResource {
 		return this;
 	}
 
-	public ExternalApp inheritIO(boolean inheritIO) {
-		this.inheritIO = inheritIO;
-		return this;
-	}
-
 	@Override
 	@IgnoreJRERequirement // ProcessBuilder.inheritIO() was introduced in Java 7. As this is only used in test, let's ignore it.
 	protected void before() throws Throwable {
@@ -108,9 +107,10 @@ public class ExternalApp extends ExternalResource {
 		if (appArgs != null) {
 			command.addAll(asList(appArgs));
 		}
-		ProcessBuilder processBuilder = new ProcessBuilder().command(command);
-		if (inheritIO) {
-			processBuilder.inheritIO();
+		ProcessBuilder processBuilder = new ProcessBuilder().command(command)
+			.inheritIO();
+		if (outputFile != null) {
+			processBuilder.redirectOutput(outputFile);
 		}
 		app = processBuilder.start();
 	}
