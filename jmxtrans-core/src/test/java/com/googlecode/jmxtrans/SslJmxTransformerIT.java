@@ -22,42 +22,34 @@
  */
 package com.googlecode.jmxtrans;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.test.DummyApp;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.ExternalApp;
 import com.googlecode.jmxtrans.test.OutputCapture;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.net.URISyntaxException;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Category({IntegrationTest.class, RequiresIO.class})
-public class JmxTransformerIT {
-	@Rule public OutputCapture output = new OutputCapture();
-	@Rule public ExternalApp app = new ExternalApp(DummyApp.class).enableJmx(12345);
-	private JmxTransDummyApp jmxTransDummyApp;
-	@Before
-	public void startJmxTrans() throws LifecycleException, URISyntaxException {
-		jmxTransDummyApp = new JmxTransDummyApp("integration-test.json");
-		jmxTransDummyApp.start();
-	}
+public class SslJmxTransformerIT {
+    @Rule
+    public OutputCapture output = new OutputCapture();
+    @Rule
+    public ExternalApp app = new ExternalApp(DummyApp.class).enableJmx(12346)
+            .enableSsl("localhost.jks", "localhost");
+    @Rule
+    public ExternalApp jmxTransDummyApp = new ExternalApp(JmxTransDummyApp.class, "ssl-integration-test.json", "5")
+            .enableSsl("localhost.jks", "localhost");
 
-	@Test
-	public void metricsAreSentToStdout() throws Exception {
-		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=1"));
-		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=2"));
-	}
+    @Test
+    public void metricsAreSentToStdout() throws Exception {
+        await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("Value=1"));
+    }
 
-	@After
-	public void stopJmxTrans() throws LifecycleException {
-		jmxTransDummyApp.stop();
-	}
+
+
 }
