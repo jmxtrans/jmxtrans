@@ -42,7 +42,6 @@ public class JmxTransDummyApp {
         JmxTransConfiguration configuration = new JmxTransConfiguration();
         configuration.setRunPeriod(1);
         File file = file(jsonFile);
-        System.out.println("Loading configuration " + file.getAbsolutePath());
         configuration.setJsonFile(file);
         Injector injector = JmxTransModule.createInjector(configuration);
         jmxTransformer = injector.getInstance(JmxTransformer.class);

@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.googlecode.jmxtrans.test.DummyApp;
 import com.googlecode.jmxtrans.test.IntegrationTest;
@@ -32,7 +33,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
 
 import static com.jayway.awaitility.Awaitility.await;
@@ -64,7 +64,7 @@ public class SslJmxTransformerIT {
 
         @Override
         public Boolean call() throws Exception {
-            return Files.toString(jmxTransAppStdOut, Charset.forName("UTF-8")).contains(value);
+            return Files.toString(jmxTransAppStdOut, Charsets.UTF_8).contains(value);
         }
     }
 }
