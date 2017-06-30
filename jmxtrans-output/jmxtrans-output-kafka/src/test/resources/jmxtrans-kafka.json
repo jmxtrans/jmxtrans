@@ -1,0 +1,41 @@
+{
+  "servers": [
+    {
+      "port": "12345",
+      "host": "localhost",
+      "queries": [
+        {
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactory",
+              "producerConfig": {
+                "bootstrap.servers": "localhost:9092"
+              },
+              "topic": "jmxtrans"
+            }
+          ],
+          "obj": "org.jmxtrans:type=Counter,name=myCounter",
+          "attr": [
+            "Value"
+          ]
+        },
+        {
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactory",
+              "producerConfig": {
+                "bootstrap.servers": "localhost:9092"
+              },
+              "topic": "jmxtrans"
+            }
+          ],
+          "obj": "java.lang:type=Memory",
+          "attr": [
+            "HeapMemoryUsage",
+            "NonHeapMemoryUsage"
+          ]
+        }
+      ]
+    }
+  ]
+}
