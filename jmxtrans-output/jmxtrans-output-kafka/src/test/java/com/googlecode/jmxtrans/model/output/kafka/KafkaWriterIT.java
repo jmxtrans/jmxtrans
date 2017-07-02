@@ -13,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -22,20 +23,15 @@ import java.util.List;
 
 public class KafkaWriterIT {
     @Rule public final MonitorableApp app = new MonitorableApp(12345);
-    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-    public EmbeddedZookeeper zookeeper;
-    public EmbeddedKafka kafka;
+    private final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    private final EmbeddedZookeeper zookeeper = new EmbeddedZookeeper(temporaryFolder);
+    private final EmbeddedKafka kafka = new EmbeddedKafka(temporaryFolder);
+    @Rule public final RuleChain zookeeperKafka = RuleChain.outerRule(temporaryFolder)
+            .around(zookeeper)
+            .around(kafka);
 
     @Before
     public void before() throws Exception {
-        // Start Zookeeper
-        zookeeper = new EmbeddedZookeeper(temporaryFolder.newFolder("zookeeper"));
-        zookeeper.before();
-
-        // Start Kafka
-        kafka = new EmbeddedKafka(temporaryFolder.newFolder("kafka"));
-        kafka.before();
-
         // Start JMXTrans
         JmxTransConfiguration configuration = new JmxTransConfiguration();
         configuration.setRunPeriod(1);
@@ -69,7 +65,5 @@ public class KafkaWriterIT {
     @After
     public void after() throws Exception {
         jmxTransformer.stop();
-        kafka.after();
-        zookeeper.after();
     }
 }

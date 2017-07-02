@@ -5,6 +5,8 @@ import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ServerConfig;
 import org.apache.zookeeper.server.ZooKeeperServerMain;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
+import org.junit.rules.ExternalResource;
+import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,15 +24,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * Embedded Zookeeper server for integration testing
  */
-public class EmbeddedZookeeper {
+public class EmbeddedZookeeper extends ExternalResource {
     private final static Logger LOGGER = LoggerFactory.getLogger(EmbeddedZookeeper.class);
     private final ZooKeeperServerMain server = new ZooKeeperServerMain();
     private ServerCnxnFactory serverCnxnFactory;
     private final Executor executor = Executors.newSingleThreadExecutor();
-    private final File dataDir;
+    private final TemporaryFolder temporaryFolder;
+    private File dataDir;
 
-    public EmbeddedZookeeper(File dataDir) {
-        this.dataDir = dataDir;
+    public EmbeddedZookeeper(TemporaryFolder temporaryFolder) {
+        this.temporaryFolder = temporaryFolder;
     }
 
     static InputStream getResourceAsStream(String name) throws FileNotFoundException {
@@ -49,9 +52,11 @@ public class EmbeddedZookeeper {
         }
     }
 
+    @Override
     public void before() throws Exception {
         LOGGER.info("Starting Zookeeper");
         Properties properties = getResourceAsProperties("zookeeper.properties");
+        dataDir = temporaryFolder.newFolder("zookeeper");
         properties.setProperty("dataDir", dataDir.getAbsolutePath());
         QuorumPeerConfig quorumConfiguration = new QuorumPeerConfig();
         try {
@@ -77,6 +82,7 @@ public class EmbeddedZookeeper {
         });
     }
 
+    @Override
     public void after() {
         LOGGER.info("Stopping Zookeeper");
         ServerCnxnFactory serverCnxFactory = getServerCnxnFactory();

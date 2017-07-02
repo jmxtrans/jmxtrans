@@ -5,6 +5,8 @@ import kafka.server.KafkaServerStartable;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.junit.rules.ExternalResource;
+import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,17 +16,20 @@ import java.util.*;
 
 import static com.googlecode.jmxtrans.model.output.kafka.EmbeddedZookeeper.getResourceAsProperties;
 
-public class EmbeddedKafka {
+public class EmbeddedKafka extends ExternalResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedKafka.class);
+    private final TemporaryFolder temporaryFolder;
     private KafkaServerStartable server;
-    private final File logDir;
+    private File logDir;
 
-    public EmbeddedKafka(File logDir) {
-        this.logDir = logDir;
+    public EmbeddedKafka(TemporaryFolder temporaryFolder) {
+        this.temporaryFolder = temporaryFolder;
     }
 
+    @Override
     public void before() throws IOException {
         LOGGER.info("Starting Kafka");
+        logDir = temporaryFolder.newFolder("kafka");
         Properties properties = getResourceAsProperties("kafka.properties");
         properties.setProperty("log.dirs", logDir.getAbsolutePath());
         properties.setProperty("listeners", "PLAINTEXT://:9092");
@@ -60,6 +65,7 @@ public class EmbeddedKafka {
         return messages;
     }
 
+    @Override
     public void after() {
         LOGGER.info("Stopping Kafka");
         server.shutdown();
