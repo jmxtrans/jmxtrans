@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import lombok.EqualsAndHashCode;
@@ -17,7 +16,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-@EqualsAndHashCode(exclude = {"objectMapper", "producerConfig"})
+@EqualsAndHashCode(exclude = {"objectMapper"})
 public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
     @Nonnull
     @Getter @JsonIgnore
@@ -25,9 +24,6 @@ public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
     @Nonnull
     @Getter
     private final Map<String, Object> producerConfig;
-    @Nonnull
-    @Getter
-    private final String bootstrapServers;
     @Nonnull
     @Getter
     private final String topic;
@@ -49,8 +45,6 @@ public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
             producerConfigBuilder.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, STRING_SERIALIZER_CLASS);
         }
         this.producerConfig = producerConfigBuilder.build();
-        this.bootstrapServers = (String) producerConfig.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
-        checkNotNull(bootstrapServers);
         this.topic = topic;
         checkNotNull(topic);
     }
