@@ -44,99 +44,99 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 import static java.util.Collections.singletonList;
 
 public class DetailedResultSerializer implements ResultSerializer {
-    private final ObjectMapper objectMapper;
-    private final boolean singleValue;
+	private final ObjectMapper objectMapper;
+	private final boolean singleValue;
 
-    @JsonCreator
-    public DetailedResultSerializer(@JsonProperty(value = "singleValue", defaultValue = "false") boolean singleValue) {
-        this.objectMapper = new ObjectMapper();
-        this.singleValue = singleValue;
-    }
+	@JsonCreator
+	public DetailedResultSerializer(@JsonProperty(value = "singleValue", defaultValue = "false") boolean singleValue) {
+		this.objectMapper = new ObjectMapper();
+		this.singleValue = singleValue;
+	}
 
-    @Nonnull
-    @Override
-    public Collection<String> serialize(final Server server, final Query query, final Result result) throws IOException {
-        if (singleValue) {
-            List<String> messages = new ArrayList<>();
-            for (String valueName : result.getValues().keySet()) {
-                messages.add(objectMapper.writeValueAsString(new SingleValueResult(server, result, valueName)));
-            }
-            return messages;
-        } else {
-            return singletonList(objectMapper.writeValueAsString(new MultiValuesResult(server, result)));
-        }
-    }
+	@Nonnull
+	@Override
+	public Collection<String> serialize(final Server server, final Query query, final Result result) throws IOException {
+		if (singleValue) {
+			List<String> messages = new ArrayList<>();
+			for (String valueName : result.getValues().keySet()) {
+				messages.add(objectMapper.writeValueAsString(new SingleValueResult(server, result, valueName)));
+			}
+			return messages;
+		} else {
+			return singletonList(objectMapper.writeValueAsString(new MultiValuesResult(server, result)));
+		}
+	}
 
-    /**
-     * DTO containing server and result information
-     */
-    @JsonSerialize(include = NON_NULL)
-    @Immutable
-    @ThreadSafe
-    private static abstract class KResult {
-        // Server
-        @Getter
-        private final String alias;
-        @Getter
-        private final String pid;
-        @Getter
-        private final String host;
-        @Getter
-        private final String port;
-        // Result
-        @Getter
-        private final String attributeName;
-        @Getter
-        private final String className;
-        @Getter
-        private final String objDomain;
-        @Getter
-        private final String typeName;
-        @Getter
-        private final long epoch;
-        @Getter
-        private final String keyAlias;
+	/**
+	 * DTO containing server and result information
+	 */
+	@JsonSerialize(include = NON_NULL)
+	@Immutable
+	@ThreadSafe
+	private static abstract class KResult {
+		// Server
+		@Getter
+		private final String alias;
+		@Getter
+		private final String pid;
+		@Getter
+		private final String host;
+		@Getter
+		private final String port;
+		// Result
+		@Getter
+		private final String attributeName;
+		@Getter
+		private final String className;
+		@Getter
+		private final String objDomain;
+		@Getter
+		private final String typeName;
+		@Getter
+		private final long epoch;
+		@Getter
+		private final String keyAlias;
 
-        public KResult(Server server, Result result) {
-            alias = server.getAlias();
-            pid = server.getPid();
-            host = server.getHost();
-            port = server.getPort();
-            attributeName = result.getAttributeName();
-            className = result.getClassName();
-            objDomain = result.getObjDomain();
-            typeName = result.getTypeName();
-            epoch = result.getEpoch();
-            keyAlias = result.getKeyAlias();
-        }
-    }
+		public KResult(Server server, Result result) {
+			alias = server.getAlias();
+			pid = server.getPid();
+			host = server.getHost();
+			port = server.getPort();
+			attributeName = result.getAttributeName();
+			className = result.getClassName();
+			objDomain = result.getObjDomain();
+			typeName = result.getTypeName();
+			epoch = result.getEpoch();
+			keyAlias = result.getKeyAlias();
+		}
+	}
 
-    @JsonSerialize(include = NON_NULL)
-    @Immutable
-    @ThreadSafe
-    private static class MultiValuesResult extends KResult {
-        @Getter
-        private final ImmutableMap<String, Object> values;
+	@JsonSerialize(include = NON_NULL)
+	@Immutable
+	@ThreadSafe
+	private static class MultiValuesResult extends KResult {
+		@Getter
+		private final ImmutableMap<String, Object> values;
 
-        public MultiValuesResult(Server server, Result result) {
-            super(server, result);
-            this.values = result.getValues();
-        }
-    }
+		public MultiValuesResult(Server server, Result result) {
+			super(server, result);
+			this.values = result.getValues();
+		}
+	}
 
-    @JsonSerialize(include = NON_NULL)
-    @Immutable
-    @ThreadSafe
-    private static class SingleValueResult extends KResult {
-        @Getter
-        private final String valueName;
-        @Getter
-        private final Object value;
+	@JsonSerialize(include = NON_NULL)
+	@Immutable
+	@ThreadSafe
+	private static class SingleValueResult extends KResult {
+		@Getter
+		private final String valueName;
+		@Getter
+		private final Object value;
 
-        public SingleValueResult(Server server, Result result, String valueName) {
-            super(server, result);
-            this.valueName = valueName;
-            this.value = result.getValues().get(valueName);
-        }
-    }
+		public SingleValueResult(Server server, Result result, String valueName) {
+			super(server, result);
+			this.valueName = valueName;
+			this.value = result.getValues().get(valueName);
+		}
+	}
 }

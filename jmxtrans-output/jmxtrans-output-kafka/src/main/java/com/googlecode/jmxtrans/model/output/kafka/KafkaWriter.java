@@ -63,7 +63,7 @@ public class KafkaWriter extends BaseOutputWriter {
 
 	private static final String DEFAULT_ROOT_PREFIX = "servers";
 
-	private Producer<String,String> producer;
+	private Producer<String, String> producer;
 	private final Iterable<String> topics;
 	private final ResultSerializer resultSerializer;
 
@@ -78,11 +78,11 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		// Setting all the required Kafka Properties
-		Properties kafkaProperties =  new Properties();
+		Properties kafkaProperties = new Properties();
 		kafkaProperties.setProperty(BOOTSTRAP_SERVERS_CONFIG, Settings.getStringSetting(settings, BOOTSTRAP_SERVERS_CONFIG, null));
 		kafkaProperties.setProperty(KEY_SERIALIZER_CLASS_CONFIG, Settings.getStringSetting(settings, KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()));
 		kafkaProperties.setProperty(VALUE_SERIALIZER_CLASS_CONFIG, Settings.getStringSetting(settings, VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()));
-		this.producer= new KafkaProducer<>(kafkaProperties);
+		this.producer = new KafkaProducer<>(kafkaProperties);
 		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
 		String aRootPrefix = firstNonNull(
 				rootPrefix,
@@ -93,14 +93,15 @@ public class KafkaWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {}
+	public void validateSetup(Server server, Query query) throws ValidationException {
+	}
 
 	@Override
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (Result result : results) {
 			log.debug("Query result: [{}]", result);
-			for(String message: resultSerializer.serialize(server, query, result)) {
-				for(String topic : this.topics) {
+			for (String message : resultSerializer.serialize(server, query, result)) {
+				for (String topic : this.topics) {
 					log.debug("Topic: [{}] ; Kafka Message: [{}]", topic, message);
 					producer.send(new ProducerRecord<String, String>(topic, message));
 				}

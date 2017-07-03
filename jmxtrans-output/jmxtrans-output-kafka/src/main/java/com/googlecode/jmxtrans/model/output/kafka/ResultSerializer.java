@@ -38,9 +38,9 @@ import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.
 @JsonSerialize(include = NON_NULL)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public interface ResultSerializer {
-    /**
-     * Converts query result into one or more strings
-     */
-    @Nonnull
-    Collection<String> serialize(Server server, Query query, Result result) throws IOException;
+	/**
+	 * Converts query result into one or more strings
+	 */
+	@Nonnull
+	Collection<String> serialize(Server server, Query query, Result result) throws IOException;
 }

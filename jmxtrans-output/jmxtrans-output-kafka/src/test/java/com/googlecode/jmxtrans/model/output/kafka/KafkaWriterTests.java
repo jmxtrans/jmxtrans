@@ -46,15 +46,19 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class KafkaWriterTests {
 
-	@Mock private Producer<String, String> producer;
-	@Captor private ArgumentCaptor<ProducerRecord<String, String>> messageCaptor;
+	@Mock
+	private Producer<String, String> producer;
+	@Captor
+	private ArgumentCaptor<ProducerRecord<String, String>> messageCaptor;
 
-	@Test public void
+	@Test
+	public void
 	kafkaWriterNotNull() throws Exception {
 		assertThat(getTestKafkaWriter()).isNotNull();
 	}
 
-	@Test public void
+	@Test
+	public void
 	messagesAreSentToKafka() throws Exception {
 		KafkaWriter writer = getTestKafkaWriter();
 		writer.setProducer(producer);
@@ -70,11 +74,11 @@ public class KafkaWriterTests {
 				.contains("\"timestamp\":0")
 				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
 	}
-	
+
 	private static KafkaWriter getTestKafkaWriter() {
 		ImmutableList typenames = ImmutableList.of();
-		Map<String,Object> settings = new HashMap<String,Object>();
-		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1"); 
+		Map<String, Object> settings = new HashMap<String, Object>();
+		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
 		settings.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 		settings.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 		settings.put("debug", false);
@@ -82,5 +86,5 @@ public class KafkaWriterTests {
 		settings.put("topics", "myTopic");
 		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings);
 	}
-	
+
 }

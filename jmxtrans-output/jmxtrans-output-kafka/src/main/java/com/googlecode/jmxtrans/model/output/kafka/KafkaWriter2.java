@@ -37,45 +37,39 @@ import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class KafkaWriter2 extends OutputWriterAdapter {
-    @Nonnull
-    @Getter
-    private final ObjectMapper objectMapper;
-    @Nonnull
-    @Getter
-    private final Map<String, Object> producerConfig;
-    @Nonnull
-    @Getter
-    private final String topic;
-    private Producer<String, String> producer;
-    @Nonnull
-    @Getter
-    private final ResultSerializer resultSerializer;
+	@Nonnull
+	@Getter
+	private final ObjectMapper objectMapper;
+	@Nonnull
+	@Getter
+	private final Map<String, Object> producerConfig;
+	@Nonnull
+	@Getter
+	private final String topic;
+	private final Producer<String, String> producer;
+	@Nonnull
+	@Getter
+	private final ResultSerializer resultSerializer;
 
-    public KafkaWriter2(@Nonnull ObjectMapper objectMapper, @Nonnull Map<String, Object> producerConfig, @Nonnull String topic, @Nonnull ResultSerializer resultSerializer) {
-        this.objectMapper = objectMapper;
-        this.producerConfig = producerConfig;
-        this.topic = topic;
-        this.resultSerializer = resultSerializer;
-    }
+	public KafkaWriter2(@Nonnull ObjectMapper objectMapper, @Nonnull Map<String, Object> producerConfig, @Nonnull String topic, @Nonnull ResultSerializer resultSerializer) {
+		this.objectMapper = objectMapper;
+		this.producerConfig = producerConfig;
+		this.topic = topic;
+		this.resultSerializer = resultSerializer;
+		producer = new KafkaProducer<String, String>(producerConfig);
+	}
 
-    @Override
-    public void start() throws LifecycleException {
-        producer = new KafkaProducer<String, String>(producerConfig);
-        // Force connection to broker and fetch partition assignments
-        producer.partitionsFor(topic);
-    }
+	@Override
+	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
+		for (Result result : results) {
+			for (String message : resultSerializer.serialize(server, query, result)) {
+				producer.send(new ProducerRecord<String, String>(topic, message));
+			}
+		}
+	}
 
-    @Override
-    public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
-        for (Result result : results) {
-            for (String message : resultSerializer.serialize(server, query, result)) {
-                producer.send(new ProducerRecord<String, String>(topic, message));
-            }
-        }
-    }
-
-    @Override
-    public void close() throws LifecycleException {
-        producer.close();
-    }
+	@Override
+	public void close() throws LifecycleException {
+		producer.close();
+	}
 }

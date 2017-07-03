@@ -35,37 +35,37 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefaultResultSerializerTest {
-    @Test
-    public void convertSingleToString() throws Exception {
-        ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
-        ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags);
+	@Test
+	public void convertSingleToString() throws Exception {
+		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
+		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags);
 
-        Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
+		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
 
-        assertThat(messages).hasSize(1);
-        String message = messages.iterator().next();
-        assertThat(message)
-                .contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
-                .contains("\"value\":\"10\"")
-                .contains("\"timestamp\":0")
-                .contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
-    }
+		assertThat(messages).hasSize(1);
+		String message = messages.iterator().next();
+		assertThat(message)
+				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
+				.contains("\"value\":\"10\"")
+				.contains("\"timestamp\":0")
+				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
+	}
 
-    @Test
-    public void convertHashToStrings() throws Exception {
-        ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
-        ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags);
+	@Test
+	public void convertHashToStrings() throws Exception {
+		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
+		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags);
 
-        Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
+		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
 
-        assertThat(messages).hasSize(4);
-        for(String message: messages) {
-            assertThat(message)
-                    .contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.NonHeapMemoryUsage_")
-                    .contains("\"value\":")
-                    .contains("\"timestamp\":0")
-                    .contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
+		assertThat(messages).hasSize(4);
+		for (String message : messages) {
+			assertThat(message)
+					.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.NonHeapMemoryUsage_")
+					.contains("\"value\":")
+					.contains("\"timestamp\":0")
+					.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
 
-        }
-    }
+		}
+	}
 }

@@ -50,64 +50,64 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
  * Original Result serializer (looks like OpenTSDB data format)
  */
 public class DefaultResultSerializer implements ResultSerializer {
-    private static final Logger log = LoggerFactory.getLogger(DefaultResultSerializer.class);
-    private final JsonFactory jsonFactory;
-    private final ImmutableList<String> typeNames;
-    private final boolean booleanAsNumber;
-    private final String rootPrefix;
-    private final ImmutableMap<String, String> tags;
+	private static final Logger log = LoggerFactory.getLogger(DefaultResultSerializer.class);
+	private final JsonFactory jsonFactory;
+	private final ImmutableList<String> typeNames;
+	private final boolean booleanAsNumber;
+	private final String rootPrefix;
+	private final ImmutableMap<String, String> tags;
 
-    @JsonCreator
-    public DefaultResultSerializer(@JsonProperty("typeNames") List<String> typeNames,
-                                   @JsonProperty("booleanAsNumber") boolean booleanAsNumber,
-                                   @JsonProperty("rootPrefix") String rootPrefix,
-                                   @JsonProperty("tags") Map<String, String> tags) {
-        this.jsonFactory = new JsonFactory();
-        this.typeNames = ImmutableList.copyOf(typeNames);
-        this.booleanAsNumber = booleanAsNumber;
-        this.rootPrefix = rootPrefix;
-        this.tags = ImmutableMap.copyOf(tags);
-    }
+	@JsonCreator
+	public DefaultResultSerializer(@JsonProperty("typeNames") List<String> typeNames,
+								   @JsonProperty("booleanAsNumber") boolean booleanAsNumber,
+								   @JsonProperty("rootPrefix") String rootPrefix,
+								   @JsonProperty("tags") Map<String, String> tags) {
+		this.jsonFactory = new JsonFactory();
+		this.typeNames = ImmutableList.copyOf(typeNames);
+		this.booleanAsNumber = booleanAsNumber;
+		this.rootPrefix = rootPrefix;
+		this.tags = ImmutableMap.copyOf(tags);
+	}
 
-    @Nonnull
-    @Override
-    public Collection<String> serialize(Server server, Query query, Result result) throws IOException {
-        log.debug("Query result: [{}]", result);
-        Map<String, Object> resultValues = result.getValues();
-        List<String> messages = new ArrayList<>();
-        for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-            Object value = values.getValue();
-            if (isNumeric(value)) {
-                messages.add(createJsonMessage(server, query, result, values, value));
-            } else {
-                log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
-            }
-        }
-        return messages;
-    }
+	@Nonnull
+	@Override
+	public Collection<String> serialize(Server server, Query query, Result result) throws IOException {
+		log.debug("Query result: [{}]", result);
+		Map<String, Object> resultValues = result.getValues();
+		List<String> messages = new ArrayList<>();
+		for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+			Object value = values.getValue();
+			if (isNumeric(value)) {
+				messages.add(createJsonMessage(server, query, result, values, value));
+			} else {
+				log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
+			}
+		}
+		return messages;
+	}
 
-    private String createJsonMessage(Server server, Query query, Result result, Map.Entry<String, Object> values, Object value) throws IOException  {
-        String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
-        String cleanKeyString = keyString.replaceAll("[()]", "_");
+	private String createJsonMessage(Server server, Query query, Result result, Map.Entry<String, Object> values, Object value) throws IOException {
+		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
+		String cleanKeyString = keyString.replaceAll("[()]", "_");
 
-        try (
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                JsonGenerator generator = jsonFactory.createGenerator(out, UTF8)
-        ){
-            generator.writeStartObject();
-            generator.writeStringField("keyspace", cleanKeyString);
-            generator.writeStringField("value", value.toString());
-            generator.writeNumberField("timestamp", result.getEpoch() / 1000);
-            generator.writeObjectFieldStart("tags");
+		try (
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				JsonGenerator generator = jsonFactory.createGenerator(out, UTF8)
+		) {
+			generator.writeStartObject();
+			generator.writeStringField("keyspace", cleanKeyString);
+			generator.writeStringField("value", value.toString());
+			generator.writeNumberField("timestamp", result.getEpoch() / 1000);
+			generator.writeObjectFieldStart("tags");
 
-            for (Map.Entry<String, String> tag : this.tags.entrySet()) {
-                generator.writeStringField(tag.getKey(), tag.getValue());
-            }
+			for (Map.Entry<String, String> tag : this.tags.entrySet()) {
+				generator.writeStringField(tag.getKey(), tag.getValue());
+			}
 
-            generator.writeEndObject();
-            generator.writeEndObject();
-            generator.close();
-            return out.toString("UTF-8");
-        }
-    }
+			generator.writeEndObject();
+			generator.writeEndObject();
+			generator.close();
+			return out.toString("UTF-8");
+		}
+	}
 }

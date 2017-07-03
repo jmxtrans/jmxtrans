@@ -33,77 +33,78 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DetailedResultSerializerTest {
-    @Test
-    public void convertSingleToStringWhenMultiValues() throws Exception {
-        ResultSerializer resultSerializer = new DetailedResultSerializer(false);
+	@Test
+	public void convertSingleToStringWhenMultiValues() throws Exception {
+		ResultSerializer resultSerializer = new DetailedResultSerializer(false);
 
-        Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
+		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
 
-        assertThat(messages).hasSize(1);
-        String message = messages.iterator().next();
-        assertThat(message)
-                .contains("\"host\":\"host.example.net\"")
-                .contains("\"attributeName\":\"ObjectPendingFinalizationCount\"")
-                .contains("\"typeName\":\"type=Memory\"")
-                .contains("\"ObjectPendingFinalizationCount\":10")
-                .contains("\"epoch\":0")
-                .contains("\"keyAlias\":\"MemoryAlias\"");
-    }
+		assertThat(messages).hasSize(1);
+		String message = messages.iterator().next();
+		assertThat(message)
+				.contains("\"host\":\"host.example.net\"")
+				.contains("\"attributeName\":\"ObjectPendingFinalizationCount\"")
+				.contains("\"typeName\":\"type=Memory\"")
+				.contains("\"ObjectPendingFinalizationCount\":10")
+				.contains("\"epoch\":0")
+				.contains("\"keyAlias\":\"MemoryAlias\"");
+	}
 
-    @Test
-    public void convertHashToStringsWhenMultiValues() throws Exception {
-        ResultSerializer resultSerializer = new DetailedResultSerializer(false);
+	@Test
+	public void convertHashToStringsWhenMultiValues() throws Exception {
+		ResultSerializer resultSerializer = new DetailedResultSerializer(false);
 
-        Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
+		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
 
-        assertThat(messages).hasSize(1);
-        for(String message: messages) {
-            assertThat(message)
-                    .contains("\"host\":\"host.example.net\"")
-                    .contains("\"attributeName\":\"NonHeapMemoryUsage\"")
-                    .contains("\"typeName\":\"type=Memory\"")
-                    .contains("\"values\":")
-                    .contains("\"committed\":12345")
-                    .contains("\"epoch\":0")
-                    .contains("\"keyAlias\":\"MemoryAlias\"");
+		assertThat(messages).hasSize(1);
+		for (String message : messages) {
+			assertThat(message)
+					.contains("\"host\":\"host.example.net\"")
+					.contains("\"attributeName\":\"NonHeapMemoryUsage\"")
+					.contains("\"typeName\":\"type=Memory\"")
+					.contains("\"values\":")
+					.contains("\"committed\":12345")
+					.contains("\"epoch\":0")
+					.contains("\"keyAlias\":\"MemoryAlias\"");
 
-        }
-    }
-    @Test
-    public void convertSingleToStringWhenSingleValue() throws Exception {
-        ResultSerializer resultSerializer = new DetailedResultSerializer(true);
+		}
+	}
 
-        Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
+	@Test
+	public void convertSingleToStringWhenSingleValue() throws Exception {
+		ResultSerializer resultSerializer = new DetailedResultSerializer(true);
 
-        assertThat(messages).hasSize(1);
-        String message = messages.iterator().next();
-        assertThat(message)
-                .contains("\"host\":\"host.example.net\"")
-                .contains("\"attributeName\":\"ObjectPendingFinalizationCount\"")
-                .contains("\"typeName\":\"type=Memory\"")
-                .contains("\"valueName\":\"ObjectPendingFinalizationCount\"")
-                .contains("\"value\":10")
-                .contains("\"epoch\":0")
-                .contains("\"keyAlias\":\"MemoryAlias\"");
-    }
+		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
 
-    @Test
-    public void convertHashToStringsWhenSingleValue() throws Exception {
-        ResultSerializer resultSerializer = new DetailedResultSerializer(true);
+		assertThat(messages).hasSize(1);
+		String message = messages.iterator().next();
+		assertThat(message)
+				.contains("\"host\":\"host.example.net\"")
+				.contains("\"attributeName\":\"ObjectPendingFinalizationCount\"")
+				.contains("\"typeName\":\"type=Memory\"")
+				.contains("\"valueName\":\"ObjectPendingFinalizationCount\"")
+				.contains("\"value\":10")
+				.contains("\"epoch\":0")
+				.contains("\"keyAlias\":\"MemoryAlias\"");
+	}
 
-        Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
+	@Test
+	public void convertHashToStringsWhenSingleValue() throws Exception {
+		ResultSerializer resultSerializer = new DetailedResultSerializer(true);
 
-        assertThat(messages).hasSize(4);
-        for(String message: messages) {
-            assertThat(message)
-                    .contains("\"host\":\"host.example.net\"")
-                    .contains("\"attributeName\":\"NonHeapMemoryUsage\"")
-                    .contains("\"typeName\":\"type=Memory\"")
-                    .contains("\"value\":")
-                    .contains("\"epoch\":0")
-                    .contains("\"keyAlias\":\"MemoryAlias\"");
+		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
 
-        }
-    }
+		assertThat(messages).hasSize(4);
+		for (String message : messages) {
+			assertThat(message)
+					.contains("\"host\":\"host.example.net\"")
+					.contains("\"attributeName\":\"NonHeapMemoryUsage\"")
+					.contains("\"typeName\":\"type=Memory\"")
+					.contains("\"value\":")
+					.contains("\"epoch\":0")
+					.contains("\"keyAlias\":\"MemoryAlias\"");
+
+		}
+	}
 
 }

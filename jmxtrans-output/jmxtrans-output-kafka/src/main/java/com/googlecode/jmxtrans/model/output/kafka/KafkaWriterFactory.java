@@ -41,49 +41,50 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 @EqualsAndHashCode(exclude = {"objectMapper"})
 public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
-    @Nonnull
-    @Getter @JsonIgnore
-    private final ObjectMapper objectMapper;
-    @Nonnull
-    @Getter
-    private final Map<String, Object> producerConfig;
-    @Nonnull
-    @Getter
-    private final String topic;
-    @Nonnull
-    @Getter
-    private final ResultSerializer resultSerializer;
+	@Nonnull
+	@Getter
+	@JsonIgnore
+	private final ObjectMapper objectMapper;
+	@Nonnull
+	@Getter
+	private final Map<String, Object> producerConfig;
+	@Nonnull
+	@Getter
+	private final String topic;
+	@Nonnull
+	@Getter
+	private final ResultSerializer resultSerializer;
 
-    private static final String STRING_SERIALIZER_CLASS = StringSerializer.class.getName();
+	private static final String STRING_SERIALIZER_CLASS = StringSerializer.class.getName();
 
-    @JsonCreator
-    public KafkaWriterFactory(
-            @JsonProperty("producerConfig") @Nonnull Map<String, Object> producerConfig,
-            @JsonProperty("topic") @Nonnull String topic,
-            @JsonProperty("resultSerializer") ResultSerializer resultSerializer) {
-        this.objectMapper = new ObjectMapper();
-        checkNotNull(producerConfig);
-        ImmutableMap.Builder<String, Object> producerConfigBuilder = ImmutableMap.<String, Object>builder()
-                .putAll(producerConfig);
-        // Add default settings
-        if (!producerConfig.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
-            producerConfigBuilder.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, STRING_SERIALIZER_CLASS);
-        }
-        if (!producerConfig.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
-            producerConfigBuilder.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, STRING_SERIALIZER_CLASS);
-        }
-        this.producerConfig = producerConfigBuilder.build();
-        this.topic = topic;
-        checkNotNull(topic);
-        this.resultSerializer = resultSerializer == null ? new DefaultResultSerializer(
-                Collections.<String>emptyList(),
-                false, "",
-                Collections.<String,String> emptyMap()) : resultSerializer;
-    }
+	@JsonCreator
+	public KafkaWriterFactory(
+			@JsonProperty("producerConfig") @Nonnull Map<String, Object> producerConfig,
+			@JsonProperty("topic") @Nonnull String topic,
+			@JsonProperty("resultSerializer") ResultSerializer resultSerializer) {
+		this.objectMapper = new ObjectMapper();
+		checkNotNull(producerConfig);
+		ImmutableMap.Builder<String, Object> producerConfigBuilder = ImmutableMap.<String, Object>builder()
+				.putAll(producerConfig);
+		// Add default settings
+		if (!producerConfig.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
+			producerConfigBuilder.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, STRING_SERIALIZER_CLASS);
+		}
+		if (!producerConfig.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
+			producerConfigBuilder.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, STRING_SERIALIZER_CLASS);
+		}
+		this.producerConfig = producerConfigBuilder.build();
+		this.topic = topic;
+		checkNotNull(topic);
+		this.resultSerializer = resultSerializer == null ? new DefaultResultSerializer(
+				Collections.<String>emptyList(),
+				false, "",
+				Collections.<String, String>emptyMap()) : resultSerializer;
+	}
 
-    @Nonnull
-    @Override
-    public KafkaWriter2 create() {
-        return new KafkaWriter2(objectMapper, producerConfig, topic, resultSerializer);
-    }
+	@Nonnull
+	@Override
+	public KafkaWriter2 create() {
+		return new KafkaWriter2(objectMapper, producerConfig, topic, resultSerializer);
+	}
 }
