@@ -23,22 +23,25 @@
 package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Map;
 
 public class KafkaWriter2 extends OutputWriterAdapter {
 	@Nonnull
-	@Getter
+	@Getter(AccessLevel.PROTECTED)
 	private final ObjectMapper objectMapper;
 	@Nonnull
 	@Getter
@@ -57,6 +60,15 @@ public class KafkaWriter2 extends OutputWriterAdapter {
 		this.topic = topic;
 		this.resultSerializer = resultSerializer;
 		producer = new KafkaProducer<String, String>(producerConfig);
+	}
+
+	@VisibleForTesting
+	KafkaWriter2(@Nonnull ObjectMapper objectMapper, Producer<String, String> producer, @Nonnull String topic, @Nonnull ResultSerializer resultSerializer) {
+		this.objectMapper = objectMapper;
+		this.producerConfig = Collections.emptyMap();
+		this.topic = topic;
+		this.resultSerializer = resultSerializer;
+		this.producer = producer;
 	}
 
 	@Override

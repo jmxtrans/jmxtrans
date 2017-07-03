@@ -45,7 +45,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import static java.util.Arrays.asList;
-import static org.apache.kafka.clients.producer.ProducerConfig.*;
+import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 
 /**
  * This low latency and thread safe output writer sends data to a kafka topics in JSON format.

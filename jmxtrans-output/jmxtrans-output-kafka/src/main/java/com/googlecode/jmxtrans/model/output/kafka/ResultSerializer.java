@@ -29,7 +29,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 
 import javax.annotation.Nonnull;
-
 import java.io.IOException;
 import java.util.Collection;
 

@@ -60,19 +60,20 @@ public class KafkaWriterTests {
 	@Test
 	public void
 	messagesAreSentToKafka() throws Exception {
-		KafkaWriter writer = getTestKafkaWriter();
-		writer.setProducer(producer);
-		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+		try(KafkaWriter writer = getTestKafkaWriter()) {
+			writer.setProducer(producer);
+			writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
-		verify(producer).send(messageCaptor.capture());
-		ProducerRecord<String, String> message = messageCaptor.getValue();
+			verify(producer).send(messageCaptor.capture());
+			ProducerRecord<String, String> message = messageCaptor.getValue();
 
-		assertThat(message.topic()).isEqualTo("myTopic");
-		assertThat(message.value())
-				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
-				.contains("\"value\":\"10\"")
-				.contains("\"timestamp\":0")
-				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
+			assertThat(message.topic()).isEqualTo("myTopic");
+			assertThat(message.value())
+					.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
+					.contains("\"value\":\"10\"")
+					.contains("\"timestamp\":0")
+					.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
+		}
 	}
 
 	private static KafkaWriter getTestKafkaWriter() {

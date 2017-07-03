@@ -68,4 +68,14 @@ public class DefaultResultSerializerTest {
 
 		}
 	}
+
+	@Test
+	public void initDefaults() throws Exception {
+		DefaultResultSerializer resultSerializer = new DefaultResultSerializer(null, false, null, null);
+
+		assertThat(resultSerializer.getTypeNames()).isNotNull();
+		assertThat(resultSerializer.getTypeNames()).isEmpty();
+		assertThat(resultSerializer.getTags()).isNotNull();
+		assertThat(resultSerializer.getTags()).isEmpty();
+	}
 }

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -42,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @EqualsAndHashCode(exclude = {"objectMapper"})
 public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
 	@Nonnull
-	@Getter
+	@Getter(AccessLevel.PROTECTED)
 	@JsonIgnore
 	private final ObjectMapper objectMapper;
 	@Nonnull

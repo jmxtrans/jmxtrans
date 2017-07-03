@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -43,8 +44,10 @@ import java.util.List;
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static java.util.Collections.singletonList;
 
+@EqualsAndHashCode(exclude = {"objectMapper"})
 public class DetailedResultSerializer implements ResultSerializer {
 	private final ObjectMapper objectMapper;
+	@Getter
 	private final boolean singleValue;
 
 	@JsonCreator
@@ -97,7 +100,7 @@ public class DetailedResultSerializer implements ResultSerializer {
 		@Getter
 		private final String keyAlias;
 
-		public KResult(Server server, Result result) {
+		private KResult(Server server, Result result) {
 			alias = server.getAlias();
 			pid = server.getPid();
 			host = server.getHost();
@@ -118,7 +121,7 @@ public class DetailedResultSerializer implements ResultSerializer {
 		@Getter
 		private final ImmutableMap<String, Object> values;
 
-		public MultiValuesResult(Server server, Result result) {
+		private MultiValuesResult(Server server, Result result) {
 			super(server, result);
 			this.values = result.getValues();
 		}
@@ -133,7 +136,7 @@ public class DetailedResultSerializer implements ResultSerializer {
 		@Getter
 		private final Object value;
 
-		public SingleValueResult(Server server, Result result, String valueName) {
+		private SingleValueResult(Server server, Result result, String valueName) {
 			super(server, result);
 			this.valueName = valueName;
 			this.value = result.getValues().get(valueName);

@@ -29,12 +29,11 @@ import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
+import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.MonitorableApp;
-import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import com.googlecode.jmxtrans.test.RequiresIO;
+import org.junit.*;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
 
@@ -43,9 +42,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
+@Category({IntegrationTest.class, RequiresIO.class})
 public class KafkaWriterIT {
 	@Rule
-	public final MonitorableApp app = new MonitorableApp(12345);
+	public final MonitorableApp app = new MonitorableApp(12347);
 	private final TemporaryFolder temporaryFolder = new TemporaryFolder();
 	private final EmbeddedZookeeper zookeeper = new EmbeddedZookeeper(temporaryFolder);
 	private final EmbeddedKafka kafka = new EmbeddedKafka(temporaryFolder);
@@ -71,11 +74,15 @@ public class KafkaWriterIT {
 
 	@Test
 	public void testKafkaWriter() throws IOException {
-		List<String> jmxtrans = kafka.consume("jmxtrans", "jmxtrans-kafka-it", 10000L);
-		Assertions.assertThat(jmxtrans).isNotEmpty();
+		List<String> messages = kafka.consume("jmxtrans", "jmxtrans-kafka-it", 10000L);
+		assertThat(messages).isNotEmpty();
 		ObjectMapper objectMapper = new ObjectMapper();
-		JsonNode jsonNode = objectMapper.readValue(jmxtrans.get(0), JsonNode.class);
-
+		for(String message: messages) {
+			JsonNode jsonNode = objectMapper.readValue(message, JsonNode.class);
+			assertThat(jsonNode.get("keyspace").asText()).startsWith("test.localhost_12347.");
+			assertThat(jsonNode.get("value").asText()).isNotEmpty();
+			assertThat(jsonNode.get("timestamp").asLong()).isCloseTo(System.currentTimeMillis() / 1000L, within(10L));
+		}
 	}
 
 	@Before

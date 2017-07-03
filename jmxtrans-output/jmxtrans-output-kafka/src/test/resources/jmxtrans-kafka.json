@@ -1,7 +1,7 @@
 {
   "servers": [
     {
-      "port": "12345",
+      "port": "12347",
       "host": "localhost",
       "queries": [
         {
@@ -11,7 +11,11 @@
               "producerConfig": {
                 "bootstrap.servers": "localhost:9092"
               },
-              "topic": "jmxtrans"
+              "topic": "jmxtrans",
+              "resultSerializer": {
+                "@class": "com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializer",
+                "rootPrefix": "test"
+              }
             }
           ],
           "obj": "org.jmxtrans:type=Counter,name=myCounter",
@@ -26,7 +30,11 @@
               "producerConfig": {
                 "bootstrap.servers": "localhost:9092"
               },
-              "topic": "jmxtrans"
+              "topic": "jmxtrans",
+              "resultSerializer": {
+                "@class": "com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializer",
+                "rootPrefix": "test"
+              }
             }
           ],
           "obj": "java.lang:type=Memory",
