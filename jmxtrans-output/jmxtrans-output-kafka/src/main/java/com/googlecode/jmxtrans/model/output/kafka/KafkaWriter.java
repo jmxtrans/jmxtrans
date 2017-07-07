@@ -65,9 +65,31 @@ public class KafkaWriter extends BaseOutputWriter {
 
 	private static final String DEFAULT_ROOT_PREFIX = "servers";
 
-	private Producer<String, String> producer;
+	private final Producer<String, String> producer;
 	private final Iterable<String> topics;
 	private final ResultSerializer resultSerializer;
+
+	@VisibleForTesting
+	KafkaWriter(
+			ImmutableList<String> typeNames,
+			boolean booleanAsNumber,
+			String rootPrefix,
+			Boolean debugEnabled,
+			String topics,
+			Map<String, String> tags,
+			Map<String, Object> settings,
+			Producer<String, String> producer) {
+		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		this.producer = producer;
+		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
+		String aRootPrefix = firstNonNull(
+				rootPrefix,
+				(String) getSettings().get("rootPrefix"),
+				DEFAULT_ROOT_PREFIX);
+		Map<String, String> aTags = firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of());
+		resultSerializer = new DefaultResultSerializer(typeNames, booleanAsNumber, aRootPrefix, aTags);
+	}
+
 
 	@JsonCreator
 	public KafkaWriter(
@@ -78,20 +100,17 @@ public class KafkaWriter extends BaseOutputWriter {
 			@JsonProperty("topics") String topics,
 			@JsonProperty("tags") Map<String, String> tags,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, settings);
+		this(typeNames, booleanAsNumber, rootPrefix, debugEnabled, topics, tags, settings, createProducer(settings));
+	}
+
+	private static Producer<String, String> createProducer(Map<String, Object> settings) {
 		// Setting all the required Kafka Properties
 		Properties kafkaProperties = new Properties();
 		kafkaProperties.setProperty(BOOTSTRAP_SERVERS_CONFIG, Settings.getStringSetting(settings, BOOTSTRAP_SERVERS_CONFIG, null));
 		kafkaProperties.setProperty(KEY_SERIALIZER_CLASS_CONFIG, Settings.getStringSetting(settings, KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()));
 		kafkaProperties.setProperty(VALUE_SERIALIZER_CLASS_CONFIG, Settings.getStringSetting(settings, VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()));
-		this.producer = new KafkaProducer<>(kafkaProperties);
-		this.topics = asList(Settings.getStringSetting(settings, "topics", "").split(","));
-		String aRootPrefix = firstNonNull(
-				rootPrefix,
-				(String) getSettings().get("rootPrefix"),
-				DEFAULT_ROOT_PREFIX);
-		Map<String, String> aTags = firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of());
-		resultSerializer = new DefaultResultSerializer(typeNames, booleanAsNumber, aRootPrefix, aTags);
+		// Starts Kafka producer thread
+		return new KafkaProducer<>(kafkaProperties);
 	}
 
 	@Override
@@ -109,11 +128,6 @@ public class KafkaWriter extends BaseOutputWriter {
 				}
 			}
 		}
-	}
-
-	@VisibleForTesting
-	void setProducer(Producer<String, String> producer) {
-		this.producer = producer;
 	}
 
 	@Override

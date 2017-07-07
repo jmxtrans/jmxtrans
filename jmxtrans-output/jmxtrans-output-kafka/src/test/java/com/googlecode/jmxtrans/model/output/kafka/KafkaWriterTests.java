@@ -61,7 +61,6 @@ public class KafkaWriterTests {
 	public void
 	messagesAreSentToKafka() throws Exception {
 		try(KafkaWriter writer = getTestKafkaWriter()) {
-			writer.setProducer(producer);
 			writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 			verify(producer).send(messageCaptor.capture());
@@ -76,7 +75,7 @@ public class KafkaWriterTests {
 		}
 	}
 
-	private static KafkaWriter getTestKafkaWriter() {
+	private KafkaWriter getTestKafkaWriter() {
 		ImmutableList typenames = ImmutableList.of();
 		Map<String, Object> settings = new HashMap<String, Object>();
 		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
@@ -85,7 +84,7 @@ public class KafkaWriterTests {
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
 		settings.put("topics", "myTopic");
-		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings);
+		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings, producer);
 	}
 
 }
