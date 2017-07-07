@@ -30,6 +30,7 @@ import org.junit.Test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,6 +52,7 @@ public class KafkaWriterFactoryTest {
             assertThat(writerFactory.getTopic()).isEqualTo("jmxtrans");
             assertThat(writerFactory.getProducerConfig().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG)).isEqualTo("localhost:9092");
             assertThat(writerFactory.getResultSerializer()).isInstanceOf(DefaultResultSerializer.class);
+			assertThat(writerFactory.getObjectMapper()).isNotNull();
             try (KafkaWriter2 writer = writerFactory.create()) {
                 assertThat(writer.getTopic()).isEqualTo("jmxtrans");
                 assertThat(writer.getProducerConfig().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG)).isEqualTo("localhost:9092");
@@ -125,6 +127,29 @@ public class KafkaWriterFactoryTest {
             KafkaWriterFactory writerFactory1 = (KafkaWriterFactory) objectMapper.readValue(inputStream1, KafkaWriterFactory.class);
             KafkaWriterFactory writerFactory2 = (KafkaWriterFactory) objectMapper.readValue(inputStream2, KafkaWriterFactory.class);
             assertThat(writerFactory1.hashCode()).isNotEqualTo(writerFactory2.hashCode());
-        }
+			assertThat(writerFactory1).isNotEqualTo(writerFactory2);
+		}
     }
+
+	@Test(expected = NullPointerException.class)
+	public void testConstructorWithNullProducerConfig() {
+		new KafkaWriterFactory(null, "topic", new DetailedResultSerializer(true));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void testConstructorWithNullTopic() {
+		new KafkaWriterFactory(new HashMap<String, Object>(), null, new DetailedResultSerializer(true));
+	}
+
+	@Test()
+	public void testConstructorWithNullResultSerializer() {
+		KafkaWriterFactory writerFactory = new KafkaWriterFactory(new HashMap<String, Object>(), "topic", null);
+		ResultSerializer resultSerializer = writerFactory.getResultSerializer();
+		assertThat(resultSerializer).isInstanceOf(DefaultResultSerializer.class);
+		DefaultResultSerializer defaultResultSerializer = (DefaultResultSerializer) resultSerializer;
+		assertThat(defaultResultSerializer.getTags()).isEmpty();
+		assertThat(defaultResultSerializer.getRootPrefix()).isEmpty();
+		assertThat(defaultResultSerializer.getTypeNames()).isEmpty();
+		assertThat(defaultResultSerializer.isBooleanAsNumber()).isFalse();
+	}
 }

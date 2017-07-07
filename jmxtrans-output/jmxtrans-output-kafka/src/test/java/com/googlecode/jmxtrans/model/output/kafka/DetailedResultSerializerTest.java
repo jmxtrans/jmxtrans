@@ -30,6 +30,7 @@ import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.hashResult;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DetailedResultSerializerTest {
@@ -105,6 +106,23 @@ public class DetailedResultSerializerTest {
 					.contains("\"keyAlias\":\"MemoryAlias\"");
 
 		}
+	}
+
+	@Test
+	public void equalsHashCodeWhenSame() throws Exception {
+		DetailedResultSerializer resultSerializer1 = new DetailedResultSerializer(true);
+		DetailedResultSerializer resultSerializer2 = new DetailedResultSerializer(true);
+
+		assertThat(resultSerializer1).isEqualTo(resultSerializer2);
+		assertThat(resultSerializer1.hashCode()).isEqualTo(resultSerializer2.hashCode());
+	}
+
+	@Test
+	public void equalsWhenDifferent() throws Exception {
+		DetailedResultSerializer resultSerializer1 = new DetailedResultSerializer(true);
+		DetailedResultSerializer resultSerializer2 = new DetailedResultSerializer(false);
+
+		assertThat(resultSerializer1).isNotEqualTo(resultSerializer2);
 	}
 
 }

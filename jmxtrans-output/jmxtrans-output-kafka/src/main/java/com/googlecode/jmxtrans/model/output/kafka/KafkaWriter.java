@@ -33,6 +33,8 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
 import com.googlecode.jmxtrans.model.output.Settings;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -65,6 +67,7 @@ public class KafkaWriter extends BaseOutputWriter {
 
 	private static final String DEFAULT_ROOT_PREFIX = "servers";
 
+	@Getter(AccessLevel.PACKAGE)
 	private final Producer<String, String> producer;
 	private final Iterable<String> topics;
 	private final ResultSerializer resultSerializer;

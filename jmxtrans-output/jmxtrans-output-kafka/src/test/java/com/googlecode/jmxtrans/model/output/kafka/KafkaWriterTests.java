@@ -24,9 +24,11 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -50,17 +52,23 @@ public class KafkaWriterTests {
 	private Producer<String, String> producer;
 	@Captor
 	private ArgumentCaptor<ProducerRecord<String, String>> messageCaptor;
+	private Map<String, Object> settings;
+	private final ImmutableMap<String, String> tags =	ImmutableMap.of("myTagKey1", "myTagValue1");
 
-	@Test
-	public void
-	kafkaWriterNotNull() throws Exception {
-		assertThat(getTestKafkaWriter()).isNotNull();
+	@Before
+	public void before() {
+		settings = new HashMap<String, Object>();
+		settings.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		settings.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+		settings.put("debug", false);
+		settings.put("booleanAsNumber", true);
+		settings.put("topics", "myTopic");
 	}
 
 	@Test
 	public void
 	messagesAreSentToKafka() throws Exception {
-		try(KafkaWriter writer = getTestKafkaWriter()) {
+		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings, producer)) {
 			writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
 			verify(producer).send(messageCaptor.capture());
@@ -74,17 +82,11 @@ public class KafkaWriterTests {
 					.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
 		}
 	}
-
-	private KafkaWriter getTestKafkaWriter() {
-		ImmutableList typenames = ImmutableList.of();
-		Map<String, Object> settings = new HashMap<String, Object>();
-		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
-		settings.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-		settings.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-		settings.put("debug", false);
-		settings.put("booleanAsNumber", true);
-		settings.put("topics", "myTopic");
-		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings, producer);
+	@Test
+	public void createKafkaProducer() throws Exception {
+		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings)) {
+			assertThat(writer.getProducer()).isInstanceOf(KafkaProducer.class);
+		}
 	}
 
 }

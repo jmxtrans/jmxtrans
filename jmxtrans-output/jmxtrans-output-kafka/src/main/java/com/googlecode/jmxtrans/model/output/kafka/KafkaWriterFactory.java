@@ -64,7 +64,6 @@ public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
 			@JsonProperty("topic") @Nonnull String topic,
 			@JsonProperty("resultSerializer") ResultSerializer resultSerializer) {
 		this.objectMapper = new ObjectMapper();
-		checkNotNull(producerConfig);
 		ImmutableMap.Builder<String, Object> producerConfigBuilder = ImmutableMap.<String, Object>builder()
 				.putAll(producerConfig);
 		// Add default settings
