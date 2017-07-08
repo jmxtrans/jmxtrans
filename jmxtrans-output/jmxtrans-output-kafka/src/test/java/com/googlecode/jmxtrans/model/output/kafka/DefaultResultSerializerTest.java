@@ -59,6 +59,7 @@ public class DefaultResultSerializerTest {
 		assertThat(messages).hasSize(1);
 		String message = messages.iterator().next();
 		// Check JSON syntax
+		assertThat(message).endsWith("}}");
 		JsonNode jsonNode = objectMapper.readValue(message, JsonNode.class);
 		assertThat(jsonNode.get("keyspace").asText()).isEqualTo("rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount");
 		assertThat(jsonNode.get("value").asLong()).isEqualTo(10L);

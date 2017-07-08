@@ -86,6 +86,8 @@ public class DetailedResultSerializer implements ResultSerializer {
 		private final String host;
 		@Getter
 		private final String port;
+		@Getter
+		private final String source;
 		// Result
 		@Getter
 		private final String attributeName;
@@ -105,6 +107,7 @@ public class DetailedResultSerializer implements ResultSerializer {
 			pid = server.getPid();
 			host = server.getHost();
 			port = server.getPort();
+			source = server.getSource();
 			attributeName = result.getAttributeName();
 			className = result.getClassName();
 			objDomain = result.getObjDomain();

@@ -72,4 +72,19 @@ public class KafkaWriter2Test {
             assertThat(jsonNode.get("value").asLong()).isNotNull();
         }
     }
+
+	@Test
+	public void producerClosed() throws Exception {
+		// Given
+		KafkaWriter2 writer = new KafkaWriter2(
+				objectMapper,
+				producerMock,
+				TOPIC,
+				new DetailedResultSerializer(true));
+
+		writer.close();
+
+		verify(producerMock).close();
+	}
+
 }

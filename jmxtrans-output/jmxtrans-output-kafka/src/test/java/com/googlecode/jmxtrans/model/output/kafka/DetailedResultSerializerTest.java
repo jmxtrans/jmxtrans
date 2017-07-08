@@ -22,6 +22,8 @@
  */
 package com.googlecode.jmxtrans.model.output.kafka;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -41,14 +43,20 @@ public class DetailedResultSerializerTest {
 		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
 
 		assertThat(messages).hasSize(1);
+
 		String message = messages.iterator().next();
-		assertThat(message)
-				.contains("\"host\":\"host.example.net\"")
-				.contains("\"attributeName\":\"ObjectPendingFinalizationCount\"")
-				.contains("\"typeName\":\"type=Memory\"")
-				.contains("\"ObjectPendingFinalizationCount\":10")
-				.contains("\"epoch\":0")
-				.contains("\"keyAlias\":\"MemoryAlias\"");
+		// Check JSON Syntax and detailed content
+		JsonNode jsonNode = new ObjectMapper().readValue(message, JsonNode.class);
+		assertThat(jsonNode.get("host").asText()).isEqualTo("host.example.net");
+		assertThat(jsonNode.get("source").asText()).isEqualTo("host.example.net");
+		assertThat(jsonNode.get("port").asInt()).isEqualTo(4321);
+		assertThat(jsonNode.get("attributeName").asText()).isEqualTo("ObjectPendingFinalizationCount");
+		assertThat(jsonNode.get("className").asText()).isEqualTo("sun.management.MemoryImpl");
+		assertThat(jsonNode.get("objDomain").asText()).isEqualTo("ObjectDomainName");
+		assertThat(jsonNode.get("typeName").asText()).isEqualTo("type=Memory");
+		assertThat(jsonNode.get("values").get("ObjectPendingFinalizationCount").asLong()).isEqualTo(10L);
+		assertThat(jsonNode.get("epoch").asLong()).isEqualTo(0L);
+		assertThat(jsonNode.get("keyAlias").asText()).isEqualTo("MemoryAlias");
 	}
 
 	@Test

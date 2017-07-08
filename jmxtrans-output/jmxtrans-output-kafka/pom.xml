@@ -36,8 +36,8 @@
 	<name>JmxTrans - Kafka output writers</name>
 
 	<properties>
-		<verify.mutationThreshold>80</verify.mutationThreshold>
-		<verify.totalBranchRate>40</verify.totalBranchRate>
+		<verify.mutationThreshold>60</verify.mutationThreshold>
+		<verify.totalBranchRate>50</verify.totalBranchRate>
 		<verify.totalLineRate>90</verify.totalLineRate>
 	</properties>
 	<dependencies>

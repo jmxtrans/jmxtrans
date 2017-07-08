@@ -59,15 +59,13 @@ public class KafkaWriterTests {
 	public void before() {
 		settings = new HashMap<String, Object>();
 		settings.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-		settings.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
 		settings.put("topics", "myTopic");
 	}
 
 	@Test
-	public void
-	messagesAreSentToKafka() throws Exception {
+	public void messagesAreSentToKafka() throws Exception {
 		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings, producer)) {
 			writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 
@@ -82,6 +80,16 @@ public class KafkaWriterTests {
 					.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
 		}
 	}
+
+	@Test
+	public void producerClosed() throws Exception {
+		KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings, producer);
+
+		writer.close();
+
+		verify(producer).close();
+	}
+
 	@Test
 	public void createKafkaProducer() throws Exception {
 		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings)) {
