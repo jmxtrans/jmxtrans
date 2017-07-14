@@ -27,39 +27,65 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.jmxtrans</groupId>
-		<artifactId>jmxtrans-parent</artifactId>
+		<artifactId>jmxtrans-output</artifactId>
 		<version>266-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>jmxtrans-output</artifactId>
+	<artifactId>jxmtrans-output-gelf</artifactId>
 
-	<packaging>pom</packaging>
+	<properties>
+		<verify.totalBranchRate>28</verify.totalBranchRate>
+		<verify.totalLineRate>48</verify.totalLineRate>
+	</properties>
 
-	<name>jmxtrans - output writers</name>
-
-	<description>This module groups all different output writers.
-
-		Different output writers have different dependencies. To ensure that those dependencies do not leak to other
-		output writer, or that we can limit to number of dependencies at runtime, output writers are split into
-		separate modules based on the dependencies they use. For example, the CloudWatch output writers depends on the
-		AWS SDK, which is quite large and not used by any other output writer. If you only want to send metrics to
-		Graphite, there should be no need to have the AWS SDK in your classpath at runtime.
-
-		Some dependencies are also problematic. They can introduce incompatibilities. For example, a few writers are
-		based directly on log4j or logback. This direct dependence breaks the use of SLF4J. By isolating those output
-		writers to a specific module, we can ensure this has minimal impact.</description>
-
-	<modules>
-		<module>jmxtrans-output-cloudwatch</module>
-		<module>jmxtrans-output-core</module>
-		<module>jmxtrans-output-ganglia</module>
-		<module>jmxtrans-output-jrobin</module>
-		<module>jmxtrans-output-log4j</module>
-		<module>jmxtrans-output-velocity</module>
-		<module>jmxtrans-output-kafka</module>
-		<module>jmxtrans-output-elastic</module>
-		<module>jmxtrans-output-influxdb</module>
-		<module>jmxtrans-output-gelf</module>
-	</modules>
-
+	<dependencies>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.graylog2</groupId>
+			<artifactId>gelfclient</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-test-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
