@@ -79,14 +79,11 @@ public class GelfWriter extends BaseOutputWriter {
 			throw new NullPointerException("Host can not be null");
 		}
 
-		// set default values
-
-		if (port == null) {
-			port = 12201;
+		if (port != null) {
+			this.gelfConfiguration = new GelfConfiguration(host, port);
+		} else {
+			this.gelfConfiguration = new GelfConfiguration(host);
 		}
-
-
-		this.gelfConfiguration = new GelfConfiguration(host, port);
 
 		if (transport != null) {
 			final GelfTransports gelfTransports;
@@ -97,7 +94,7 @@ public class GelfWriter extends BaseOutputWriter {
 				case "UDP": gelfTransports = GelfTransports.UDP;
 					break;
 				case "TEST": useMock = true;
-				default: gelfTransports = GelfTransports.UDP;
+				default: gelfTransports = GelfTransports.TCP;
 			}
 
 			gelfConfiguration.transport(gelfTransports);
@@ -146,6 +143,8 @@ public class GelfWriter extends BaseOutputWriter {
 		if (maxInflightSends != null) {
 			gelfConfiguration.maxInflightSends(maxInflightSends);
 		}
+
+		log.debug("Created gelf configuration: %s", gelfConfiguration.toString());
 
 	}
 
@@ -204,8 +203,17 @@ public class GelfWriter extends BaseOutputWriter {
 			}
 		}
 
-		messageBuilder.message(StringUtils.join(messages, "|"));
-		messageBuilder.fullMessage(StringUtils.join(messages, "|"));
+		final String message = StringUtils.join(messages, "|");
+
+		messageBuilder.message(message);
+		messageBuilder.fullMessage(message);
+
+		log.debug(
+			String.format(
+				"Sending GELF message: %s",
+				messageBuilder.build().toString()
+			)
+		);
 
 		transport.send(messageBuilder.build());
 	}
