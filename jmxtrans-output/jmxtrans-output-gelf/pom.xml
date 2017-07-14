@@ -31,7 +31,9 @@
 		<version>266-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>jxmtrans-output-gelf</artifactId>
+	<artifactId>jmxtrans-output-gelf</artifactId>
+
+	<name>JmxTrans - GELF output writers</name>
 
 	<properties>
 		<verify.totalBranchRate>28</verify.totalBranchRate>
