@@ -203,7 +203,7 @@ public class GelfWriter extends BaseOutputWriter {
 			}
 		}
 
-		final String message = StringUtils.join(messages, "|");
+		final String message = StringUtils.join(messages, " ");
 
 		messageBuilder.message(message);
 		messageBuilder.fullMessage(message);
