@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.model.output.gelf;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import lombok.EqualsAndHashCode;
@@ -40,9 +41,6 @@ import java.util.Map;
 public class GelfWriterFactory implements OutputWriterFactory {
 
 	private final ImmutableList<String> typeNames;
-	private final boolean booleanAsNumber;
-	private final Boolean debugEnabled;
-	private final Map<String, Object> settings;
 	private final GelfConfiguration gelfConfiguration;
 	private final Map<String, Object> additionalFields;
 	private static final Logger log = LoggerFactory.getLogger(GelfWriter.class);
@@ -72,9 +70,6 @@ public class GelfWriterFactory implements OutputWriterFactory {
 	)
 	{
 		this.typeNames = typeNames;
-		this.booleanAsNumber = booleanAsNumber;
-		this.debugEnabled = debugEnabled;
-		this.settings = settings;
 
 		this.additionalFields = additionalFields;
 
@@ -173,6 +168,7 @@ public class GelfWriterFactory implements OutputWriterFactory {
 		);
 	}
 
+	@VisibleForTesting
 	public GelfConfiguration getGelfConfiguration() {
 		return gelfConfiguration;
 	}

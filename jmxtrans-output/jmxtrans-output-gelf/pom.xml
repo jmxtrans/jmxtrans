@@ -36,7 +36,7 @@
 	<name>JmxTrans - GELF output writers</name>
 
 	<properties>
-		<verify.mutationThreshold>53</verify.mutationThreshold>
+		<verify.mutationThreshold>32</verify.mutationThreshold>
 		<verify.totalBranchRate>35</verify.totalBranchRate>
 		<verify.totalLineRate>97</verify.totalLineRate>
 	</properties>
@@ -49,7 +49,6 @@
 		<dependency>
 			<groupId>org.graylog2</groupId>
 			<artifactId>gelfclient</artifactId>
-			<version>1.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>

@@ -315,6 +315,11 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
+				<groupId>org.graylog2</groupId>
+				<artifactId>gelfclient</artifactId>
+				<version>1.4.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.influxdb</groupId>
 				<artifactId>influxdb-java</artifactId>
 				<version>2.4</version>

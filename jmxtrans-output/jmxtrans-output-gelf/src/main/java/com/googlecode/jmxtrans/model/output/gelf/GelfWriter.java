@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model.output.gelf;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
@@ -110,6 +111,7 @@ public class GelfWriter extends OutputWriterAdapter {
 		this.gelfTransport.send(messageBuilder.build());
 	}
 
+	@VisibleForTesting
 	public Map<String, Object> getAdditionalFields() {
 		return additionalFields;
 	}
