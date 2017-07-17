@@ -36,8 +36,9 @@
 	<name>JmxTrans - GELF output writers</name>
 
 	<properties>
-		<verify.totalBranchRate>28</verify.totalBranchRate>
-		<verify.totalLineRate>48</verify.totalLineRate>
+		<verify.mutationThreshold>53</verify.mutationThreshold>
+		<verify.totalBranchRate>93</verify.totalBranchRate>
+		<verify.totalLineRate>98</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
