@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model.output.gelf;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
+import lombok.EqualsAndHashCode;
 import org.graylog2.gelfclient.GelfConfiguration;
 import org.graylog2.gelfclient.GelfTransports;
 import org.graylog2.gelfclient.transport.GelfTransport;
@@ -35,7 +36,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.Map;
 
-public class GelfWriterFactory implements OutputWriterFactory{
+@EqualsAndHashCode
+public class GelfWriterFactory implements OutputWriterFactory {
 
 	private final ImmutableList<String> typeNames;
 	private final boolean booleanAsNumber;
@@ -67,7 +69,8 @@ public class GelfWriterFactory implements OutputWriterFactory{
 		final Boolean tlsCertVerificationEnabled,
 		@JsonProperty("tcpKeepAlive") final Boolean tcpKeepAlive,
 		@JsonProperty("maxInflightSends") final Integer maxInflightSends
-	) {
+	)
+	{
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.debugEnabled = debugEnabled;
@@ -143,6 +146,10 @@ public class GelfWriterFactory implements OutputWriterFactory{
 				tlsTrustCertChainFile));
 		}
 
+		if (tcpKeepAlive != null) {
+			gelfConfiguration.tcpKeepAlive(tcpKeepAlive);
+		}
+
 		if (maxInflightSends != null) {
 			gelfConfiguration.maxInflightSends(maxInflightSends);
 		}
@@ -161,11 +168,12 @@ public class GelfWriterFactory implements OutputWriterFactory{
 
 		return new GelfWriter(
 			this.typeNames,
-			this.booleanAsNumber,
-			this.debugEnabled,
-			this.settings,
 			this.additionalFields,
 			gelfTransport
 		);
+	}
+
+	public GelfConfiguration getGelfConfiguration() {
+		return gelfConfiguration;
 	}
 }

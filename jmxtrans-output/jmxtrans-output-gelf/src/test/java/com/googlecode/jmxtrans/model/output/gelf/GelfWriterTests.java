@@ -23,13 +23,11 @@
 package com.googlecode.jmxtrans.model.output.gelf;
 
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.model.Result;
+import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.ResultFixtures;
-import com.googlecode.jmxtrans.model.ValidationException;
 import org.graylog2.gelfclient.GelfMessage;
 import org.graylog2.gelfclient.transport.GelfTcpTransport;
 import org.graylog2.gelfclient.transport.GelfTransport;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
@@ -40,7 +38,6 @@ import java.util.Map;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doNothing;
@@ -49,21 +46,10 @@ import static org.mockito.Mockito.verify;
 
 public class GelfWriterTests {
 
-	private Result result;
-
-	@Before
-	public void setUp() throws Exception {
-		this.result = ResultFixtures.numericResult();
-	}
-
 	@Test
 	public void testSendGelfMessage() throws Exception {
 		final ImmutableList<String> typenames = ImmutableList.of();
 		final Map<String, Object> settings = new HashMap<>();
-
-		final Map<String, Object> additionalFields = new HashMap<>();
-
-		additionalFields.put("test", "test");
 
 		final GelfTransport gelfTransport = Mockito.mock(GelfTcpTransport.class);
 
@@ -76,7 +62,6 @@ public class GelfWriterTests {
 						assertThat(message.getAdditionalFields())
 							.containsKey("test")
 							.as("Additional fields were not checked");
-
 						assertThat(message.getFullMessage())
 							.isNotEmpty()
 							.as("Invalid full message");
@@ -93,245 +78,18 @@ public class GelfWriterTests {
 
 		gelfWriter = new GelfWriter(
 			typenames,
-			true,
-			true,
-			settings,
-			additionalFields,
+			ImmutableMap.of("test", (Object) "test"),
 			gelfTransport
 		);
 		gelfWriter.start();
 		gelfWriter.doWrite(dummyServer(),
 			dummyQuery(),
-			ImmutableList.of(result));
+			ImmutableList.of(ResultFixtures.numericResult()));
 
 		verify(
 			gelfTransport,
 			times(1)
 		).send(isA(GelfMessage.class));
-	}
-
-	@Test
-	public void testTcpDefaultsWriterFactory() throws ValidationException {
-
-		final ImmutableList<String> typenames = ImmutableList.of();
-		final Map<String, Object> settings = new HashMap<>();
-
-		final Map<String, Object> additionalFields = new HashMap<>();
-
-		additionalFields.put("test", "test");
-
-		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
-			typenames,
-			true,
-			true,
-			settings,
-			"test",
-			null,
-			additionalFields,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null
-		);
-
-		final GelfWriter gelfWriter = gelfWriterFactory.create();
-		gelfWriter.validateSetup(dummyServer(), dummyQuery());
-
-		assertThat(gelfWriter).isNotNull().as("Didn't get a writer back.");
-	}
-
-	@Test
-	public void testUdpDefaultsWriterFactory() throws ValidationException {
-
-		final ImmutableList<String> typenames = ImmutableList.of();
-		final Map<String, Object> settings = new HashMap<>();
-
-		final Map<String, Object> additionalFields = new HashMap<>();
-
-		additionalFields.put("test", "test");
-
-		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
-			typenames,
-			true,
-			true,
-			settings,
-			"test",
-			null,
-			additionalFields,
-			"udp",
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null
-		);
-
-		final GelfWriter gelfWriter = gelfWriterFactory.create();
-		gelfWriter.validateSetup(dummyServer(), dummyQuery());
-
-		assertThat(gelfWriter).isNotNull().as("Didn't get a writer back.");
-	}
-
-	@Test
-	public void testNonDefaultsWriterFactory() throws ValidationException {
-
-		final ImmutableList<String> typenames = ImmutableList.of();
-		final Map<String, Object> settings = new HashMap<>();
-
-		final Map<String, Object> additionalFields = new HashMap<>();
-
-		additionalFields.put("test", "test");
-
-		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
-			typenames,
-			true,
-			true,
-			settings,
-			"test",
-			12202,
-			additionalFields,
-			"udp",
-			10,
-			10,
-			10,
-			true,
-			10,
-			true,
-			"/somefile",
-			true,
-			true,
-			10
-		);
-
-		final GelfWriter gelfWriter = gelfWriterFactory.create();
-		gelfWriter.validateSetup(dummyServer(), dummyQuery());
-
-		assertThat(gelfWriter).isNotNull().as("Didn't get a writer back.");
-	}
-
-	@Test
-	public void testNonDefaultsFalseWriterFactory() throws ValidationException {
-
-		final ImmutableList<String> typenames = ImmutableList.of();
-		final Map<String, Object> settings = new HashMap<>();
-
-		final Map<String, Object> additionalFields = new HashMap<>();
-
-		additionalFields.put("test", "test");
-
-		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
-			typenames,
-			true,
-			true,
-			settings,
-			"test",
-			null,
-			additionalFields,
-			"tcp",
-			10,
-			10,
-			10,
-			false,
-			10,
-			false,
-			"/somefile",
-			false,
-			false,
-			10
-		);
-
-		final GelfWriter gelfWriter = gelfWriterFactory.create();
-		gelfWriter.validateSetup(dummyServer(), dummyQuery());
-
-		assertThat(gelfWriter).isNotNull().as("Didn't get a writer back.");
-	}
-	@Test
-	public void testIgnoreWrongTransport() throws ValidationException {
-
-		final ImmutableList<String> typenames = ImmutableList.of();
-		final Map<String, Object> settings = new HashMap<>();
-
-		final Map<String, Object> additionalFields = new HashMap<>();
-
-		additionalFields.put("test", "test");
-
-		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
-			typenames,
-			true,
-			true,
-			settings,
-			"test",
-			null,
-			additionalFields,
-			"bogus",
-			10,
-			10,
-			10,
-			false,
-			10,
-			false,
-			"/somefile",
-			false,
-			false,
-			10
-		);
-
-		final GelfWriter gelfWriter = gelfWriterFactory.create();
-		gelfWriter.validateSetup(dummyServer(), dummyQuery());
-
-		assertThat(gelfWriter).isNotNull().as("Didn't get a writer back.");
-	}
-
-	@Test
-	public void testHostNotSpecified() throws ValidationException {
-
-		final ImmutableList<String> typenames = ImmutableList.of();
-		final Map<String, Object> settings = new HashMap<>();
-
-		final Map<String, Object> additionalFields = new HashMap<>();
-
-		additionalFields.put("test", "test");
-
-		try {
-			final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
-				typenames,
-				true,
-				true,
-				settings,
-				null,
-				null,
-				additionalFields,
-				"udp",
-				10,
-				10,
-				10,
-				true,
-				10,
-				true,
-				"/somefile",
-				true,
-				true,
-				10
-			);
-		} catch (final NullPointerException e) {
-			assertThat(e).isNotNull();
-			return;
-		}
-
-		fail("No error received");
-
 	}
 
 }

@@ -23,12 +23,12 @@
 package com.googlecode.jmxtrans.model.output.gelf;
 
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang.StringUtils;
 import org.graylog2.gelfclient.GelfMessageBuilder;
 import org.graylog2.gelfclient.transport.GelfTransport;
@@ -39,41 +39,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class GelfWriter extends BaseOutputWriter {
+@EqualsAndHashCode
+public class GelfWriter extends OutputWriterAdapter {
 
 	private static final Logger log = LoggerFactory.getLogger(GelfWriter.class);
 
 	private final Map<String, Object> additionalFields;
 	private final GelfTransport gelfTransport;
+	private final ImmutableList<String> typeNames;
 
 	public GelfWriter(
-		ImmutableList<String> typeNames,
-		boolean booleanAsNumber,
-		Boolean debugEnabled,
-		Map<String, Object> settings,
-		Map<String, Object> additionalFields,
-		GelfTransport gelfTransport
+		final ImmutableList<String> typeNames,
+		final Map<String, Object> additionalFields,
+		final GelfTransport gelfTransport
 	) {
-		super(typeNames,booleanAsNumber, debugEnabled, settings);
+		this.typeNames = typeNames;
 		this.additionalFields = additionalFields;
 		this.gelfTransport = gelfTransport;
 	}
 
 	@Override
-	public void validateSetup(final Server server, final Query query)
-		throws ValidationException
+	public void doWrite(final Server server, final Query query, final Iterable<Result> results)
+		throws Exception
 	{
-		// no validations
-	}
-
-	@Override
-	protected void internalWrite(
-		final Server server,
-		final Query query,
-		final ImmutableList<Result> results) throws Exception
-	{
-		final List<String> typeNames = this.getTypeNames();
-
 		final GelfMessageBuilder messageBuilder = new GelfMessageBuilder(
 			"",
 			server.getHost()
@@ -87,7 +75,7 @@ public class GelfWriter extends BaseOutputWriter {
 				.entrySet()) {
 				final String
 					key =
-					KeyUtils.getKeyString(query, result, values, typeNames);
+					KeyUtils.getKeyString(query, result, values, this.typeNames);
 
 				messages.add(
 					String.format(
@@ -122,4 +110,7 @@ public class GelfWriter extends BaseOutputWriter {
 		this.gelfTransport.send(messageBuilder.build());
 	}
 
+	public Map<String, Object> getAdditionalFields() {
+		return additionalFields;
+	}
 }

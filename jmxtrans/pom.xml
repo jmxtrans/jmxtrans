@@ -108,6 +108,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-gelf</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-output-influxdb</artifactId>
 			<scope>runtime</scope>
 		</dependency>
@@ -129,11 +134,6 @@
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-output-velocity</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jmxtrans</groupId>
-			<artifactId>jmxtrans-output-gelf</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
