@@ -25,11 +25,10 @@ package com.googlecode.jmxtrans.model.output.gelf;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.ValidationException;
-import org.assertj.core.api.Condition;
-import org.graylog2.gelfclient.GelfConfiguration;
 import org.graylog2.gelfclient.GelfTransports;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,10 +70,62 @@ public class GelfWriterFactoryTests {
 			.as("Hostname is wrong");
 
 		// Check, that default values were used.
+		// Beware, as this may change with a new version of GelfClient
 
-		assertThat(gelfWriterFactory.getGelfConfiguration()).is(
-			new GelfDefaultConfigurationCondition()
-		).as("Values are not the expected default values");
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getPort()
+		).isEqualTo(12201)
+			.as("Invalid port");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getTransport()
+		).isEqualTo(GelfTransports.TCP)
+			.as("Invalid transport");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getQueueSize()
+		).isEqualTo(512)
+			.as("Invalid queue size");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getConnectTimeout()
+		).isEqualTo(1000)
+			.as("Invalid connect timeout");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getReconnectDelay()
+		).isEqualTo(500)
+			.as("Invalid reconnect delay");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().isTcpNoDelay()
+		).isFalse()
+			.as("Invalid tcp nodelay");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getSendBufferSize()
+		).isEqualTo(-1)
+			.as("Invalid send buffer size");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().isTlsEnabled()
+		).isFalse()
+			.as("Invalid tls enabled");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().isTlsCertVerificationEnabled()
+		).isTrue()
+			.as("Invalid tls cert verification enabled");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().isTcpKeepAlive()
+		).isFalse()
+			.as("Invalid tcp keep alive");
+
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getMaxInflightSends()
+		).isEqualTo(512)
+			.as("Invalid max inflight sends");
 
 		final GelfWriter gelfWriter = gelfWriterFactory.create();
 
@@ -153,60 +204,55 @@ public class GelfWriterFactoryTests {
 		);
 
 		assertThat(
-			gelfWriterFactory.getGelfConfiguration()
-		).is(
-			new Condition<GelfConfiguration>() {
-				@Override
-				public boolean matches(final GelfConfiguration gelfConfiguration) {
+			gelfWriterFactory.getGelfConfiguration().getQueueSize()
+		).isEqualTo(10)
+			.as("Invalid queue size");
 
-					if (gelfConfiguration.getQueueSize() != 10) {
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getConnectTimeout()
+		).isEqualTo(10)
+			.as("Invalid connection timeout");
 
-					if (gelfConfiguration.getConnectTimeout() != 10) {
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getReconnectDelay()
+		).isEqualTo(10)
+			.as("Invalid reconnect delay");
 
-					if (gelfConfiguration.getReconnectDelay() != 10) {
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().isTcpNoDelay()
+		).isTrue()
+			.as("Invalid tcp no delay");
 
-					if (!gelfConfiguration.isTcpNoDelay()) {
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getSendBufferSize()
+		).isEqualTo(10)
+			.as("Invalid send buffer size");
 
-					if (gelfConfiguration.getSendBufferSize() != 10) {
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getTlsTrustCertChainFile()
+		).isInstanceOf(File.class)
+			.as("Invalid tls trustcertchain file");
 
-					if (!gelfConfiguration.isTlsEnabled()) {
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getTlsTrustCertChainFile()
+				.getPath()
+		).isEqualTo("/somefile")
+			.as("Invalid tls trustcertchain file");
 
-					if (!gelfConfiguration.getTlsTrustCertChainFile()
-						.getPath()
-						.equals("/somefile"))
-					{
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().isTlsCertVerificationEnabled()
+		).isTrue()
+			.as("Invalid tls Cert verification enabled");
 
-					if (!gelfConfiguration.isTlsCertVerificationEnabled()) {
-						return false;
-					}
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().isTcpKeepAlive()
+		).isTrue()
+			.as("Invalid tcp keep alive");
 
-					if (!gelfConfiguration.isTcpKeepAlive()) {
-						return false;
-					}
-
-					if (gelfConfiguration.getMaxInflightSends() != 10) {
-						return false;
-					}
-
-					return true;
-				}
-			}
-		)
-			.as("Custom configuration not used");
+		assertThat(
+			gelfWriterFactory.getGelfConfiguration().getMaxInflightSends()
+		).isEqualTo(10)
+			.as("Invalid max inflight sends");
 
 		final GelfWriter gelfWriter = gelfWriterFactory.create();
 

@@ -1,17 +1,17 @@
 /**
  * The MIT License
  * Copyright © 2010 JmxTrans team
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,7 +31,6 @@ import org.graylog2.gelfclient.transport.GelfTransport;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -42,7 +41,6 @@ import java.util.Map;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -71,6 +69,18 @@ public class GelfWriterTests {
 			messageArgumentCaptor.capture()
 		);
 
+		final GelfWriter gelfWriter;
+
+		gelfWriter = new GelfWriter(
+			typenames,
+			ImmutableMap.of("test", (Object) "test"),
+			gelfTransport
+		);
+		gelfWriter.start();
+		gelfWriter.doWrite(dummyServer(),
+			dummyQuery(),
+			ImmutableList.of(ResultFixtures.numericResult()));
+
 		GelfMessage gelfMessage = messageArgumentCaptor.getValue();
 
 		assertThat(gelfMessage.getAdditionalFields())
@@ -84,18 +94,6 @@ public class GelfWriterTests {
 		assertThat(gelfMessage.getMessage())
 			.isNotEmpty()
 			.as("Invalid message");
-
-		final GelfWriter gelfWriter;
-
-		gelfWriter = new GelfWriter(
-			typenames,
-			ImmutableMap.of("test", (Object) "test"),
-			gelfTransport
-		);
-		gelfWriter.start();
-		gelfWriter.doWrite(dummyServer(),
-			dummyQuery(),
-			ImmutableList.of(ResultFixtures.numericResult()));
 
 		verify(
 			gelfTransport,
