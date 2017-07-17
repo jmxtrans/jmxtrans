@@ -55,6 +55,10 @@
 			<artifactId>jmxtrans-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.jmxtrans</groupId>
+			<artifactId>jmxtrans-output-core</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
@@ -68,10 +72,6 @@
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-test-utils</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jmxtrans</groupId>
-			<artifactId>jmxtrans-output-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
