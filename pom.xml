@@ -23,9 +23,7 @@
     THE SOFTWARE.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -112,8 +110,7 @@
 
 	<scm>
 		<connection>scm:git:git@github.com:jmxtrans/jmxtrans.git</connection>
-		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git
-		</developerConnection>
+		<developerConnection>scm:git:git@github.com:jmxtrans/jmxtrans.git</developerConnection>
 		<tag>HEAD</tag>
 		<url>https://github.com/jmxtrans/jmxtrans</url>
 	</scm>
@@ -121,8 +118,7 @@
 	<distributionManagement>
 		<repository>
 			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
-			</url>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 		<snapshotRepository>
 			<id>ossrh</id>
@@ -146,22 +142,18 @@
 		<github.global.server>github</github.global.server>
 		<!-- some versions used by multiple dependencies -->
 		<jackson.version>2.7.4</jackson.version>
-		<jsw.dir>
-			${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}
-		</jsw.dir>
+		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<logback.version>1.1.7</logback.version>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
 		<package.daemon.name>${project.artifactId}</package.daemon.name>
 		<package.group>${project.artifactId}</package.group>
-		<package.install.dir>/usr/share/${project.artifactId}
-		</package.install.dir>
+		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
 		<package.user>${project.artifactId}</package.user>
 		<packageBuildTimeStamp>${maven.build.timestamp}</packageBuildTimeStamp>
 		<powermock.version>1.6.5</powermock.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8
-		</project.reporting.outputEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<slf4j.version>1.7.21</slf4j.version>
 		<verify.mutationThreshold>100</verify.mutationThreshold>
 		<verify.totalBranchRate>100</verify.totalBranchRate>
@@ -628,10 +620,8 @@
 					<!-- version 2.5.0 is compiled with Java 8 as target class format -->
 					<version>2.5.0</version>
 					<configuration>
-						<predefinedSortOrder>recommended_2008_06
-						</predefinedSortOrder>
-						<sortDependencies>scope,groupId,artifactId
-						</sortDependencies>
+						<predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
+						<sortDependencies>scope,groupId,artifactId</sortDependencies>
 						<sortPlugins>groupId,artifactId</sortPlugins>
 						<lineSeparator>\n</lineSeparator>
 						<encoding>${project.build.sourceEncoding}</encoding>
@@ -654,9 +644,7 @@
 					<artifactId>license-maven-plugin</artifactId>
 					<version>3.0.rc1</version>
 					<configuration>
-						<header>
-							com/mycila/maven/plugin/license/templates/MIT.txt
-						</header>
+						<header>com/mycila/maven/plugin/license/templates/MIT.txt</header>
 						<strictCheck>true</strictCheck>
 						<properties>
 							<year>2015</year>
@@ -687,30 +675,20 @@
 					<version>2.1.0</version>
 					<configuration>
 						<classesToIgnore>
-							<param>com.googlecode.jmxtrans.model.QueryFixtures
-							</param>
-							<param>
-								com.googlecode.jmxtrans.model.ResultFixtures
-							</param>
-							<param>
-								com.googlecode.jmxtrans.model.ServerFixtures
-							</param>
+							<param>com.googlecode.jmxtrans.model.QueryFixtures</param>
+							<param>com.googlecode.jmxtrans.model.ResultFixtures</param>
+							<param>com.googlecode.jmxtrans.model.ServerFixtures</param>
 						</classesToIgnore>
 						<interfacesMarkingLiveCode>
-							<param>
-								com.googlecode.jmxtrans.model.OutputWriterFactory
-							</param>
+							<param>com.googlecode.jmxtrans.model.OutputWriterFactory</param>
 						</interfacesMarkingLiveCode>
 						<modulesToSkip>
 							<param>jmxtrans-examples</param>
 							<param>jmxtrans-test-utils</param>
 						</modulesToSkip>
-						<skipSendingUsageStatistics>false
-						</skipSendingUsageStatistics>
+						<skipSendingUsageStatistics>false</skipSendingUsageStatistics>
 						<skipUpdateCheck>true</skipUpdateCheck>
-						<usageStatisticsComment>JmxTrans -
-							https://github.com/jmxtrans/jmxtrans
-						</usageStatisticsComment>
+						<usageStatisticsComment>JmxTrans - https://github.com/jmxtrans/jmxtrans</usageStatisticsComment>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -754,9 +732,7 @@
 					<configuration>
 						<configLocation>src/etc/checkstyle.xml</configLocation>
 						<consoleOutput>true</consoleOutput>
-						<maxAllowedViolations>
-							${checkstyle.max.allowed.violations}
-						</maxAllowedViolations>
+						<maxAllowedViolations>${checkstyle.max.allowed.violations}</maxAllowedViolations>
 					</configuration>
 					<dependencies>
 						<!-- to workaround https://github.com/jcgay/maven-color/issues/8 -->
@@ -812,8 +788,7 @@
 					<dependencies>
 						<dependency>
 							<groupId>de.andrena.tools.nopackagecycles</groupId>
-							<artifactId>no-package-cycles-enforcer-rule
-							</artifactId>
+							<artifactId>no-package-cycles-enforcer-rule</artifactId>
 							<version>1.0.5</version>
 						</dependency>
 					</dependencies>
@@ -826,8 +801,7 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule
-										implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"/>
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
 								</rules>
 							</configuration>
 						</execution>
@@ -838,8 +812,7 @@
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>2.19.1</version>
 					<configuration>
-						<groups>com.googlecode.jmxtrans.test.IntegrationTest
-						</groups>
+						<groups>com.googlecode.jmxtrans.test.IntegrationTest</groups>
 					</configuration>
 					<executions>
 						<execution>
@@ -893,8 +866,7 @@
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.3</version>
 					<configuration>
-						<preparationGoals>sortpom:sort clean verify
-						</preparationGoals>
+						<preparationGoals>sortpom:sort clean verify</preparationGoals>
 						<goals>deploy</goals>
 						<releaseProfiles>gpg,deb,rpm</releaseProfiles>
 					</configuration>
@@ -909,16 +881,11 @@
 					<artifactId>maven-scm-publish-plugin</artifactId>
 					<version>1.1</version>
 					<configuration>
-						<checkoutDirectory>
-							${session.executionRootDirectory}/target/scmpublish-checkout/
-						</checkoutDirectory>
-						<content>
-							${session.executionRootDirectory}/target/staging/
-						</content>
+						<checkoutDirectory>${session.executionRootDirectory}/target/scmpublish-checkout/</checkoutDirectory>
+						<content>${session.executionRootDirectory}/target/staging/</content>
 						<skipDeletedFiles>true</skipDeletedFiles>
 						<ignorePathsToDelete>
-							<ignorePathsToDelete>%regex[.*]
-							</ignorePathsToDelete>
+							<ignorePathsToDelete>%regex[.*]</ignorePathsToDelete>
 						</ignorePathsToDelete>
 						<providerImplementations>
 							<git>jgit</git>
@@ -1034,10 +1001,8 @@
 							<lineRate>0</lineRate>
 							<packageBranchRate>0</packageBranchRate>
 							<packageLineRate>0</packageLineRate>
-							<totalBranchRate>${verify.totalBranchRate}
-							</totalBranchRate>
-							<totalLineRate>${verify.totalLineRate}
-							</totalLineRate>
+							<totalBranchRate>${verify.totalBranchRate}</totalBranchRate>
+							<totalLineRate>${verify.totalLineRate}</totalLineRate>
 						</check>
 					</configuration>
 					<executions>
@@ -1091,25 +1056,14 @@
 							<mutator>CONSTRUCTOR_CALLS</mutator>
 						</mutators>
 						<excludedGroups>
-							<excludedGroup>
-								com.googlecode.jmxtrans.test.IntegrationTest
-							</excludedGroup>
-							<excludedGroup>
-								com.googlecode.jmxtrans.test.RequiresIO
-							</excludedGroup>
+							<excludedGroup>com.googlecode.jmxtrans.test.IntegrationTest</excludedGroup>
+							<excludedGroup>com.googlecode.jmxtrans.test.RequiresIO</excludedGroup>
 						</excludedGroups>
 						<coverageThreshold>0</coverageThreshold>
-						<mutationThreshold>${verify.mutationThreshold}
-						</mutationThreshold>
-						<historyInputFile>
-							${project.basedir}/pitest-history.xml
-						</historyInputFile>
-						<historyOutputFile>
-							${project.build.directory}/pitest-history.xml
-						</historyOutputFile>
-						<reportsDirectory>
-							${project.build.directory}/site/pit-reports
-						</reportsDirectory>
+						<mutationThreshold>${verify.mutationThreshold}</mutationThreshold>
+						<historyInputFile>${project.basedir}/pitest-history.xml</historyInputFile>
+						<historyOutputFile>${project.build.directory}/pitest-history.xml</historyOutputFile>
+						<reportsDirectory>${project.build.directory}/site/pit-reports</reportsDirectory>
 						<threads>4</threads>
 						<targetClasses>
 							<param>com.googlecode.jmxtrans.*</param>
@@ -1210,18 +1164,10 @@
 					<links>
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
 						<link>http://commons.apache.org/pool/api-1.6</link>
-						<link>
-							http://fasterxml.github.io/jackson-annotations/javadoc/2.4
-						</link>
-						<link>
-							http://fasterxml.github.io/jackson-core/javadoc/2.4
-						</link>
-						<link>
-							http://fasterxml.github.io/jackson-databind/javadoc/2.4
-						</link>
-						<link>
-							http://docs.guava-libraries.googlecode.com/git-history/release/javadoc
-						</link>
+						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.4</link>
+						<link>http://fasterxml.github.io/jackson-core/javadoc/2.4</link>
+						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.4</link>
+						<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc</link>
 					</links>
 				</configuration>
 			</plugin>
@@ -1235,8 +1181,7 @@
 				<artifactId>maven-pmd-plugin</artifactId>
 				<version>3.6</version>
 				<configuration>
-					<sourceEncoding>${project.build.sourceEncoding}
-					</sourceEncoding>
+					<sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
 					<targetJdk>1.6</targetJdk>
 				</configuration>
 			</plugin>
@@ -1365,16 +1310,12 @@
 								</goals>
 								<phase>install</phase>
 								<configuration>
-									<outputDirectory>${project.basedir}
-									</outputDirectory>
+									<outputDirectory>${project.basedir}</outputDirectory>
 									<resources>
 										<resource>
-											<directory>
-												${project.build.directory}
-											</directory>
+											<directory>${project.build.directory}</directory>
 											<includes>
-												<include>pitest-history.xml
-												</include>
+												<include>pitest-history.xml</include>
 											</includes>
 											<filtering>false</filtering>
 										</resource>
@@ -1432,8 +1373,7 @@
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-javadoc-plugin</artifactId>
 							<configuration>
-								<additionalparam>-Xdoclint:none
-								</additionalparam>
+								<additionalparam>-Xdoclint:none</additionalparam>
 							</configuration>
 						</plugin>
 					</plugins>
