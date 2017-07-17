@@ -275,7 +275,7 @@ public class GelfWriterTests {
 			"test",
 			null,
 			additionalFields,
-			"bogus,
+			"bogus",
 			10,
 			10,
 			10,
