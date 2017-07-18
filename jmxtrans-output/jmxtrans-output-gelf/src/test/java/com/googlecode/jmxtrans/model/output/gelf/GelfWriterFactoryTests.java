@@ -49,7 +49,7 @@ public class GelfWriterFactoryTests {
 			settings,
 			"test",
 			null,
-			ImmutableMap.of("test", (Object) "test"),
+			ImmutableMap.of("type", (Object) "jmx"),
 			null,
 			null,
 			null,
@@ -133,7 +133,7 @@ public class GelfWriterFactoryTests {
 			.isNotNull()
 			.as("Didn't get a writer back.");
 		assertThat(gelfWriter.getAdditionalFields())
-			.containsEntry("test", "test")
+			.containsEntry("type", "jmx")
 			.as("Wrong additional fields set");
 	}
 
@@ -150,7 +150,7 @@ public class GelfWriterFactoryTests {
 			settings,
 			"test",
 			null,
-			ImmutableMap.of("test", (Object) "test"),
+			ImmutableMap.of("type", (Object) "jmx"),
 			"udp",
 			null,
 			null,
@@ -189,7 +189,7 @@ public class GelfWriterFactoryTests {
 			settings,
 			"test",
 			12202,
-			ImmutableMap.of("test", (Object) "test"),
+			ImmutableMap.of("type", (Object) "jmx"),
 			"udp",
 			10,
 			10,
@@ -272,7 +272,7 @@ public class GelfWriterFactoryTests {
 			settings,
 			"test",
 			null,
-			ImmutableMap.of("test", (Object) "test"),
+			ImmutableMap.of("type", (Object) "jmx"),
 			"tcp",
 			10,
 			10,
@@ -321,7 +321,7 @@ public class GelfWriterFactoryTests {
 			settings,
 			"test",
 			null,
-			ImmutableMap.of("test", (Object) "test"),
+			ImmutableMap.of("type", (Object) "jmx"),
 			"bogus",
 			10,
 			10,
@@ -354,7 +354,7 @@ public class GelfWriterFactoryTests {
 				settings,
 				null,
 				null,
-				ImmutableMap.of("test", (Object) "test"),
+				ImmutableMap.of("type", (Object) "jmx"),
 				"udp",
 				10,
 				10,

@@ -26,14 +26,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.ResultFixtures;
 import org.graylog2.gelfclient.GelfMessage;
-import org.graylog2.gelfclient.transport.GelfTcpTransport;
 import org.graylog2.gelfclient.transport.GelfTransport;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,24 +45,21 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class GelfWriterTests {
 
 	@Captor
+	private
 	ArgumentCaptor<GelfMessage> messageArgumentCaptor;
 
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-	}
+	@Mock
+	private
+	GelfTransport gelfTransport;
 
 	@Test
 	public void testSendGelfMessage() throws Exception {
 		final ImmutableList<String> typenames = ImmutableList.of();
 		final Map<String, Object> settings = new HashMap<>();
-
-		final GelfTransport
-			gelfTransport =
-			Mockito.mock(GelfTcpTransport.class);
 
 		doNothing().when(gelfTransport).send(
 			messageArgumentCaptor.capture()
@@ -73,18 +69,18 @@ public class GelfWriterTests {
 
 		gelfWriter = new GelfWriter(
 			typenames,
-			ImmutableMap.of("test", (Object) "test"),
+			ImmutableMap.of("type", (Object) "jmx"),
 			gelfTransport
 		);
 		gelfWriter.start();
 		gelfWriter.doWrite(dummyServer(),
 			dummyQuery(),
-			ImmutableList.of(ResultFixtures.numericResult()));
+			ResultFixtures.singleNumericResult());
 
-		GelfMessage gelfMessage = messageArgumentCaptor.getValue();
+		final GelfMessage gelfMessage = messageArgumentCaptor.getValue();
 
 		assertThat(gelfMessage.getAdditionalFields())
-			.containsEntry("test", "test")
+			.containsEntry("type", "jmx")
 			.as("Additional fields were not checked");
 
 		assertThat(gelfMessage.getFullMessage())
