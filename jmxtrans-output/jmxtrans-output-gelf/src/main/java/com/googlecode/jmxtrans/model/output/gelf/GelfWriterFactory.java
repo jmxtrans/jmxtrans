@@ -47,9 +47,6 @@ public class GelfWriterFactory implements OutputWriterFactory {
 
 	public GelfWriterFactory(
 		@JsonProperty("typeNames") final ImmutableList<String> typeNames,
-		@JsonProperty("booleanAsNumber") final boolean booleanAsNumber,
-		@JsonProperty("debugEnabled") final Boolean debugEnabled,
-		@JsonProperty("settings") final Map<String, Object> settings,
 		@JsonProperty("host") final String host,
 		@JsonProperty("port") final Integer port,
 		@JsonProperty("additionalFields")

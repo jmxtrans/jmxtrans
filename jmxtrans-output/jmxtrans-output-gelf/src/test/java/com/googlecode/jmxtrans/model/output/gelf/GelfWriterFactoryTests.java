@@ -44,9 +44,6 @@ public class GelfWriterFactoryTests {
 
 		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
 			typenames,
-			true,
-			true,
-			settings,
 			"test",
 			null,
 			ImmutableMap.of("type", (Object) "jmx"),
@@ -145,9 +142,6 @@ public class GelfWriterFactoryTests {
 
 		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
 			typenames,
-			true,
-			true,
-			settings,
 			"test",
 			null,
 			ImmutableMap.of("type", (Object) "jmx"),
@@ -184,9 +178,6 @@ public class GelfWriterFactoryTests {
 
 		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
 			typenames,
-			true,
-			true,
-			settings,
 			"test",
 			12202,
 			ImmutableMap.of("type", (Object) "jmx"),
@@ -267,9 +258,6 @@ public class GelfWriterFactoryTests {
 
 		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
 			typenames,
-			true,
-			true,
-			settings,
 			"test",
 			null,
 			ImmutableMap.of("type", (Object) "jmx"),
@@ -316,9 +304,6 @@ public class GelfWriterFactoryTests {
 
 		final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
 			typenames,
-			true,
-			true,
-			settings,
 			"test",
 			null,
 			ImmutableMap.of("type", (Object) "jmx"),
@@ -349,9 +334,6 @@ public class GelfWriterFactoryTests {
 		try {
 			final GelfWriterFactory gelfWriterFactory = new GelfWriterFactory(
 				typenames,
-				true,
-				true,
-				settings,
 				null,
 				null,
 				ImmutableMap.of("type", (Object) "jmx"),
