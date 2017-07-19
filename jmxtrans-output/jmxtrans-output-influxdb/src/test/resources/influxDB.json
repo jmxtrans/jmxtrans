@@ -24,7 +24,9 @@
               		 "url": "http://localhost:8086",
               		 "resultTags":["typeName","className"],
               		 "retentionPolicy":"default",
-              		 "writeConsistency":"ALL"
+              		 "writeConsistency":"ALL",
+              		 "createDatabase":"false",
+              		 "reportJmxPortAsTag":"true"
                   }
                ]
             }

@@ -62,6 +62,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	private static final Logger log = LoggerFactory.getLogger(InfluxDbWriter.class);
 
 	public static final String TAG_HOSTNAME = "hostname";
+	public static final String JMX_PORT_KEY = "_jmx_port";
 
 	@Nonnull private final InfluxDB influxDB;
 	@Nonnull private final String database;
@@ -77,6 +78,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	private final boolean createDatabase;
+	private final boolean reportJmxPortAsTag;
 
 	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
 		@Override
@@ -93,7 +95,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull ImmutableMap<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			@Nonnull ImmutableList<String> typeNames,
-			boolean createDatabase) {
+			boolean createDatabase,
+			boolean reportJmxPortAsTag) {
 		this.typeNames = typeNames;
 		this.database = database;
 		this.writeConsistency = writeConsistency;
@@ -102,6 +105,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 		this.createDatabase = createDatabase;
+		this.reportJmxPortAsTag = reportJmxPortAsTag;
 	}
 
 	/**
@@ -152,6 +156,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	 * <p>
 	 * {@link Server#getHost()} is set as a tag on every {@link Point}
 	 * </p>
+	 * <p>
+	 * {@link Server#getPort()} is written as a field, unless {@link #reportJmxPortAsTag} is set to {@code true}
+	 * </p>
 	 *
 	 */
 	@Override
@@ -178,9 +185,12 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 			// send the point if filteredValues isn't empty
 			if (!filteredValues.isEmpty()) {
-				filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
-
+				if (reportJmxPortAsTag) {
+					resultTagsToApply.put(JMX_PORT_KEY, server.getPort());
+				} else {
+					filteredValues.put(JMX_PORT_KEY, Integer.parseInt(server.getPort()));
+				}
 				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
 						.tag(resultTagsToApply).fields(filteredValues).build();
 

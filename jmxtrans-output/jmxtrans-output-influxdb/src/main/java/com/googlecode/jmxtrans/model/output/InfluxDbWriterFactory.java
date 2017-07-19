@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 public class InfluxDbWriterFactory implements OutputWriterFactory {
@@ -63,6 +64,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 	private final boolean booleanAsNumber;
 	private final boolean createDatabase;
+	private final boolean reportJmxPortAsTag;
 	private final ImmutableList<String> typeNames;
 
 	/**
@@ -83,7 +85,8 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("writeConsistency") String writeConsistency,
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
-			@JsonProperty("createDatabase") Boolean createDatabase) {
+			@JsonProperty("createDatabase") Boolean createDatabase,
+			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
@@ -99,6 +102,8 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
 		influxDB = InfluxDBFactory.connect(url, username, password);
+
+		this.reportJmxPortAsTag = firstNonNull(reportJmxPortAsTag, FALSE);
 	}
 
 
@@ -120,6 +125,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag));
 	}
 }
