@@ -46,9 +46,9 @@ public class JmxTransConfiguration {
 	private boolean continueOnJsonError = false;
 
 	@Parameter(names = {"-j", "--json-directory"}, validateValueWith = ExistingDirectoryValidator.class)
-	@Setter private File jsonDir;
+	@Setter private File processConfigDir;
 	@Parameter(names = {"-f", "--json-file"}, validateValueWith = ExistingFileValidator.class)
-	@Setter private File jsonFile;
+	@Setter private File processConfigFile;
 
 	@Parameter(
 			names = {"--config"},
@@ -56,9 +56,9 @@ public class JmxTransConfiguration {
 			validateValueWith = ExistingFileValidator.class)
 	@Getter @Setter private File configFile;
 
-	public File getJsonDirOrFile() {
-		if (jsonDir != null) return jsonDir;
-		return jsonFile;
+	public File getProcessConfigDirOrFile() {
+		if (processConfigDir != null) return processConfigDir;
+		return processConfigFile;
 	}
 
 	@Parameter(

@@ -20,39 +20,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.guice;
 
-import java.io.File;
-import java.io.IOException;
+import javax.inject.Qualifier;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import javax.annotation.Nonnull;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-import com.googlecode.jmxtrans.model.JmxProcess;
-
-public class JsonUtils {
-
-	@Nonnull private final ObjectMapper mapper;
-
-	@Inject
-	public JsonUtils(
-			@Nonnull ObjectMapper mapper,
-			@Nonnull PlaceholderResolverJsonNodeFactory placeholderResolverJsonNodeFactory) {
-		this.mapper = mapper;
-		// configuring mapper here is dead ugly, but I do not yet understand how ObjectMapperModule works to do it properly
-		this.mapper.setNodeFactory(placeholderResolverJsonNodeFactory);
-	}
-
-	/**
-	 * Uses jackson to load json configuration from a File into a full object
-	 * tree representation of that json.
-	 */
-	public JmxProcess parseProcess(File file) throws IOException {
-		JsonNode jsonNode = mapper.readTree(file);
-		JmxProcess jmx = mapper.treeToValue(jsonNode, JmxProcess.class);
-		jmx.setName(file.getName());
-		return jmx;
-	}
+/**
+ * JSON Format {@link com.fasterxml.jackson.databind.ObjectMapper}
+ */
+@Qualifier
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface JsonFormat {
 }

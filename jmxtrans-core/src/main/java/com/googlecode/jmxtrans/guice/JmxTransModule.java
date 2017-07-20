@@ -23,6 +23,8 @@
 package com.googlecode.jmxtrans.guice;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.module.guice.ObjectMapperModule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -37,6 +39,8 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
 import com.googlecode.jmxtrans.connections.SocketFactory;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
@@ -83,7 +87,7 @@ public class JmxTransModule extends AbstractModule {
 				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName()));
 		bind(new TypeLiteral<GenericKeyedObjectPool<SocketAddress, DatagramSocket>>(){})
 				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName()));
-		bind(KeyedObjectPool.class).annotatedWith(Names.named("mbeanPool"))
+		bind(new TypeLiteral<KeyedObjectPool<JmxConnectionProvider, JMXConnection>>(){}).annotatedWith(Names.named("mbeanPool"))
 				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName()));
 	}
 
@@ -171,7 +175,10 @@ public class JmxTransModule extends AbstractModule {
 	public static Injector createInjector(@Nonnull JmxTransConfiguration configuration) {
 		return Guice.createInjector(
 				new JmxTransModule(configuration),
-				new ObjectMapperModule()
+				new ObjectMapperModule(JsonFormat.class)
+						.registerModule(new GuavaModule()),
+				new ObjectMapperModule(YamlFormat.class)
+						.withObjectMapper(new ObjectMapper(new YAMLFactory()))
 						.registerModule(new GuavaModule())
 		);
 	}

@@ -20,31 +20,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.example;
+package com.googlecode.jmxtrans.guice;
 
-import com.google.inject.Injector;
-import com.googlecode.jmxtrans.JmxTransformer;
-import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import com.googlecode.jmxtrans.guice.JmxTransModule;
-import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 
-import java.io.File;
+import javax.inject.Qualifier;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Shows how to process a file.
- *
- * @author jon
+ * YAML Format {@link com.fasterxml.jackson.databind.ObjectMapper}
  */
-@SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
-public class MemoryPool {
-
-	public static void main(String[] args) throws Exception {
-		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
-		ProcessConfigUtils processConfigUtils = injector.getInstance(ProcessConfigUtils.class);
-		JmxProcess process = processConfigUtils.parseProcess(new File("memorypool.json"));
-		new JsonPrinter(System.out).print(process);
-		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
-		transformer.executeStandalone(process);
-	}
+@Qualifier
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface YamlFormat {
 }
