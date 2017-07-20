@@ -62,7 +62,7 @@ public class KafkaWriterIT {
 		// Start JMXTrans
 		JmxTransConfiguration configuration = new JmxTransConfiguration();
 		configuration.setRunPeriod(1);
-		configuration.setJsonFile(file("jmxtrans-kafka.json"));
+		configuration.setProcessConfigFile(file("jmxtrans-kafka.json"));
 		Injector injector = JmxTransModule.createInjector(configuration);
 		jmxTransformer = injector.getInstance(JmxTransformer.class);
 		jmxTransformer.start();
