@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model.output.support;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
@@ -34,6 +35,7 @@ import stormpot.LifecycledPool;
 import stormpot.Timeout;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends OutputWriterAdapter{
@@ -43,12 +45,21 @@ public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends O
 	@Nonnull private final T target;
 	@Nonnull private final LifecycledPool<? extends WriterPoolable> writerPool;
 	@Nonnull private final Timeout poolClaimTimeout;
+	@Nullable private int socketTimeoutMs;
 
 	public WriterPoolOutputWriter(@Nonnull T target, @Nonnull LifecycledPool<? extends WriterPoolable> writerPool, @Nonnull Timeout poolClaimTimeout) {
 		this.target = target;
 		this.writerPool = writerPool;
 		this.poolClaimTimeout = poolClaimTimeout;
 	}
+
+	public WriterPoolOutputWriter(@Nonnull T target, @Nonnull LifecycledPool<? extends WriterPoolable> writerPool, @Nonnull Timeout poolClaimTimeout, @Nullable int socketTimeoutMs) {
+		this.target = target;
+		this.writerPool = writerPool;
+		this.poolClaimTimeout = poolClaimTimeout;
+		this.socketTimeoutMs = socketTimeoutMs;
+	}
+
 
 	@Override
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
@@ -86,4 +97,18 @@ public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends O
 		return result;
 	}
 
+	@VisibleForTesting
+	public int getSocketTimeoutMs() {
+		return socketTimeoutMs;
+	}
+
+	@VisibleForTesting
+	Timeout getPoolClaimTimeout() {
+		return poolClaimTimeout;
+	}
+
+	@VisibleForTesting
+	public LifecycledPool<? extends WriterPoolable> getWriterPool() {
+		return writerPool;
+	}
 }

@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
+import com.googlecode.jmxtrans.model.output.support.UdpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import lombok.EqualsAndHashCode;
@@ -54,6 +55,7 @@ import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUti
 public class GraphiteWriterFactory implements OutputWriterFactory {
 
 	private static final String DEFAULT_ROOT_PREFIX = "servers";
+	private static final String DEFAULT_PROTOCOL = "tcp";
 
 	@Nonnull private final String rootPrefix;
 	@Nonnull private final InetSocketAddress graphiteServer;
@@ -61,6 +63,14 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 	private final boolean booleanAsNumber;
 	@Nonnull private final FlushStrategy flushStrategy;
 	private final int poolSize;
+	private final int socketTimeoutMs;
+	private final Integer poolClaimTimeoutSeconds;
+
+	/**
+	 * protocol to use to send metrics to graphite server.
+	 * Default to "tcp". Possible values: "udp" or omit the value to use tcp protocol.
+	 */
+	private final String protocol;
 
 	@JsonCreator
 	public GraphiteWriterFactory(
@@ -71,7 +81,11 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("flushStrategy") String flushStrategy,
 			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
-			@JsonProperty("poolSize") Integer poolSize) {
+			@JsonProperty("poolSize") Integer poolSize,
+			@JsonProperty("socketTimeoutMs") Integer socketTimeoutMs,
+			@JsonProperty("poolClaimTimeoutSeconds") Integer poolClaimTimeoutSeconds,
+			@JsonProperty("protocol") String protocol) {
+
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.rootPrefix = firstNonNull(rootPrefix, DEFAULT_ROOT_PREFIX);
@@ -81,18 +95,36 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 				checkNotNull(port, "Port cannot be null."));
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
+		this.socketTimeoutMs = firstNonNull(socketTimeoutMs, 200);
+		this.poolClaimTimeoutSeconds = firstNonNull(poolClaimTimeoutSeconds, 1);
+		this.protocol = firstNonNull(protocol, DEFAULT_PROTOCOL);
 	}
 
 	@Override
 	public ResultTransformerOutputWriter<WriterPoolOutputWriter<GraphiteWriter2>> create() {
-		return ResultTransformerOutputWriter.booleanToNumber(
-				booleanAsNumber,
-				TcpOutputWriterBuilder.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
-						.setCharset(UTF_8)
-						.setFlushStrategy(flushStrategy)
-						.setPoolSize(poolSize)
-						.build()
-		);
+
+		WriterPoolOutputWriter<GraphiteWriter2> writerPoolOutputWriter;
+		// check if we want to use udp protocol or fallback on default tcp protocol
+		if ("udp".equals(this.protocol)) {
+			writerPoolOutputWriter = UdpOutputWriterBuilder.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
+					.setCharset(UTF_8)
+					.setFlushStrategy(flushStrategy)
+					.setPoolSize(poolSize)
+					.setPoolClaimTimeoutSeconds(poolClaimTimeoutSeconds)
+					.build();
+		} else {
+			writerPoolOutputWriter = TcpOutputWriterBuilder.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
+					.setCharset(UTF_8)
+					.setFlushStrategy(flushStrategy)
+					.setPoolSize(poolSize)
+					.setSocketTimeoutMillis(socketTimeoutMs)
+					.setPoolClaimTimeoutSeconds(poolClaimTimeoutSeconds)
+					.build();
+
+		}
+
+		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, writerPoolOutputWriter);
+
 	}
 
 }

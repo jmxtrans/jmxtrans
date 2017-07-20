@@ -25,16 +25,20 @@ package com.googlecode.jmxtrans.model.output;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
@@ -43,6 +47,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.googlecode.jmxtrans.util.NumberUtils.isValidNumber;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -54,6 +59,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 @ThreadSafe
 public class InfluxDbWriter extends OutputWriterAdapter {
+	private static final Logger log = LoggerFactory.getLogger(InfluxDbWriter.class);
 
 	public static final String TAG_HOSTNAME = "hostname";
 
@@ -62,6 +68,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
 	@Nonnull private final ImmutableMap<String,String> tags;
+	@Nonnull ImmutableList<String> typeNames;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -85,7 +92,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull String retentionPolicy,
 			@Nonnull ImmutableMap<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
+			@Nonnull ImmutableList<String> typeNames,
 			boolean createDatabase) {
+		this.typeNames = typeNames;
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
@@ -155,20 +164,33 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		for(Map.Entry<String,String> tag : tags.entrySet()) {
 			batchPointsBuilder.tag(tag.getKey(),tag.getValue());
 		}
+
 		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
 		for (Result result : results) {
+			log.debug("Query result: {}", result);
 
-			HashMap<String, Object> filteredValues = newHashMap(Maps.filterValues(result.getValues(), isNotNaN));
+			Map<String, Object> resultValues = result.getValues();
+
+			HashMap<String, Object> filteredValues = newHashMap();
+			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
+				Object value = values.getValue();
+				if (isValidNumber(value)) {
+					String key = KeyUtils.getPrefixedKeyString(query, result, values, typeNames, values.getKey());
+					filteredValues.put(key, value);
+				}
+			}
 
 			// send the point if filteredValues isn't empty
 			if (!filteredValues.isEmpty()) {
 				filteredValues.put("_jmx_port", Integer.parseInt(server.getPort()));
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
+
 				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
 						.tag(resultTagsToApply).fields(filteredValues).build();
+
+				log.debug("Point: {}", point);
 				batchPoints.point(point);
 			}
-
 		}
 
 		influxDB.write(batchPoints);
