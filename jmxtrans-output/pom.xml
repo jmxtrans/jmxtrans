@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>266-SNAPSHOT</version>
+		<version>267-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-output</artifactId>
@@ -59,6 +59,7 @@
 		<module>jmxtrans-output-kafka</module>
 		<module>jmxtrans-output-elastic</module>
 		<module>jmxtrans-output-influxdb</module>
+		<module>jmxtrans-output-gelf</module>
 	</modules>
 
 </project>

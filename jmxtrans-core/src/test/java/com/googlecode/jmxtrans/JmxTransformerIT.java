@@ -41,9 +41,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Category({IntegrationTest.class, RequiresIO.class})
 public class JmxTransformerIT {
-	@Rule public OutputCapture output = new OutputCapture();
-	@Rule public ExternalApp app = new ExternalApp(DummyApp.class).enableJmx(12345);
+	@Rule
+	public OutputCapture output = new OutputCapture();
+	@Rule
+	public ExternalApp app = new ExternalApp(DummyApp.class).enableJmx(12345);
 	private JmxTransDummyApp jmxTransDummyApp;
+
 	@Before
 	public void startJmxTrans() throws LifecycleException, URISyntaxException {
 		jmxTransDummyApp = new JmxTransDummyApp("integration-test.json");

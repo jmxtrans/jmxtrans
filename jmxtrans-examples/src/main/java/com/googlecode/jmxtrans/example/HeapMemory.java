@@ -27,13 +27,13 @@ import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 
 import java.io.File;
 
 /**
  * Shows how to process a file.
- * 
+ *
  * @author jon
  */
 @SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
@@ -42,9 +42,9 @@ public class HeapMemory {
 	public static void main(String[] args) throws Exception {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
 
-		JsonUtils jsonUtils = injector.getInstance(JsonUtils.class);
+		ProcessConfigUtils processConfigUtils = injector.getInstance(ProcessConfigUtils.class);
 
-		JmxProcess process = jsonUtils.parseProcess(new File("heapmemory.json"));
+		JmxProcess process = processConfigUtils.parseProcess(new File("heapmemory.json"));
 		new JsonPrinter(System.out).print(process);
 
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);

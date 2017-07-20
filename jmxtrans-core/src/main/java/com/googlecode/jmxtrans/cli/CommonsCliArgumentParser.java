@@ -51,14 +51,14 @@ public class CommonsCliArgumentParser implements CliArgumentParser {
 			} else if (option.getOpt().equals("j")) {
 				File jsonDir = new File(option.getValue());
 				if (jsonDir.exists() && jsonDir.isDirectory()) {
-					configuration.setJsonDir(jsonDir);
+					configuration.setProcessConfigDir(jsonDir);
 				} else {
 					throw new OptionsException("Path to json directory is invalid: " + jsonDir);
 				}
 			} else if (option.getOpt().equals("f")) {
 				File jsonFile = new File(option.getValue());
 				if (jsonFile.exists() && jsonFile.isFile()) {
-					configuration.setJsonFile(jsonFile);
+					configuration.setProcessConfigFile(jsonFile);
 				} else {
 					throw new OptionsException("Path to json file is invalid: " + jsonFile);
 				}
@@ -86,7 +86,7 @@ public class CommonsCliArgumentParser implements CliArgumentParser {
 				configuration.setHelp(true);
 			}
 		}
-		if ((!configuration.isHelp()) && (configuration.getJsonDirOrFile() == null)) {
+		if ((!configuration.isHelp()) && (configuration.getProcessConfigDirOrFile() == null)) {
 			throw new OptionsException("Please specify either the -f or -j option.");
 		}
 		return configuration;

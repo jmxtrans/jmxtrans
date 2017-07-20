@@ -116,8 +116,8 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	@Override
 	public void setJsonDirOrFile(String jsonDirOrFile) {
 		File file = new File(jsonDirOrFile);
-		if (file.isDirectory()) configuration.setJsonDir(file);
-		else configuration.setJsonFile(file);
+		if (file.isDirectory()) configuration.setProcessConfigDir(file);
+		else configuration.setProcessConfigFile(file);
 	}
 
 	/* (non-Javadoc)
@@ -125,7 +125,7 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	 */
 	@Override
 	public String getJsonDirOrFile() {
-		return configuration.getJsonDirOrFile().getAbsolutePath();
+		return configuration.getProcessConfigDirOrFile().getAbsolutePath();
 	}
 
 	/* (non-Javadoc)
