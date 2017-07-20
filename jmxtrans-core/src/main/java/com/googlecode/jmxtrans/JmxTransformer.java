@@ -452,7 +452,8 @@ public class JmxTransformer implements WatchedCallback {
 	 * <p/>
 	 * Files must end with .json as the suffix.
 	 */
-	private List<File> getProcessConfigFiles() {
+	@VisibleForTesting
+	List<File> getProcessConfigFiles() {
 		// TODO : should use a FileVisitor (Once we update to Java 7)
 		File[] files;
 		File configurationDirOrFile = configuration.getProcessConfigDirOrFile();

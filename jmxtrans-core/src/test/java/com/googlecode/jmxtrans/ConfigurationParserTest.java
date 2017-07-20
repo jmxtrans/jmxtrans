@@ -57,6 +57,16 @@ public class ConfigurationParserTest {
 		configurationParser = new ConfigurationParser(processConfigUtils);
 	}
 
+	@Test
+	public void mixJsonAndYamlFormats() throws URISyntaxException, LifecycleException {
+		File jsonInput = new File(ConfigurationParserTest.class.getResource("/example.json").toURI());
+		File yamlInput = new File(ConfigurationParserTest.class.getResource("/example2.yml").toURI());
+
+		ImmutableList<Server> servers = configurationParser.parseServers(of(jsonInput, yamlInput), false);
+
+		assertThat(servers).hasSize(2);
+	}
+
 	@Test(expected = LifecycleException.class)
 	public void failParsingOnErrorIfRequested() throws URISyntaxException, LifecycleException {
 		File validInput = new File(ConfigurationParserTest.class.getResource("/example.json").toURI());
