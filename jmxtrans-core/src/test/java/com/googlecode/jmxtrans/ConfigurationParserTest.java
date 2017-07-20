@@ -30,7 +30,7 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ServerFixtures;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -53,8 +53,8 @@ public class ConfigurationParserTest {
 
 	@Before
 	public void configureParser() {
-		JsonUtils jsonUtils = createInjector(new JmxTransConfiguration()).getInstance(JsonUtils.class);
-		configurationParser = new ConfigurationParser(jsonUtils);
+		ProcessConfigUtils processConfigUtils = createInjector(new JmxTransConfiguration()).getInstance(ProcessConfigUtils.class);
+		configurationParser = new ConfigurationParser(processConfigUtils);
 	}
 
 	@Test(expected = LifecycleException.class)

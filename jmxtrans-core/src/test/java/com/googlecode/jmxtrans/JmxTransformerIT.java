@@ -52,7 +52,7 @@ public class JmxTransformerIT {
 	public void startJmxTrans() throws LifecycleException, URISyntaxException {
 		JmxTransConfiguration configuration = new JmxTransConfiguration();
 		configuration.setRunPeriod(1);
-		configuration.setJsonFile(file("integration-test.json"));
+		configuration.setProcessConfigFile(file("integration-test.json"));
 		Injector injector = JmxTransModule.createInjector(configuration);
 		jmxTransformer = injector.getInstance(JmxTransformer.class);
 		jmxTransformer.start();

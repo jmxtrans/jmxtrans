@@ -30,19 +30,26 @@ import javax.annotation.Nonnull;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.googlecode.jmxtrans.guice.JsonFormat;
+import com.googlecode.jmxtrans.guice.YamlFormat;
 import com.googlecode.jmxtrans.model.JmxProcess;
 
-public class JsonUtils {
+public class ProcessConfigUtils {
 
-	@Nonnull private final ObjectMapper mapper;
+	@Nonnull private final ObjectMapper jsonMapper;
+
+	@Nonnull private final ObjectMapper yamlMapper;
 
 	@Inject
-	public JsonUtils(
-			@Nonnull ObjectMapper mapper,
+	public ProcessConfigUtils(
+			@Nonnull @JsonFormat ObjectMapper jsonMapper,
+			@Nonnull @YamlFormat ObjectMapper yamlMapper,
 			@Nonnull PlaceholderResolverJsonNodeFactory placeholderResolverJsonNodeFactory) {
-		this.mapper = mapper;
+		this.jsonMapper = jsonMapper;
+		this.yamlMapper = yamlMapper;
 		// configuring mapper here is dead ugly, but I do not yet understand how ObjectMapperModule works to do it properly
-		this.mapper.setNodeFactory(placeholderResolverJsonNodeFactory);
+		this.jsonMapper.setNodeFactory(placeholderResolverJsonNodeFactory);
+		this.yamlMapper.setNodeFactory(placeholderResolverJsonNodeFactory);
 	}
 
 	/**
@@ -50,6 +57,7 @@ public class JsonUtils {
 	 * tree representation of that json.
 	 */
 	public JmxProcess parseProcess(File file) throws IOException {
+		ObjectMapper mapper = file.getName().endsWith(".yml") || file.getName().endsWith(".yaml") ? yamlMapper : jsonMapper;
 		JsonNode jsonNode = mapper.readTree(file);
 		JmxProcess jmx = mapper.treeToValue(jsonNode, JmxProcess.class);
 		jmx.setName(file.getName());

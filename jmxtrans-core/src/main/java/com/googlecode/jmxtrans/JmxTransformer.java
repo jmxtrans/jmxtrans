@@ -178,7 +178,7 @@ public class JmxTransformer implements WatchedCallback {
 		if (isRunning) {
 			throw new LifecycleException("Process already started");
 		} else {
-			log.info("Starting Jmxtrans on : {}", configuration.getJsonDirOrFile());
+			log.info("Starting Jmxtrans on : {}", configuration.getProcessConfigDirOrFile());
 			try {
 				this.serverScheduler.start();
 
@@ -287,10 +287,10 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void startupWatchdir() throws Exception {
 		File dirToWatch;
-		if (this.configuration.getJsonDirOrFile().isFile()) {
-			dirToWatch = new File(FilenameUtils.getFullPath(this.configuration.getJsonDirOrFile().getAbsolutePath()));
+		if (this.configuration.getProcessConfigDirOrFile().isFile()) {
+			dirToWatch = new File(FilenameUtils.getFullPath(this.configuration.getProcessConfigDirOrFile().getAbsolutePath()));
 		} else {
-			dirToWatch = this.configuration.getJsonDirOrFile();
+			dirToWatch = this.configuration.getProcessConfigDirOrFile();
 		}
 
 		// start the watcher
@@ -351,7 +351,7 @@ public class JmxTransformer implements WatchedCallback {
 			throw new LifecycleException(e);
 		}
 
-		this.masterServersList = configurationParser.parseServers(getJsonFiles(), configuration.isContinueOnJsonError());
+		this.masterServersList = configurationParser.parseServers(getProcessConfigFiles(), configuration.isContinueOnJsonError());
 	}
 
 	/**
@@ -452,23 +452,23 @@ public class JmxTransformer implements WatchedCallback {
 	 * <p/>
 	 * Files must end with .json as the suffix.
 	 */
-	private List<File> getJsonFiles() {
+	private List<File> getProcessConfigFiles() {
 		// TODO : should use a FileVisitor (Once we update to Java 7)
 		File[] files;
-		File jsonDirOrFile = configuration.getJsonDirOrFile();
-		if (jsonDirOrFile == null) {
+		File configurationDirOrFile = configuration.getProcessConfigDirOrFile();
+		if (configurationDirOrFile == null) {
 			throw new IllegalStateException("Configuration should specify configuration directory or file, with -j of -f option");
 		}
-		if (jsonDirOrFile.isFile()) {
+		if (configurationDirOrFile.isFile()) {
 			files = new File[1];
-			files[0] = jsonDirOrFile;
+			files[0] = configurationDirOrFile;
 		} else {
-			files = firstNonNull(jsonDirOrFile.listFiles(), new File[0]);
+			files = firstNonNull(configurationDirOrFile.listFiles(), new File[0]);
 		}
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			if (this.isJsonFile(file)) {
+			if (this.isProcessConfigFile(file)) {
 				result.add(file);
 			}
 		}
@@ -476,19 +476,19 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	/**
-	 * Are we a file and a json file?
+	 * Are we a file and a JSON or YAML file?
 	 */
-	private boolean isJsonFile(File file) {
-		if (this.configuration.getJsonDirOrFile().isFile()) {
-			return file.equals(this.configuration.getJsonDirOrFile());
+	private boolean isProcessConfigFile(File file) {
+		if (this.configuration.getProcessConfigDirOrFile().isFile()) {
+			return file.equals(this.configuration.getProcessConfigDirOrFile());
 		}
 
-		return file.isFile() && file.getName().endsWith(".json");
+		return file.isFile() && (file.getName().endsWith(".json") || file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"));
 	}
 
 	@Override
 	public void fileModified(File file) throws Exception {
-		if (this.isJsonFile(file)) {
+		if (this.isProcessConfigFile(file)) {
 			Thread.sleep(1000);
 			log.info("Configuration file modified: " + file);
 			this.deleteAllJobs();
@@ -506,7 +506,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	@Override
 	public void fileAdded(File file) throws Exception {
-		if (this.isJsonFile(file)) {
+		if (this.isProcessConfigFile(file)) {
 			Thread.sleep(1000);
 			log.info("Configuration file added: " + file);
 			this.deleteAllJobs();

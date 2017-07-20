@@ -22,12 +22,14 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.guice.JsonFormat;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,18 +43,18 @@ public class ConfigurationParser {
 
 	private static final Logger log = LoggerFactory.getLogger(ConfigurationParser.class);
 
-	private final JsonUtils jsonUtils;
+	private final ProcessConfigUtils processConfigUtils;
 
 	@Inject
-	public ConfigurationParser(JsonUtils jsonUtils) {
-		this.jsonUtils = jsonUtils;
+	public ConfigurationParser(ProcessConfigUtils jsonUtils) {
+		this.processConfigUtils = jsonUtils;
 	}
 
 	public ImmutableList parseServers(Iterable<File> jsonFiles, boolean continueOnJsonError) throws LifecycleException {
 		ServerListBuilder serverListBuilder = new ServerListBuilder();
 		for (File jsonFile : jsonFiles) {
 			try {
-				JmxProcess process = jsonUtils.parseProcess(jsonFile);
+				JmxProcess process = processConfigUtils.parseProcess(jsonFile);
 				log.debug("Loaded file: {}", jsonFile.getAbsolutePath());
 				serverListBuilder.add(process.getServers());
 			} catch (Exception ex) {
