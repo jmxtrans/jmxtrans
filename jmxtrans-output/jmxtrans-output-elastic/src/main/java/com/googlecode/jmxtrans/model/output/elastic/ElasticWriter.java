@@ -41,6 +41,7 @@ import io.searchbox.core.Index;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,8 +114,8 @@ public class ElasticWriter extends BaseOutputWriter {
 	private JestClient createJestClient(String connectionUrl, String username, String password) {
 		log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
 		JestClientFactory factory = new JestClientFactory();
-		HttpClientConfig.Builder httpClientBuilder  = new HttpClientConfig.Builder(connectionUrl).connTimeout(Integer.valueOf(connTimeout)).readTimeout(Integer.valueOf(readTimeout)).multiThreaded(true);
-		if( username != null && username.trim() != "") {
+		HttpClientConfig.Builder httpClientBuilder  = new HttpClientConfig.Builder(connectionUrl).connTimeout(connTimeout).readTimeout(readTimeout).multiThreaded(true);
+		if (StringUtils.isNotEmpty(username)) {
 			httpClientBuilder.defaultCredentials(username, password);
 		}
 		factory.setHttpClientConfig(httpClientBuilder.build());
