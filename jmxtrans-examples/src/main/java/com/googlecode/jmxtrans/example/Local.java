@@ -27,13 +27,13 @@ import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 
 import java.io.File;
 
 /**
  * Shows how to connect to a local process.
- * 
+ *
  * @author henri
  */
 @SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
@@ -41,8 +41,8 @@ public class Local {
 
 	public static void main(String[] args) throws Exception {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
-		JsonUtils jsonUtils = injector.getInstance(JsonUtils.class);
-		JmxProcess process = jsonUtils.parseProcess(new File("local.json"));
+		ProcessConfigUtils processConfigUtils = injector.getInstance(ProcessConfigUtils.class);
+		JmxProcess process = processConfigUtils.parseProcess(new File("local.json"));
 		new JsonPrinter(System.out).print(process);
 		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
 		transformer.executeStandalone(process);

@@ -49,15 +49,15 @@ import static com.google.common.collect.FluentIterable.from;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Category(RequiresIO.class)
-public class JsonUtilsTest {
+public class ProcessConfigUtilsTest {
 
-	private JsonUtils jsonUtils;
+	private ProcessConfigUtils processConfigUtils;
 	private Closer closer = Closer.create();
 
 	@Before
 	public void setupJsonUtils() {
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
-		jsonUtils = injector.getInstance(JsonUtils.class);
+		processConfigUtils = injector.getInstance(ProcessConfigUtils.class);
 
 		closer.register(ResetableSystemProperty.setSystemProperty("server.port", "1099"));
 		closer.register(ResetableSystemProperty.setSystemProperty("server.attribute", "HeapMemoryUsage"));
@@ -70,19 +70,29 @@ public class JsonUtilsTest {
 	}
 
 	@Test
-	public void loadingFromSimpleFile() throws URISyntaxException, IOException, MalformedObjectNameException {
+	public void loadingFromSimpleJsonFile() throws URISyntaxException, IOException, MalformedObjectNameException {
 		loadFromFile("example.json");
 	}
 
 	@Test
-	public void loadingFromFileWithVariables() throws Exception {
+	public void loadingFromSimpleYamlFile() throws URISyntaxException, IOException, MalformedObjectNameException {
+		loadFromFile("example.yaml");
+	}
+
+	@Test
+	public void loadingFromJsonFileWithVariables() throws Exception {
 		loadFromFile("exampleWithVariables.json");
 	}
 
-	private void loadFromFile(String file) throws URISyntaxException, IOException, MalformedObjectNameException {
-		File input = new File(JsonUtilsTest.class.getResource("/" + file).toURI());
+	@Test
+	public void loadingFromYamlFileWithVariables() throws Exception {
+		loadFromFile("exampleWithVariables.yaml");
+	}
 
-		JmxProcess process = jsonUtils.parseProcess(input);
+	private void loadFromFile(String file) throws URISyntaxException, IOException, MalformedObjectNameException {
+		File input = new File(ProcessConfigUtilsTest.class.getResource("/" + file).toURI());
+
+		JmxProcess process = processConfigUtils.parseProcess(input);
 		assertThat(process.getName()).isEqualTo(file);
 
 		Server server = process.getServers().get(0);

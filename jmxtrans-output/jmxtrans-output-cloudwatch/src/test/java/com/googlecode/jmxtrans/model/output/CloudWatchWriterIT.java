@@ -28,7 +28,7 @@ import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -75,9 +75,9 @@ public class CloudWatchWriterIT {
 
 	@Test
 	public void loadingFromFile() throws URISyntaxException, IOException {
-		JsonUtils jsonUtils = createInjector(new JmxTransConfiguration()).getInstance(JsonUtils.class);
+		ProcessConfigUtils processConfigUtils = createInjector(new JmxTransConfiguration()).getInstance(ProcessConfigUtils.class);
 		File input = new File(CloudWatchWriterIT.class.getResource("/cloud-watch.json").toURI());
-		JmxProcess process = jsonUtils.parseProcess(input);
+		JmxProcess process = processConfigUtils.parseProcess(input);
 		assertThat(process.getName()).isEqualTo("cloud-watch.json");
 	}
 

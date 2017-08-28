@@ -77,7 +77,7 @@ public class JCommanderArgumentParser implements CliArgumentParser {
 	}
 
 	private void validate(JmxTransConfiguration configuration) {
-		if (configuration.getJsonDirOrFile() == null) throw new ParameterException("Please specify either the -f or -j option.");
+		if (configuration.getProcessConfigDirOrFile() == null) throw new ParameterException("Please specify either the -f or -j option.");
 	}
 
 }

@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,22 +41,22 @@ public class ConfigurationParser {
 
 	private static final Logger log = LoggerFactory.getLogger(ConfigurationParser.class);
 
-	private final JsonUtils jsonUtils;
+	private final ProcessConfigUtils processConfigUtils;
 
 	@Inject
-	public ConfigurationParser(JsonUtils jsonUtils) {
-		this.jsonUtils = jsonUtils;
+	public ConfigurationParser(ProcessConfigUtils processConfigUtils) {
+		this.processConfigUtils = processConfigUtils;
 	}
 
-	public ImmutableList parseServers(Iterable<File> jsonFiles, boolean continueOnJsonError) throws LifecycleException {
+	public ImmutableList parseServers(Iterable<File> processConfigFiles, boolean continueOnJsonError) throws LifecycleException {
 		ServerListBuilder serverListBuilder = new ServerListBuilder();
-		for (File jsonFile : jsonFiles) {
+		for (File processConfigFile : processConfigFiles) {
 			try {
-				JmxProcess process = jsonUtils.parseProcess(jsonFile);
-				log.debug("Loaded file: {}", jsonFile.getAbsolutePath());
+				JmxProcess process = processConfigUtils.parseProcess(processConfigFile);
+				log.debug("Loaded file: {}", processConfigFile.getAbsolutePath());
 				serverListBuilder.add(process.getServers());
 			} catch (Exception ex) {
-				String message = "Error parsing json: " + jsonFile;
+				String message = "Error parsing json: " + processConfigFile;
 				// error parsing one file should not prevent the startup of JMXTrans
 				if (continueOnJsonError) log.error(message, ex);
 				else throw new LifecycleException(message, ex);

@@ -32,7 +32,7 @@ import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 
-import com.googlecode.jmxtrans.util.JsonUtils;
+import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.influxdb.InfluxDB;
@@ -218,8 +218,8 @@ public class InfluxDbWriterTests {
 	public void loadingFromFile() throws URISyntaxException, IOException {
 		File input = new File(InfluxDbWriterTests.class.getResource("/influxDB.json").toURI());
 		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
-		JsonUtils jsonUtils = injector.getInstance(JsonUtils.class);
-		JmxProcess process = jsonUtils.parseProcess(input);
+		ProcessConfigUtils processConfigUtils = injector.getInstance(ProcessConfigUtils.class);
+		JmxProcess process = processConfigUtils.parseProcess(input);
 		assertThat(process.getName()).isEqualTo("influxDB.json");
 	}
 
