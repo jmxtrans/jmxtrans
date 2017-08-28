@@ -43,6 +43,7 @@ import java.util.List;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.Boolean.TRUE;
+import static java.lang.Boolean.FALSE;
 
 public class InfluxDbWriterFactory implements OutputWriterFactory {
 
@@ -63,6 +64,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final InfluxDB influxDB;
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 	private final boolean booleanAsNumber;
+	private final boolean typeNamesAsTags;
 	private final boolean createDatabase;
 	private final ImmutableList<String> typeNames;
 
@@ -84,10 +86,12 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("writeConsistency") String writeConsistency,
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
+			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
 			@JsonProperty("createDatabase") Boolean createDatabase) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
+		this.typeNamesAsTags = firstNonNull(typeNamesAsTags, FALSE);
 		this.createDatabase = firstNonNull(createDatabase, TRUE);
 
 		this.writeConsistency = StringUtils.isNotBlank(writeConsistency)
@@ -125,6 +129,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, typeNamesAsTags, createDatabase));
 	}
 }

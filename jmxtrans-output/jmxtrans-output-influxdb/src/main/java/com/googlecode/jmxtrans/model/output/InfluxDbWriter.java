@@ -32,6 +32,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
@@ -77,6 +78,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	private final boolean createDatabase;
+	private final boolean typeNamesAsTags;
 
 	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
 		@Override
@@ -93,6 +95,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull ImmutableMap<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			@Nonnull ImmutableList<String> typeNames,
+			boolean typeNamesAsTags,
 			boolean createDatabase) {
 		this.typeNames = typeNames;
 		this.database = database;
@@ -101,6 +104,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.influxDB = influxDB;
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
+		this.typeNamesAsTags = typeNamesAsTags;
 		this.createDatabase = createDatabase;
 	}
 
@@ -197,14 +201,21 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	}
 
 	private Map<String, String> buildResultTagMap(Result result) throws Exception {
-
 		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}
 
-		return resultTagMap;
+		if(typeNamesAsTags) {
+			Map<String, String> typeNameValueMap = TypeNameValue.extractMap(resultTagMap.get("typeName"));
+			for (String typeToTag : this.typeNames) {
+				if (typeNameValueMap.containsKey(typeToTag)) {
+					resultTagMap.put(typeToTag, typeNameValueMap.get(typeToTag));
+				}
+			}
+		}
 
+		return resultTagMap;
 	}
 
 }
