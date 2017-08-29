@@ -201,6 +201,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	}
 
 	private Map<String, String> buildResultTagMap(Result result) throws Exception {
+
 		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addAttribute(resultTagMap, result);
@@ -216,6 +217,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		return resultTagMap;
+
 	}
 
 }
