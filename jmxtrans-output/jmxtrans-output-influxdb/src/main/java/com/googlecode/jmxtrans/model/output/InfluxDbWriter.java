@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -179,7 +180,12 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 				Object value = values.getValue();
 				if (isValidNumber(value)) {
-					String key = KeyUtils.getPrefixedKeyString(query, result, values, typeNames, values.getKey());
+					String key;
+					if(typeNamesAsTags) {
+						key = KeyUtils.getPrefixedKeyString(query, result, values, Collections.<String>emptyList(), values.getKey());
+					} else {
+						key = KeyUtils.getPrefixedKeyString(query, result, values, typeNames, values.getKey());
+					}
 					filteredValues.put(key, value);
 				}
 			}
