@@ -28,8 +28,11 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.ResultAttribute;
+import com.googlecode.jmxtrans.model.ResultAttributes;
 import com.googlecode.jmxtrans.model.Server;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -63,17 +66,22 @@ public class DefaultResultSerializer implements ResultSerializer {
 	private final String rootPrefix;
 	@Getter @Nonnull
 	private final ImmutableMap<String, String> tags;
+	@Nonnull
+	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	@JsonCreator
 	public DefaultResultSerializer(@JsonProperty("typeNames") List<String> typeNames,
 									@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 									@JsonProperty("rootPrefix") String rootPrefix,
-									@JsonProperty("tags") Map<String, String> tags) {
+									@JsonProperty("tags") Map<String, String> tags,
+									@JsonProperty("resultTags") List<String> resultTags
+									) {
 		this.jsonFactory = new JsonFactory();
 		this.typeNames = typeNames == null ? ImmutableList.<String>of() : ImmutableList.copyOf(typeNames);
 		this.booleanAsNumber = booleanAsNumber;
 		this.rootPrefix = rootPrefix;
 		this.tags = tags == null ? ImmutableMap.<String, String>of() : ImmutableMap.copyOf(tags);
+		this.resultAttributesToWriteAsTags = resultTags == null ? ImmutableSet.<ResultAttribute>of() : ResultAttributes.fromAttributes(resultTags);
 	}
 
 	@Nonnull
@@ -109,6 +117,9 @@ public class DefaultResultSerializer implements ResultSerializer {
 
 			for (Map.Entry<String, String> tag : this.tags.entrySet()) {
 				generator.writeStringField(tag.getKey(), tag.getValue());
+			}
+			for (ResultAttribute resultAttribute : this.resultAttributesToWriteAsTags) {
+				generator.writeStringField(resultAttribute.getAttributeName(), resultAttribute.getAttribute(result));
 			}
 
 			generator.writeEndObject();

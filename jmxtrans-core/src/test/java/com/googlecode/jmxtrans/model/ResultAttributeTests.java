@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * 
+ *
  * @author Simon Hutchinson
  *         <a href="https://github.com/sihutch">github.com/sihutch</a>
  *
@@ -47,7 +48,7 @@ import com.google.common.collect.ImmutableMap;
 public class ResultAttributeTests {
 
 	private Map<String, String> attributeMap;
-	Result result = new Result(2l, "attributeName1", "className1", "objDomain1", "keyAlias1", "typeName1",
+	Result result = new Result(2l, "attributeName1", "className1", "objDomain1", "keyAlias1", "type=Type1,name=Name1",
 			ImmutableMap.of("key", (Object) 1));
 
 	@Before
@@ -57,8 +58,7 @@ public class ResultAttributeTests {
 
 	@Test
 	public void attributeNamesFromResultAreWrittenToMap() throws Exception {
-		
-		for (ResultAttribute resultAttribute : ResultAttribute.values()) {
+		for (ResultAttribute resultAttribute : ResultAttributes.values()) {
 			resultAttribute.addAttribute(attributeMap, result);
 			String attributeName = enumValueToAttribute(resultAttribute);
 			Method m = result.getClass().getMethod("get" + WordUtils.capitalize(attributeName));
@@ -66,7 +66,32 @@ public class ResultAttributeTests {
 			assertThat(attributeMap).containsEntry(attributeName, expectedValue);
 		}
 	}
-	
+
+	@Test
+	public void typeNamePropertyResultAttribute() {
+		ResultAttribute typeAttr = ResultAttributes.fromAttribute("typeName.type");
+		assertThat(typeAttr.name()).isEqualTo("TYPE_NAME.TYPE");
+		String type = typeAttr.getAttribute(result);
+		assertThat(type).isEqualTo("Type1");
+
+		ResultAttribute nameAttr = ResultAttributes.fromAttribute("typeName.name");
+		assertThat(nameAttr.name()).isEqualTo("TYPE_NAME.NAME");
+		String name = nameAttr.getAttribute(result);
+		assertThat(name).isEqualTo("Name1");
+
+		ResultAttribute notExistAttr = ResultAttributes.fromAttribute("typeName.notExist");
+		assertThat(notExistAttr.name()).isEqualTo("TYPE_NAME.NOT_EXIST");
+		String notExist = notExistAttr.getAttribute(result);
+		assertThat(notExist).isNull();
+
+		try {
+			ResultAttributes.fromAttribute("notExist");
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+
+		}
+	}
+
 	private String enumValueToAttribute(ResultAttribute attribute) {
 		String[] split = attribute.name().split("_");
 		return StringUtils.lowerCase(split[0]) + WordUtils.capitalizeFully(split[1]);

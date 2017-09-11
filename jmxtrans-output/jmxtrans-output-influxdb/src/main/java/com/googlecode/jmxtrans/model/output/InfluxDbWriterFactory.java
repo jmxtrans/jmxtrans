@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.ResultAttribute;
+import com.googlecode.jmxtrans.model.ResultAttributes;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import org.apache.commons.lang.StringUtils;
 import org.influxdb.InfluxDB;
@@ -37,11 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.Boolean.TRUE;
 
 public class InfluxDbWriterFactory implements OutputWriterFactory {
@@ -108,16 +107,12 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	}
 
 	private ImmutableSet<ResultAttribute> initResultAttributesToWriteAsTags(List<String> resultTags) {
-		EnumSet<ResultAttribute> resultAttributes = EnumSet.noneOf(ResultAttribute.class);
-		if (resultTags != null) {
-			for (String resultTag : resultTags) {
-				resultAttributes.add(ResultAttribute.fromAttribute(resultTag));
-			}
+		ImmutableSet<ResultAttribute> result;
+		if (resultTags == null) {
+			result = ImmutableSet.copyOf(ResultAttributes.values());
 		} else {
-			resultAttributes = EnumSet.allOf(ResultAttribute.class);
+			result = ResultAttributes.fromAttributes(resultTags);
 		}
-
-		ImmutableSet<ResultAttribute> result = immutableEnumSet(resultAttributes);
 		LOG.debug("Result Tags to write set to: {}", result);
 		return result;
 	}

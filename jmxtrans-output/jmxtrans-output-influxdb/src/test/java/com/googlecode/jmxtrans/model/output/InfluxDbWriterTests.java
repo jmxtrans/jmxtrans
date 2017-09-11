@@ -31,7 +31,7 @@ import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
-
+import com.googlecode.jmxtrans.model.ResultAttributes;
 import com.googlecode.jmxtrans.util.ProcessConfigUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -49,20 +49,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
-import static com.google.common.collect.Sets.immutableEnumSet;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_HOSTNAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link InfluxDbWriter}.
@@ -85,7 +79,7 @@ public class InfluxDbWriterTests {
 
 	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.ALL;
 	private static final String DEFAULT_RETENTION_POLICY = "default";
-	private static final ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = immutableEnumSet(EnumSet.allOf(ResultAttribute.class));
+	private static final ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = ImmutableSet.copyOf(ResultAttributes.values());
 
 	Result result = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "type=test,name=name",
 			ImmutableMap.of("key", (Object) 1));
@@ -107,9 +101,9 @@ public class InfluxDbWriterTests {
 		// measurement,<comma separated key=val tags>" " <comma separated
 		// key=val fields>
 		Map<String, String> expectedTags = new TreeMap<String, String>();
-		expectedTags.put(enumValueToAttribute(ResultAttribute.ATTRIBUTE_NAME), result.getAttributeName());
-		expectedTags.put(enumValueToAttribute(ResultAttribute.CLASS_NAME), result.getClassName());
-		expectedTags.put(enumValueToAttribute(ResultAttribute.OBJ_DOMAIN), result.getObjDomain());
+		expectedTags.put(enumValueToAttribute(ResultAttributes.ATTRIBUTE_NAME), result.getAttributeName());
+		expectedTags.put(enumValueToAttribute(ResultAttributes.CLASS_NAME), result.getClassName());
+		expectedTags.put(enumValueToAttribute(ResultAttributes.OBJ_DOMAIN), result.getObjDomain());
 		expectedTags.put(TAG_HOSTNAME, HOST);
 		String lineProtocol = buildLineProtocol(result.getKeyAlias(), expectedTags);
 
@@ -181,7 +175,7 @@ public class InfluxDbWriterTests {
 
 	@Test
 	public void onlyRequestedResultPropertiesAreAppliedAsTags() throws Exception {
-		for (ResultAttribute expectedResultTag : ResultAttribute.values()) {
+		for (ResultAttribute expectedResultTag : ResultAttributes.values()) {
 			ImmutableSet<ResultAttribute> expectedResultTags = ImmutableSet.of(expectedResultTag);
 			InfluxDbWriter writer = getTestInfluxDbWriterWithResultTags(expectedResultTags);
 			writer.doWrite(dummyServer(), dummyQuery(), results);
@@ -191,7 +185,8 @@ public class InfluxDbWriterTests {
 			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
 
 			assertThat(lineProtocol).contains(enumValueToAttribute(expectedResultTag));
-			EnumSet<ResultAttribute> unexpectedResultTags = EnumSet.complementOf(EnumSet.of(expectedResultTag));
+			Set<ResultAttribute> unexpectedResultTags = new HashSet<ResultAttribute>(ResultAttributes.values());
+			unexpectedResultTags.remove(expectedResultTag);
 			for (ResultAttribute unexpectedResultTag : unexpectedResultTags) {
 				assertThat(lineProtocol).doesNotContain(enumValueToAttribute(unexpectedResultTag));
 			}

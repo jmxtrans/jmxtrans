@@ -22,61 +22,50 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
 import java.util.Map;
 
-import static org.apache.commons.lang.StringUtils.capitalize;
-
 /**
- * Enumerates the attributes of {@link Result}
- * 
+ * Attributes of {@link Result}
+ *
  * @author Simon Hutchinson
  *         <a href="https://github.com/sihutch">github.com/sihutch</a>
  *
  */
 @ToString
-public enum ResultAttribute {
+public abstract class ResultAttribute {
 
-	TYPE_NAME("typeName"), OBJ_DOMAIN("objDomain"), CLASS_NAME("className"), ATTRIBUTE_NAME("attributeName");
-
+	/**
+	 * Attribute name in camel case
+	 */
+	@Getter
 	@Nonnull
 	private String attributeName;
-	@Nonnull
-	private String accessorMethod;
 
 	ResultAttribute(String attributeName) {
 		this.attributeName = attributeName;
-		this.accessorMethod = "get" + capitalize(attributeName);
 	}
 
 	/**
-	 * Get the {@link ResultAttribute} value from the attribute name
-	 * 
-	 * @param attributeName
-	 *            <p>The attribute name for the {@link ResultAttribute} allowed values are:</p>
-	 *            <ul>
-	 *            	<li>typeName</li>
-	 *              <li>objDomain</li>
-	 *              <li>className</li>
-	 *              <li>attributeName</li>
-	 *            </ul>
-	 * @return the {@link ResultAttribute}
-	 */
-	public static ResultAttribute fromAttribute(@Nonnull String attributeName) {
-		String[] split = StringUtils.splitByCharacterTypeCamelCase(attributeName);
-		StringBuilder sb = new StringBuilder(split[0].toUpperCase()).append("_").append(split[1].toUpperCase());
-		return valueOf(sb.toString());
+	 * Get attribute name in upper case snake case
+     */
+	public String name() {
+		String[] words = StringUtils.splitByCharacterTypeCamelCase(attributeName);
+		return StringUtils.join(words, "_").replaceAll("_\\._", ".").toUpperCase();
 	}
-
 	/**
-	 * Calls the Getter defined by the {@link ResultAttribute} on the
+	 * Get attribute on result
+     */
+	public abstract String getAttribute(Result result);
+	/**
+	 * Calls the Getter defined by the {@link #getAttribute(Result)} on the
 	 * {@link Result} add adds the entry to the supplied {@link Map}
-	 * 
+	 *
 	 * @param attributeMap
 	 *            The map to add the {@link Result} data to
 	 * @param result
@@ -85,7 +74,6 @@ public enum ResultAttribute {
 	// Reflection errors have been covered fully by tests
 	@SneakyThrows
 	public void addAttribute(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) {
-		Method m = result.getClass().getMethod(accessorMethod);
-		attributeMap.put(attributeName, (String) m.invoke(result));
+		attributeMap.put(attributeName, getAttribute(result));
 	}
 }

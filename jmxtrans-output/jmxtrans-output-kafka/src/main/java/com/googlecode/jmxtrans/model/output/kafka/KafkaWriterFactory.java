@@ -79,7 +79,8 @@ public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
 		this.resultSerializer = resultSerializer == null ? new DefaultResultSerializer(
 				Collections.<String>emptyList(),
 				false, "",
-				Collections.<String, String>emptyMap()) : resultSerializer;
+				Collections.<String, String>emptyMap(),
+				Collections.<String>emptyList()) : resultSerializer;
 	}
 
 	@Nonnull
