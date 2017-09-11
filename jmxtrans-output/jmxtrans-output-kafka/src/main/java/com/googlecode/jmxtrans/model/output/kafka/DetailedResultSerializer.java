@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static java.util.Collections.singletonList;
@@ -98,6 +99,8 @@ public class DetailedResultSerializer implements ResultSerializer {
 		@Getter
 		private final String typeName;
 		@Getter
+		private final Map<String, String> typeNameMap;
+		@Getter
 		private final long epoch;
 		@Getter
 		private final String keyAlias;
@@ -112,6 +115,7 @@ public class DetailedResultSerializer implements ResultSerializer {
 			className = result.getClassName();
 			objDomain = result.getObjDomain();
 			typeName = result.getTypeName();
+			typeNameMap = result.getTypeNameMap();
 			epoch = result.getEpoch();
 			keyAlias = result.getKeyAlias();
 		}
