@@ -29,10 +29,14 @@ import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
+import com.googlecode.jmxtrans.test.DummyApp;
+import com.googlecode.jmxtrans.test.ExternalApp;
 import com.googlecode.jmxtrans.test.IntegrationTest;
-import com.googlecode.jmxtrans.test.MonitorableApp;
 import com.googlecode.jmxtrans.test.RequiresIO;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
@@ -48,7 +52,7 @@ import static org.assertj.core.api.Assertions.within;
 @Category({IntegrationTest.class, RequiresIO.class})
 public class KafkaWriterIT {
 	@Rule
-	public final MonitorableApp app = new MonitorableApp(12347);
+	public final ExternalApp app = new ExternalApp(DummyApp.class).enableJmx(12347);
 	private final TemporaryFolder temporaryFolder = new TemporaryFolder();
 	private final EmbeddedZookeeper zookeeper = new EmbeddedZookeeper(temporaryFolder);
 	private final EmbeddedKafka kafka = new EmbeddedKafka(temporaryFolder);
