@@ -1,0 +1,14 @@
+{
+  "servers" : [ {
+    "port" : "12346",
+    "host" : "localhost",
+    "ssl" : true,
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter"
+      } ],
+      "obj" : "org.jmxtrans:type=Counter,name=myCounter",
+      "attr" : [ "Value" ]
+    } ]
+  } ]
+}
