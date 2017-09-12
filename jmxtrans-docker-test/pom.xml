@@ -34,6 +34,8 @@
 
 	<artifactId>jmxtrans-docker-test</artifactId>
 
+	<packaging>pom</packaging>
+
 	<properties>
 		<deb.install.artifact>org.jmxtrans:jmxtrans:deb</deb.install.artifact>
 		<deb.install.file>jmxtrans.deb</deb.install.file>
