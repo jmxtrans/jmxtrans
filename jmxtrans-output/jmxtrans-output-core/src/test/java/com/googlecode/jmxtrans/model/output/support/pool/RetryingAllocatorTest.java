@@ -26,7 +26,10 @@ import com.github.rholder.retry.RetryException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import stormpot.Allocator;
 import stormpot.Poolable;
 import stormpot.Slot;
@@ -37,16 +40,16 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class RetryingAllocatorTest {
 
-	private Allocator<TestPoolable> allocator;
+	@Mock private Allocator<TestPoolable> allocator;
 	private RetryingAllocator<TestPoolable> retryingAllocator;
+	@Mock private Slot slot;
 
 	@Before
-	@SuppressWarnings("unchecked")
 	public void setUp() {
-		allocator = (Allocator<TestPoolable>) Mockito.mock(Allocator.class);
-		retryingAllocator = new RetryingAllocator<TestPoolable>(allocator, 100, 5000);
+		retryingAllocator = new RetryingAllocator<>(allocator, 100, 5000);
 	}
 
 	@Test
@@ -60,30 +63,30 @@ public class RetryingAllocatorTest {
 	@Test
 	public void testAllocate() throws Exception {
 		TestPoolable value = new TestPoolable("value");
-		when(allocator.allocate(any(Slot.class))).thenReturn(value);
+		when(allocator.allocate(slot)).thenReturn(value);
 
-		Assert.assertSame(value, retryingAllocator.allocate(null));
+		Assert.assertSame(value, retryingAllocator.allocate(slot));
 	}
 
 	@Test
 	public void testAllocate_FailThenSucceed() throws Exception {
 		TestPoolable value = new TestPoolable("value");
 
-		when(allocator.allocate(any(Slot.class)))
+		when(allocator.allocate(slot))
 			.thenThrow(new IOException())
 			.thenThrow(new IOException())
 			.thenThrow(new IOException())
 			.thenReturn(value);
 
-		Assert.assertSame(value, retryingAllocator.allocate(null));
-		Mockito.verify(allocator, atLeast(2)).allocate(any(Slot.class));
+		Assert.assertSame(value, retryingAllocator.allocate(slot));
+		Mockito.verify(allocator, atLeast(2)).allocate(slot);
 	}
 
 	@Test(expected = RetryException.class)
 	public void testAllocate_Fail() throws Exception {
-		when(allocator.allocate(any(Slot.class))).thenThrow(new IOException());
+		when(allocator.allocate(slot)).thenThrow(new IOException());
 
-		retryingAllocator.allocate(null);
+		retryingAllocator.allocate(slot);
 	}
 
 	private static class TestPoolable implements Poolable {

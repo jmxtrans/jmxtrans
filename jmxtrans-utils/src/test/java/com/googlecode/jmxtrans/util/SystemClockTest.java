@@ -33,7 +33,7 @@ public class SystemClockTest {
 	@Test
 	public void correctTimeIsReturned() {
 		// pretty dumb test, I know...
-		assertThat(new SystemClock().currentTimeMillis()).isCloseTo(currentTimeMillis(), within(100L));
+		assertThat(new SystemClock().currentTimeMillis()).isCloseTo(currentTimeMillis(), within(150L));
 	}
 
 }
