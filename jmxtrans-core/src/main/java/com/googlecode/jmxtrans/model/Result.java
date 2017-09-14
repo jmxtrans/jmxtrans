@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -38,7 +39,7 @@ import static com.google.common.collect.ImmutableMap.copyOf;
 
 /**
  * Represents the result of a query.
- * 
+ *
  * @author jon
  */
 @JsonSerialize(include = NON_NULL)
@@ -68,4 +69,10 @@ public class Result {
 		this.keyAlias = keyAlias;
 	}
 
+	/**
+	 * Get typeName split into a Map
+     */
+	public Map<String, String> getTypeNameMap() {
+		return TypeNameValue.extractMap(this.typeName);
+	}
 }

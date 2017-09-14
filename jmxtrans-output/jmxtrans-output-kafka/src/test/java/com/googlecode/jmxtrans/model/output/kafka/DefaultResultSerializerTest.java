@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.Result;
 import org.junit.Test;
 
@@ -51,7 +50,7 @@ public class DefaultResultSerializerTest {
 	@Test
 	public void convertSingleNumericToString() throws Exception {
 		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
-		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags);
+		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags, asList("typeName.type", "className"));
 
 		long now = System.currentTimeMillis();
 		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResultAt(now));
@@ -65,12 +64,14 @@ public class DefaultResultSerializerTest {
 		assertThat(jsonNode.get("value").asLong()).isEqualTo(10L);
 		assertThat(jsonNode.get("timestamp").asLong()).isEqualTo(now / 1000);
 		assertThat(jsonNode.get("tags").get("myTagKey1").asText()).isEqualTo("myTagValue1");
+		assertThat(jsonNode.get("tags").get("typeName.type").asText()).isEqualTo("Memory");
+		assertThat(jsonNode.get("tags").get("className").asText()).endsWith("MemoryImpl");
 	}
 
 	@Test
 	public void convertSingleNonNumericToString() throws Exception {
 		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
-		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags);
+		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags, ImmutableList.<String>of());
 
 		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), stringResult());
 
@@ -80,7 +81,7 @@ public class DefaultResultSerializerTest {
 	@Test
 	public void convertHashToStrings() throws Exception {
 		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
-		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags);
+		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags, ImmutableList.<String>of());
 
 		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
 
@@ -97,7 +98,7 @@ public class DefaultResultSerializerTest {
 
 	@Test
 	public void initDefaults() throws Exception {
-		DefaultResultSerializer resultSerializer = new DefaultResultSerializer(null, false, null, null);
+		DefaultResultSerializer resultSerializer = new DefaultResultSerializer(null, false, null, null, null);
 
 		assertThat(resultSerializer.getTypeNames()).isNotNull();
 		assertThat(resultSerializer.getTypeNames()).isEmpty();
@@ -107,8 +108,8 @@ public class DefaultResultSerializerTest {
 
 	@Test
 	public void equalsHashCodeWhenSame() throws Exception {
-		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null);
-		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(null, false, null, null);
+		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null, null);
+		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(null, false, null, null, null);
 
 		assertThat(resultSerializer1).isEqualTo(resultSerializer2);
 		assertThat(resultSerializer1.hashCode()).isEqualTo(resultSerializer2.hashCode());
@@ -116,8 +117,8 @@ public class DefaultResultSerializerTest {
 
 	@Test
 	public void equalsWhenDifferent() throws Exception {
-		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null);
-		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(asList("Type"), true, "root", null);
+		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null, null);
+		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(asList("Type"), true, "root", null, null);
 
 		assertThat(resultSerializer1).isNotEqualTo(resultSerializer2);
 	}

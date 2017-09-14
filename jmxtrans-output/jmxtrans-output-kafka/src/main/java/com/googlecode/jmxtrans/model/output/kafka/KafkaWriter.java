@@ -90,7 +90,7 @@ public class KafkaWriter extends BaseOutputWriter {
 				(String) getSettings().get("rootPrefix"),
 				DEFAULT_ROOT_PREFIX);
 		Map<String, String> aTags = firstNonNull(tags, (Map<String, String>) getSettings().get("tags"), ImmutableMap.<String, String>of());
-		resultSerializer = new DefaultResultSerializer(typeNames, booleanAsNumber, aRootPrefix, aTags);
+		resultSerializer = new DefaultResultSerializer(typeNames, booleanAsNumber, aRootPrefix, aTags, ImmutableList.<String>of());
 	}
 
 
