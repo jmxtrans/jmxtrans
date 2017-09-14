@@ -111,7 +111,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 		if (resultTags == null) {
 			result = ImmutableSet.copyOf(ResultAttributes.values());
 		} else {
-			result = ResultAttributes.fromAttributes(resultTags);
+			result = ResultAttributes.forNames(resultTags);
 		}
 		LOG.debug("Result Tags to write set to: {}", result);
 		return result;

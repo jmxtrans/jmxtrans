@@ -55,7 +55,7 @@ public class DetailedResultSerializerTest {
 		assertThat(jsonNode.get("objDomain").asText()).isEqualTo("ObjectDomainName");
 		assertThat(jsonNode.get("typeName").asText()).isEqualTo("type=Memory");
 		assertThat(jsonNode.get("typeNameMap").get("type").asText()).isEqualTo("Memory");
-		assertThat(jsonNode.get("typeNameMap").size()).isEqualTo(1);
+		assertThat(jsonNode.get("typeNameMap")).hasSize(1);
 		assertThat(jsonNode.get("values").get("ObjectPendingFinalizationCount").asLong()).isEqualTo(10L);
 		assertThat(jsonNode.get("epoch").asLong()).isEqualTo(0L);
 		assertThat(jsonNode.get("keyAlias").asText()).isEqualTo("MemoryAlias");

@@ -29,7 +29,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,8 +58,8 @@ public class ResultAttributeTests {
 	@Test
 	public void attributeNamesFromResultAreWrittenToMap() throws Exception {
 		for (ResultAttribute resultAttribute : ResultAttributes.values()) {
-			resultAttribute.addAttribute(attributeMap, result);
-			String attributeName = enumValueToAttribute(resultAttribute);
+			resultAttribute.addTo(attributeMap, result);
+			String attributeName = resultAttribute.getName();
 			Method m = result.getClass().getMethod("get" + WordUtils.capitalize(attributeName));
 			String expectedValue = (String) m.invoke(result);
 			assertThat(attributeMap).containsEntry(attributeName, expectedValue);
@@ -69,31 +68,26 @@ public class ResultAttributeTests {
 
 	@Test
 	public void typeNamePropertyResultAttribute() {
-		ResultAttribute typeAttr = ResultAttributes.fromAttribute("typeName.type");
-		assertThat(typeAttr.name()).isEqualTo("TYPE_NAME.TYPE");
-		String type = typeAttr.getAttribute(result);
+		ResultAttribute typeAttr = ResultAttributes.forName("typeName.type");
+		assertThat(typeAttr.getName()).isEqualTo("typeName.type");
+		String type = typeAttr.get(result);
 		assertThat(type).isEqualTo("Type1");
 
-		ResultAttribute nameAttr = ResultAttributes.fromAttribute("typeName.name");
-		assertThat(nameAttr.name()).isEqualTo("TYPE_NAME.NAME");
-		String name = nameAttr.getAttribute(result);
+		ResultAttribute nameAttr = ResultAttributes.forName("typeName.name");
+		assertThat(nameAttr.getName()).isEqualTo("typeName.name");
+		String name = nameAttr.get(result);
 		assertThat(name).isEqualTo("Name1");
 
-		ResultAttribute notExistAttr = ResultAttributes.fromAttribute("typeName.notExist");
-		assertThat(notExistAttr.name()).isEqualTo("TYPE_NAME.NOT_EXIST");
-		String notExist = notExistAttr.getAttribute(result);
+		ResultAttribute notExistAttr = ResultAttributes.forName("typeName.notExist");
+		assertThat(notExistAttr.getName()).isEqualTo("typeName.notExist");
+		String notExist = notExistAttr.get(result);
 		assertThat(notExist).isNull();
 
 		try {
-			ResultAttributes.fromAttribute("notExist");
+			ResultAttributes.forName("notExist");
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
 
 		}
-	}
-
-	private String enumValueToAttribute(ResultAttribute attribute) {
-		String[] split = attribute.name().split("_");
-		return StringUtils.lowerCase(split[0]) + WordUtils.capitalizeFully(split[1]);
 	}
 }

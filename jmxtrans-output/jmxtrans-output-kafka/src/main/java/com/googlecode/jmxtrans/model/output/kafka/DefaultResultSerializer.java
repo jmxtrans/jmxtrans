@@ -81,7 +81,7 @@ public class DefaultResultSerializer implements ResultSerializer {
 		this.booleanAsNumber = booleanAsNumber;
 		this.rootPrefix = rootPrefix;
 		this.tags = tags == null ? ImmutableMap.<String, String>of() : ImmutableMap.copyOf(tags);
-		this.resultAttributesToWriteAsTags = resultTags == null ? ImmutableSet.<ResultAttribute>of() : ResultAttributes.fromAttributes(resultTags);
+		this.resultAttributesToWriteAsTags = resultTags == null ? ImmutableSet.<ResultAttribute>of() : ResultAttributes.forNames(resultTags);
 	}
 
 	@Nonnull
@@ -119,7 +119,7 @@ public class DefaultResultSerializer implements ResultSerializer {
 				generator.writeStringField(tag.getKey(), tag.getValue());
 			}
 			for (ResultAttribute resultAttribute : this.resultAttributesToWriteAsTags) {
-				generator.writeStringField(resultAttribute.getAttributeName(), resultAttribute.getAttribute(result));
+				generator.writeStringField(resultAttribute.getName(), resultAttribute.get(result));
 			}
 
 			generator.writeEndObject();

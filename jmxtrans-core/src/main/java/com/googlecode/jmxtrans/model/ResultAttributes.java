@@ -28,9 +28,8 @@ import org.apache.commons.lang.StringUtils;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
 
 /**
  * Enumerates the attributes of {@link Result}
@@ -44,28 +43,28 @@ public final class ResultAttributes {
 
 	public static final ResultAttribute TYPE_NAME = new ResultAttribute("typeName") {
 		@Override
-		public String getAttribute(Result result) {
+		public String get(Result result) {
 			return result.getTypeName();
 		}
 	};
 
 	public static final ResultAttribute OBJ_DOMAIN = new ResultAttribute("objDomain") {
 		@Override
-		public String getAttribute(Result result) {
+		public String get(Result result) {
 			return result.getObjDomain();
 		}
 	};
 
 	public static final ResultAttribute CLASS_NAME = new ResultAttribute("className") {
 		@Override
-		public String getAttribute(Result result) {
+		public String get(Result result) {
 			return result.getClassName();
 		}
 	};
 
 	public static final ResultAttribute ATTRIBUTE_NAME = new ResultAttribute("attributeName") {
 		@Override
-		public String getAttribute(Result result) {
+		public String get(Result result) {
 			return result.getAttributeName();
 		}
 	};
@@ -83,7 +82,7 @@ public final class ResultAttributes {
 		}
 
 		@Override
-		public String getAttribute(Result result) {
+		public String get(Result result) {
 			return result.getTypeNameMap().get(propertyName);
 		}
 	}
@@ -100,7 +99,7 @@ public final class ResultAttributes {
 	 *                      </ul>
 	 * @return the {@link ResultAttribute}
 	 */
-	public static ResultAttribute fromAttribute(@Nonnull String attributeName) {
+	public static ResultAttribute forName(@Nonnull String attributeName) {
 		if (attributeName.startsWith(TypeNameProperty.PREFIX)) {
 			return new TypeNameProperty(attributeName.substring(TypeNameProperty.PREFIX.length()));
 		}
@@ -113,14 +112,14 @@ public final class ResultAttributes {
 	 * Get the {@link ResultAttributes} value for each attribute name.
 	 *
 	 * @return Set of {@link ResultAttribute}
-	 * @see #fromAttribute(String)
+	 * @see #forName(String)
 	 */
-	public static ImmutableSet<ResultAttribute> fromAttributes(@Nonnull Collection<String> attributeNames) {
-		Set<ResultAttribute> set = new HashSet<ResultAttribute>(attributeNames.size());
+	public static ImmutableSet<ResultAttribute> forNames(@Nonnull Collection<String> attributeNames) {
+		ImmutableSet.Builder<ResultAttribute> builder = ImmutableSet.<ResultAttribute>builder();
 		for (String attributeName : attributeNames) {
-			set.add(fromAttribute(attributeName));
+			builder.add(forName(attributeName));
 		}
-		return ImmutableSet.copyOf(set);
+		return builder.build();
 	}
 
 	/**

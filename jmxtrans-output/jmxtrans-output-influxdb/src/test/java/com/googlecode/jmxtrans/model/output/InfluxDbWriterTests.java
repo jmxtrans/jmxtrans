@@ -101,9 +101,10 @@ public class InfluxDbWriterTests {
 		// measurement,<comma separated key=val tags>" " <comma separated
 		// key=val fields>
 		Map<String, String> expectedTags = new TreeMap<String, String>();
-		expectedTags.put(enumValueToAttribute(ResultAttributes.ATTRIBUTE_NAME), result.getAttributeName());
-		expectedTags.put(enumValueToAttribute(ResultAttributes.CLASS_NAME), result.getClassName());
-		expectedTags.put(enumValueToAttribute(ResultAttributes.OBJ_DOMAIN), result.getObjDomain());
+		expectedTags.put(ResultAttributes.ATTRIBUTE_NAME.getName() , result.getAttributeName());
+		expectedTags.put(ResultAttributes.CLASS_NAME.getName(), result.getClassName());
+		expectedTags.put(ResultAttributes.OBJ_DOMAIN.getName
+					(), result.getObjDomain());
 		expectedTags.put(TAG_HOSTNAME, HOST);
 		String lineProtocol = buildLineProtocol(result.getKeyAlias(), expectedTags);
 
@@ -184,11 +185,11 @@ public class InfluxDbWriterTests {
 			BatchPoints batchPoints = messageCaptor.getValue();
 			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
 
-			assertThat(lineProtocol).contains(enumValueToAttribute(expectedResultTag));
+			assertThat(lineProtocol).contains(expectedResultTag.getName());
 			Set<ResultAttribute> unexpectedResultTags = new HashSet<ResultAttribute>(ResultAttributes.values());
 			unexpectedResultTags.remove(expectedResultTag);
 			for (ResultAttribute unexpectedResultTag : unexpectedResultTags) {
-				assertThat(lineProtocol).doesNotContain(enumValueToAttribute(unexpectedResultTag));
+				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getName());
 			}
 		}
 	}
@@ -259,10 +260,5 @@ public class InfluxDbWriterTests {
 	private InfluxDbWriter getTestInfluxDbWriter(ConsistencyLevel consistencyLevel, String retentionPolicy, ImmutableMap<String, String> tags,
 												 ImmutableSet<ResultAttribute> resultTags, ImmutableList<String> typeNames, boolean createDatabase) {
 		return new InfluxDbWriter(influxDB, DATABASE_NAME, consistencyLevel, retentionPolicy, tags, resultTags, typeNames, createDatabase);
-	}
-
-	private String enumValueToAttribute(ResultAttribute attribute) {
-		String[] split = attribute.name().split("_");
-		return StringUtils.lowerCase(split[0]) + WordUtils.capitalizeFully(split[1]);
 	}
 }

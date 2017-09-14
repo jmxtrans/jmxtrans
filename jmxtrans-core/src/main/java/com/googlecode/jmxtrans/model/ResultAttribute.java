@@ -23,9 +23,7 @@
 package com.googlecode.jmxtrans.model;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.ToString;
-import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -45,25 +43,19 @@ public abstract class ResultAttribute {
 	 */
 	@Getter
 	@Nonnull
-	private String attributeName;
+	private final String name;
 
-	ResultAttribute(String attributeName) {
-		this.attributeName = attributeName;
+	ResultAttribute(String name) {
+		this.name = name;
 	}
 
-	/**
-	 * Get attribute name in upper case snake case
-     */
-	public String name() {
-		String[] words = StringUtils.splitByCharacterTypeCamelCase(attributeName);
-		return StringUtils.join(words, "_").replaceAll("_\\._", ".").toUpperCase();
-	}
 	/**
 	 * Get attribute on result
      */
-	public abstract String getAttribute(Result result);
+	public abstract String get(Result result);
+
 	/**
-	 * Calls the Getter defined by the {@link #getAttribute(Result)} on the
+	 * Calls the Getter defined by the {@link #get(Result)} on the
 	 * {@link Result} add adds the entry to the supplied {@link Map}
 	 *
 	 * @param attributeMap
@@ -71,9 +63,7 @@ public abstract class ResultAttribute {
 	 * @param result
 	 *            The {@link Result} to get the data from
 	 */
-	// Reflection errors have been covered fully by tests
-	@SneakyThrows
-	public void addAttribute(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) {
-		attributeMap.put(attributeName, getAttribute(result));
+	public void addTo(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) {
+		attributeMap.put(name, get(result));
 	}
 }
