@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -29,9 +30,8 @@ import javax.management.Attribute;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularData;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.List;
@@ -58,132 +58,137 @@ public class JmxResultProcessor {
 	}
 
 	public ImmutableList<Result> getResults() {
-		Builder<Result> accumulator = ImmutableList.builder();
+		ResultsBuilder builder = new ResultsBuilder();
 		for (Attribute attribute : attributes) {
-			getResult(accumulator, attribute);
+			builder.add(attribute.getName(), attribute.getValue());
 		}
-		return accumulator.build();
+		return builder.build();
 	}
 
 	/**
-	 * Used when the object is effectively a java type
+	 * Result list builders.
+	 * Recursively walks in the value to add results.
 	 */
-	private void getResult(Builder<Result> accumulator, Attribute attribute) {
-		Object value = attribute.getValue();
-		if (value == null) {
-			return;
+	private class ResultsBuilder {
+		private final Builder<Result> accumulator = ImmutableList.builder();
+		private final long epoch = System.currentTimeMillis();
+
+		/**
+		 * Add one or more results from a value of any type.
+		 * This is a recursive function.
+         */
+		private void add(String name, Object value) {
+			if (value == null) {
+				return;
+			}
+			if (value instanceof CompositeData) {
+				add(name, (CompositeData) value);
+			} else if (value instanceof CompositeData[]) {
+				for (CompositeData cd : (CompositeData[]) value) {
+					add(name, cd);
+				}
+			} else if (value instanceof ObjectName[]) {
+				add(name, (ObjectName[]) value);
+			} else if (value.getClass().isArray()) {
+				// OMFG: this is nutty. some of the items in the array can be
+				// primitive! great interview question!
+				Map<String, Object> values = newHashMap();
+				for (int i = 0; i < Array.getLength(value); i++) {
+					Object val = Array.get(value, i);
+					values.put(name + "." + i, val);
+				}
+				addNew(name, values);
+			} else if (value instanceof TabularData) {
+				add(name, (TabularData) value);
+			}  else if (value instanceof Map) {
+				add(name, (Map<Object, Object>) value);
+			} else {
+				addNew(name, Collections.singletonMap(name, value));
+			}
 		}
 
-		if (value instanceof CompositeData) {
-			getResult(accumulator, attribute.getName(), (CompositeData) value);
-		} else if (value instanceof CompositeData[]) {
-			for (CompositeData cd : (CompositeData[]) value) {
-				getResult(accumulator, attribute.getName(), cd);
+		/**
+		 * Add results from a value of type map.
+		 */
+		private void add(String attributeName, Map<Object, Object> map) {
+			ImmutableMap.Builder<String, Object> values = ImmutableMap.builder();
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				values.put(entry.getKey().toString(), entry.getValue());
 			}
-		} else if (value instanceof ObjectName[]) {
-			Map<String, Object> values = newHashMap();
-			for (ObjectName obj : (ObjectName[]) value) {
+			addNew(attributeName, values.build());
+		}
+
+		/**
+		 * Add results from a value of type objet name array.
+		 */
+		private void add(String attributeName, ObjectName[] objs) {
+			ImmutableMap.Builder<String, Object> values = ImmutableMap.builder();
+			for (ObjectName obj : objs) {
 				values.put(obj.getCanonicalName(), obj.getKeyPropertyListString());
 			}
-			Result r = getNewResultObject(attribute.getName(), values);
-			accumulator.add(r);
-		} else if (value.getClass().isArray()) {
-			// OMFG: this is nutty. some of the items in the array can be
-			// primitive! great interview question!
+			addNew(attributeName, values.build());
+		}
+
+		/**
+		 * Add results from a value of type composite data.
+		 * This is a recursive function.
+		 */
+		private void add(String attributeName, CompositeData cds) {
+			CompositeType t = cds.getCompositeType();
+
 			Map<String, Object> values = newHashMap();
-			for (int i = 0; i < Array.getLength(value); i++) {
-				Object val = Array.get(value, i);
-				values.put(attribute.getName() + "." + i, val);
+
+			Set<String> keys = t.keySet();
+			for (String key : keys) {
+				Object value = cds.get(key);
+				if (value instanceof TabularData) {
+					TabularData tds = (TabularData) value;
+					add(attributeName + "." + key, tds);
+					// continue because we added tabular contents within above, but need primitives at this level
+				} else if (value instanceof CompositeData) {
+					// now recursively go through everything.
+					CompositeData cds2 = (CompositeData) value;
+					add(attributeName, cds2);
+					return; // because we don't want to add to the list yet.
+				} else {
+					values.put(key, value);
+				}
 			}
-			accumulator.add(getNewResultObject(attribute.getName(), values));
-		} else if (value instanceof TabularDataSupport) {
-			TabularDataSupport tds = (TabularDataSupport) value;
-			Map<String, Object> values = Collections.emptyMap();
-			Result r = getNewResultObject(attribute.getName(), values);
-			processTabularDataSupport(accumulator, attribute.getName(), tds);
-			accumulator.add(r);
-		}  else if (value instanceof Map) {
-			Result r = getNewResultObject(attribute.getName(), convertKeysToString((Map<Object, Object>) value));
-			accumulator.add(r);
-		} else {
-			Map<String, Object> values = newHashMap();
-			values.put(attribute.getName(), value);
-			Result r = getNewResultObject(attribute.getName(), values);
-			accumulator.add(r);
+			addNew(attributeName, values);
 		}
-	}
 
-	private <K, V> ImmutableMap<String, V> convertKeysToString(Map<K, V> value) {
-		ImmutableMap.Builder<String, V> values = ImmutableMap.builder();
-		for (Map.Entry<K, V> entry : value.entrySet()) {
-			values.put(entry.getKey().toString(), entry.getValue());
-		}
-		return values.build();
-	}
-
-	/**
-	 * Populates the Result objects. This is a recursive function. Query
-	 * contains the keys that we want to get the values of.
-	 */
-	private void getResult(Builder<Result> accumulator, String attributeName, CompositeData cds) {
-		CompositeType t = cds.getCompositeType();
-
-		Map<String, Object> values = newHashMap();
-
-		Set<String> keys = t.keySet();
-		for (String key : keys) {
-			Object value = cds.get(key);
-			if (value instanceof TabularDataSupport) {
-				TabularDataSupport tds = (TabularDataSupport) value;
-				processTabularDataSupport(accumulator, attributeName + "." + key, tds);
-				// continue because we added tabular contents within above, but need primitives at this level
-			} else if (value instanceof CompositeDataSupport) {
-				// now recursively go through everything.
-				CompositeDataSupport cds2 = (CompositeDataSupport) value;
-				getResult(accumulator, attributeName, cds2);
-				return; // because we don't want to add to the list yet.
-			} else {
-				values.put(key, value);
-			}
-		}
-		Result r = getNewResultObject(attributeName, values);
-		accumulator.add(r);
-	}
-
-	private void processTabularDataSupport(
-			Builder<Result> accumulator, String attributeName,
-			TabularDataSupport tds) {
-		Set<Map.Entry<Object, Object>> entries = tds.entrySet();
-		for (Map.Entry<Object, Object> entry : entries) {
-			Object entryKeys = entry.getKey();
-			if (entryKeys instanceof List) {
+		/**
+		 * Add results from a value of type tabular data.
+		 * This is a recursive function.
+		 */
+		private void add(String attributeName, TabularData tds) {
+			// @see TabularData#keySet JavaDoc:
+			// "Set<List<?>>" but is declared as a {@code Set<?>} for
+			// compatibility reasons. The returned set can be used to iterate
+			// over the keys."
+			Set<List<?>> keys = (Set<List<?>>) tds.keySet();
+			for (List<?> key: keys) {
 				// ie: attributeName=LastGcInfo.Par Survivor Space
 				// i haven't seen this be smaller or larger than List<1>, but
 				// might as well loop it.
-				StringBuilder sb = new StringBuilder();
-				for (Object entryKey : (List<?>) entryKeys) {
-					sb.append(".");
-					sb.append(entryKey);
-				}
-				String attributeName2 = sb.toString();
-				Object entryValue = entry.getValue();
-				if (entryValue instanceof CompositeDataSupport) {
-					getResult(accumulator, attributeName + attributeName2, (CompositeDataSupport) entryValue);
-				} else {
-					throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/jmxtrans/jmxtrans/issues entryValue is: "
-							+ entryValue.getClass().getCanonicalName());
-				}
-			} else {
-				throw new RuntimeException("!!!!!!!!!! Please file a bug: https://github.com/jmxtrans/jmxtrans/issues entryKeys is: "
-						+ entryKeys.getClass().getCanonicalName());
+				CompositeData compositeData = tds.get(key.toArray());
+				String attributeName2 = Joiner.on('.').join(key);
+				add(attributeName + "." + attributeName2, compositeData);
 			}
+		}
+		/**
+		 * Create and add a new result.
+		 */
+		private void addNew(String attributeName, Map<String, Object> values) {
+			accumulator.add(new Result(epoch, attributeName, className, objDomain, query.getResultAlias(), objectInstance.getObjectName().getKeyPropertyListString(), values));
+		}
+
+		/**
+		 * Return the built list
+         */
+		public ImmutableList<Result> build() {
+			return accumulator.build();
 		}
 	}
 
-	/**
-	 * Builds up the base Result object
-	 */
-	private Result getNewResultObject(String attributeName, Map<String, Object> values) {
-		return new Result(System.currentTimeMillis(), attributeName, className, objDomain, query.getResultAlias(), objectInstance.getObjectName().getKeyPropertyListString(), values);
-	}
 }
