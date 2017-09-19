@@ -180,12 +180,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
 				Object value = values.getValue();
 				if (isValidNumber(value)) {
-					String key;
-					if(typeNamesAsTags) {
-						key = KeyUtils.getPrefixedKeyString(query, result, values, Collections.<String>emptyList(), values.getKey());
-					} else {
-						key = KeyUtils.getPrefixedKeyString(query, result, values, typeNames, values.getKey());
-					}
+					typeNames = typeNamesAsTags ? typeNames : Collections.<String>emptyList();
+					String key = KeyUtils.getPrefixedKeyString(query, result, values, typeNames, values.getKey());
 					filteredValues.put(key, value);
 				}
 			}
@@ -213,7 +209,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			resultAttribute.addAttribute(resultTagMap, result);
 		}
 
-		if(typeNamesAsTags) {
+		if (typeNamesAsTags) {
 			Map<String, String> typeNameValueMap = TypeNameValue.extractMap(resultTagMap.get("typeName"));
 			for (String typeToTag : this.typeNames) {
 				if (typeNameValueMap.containsKey(typeToTag)) {
