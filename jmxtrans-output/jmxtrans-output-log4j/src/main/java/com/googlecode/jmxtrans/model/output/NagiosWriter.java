@@ -103,7 +103,7 @@ public class NagiosWriter extends BaseOutputWriter {
 		this.prefix = firstNonNull(prefix, (String) this.getSettings().get(PREFIX), "");
 		this.suffix = firstNonNull(suffix, (String) this.getSettings().get(POSFIX), "");
 
-		if (filters.size() != thresholds.size()) {
+		if (this.filters.size() != this.thresholds.size()) {
 			throw new IllegalStateException("filters and thresholds must have the same size.");
 		}
 	}
