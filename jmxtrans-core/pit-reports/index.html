@@ -1,0 +1,204 @@
+<html>
+<head>
+  
+    <style type='text/css'>
+   
+   .tests{ 
+     width : 50%;
+     float : left;
+   }
+   
+   .mutees{
+     float : right;
+     width : 50%;
+   }
+   
+   .unit {
+     padding-top : 20px;
+     clear : both;
+   }
+   
+   .coverage_bar {
+    display : inline-block;
+    height : 1.1em;
+    width: 130px;
+    background: #FAA;
+    margin: 0 5px;
+    vertical-align: middle;
+    border: 1px solid #AAA;
+    position : relative;
+   }
+   
+   .coverage_complete {
+    display : inline-block;
+    height : 100%;
+    background: #DFD;
+    float: left;
+   }
+   
+   .coverage_ledgend {
+        position : absolute;
+        height : 100%;
+        width : 100%;
+        left : 0;
+        top : 0;
+        text-align : center;
+   }
+   
+   .line, .mut {
+        vertical-align : middle;
+   }
+   
+   .coveragePercentage {
+    display: inline-block;
+    width: 3em;
+    text-align: right;
+   }
+  </style>
+  
+</head>
+<body>
+
+<h1>Pit Test Coverage Report</h1>
+
+<h3>Project Summary</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Number of Classes</th>
+            <th>Line Coverage</th>
+            <th>Mutation Coverage</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>55</td>
+            <td>46% <div class="coverage_bar"><div class="coverage_complete" style="width:46%"></div><div class="coverage_ledgend">736/1615</div></div></td>
+            <td>31% <div class="coverage_bar"><div class="coverage_complete" style="width:31%"></div><div class="coverage_ledgend">1152/3725</div></div></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<h3>Breakdown by Package</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Number of Classes</th>
+            <th>Line Coverage</th>
+            <th>Mutation Coverage</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans/index.html">com.googlecode.jmxtrans</a></td>
+            <td>4</td>
+            <td><div class="coveragePercentage">24% </div><div class="coverage_bar"><div class="coverage_complete" style="width:24%"></div><div class="coverage_ledgend">82/338</div></div></td>
+            <td><div class="coveragePercentage">28% </div><div class="coverage_bar"><div class="coverage_complete" style="width:28%"></div><div class="coverage_ledgend">146/518</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.cli/index.html">com.googlecode.jmxtrans.cli</a></td>
+            <td>7</td>
+            <td><div class="coveragePercentage">81% </div><div class="coverage_bar"><div class="coverage_complete" style="width:81%"></div><div class="coverage_ledgend">121/150</div></div></td>
+            <td><div class="coveragePercentage">45% </div><div class="coverage_bar"><div class="coverage_complete" style="width:45%"></div><div class="coverage_ledgend">146/321</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.connections/index.html">com.googlecode.jmxtrans.connections</a></td>
+            <td>4</td>
+            <td><div class="coveragePercentage">29% </div><div class="coverage_bar"><div class="coverage_complete" style="width:29%"></div><div class="coverage_ledgend">14/48</div></div></td>
+            <td><div class="coveragePercentage">19% </div><div class="coverage_bar"><div class="coverage_complete" style="width:19%"></div><div class="coverage_ledgend">17/89</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.guice/index.html">com.googlecode.jmxtrans.guice</a></td>
+            <td>2</td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/60</div></div></td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/98</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.jmx/index.html">com.googlecode.jmxtrans.jmx</a></td>
+            <td>3</td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/45</div></div></td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/33</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.jobs/index.html">com.googlecode.jmxtrans.jobs</a></td>
+            <td>1</td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/13</div></div></td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/5</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.model/index.html">com.googlecode.jmxtrans.model</a></td>
+            <td>13</td>
+            <td><div class="coveragePercentage">57% </div><div class="coverage_bar"><div class="coverage_complete" style="width:57%"></div><div class="coverage_ledgend">320/559</div></div></td>
+            <td><div class="coveragePercentage">29% </div><div class="coverage_bar"><div class="coverage_complete" style="width:29%"></div><div class="coverage_ledgend">494/1704</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.model.naming/index.html">com.googlecode.jmxtrans.model.naming</a></td>
+            <td>4</td>
+            <td><div class="coveragePercentage">13% </div><div class="coverage_bar"><div class="coverage_complete" style="width:13%"></div><div class="coverage_ledgend">14/106</div></div></td>
+            <td><div class="coveragePercentage">7% </div><div class="coverage_bar"><div class="coverage_complete" style="width:7%"></div><div class="coverage_ledgend">17/255</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.model.naming.typename/index.html">com.googlecode.jmxtrans.model.naming.typename</a></td>
+            <td>4</td>
+            <td><div class="coveragePercentage">95% </div><div class="coverage_bar"><div class="coverage_complete" style="width:95%"></div><div class="coverage_ledgend">73/77</div></div></td>
+            <td><div class="coveragePercentage">51% </div><div class="coverage_bar"><div class="coverage_complete" style="width:51%"></div><div class="coverage_ledgend">153/302</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.model.output/index.html">com.googlecode.jmxtrans.model.output</a></td>
+            <td>3</td>
+            <td><div class="coveragePercentage">64% </div><div class="coverage_bar"><div class="coverage_complete" style="width:64%"></div><div class="coverage_ledgend">47/74</div></div></td>
+            <td><div class="coveragePercentage">50% </div><div class="coverage_bar"><div class="coverage_complete" style="width:50%"></div><div class="coverage_ledgend">79/158</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.model.output.support/index.html">com.googlecode.jmxtrans.model.output.support</a></td>
+            <td>1</td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/14</div></div></td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/25</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.model.results/index.html">com.googlecode.jmxtrans.model.results</a></td>
+            <td>4</td>
+            <td><div class="coveragePercentage">94% </div><div class="coverage_bar"><div class="coverage_complete" style="width:94%"></div><div class="coverage_ledgend">33/35</div></div></td>
+            <td><div class="coveragePercentage">81% </div><div class="coverage_bar"><div class="coverage_complete" style="width:81%"></div><div class="coverage_ledgend">46/57</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.monitoring/index.html">com.googlecode.jmxtrans.monitoring</a></td>
+            <td>2</td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/45</div></div></td>
+            <td><div class="coveragePercentage">0% </div><div class="coverage_bar"><div class="coverage_complete" style="width:0%"></div><div class="coverage_ledgend">0/71</div></div></td>
+        </tr>
+
+        <tr>
+            <td><a href="./com.googlecode.jmxtrans.util/index.html">com.googlecode.jmxtrans.util</a></td>
+            <td>3</td>
+            <td><div class="coveragePercentage">63% </div><div class="coverage_bar"><div class="coverage_complete" style="width:63%"></div><div class="coverage_ledgend">32/51</div></div></td>
+            <td><div class="coveragePercentage">61% </div><div class="coverage_bar"><div class="coverage_complete" style="width:61%"></div><div class="coverage_ledgend">54/89</div></div></td>
+        </tr>
+
+     </tbody>
+</table>
+<br/>
+
+
+
+<hr/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.2.2
+
+</body>
+</html>

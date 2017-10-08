@@ -1,0 +1,2430 @@
+<html>
+<head>
+<style type='text/css'>
+html, body, div, span, p, blockquote, pre {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+}
+
+body{
+	line-height: 1;
+	color: black;
+	background: white;
+	margin-left: 20px;
+}
+
+.src { 
+	border: 1px solid #dddddd;
+	padding-top: 10px;
+	padding-right: 5px;
+	padding-left: 5px;
+	font-family: Consolas, Courier, monospace;
+}
+
+
+.covered {background-color: #ddffdd}
+.uncovered {background-color: #ffdddd}
+.killed {background-color: #aaffaa}
+.survived {background-color: #ffaaaa}
+.uncertain {background-color: #dde7ef}
+.run_error {background-color: #dde7ef}
+.na {background-color: #eeeeee}
+.timed_out {background-color: #dde7ef}
+.non_viable {background-color: #aaffaa}
+.memory_error {background-color: #dde7ef}
+.not_started {background-color: #dde7ef; color : red}
+.no_coverage {background-color: #ffaaaa}
+
+
+.pop {outline:none; }
+.pop strong {line-height:30px;}
+.pop {text-decoration:none;}
+.pop span { z-index:10;display:none; padding:14px 20px; margin-top:-30px; margin-left:28px; width:800px; line-height:16px; word-wrap:break-word; }
+.pop:hover span{ display:inline; position:absolute; color:#111; border:1px solid #DCA; background:#fffAF0;}
+
+.pop span { border-radius:4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; -moz-box-shadow: 5px 5px 8px #CCC; -webkit-box-shadow: 5px 5px 8px #CCC; box-shadow: 5px 5px 8px #CCC; }
+</style>
+
+</head>
+<body>
+
+
+<h1>CommonsCliArgumentParser.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_1'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_2'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * The MIT License</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_3'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Copyright &#169; 2010 JmxTrans team</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_4'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_5'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_6'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * of this software and associated documentation files (the &#34;Software&#34;), to deal</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_7'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * in the Software without restriction, including without limitation the rights</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_8'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_9'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * copies of the Software, and to permit persons to whom the Software is</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_10'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * furnished to do so, subject to the following conditions:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_11'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_12'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * The above copyright notice and this permission notice shall be included in</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_13'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * all copies or substantial portions of the Software.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_14'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_15'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_16'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_17'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_18'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_19'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_20'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_21'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THE SOFTWARE.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_22'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_23'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.googlecode.jmxtrans.cli;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_24'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_25'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.cli.CommandLine;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_26'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.cli.CommandLineParser;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_27'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.cli.GnuParser;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_28'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.cli.HelpFormatter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_29'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.cli.Option;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_30'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.cli.OptionBuilder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_31'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.cli.Options;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_32'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_33'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import javax.annotation.Nonnull;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_34'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.io.File;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_35'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_36'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@SuppressWarnings(&#34;squid:S1132&#34;) // string literals on the right side look just fine to me here</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_37'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public class CommonsCliArgumentParser implements CliArgumentParser {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_38'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/** Parse the options given on the command line. */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_39'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;@Nonnull</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_40'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;@Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_41'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;public JmxTransConfiguration parseOptions(@Nonnull String[] args) throws OptionsException, org.apache.commons.cli.ParseException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_42'/>
+42
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_42'>1</a>
+<span>
+1. parseOptions : removed call to org/apache/commons/cli/GnuParser::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;CommandLineParser parser = new GnuParser();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_43'/>
+43
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_43'>2</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::getOptions &rarr; KILLED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/CommandLineParser::parse &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;CommandLine cl = parser.parse(getOptions(), args);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_44'/>
+44
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_44'>1</a>
+<span>
+1. parseOptions : removed call to org/apache/commons/cli/CommandLine::getOptions &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;Option[] options = cl.getOptions();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_45'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_46'/>
+46
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_46'>1</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;JmxTransConfiguration configuration = new JmxTransConfiguration();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_47'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_48'/>
+48
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_48'>6</a>
+<span>
+1. parseOptions : changed conditional boundary &rarr; KILLED<br/>
+2. parseOptions : Changed increment from 1 to -1 &rarr; KILLED<br/>
+3. parseOptions : Substituted 0 with 1 &rarr; KILLED<br/>
+4. parseOptions : negated conditional &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced comparison check with false &rarr; KILLED<br/>
+6. parseOptions : removed conditional - replaced comparison check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;for (Option option : options) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_49'/>
+49
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_49'>5</a>
+<span>
+1. parseOptions : negated conditional &rarr; KILLED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+3. parseOptions : removed call to java/lang/String::equals &rarr; KILLED<br/>
+4. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;if (option.getOpt().equals(&#34;c&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_50'/>
+50
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_50'>3</a>
+<span>
+1. parseOptions : removed call to org/apache/commons/cli/Option::getValue &rarr; KILLED<br/>
+2. parseOptions : removed call to java/lang/Boolean::parseBoolean &rarr; KILLED<br/>
+3. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setContinueOnJsonError &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;configuration.setContinueOnJsonError(Boolean.parseBoolean(option.getValue()));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_51'/>
+51
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_51'>5</a>
+<span>
+1. parseOptions : negated conditional &rarr; KILLED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+3. parseOptions : removed call to java/lang/String::equals &rarr; KILLED<br/>
+4. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;} else if (option.getOpt().equals(&#34;j&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_52'/>
+52
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_52'>2</a>
+<span>
+1. parseOptions : removed call to java/io/File::&#60;init&#62; &rarr; SURVIVED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getValue &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;File jsonDir = new File(option.getValue());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_53'/>
+53
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_53'>8</a>
+<span>
+1. parseOptions : negated conditional &rarr; SURVIVED<br/>
+2. parseOptions : removed call to java/io/File::exists &rarr; SURVIVED<br/>
+3. parseOptions : removed call to java/io/File::isDirectory &rarr; SURVIVED<br/>
+4. parseOptions : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+5. parseOptions : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+6. parseOptions : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+7. parseOptions : negated conditional &rarr; KILLED<br/>
+8. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;if (jsonDir.exists() &#38;&#38; jsonDir.isDirectory()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_54'/>
+54
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_54'>1</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setProcessConfigDir &rarr; NO_COVERAGE<br/>
+
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;&#9;configuration.setProcessConfigDir(jsonDir);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_55'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_56'/>
+56
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_56'>5</a>
+<span>
+1. parseOptions : removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; SURVIVED<br/>
+2. parseOptions : removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED<br/>
+3. parseOptions : removed call to java/lang/StringBuilder::append &rarr; SURVIVED<br/>
+4. parseOptions : removed call to java/lang/StringBuilder::append &rarr; SURVIVED<br/>
+5. parseOptions : removed call to java/lang/StringBuilder::toString &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;&#9;throw new OptionsException(&#34;Path to json directory is invalid: &#34; + jsonDir);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_57'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_58'/>
+58
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_58'>5</a>
+<span>
+1. parseOptions : negated conditional &rarr; KILLED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+3. parseOptions : removed call to java/lang/String::equals &rarr; KILLED<br/>
+4. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;} else if (option.getOpt().equals(&#34;f&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_59'/>
+59
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_59'>2</a>
+<span>
+1. parseOptions : removed call to java/io/File::&#60;init&#62; &rarr; KILLED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getValue &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;File jsonFile = new File(option.getValue());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_60'/>
+60
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_60'>8</a>
+<span>
+1. parseOptions : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+2. parseOptions : negated conditional &rarr; KILLED<br/>
+3. parseOptions : negated conditional &rarr; KILLED<br/>
+4. parseOptions : removed call to java/io/File::exists &rarr; KILLED<br/>
+5. parseOptions : removed call to java/io/File::isFile &rarr; KILLED<br/>
+6. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+7. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+8. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;if (jsonFile.exists() &#38;&#38; jsonFile.isFile()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_61'/>
+61
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_61'>1</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setProcessConfigFile &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;&#9;configuration.setProcessConfigFile(jsonFile);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_62'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_63'/>
+63
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_63'>5</a>
+<span>
+1. parseOptions : removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; SURVIVED<br/>
+2. parseOptions : removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED<br/>
+3. parseOptions : removed call to java/lang/StringBuilder::append &rarr; SURVIVED<br/>
+4. parseOptions : removed call to java/lang/StringBuilder::append &rarr; SURVIVED<br/>
+5. parseOptions : removed call to java/lang/StringBuilder::toString &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;&#9;throw new OptionsException(&#34;Path to json file is invalid: &#34; + jsonFile);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_64'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_65'/>
+65
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_65'>5</a>
+<span>
+1. parseOptions : removed call to java/lang/String::equals &rarr; SURVIVED<br/>
+2. parseOptions : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+3. parseOptions : negated conditional &rarr; KILLED<br/>
+4. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;} else if (option.getOpt().equals(&#34;e&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_66'/>
+66
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_66'>2</a>
+<span>
+1. parseOptions : Substituted 1 with 0 &rarr; NO_COVERAGE<br/>
+2. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setRunEndlessly &rarr; NO_COVERAGE<br/>
+
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;configuration.setRunEndlessly(true);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_67'/>
+67
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_67'>5</a>
+<span>
+1. parseOptions : negated conditional &rarr; KILLED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+3. parseOptions : removed call to java/lang/String::equals &rarr; KILLED<br/>
+4. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;} else if (option.getOpt().equals(&#34;q&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_68'/>
+68
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_68'>2</a>
+<span>
+1. parseOptions : removed call to java/io/File::&#60;init&#62; &rarr; SURVIVED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getValue &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;File quartzConfigFile = new File(option.getValue());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_69'/>
+69
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_69'>8</a>
+<span>
+1. parseOptions : negated conditional &rarr; SURVIVED<br/>
+2. parseOptions : removed call to java/io/File::exists &rarr; SURVIVED<br/>
+3. parseOptions : removed call to java/io/File::isFile &rarr; SURVIVED<br/>
+4. parseOptions : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+5. parseOptions : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+6. parseOptions : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+7. parseOptions : negated conditional &rarr; KILLED<br/>
+8. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;if (quartzConfigFile.exists() &#38;&#38; quartzConfigFile.isFile()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_70'/>
+70
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_70'>1</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setQuartzPropertiesFile &rarr; NO_COVERAGE<br/>
+
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;&#9;configuration.setQuartzPropertiesFile(quartzConfigFile);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_71'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_72'/>
+72
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_72'>2</a>
+<span>
+1. parseOptions : removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; SURVIVED<br/>
+2. parseOptions : removed call to java/lang/StringBuilder::append &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;&#9;throw new OptionsException(&#34;Could not find path to the quartz properties file: &#34;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_73'/>
+73
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_73'>4</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED<br/>
+2. parseOptions : removed call to java/io/File::getAbsolutePath &rarr; SURVIVED<br/>
+3. parseOptions : removed call to java/lang/StringBuilder::append &rarr; SURVIVED<br/>
+4. parseOptions : removed call to java/lang/StringBuilder::toString &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;&#9;&#9;&#9;+ quartzConfigFile.getAbsolutePath());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_74'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_75'/>
+75
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_75'>5</a>
+<span>
+1. parseOptions : negated conditional &rarr; KILLED<br/>
+2. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+3. parseOptions : removed call to java/lang/String::equals &rarr; KILLED<br/>
+4. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;} else if (option.getOpt().equals(&#34;s&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_76'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;try {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_77'/>
+77
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_77'>3</a>
+<span>
+1. parseOptions : removed call to org/apache/commons/cli/Option::getValue &rarr; KILLED<br/>
+2. parseOptions : removed call to java/lang/Integer::parseInt &rarr; KILLED<br/>
+3. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setRunPeriod &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;&#9;configuration.setRunPeriod(Integer.parseInt(option.getValue()));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_78'/>
+78
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_78'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;&#9;} catch (NumberFormatException nfe) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_79'/>
+79
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_79'>1</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;&#9;throw new OptionsException(&#34;Seconds between server job runs must be an integer&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_80'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_81'/>
+81
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_81'>5</a>
+<span>
+1. parseOptions : removed call to java/lang/String::equals &rarr; SURVIVED<br/>
+2. parseOptions : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+3. parseOptions : negated conditional &rarr; KILLED<br/>
+4. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;} else if (option.getOpt().equals(&#34;a&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_82'/>
+82
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_82'>2</a>
+<span>
+1. parseOptions : removed call to org/apache/commons/cli/Option::getValuesList &rarr; NO_COVERAGE<br/>
+2. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setAdditionalJars &rarr; NO_COVERAGE<br/>
+
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;configuration.setAdditionalJars(option.getValuesList());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_83'/>
+83
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_83'>5</a>
+<span>
+1. parseOptions : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+2. parseOptions : negated conditional &rarr; KILLED<br/>
+3. parseOptions : removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED<br/>
+4. parseOptions : removed call to java/lang/String::equals &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;} else if (option.getOpt().equals(&#34;h&#34;)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_84'/>
+84
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_84'>1</a>
+<span>
+1. parseOptions : removed call to org/apache/commons/cli/HelpFormatter::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;HelpFormatter formatter = new HelpFormatter();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_85'/>
+85
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_85'>2</a>
+<span>
+1. parseOptions : removed call to org/apache/commons/cli/HelpFormatter::printHelp &rarr; SURVIVED<br/>
+2. parseOptions : removed call to com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::getOptions &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;formatter.printHelp(&#34;java -jar jmxtrans-all.jar&#34;, getOptions());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_86'/>
+86
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_86'>2</a>
+<span>
+1. parseOptions : Substituted 1 with 0 &rarr; KILLED<br/>
+2. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setHelp &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;configuration.setHelp(true);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_87'/>
+87
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_87'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_88'/>
+88
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_88'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_89'/>
+89
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_89'>8</a>
+<span>
+1. parseOptions : negated conditional &rarr; KILLED<br/>
+2. parseOptions : negated conditional &rarr; KILLED<br/>
+3. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::isHelp &rarr; KILLED<br/>
+4. parseOptions : removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::getProcessConfigDirOrFile &rarr; KILLED<br/>
+5. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+6. parseOptions : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+7. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+8. parseOptions : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;if ((!configuration.isHelp()) &#38;&#38; (configuration.getProcessConfigDirOrFile() == null)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_90'/>
+90
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_90'>1</a>
+<span>
+1. parseOptions : removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;throw new OptionsException(&#34;Please specify either the -f or -j option.&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_91'/>
+91
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_91'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_92'/>
+92
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_92'>1</a>
+<span>
+1. parseOptions : mutated return of Object value for com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::parseOptions to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;return configuration;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_93'/>
+93
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_93'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_94'/>
+94
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_94'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_95'/>
+95
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_95'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;@Nonnull</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_96'/>
+96
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_96'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private Options getOptions() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_97'/>
+97
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_97'>1</a>
+<span>
+1. getOptions : removed call to org/apache/commons/cli/Options::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;Options options = new Options();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_98'/>
+98
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_98'>2</a>
+<span>
+1. getOptions : Substituted 1 with 0 &rarr; KILLED<br/>
+2. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;options.addOption(&#34;c&#34;, true, &#34;Continue processing even if one of the JSON configuration file is invalid.&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_99'/>
+99
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_99'>2</a>
+<span>
+1. getOptions : Substituted 1 with 0 &rarr; SURVIVED<br/>
+2. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;options.addOption(&#34;j&#34;, true, &#34;Directory where json configuration is stored. Default is .&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_100'/>
+100
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_100'>2</a>
+<span>
+1. getOptions : Substituted 1 with 0 &rarr; KILLED<br/>
+2. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;options.addOption(&#34;f&#34;, true, &#34;A single json file to execute.&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_101'/>
+101
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_101'>2</a>
+<span>
+1. getOptions : Substituted 0 with 1 &rarr; SURVIVED<br/>
+2. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;options.addOption(&#34;e&#34;, false, &#34;Run endlessly. Default false.&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_102'/>
+102
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_102'>2</a>
+<span>
+1. getOptions : Substituted 1 with 0 &rarr; SURVIVED<br/>
+2. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;options.addOption(&#34;q&#34;, true, &#34;Path to quartz configuration file.&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_103'/>
+103
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_103'>2</a>
+<span>
+1. getOptions : Substituted 1 with 0 &rarr; KILLED<br/>
+2. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;options.addOption(&#34;s&#34;, true, &#34;Seconds between server job runs (not defined with cron). Default: 60&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_104'/>
+104
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_104'>1</a>
+<span>
+1. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;options.addOption(OptionBuilder</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_105'/>
+105
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_105'>1</a>
+<span>
+1. getOptions : removed call to org/apache/commons/cli/OptionBuilder::withArgName &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;.withArgName(&#34;a&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_106'/>
+106
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_106'>1</a>
+<span>
+1. getOptions : removed call to org/apache/commons/cli/OptionBuilder::withLongOpt &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;.withLongOpt(&#34;additionalJars&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_107'/>
+107
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_107'>2</a>
+<span>
+1. getOptions : Substituted 44 with 45 &rarr; SURVIVED<br/>
+2. getOptions : removed call to org/apache/commons/cli/OptionBuilder::hasArgs &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;.hasArgs()</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_108'/>
+108
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_108'>1</a>
+<span>
+1. getOptions : removed call to org/apache/commons/cli/OptionBuilder::withValueSeparator &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;.withValueSeparator(&#39;,&#39;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_109'/>
+109
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_109'>1</a>
+<span>
+1. getOptions : removed call to org/apache/commons/cli/OptionBuilder::withDescription &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;&#9;.withDescription(&#34;Comma delimited list of additional jars to add to the class path&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_110'/>
+110
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_110'>1</a>
+<span>
+1. getOptions : removed call to org/apache/commons/cli/OptionBuilder::create &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;.create(&#34;a&#34;));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_111'/>
+111
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_111'>2</a>
+<span>
+1. getOptions : Substituted 0 with 1 &rarr; KILLED<br/>
+2. getOptions : removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;options.addOption(&#34;h&#34;, false, &#34;Help&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_112'/>
+112
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_112'>1</a>
+<span>
+1. getOptions : mutated return of Object value for com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::getOptions to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;return options;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_113'/>
+113
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_113'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@37e15b23_114'/>
+114
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_114'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_42'>42</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_42'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/GnuParser::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_43'>43</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_43'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::getOptions &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/CommandLineParser::parse &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_44'>44</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_44'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/CommandLine::getOptions &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_46'>46</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_46'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_48'>48</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_48'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> changed conditional boundary &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> Changed increment from 1 to -1 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> Substituted 0 with 1 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced comparison check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced comparison check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_49'>49</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_49'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/String::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_50'>50</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_50'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getValue &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/Boolean::parseBoolean &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setContinueOnJsonError &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_51'>51</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_51'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/String::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_52'>52</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_52'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/io/File::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/Option::getValue &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_53'>53</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_53'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryCannotBeAFile(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/io/File::exists &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/io/File::isDirectory &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryCannotBeAFile(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_54'>54</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_54'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setProcessConfigDir &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_56'>56</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_56'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/StringBuilder::toString &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_58'>58</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_58'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/String::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_59'>59</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_59'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/io/File::&#60;init&#62; &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getValue &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_60'>60</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_60'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/io/File::exists &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/io/File::isFile &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_61'>61</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_61'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setProcessConfigFile &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_63'>63</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_63'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/StringBuilder::toString &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_65'>65</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_65'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/String::equals &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_66'>66</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_66'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setRunEndlessly &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_67'>67</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_67'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/String::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.runIntervalMustBeInteger(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_68'>68</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_68'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/io/File::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/Option::getValue &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_69'>69</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_69'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/io/File::exists &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/io/File::isFile &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_70'>70</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_70'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setQuartzPropertiesFile &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_72'>72</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_72'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_73'>73</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_73'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/io/File::getAbsolutePath &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/StringBuilder::toString &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_75'>75</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_75'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.runIntervalMustBeInteger(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.runIntervalMustBeInteger(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/String::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.runIntervalMustBeInteger(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_77'>77</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_77'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.canParseRunInterval(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getValue &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.runIntervalMustBeInteger(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/Integer::parseInt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.canParseRunInterval(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setRunPeriod &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_79'>79</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_79'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_81'>81</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_81'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to java/lang/String::equals &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_82'>82</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_82'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/Option::getValuesList &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setAdditionalJars &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_83'>83</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_83'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Option::getOpt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to java/lang/String::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_84'>84</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_84'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/HelpFormatter::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_85'>85</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_85'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::getOptions &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/HelpFormatter::printHelp &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_86'>86</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_86'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::setHelp &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_89'>89</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_89'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonDirectoryOrJsonFileIsRequired(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonDirectoryOrJsonFileIsRequired(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::isHelp &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to com/googlecode/jmxtrans/cli/JmxTransConfiguration::getProcessConfigDirOrFile &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonDirectoryOrJsonFileIsRequired(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonDirectoryOrJsonFileIsRequired(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_90'>90</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_90'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/cli/OptionsException::&#60;init&#62; &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_92'>92</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_92'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>parseOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::parseOptions to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_97'>97</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_97'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Options::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_98'>98</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_98'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_99'>99</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_99'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_100'>100</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_100'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_101'>101</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_101'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_102'>102</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_102'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_103'>103</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_103'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.canParseRunInterval(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.canParseRunInterval(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_104'>104</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_104'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_105'>105</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_105'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/OptionBuilder::withArgName &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_106'>106</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_106'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/OptionBuilder::withLongOpt &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_107'>107</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_107'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> Substituted 44 with 45 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/OptionBuilder::hasArgs &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_108'>108</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_108'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/OptionBuilder::withValueSeparator &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_109'>109</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_109'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/cli/OptionBuilder::withDescription &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_110'>110</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_110'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/OptionBuilder::create &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_111'>111</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_111'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> Substituted 0 with 1 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> removed call to org/apache/commons/cli/Options::addOption &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@37e15b23_112'>112</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@37e15b23_112'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getOptions<br/><b>Killed by : </b>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/cli/CommonsCliArgumentParser::getOptions to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONSTRUCTOR_CALL_MUTATOR</li>
+<li class='mutator'>RETURN_VALS_MUTATOR</li>
+<li class='mutator'>INVERT_NEGS_MUTATOR</li>
+<li class='mutator'>CONDITIONALS_BOUNDARY_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_ORDER_IF_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_EQUAL_ELSE_MUTATOR</li>
+<li class='mutator'>INCREMENTS_MUTATOR</li>
+<li class='mutator'>VOID_METHOD_CALL_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_ORDER_ELSE_MUTATOR</li>
+<li class='mutator'>MATH_MUTATOR</li>
+<li class='mutator'>NEGATE_CONDITIONALS_MUTATOR</li>
+<li class='mutator'>NON_VOID_METHOD_CALL_MUTATOR</li>
+<li class='mutator'>INLINE_CONSTANT_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_EQUAL_IF_MUTATOR</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.canParseRunInterval(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (37 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonDirectoryOrJsonFileIsRequired(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (0 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.noExceptionThrownWhenHelpIsAsked(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (4 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigDirectoryCannotBeAFile(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (3 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileCannotBeADirectory(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.runIntervalMustBeInteger(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsCanBeSetToTrueOrFalse(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.continueOnJsonErrorIsFalseByDefault(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.jsonConfigFileMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li><li>com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest.quartzConfigFileMustExist(com.googlecode.jmxtrans.cli.CommonsCliArgumentParserTest) (1 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.2.2
+
+</body>
+</html>

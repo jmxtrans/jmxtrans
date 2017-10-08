@@ -1,0 +1,4460 @@
+<html>
+<head>
+<style type='text/css'>
+html, body, div, span, p, blockquote, pre {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+}
+
+body{
+	line-height: 1;
+	color: black;
+	background: white;
+	margin-left: 20px;
+}
+
+.src { 
+	border: 1px solid #dddddd;
+	padding-top: 10px;
+	padding-right: 5px;
+	padding-left: 5px;
+	font-family: Consolas, Courier, monospace;
+}
+
+
+.covered {background-color: #ddffdd}
+.uncovered {background-color: #ffdddd}
+.killed {background-color: #aaffaa}
+.survived {background-color: #ffaaaa}
+.uncertain {background-color: #dde7ef}
+.run_error {background-color: #dde7ef}
+.na {background-color: #eeeeee}
+.timed_out {background-color: #dde7ef}
+.non_viable {background-color: #aaffaa}
+.memory_error {background-color: #dde7ef}
+.not_started {background-color: #dde7ef; color : red}
+.no_coverage {background-color: #ffaaaa}
+
+
+.pop {outline:none; }
+.pop strong {line-height:30px;}
+.pop {text-decoration:none;}
+.pop span { z-index:10;display:none; padding:14px 20px; margin-top:-30px; margin-left:28px; width:800px; line-height:16px; word-wrap:break-word; }
+.pop:hover span{ display:inline; position:absolute; color:#111; border:1px solid #DCA; background:#fffAF0;}
+
+.pop span { border-radius:4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; -moz-box-shadow: 5px 5px 8px #CCC; -webkit-box-shadow: 5px 5px 8px #CCC; box-shadow: 5px 5px 8px #CCC; }
+</style>
+
+</head>
+<body>
+
+
+<h1>OpenTSDBMessageFormatter.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_1'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_2'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * The MIT License</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_3'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Copyright &#169; 2010 JmxTrans team</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_4'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_5'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_6'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * of this software and associated documentation files (the &#34;Software&#34;), to deal</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_7'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * in the Software without restriction, including without limitation the rights</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_8'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_9'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * copies of the Software, and to permit persons to whom the Software is</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_10'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * furnished to do so, subject to the following conditions:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_11'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_12'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * The above copyright notice and this permission notice shall be included in</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_13'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * all copies or substantial portions of the Software.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_14'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_15'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_16'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_17'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_18'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_19'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_20'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_21'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THE SOFTWARE.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_22'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_23'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.googlecode.jmxtrans.model.output.support.opentsdb;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_24'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_25'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.google.common.base.Function;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_26'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.google.common.collect.ImmutableList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_27'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.google.common.collect.ImmutableMap;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_28'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.exceptions.LifecycleException;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_29'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.NamingStrategy;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_30'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.Result;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_31'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.Server;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_32'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.naming.ClassAttributeNamingStrategy;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_33'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.naming.JexlNamingStrategy;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_34'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_35'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_36'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.EqualsAndHashCode;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_37'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.ToString;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_38'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.jexl2.JexlException;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_39'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.apache.commons.lang.StringUtils;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_40'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.slf4j.Logger;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_41'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.slf4j.LoggerFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_42'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_43'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import javax.annotation.Nonnull;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_44'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import javax.annotation.Nullable;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_45'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.LinkedList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_46'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_47'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Map;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_48'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_49'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.google.common.collect.FluentIterable.from;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_50'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_51'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_52'/>
+52
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_52'>128</a>
+<span>
+1. canEqual : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+2. equals : Substituted 1 with 0 &rarr; NO_COVERAGE<br/>
+3. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+4. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+5. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+6. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+7. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+8. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+9. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+10. equals : Substituted 0 with 1 &rarr; NO_COVERAGE<br/>
+11. equals : Substituted 1 with 0 &rarr; NO_COVERAGE<br/>
+12. equals : negated conditional &rarr; NO_COVERAGE<br/>
+13. equals : negated conditional &rarr; NO_COVERAGE<br/>
+14. equals : negated conditional &rarr; NO_COVERAGE<br/>
+15. equals : negated conditional &rarr; NO_COVERAGE<br/>
+16. equals : negated conditional &rarr; NO_COVERAGE<br/>
+17. equals : negated conditional &rarr; NO_COVERAGE<br/>
+18. equals : negated conditional &rarr; NO_COVERAGE<br/>
+19. equals : negated conditional &rarr; NO_COVERAGE<br/>
+20. equals : negated conditional &rarr; NO_COVERAGE<br/>
+21. equals : negated conditional &rarr; NO_COVERAGE<br/>
+22. equals : negated conditional &rarr; NO_COVERAGE<br/>
+23. equals : negated conditional &rarr; NO_COVERAGE<br/>
+24. equals : negated conditional &rarr; NO_COVERAGE<br/>
+25. equals : negated conditional &rarr; NO_COVERAGE<br/>
+26. equals : negated conditional &rarr; NO_COVERAGE<br/>
+27. equals : negated conditional &rarr; NO_COVERAGE<br/>
+28. equals : negated conditional &rarr; NO_COVERAGE<br/>
+29. equals : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::canEqual &rarr; NO_COVERAGE<br/>
+30. equals : removed call to java/lang/Object::equals &rarr; NO_COVERAGE<br/>
+31. equals : removed call to java/lang/Object::equals &rarr; NO_COVERAGE<br/>
+32. equals : removed call to java/lang/Object::equals &rarr; NO_COVERAGE<br/>
+33. equals : removed call to java/lang/Object::equals &rarr; NO_COVERAGE<br/>
+34. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+35. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+36. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+37. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+38. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+39. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+40. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+41. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+42. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+43. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+44. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+45. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+46. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+47. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+48. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+49. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+50. equals : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+51. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+52. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+53. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+54. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+55. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+56. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+57. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+58. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+59. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+60. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+61. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+62. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+63. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+64. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+65. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+66. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+67. equals : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+68. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+69. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+70. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+71. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+72. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+73. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+74. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+75. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+76. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+77. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+78. hashCode : Substituted 59 with 60 &rarr; NO_COVERAGE<br/>
+79. hashCode : Substituted 1 with 0 &rarr; NO_COVERAGE<br/>
+80. hashCode : Substituted 59 with 60 &rarr; NO_COVERAGE<br/>
+81. hashCode : Substituted 43 with 44 &rarr; NO_COVERAGE<br/>
+82. hashCode : Substituted 59 with 60 &rarr; NO_COVERAGE<br/>
+83. hashCode : Substituted 43 with 44 &rarr; NO_COVERAGE<br/>
+84. hashCode : Substituted 59 with 60 &rarr; NO_COVERAGE<br/>
+85. hashCode : Substituted 43 with 44 &rarr; NO_COVERAGE<br/>
+86. hashCode : Substituted 59 with 60 &rarr; NO_COVERAGE<br/>
+87. hashCode : Substituted 43 with 44 &rarr; NO_COVERAGE<br/>
+88. hashCode : Substituted 59 with 60 &rarr; NO_COVERAGE<br/>
+89. hashCode : Substituted 79 with 80 &rarr; NO_COVERAGE<br/>
+90. hashCode : Substituted 97 with 98 &rarr; NO_COVERAGE<br/>
+91. hashCode : Substituted 59 with 60 &rarr; NO_COVERAGE<br/>
+92. hashCode : Substituted 79 with 80 &rarr; NO_COVERAGE<br/>
+93. hashCode : Substituted 97 with 98 &rarr; NO_COVERAGE<br/>
+94. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+95. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+96. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+97. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+98. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+99. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+100. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+101. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+102. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+103. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+104. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+105. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+106. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+107. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+108. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+109. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+110. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+111. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+112. hashCode : removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE<br/>
+113. hashCode : removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE<br/>
+114. hashCode : removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE<br/>
+115. hashCode : removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE<br/>
+116. hashCode : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+117. hashCode : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+118. hashCode : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+119. hashCode : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+120. hashCode : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+121. hashCode : removed conditional - replaced equality check with false &rarr; NO_COVERAGE<br/>
+122. hashCode : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+123. hashCode : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+124. hashCode : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+125. hashCode : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+126. hashCode : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+127. hashCode : removed conditional - replaced equality check with true &rarr; NO_COVERAGE<br/>
+128. hashCode : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE<br/>
+
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>@EqualsAndHashCode</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_53'/>
+53
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_53'>16</a>
+<span>
+1. toString : removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; NO_COVERAGE<br/>
+2. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+3. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+4. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+5. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+6. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+7. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+8. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+9. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+10. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+11. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+12. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+13. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+14. toString : removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE<br/>
+15. toString : removed call to java/lang/StringBuilder::toString &rarr; NO_COVERAGE<br/>
+16. toString : mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::toString to ( if (x != null) null else throw new RuntimeException ) &rarr; NO_COVERAGE<br/>
+
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>@ToString</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_54'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public class OpenTSDBMessageFormatter {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_55'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_56'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;private static final Logger log = LoggerFactory.getLogger(OpenTSDBMessageFormatter.class);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_57'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;public static final String DEFAULT_TAG_NAME = &#34;type&#34;;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_58'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_59'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final ImmutableList&#60;String&#62; typeNames;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_60'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final ImmutableMap&#60;String, String&#62; tags;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_61'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final String tagName;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_62'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final NamingStrategy metricNameStrategy;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_63'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_64'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_65'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final boolean mergeTypeNamesTags;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_66'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final boolean hostnameTag;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_67'/>
+67
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_67'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_68'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;public OpenTSDBMessageFormatter(@Nonnull ImmutableList&#60;String&#62; typeNames,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_69'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@Nonnull ImmutableMap&#60;String, String&#62; tags) throws LifecycleException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_70'/>
+70
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_70'>2</a>
+<span>
+1. <init> : Substituted 1 with 0 &rarr; KILLED<br/>
+2. <init> : Substituted 1 with 0 &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;this(typeNames, tags, DEFAULT_TAG_NAME, null, true, true);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_71'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_72'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_73'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;public OpenTSDBMessageFormatter(@Nonnull ImmutableList&#60;String&#62; typeNames,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_74'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@Nonnull ImmutableMap&#60;String, String&#62; tags,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_75'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@Nonnull String tagName,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_76'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@Nullable String metricNamingExpression,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_77'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;boolean mergeTypeNamesTags,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_78'/>
+78
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_78'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;boolean hostnameTag) throws LifecycleException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_79'/>
+79
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_79'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;this.typeNames = typeNames;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_80'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;this.tags = tags;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_81'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;this.tagName = tagName;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_82'/>
+82
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_82'>3</a>
+<span>
+1. <init> : negated conditional &rarr; KILLED<br/>
+2. <init> : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+3. <init> : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;if (metricNamingExpression != null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_83'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;try {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_84'/>
+84
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_84'>1</a>
+<span>
+1. <init> : removed call to com/googlecode/jmxtrans/model/naming/JexlNamingStrategy::&#60;init&#62; &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;&#9;metricNameStrategy = new JexlNamingStrategy(metricNamingExpression);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_85'/>
+85
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_85'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;} catch (JexlException jexlExc) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_86'/>
+86
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_86'>1</a>
+<span>
+1. <init> : removed call to com/googlecode/jmxtrans/exceptions/LifecycleException::&#60;init&#62; &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;&#9;throw new LifecycleException(&#34;failed to setup naming strategy&#34;, jexlExc);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_87'/>
+87
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_87'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_88'/>
+88
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_88'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_89'/>
+89
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_89'>1</a>
+<span>
+1. <init> : removed call to com/googlecode/jmxtrans/model/naming/ClassAttributeNamingStrategy::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;metricNameStrategy = new ClassAttributeNamingStrategy();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_90'/>
+90
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_90'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_91'/>
+91
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_91'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;this.mergeTypeNamesTags = mergeTypeNamesTags;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_92'/>
+92
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_92'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;this.hostnameTag = hostnameTag;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_93'/>
+93
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_93'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_94'/>
+94
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_94'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_95'/>
+95
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_95'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_96'/>
+96
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_96'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_97'/>
+97
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_97'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * Add tags to the given result string, including a &#34;host&#34; tag with the name of the server and all of the tags</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_98'/>
+98
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_98'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * defined in the &#34;settings&#34; entry in the configuration file within the &#34;tag&#34; element.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_99'/>
+99
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_99'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_100'/>
+100
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_100'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param resultString - the string containing the metric name, timestamp, value, and possibly other content.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_101'/>
+101
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_101'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_102'/>
+102
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_102'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;void addTags(StringBuilder resultString, Server server) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_103'/>
+103
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_103'>3</a>
+<span>
+1. addTags : removed conditional - replaced equality check with false &rarr; TIMED_OUT<br/>
+2. addTags : removed conditional - replaced equality check with true &rarr; TIMED_OUT<br/>
+3. addTags : negated conditional &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;if (hostnameTag) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_104'/>
+104
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_104'>2</a>
+<span>
+1. addTags : removed call to com/googlecode/jmxtrans/model/Server::getLabel &rarr; TIMED_OUT<br/>
+2. addTags : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;addTag(resultString, &#34;host&#34;, server.getLabel());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_105'/>
+105
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_105'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_106'/>
+106
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_106'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_107'/>
+107
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_107'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;// Add the constant tag names and values.</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_108'/>
+108
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_108'>7</a>
+<span>
+1. addTags : negated conditional &rarr; TIMED_OUT<br/>
+2. addTags : removed call to com/google/common/collect/ImmutableSet::iterator &rarr; TIMED_OUT<br/>
+3. addTags : removed call to java/util/Iterator::next &rarr; TIMED_OUT<br/>
+4. addTags : removed conditional - replaced equality check with false &rarr; TIMED_OUT<br/>
+5. addTags : removed conditional - replaced equality check with true &rarr; TIMED_OUT<br/>
+6. addTags : removed call to com/google/common/collect/ImmutableMap::entrySet &rarr; KILLED<br/>
+7. addTags : removed call to java/util/Iterator::hasNext &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;for (Map.Entry&#60;String, String&#62; tagEntry : tags.entrySet()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_109'/>
+109
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_109'>3</a>
+<span>
+1. addTags : removed call to java/util/Map$Entry::getKey &rarr; TIMED_OUT<br/>
+2. addTags : removed call to java/util/Map$Entry::getValue &rarr; KILLED<br/>
+3. addTags : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;addTag(resultString, tagEntry.getKey(), tagEntry.getValue());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_110'/>
+110
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_110'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_111'/>
+111
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_111'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_112'/>
+112
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_112'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_113'/>
+113
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_113'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_114'/>
+114
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_114'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * Add one tag, with the provided name and value, to the given result string.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_115'/>
+115
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_115'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_116'/>
+116
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_116'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param resultString - the string containing the metric name, timestamp, value, and possibly other content.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_117'/>
+117
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_117'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @return String - the new result string with the tag appended.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_118'/>
+118
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_118'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_119'/>
+119
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_119'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;void addTag(StringBuilder resultString, String tagName, String tagValue) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_120'/>
+120
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_120'>1</a>
+<span>
+1. addTag : removed call to java/lang/StringBuilder::append &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;resultString.append(&#34; &#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_121'/>
+121
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_121'>2</a>
+<span>
+1. addTag : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; TIMED_OUT<br/>
+2. addTag : removed call to java/lang/StringBuilder::append &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;resultString.append(sanitizeString(tagName));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_122'/>
+122
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_122'>1</a>
+<span>
+1. addTag : removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;resultString.append(&#34;=&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_123'/>
+123
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_123'>2</a>
+<span>
+1. addTag : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; TIMED_OUT<br/>
+2. addTag : removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;resultString.append(sanitizeString(tagValue));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_124'/>
+124
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_124'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_125'/>
+125
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_125'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_126'/>
+126
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_126'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_127'/>
+127
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_127'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * Format the result string given the class name and attribute name of the source value, the timestamp, and the</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_128'/>
+128
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_128'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * value.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_129'/>
+129
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_129'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_130'/>
+130
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_130'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param epoch - the timestamp of the metric.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_131'/>
+131
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_131'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param value - value of the attribute to use as the metric value.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_132'/>
+132
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_132'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @return String - the formatted result string.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_133'/>
+133
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_133'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_134'/>
+134
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_134'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private void formatResultString(StringBuilder resultString, String metricName, long epoch, Object value) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_135'/>
+135
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_135'>2</a>
+<span>
+1. formatResultString : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; KILLED<br/>
+2. formatResultString : removed call to java/lang/StringBuilder::append &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;resultString.append(sanitizeString(metricName));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_136'/>
+136
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_136'>1</a>
+<span>
+1. formatResultString : removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;resultString.append(&#34; &#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_137'/>
+137
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_137'>2</a>
+<span>
+1. formatResultString : removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT<br/>
+2. formatResultString : removed call to java/lang/Long::toString &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;resultString.append(Long.toString(epoch));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_138'/>
+138
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_138'>1</a>
+<span>
+1. formatResultString : removed call to java/lang/StringBuilder::append &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;resultString.append(&#34; &#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_139'/>
+139
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_139'>3</a>
+<span>
+1. formatResultString : removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT<br/>
+2. formatResultString : removed call to java/lang/Object::toString &rarr; KILLED<br/>
+3. formatResultString : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;resultString.append(sanitizeString(value.toString()));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_140'/>
+140
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_140'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_141'/>
+141
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_141'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_142'/>
+142
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_142'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_143'/>
+143
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_143'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * Parse one of the results of a Query and return a list of strings containing metric details ready for sending to</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_144'/>
+144
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_144'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * OpenTSDB.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_145'/>
+145
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_145'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_146'/>
+146
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_146'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param result - one results from the Query.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_147'/>
+147
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_147'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param server - Server object for importing hostname</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_148'/>
+148
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_148'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @return List&#60;String&#62; - the list of strings containing metric details ready for sending to OpenTSDB.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_149'/>
+149
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_149'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_150'/>
+150
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_150'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/*</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_151'/>
+151
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_151'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private List&#60;String&#62; formatResult(Result result) {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_152'/>
+152
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_152'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;return this.formatResult(result, null);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_153'/>
+153
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_153'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_154'/>
+154
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_154'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;*/</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_155'/>
+155
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_155'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private List&#60;String&#62; formatResult(Result result, Server server) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_156'/>
+156
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_156'>1</a>
+<span>
+1. formatResult : removed call to java/util/LinkedList::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;List&#60;String&#62; resultStrings = new LinkedList&#60;&#62;();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_157'/>
+157
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_157'>1</a>
+<span>
+1. formatResult : removed call to com/googlecode/jmxtrans/model/Result::getValues &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;Map&#60;String, Object&#62; values = result.getValues();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_158'/>
+158
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_158'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_159'/>
+159
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_159'>1</a>
+<span>
+1. formatResult : removed call to com/googlecode/jmxtrans/model/Result::getAttributeName &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;String attributeName = result.getAttributeName();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_160'/>
+160
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_160'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_161'/>
+161
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_161'>9</a>
+<span>
+1. formatResult : negated conditional &rarr; TIMED_OUT<br/>
+2. formatResult : removed call to java/util/Map::containsKey &rarr; TIMED_OUT<br/>
+3. formatResult : removed call to java/util/Map::size &rarr; TIMED_OUT<br/>
+4. formatResult : Substituted 1 with 0 &rarr; KILLED<br/>
+5. formatResult : negated conditional &rarr; KILLED<br/>
+6. formatResult : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+7. formatResult : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+8. formatResult : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+9. formatResult : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;if (values.containsKey(attributeName) &#38;&#38; values.size() == 1) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_162'/>
+162
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_162'>2</a>
+<span>
+1. formatResult : removed call to java/util/Map::get &rarr; KILLED<br/>
+2. formatResult : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::processOneMetric &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;processOneMetric(resultStrings, server, result, values.get(attributeName), null, null);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_163'/>
+163
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_163'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_164'/>
+164
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_164'>6</a>
+<span>
+1. formatResult : negated conditional &rarr; TIMED_OUT<br/>
+2. formatResult : removed call to java/util/Set::iterator &rarr; TIMED_OUT<br/>
+3. formatResult : removed conditional - replaced equality check with false &rarr; TIMED_OUT<br/>
+4. formatResult : removed conditional - replaced equality check with true &rarr; TIMED_OUT<br/>
+5. formatResult : removed call to java/util/Map::entrySet &rarr; KILLED<br/>
+6. formatResult : removed call to java/util/Iterator::hasNext &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;for (Map.Entry&#60;String, Object&#62; valueEntry : values.entrySet()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_165'/>
+165
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_165'>3</a>
+<span>
+1. formatResult : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::processOneMetric &rarr; TIMED_OUT<br/>
+2. formatResult : removed call to java/util/Map$Entry::getValue &rarr; KILLED<br/>
+3. formatResult : removed call to java/util/Map$Entry::getKey &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;&#9;processOneMetric(resultStrings, server, result, valueEntry.getValue(), tagName, valueEntry.getKey());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_166'/>
+166
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_166'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_167'/>
+167
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_167'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_168'/>
+168
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_168'>1</a>
+<span>
+1. formatResult : mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::formatResult to ( if (x != null) null else throw new RuntimeException ) &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;return resultStrings;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_169'/>
+169
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_169'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_170'/>
+170
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_170'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_171'/>
+171
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_171'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;public Iterable&#60;String&#62; formatResults(Iterable&#60;Result&#62; results, final Server server) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_172'/>
+172
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_172'>4</a>
+<span>
+1. formatResults : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter$1::&#60;init&#62; &rarr; TIMED_OUT<br/>
+2. formatResults : removed call to com/google/common/collect/FluentIterable::from &rarr; TIMED_OUT<br/>
+3. formatResults : mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::formatResults to ( if (x != null) null else throw new RuntimeException ) &rarr; TIMED_OUT<br/>
+4. formatResults : removed call to com/google/common/collect/FluentIterable::transformAndConcat &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;return from(results).transformAndConcat(new Function&#60;Result, List&#60;String&#62;&#62;() {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_173'/>
+173
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_173'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_174'/>
+174
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_174'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;@Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_175'/>
+175
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_175'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;public List&#60;String&#62; apply(Result input) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_176'/>
+176
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_176'>2</a>
+<span>
+1. apply : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::access$000 &rarr; KILLED<br/>
+2. apply : mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter$1::apply to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;return formatResult(input, server);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_177'/>
+177
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_177'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_178'/>
+178
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_178'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_179'/>
+179
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_179'>1</a>
+<span>
+1. formatResults : removed call to com/google/common/collect/FluentIterable::toList &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;}).toList();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_180'/>
+180
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_180'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_181'/>
+181
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_181'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_182'/>
+182
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_182'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_183'/>
+183
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_183'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * Process a single metric from the given JMX query result with the specified value.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_184'/>
+184
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_184'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_185'/>
+185
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_185'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;protected void processOneMetric(List&#60;String&#62; resultStrings, Server server, Result result, Object value, String addTagName,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_186'/>
+186
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_186'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;String addTagValue) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_187'/>
+187
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_187'>1</a>
+<span>
+1. processOneMetric : removed call to com/googlecode/jmxtrans/model/NamingStrategy::formatName &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;String metricName = this.metricNameStrategy.formatName(result);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_188'/>
+188
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_188'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_189'/>
+189
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_189'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;//</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_190'/>
+190
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_190'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;// Skip any non-numeric values since OpenTSDB only supports numeric metrics.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_191'/>
+191
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_191'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;//</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_192'/>
+192
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_192'>4</a>
+<span>
+1. processOneMetric : removed conditional - replaced equality check with false &rarr; TIMED_OUT<br/>
+2. processOneMetric : negated conditional &rarr; KILLED<br/>
+3. processOneMetric : removed call to com/googlecode/jmxtrans/util/NumberUtils::isNumeric &rarr; KILLED<br/>
+4. processOneMetric : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;if (isNumeric(value)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_193'/>
+193
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_193'>1</a>
+<span>
+1. processOneMetric : removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;StringBuilder resultString = new StringBuilder();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_194'/>
+194
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_194'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_195'/>
+195
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_195'>4</a>
+<span>
+1. processOneMetric : Substituted 1000 with 1001 &rarr; TIMED_OUT<br/>
+2. processOneMetric : Replaced long division with multiplication &rarr; TIMED_OUT<br/>
+3. processOneMetric : removed call to com/googlecode/jmxtrans/model/Result::getEpoch &rarr; TIMED_OUT<br/>
+4. processOneMetric : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::formatResultString &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;formatResultString(resultString, metricName, result.getEpoch() / 1000L, value);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_196'/>
+196
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_196'>1</a>
+<span>
+1. processOneMetric : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTags &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;addTags(resultString, server);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_197'/>
+197
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_197'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_198'/>
+198
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_198'>3</a>
+<span>
+1. processOneMetric : negated conditional &rarr; KILLED<br/>
+2. processOneMetric : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+3. processOneMetric : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;if (addTagName != null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_199'/>
+199
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_199'>1</a>
+<span>
+1. processOneMetric : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;addTag(resultString, addTagName, addTagValue);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_200'/>
+200
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_200'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_201'/>
+201
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_201'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_202'/>
+202
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_202'>4</a>
+<span>
+1. processOneMetric : removed call to com/google/common/collect/ImmutableList::isEmpty &rarr; TIMED_OUT<br/>
+2. processOneMetric : removed conditional - replaced equality check with false &rarr; TIMED_OUT<br/>
+3. processOneMetric : negated conditional &rarr; KILLED<br/>
+4. processOneMetric : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;if (!typeNames.isEmpty()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_203'/>
+203
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_203'>1</a>
+<span>
+1. processOneMetric : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTypeNamesTags &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;this.addTypeNamesTags(resultString, result);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_204'/>
+204
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_204'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_205'/>
+205
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_205'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_206'/>
+206
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_206'>2</a>
+<span>
+1. processOneMetric : removed call to java/lang/StringBuilder::toString &rarr; KILLED<br/>
+2. processOneMetric : removed call to java/util/List::add &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;resultStrings.add(resultString.toString());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_207'/>
+207
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_207'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_208'/>
+208
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_208'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;log.debug(&#34;Skipping non-numeric value for metric {}; value={}&#34;, metricName, value);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_209'/>
+209
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_209'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_210'/>
+210
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_210'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_211'/>
+211
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_211'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_212'/>
+212
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_212'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_213'/>
+213
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_213'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * Add the tag(s) for typeNames.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_214'/>
+214
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_214'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_215'/>
+215
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_215'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param result       - the result of the JMX query.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_216'/>
+216
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_216'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @param resultString - current form of the metric string.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_217'/>
+217
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_217'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * @return String - the updated metric string with the necessary tag(s) added.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_218'/>
+218
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_218'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_219'/>
+219
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_219'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;protected void addTypeNamesTags(StringBuilder resultString, Result result) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_220'/>
+220
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_220'>3</a>
+<span>
+1. addTypeNamesTags : negated conditional &rarr; KILLED<br/>
+2. addTypeNamesTags : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+3. addTypeNamesTags : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;if (mergeTypeNamesTags) {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_221'/>
+221
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_221'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;// Produce a single tag with all the TypeName keys concatenated and all the values joined with &#39;_&#39;.</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_222'/>
+222
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_222'>3</a>
+<span>
+1. addTypeNamesTags : removed call to com/googlecode/jmxtrans/model/naming/typename/TypeNameValuesStringBuilder::getDefaultBuilder &rarr; TIMED_OUT<br/>
+2. addTypeNamesTags : removed call to com/googlecode/jmxtrans/model/Result::getTypeName &rarr; KILLED<br/>
+3. addTypeNamesTags : removed call to com/googlecode/jmxtrans/model/naming/typename/TypeNameValuesStringBuilder::build &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;String typeNameValues = TypeNameValuesStringBuilder.getDefaultBuilder().build(typeNames, result.getTypeName());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_223'/>
+223
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_223'>2</a>
+<span>
+1. addTypeNamesTags : removed call to org/apache/commons/lang/StringUtils::join &rarr; TIMED_OUT<br/>
+2. addTypeNamesTags : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;addTag(resultString, StringUtils.join(typeNames, &#34;&#34;), typeNameValues);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_224'/>
+224
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_224'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_225'/>
+225
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_225'>2</a>
+<span>
+1. addTypeNamesTags : removed call to com/googlecode/jmxtrans/model/Result::getTypeName &rarr; TIMED_OUT<br/>
+2. addTypeNamesTags : removed call to com/googlecode/jmxtrans/model/naming/typename/TypeNameValue::extractMap &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;Map&#60;String, String&#62; typeNameMap = TypeNameValue.extractMap(result.getTypeName());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_226'/>
+226
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_226'>6</a>
+<span>
+1. addTypeNamesTags : negated conditional &rarr; TIMED_OUT<br/>
+2. addTypeNamesTags : removed call to com/google/common/collect/ImmutableList::iterator &rarr; TIMED_OUT<br/>
+3. addTypeNamesTags : removed call to java/util/Iterator::hasNext &rarr; KILLED<br/>
+4. addTypeNamesTags : removed call to java/util/Iterator::next &rarr; KILLED<br/>
+5. addTypeNamesTags : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+6. addTypeNamesTags : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;for (String oneTypeName : typeNames) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_227'/>
+227
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_227'>1</a>
+<span>
+1. addTypeNamesTags : removed call to java/util/Map::get &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;String value = typeNameMap.get(oneTypeName);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_228'/>
+228
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_228'>3</a>
+<span>
+1. addTypeNamesTags : negated conditional &rarr; KILLED<br/>
+2. addTypeNamesTags : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+3. addTypeNamesTags : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;if (value == null)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_229'/>
+229
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_229'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;value = &#34;&#34;;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_230'/>
+230
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_230'>1</a>
+<span>
+1. addTypeNamesTags : removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;&#9;addTag(resultString, oneTypeName, value);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_231'/>
+231
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_231'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_232'/>
+232
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_232'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_233'/>
+233
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_233'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_234'/>
+234
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_234'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_235'/>
+235
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_235'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_236'/>
+236
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_236'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_237'/>
+237
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_237'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * VALID CHARACTERS:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_238'/>
+238
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_238'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * METRIC, TAGNAME, AND TAG-VALUE:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_239'/>
+239
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_239'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * [-_./a-zA-Z0-9]+</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_240'/>
+240
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_240'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * &#60;p/&#62;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_241'/>
+241
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_241'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * &#60;p/&#62;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_242'/>
+242
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_242'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * SANITIZATION:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_243'/>
+243
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_243'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * - Discard Quotes.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_244'/>
+244
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_244'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; * - Replace all other invalid characters with &#39;_&#39;.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_245'/>
+245
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_245'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9; */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_246'/>
+246
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_246'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;protected String sanitizeString(String unSanitized) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_247'/>
+247
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_247'>1</a>
+<span>
+1. sanitizeString : mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString to ( if (x != null) null else throw new RuntimeException ) &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;return unSanitized.</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_248'/>
+248
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_248'>1</a>
+<span>
+1. sanitizeString : removed call to java/lang/String::replaceAll &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;replaceAll(&#34;[\&#34;&#39;]&#34;, &#34;&#34;).</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_249'/>
+249
+</td>
+<td class='uncertain'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_249'>1</a>
+<span>
+1. sanitizeString : removed call to java/lang/String::replaceAll &rarr; TIMED_OUT<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='uncertain'>&#9;&#9;&#9;&#9;replaceAll(&#34;[^-_./a-zA-Z0-9]&#34;, &#34;_&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_250'/>
+250
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_250'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_251'/>
+251
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_251'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@7c037e33_252'/>
+252
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_252'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_52'>52</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_52'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>19.<span><b>19</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>20.<span><b>20</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>21.<span><b>21</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>22.<span><b>22</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>23.<span><b>23</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>24.<span><b>24</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>25.<span><b>25</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>26.<span><b>26</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>27.<span><b>27</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>28.<span><b>28</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>29.<span><b>29</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::canEqual &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>30.<span><b>30</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>31.<span><b>31</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>32.<span><b>32</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>33.<span><b>33</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>34.<span><b>34</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>35.<span><b>35</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>36.<span><b>36</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>37.<span><b>37</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>38.<span><b>38</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>39.<span><b>39</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>40.<span><b>40</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>41.<span><b>41</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>42.<span><b>42</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>43.<span><b>43</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>44.<span><b>44</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>45.<span><b>45</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>46.<span><b>46</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>47.<span><b>47</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>48.<span><b>48</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>49.<span><b>49</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>50.<span><b>50</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>51.<span><b>51</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>52.<span><b>52</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>53.<span><b>53</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>54.<span><b>54</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>55.<span><b>55</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>56.<span><b>56</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>57.<span><b>57</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>58.<span><b>58</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>59.<span><b>59</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>60.<span><b>60</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>61.<span><b>61</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>62.<span><b>62</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>63.<span><b>63</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>64.<span><b>64</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>65.<span><b>65</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>66.<span><b>66</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>67.<span><b>67</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>68.<span><b>68</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>69.<span><b>69</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>70.<span><b>70</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>71.<span><b>71</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>72.<span><b>72</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>73.<span><b>73</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>74.<span><b>74</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>75.<span><b>75</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>76.<span><b>76</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>77.<span><b>77</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>78.<span><b>78</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>79.<span><b>79</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>80.<span><b>80</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>81.<span><b>81</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>82.<span><b>82</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>83.<span><b>83</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>84.<span><b>84</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>85.<span><b>85</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>86.<span><b>86</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>87.<span><b>87</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>88.<span><b>88</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>89.<span><b>89</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 79 with 80 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>90.<span><b>90</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 97 with 98 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>91.<span><b>91</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>92.<span><b>92</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 79 with 80 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>93.<span><b>93</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 97 with 98 &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>94.<span><b>94</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>95.<span><b>95</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>96.<span><b>96</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>97.<span><b>97</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>98.<span><b>98</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>99.<span><b>99</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>100.<span><b>100</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>101.<span><b>101</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>102.<span><b>102</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>103.<span><b>103</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>104.<span><b>104</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>105.<span><b>105</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>106.<span><b>106</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>107.<span><b>107</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>108.<span><b>108</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>109.<span><b>109</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>110.<span><b>110</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>111.<span><b>111</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>112.<span><b>112</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>113.<span><b>113</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>114.<span><b>114</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>115.<span><b>115</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>116.<span><b>116</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>117.<span><b>117</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>118.<span><b>118</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>119.<span><b>119</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>120.<span><b>120</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>121.<span><b>121</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>122.<span><b>122</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>123.<span><b>123</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>124.<span><b>124</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>125.<span><b>125</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>126.<span><b>126</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>127.<span><b>127</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>128.<span><b>128</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_53'>53</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_53'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::toString &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::toString to ( if (x != null) null else throw new RuntimeException ) &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_70'>70</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_70'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_82'>82</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_82'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testJexlNaming(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_84'>84</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_84'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/naming/JexlNamingStrategy::&#60;init&#62; &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_86'>86</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_86'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/exceptions/LifecycleException::&#60;init&#62; &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_89'>89</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_89'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonNumericValue(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/naming/ClassAttributeNamingStrategy::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_103'>103</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_103'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_104'>104</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_104'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/Server::getLabel &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_108'>108</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_108'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/google/common/collect/ImmutableMap::entrySet &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed call to com/google/common/collect/ImmutableSet::iterator &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMultipleTags(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Iterator::hasNext &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed call to java/util/Iterator::next &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_109'>109</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_109'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>none</span></span> removed call to java/util/Map$Entry::getKey &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMultipleTags(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Map$Entry::getValue &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>addTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMultipleTags(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_120'>120</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_120'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTag<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/StringBuilder::append &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_121'>121</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_121'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTag<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTag<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/StringBuilder::append &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_122'>122</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_122'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTag<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_123'>123</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_123'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTag<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTag<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_135'>135</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_135'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/StringBuilder::append &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_136'>136</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_136'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_137'>137</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_137'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/Long::toString &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_138'>138</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_138'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/StringBuilder::append &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_139'>139</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_139'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/Object::toString &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>formatResultString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/StringBuilder::append &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_156'>156</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_156'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/LinkedList::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_157'>157</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_157'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/Result::getValues &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_159'>159</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_159'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/Result::getAttributeName &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_161'>161</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_161'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> removed call to java/util/Map::containsKey &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> removed call to java/util/Map::size &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='KILLED'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMultipleValuesWithMatchingAttribute(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_162'>162</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_162'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Map::get &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::processOneMetric &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_164'>164</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_164'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Map::entrySet &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> removed call to java/util/Set::iterator &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Iterator::hasNext &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_165'>165</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_165'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Map$Entry::getValue &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Map$Entry::getKey &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::processOneMetric &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_168'>168</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_168'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResult<br/><b>Killed by : </b>none</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::formatResult to ( if (x != null) null else throw new RuntimeException ) &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_172'>172</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_172'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResults<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter$1::&#60;init&#62; &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>formatResults<br/><b>Killed by : </b>none</span></span> removed call to com/google/common/collect/FluentIterable::from &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>formatResults<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/google/common/collect/FluentIterable::transformAndConcat &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>formatResults<br/><b>Killed by : </b>none</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::formatResults to ( if (x != null) null else throw new RuntimeException ) &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_176'>176</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_176'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>apply<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::access$000 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>apply<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter$1::apply to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_179'>179</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_179'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>formatResults<br/><b>Killed by : </b>none</span></span> removed call to com/google/common/collect/FluentIterable::toList &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_187'>187</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_187'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/NamingStrategy::formatName &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_192'>192</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_192'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonNumericValue(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/util/NumberUtils::isNumeric &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonNumericValue(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_193'>193</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_193'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/StringBuilder::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_195'>195</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_195'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>none</span></span> Substituted 1000 with 1001 &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>none</span></span> Replaced long division with multiplication &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/Result::getEpoch &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::formatResultString &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_196'>196</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_196'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTags &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_198'>198</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_198'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_199'>199</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_199'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_202'>202</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_202'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>none</span></span> removed call to com/google/common/collect/ImmutableList::isEmpty &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_203'>203</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_203'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTypeNamesTags &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_206'>206</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_206'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/StringBuilder::toString &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>processOneMetric<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/List::add &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_220'>220</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_220'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_222'>222</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_222'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/naming/typename/TypeNameValuesStringBuilder::getDefaultBuilder &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/Result::getTypeName &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testDontAddHostnameTag(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/naming/typename/TypeNameValuesStringBuilder::build &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_223'>223</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_223'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>none</span></span> removed call to org/apache/commons/lang/StringUtils::join &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_225'>225</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_225'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/Result::getTypeName &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to com/googlecode/jmxtrans/model/naming/typename/TypeNameValue::extractMap &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_226'>226</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_226'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; TIMED_OUT</p> <p class='TIMED_OUT'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>none</span></span> removed call to com/google/common/collect/ImmutableList::iterator &rarr; TIMED_OUT</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Iterator::hasNext &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Iterator::next &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_227'>227</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_227'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/util/Map::get &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_228'>228</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_228'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_230'>230</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_230'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>addTypeNamesTags<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::addTag &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_247'>247</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_247'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>sanitizeString<br/><b>Killed by : </b>none</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/support/opentsdb/OpenTSDBMessageFormatter::sanitizeString to ( if (x != null) null else throw new RuntimeException ) &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_248'>248</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_248'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>sanitizeString<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest)</span></span> removed call to java/lang/String::replaceAll &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@7c037e33_249'>249</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@7c037e33_249'/> 
+
+<p class='TIMED_OUT'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>sanitizeString<br/><b>Killed by : </b>none</span></span> removed call to java/lang/String::replaceAll &rarr; TIMED_OUT</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONSTRUCTOR_CALL_MUTATOR</li>
+<li class='mutator'>RETURN_VALS_MUTATOR</li>
+<li class='mutator'>INVERT_NEGS_MUTATOR</li>
+<li class='mutator'>CONDITIONALS_BOUNDARY_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_ORDER_IF_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_EQUAL_ELSE_MUTATOR</li>
+<li class='mutator'>INCREMENTS_MUTATOR</li>
+<li class='mutator'>VOID_METHOD_CALL_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_ORDER_ELSE_MUTATOR</li>
+<li class='mutator'>MATH_MUTATOR</li>
+<li class='mutator'>NEGATE_CONDITIONALS_MUTATOR</li>
+<li class='mutator'>NON_VOID_METHOD_CALL_MUTATOR</li>
+<li class='mutator'>INLINE_CONSTANT_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_EQUAL_IF_MUTATOR</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests.testValidateValidHostPort(com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests) (0 ms)</li><li>com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests.testTagSetting(com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests) (2 ms)</li><li>com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests.testHooksCalled(com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests) (2 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testInvalidJexlNaming(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (52 ms)</li><li>com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests.testSocketException(com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests) (2613 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testAddHostnameTag(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (2 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyResultValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (1 ms)</li><li>com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests.testDebugEnabled(com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests) (732 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonNumericValue(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (1 ms)</li><li>com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests.exceptionIsThrownWhenPortIsNotDefined(com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests) (2972 ms)</li><li>com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests.exceptionIsThrownWhenHostIsNotDefined(com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests) (3339 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMultipleValuesWithMatchingAttribute(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (2 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (1 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (4 ms)</li><li>com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests.testPortNumberAsString(com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests) (0 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testOneValueMatchingAttribute(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (1 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testMultipleTags(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (2 ms)</li><li>com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests.successfullySendMessageToTCollector(com.googlecode.jmxtrans.model.output.TCollectorUDPWriterTests) (2802 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testJexlNaming(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (9 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testNonMergedTypeNameValues(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (1 ms)</li><li>com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest.testDontAddHostnameTag(com.googlecode.jmxtrans.model.output.support.opentsdb.OpenTSDBMessageFormatterTest) (1 ms)</li><li>com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests.testEmptyTagSetting(com.googlecode.jmxtrans.model.output.OpenTSDBGenericWriterTests) (17 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.2.2
+
+</body>
+</html>

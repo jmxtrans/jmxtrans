@@ -1,0 +1,2498 @@
+<html>
+<head>
+<style type='text/css'>
+html, body, div, span, p, blockquote, pre {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+}
+
+body{
+	line-height: 1;
+	color: black;
+	background: white;
+	margin-left: 20px;
+}
+
+.src { 
+	border: 1px solid #dddddd;
+	padding-top: 10px;
+	padding-right: 5px;
+	padding-left: 5px;
+	font-family: Consolas, Courier, monospace;
+}
+
+
+.covered {background-color: #ddffdd}
+.uncovered {background-color: #ffdddd}
+.killed {background-color: #aaffaa}
+.survived {background-color: #ffaaaa}
+.uncertain {background-color: #dde7ef}
+.run_error {background-color: #dde7ef}
+.na {background-color: #eeeeee}
+.timed_out {background-color: #dde7ef}
+.non_viable {background-color: #aaffaa}
+.memory_error {background-color: #dde7ef}
+.not_started {background-color: #dde7ef; color : red}
+.no_coverage {background-color: #ffaaaa}
+
+
+.pop {outline:none; }
+.pop strong {line-height:30px;}
+.pop {text-decoration:none;}
+.pop span { z-index:10;display:none; padding:14px 20px; margin-top:-30px; margin-left:28px; width:800px; line-height:16px; word-wrap:break-word; }
+.pop:hover span{ display:inline; position:absolute; color:#111; border:1px solid #DCA; background:#fffAF0;}
+
+.pop span { border-radius:4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; -moz-box-shadow: 5px 5px 8px #CCC; -webkit-box-shadow: 5px 5px 8px #CCC; box-shadow: 5px 5px 8px #CCC; }
+</style>
+
+</head>
+<body>
+
+
+<h1>DefaultResultSerializer.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_1'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_2'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * The MIT License</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_3'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Copyright &#169; 2010 JmxTrans team</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_4'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_5'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_6'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * of this software and associated documentation files (the &#34;Software&#34;), to deal</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_7'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * in the Software without restriction, including without limitation the rights</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_8'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_9'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * copies of the Software, and to permit persons to whom the Software is</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_10'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * furnished to do so, subject to the following conditions:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_11'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_12'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * The above copyright notice and this permission notice shall be included in</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_13'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * all copies or substantial portions of the Software.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_14'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_15'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_16'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_17'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_18'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_19'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_20'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_21'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THE SOFTWARE.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_22'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_23'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.googlecode.jmxtrans.model.output.kafka;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_24'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_25'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.annotation.JsonCreator;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_26'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.annotation.JsonProperty;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_27'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.core.JsonFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_28'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.core.JsonGenerator;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_29'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.google.common.collect.ImmutableList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_30'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.google.common.collect.ImmutableMap;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_31'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.google.common.collect.ImmutableSet;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_32'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.Query;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_33'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.Result;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_34'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.ResultAttribute;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_35'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.ResultAttributes;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_36'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.googlecode.jmxtrans.model.Server;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_37'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.EqualsAndHashCode;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_38'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Getter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_39'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.slf4j.Logger;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_40'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.slf4j.LoggerFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_41'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_42'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import javax.annotation.Nonnull;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_43'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.io.ByteArrayOutputStream;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_44'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.io.IOException;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_45'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.ArrayList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_46'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Collection;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_47'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_48'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Map;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_49'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_50'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.fasterxml.jackson.core.JsonEncoding.UTF8;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_51'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.googlecode.jmxtrans.model.naming.KeyUtils.getKeyString;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_52'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_53'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_54'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_55'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Original Result serializer (looks like OpenTSDB data format)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_56'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_57'/>
+57
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_57'>127</a>
+<span>
+1. equals : Substituted 1 with 0 &rarr; SURVIVED<br/>
+2. equals : Substituted 0 with 1 &rarr; SURVIVED<br/>
+3. equals : Substituted 0 with 1 &rarr; SURVIVED<br/>
+4. equals : Substituted 0 with 1 &rarr; SURVIVED<br/>
+5. equals : Substituted 0 with 1 &rarr; SURVIVED<br/>
+6. equals : Substituted 0 with 1 &rarr; SURVIVED<br/>
+7. equals : Substituted 0 with 1 &rarr; SURVIVED<br/>
+8. equals : negated conditional &rarr; SURVIVED<br/>
+9. equals : negated conditional &rarr; SURVIVED<br/>
+10. equals : negated conditional &rarr; SURVIVED<br/>
+11. equals : negated conditional &rarr; SURVIVED<br/>
+12. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::isBooleanAsNumber &rarr; SURVIVED<br/>
+13. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::isBooleanAsNumber &rarr; SURVIVED<br/>
+14. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix &rarr; SURVIVED<br/>
+15. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix &rarr; SURVIVED<br/>
+16. equals : removed call to java/lang/Object::equals &rarr; SURVIVED<br/>
+17. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+18. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+19. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+20. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+21. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+22. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+23. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+24. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+25. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+26. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+27. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+28. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+29. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+30. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+31. equals : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+32. equals : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+33. equals : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+34. equals : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+35. equals : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+36. equals : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+37. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+38. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+39. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+40. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+41. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+42. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+43. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+44. hashCode : Substituted 59 with 60 &rarr; SURVIVED<br/>
+45. hashCode : Substituted 1 with 0 &rarr; SURVIVED<br/>
+46. hashCode : Substituted 59 with 60 &rarr; SURVIVED<br/>
+47. hashCode : Substituted 43 with 44 &rarr; SURVIVED<br/>
+48. hashCode : Substituted 59 with 60 &rarr; SURVIVED<br/>
+49. hashCode : Substituted 79 with 80 &rarr; SURVIVED<br/>
+50. hashCode : Substituted 97 with 98 &rarr; SURVIVED<br/>
+51. hashCode : Substituted 59 with 60 &rarr; SURVIVED<br/>
+52. hashCode : Substituted 43 with 44 &rarr; SURVIVED<br/>
+53. hashCode : Substituted 59 with 60 &rarr; SURVIVED<br/>
+54. hashCode : Substituted 43 with 44 &rarr; SURVIVED<br/>
+55. hashCode : Substituted 59 with 60 &rarr; SURVIVED<br/>
+56. hashCode : Substituted 43 with 44 &rarr; SURVIVED<br/>
+57. hashCode : Replaced integer multiplication with division &rarr; SURVIVED<br/>
+58. hashCode : Replaced integer addition with subtraction &rarr; SURVIVED<br/>
+59. hashCode : Replaced integer multiplication with division &rarr; SURVIVED<br/>
+60. hashCode : Replaced integer addition with subtraction &rarr; SURVIVED<br/>
+61. hashCode : Replaced integer multiplication with division &rarr; SURVIVED<br/>
+62. hashCode : Replaced integer addition with subtraction &rarr; SURVIVED<br/>
+63. hashCode : Replaced integer multiplication with division &rarr; SURVIVED<br/>
+64. hashCode : Replaced integer addition with subtraction &rarr; SURVIVED<br/>
+65. hashCode : Replaced integer multiplication with division &rarr; SURVIVED<br/>
+66. hashCode : Replaced integer addition with subtraction &rarr; SURVIVED<br/>
+67. hashCode : negated conditional &rarr; SURVIVED<br/>
+68. hashCode : negated conditional &rarr; SURVIVED<br/>
+69. hashCode : negated conditional &rarr; SURVIVED<br/>
+70. hashCode : negated conditional &rarr; SURVIVED<br/>
+71. hashCode : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames &rarr; SURVIVED<br/>
+72. hashCode : removed call to java/lang/Object::hashCode &rarr; SURVIVED<br/>
+73. hashCode : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::isBooleanAsNumber &rarr; SURVIVED<br/>
+74. hashCode : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix &rarr; SURVIVED<br/>
+75. hashCode : removed call to java/lang/Object::hashCode &rarr; SURVIVED<br/>
+76. hashCode : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags &rarr; SURVIVED<br/>
+77. hashCode : removed call to java/lang/Object::hashCode &rarr; SURVIVED<br/>
+78. hashCode : removed call to java/lang/Object::hashCode &rarr; SURVIVED<br/>
+79. hashCode : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+80. hashCode : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+81. hashCode : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+82. hashCode : removed conditional - replaced equality check with false &rarr; SURVIVED<br/>
+83. hashCode : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+84. hashCode : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+85. hashCode : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+86. hashCode : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+87. hashCode : removed conditional - replaced equality check with true &rarr; SURVIVED<br/>
+88. hashCode : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED<br/>
+89. canEqual : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED<br/>
+90. equals : Substituted 0 with 1 &rarr; KILLED<br/>
+91. equals : Substituted 1 with 0 &rarr; KILLED<br/>
+92. equals : negated conditional &rarr; KILLED<br/>
+93. equals : negated conditional &rarr; KILLED<br/>
+94. equals : negated conditional &rarr; KILLED<br/>
+95. equals : negated conditional &rarr; KILLED<br/>
+96. equals : negated conditional &rarr; KILLED<br/>
+97. equals : negated conditional &rarr; KILLED<br/>
+98. equals : negated conditional &rarr; KILLED<br/>
+99. equals : negated conditional &rarr; KILLED<br/>
+100. equals : negated conditional &rarr; KILLED<br/>
+101. equals : negated conditional &rarr; KILLED<br/>
+102. equals : negated conditional &rarr; KILLED<br/>
+103. equals : negated conditional &rarr; KILLED<br/>
+104. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::canEqual &rarr; KILLED<br/>
+105. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames &rarr; KILLED<br/>
+106. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames &rarr; KILLED<br/>
+107. equals : removed call to java/lang/Object::equals &rarr; KILLED<br/>
+108. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags &rarr; KILLED<br/>
+109. equals : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags &rarr; KILLED<br/>
+110. equals : removed call to java/lang/Object::equals &rarr; KILLED<br/>
+111. equals : removed call to java/lang/Object::equals &rarr; KILLED<br/>
+112. equals : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+113. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+114. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+115. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+116. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+117. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+118. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+119. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+120. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+121. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+122. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+123. equals : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+124. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED<br/>
+125. equals : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED<br/>
+126. hashCode : negated conditional &rarr; KILLED<br/>
+127. hashCode : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@EqualsAndHashCode(exclude = {&#34;jsonFactory&#34;})</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_58'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class DefaultResultSerializer implements ResultSerializer {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_59'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;private static final Logger log = LoggerFactory.getLogger(DefaultResultSerializer.class);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_60'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final JsonFactory jsonFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_61'/>
+61
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_61'>1</a>
+<span>
+1. getTypeNames : mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;@Getter @Nonnull</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_62'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final ImmutableList&#60;String&#62; typeNames;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_63'/>
+63
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_63'>1</a>
+<span>
+1. isBooleanAsNumber : replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_64'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final boolean booleanAsNumber;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_65'/>
+65
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_65'>1</a>
+<span>
+1. getRootPrefix : mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;@Getter @Nonnull</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_66'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final String rootPrefix;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_67'/>
+67
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_67'>1</a>
+<span>
+1. getTags : mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;@Getter @Nonnull</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_68'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final ImmutableMap&#60;String, String&#62; tags;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_69'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;@Nonnull</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_70'/>
+70
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_70'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private final ImmutableSet&#60;ResultAttribute&#62; resultAttributesToWriteAsTags;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_71'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_72'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;@JsonCreator</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_73'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;public DefaultResultSerializer(@JsonProperty(&#34;typeNames&#34;) List&#60;String&#62; typeNames,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_74'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@JsonProperty(&#34;booleanAsNumber&#34;) boolean booleanAsNumber,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_75'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@JsonProperty(&#34;rootPrefix&#34;) String rootPrefix,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_76'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@JsonProperty(&#34;tags&#34;) Map&#60;String, String&#62; tags,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_77'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;@JsonProperty(&#34;resultTags&#34;) List&#60;String&#62; resultTags</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_78'/>
+78
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_78'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_79'/>
+79
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_79'>1</a>
+<span>
+1. <init> : removed call to com/fasterxml/jackson/core/JsonFactory::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;this.jsonFactory = new JsonFactory();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_80'/>
+80
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_80'>5</a>
+<span>
+1. <init> : negated conditional &rarr; KILLED<br/>
+2. <init> : removed call to com/google/common/collect/ImmutableList::of &rarr; KILLED<br/>
+3. <init> : removed call to com/google/common/collect/ImmutableList::copyOf &rarr; KILLED<br/>
+4. <init> : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. <init> : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;this.typeNames = typeNames == null ? ImmutableList.&#60;String&#62;of() : ImmutableList.copyOf(typeNames);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_81'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;this.booleanAsNumber = booleanAsNumber;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_82'/>
+82
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_82'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;this.rootPrefix = rootPrefix;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_83'/>
+83
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_83'>5</a>
+<span>
+1. <init> : negated conditional &rarr; KILLED<br/>
+2. <init> : removed call to com/google/common/collect/ImmutableMap::of &rarr; KILLED<br/>
+3. <init> : removed call to com/google/common/collect/ImmutableMap::copyOf &rarr; KILLED<br/>
+4. <init> : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. <init> : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;this.tags = tags == null ? ImmutableMap.&#60;String, String&#62;of() : ImmutableMap.copyOf(tags);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_84'/>
+84
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_84'>5</a>
+<span>
+1. <init> : removed call to com/google/common/collect/ImmutableSet::of &rarr; SURVIVED<br/>
+2. <init> : negated conditional &rarr; KILLED<br/>
+3. <init> : removed call to com/googlecode/jmxtrans/model/ResultAttributes::forNames &rarr; KILLED<br/>
+4. <init> : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+5. <init> : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;this.resultAttributesToWriteAsTags = resultTags == null ? ImmutableSet.&#60;ResultAttribute&#62;of() : ResultAttributes.forNames(resultTags);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_85'/>
+85
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_85'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_86'/>
+86
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_86'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_87'/>
+87
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_87'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;@Nonnull</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_88'/>
+88
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_88'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;@Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_89'/>
+89
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_89'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;public Collection&#60;String&#62; serialize(Server server, Query query, Result result) throws IOException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_90'/>
+90
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_90'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;log.debug(&#34;Query result: [{}]&#34;, result);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_91'/>
+91
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_91'>1</a>
+<span>
+1. serialize : removed call to com/googlecode/jmxtrans/model/Result::getValues &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;Map&#60;String, Object&#62; resultValues = result.getValues();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_92'/>
+92
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_92'>1</a>
+<span>
+1. serialize : removed call to java/util/ArrayList::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;List&#60;String&#62; messages = new ArrayList&#60;&#62;();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_93'/>
+93
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_93'>6</a>
+<span>
+1. serialize : negated conditional &rarr; KILLED<br/>
+2. serialize : removed call to java/util/Map::entrySet &rarr; KILLED<br/>
+3. serialize : removed call to java/util/Set::iterator &rarr; KILLED<br/>
+4. serialize : removed call to java/util/Iterator::hasNext &rarr; KILLED<br/>
+5. serialize : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+6. serialize : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;for (Map.Entry&#60;String, Object&#62; values : resultValues.entrySet()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_94'/>
+94
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_94'>1</a>
+<span>
+1. serialize : removed call to java/util/Map$Entry::getValue &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;Object value = values.getValue();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_95'/>
+95
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_95'>4</a>
+<span>
+1. serialize : negated conditional &rarr; KILLED<br/>
+2. serialize : removed call to com/googlecode/jmxtrans/util/NumberUtils::isNumeric &rarr; KILLED<br/>
+3. serialize : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+4. serialize : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;if (isNumeric(value)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_96'/>
+96
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_96'>2</a>
+<span>
+1. serialize : removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::createJsonMessage &rarr; KILLED<br/>
+2. serialize : removed call to java/util/List::add &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;messages.add(createJsonMessage(server, query, result, values, value));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_97'/>
+97
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_97'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;} else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_98'/>
+98
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_98'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;&#9;log.warn(&#34;Unable to submit non-numeric value to Kafka: [{}] from result [{}]&#34;, value, result);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_99'/>
+99
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_99'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_100'/>
+100
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_100'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_101'/>
+101
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_101'>1</a>
+<span>
+1. serialize : mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::serialize to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;return messages;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_102'/>
+102
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_102'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_103'/>
+103
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_103'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_104'/>
+104
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_104'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;private String createJsonMessage(Server server, Query query, Result result, Map.Entry&#60;String, Object&#62; values, Object value) throws IOException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_105'/>
+105
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_105'>1</a>
+<span>
+1. createJsonMessage : removed call to com/googlecode/jmxtrans/model/naming/KeyUtils::getKeyString &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_106'/>
+106
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_106'>1</a>
+<span>
+1. createJsonMessage : removed call to java/lang/String::replaceAll &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;String cleanKeyString = keyString.replaceAll(&#34;[()]&#34;, &#34;_&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_107'/>
+107
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_107'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_108'/>
+108
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_108'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;try (</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_109'/>
+109
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_109'>1</a>
+<span>
+1. createJsonMessage : removed call to java/io/ByteArrayOutputStream::&#60;init&#62; &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;ByteArrayOutputStream out = new ByteArrayOutputStream();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_110'/>
+110
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_110'>1</a>
+<span>
+1. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonFactory::createGenerator &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;JsonGenerator generator = jsonFactory.createGenerator(out, UTF8)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_111'/>
+111
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_111'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;&#9;) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_112'/>
+112
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_112'>1</a>
+<span>
+1. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeStartObject &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;generator.writeStartObject();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_113'/>
+113
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_113'>1</a>
+<span>
+1. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;generator.writeStringField(&#34;keyspace&#34;, cleanKeyString);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_114'/>
+114
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_114'>2</a>
+<span>
+1. createJsonMessage : removed call to java/lang/Object::toString &rarr; KILLED<br/>
+2. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;generator.writeStringField(&#34;value&#34;, value.toString());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_115'/>
+115
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_115'>4</a>
+<span>
+1. createJsonMessage : Substituted 1000 with 1001 &rarr; KILLED<br/>
+2. createJsonMessage : Replaced long division with multiplication &rarr; KILLED<br/>
+3. createJsonMessage : removed call to com/googlecode/jmxtrans/model/Result::getEpoch &rarr; KILLED<br/>
+4. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeNumberField &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;generator.writeNumberField(&#34;timestamp&#34;, result.getEpoch() / 1000);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_116'/>
+116
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_116'>1</a>
+<span>
+1. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeObjectFieldStart &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;generator.writeObjectFieldStart(&#34;tags&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_117'/>
+117
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_117'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_118'/>
+118
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_118'>7</a>
+<span>
+1. createJsonMessage : negated conditional &rarr; KILLED<br/>
+2. createJsonMessage : removed call to com/google/common/collect/ImmutableMap::entrySet &rarr; KILLED<br/>
+3. createJsonMessage : removed call to com/google/common/collect/ImmutableSet::iterator &rarr; KILLED<br/>
+4. createJsonMessage : removed call to java/util/Iterator::hasNext &rarr; KILLED<br/>
+5. createJsonMessage : removed call to java/util/Iterator::next &rarr; KILLED<br/>
+6. createJsonMessage : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+7. createJsonMessage : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;for (Map.Entry&#60;String, String&#62; tag : this.tags.entrySet()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_119'/>
+119
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_119'>3</a>
+<span>
+1. createJsonMessage : removed call to java/util/Map$Entry::getKey &rarr; KILLED<br/>
+2. createJsonMessage : removed call to java/util/Map$Entry::getValue &rarr; KILLED<br/>
+3. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;generator.writeStringField(tag.getKey(), tag.getValue());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_120'/>
+120
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_120'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_121'/>
+121
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_121'>6</a>
+<span>
+1. createJsonMessage : negated conditional &rarr; KILLED<br/>
+2. createJsonMessage : removed call to com/google/common/collect/ImmutableSet::iterator &rarr; KILLED<br/>
+3. createJsonMessage : removed call to java/util/Iterator::hasNext &rarr; KILLED<br/>
+4. createJsonMessage : removed call to java/util/Iterator::next &rarr; KILLED<br/>
+5. createJsonMessage : removed conditional - replaced equality check with false &rarr; KILLED<br/>
+6. createJsonMessage : removed conditional - replaced equality check with true &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;for (ResultAttribute resultAttribute : this.resultAttributesToWriteAsTags) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_122'/>
+122
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_122'>3</a>
+<span>
+1. createJsonMessage : removed call to com/googlecode/jmxtrans/model/ResultAttribute::getName &rarr; KILLED<br/>
+2. createJsonMessage : removed call to com/googlecode/jmxtrans/model/ResultAttribute::get &rarr; KILLED<br/>
+3. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;&#9;generator.writeStringField(resultAttribute.getName(), resultAttribute.get(result));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_123'/>
+123
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_123'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_124'/>
+124
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_124'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_125'/>
+125
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_125'>1</a>
+<span>
+1. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeEndObject &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;generator.writeEndObject();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_126'/>
+126
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_126'>1</a>
+<span>
+1. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::writeEndObject &rarr; SURVIVED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>&#9;&#9;&#9;generator.writeEndObject();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_127'/>
+127
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_127'>1</a>
+<span>
+1. createJsonMessage : removed call to com/fasterxml/jackson/core/JsonGenerator::close &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;generator.close();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_128'/>
+128
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_128'>2</a>
+<span>
+1. createJsonMessage : removed call to java/io/ByteArrayOutputStream::toString &rarr; KILLED<br/>
+2. createJsonMessage : mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::createJsonMessage to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED<br/>
+
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>&#9;&#9;&#9;return out.toString(&#34;UTF-8&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_129'/>
+129
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_129'></a>
+<span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>&#9;&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_130'/>
+130
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_130'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>&#9;}</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@32091be6_131'/>
+131
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_131'></a>
+<span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_57'>57</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_57'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> Substituted 0 with 1 &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> Substituted 0 with 1 &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> Substituted 1 with 0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>19.<span><b>19</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>20.<span><b>20</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>21.<span><b>21</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>22.<span><b>22</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>23.<span><b>23</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>24.<span><b>24</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>25.<span><b>25</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>26.<span><b>26</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>27.<span><b>27</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::canEqual &rarr; KILLED</p> <p class='KILLED'><span class='pop'>28.<span><b>28</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames &rarr; KILLED</p> <p class='KILLED'><span class='pop'>29.<span><b>29</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames &rarr; KILLED</p> <p class='KILLED'><span class='pop'>30.<span><b>30</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/lang/Object::equals &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>31.<span><b>31</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::isBooleanAsNumber &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>32.<span><b>32</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::isBooleanAsNumber &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>33.<span><b>33</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>34.<span><b>34</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>35.<span><b>35</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::equals &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>36.<span><b>36</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags &rarr; KILLED</p> <p class='KILLED'><span class='pop'>37.<span><b>37</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags &rarr; KILLED</p> <p class='KILLED'><span class='pop'>38.<span><b>38</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/lang/Object::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>39.<span><b>39</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/lang/Object::equals &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>40.<span><b>40</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>41.<span><b>41</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>42.<span><b>42</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>43.<span><b>43</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>44.<span><b>44</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>45.<span><b>45</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>46.<span><b>46</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>47.<span><b>47</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>48.<span><b>48</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>49.<span><b>49</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>50.<span><b>50</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>51.<span><b>51</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>52.<span><b>52</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>53.<span><b>53</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>54.<span><b>54</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>55.<span><b>55</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>56.<span><b>56</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='KILLED'><span class='pop'>57.<span><b>57</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='KILLED'><span class='pop'>58.<span><b>58</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='KILLED'><span class='pop'>59.<span><b>59</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>60.<span><b>60</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>61.<span><b>61</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='KILLED'><span class='pop'>62.<span><b>62</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>63.<span><b>63</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>64.<span><b>64</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>65.<span><b>65</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>66.<span><b>66</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>67.<span><b>67</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>68.<span><b>68</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='KILLED'><span class='pop'>69.<span><b>69</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>70.<span><b>70</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>71.<span><b>71</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>72.<span><b>72</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>73.<span><b>73</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>74.<span><b>74</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>75.<span><b>75</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>76.<span><b>76</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>77.<span><b>77</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>78.<span><b>78</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>79.<span><b>79</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>80.<span><b>80</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>81.<span><b>81</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>82.<span><b>82</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 1 with 0 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>83.<span><b>83</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>84.<span><b>84</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>85.<span><b>85</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>86.<span><b>86</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 79 with 80 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>87.<span><b>87</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 97 with 98 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>88.<span><b>88</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>89.<span><b>89</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>90.<span><b>90</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>91.<span><b>91</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>92.<span><b>92</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 59 with 60 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>93.<span><b>93</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Substituted 43 with 44 &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>94.<span><b>94</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>95.<span><b>95</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>96.<span><b>96</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>97.<span><b>97</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>98.<span><b>98</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>99.<span><b>99</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>100.<span><b>100</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>101.<span><b>101</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>102.<span><b>102</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>103.<span><b>103</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>104.<span><b>104</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>105.<span><b>105</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>106.<span><b>106</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>107.<span><b>107</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>108.<span><b>108</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>109.<span><b>109</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>110.<span><b>110</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>111.<span><b>111</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::isBooleanAsNumber &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>112.<span><b>112</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>113.<span><b>113</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>114.<span><b>114</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>115.<span><b>115</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>116.<span><b>116</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed call to java/lang/Object::hashCode &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>117.<span><b>117</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>118.<span><b>118</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>119.<span><b>119</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>120.<span><b>120</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>121.<span><b>121</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with false &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>122.<span><b>122</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>123.<span><b>123</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>124.<span><b>124</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>125.<span><b>125</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>126.<span><b>126</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> removed conditional - replaced equality check with true &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>127.<span><b>127</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_61'>61</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_61'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTypeNames<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.initDefaults(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTypeNames to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_63'>63</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_63'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isBooleanAsNumber<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest.testConstructorWithNullResultSerializer(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest)</span></span> replaced return of integer sized value with (x == 0 ? 1 : 0) &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_65'>65</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_65'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getRootPrefix<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getRootPrefix to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_67'>67</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_67'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTags<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.initDefaults(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::getTags to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_79'>79</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_79'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonFactory::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_80'>80</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_80'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.initDefaults(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/google/common/collect/ImmutableList::of &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest.testConstructorWithNullResultSerializer(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest)</span></span> removed call to com/google/common/collect/ImmutableList::copyOf &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest.testReadConfigDefaultCustomized(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_83'>83</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_83'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.initDefaults(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/google/common/collect/ImmutableMap::of &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/google/common/collect/ImmutableMap::copyOf &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_84'>84</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_84'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b><init><br/><b>Killed by : </b>none</span></span> removed call to com/google/common/collect/ImmutableSet::of &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/ResultAttributes::forNames &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b><init><br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_91'>91</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_91'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/Result::getValues &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_92'>92</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_92'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/ArrayList::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_93'>93</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_93'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Map::entrySet &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Set::iterator &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Iterator::hasNext &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_94'>94</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_94'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Map$Entry::getValue &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_95'>95</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_95'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/util/NumberUtils::isNumeric &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_96'>96</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_96'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::createJsonMessage &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/List::add &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_101'>101</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_101'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>serialize<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::serialize to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_105'>105</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_105'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/naming/KeyUtils::getKeyString &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_106'>106</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_106'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/lang/String::replaceAll &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_109'>109</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_109'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/io/ByteArrayOutputStream::&#60;init&#62; &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_110'>110</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_110'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonFactory::createGenerator &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_112'>112</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_112'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeStartObject &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_113'>113</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_113'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_114'>114</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_114'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/lang/Object::toString &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_115'>115</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_115'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> Substituted 1000 with 1001 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> Replaced long division with multiplication &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/Result::getEpoch &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeNumberField &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_116'>116</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_116'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeObjectFieldStart &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_118'>118</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_118'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/google/common/collect/ImmutableMap::entrySet &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/google/common/collect/ImmutableSet::iterator &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Iterator::hasNext &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Iterator::next &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_119'>119</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_119'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Map$Entry::getKey &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Map$Entry::getValue &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_121'>121</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_121'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/google/common/collect/ImmutableSet::iterator &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Iterator::hasNext &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/util/Iterator::next &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with false &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed conditional - replaced equality check with true &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_122'>122</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_122'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/ResultAttribute::getName &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/googlecode/jmxtrans/model/ResultAttribute::get &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeStringField &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_125'>125</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_125'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>none</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeEndObject &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_126'>126</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_126'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>none</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::writeEndObject &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_127'>127</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_127'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to com/fasterxml/jackson/core/JsonGenerator::close &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@32091be6_128'>128</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@32091be6_128'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> removed call to java/io/ByteArrayOutputStream::toString &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>createJsonMessage<br/><b>Killed by : </b>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest)</span></span> mutated return of Object value for com/googlecode/jmxtrans/model/output/kafka/DefaultResultSerializer::createJsonMessage to ( if (x != null) null else throw new RuntimeException ) &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONSTRUCTOR_CALL_MUTATOR</li>
+<li class='mutator'>RETURN_VALS_MUTATOR</li>
+<li class='mutator'>INVERT_NEGS_MUTATOR</li>
+<li class='mutator'>CONDITIONALS_BOUNDARY_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_ORDER_IF_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_EQUAL_ELSE_MUTATOR</li>
+<li class='mutator'>INCREMENTS_MUTATOR</li>
+<li class='mutator'>VOID_METHOD_CALL_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_ORDER_ELSE_MUTATOR</li>
+<li class='mutator'>MATH_MUTATOR</li>
+<li class='mutator'>NEGATE_CONDITIONALS_MUTATOR</li>
+<li class='mutator'>NON_VOID_METHOD_CALL_MUTATOR</li>
+<li class='mutator'>INLINE_CONSTANT_MUTATOR</li>
+<li class='mutator'>REMOVE_CONDITIONALS_EQUAL_IF_MUTATOR</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest.testReadConfigDefault(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest) (194 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsWhenDifferent(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest) (2 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.equalsHashCodeWhenSame(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest) (3 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNonNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest) (3 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest.testConstructorWithNullResultSerializer(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest) (3 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterTests.messagesAreSentToKafka(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterTests) (9 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertHashToStrings(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest) (625 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest.testReadConfigDefaultCustomized(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactoryTest) (12 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterTests.producerClosed(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterTests) (2 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.initDefaults(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest) (8 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest.convertSingleNumericToString(com.googlecode.jmxtrans.model.output.kafka.DefaultResultSerializerTest) (36 ms)</li><li>com.googlecode.jmxtrans.model.output.kafka.KafkaWriterTests.createKafkaProducer(com.googlecode.jmxtrans.model.output.kafka.KafkaWriterTests) (17 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.2.2
+
+</body>
+</html>

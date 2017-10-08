@@ -92,7 +92,7 @@
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  		GenericKeyedObjectPool&lt;InetSocketAddress, Socket&gt; pool = Mockito.mock(GenericKeyedObjectPool.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  		Socket socket = Mockito.mock(Socket.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		Mockito.when(pool.borrowObject(Matchers.any(InetSocketAddress.<strong class="jxr_keyword">class</strong>))).thenReturn(socket);
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		UnflushableByteArrayOutputStream out = <strong class="jxr_keyword">new</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/OpenTSDBWriterTests.html">UnflushableByteArrayOutputStream</a>();
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		UnflushableByteArrayOutputStream out = <strong class="jxr_keyword">new</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/GraphiteWriterTests.html">UnflushableByteArrayOutputStream</a>();
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  		Mockito.when(socket.getOutputStream()).thenReturn(out);
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>  
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  		OpenTSDBWriter writer = OpenTSDBWriter.builder()
@@ -141,7 +141,7 @@
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 			.endsWith(<span class="jxr_string">"\n"</span>);
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> 	}
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/OpenTSDBWriterTests.html">UnflushableByteArrayOutputStream</a> <strong class="jxr_keyword">extends</strong> ByteArrayOutputStream {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/GraphiteWriterTests.html">UnflushableByteArrayOutputStream</a> <strong class="jxr_keyword">extends</strong> ByteArrayOutputStream {
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> 		@Override
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> flush() <strong class="jxr_keyword">throws</strong> IOException {
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException();

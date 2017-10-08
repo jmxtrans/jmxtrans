@@ -476,17 +476,17 @@
 <a class="jxr_linenumber" name="L468" href="#L468">468</a> 
 <a class="jxr_linenumber" name="L469" href="#L469">469</a> 	}
 <a class="jxr_linenumber" name="L470" href="#L470">470</a> 
-<a class="jxr_linenumber" name="L471" href="#L471">471</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> builder() {
-<a class="jxr_linenumber" name="L472" href="#L472">472</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a>();
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> builder() {
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a>();
 <a class="jxr_linenumber" name="L473" href="#L473">473</a> 	}
 <a class="jxr_linenumber" name="L474" href="#L474">474</a> 
-<a class="jxr_linenumber" name="L475" href="#L475">475</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> builder(<a href="../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server) {
-<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a>(server);
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> builder(<a href="../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server) {
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a>(server);
 <a class="jxr_linenumber" name="L477" href="#L477">477</a> 	}
 <a class="jxr_linenumber" name="L478" href="#L478">478</a> 
 <a class="jxr_linenumber" name="L479" href="#L479">479</a> 	@NotThreadSafe
 <a class="jxr_linenumber" name="L480" href="#L480">480</a> 	@Accessors(chain = <strong class="jxr_keyword">true</strong>)
-<a class="jxr_linenumber" name="L481" href="#L481">481</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> {
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> {
 <a class="jxr_linenumber" name="L482" href="#L482">482</a> 		@Setter <strong class="jxr_keyword">private</strong> String alias;
 <a class="jxr_linenumber" name="L483" href="#L483">483</a> 		@Setter <strong class="jxr_keyword">private</strong> String pid;
 <a class="jxr_linenumber" name="L484" href="#L484">484</a> 		@Setter <strong class="jxr_keyword">private</strong> String host;
@@ -505,9 +505,9 @@
 <a class="jxr_linenumber" name="L497" href="#L497">497</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;Query&gt; queries = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
 <a class="jxr_linenumber" name="L498" href="#L498">498</a> 		@Setter <strong class="jxr_keyword">private</strong> KeyedObjectPool&lt;JmxConnectionProvider, JMXConnection&gt; pool;
 <a class="jxr_linenumber" name="L499" href="#L499">499</a> 
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a>() {}
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a>() {}
 <a class="jxr_linenumber" name="L501" href="#L501">501</a> 
-<a class="jxr_linenumber" name="L502" href="#L502">502</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a>(<a href="../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server) {
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a>(<a href="../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server) {
 <a class="jxr_linenumber" name="L503" href="#L503">503</a> 			<strong class="jxr_keyword">this</strong>.alias = server.alias;
 <a class="jxr_linenumber" name="L504" href="#L504">504</a> 			<strong class="jxr_keyword">this</strong>.pid = server.pid;
 <a class="jxr_linenumber" name="L505" href="#L505">505</a> 			<strong class="jxr_keyword">this</strong>.host = server.pid != <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">null</strong> : server.host; <em class="jxr_comment">// let the host be deduced in the constructor</em>
@@ -525,27 +525,27 @@
 <a class="jxr_linenumber" name="L517" href="#L517">517</a> 			<strong class="jxr_keyword">this</strong>.pool = server.pool;
 <a class="jxr_linenumber" name="L518" href="#L518">518</a> 		}
 <a class="jxr_linenumber" name="L519" href="#L519">519</a> 
-<a class="jxr_linenumber" name="L520" href="#L520">520</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> clearQueries() {
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> clearQueries() {
 <a class="jxr_linenumber" name="L521" href="#L521">521</a> 			queries.clear();
 <a class="jxr_linenumber" name="L522" href="#L522">522</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L523" href="#L523">523</a> 		}
 <a class="jxr_linenumber" name="L524" href="#L524">524</a> 
-<a class="jxr_linenumber" name="L525" href="#L525">525</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> addQuery(<a href="../../../../com/googlecode/jmxtrans/model/Query.html">Query</a> query) {
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> addQuery(<a href="../../../../com/googlecode/jmxtrans/model/Query.html">Query</a> query) {
 <a class="jxr_linenumber" name="L526" href="#L526">526</a> 			<strong class="jxr_keyword">this</strong>.queries.add(query);
 <a class="jxr_linenumber" name="L527" href="#L527">527</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L528" href="#L528">528</a> 		}
 <a class="jxr_linenumber" name="L529" href="#L529">529</a> 
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> addQueries(Set&lt;Query&gt; queries) {
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> addQueries(Set&lt;Query&gt; queries) {
 <a class="jxr_linenumber" name="L531" href="#L531">531</a> 			<strong class="jxr_keyword">this</strong>.queries.addAll(queries);
 <a class="jxr_linenumber" name="L532" href="#L532">532</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L533" href="#L533">533</a> 		}
 <a class="jxr_linenumber" name="L534" href="#L534">534</a> 
-<a class="jxr_linenumber" name="L535" href="#L535">535</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> addOutputWriterFactory(<a href="../../../../com/googlecode/jmxtrans/model/OutputWriterFactory.html">OutputWriterFactory</a> outputWriterFactory) {
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> addOutputWriterFactory(<a href="../../../../com/googlecode/jmxtrans/model/OutputWriterFactory.html">OutputWriterFactory</a> outputWriterFactory) {
 <a class="jxr_linenumber" name="L536" href="#L536">536</a> 			<strong class="jxr_keyword">this</strong>.outputWriterFactories.add(outputWriterFactory);
 <a class="jxr_linenumber" name="L537" href="#L537">537</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L538" href="#L538">538</a> 		}
 <a class="jxr_linenumber" name="L539" href="#L539">539</a> 
-<a class="jxr_linenumber" name="L540" href="#L540">540</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Query.html">Builder</a> addOutputWriters(Collection&lt;OutputWriter&gt; outputWriters) {
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../com/googlecode/jmxtrans/model/Server.html">Builder</a> addOutputWriters(Collection&lt;OutputWriter&gt; outputWriters) {
 <a class="jxr_linenumber" name="L541" href="#L541">541</a> 			<strong class="jxr_keyword">this</strong>.outputWriters.addAll(outputWriters);
 <a class="jxr_linenumber" name="L542" href="#L542">542</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L543" href="#L543">543</a> 		}

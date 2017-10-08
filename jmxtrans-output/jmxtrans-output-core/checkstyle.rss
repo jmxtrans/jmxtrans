@@ -116,6 +116,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.java">com/googlecode/jmxtrans/model/output/support/pool/FlushStrategyUtils.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelExpiration.java">com/googlecode/jmxtrans/model/output/support/pool/DatagramChannelExpiration.java</a>
                 </td>
                 <td>
@@ -131,20 +145,6 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.SocketAllocator.java">com/googlecode/jmxtrans/model/output/support/pool/SocketAllocator.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
-                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.java">com/googlecode/jmxtrans/model/output/support/pool/FlushStrategyUtils.java</a>
                 </td>
                 <td>
                   0
@@ -200,20 +200,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.GraphiteWriterFactory.java">com/googlecode/jmxtrans/model/output/GraphiteWriterFactory.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.TCollectorUDPWriter.java">com/googlecode/jmxtrans/model/output/TCollectorUDPWriter.java</a>
                 </td>
                 <td>
@@ -228,7 +214,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.GraphiteWriter2.java">com/googlecode/jmxtrans/model/output/GraphiteWriter2.java</a>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelPoolable.java">com/googlecode/jmxtrans/model/output/support/pool/DatagramChannelPoolable.java</a>
                 </td>
                 <td>
                   0
@@ -242,7 +228,21 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelPoolable.java">com/googlecode/jmxtrans/model/output/support/pool/DatagramChannelPoolable.java</a>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.GraphiteWriterFactory.java">com/googlecode/jmxtrans/model/output/GraphiteWriterFactory.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.GraphiteWriter2.java">com/googlecode/jmxtrans/model/output/GraphiteWriter2.java</a>
                 </td>
                 <td>
                   0
@@ -382,7 +382,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.OpenTSDBWriter.java">com/googlecode/jmxtrans/model/output/OpenTSDBWriter.java</a>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.AlwaysFlush.java">com/googlecode/jmxtrans/model/output/support/pool/AlwaysFlush.java</a>
                 </td>
                 <td>
                   0
@@ -410,7 +410,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.AlwaysFlush.java">com/googlecode/jmxtrans/model/output/support/pool/AlwaysFlush.java</a>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.OpenTSDBWriter.java">com/googlecode/jmxtrans/model/output/OpenTSDBWriter.java</a>
                 </td>
                 <td>
                   0
