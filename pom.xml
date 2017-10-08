@@ -909,9 +909,6 @@
 						<ignorePathsToDelete>
 							<ignorePathsToDelete>%regex[.*]</ignorePathsToDelete>
 						</ignorePathsToDelete>
-						<providerImplementations>
-							<git>jgit</git>
-						</providerImplementations>
 						<scmBranch>gh-pages</scmBranch>
 						<serverId>github</serverId>
 					</configuration>
@@ -919,13 +916,7 @@
 						<dependency>
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-api</artifactId>
-							<version>1.9.4</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.maven.scm</groupId>
-							<artifactId>maven-scm-provider-jgit</artifactId>
-							<version>1.9.4</version>
-							<!-- required in order to hide password value in command logging on travis -->
+							<version>1.9.5</version>
 						</dependency>
 					</dependencies>
 					<executions>

@@ -40,7 +40,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     git config --global user.name "JmxTrans travis build"
 
     echo "Building master"
-    mvn package sonar:sonar deploy \
+    mvn package sonar:sonar deploy site:site site:stage scm-publish:publish-scm \
       --settings ${MVN_SETTINGS} -B -V \
       -PwithMutationTests,gpg,rpm,deb \
       -Ddocker.skip=false \
