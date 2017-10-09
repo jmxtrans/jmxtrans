@@ -76,6 +76,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	private static final String BUCKET_TYPE = "bucketType";
 	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
 	private static final String STRING_VALUE_DEFAULT_COUNTER = "stringValueDefaultCount";
+	private static final Pattern STATSD_INVALID = Pattern.compile("[./]");
 
 	private final ByteBuffer sendBuffer;
 
@@ -200,8 +201,7 @@ public class StatsDWriter extends BaseOutputWriter {
 				if (this.invalidCharValue != null){
 					replaceString = this.invalidCharValue;
 				}
-				Pattern invalidChar = Pattern.compile("[:|]");
-				line = invalidChar.matcher(line).replaceAll(replaceString);
+				line = STATSD_INVALID.matcher(line).replaceAll(replaceString);
 				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
 
 				doSend(line.trim());

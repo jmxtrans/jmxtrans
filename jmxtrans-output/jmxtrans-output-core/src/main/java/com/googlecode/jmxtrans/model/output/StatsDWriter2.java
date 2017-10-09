@@ -61,6 +61,8 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	@Nonnull
 	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
 
+	private static final Pattern STATSD_INVALID = Pattern.compile("[./]");
+
 	public StatsDWriter2(
 			@Nonnull List<String> typeNames,
 			@Nonnull String rootPrefix,
@@ -90,8 +92,7 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix);
 
 				// These characters can mess with formatting.
-				Pattern invalidChar = Pattern.compile("[:|]");
-				line = invalidChar.matcher(line).replaceAll(invalidCharValue);
+				line = STATSD_INVALID.matcher(line).replaceAll(invalidCharValue);
 				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
 
 				writer.write(line);
