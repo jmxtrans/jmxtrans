@@ -56,7 +56,7 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	@Nonnull
 	private final String stringValueDefaultCount;
 	@Nonnull
-	private final String invalidCharValue;
+	private final String replacementForInvalidChar;
 
 	@Nonnull
 	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
@@ -69,13 +69,13 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 			@Nonnull String bucketType,
 			boolean stringsValuesAsKey,
 			@Nonnull Long stringValueDefaultCount,
-			@Nonnull String invalidCharValue) {
+			@Nonnull String replacementForInvalidChar) {
 		this.typeNames = typeNames;
 		this.rootPrefix = rootPrefix;
 		this.stringsValuesAsKey = stringsValuesAsKey;
 		this.bucketType = bucketType;
 		this.stringValueDefaultCount = stringValueDefaultCount.toString();
-		this.invalidCharValue = invalidCharValue;
+		this.replacementForInvalidChar = replacementForInvalidChar;
 
 	}
 
@@ -92,7 +92,7 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix);
 
 				// These characters can mess with formatting.
-				line = STATSD_INVALID.matcher(line).replaceAll(invalidCharValue);
+				line = STATSD_INVALID.matcher(line).replaceAll(replacementForInvalidChar);
 				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
 
 				writer.write(line);

@@ -82,7 +82,7 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private final String bucketType;
 	private final String rootPrefix;
-	private final String invalidCharValue;
+	private final String replacementForInvalidChar;
 	private final InetSocketAddress address;
 	private final DatagramChannel channel;
 	private final Boolean stringsValuesAsKey;
@@ -111,7 +111,7 @@ public class StatsDWriter extends BaseOutputWriter {
 			@JsonProperty(STRING_VALUE_AS_KEY) Boolean stringsValuesAsKey,
 			@JsonProperty(STRING_VALUE_DEFAULT_COUNTER) Long stringValueDefaultCount,
 			@JsonProperty("settings") Map<String, Object> settings,
-			@JsonProperty("invalidCharValue") String invalidCharValue
+			@JsonProperty("replacementForInvalidChar") String replacementForInvalidChar
 			) throws IOException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		log.warn("StatsDWriter is deprecated. Please use StatsDWriterFactory instead.");
@@ -137,7 +137,7 @@ public class StatsDWriter extends BaseOutputWriter {
 		checkNotNull(host, "Host cannot be null");
 		checkNotNull(port, "Port cannot be null");
 		this.address = new InetSocketAddress(host, port);
-		this.invalidCharValue = invalidCharValue;
+		this.replacementForInvalidChar = replacementForInvalidChar;
 	}
 
 	@Override
@@ -198,8 +198,8 @@ public class StatsDWriter extends BaseOutputWriter {
 
 				// These characters can mess with formatting.
 				String replaceString = "_";
-				if (this.invalidCharValue != null){
-					replaceString = this.invalidCharValue;
+				if (this.replacementForInvalidChar != null){
+					replaceString = this.replacementForInvalidChar;
 				}
 				line = STATSD_INVALID.matcher(line).replaceAll(replaceString);
 				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
