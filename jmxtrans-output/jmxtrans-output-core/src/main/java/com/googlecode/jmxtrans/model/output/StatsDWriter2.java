@@ -61,7 +61,7 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	@Nonnull
 	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
 
-	private static final Pattern STATSD_INVALID = Pattern.compile("[./]");
+	private static final Pattern STATSD_INVALID = Pattern.compile("[:|]");
 
 	public StatsDWriter2(
 			@Nonnull List<String> typeNames,

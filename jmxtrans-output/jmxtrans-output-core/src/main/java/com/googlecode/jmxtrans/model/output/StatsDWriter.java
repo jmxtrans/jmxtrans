@@ -76,7 +76,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	private static final String BUCKET_TYPE = "bucketType";
 	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
 	private static final String STRING_VALUE_DEFAULT_COUNTER = "stringValueDefaultCount";
-	private static final Pattern STATSD_INVALID = Pattern.compile("[./]");
+	private static final Pattern STATSD_INVALID = Pattern.compile("[:|]");
 
 	private final ByteBuffer sendBuffer;
 
