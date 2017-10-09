@@ -30,16 +30,16 @@
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">package</strong> com.googlecode.jmxtrans.model;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableMap;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> javax.management.Attribute;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> javax.management.ObjectInstance;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> javax.management.ObjectName;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> javax.management.openmbean.CompositeData;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> javax.management.openmbean.CompositeDataSupport;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Joiner;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableMap;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> javax.management.Attribute;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> javax.management.ObjectInstance;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> javax.management.ObjectName;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> javax.management.openmbean.CompositeData;
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> javax.management.openmbean.CompositeType;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> javax.management.openmbean.TabularDataSupport;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> javax.management.openmbean.TabularData;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Array;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> java.util.List;
@@ -66,135 +66,140 @@
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  	}
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">public</strong> ImmutableList&lt;Result&gt; getResults() {
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  		Builder&lt;Result&gt; accumulator = ImmutableList.builder();
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  		ResultsBuilder builder = <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/JmxResultProcessor.html">ResultsBuilder</a>();
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">for</strong> (Attribute attribute : attributes) {
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			getResult(accumulator, attribute);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			builder.add(attribute.getName(), attribute.getValue());
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		}
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		<strong class="jxr_keyword">return</strong> accumulator.build();
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		<strong class="jxr_keyword">return</strong> builder.build();
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  	}
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment">	 * Used when the object is effectively a java type</em>
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> getResult(Builder&lt;Result&gt; accumulator, Attribute attribute) {
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		Object value = attribute.getValue();
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<strong class="jxr_keyword">if</strong> (value == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		}
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">if</strong> (value instanceof CompositeData) {
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			getResult(accumulator, attribute.getName(), (CompositeData) value);
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof CompositeData[]) {
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			<strong class="jxr_keyword">for</strong> (CompositeData cd : (CompositeData[]) value) {
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  				getResult(accumulator, attribute.getName(), cd);
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			}
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof ObjectName[]) {
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			Map&lt;String, Object&gt; values = newHashMap();
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			<strong class="jxr_keyword">for</strong> (ObjectName obj : (ObjectName[]) value) {
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  				values.put(obj.getCanonicalName(), obj.getKeyPropertyListString());
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			}
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			Result r = getNewResultObject(attribute.getName(), values);
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			accumulator.add(r);
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value.getClass().isArray()) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			<em class="jxr_comment">// OMFG: this is nutty. some of the items in the array can be</em>
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			<em class="jxr_comment">// primitive! great interview question!</em>
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			Map&lt;String, Object&gt; values = newHashMap();
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; Array.getLength(value); i++) {
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  				Object val = Array.get(value, i);
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  				values.put(attribute.getName() + <span class="jxr_string">"."</span> + i, val);
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			}
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			accumulator.add(getNewResultObject(attribute.getName(), values));
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof TabularDataSupport) {
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			TabularDataSupport tds = (TabularDataSupport) value;
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			Map&lt;String, Object&gt; values = Collections.emptyMap();
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			Result r = getNewResultObject(attribute.getName(), values);
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			processTabularDataSupport(accumulator, attribute.getName(), tds);
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			accumulator.add(r);
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		}  <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof Map) {
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			Result r = getNewResultObject(attribute.getName(), convertKeysToString((Map&lt;Object, Object&gt;) value));
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			accumulator.add(r);
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			Map&lt;String, Object&gt; values = newHashMap();
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			values.put(attribute.getName(), value);
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			Result r = getNewResultObject(attribute.getName(), values);
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			accumulator.add(r);
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		}
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	}
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">private</strong> &lt;K, V&gt; ImmutableMap&lt;String, V&gt; convertKeysToString(Map&lt;K, V&gt; value) {
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		ImmutableMap.Builder&lt;String, V&gt; values = ImmutableMap.builder();
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">for</strong> (Map.Entry&lt;K, V&gt; entry : value.entrySet()) {
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			values.put(entry.getKey().toString(), entry.getValue());
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		}
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		<strong class="jxr_keyword">return</strong> values.build();
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	}
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">	 * Populates the Result objects. This is a recursive function. Query</em>
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">	 * contains the keys that we want to get the values of.</em>
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> getResult(Builder&lt;Result&gt; accumulator, String attributeName, CompositeData cds) {
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 		CompositeType t = cds.getCompositeType();
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		Map&lt;String, Object&gt; values = newHashMap();
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		Set&lt;String&gt; keys = t.keySet();
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 		<strong class="jxr_keyword">for</strong> (String key : keys) {
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			Object value = cds.get(key);
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			<strong class="jxr_keyword">if</strong> (value instanceof TabularDataSupport) {
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 				TabularDataSupport tds = (TabularDataSupport) value;
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 				processTabularDataSupport(accumulator, attributeName + <span class="jxr_string">"."</span> + key, tds);
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 				<em class="jxr_comment">// continue because we added tabular contents within above, but need primitives at this level</em>
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof CompositeDataSupport) {
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 				<em class="jxr_comment">// now recursively go through everything.</em>
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 				CompositeDataSupport cds2 = (CompositeDataSupport) value;
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 				getResult(accumulator, attributeName, cds2);
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 				<strong class="jxr_keyword">return</strong>; <em class="jxr_comment">// because we don't want to add to the list yet.</em>
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 				values.put(key, value);
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			}
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 		}
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 		Result r = getNewResultObject(attributeName, values);
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 		accumulator.add(r);
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 	}
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> processTabularDataSupport(
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			Builder&lt;Result&gt; accumulator, String attributeName,
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			TabularDataSupport tds) {
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 		Set&lt;Map.Entry&lt;Object, Object&gt;&gt; entries = tds.entrySet();
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		<strong class="jxr_keyword">for</strong> (Map.Entry&lt;Object, Object&gt; entry : entries) {
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			Object entryKeys = entry.getKey();
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			<strong class="jxr_keyword">if</strong> (entryKeys instanceof List) {
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 				<em class="jxr_comment">// ie: attributeName=LastGcInfo.Par Survivor Space</em>
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 				<em class="jxr_comment">// i haven't seen this be smaller or larger than List&lt;1&gt;, but</em>
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 				<em class="jxr_comment">// might as well loop it.</em>
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 				StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 				<strong class="jxr_keyword">for</strong> (Object entryKey : (List&lt;?&gt;) entryKeys) {
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 					sb.append(<span class="jxr_string">"."</span>);
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 					sb.append(entryKey);
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 				}
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 				String attributeName2 = sb.toString();
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 				Object entryValue = entry.getValue();
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 				<strong class="jxr_keyword">if</strong> (entryValue instanceof CompositeDataSupport) {
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 					getResult(accumulator, attributeName + attributeName2, (CompositeDataSupport) entryValue);
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"!!!!!!!!!! Please file a bug: https://github.com/jmxtrans/jmxtrans/issues entryValue is: "</span>
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 							+ entryValue.getClass().getCanonicalName());
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 				}
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"!!!!!!!!!! Please file a bug: https://github.com/jmxtrans/jmxtrans/issues entryKeys is: "</span>
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 						+ entryKeys.getClass().getCanonicalName());
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 			}
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		}
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 	}
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">	 * Builds up the base Result object</em>
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 	<strong class="jxr_keyword">private</strong> <a href="../../../../com/googlecode/jmxtrans/model/Result.html">Result</a> getNewResultObject(String attributeName, Map&lt;String, Object&gt; values) {
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/Result.html">Result</a>(System.currentTimeMillis(), attributeName, className, objDomain, query.getResultAlias(), objectInstance.getObjectName().getKeyPropertyListString(), values);
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 	}
-<a class="jxr_linenumber" name="L189" href="#L189">189</a> }
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment">	 * Result list builders.</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">	 * Recursively walks in the value to add results.</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../com/googlecode/jmxtrans/model/JmxResultProcessor.html">ResultsBuilder</a> {
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Builder&lt;Result&gt; accumulator = ImmutableList.builder();
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> epoch = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment">		 * Add one or more results from a value of any type.</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">		 * This is a recursive function.</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> add(String name, Object value) {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  			<strong class="jxr_keyword">if</strong> (value == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  				<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			}
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			<strong class="jxr_keyword">if</strong> (value instanceof CompositeData) {
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  				add(name, (CompositeData) value);
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof CompositeData[]) {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  				<strong class="jxr_keyword">for</strong> (CompositeData cd : (CompositeData[]) value) {
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  					add(name, cd);
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  				}
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof ObjectName[]) {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				add(name, (ObjectName[]) value);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value.getClass().isArray()) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  				<em class="jxr_comment">// OMFG: this is nutty. some of the items in the array can be</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  				<em class="jxr_comment">// primitive! great interview question!</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  				Map&lt;String, Object&gt; values = newHashMap();
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  				<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; Array.getLength(value); i++) {
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  					Object val = Array.get(value, i);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  					values.put(name + <span class="jxr_string">"."</span> + i, val);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  				}
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 				addNew(name, values);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof TabularData) {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 				add(name, (TabularData) value);
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			}  <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof Map) {
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 				add(name, (Map&lt;Object, Object&gt;) value);
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 				addNew(name, Collections.singletonMap(name, value));
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			}
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		}
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">		 * Add results from a value of type map.</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> add(String attributeName, Map&lt;Object, Object&gt; map) {
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			ImmutableMap.Builder&lt;String, Object&gt; values = ImmutableMap.builder();
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<strong class="jxr_keyword">for</strong> (Map.Entry&lt;Object, Object&gt; entry : map.entrySet()) {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				values.put(entry.getKey().toString(), entry.getValue());
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 			}
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			addNew(attributeName, values.build());
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		}
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">		 * Add results from a value of type objet name array.</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> add(String attributeName, ObjectName[] objs) {
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			ImmutableMap.Builder&lt;String, Object&gt; values = ImmutableMap.builder();
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			<strong class="jxr_keyword">for</strong> (ObjectName obj : objs) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 				values.put(obj.getCanonicalName(), obj.getKeyPropertyListString());
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			}
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 			addNew(attributeName, values.build());
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		}
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_javadoccomment">		 * Add results from a value of type composite data.</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment">		 * This is a recursive function.</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> add(String attributeName, CompositeData cds) {
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			CompositeType t = cds.getCompositeType();
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			Map&lt;String, Object&gt; values = newHashMap();
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			Set&lt;String&gt; keys = t.keySet();
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			<strong class="jxr_keyword">for</strong> (String key : keys) {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 				Object value = cds.get(key);
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 				<strong class="jxr_keyword">if</strong> (value instanceof TabularData) {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 					TabularData tds = (TabularData) value;
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 					add(attributeName + <span class="jxr_string">"."</span> + key, tds);
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 					<em class="jxr_comment">// continue because we added tabular contents within above, but need primitives at this level</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (value instanceof CompositeData) {
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 					<em class="jxr_comment">// now recursively go through everything.</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 					CompositeData cds2 = (CompositeData) value;
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 					add(attributeName, cds2);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 					<strong class="jxr_keyword">return</strong>; <em class="jxr_comment">// because we don't want to add to the list yet.</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 					values.put(key, value);
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 				}
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			}
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			addNew(attributeName, values);
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 		}
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">		 * Add results from a value of type tabular data.</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">		 * This is a recursive function.</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> add(String attributeName, TabularData tds) {
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			<em class="jxr_comment">// @see TabularData#keySet JavaDoc:</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			<em class="jxr_comment">// "Set&lt;List&lt;?&gt;&gt;" but is declared as a {@code Set&lt;?&gt;} for</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			<em class="jxr_comment">// compatibility reasons. The returned set can be used to iterate</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			<em class="jxr_comment">// over the keys."</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 			Set&lt;List&lt;?&gt;&gt; keys = (Set&lt;List&lt;?&gt;&gt;) tds.keySet();
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 			<strong class="jxr_keyword">for</strong> (List&lt;?&gt; key: keys) {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 				<em class="jxr_comment">// ie: attributeName=LastGcInfo.Par Survivor Space</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 				<em class="jxr_comment">// i haven't seen this be smaller or larger than List&lt;1&gt;, but</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 				<em class="jxr_comment">// might as well loop it.</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 				CompositeData compositeData = tds.get(key.toArray());
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 				String attributeName2 = Joiner.on('.').join(key);
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 				add(attributeName + <span class="jxr_string">"."</span> + attributeName2, compositeData);
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 			}
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		}
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">		 * Create and add a new result.</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addNew(String attributeName, Map&lt;String, Object&gt; values) {
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 			accumulator.add(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/model/Result.html">Result</a>(epoch, attributeName, className, objDomain, query.getResultAlias(), objectInstance.getObjectName().getKeyPropertyListString(), values));
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 		}
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">		 * Return the built list</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 		<strong class="jxr_keyword">public</strong> ImmutableList&lt;Result&gt; build() {
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 			<strong class="jxr_keyword">return</strong> accumulator.build();
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 		}
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 	}
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>
