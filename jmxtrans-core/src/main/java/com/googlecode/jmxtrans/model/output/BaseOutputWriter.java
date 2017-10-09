@@ -107,7 +107,7 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 				false);
 
 		// Get the value of the boolean from the JSON settings if it exists, otherwise default it to the value
-		// of the boolean passed into the Constructor. 
+		// of the boolean passed into the Constructor.
 		booleanAsNumber = getBooleanSetting(this.settings, BOOLEAN_AS_NUMBER, booleanAsNumber);
 
 		if (booleanAsNumber) {
@@ -119,6 +119,10 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 
 	protected <T> T firstNonNull(@Nullable T first, @Nullable T second, @Nullable T third) {
 		return first != null ? first : (second != null ? second : checkNotNull(third));
+	}
+
+	protected <T> T firstNonNull(@Nullable T first, @Nullable T second) {
+		return firstNonNull(first, second, null);
 	}
 
 	/**

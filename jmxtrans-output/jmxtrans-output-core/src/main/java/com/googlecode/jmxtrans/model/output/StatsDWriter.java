@@ -134,10 +134,11 @@ public class StatsDWriter extends BaseOutputWriter {
 		if (port == null) {
 			port = Settings.getIntegerSetting(getSettings(), PORT, null);
 		}
+		this.replacementForInvalidChar = firstNonNull(replacementForInvalidChar, "_");
+
 		checkNotNull(host, "Host cannot be null");
 		checkNotNull(port, "Port cannot be null");
 		this.address = new InetSocketAddress(host, port);
-		this.replacementForInvalidChar = replacementForInvalidChar;
 	}
 
 	@Override
@@ -197,11 +198,7 @@ public class StatsDWriter extends BaseOutputWriter {
 				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix);
 
 				// These characters can mess with formatting.
-				String replaceString = "_";
-				if (this.replacementForInvalidChar != null){
-					replaceString = this.replacementForInvalidChar;
-				}
-				line = STATSD_INVALID.matcher(line).replaceAll(replaceString);
+				line = STATSD_INVALID.matcher(line).replaceAll(this.replacementForInvalidChar);
 				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
 
 				doSend(line.trim());
