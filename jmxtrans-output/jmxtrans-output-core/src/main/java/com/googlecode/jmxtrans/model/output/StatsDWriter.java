@@ -54,6 +54,7 @@ import java.nio.channels.DatagramChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
@@ -80,6 +81,7 @@ public class StatsDWriter extends BaseOutputWriter {
 
 	private final String bucketType;
 	private final String rootPrefix;
+	private final String invalidCharValue;
 	private final InetSocketAddress address;
 	private final DatagramChannel channel;
 	private final Boolean stringsValuesAsKey;
@@ -107,7 +109,9 @@ public class StatsDWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty(STRING_VALUE_AS_KEY) Boolean stringsValuesAsKey,
 			@JsonProperty(STRING_VALUE_DEFAULT_COUNTER) Long stringValueDefaultCount,
-			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
+			@JsonProperty("settings") Map<String, Object> settings,
+			@JsonProperty("invalidCharValue") String invalidCharValue
+			) throws IOException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		log.warn("StatsDWriter is deprecated. Please use StatsDWriterFactory instead.");
 		channel = DatagramChannel.open();
@@ -132,6 +136,7 @@ public class StatsDWriter extends BaseOutputWriter {
 		checkNotNull(host, "Host cannot be null");
 		checkNotNull(port, "Port cannot be null");
 		this.address = new InetSocketAddress(host, port);
+		this.invalidCharValue = invalidCharValue;
 	}
 
 	@Override
@@ -188,8 +193,16 @@ public class StatsDWriter extends BaseOutputWriter {
 					continue;
 				}
 
-				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-						+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
+				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix);
+
+				// These characters can mess with formatting.
+				String replaceString = "_";
+				if (this.invalidCharValue != null){
+					replaceString = this.invalidCharValue;
+				}
+				Pattern invalidChar = Pattern.compile("[:|]");
+				line = invalidChar.matcher(line).replaceAll(replaceString);
+				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
 
 				doSend(line.trim());
 			}
