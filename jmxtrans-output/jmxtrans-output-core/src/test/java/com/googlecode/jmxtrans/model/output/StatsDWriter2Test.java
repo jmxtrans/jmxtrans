@@ -37,7 +37,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void writeNumericResult() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L, null);
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleNumericResult());
@@ -48,7 +48,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void valuesTruncatedToCPrecision() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L, null);
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleNumericBelowCPrecisionResult());
@@ -59,7 +59,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void ignoreNonNumericValues() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L, null);
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleTrueResult());
@@ -69,7 +69,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void handleNaNValues() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L, null);
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleResult(numericResult(Double.NaN)));
@@ -80,7 +80,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void nonNumericValuesAsKey() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L, null);
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleTrueResult());
@@ -91,7 +91,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void multipleValuesAreSeparatedByNewLine() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L, null);
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), dummyResults());
