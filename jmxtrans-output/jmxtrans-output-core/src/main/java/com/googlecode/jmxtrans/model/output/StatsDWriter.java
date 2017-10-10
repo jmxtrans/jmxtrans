@@ -36,6 +36,7 @@ import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
+import com.google.common.base.MoreObjects;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -134,7 +135,7 @@ public class StatsDWriter extends BaseOutputWriter {
 		if (port == null) {
 			port = Settings.getIntegerSetting(getSettings(), PORT, null);
 		}
-		this.replacementForInvalidChar = com.google.common.base.MoreObjects.firstNonNull(replacementForInvalidChar, "_");
+		this.replacementForInvalidChar = MoreObjects.firstNonNull(replacementForInvalidChar, "_");
 
 		checkNotNull(host, "Host cannot be null");
 		checkNotNull(port, "Port cannot be null");
