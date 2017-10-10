@@ -134,7 +134,7 @@ public class StatsDWriter extends BaseOutputWriter {
 		if (port == null) {
 			port = Settings.getIntegerSetting(getSettings(), PORT, null);
 		}
-		this.replacementForInvalidChar = firstNonNull(replacementForInvalidChar, "_");
+		this.replacementForInvalidChar = com.google.common.base.MoreObjects.firstNonNull(replacementForInvalidChar, "_");
 
 		checkNotNull(host, "Host cannot be null");
 		checkNotNull(port, "Port cannot be null");

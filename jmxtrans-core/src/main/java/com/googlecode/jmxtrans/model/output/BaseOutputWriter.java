@@ -120,11 +120,7 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 	protected <T> T firstNonNull(@Nullable T first, @Nullable T second, @Nullable T third) {
 		return first != null ? first : (second != null ? second : checkNotNull(third));
 	}
-
-	protected <T> T firstNonNull(@Nullable T first, @Nullable T second) {
-		return firstNonNull(first, second, null);
-	}
-
+	
 	/**
 	 * @deprecated Don't use the settings Map, please extract necessary bits at construction time.
 	 */
