@@ -82,7 +82,7 @@ public class InfluxDbWriterTests {
 	private static final ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = ImmutableSet.copyOf(ResultAttributes.values());
 
 	Result result = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "type=test,name=name",
-			ImmutableMap.of("key", (Object) 1));
+			ImmutableList.of("key"), 1);
 	ImmutableList<Result> results = ImmutableList.of(result);
 
 	@Test
@@ -158,7 +158,7 @@ public class InfluxDbWriterTests {
 		assertThat(points).hasSize(1);
 
 		Point point = points.get(0);
-		assertThat(point.lineProtocol()).contains("name.key");
+		assertThat(point.lineProtocol()).contains("name.attributeName_key");
 	}
 
 	@Test
@@ -185,11 +185,11 @@ public class InfluxDbWriterTests {
 			BatchPoints batchPoints = messageCaptor.getValue();
 			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
 
-			assertThat(lineProtocol).contains(expectedResultTag.getName());
+			assertThat(lineProtocol).contains(expectedResultTag.getName()+"=");
 			Set<ResultAttribute> unexpectedResultTags = new HashSet<ResultAttribute>(ResultAttributes.values());
 			unexpectedResultTags.remove(expectedResultTag);
 			for (ResultAttribute unexpectedResultTag : unexpectedResultTags) {
-				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getName());
+				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getName()+"=");
 			}
 		}
 	}

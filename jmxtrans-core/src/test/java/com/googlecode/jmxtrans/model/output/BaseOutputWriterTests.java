@@ -50,6 +50,10 @@ public class BaseOutputWriterTests {
 		System.setProperty("myPort", "123");
 	}
 
+	private Result newBooleanResult(boolean value) {
+		return new Result(0, "", "", "", "", "", ImmutableList.<String>of(Boolean.toString(value)), value);
+	}
+
 	@Test
 	public void booleanValuesAreTransformedToNumber() throws Exception {
 		final ArrayList<Result> processedResults = Lists.newArrayList();
@@ -63,13 +67,12 @@ public class BaseOutputWriterTests {
 			public void validateSetup(Server server, Query query) throws ValidationException {
 			}
 		};
-		Result result = new Result(0, "", "", "", "", "", ImmutableMap.<String, Object>of("true", true, "false", false));
-		outputWriter.doWrite(null, null, ImmutableList.of(result));
+		ImmutableList<Result> results = ImmutableList.of(newBooleanResult(true), newBooleanResult(false));
+		outputWriter.doWrite(null, null, results);
 
-		assertThat(processedResults).hasSize(1);
-		Result processedResult = processedResults.get(0);
-		assertThat(processedResult.getValues().get("true")).isEqualTo(1);
-		assertThat(processedResult.getValues().get("false")).isEqualTo(0);
+		assertThat(processedResults).hasSize(2);
+		assertThat(processedResults.get(0).getValue()).isEqualTo(1);
+		assertThat(processedResults.get(1).getValue()).isEqualTo(0);
 	}
 
 	@Test
@@ -85,13 +88,12 @@ public class BaseOutputWriterTests {
 			public void validateSetup(Server server, Query query) throws ValidationException {
 			}
 		};
-		Result result = new Result(0, "", "", "", "", "", ImmutableMap.<String, Object>of("true", true, "false", false));
-		outputWriter.doWrite(null, null, ImmutableList.of(result));
+		ImmutableList<Result> results = ImmutableList.of(newBooleanResult(true), newBooleanResult(false));
+		outputWriter.doWrite(null, null, results);
 
-		assertThat(processedResults).hasSize(1);
-		Result processedResult = processedResults.get(0);
-		assertThat(processedResult.getValues().get("true")).isEqualTo(true);
-		assertThat(processedResult.getValues().get("false")).isEqualTo(false);
+		assertThat(processedResults).hasSize(2);
+		assertThat(processedResults.get(0).getValue()).isEqualTo(true);
+		assertThat(processedResults.get(1).getValue()).isEqualTo(false);
 	}
 
 	@After

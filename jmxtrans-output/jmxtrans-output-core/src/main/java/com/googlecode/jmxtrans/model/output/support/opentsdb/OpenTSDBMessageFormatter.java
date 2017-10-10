@@ -154,16 +154,11 @@ public class OpenTSDBMessageFormatter {
 	*/
 	private List<String> formatResult(Result result, Server server) {
 		List<String> resultStrings = new LinkedList<>();
-		Map<String, Object> values = result.getValues();
 
-		String attributeName = result.getAttributeName();
-
-		if (values.containsKey(attributeName) && values.size() == 1) {
-			processOneMetric(resultStrings, server, result, values.get(attributeName), null, null);
+		if (result.getValuePath().isEmpty()) {
+			processOneMetric(resultStrings, server, result, result.getValue(), null, null);
 		} else {
-			for (Map.Entry<String, Object> valueEntry : values.entrySet()) {
-				processOneMetric(resultStrings, server, result, valueEntry.getValue(), tagName, valueEntry.getKey());
-			}
+			processOneMetric(resultStrings, server, result, result.getValue(), tagName, StringUtils.join(result.getValuePath(), '.'));
 		}
 		return resultStrings;
 	}

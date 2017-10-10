@@ -61,7 +61,8 @@ public class ResultTransformerOutputWriterTest {
 		assertThat(resultsCaptor.getValue()).hasSize(1);
 
 		Result transformedResult = resultsCaptor.getValue().get(0);
-		assertThat(transformedResult.getValues()).containsEntry("Verbose", 1);
+		assertThat(transformedResult.getValue()).isEqualTo(1);
+		assertThat(transformedResult.getValuePath()).isEmpty();
 	}
 
 	@Test
@@ -74,7 +75,8 @@ public class ResultTransformerOutputWriterTest {
 		assertThat(resultsCaptor.getValue()).hasSize(1);
 
 		Result transformedResult = resultsCaptor.getValue().get(0);
-		assertThat(transformedResult.getValues()).containsEntry("Verbose", FALSE);
+		assertThat(transformedResult.getValue()).isEqualTo(FALSE);
+		assertThat(transformedResult.getValuePath()).isEmpty();
 	}
 
 }

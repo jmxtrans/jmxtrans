@@ -98,7 +98,7 @@ public class JmxProcessingTests {
 		assertThat(results).hasSize(1);
 
 		Result result = results.get(0);
-		assertThat(result.getValues().get("DummyValue")).isEqualTo(123);
+		assertThat(result.getValue()).isEqualTo(123);
 	}
 
 

@@ -31,6 +31,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jrobin.core.RrdDb;
 import org.jrobin.core.RrdDef;
 import org.jrobin.core.RrdDefTemplate;
@@ -40,7 +41,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
@@ -48,12 +48,12 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 /**
  * This takes a JRobin template.xml file and then creates the database if it
  * doesn't already exist.
- * 
+ *
  * It will then write the contents of the Query (the Results) to the database.
- * 
+ *
  * This uses the JRobin rrd format and is incompatible with the C version of
  * rrd.
- * 
+ *
  * @author jon
  */
 public class RRDWriter extends BaseOutputWriter {
@@ -90,10 +90,9 @@ public class RRDWriter extends BaseOutputWriter {
 			// go over all the results and look for datasource names that map to
 			// keys from the result values
 			for (Result res : results) {
-				for (Entry<String, Object> entry : res.getValues().entrySet()) {
-					if (dsNames.contains(entry.getKey()) && isNumeric(entry.getValue())) {
-						sample.setValue(entry.getKey(), Double.valueOf(entry.getValue().toString()));
-					}
+				String key = StringUtils.join(res.getValuePath(), '.');
+				if (dsNames.contains(key) && isNumeric(res.getValue())) {
+					sample.setValue(key, Double.valueOf(res.getValue().toString()));
 				}
 			}
 			sample.update();

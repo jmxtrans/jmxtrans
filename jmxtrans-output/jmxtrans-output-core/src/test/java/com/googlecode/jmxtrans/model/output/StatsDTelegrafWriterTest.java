@@ -48,7 +48,7 @@ public class StatsDTelegrafWriterTest {
     @Test
     public void hashResultAttribues() throws IOException {
         StatsDTelegrafWriter w = new StatsDTelegrafWriter(new String[]{StatsDMetricType.COUNTER.getKey()}, ImmutableMap.<String, String>of(), ImmutableSet.<ResultAttribute>of());
-        w.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(hashResult()) );
+        w.write(writer, dummyServer(), dummyQuery(), hashResults());
         assertThat(writer.toString()).isEqualTo(
 			"MemoryAlias,jmxport=4321,attribute=NonHeapMemoryUsage,resultKey=committed:12345|c\n" +
 			"MemoryAlias,jmxport=4321,attribute=NonHeapMemoryUsage,resultKey=init:23456|c\n" +

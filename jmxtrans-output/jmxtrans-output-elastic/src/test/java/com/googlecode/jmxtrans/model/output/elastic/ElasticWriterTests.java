@@ -83,7 +83,7 @@ public class ElasticWriterTests {
 	public void initializeMocks() throws IOException {
 		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
 		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
-		result = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
+		result = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableList.of("key"), 1);
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class ElasticWriterTests {
 
 	@Test
 	public void sendNonNumericMessageToElastic() throws Exception {
-		Result resultWithNonNumericValue = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)"abc"));
+		Result resultWithNonNumericValue = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableList.of("key"), "abc");
 
 		writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(resultWithNonNumericValue));
 
@@ -158,7 +158,7 @@ public class ElasticWriterTests {
         String key = "myKey";
         int value = 1122;
 
-        Result resultWithKnownValues = new Result(epoch, attributeName, className, objDomain, classNameAlias, typeName, ImmutableMap.of(key, (Object) value));
+        Result resultWithKnownValues = new Result(epoch, attributeName, className, objDomain, classNameAlias, typeName, ImmutableList.of(key), value);
 
         ArgumentCaptor<Index> argument = ArgumentCaptor.forClass(Index.class);
 

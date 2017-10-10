@@ -51,8 +51,8 @@ public class SslJmxTransformerIT {
 
     @Test
     public void metricsAreSentToStdout() throws Exception {
-        await().atMost(5, SECONDS).until(new JmxTransStdoutContains("Value=1"));
-        await().atMost(5, SECONDS).until(new JmxTransStdoutContains("Value=2"));
+        await().atMost(5, SECONDS).until(new JmxTransStdoutContains("value=1"));
+        await().atMost(5, SECONDS).until(new JmxTransStdoutContains("value=2"));
     }
 
     private class JmxTransStdoutContains implements Callable<Boolean> {

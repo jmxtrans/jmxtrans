@@ -53,7 +53,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
@@ -181,18 +180,16 @@ public class StatsDWriter extends BaseOutputWriter {
 		for (Result result : results) {
 			log.debug(result.toString());
 
-			for (Entry<String, Object> values : result.getValues().entrySet()) {
-
-				if (isNotValidValue(values.getValue())) {
-					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
-					continue;
-				}
-
-				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-						+ computeActualValue(values.getValue()) + "|" + bucketType + "\n";
-
-				doSend(line.trim());
+			String key = KeyUtils.getKeyString(server, query, result, typeNames, rootPrefix);
+			if (isNotValidValue(result.getValue())) {
+				log.debug("Skipping message key[{}] with value: {}.", key, result.getValue());
+				continue;
 			}
+
+			String line = key
+					+ computeActualValue(result.getValue()) + "|" + bucketType + "\n";
+
+			doSend(line.trim());
 		}
 	}
 

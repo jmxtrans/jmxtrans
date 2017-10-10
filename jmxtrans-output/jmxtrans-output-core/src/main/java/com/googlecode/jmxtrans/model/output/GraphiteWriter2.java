@@ -37,7 +37,6 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Map;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isValidNumber;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -65,19 +64,16 @@ public class GraphiteWriter2 implements WriterBasedOutputWriter {
 
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
-			Map<String, Object> resultValues = result.getValues();
-			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-				Object value = values.getValue();
-				if (isValidNumber(value)) {
+			Object value = result.getValue();
+			if (isValidNumber(value)) {
 
-					String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-							.replaceAll("[()]", "_") + " " + value.toString() + " "
-							+ SECONDS.convert(result.getEpoch(), MILLISECONDS) + "\n";
-					log.debug("Graphite Message: {}", line);
-					writer.write(line);
-				} else {
-					onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
-				}
+				String line = KeyUtils.getKeyString(server, query, result, typeNames, rootPrefix)
+						.replaceAll("[()]", "_") + " " + value.toString() + " "
+						+ SECONDS.convert(result.getEpoch(), MILLISECONDS) + "\n";
+				log.debug("Graphite Message: {}", line);
+				writer.write(line);
+			} else {
+				onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 			}
 		}
 	}

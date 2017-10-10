@@ -169,15 +169,11 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
 
-			Map<String, Object> resultValues = result.getValues();
-
 			HashMap<String, Object> filteredValues = newHashMap();
-			for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-				Object value = values.getValue();
-				if (isValidNumber(value)) {
-					String key = KeyUtils.getPrefixedKeyString(query, result, values, typeNames, values.getKey());
-					filteredValues.put(key, value);
-				}
+			Object value = result.getValue();
+			if (isValidNumber(value)) {
+				String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
+				filteredValues.put(key, value);
 			}
 
 			// send the point if filteredValues isn't empty

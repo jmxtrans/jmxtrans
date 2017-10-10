@@ -23,10 +23,9 @@
 package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -37,9 +36,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
@@ -48,27 +45,16 @@ import static java.util.Collections.singletonList;
 @EqualsAndHashCode(exclude = {"objectMapper"})
 public class DetailedResultSerializer implements ResultSerializer {
 	private final ObjectMapper objectMapper;
-	@Getter
-	private final boolean singleValue;
 
 	@JsonCreator
-	public DetailedResultSerializer(@JsonProperty(value = "singleValue", defaultValue = "false") boolean singleValue) {
+	public DetailedResultSerializer() {
 		this.objectMapper = new ObjectMapper();
-		this.singleValue = singleValue;
 	}
 
 	@Nonnull
 	@Override
 	public Collection<String> serialize(final Server server, final Query query, final Result result) throws IOException {
-		if (singleValue) {
-			List<String> messages = new ArrayList<>();
-			for (String valueName : result.getValues().keySet()) {
-				messages.add(objectMapper.writeValueAsString(new SingleValueResult(server, result, valueName)));
-			}
-			return messages;
-		} else {
-			return singletonList(objectMapper.writeValueAsString(new MultiValuesResult(server, result)));
-		}
+		return singletonList(objectMapper.writeValueAsString(new KResult(server, result)));
 	}
 
 	/**
@@ -77,7 +63,7 @@ public class DetailedResultSerializer implements ResultSerializer {
 	@JsonSerialize(include = NON_NULL)
 	@Immutable
 	@ThreadSafe
-	private static abstract class KResult {
+	private static class KResult {
 		// Server
 		@Getter
 		private final String alias;
@@ -104,6 +90,10 @@ public class DetailedResultSerializer implements ResultSerializer {
 		private final long epoch;
 		@Getter
 		private final String keyAlias;
+		@Getter
+		private final ImmutableList<String> valuePath;
+		@Getter
+		private final Object value;
 
 		private KResult(Server server, Result result) {
 			alias = server.getAlias();
@@ -118,35 +108,8 @@ public class DetailedResultSerializer implements ResultSerializer {
 			typeNameMap = result.getTypeNameMap();
 			epoch = result.getEpoch();
 			keyAlias = result.getKeyAlias();
-		}
-	}
-
-	@JsonSerialize(include = NON_NULL)
-	@Immutable
-	@ThreadSafe
-	private static class MultiValuesResult extends KResult {
-		@Getter
-		private final ImmutableMap<String, Object> values;
-
-		private MultiValuesResult(Server server, Result result) {
-			super(server, result);
-			this.values = result.getValues();
-		}
-	}
-
-	@JsonSerialize(include = NON_NULL)
-	@Immutable
-	@ThreadSafe
-	private static class SingleValueResult extends KResult {
-		@Getter
-		private final String valueName;
-		@Getter
-		private final Object value;
-
-		private SingleValueResult(Server server, Result result, String valueName) {
-			super(server, result);
-			this.valueName = valueName;
-			this.value = result.getValues().get(valueName);
+			this.valuePath = result.getValuePath();
+			this.value = result.getValue();
 		}
 	}
 }
