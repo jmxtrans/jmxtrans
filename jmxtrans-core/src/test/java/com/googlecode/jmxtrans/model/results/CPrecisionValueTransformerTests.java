@@ -84,4 +84,12 @@ public class CPrecisionValueTransformerTests {
 		assertThat(transformed).isNull();
 	}
 
+	@Test
+	public void negativeInfinityDoubleIsReturnedNull() {
+		ValueTransformer transformer = new CPrecisionValueTransformer();
+		Object transformed = transformer.apply(Double.NEGATIVE_INFINITY);
+
+		assertThat(transformed).isNull();
+	}
+
 }
