@@ -37,7 +37,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void writeNumericResult() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L, "_");
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleNumericResult());
@@ -48,7 +48,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void valuesTruncatedToCPrecision() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L, "_");
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleNumericBelowCPrecisionResult());
@@ -59,7 +59,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void ignoreNonNumericValues() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "c", false, 1L, "_");
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleTrueResult());
@@ -69,7 +69,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void handleNaNValues() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L, "_");
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleResult(numericResult(Double.NaN)));
@@ -80,7 +80,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void nonNumericValuesAsKey() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L, "_");
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), singleTrueResult());
@@ -91,7 +91,7 @@ public class StatsDWriter2Test {
 
 	@Test
 	public void multipleValuesAreSeparatedByNewLine() throws IOException {
-		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L);
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.<String>of(), "root", "g", true, 1L, "_");
 
 		StringWriter out = new StringWriter();
 		writer.write(out, dummyServer(), dummyQuery(), dummyResults());
@@ -101,4 +101,17 @@ public class StatsDWriter2Test {
 						"root.host_example_net_4321.VerboseMemory.Verbose.true:1|g\n" +
 						"root.host_example_net_4321.VerboseMemory.Verbose.false:1|g\n");
 	}
+
+	@Test
+	public void badKeyNameNoInvalidCharProvided() throws IOException {
+		StatsDWriter2 writer = new StatsDWriter2(ImmutableList.of("scope", "name"), "root", "g", true, 1L, "___");
+
+		StringWriter out = new StringWriter();
+		writer.write(out, dummyServer(), dummyQuery(), dummyResultWithColon());
+
+		assertThat(out.toString())
+				.isEqualTo("root.host_example_net_4321.com_yammer_metrics_reporting_JmxReporter$Meter.127_0_0_1___8008_4XX.Count:10|g\n" +
+						"root.host_example_net_4321.VerboseMemory.Verbose.true:1|g\n");
+	}
+
 }
