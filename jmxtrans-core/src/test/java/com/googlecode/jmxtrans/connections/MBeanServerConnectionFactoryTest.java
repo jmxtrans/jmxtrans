@@ -22,12 +22,12 @@
  */
 package com.googlecode.jmxtrans.connections;
 
+import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.junit.Test;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -39,7 +39,7 @@ public class MBeanServerConnectionFactoryTest {
 	private MBeanServerConnectionFactory factory = new MBeanServerConnectionFactory();
 
 	@Test
-	public void connectionIsCreatedForRemoteServer() throws IOException {
+	public void connectionIsCreatedForRemoteServer() throws Exception {
 		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		JMXConnector jmxConnector = mock(JMXConnector.class);
 		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
@@ -47,28 +47,28 @@ public class MBeanServerConnectionFactoryTest {
 		when(server.getServerConnection()).thenReturn(jmxConnector);
 		when(jmxConnector.getMBeanServerConnection()).thenReturn(mBeanServerConnection);
 
-		JMXConnection jmxConnection = factory.makeObject(server);
+		JMXConnection jmxConnection = factory.makeObject(server).getObject();
 
 		assertThat(jmxConnection.getMBeanServerConnection()).isSameAs(mBeanServerConnection);
 	}
 
 	@Test
-	public void connectionIsCreatedForLocalServer() throws IOException {
+	public void connectionIsCreatedForLocalServer() throws Exception {
 		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		MBeanServer mBeanServerConnection = mock(MBeanServer.class);
 		when(server.isLocal()).thenReturn(true);
 		when(server.getLocalMBeanServer()).thenReturn(mBeanServerConnection);
 
-		JMXConnection jmxConnection = factory.makeObject(server);
+		JMXConnection jmxConnection = factory.makeObject(server).getObject();
 
 		assertThat(jmxConnection.getMBeanServerConnection()).isSameAs(mBeanServerConnection);
 	}
 
 	@Test
-	public void connectionIsClosedOnDestroy() throws IOException {
+	public void connectionIsClosedOnDestroy() throws Exception {
 		JMXConnection connection = mock(JMXConnection.class);
 
-		factory.destroyObject(null, connection);
+		factory.destroyObject(null, new DefaultPooledObject(connection));
 
 		verify(connection).close();
 	}

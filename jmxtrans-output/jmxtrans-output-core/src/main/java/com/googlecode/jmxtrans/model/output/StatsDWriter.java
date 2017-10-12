@@ -34,16 +34,16 @@ import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
-import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.monitoring.ManagedObject;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool2.impl.GenericKeyedObjectPoolMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.DatagramSocket;
@@ -86,7 +86,7 @@ public class StatsDWriter extends BaseOutputWriter {
 	@Nonnull private final Long stringValueDefaultCount;
 
 	private GenericKeyedObjectPool<SocketAddress, DatagramSocket> pool;
-	private ManagedObject mbean;
+	private ObjectName mbean;
 
 	@Nonnull private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
 
@@ -143,14 +143,14 @@ public class StatsDWriter extends BaseOutputWriter {
 		try {
 			pool = new GenericKeyedObjectPool<>(new DatagramSocketFactory());
 			pool.setTestOnBorrow(true);
-			pool.setMaxActive(-1);
-			pool.setMaxIdle(-1);
+			pool.setMaxIdlePerKey(-1);
+			pool.setMaxIdlePerKey(-1);
 			pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
 			pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
 
-			this.mbean = new ManagedGenericKeyedObjectPool((GenericKeyedObjectPool) pool, "StatsdConnectionPool");
-			ManagementFactory.getPlatformMBeanServer()
-					.registerMBean(this.mbean, this.mbean.getObjectName());
+			GenericKeyedObjectPoolMXBean b = pool;
+			this.mbean = new ObjectName("com.googlecode.jmxtrans:Type=GenericKeyedObjectPool,PoolName=StatsdConnectionPool,Name=" + pool.getClass().getSimpleName() + "@" + pool.hashCode());
+			ManagementFactory.getPlatformMBeanServer().registerMBean(b, mbean);
 		} catch (Exception e) {
 			throw new LifecycleException(e);
 		}
@@ -161,7 +161,7 @@ public class StatsDWriter extends BaseOutputWriter {
 		try {
 			if (this.mbean != null) {
 				MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-				mbs.unregisterMBean(this.mbean.getObjectName());
+				mbs.unregisterMBean(this.mbean);
 				this.mbean = null;
 			}
 			if (this.pool != null) {

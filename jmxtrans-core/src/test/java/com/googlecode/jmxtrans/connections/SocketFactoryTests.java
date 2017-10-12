@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.connections;
 import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import com.googlecode.jmxtrans.test.TCPEchoServer;
+import org.apache.commons.pool2.PooledObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -46,8 +47,9 @@ public class SocketFactoryTests {
 		Closer closer = Closer.create();
 		try {
 			SocketFactory socketFactory = new SocketFactory();
-			Socket socket = closer.register(socketFactory.makeObject(getServerAddress()));
-			assertThat(socketFactory.validateObject(getServerAddress(), socket)).isTrue();
+			PooledObject<Socket> socketPooledObject = socketFactory.makeObject(getServerAddress());
+			closer.register(socketPooledObject.getObject());
+			assertThat(socketFactory.validateObject(getServerAddress(), socketPooledObject)).isTrue();
 		} catch (Throwable t) {
 			throw closer.rethrow(t);
 		} finally {
@@ -57,7 +59,9 @@ public class SocketFactoryTests {
 
 	@Test
 	public void nullSocketIsInvalid() {
-		assertThat(new SocketFactory().validateObject(getServerAddress(), null)).isFalse();
+		SocketFactory socketFactory = new SocketFactory();
+		PooledObject<Socket> pooledObject = socketFactory.wrap(null);
+		assertThat(socketFactory.validateObject(getServerAddress(), pooledObject)).isFalse();
 	}
 
 	@Test
@@ -65,9 +69,10 @@ public class SocketFactoryTests {
 		Closer closer = Closer.create();
 		try {
 			SocketFactory socketFactory = new SocketFactory();
-			Socket socket = closer.register(socketFactory.makeObject(getServerAddress()));
+			PooledObject<Socket> socketPooledObject = socketFactory.makeObject(getServerAddress());
+			Socket socket = closer.register(socketPooledObject.getObject());
 			socket.close();
-			assertThat(socketFactory.validateObject(getServerAddress(), socket)).isFalse();
+			assertThat(socketFactory.validateObject(getServerAddress(), socketPooledObject)).isFalse();
 		} catch (Throwable t) {
 			throw closer.rethrow(t);
 		} finally {

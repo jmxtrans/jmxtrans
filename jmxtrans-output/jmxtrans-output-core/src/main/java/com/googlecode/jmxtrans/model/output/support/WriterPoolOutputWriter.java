@@ -38,7 +38,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends OutputWriterAdapter{
+public class WriterPoolOutputWriter<T extends WriterBasedOutputWriter> extends OutputWriterAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(WriterPoolOutputWriter.class);
 
