@@ -151,7 +151,8 @@ public class JmxResultProcessor {
 					add(attributeName, cds2);
 					return; // because we don't want to add to the list yet.
 				} else {
-					values.put(key, value);
+					if (value !=null)						
+						values.put(key, value);
 				}
 			}
 			addNew(attributeName, values);
