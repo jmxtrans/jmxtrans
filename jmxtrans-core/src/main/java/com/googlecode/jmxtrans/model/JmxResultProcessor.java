@@ -150,7 +150,7 @@ public class JmxResultProcessor {
 					CompositeData cds2 = (CompositeData) value;
 					add(attributeName, cds2);
 					return; // because we don't want to add to the list yet.
-				} else {
+				} else if (value != null){
 					values.put(key, value);
 				}
 			}
