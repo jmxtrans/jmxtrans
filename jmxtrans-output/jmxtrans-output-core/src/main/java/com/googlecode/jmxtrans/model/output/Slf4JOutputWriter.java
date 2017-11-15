@@ -80,26 +80,24 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 		final List<String> typeNames = getTypeNames();
 
 		for (final Result result : results) {
-			for (final Map.Entry<String, Object> values : result.getValues().entrySet()) {
-				logValue(server, query, typeNames, result, values);
-			}
+			logValue(server, query, typeNames, result);
 		}
 	}
 
-	private void logValue(Server server, Query query, List<String> typeNames, Result result, Map.Entry<String, Object> values) throws IOException {
-		Object value = values.getValue();
+	private void logValue(Server server, Query query, List<String> typeNames, Result result) throws IOException {
+		Object value = result.getValue();
 
 		if (value != null && isNumeric(value)) {
 			Closer closer = Closer.create();
 			try {
 				closer.register(MDC.putCloseable("server", computeAlias(server)));
-				closer.register(MDC.putCloseable("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null)));
+				closer.register(MDC.putCloseable("metric", KeyUtils.getKeyString(server, query, result, typeNames, null)));
 				closer.register(MDC.putCloseable("value", value.toString()));
 				if (result.getKeyAlias() != null) {
 					closer.register(MDC.putCloseable("resultAlias", result.getKeyAlias()));
 				}
 				closer.register(MDC.putCloseable("attributeName", result.getAttributeName()));
-				closer.register(MDC.putCloseable("key", values.getKey()));
+				closer.register(MDC.putCloseable("key", KeyUtils.getValueKey(result)));
 				closer.register(MDC.putCloseable("epoch", valueOf(result.getEpoch())));
 
 				logger.info("");

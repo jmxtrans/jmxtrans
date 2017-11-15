@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.WordUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class ResultAttributeTests {
 
 	private Map<String, String> attributeMap;
 	Result result = new Result(2l, "attributeName1", "className1", "objDomain1", "keyAlias1", "type=Type1,name=Name1",
-			ImmutableMap.of("key", (Object) 1));
+			ImmutableList.of("key"), 1);
 
 	@Before
 	public void setup() {

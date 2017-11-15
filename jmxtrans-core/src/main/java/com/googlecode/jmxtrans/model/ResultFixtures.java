@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 public final class ResultFixtures {
 	private ResultFixtures() {}
@@ -36,7 +35,8 @@ public final class ResultFixtures {
 				"ObjectDomainName",
 				"VerboseMemory",
 				"type=Memory",
-				ImmutableMap.<String, Object>of("Verbose", true));
+				ImmutableList.<String>of(),
+				true);
 	}
 
 	public static ImmutableList<Result> singleTrueResult() {
@@ -51,7 +51,8 @@ public final class ResultFixtures {
 				"ObjectDomainName",
 				"VerboseMemory",
 				"type=Memory",
-				ImmutableMap.<String, Object>of("Verbose", false));
+				ImmutableList.<String>of(),
+				false);
 	}
 
 	public static Result numericResult() {
@@ -65,7 +66,8 @@ public final class ResultFixtures {
 				"ObjectDomainName",
 				"MemoryAlias",
 				"type=Memory",
-				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", numericValue));
+				ImmutableList.<String>of(),
+				numericValue);
 	}
 
 	public static Result numericResultWithColon() {
@@ -80,7 +82,8 @@ public final class ResultFixtures {
 				"fakehostname.example.com-org.openrepose.core",
 				null,
 				"type=\"ResponseCode\",scope=\"127.0.0.1:8008\",name=\"4XX\"",
-				ImmutableMap.<String, Object>of("Count", numericValue));
+				ImmutableList.<String>of(),
+				numericValue);
 	}
 
 	public static Result stringResult() {
@@ -95,10 +98,11 @@ public final class ResultFixtures {
 			"ObjectDomainName",
 			"MemoryAlias",
 			"type=Memory",
-			ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", value));
+			ImmutableList.<String>of("ObjectPendingFinalizationCount"),
+			value);
 	}
 
-	public static Result hashResult() {
+	private static Result nonHeapMemoryResult(String valuePath, int value) {
 		return new Result(
 				0,
 				"NonHeapMemoryUsage",
@@ -106,7 +110,16 @@ public final class ResultFixtures {
 				"ObjectDomainName",
 				"MemoryAlias",
 				"type=Memory",
-				ImmutableMap.<String, Object>of("committed", 12345, "init", 23456, "max", -1, "used", 45678));
+				ImmutableList.<String>of(valuePath),
+				value);
+	}
+
+	public static ImmutableList<Result> hashResults() {
+		return ImmutableList.of(
+				nonHeapMemoryResult("committed", 12345),
+				nonHeapMemoryResult("init", 23456),
+				nonHeapMemoryResult("max", -1),
+				nonHeapMemoryResult("used", 45678));
 	}
 
 	public static Result numericBelowCPrecisionResult() {
@@ -117,7 +130,8 @@ public final class ResultFixtures {
 				"ObjectDomainName",
 				"MemoryAlias",
 				"type=Memory",
-				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", Double.MIN_VALUE));
+				ImmutableList.<String>of(),
+				Double.MIN_VALUE);
 	}
 
 	public static Iterable<Result> singleNumericBelowCPrecisionResult() {
@@ -132,7 +146,8 @@ public final class ResultFixtures {
 				"ObjectDomainName",
 				"ObjectPendingFinalizationCount",
 				typeName,
-				ImmutableMap.<String, Object>of("ObjectPendingFinalizationCount", 10));
+				ImmutableList.<String>of(),
+				10);
 	}
 
 	public static ImmutableList<Result> singleFalseResult() {

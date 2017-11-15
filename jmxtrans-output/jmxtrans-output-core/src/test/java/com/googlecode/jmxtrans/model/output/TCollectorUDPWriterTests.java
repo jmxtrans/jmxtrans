@@ -63,7 +63,6 @@ public class TCollectorUDPWriterTests {
 	protected Result mockResult;
 	protected DatagramSocket mockDgSocket;
 	protected Logger mockLog;
-	protected ImmutableMap<String, Object> testValues;
 
 	@Before
 	public void setupTest() throws Exception {
@@ -77,8 +76,8 @@ public class TCollectorUDPWriterTests {
 		PowerMockito.whenNew(DatagramSocket.class).withAnyArguments().thenReturn(this.mockDgSocket);
 
 		// When results are needed.
-		testValues = ImmutableMap.<String, Object>of("x-att1-x", "120021");
-		Mockito.when(this.mockResult.getValues()).thenReturn(testValues);
+		Mockito.when(this.mockResult.getValue()).thenReturn("120021");
+		Mockito.when(this.mockResult.getValuePath()).thenReturn(ImmutableList.<String>of("x-att1-x"));
 		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
 		Mockito.when(this.mockResult.getTypeName()).thenReturn("Type=x-type-x");

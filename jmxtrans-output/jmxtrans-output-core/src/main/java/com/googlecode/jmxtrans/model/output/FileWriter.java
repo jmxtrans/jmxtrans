@@ -90,11 +90,8 @@ public class FileWriter extends BaseOutputWriter {
 
 			for (Result result : results) {
 				log.debug(result.toString());
-
-				for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
-					outputTempPrintWriter.printf(lineFormat + System.lineSeparator(),
-							KeyUtils.getKeyString(query, result, values, typeNames), values.getValue());
-				}
+				outputTempPrintWriter.printf(lineFormat + System.lineSeparator(),
+						KeyUtils.getKeyString(query, result, typeNames), result.getValue());
 			}
 		}
 		assert(this.outputTempFile.renameTo(this.outputFile));

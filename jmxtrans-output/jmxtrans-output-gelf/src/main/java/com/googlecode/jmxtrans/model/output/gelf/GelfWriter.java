@@ -72,22 +72,19 @@ public class GelfWriter extends OutputWriterAdapter {
 
 		for (final Result result : results) {
 			log.debug("Query result: [{}]", result);
-			for (final Map.Entry<String, Object> values : result.getValues()
-				.entrySet()) {
-				final String
-					key =
-					KeyUtils.getKeyString(query, result, values, this.typeNames);
+			final String
+				key =
+				KeyUtils.getKeyString(query, result, this.typeNames);
 
-				messages.add(
-					String.format(
-						"%s=%s",
-						key,
-						values.getValue()
-					)
-				);
+			messages.add(
+				String.format(
+					"%s=%s",
+					key,
+					result.getValue()
+				)
+			);
 
-				messageBuilder.additionalField(key, values.getValue());
-			}
+			messageBuilder.additionalField(key, result.getValue());
 		}
 
 		if (additionalFields != null) {

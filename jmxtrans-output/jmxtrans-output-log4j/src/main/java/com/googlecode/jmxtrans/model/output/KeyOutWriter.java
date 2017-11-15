@@ -43,7 +43,6 @@ import org.slf4j.impl.Log4jLoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
@@ -140,13 +139,10 @@ public class KeyOutWriter extends BaseOutputWriter {
 		List<String> typeNames = getTypeNames();
 
 		for (Result result : results) {
-			Map<String, Object> resultValues = result.getValues();
-			for (Entry<String, Object> values : resultValues.entrySet()) {
-				if (isNumeric(values.getValue())) {
+			if (isNumeric(result.getValue())) {
 
-					logger.info(KeyUtils.getKeyString(server, query, result, values, typeNames, null) + delimiter
-							+ values.getValue().toString() + delimiter + result.getEpoch());
-				}
+				logger.info(KeyUtils.getKeyString(server, query, result, typeNames, null) + delimiter
+						+ result.getValue().toString() + delimiter + result.getEpoch());
 			}
 		}
 	}

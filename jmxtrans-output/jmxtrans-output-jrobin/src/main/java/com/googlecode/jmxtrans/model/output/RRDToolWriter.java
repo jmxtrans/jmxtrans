@@ -50,7 +50,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -59,12 +58,12 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 /**
  * This takes a JRobin template.xml file and then creates the database if it
  * doesn't already exist.
- * 
+ *
  * It will then write the contents of the Query (the Results) to the database.
- * 
+ *
  * This method exec's out to use the command line version of rrdtool. You need
  * to specify the path to the directory where the binary rrdtool lives.
- * 
+ *
  * @author jon
  */
 public class RRDToolWriter extends BaseOutputWriter {
@@ -106,8 +105,9 @@ public class RRDToolWriter extends BaseOutputWriter {
 	 * rrd datasources must be less than 21 characters in length, so work to
 	 * make it shorter. Not ideal at all, but works fairly well it seems.
 	 */
-	public String getDataSourceName(String typeName, String attributeName, String entry) {
+	public String getDataSourceName(String typeName, String attributeName, List<String> valuePath) {
 		String result;
+		String entry = StringUtils.join(valuePath, '.');
 		if (typeName != null) {
 			result = typeName + attributeName + entry;
 		} else {
@@ -138,15 +138,12 @@ public class RRDToolWriter extends BaseOutputWriter {
 		// keys from the result values
 		for (Result res : results) {
 			log.debug(res.toString());
-			Map<String, Object> values = res.getValues();
-			for (Entry<String, Object> entry : values.entrySet()) {
-				String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
+			String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), res.getValuePath());
 
-				if (isNumeric(entry.getValue())) {
-					log.debug("Generated DataSource name:value: {} : {}", key, entry.getValue());
-					if (dsNames.contains(key)) {
-						dataMap.put(key, entry.getValue().toString());
-					}
+			if (isNumeric(res.getValue())) {
+				log.debug("Generated DataSource name:value: {} : {}", key, res.getValue());
+				if (dsNames.contains(key)) {
+					dataMap.put(key, res.getValue().toString());
 				}
 			}
 		}
@@ -166,20 +163,18 @@ public class RRDToolWriter extends BaseOutputWriter {
 			List<String> keys = new ArrayList<>();
 
 			for (Result res : results) {
-				for (Entry<String, Object> entry : res.getValues().entrySet()) {
-					if (isNumeric(entry.getValue())) {
-						String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
-						if (keys.contains(key)) {
-							throw new Exception("Duplicate datasource name found: '" + key
-									+ "'. Please try to add more typeName keys to the writer to make the name more unique. " + res.toString());
-						}
-						keys.add(key);
-
-						sb.append("<datasource><!-- ").append(res.getTypeName()).append(":")
-								.append(res.getAttributeName()).append(":").append(entry.getKey())
-								.append(" --><name>").append(key)
-								.append("</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
+				if (isNumeric(res.getValue())) {
+					String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), res.getValuePath());
+					if (keys.contains(key)) {
+						throw new Exception("Duplicate datasource name found: '" + key
+								+ "'. Please try to add more typeName keys to the writer to make the name more unique. " + res.toString());
 					}
+					keys.add(key);
+
+					sb.append("<datasource><!-- ").append(res.getTypeName()).append(":")
+							.append(res.getAttributeName()).append(":").append(res.getValuePath())
+							.append(" --><name>").append(key)
+							.append("</name><type>GAUGE</type><heartbeat>400</heartbeat><min>U</min><max>U</max></datasource>\n");
 				}
 			}
 			log.debug(sb.toString());

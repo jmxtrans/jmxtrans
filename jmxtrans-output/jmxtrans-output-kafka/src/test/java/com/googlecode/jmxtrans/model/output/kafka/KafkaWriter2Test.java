@@ -55,7 +55,7 @@ public class KafkaWriter2Test {
                 objectMapper,
                 producerMock,
                 TOPIC,
-                new DetailedResultSerializer(true));
+                new DetailedResultSerializer());
         ArgumentCaptor<ProducerRecord> recordCaptor = ArgumentCaptor.forClass(ProducerRecord.class);
         when(producerMock.send(recordCaptor.capture())).thenReturn(null);
         // When
@@ -80,7 +80,7 @@ public class KafkaWriter2Test {
 				objectMapper,
 				producerMock,
 				TOPIC,
-				new DetailedResultSerializer(true));
+				new DetailedResultSerializer());
 
 		writer.close();
 

@@ -70,23 +70,10 @@ public class KafkaWriterFactoryTest {
             assertThat(writerFactory.getTopic()).isEqualTo("jmxtrans");
             assertThat(writerFactory.getProducerConfig().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG)).isEqualTo("localhost:9092");
             assertThat(writerFactory.getResultSerializer()).isInstanceOf(DetailedResultSerializer.class);
-            assertThat(((DetailedResultSerializer) writerFactory.getResultSerializer()).isSingleValue()).isFalse();
             try (KafkaWriter2 writer = writerFactory.create()) {
                 assertThat(writer.getTopic()).isEqualTo("jmxtrans");
                 assertThat(writer.getResultSerializer()).isInstanceOf(DetailedResultSerializer.class);
             }
-        }
-    }
-
-    @Test
-    public void testReadConfigDetailedCustomized() throws IOException, LifecycleException {
-        try (InputStream inputStream = openResource("kafka-writer-detailed2.json")) {
-            KafkaWriterFactory writerFactory = (KafkaWriterFactory) objectMapper.readValue(inputStream, KafkaWriterFactory.class);
-            assertThat(writerFactory.getTopic()).isEqualTo("jmxtrans");
-            assertThat(writerFactory.getProducerConfig().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG)).isEqualTo("localhost:9092");
-            assertThat(writerFactory.getProducerConfig().get(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)).isEqualTo("KeySerializer");
-            assertThat(writerFactory.getProducerConfig().get(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)).isEqualTo("ValueSerializer");
-            assertThat(writerFactory.getResultSerializer()).isInstanceOf(DetailedResultSerializer.class);
         }
     }
 
@@ -109,36 +96,14 @@ public class KafkaWriterFactoryTest {
         }
     }
 
-    @Test
-    public void testEqualsHashCodeSame() throws IOException, LifecycleException {
-        try (InputStream inputStream1 = openResource("kafka-writer-detailed2.json");
-             InputStream inputStream2 = openResource("kafka-writer-detailed2.json")) {
-            KafkaWriterFactory writerFactory1 = (KafkaWriterFactory) objectMapper.readValue(inputStream1, KafkaWriterFactory.class);
-            KafkaWriterFactory writerFactory2 = (KafkaWriterFactory) objectMapper.readValue(inputStream2, KafkaWriterFactory.class);
-            assertThat(writerFactory1.hashCode()).isEqualTo(writerFactory2.hashCode());
-            assertThat(writerFactory1).isEqualTo(writerFactory2);
-        }
-    }
-
-    @Test
-    public void testEqualsHashCodeDifferent() throws IOException, LifecycleException {
-        try (InputStream inputStream1 = openResource("kafka-writer-detailed2.json");
-             InputStream inputStream2 = openResource("kafka-writer-detailed.json")) {
-            KafkaWriterFactory writerFactory1 = (KafkaWriterFactory) objectMapper.readValue(inputStream1, KafkaWriterFactory.class);
-            KafkaWriterFactory writerFactory2 = (KafkaWriterFactory) objectMapper.readValue(inputStream2, KafkaWriterFactory.class);
-            assertThat(writerFactory1.hashCode()).isNotEqualTo(writerFactory2.hashCode());
-			assertThat(writerFactory1).isNotEqualTo(writerFactory2);
-		}
-    }
-
 	@Test(expected = NullPointerException.class)
 	public void testConstructorWithNullProducerConfig() {
-		new KafkaWriterFactory(null, "topic", new DetailedResultSerializer(true));
+		new KafkaWriterFactory(null, "topic", new DetailedResultSerializer());
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testConstructorWithNullTopic() {
-		new KafkaWriterFactory(new HashMap<String, Object>(), null, new DetailedResultSerializer(true));
+		new KafkaWriterFactory(new HashMap<String, Object>(), null, new DetailedResultSerializer());
 	}
 
 	@Test()

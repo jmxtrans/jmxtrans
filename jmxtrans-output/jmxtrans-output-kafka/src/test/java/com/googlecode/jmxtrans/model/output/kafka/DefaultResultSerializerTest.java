@@ -45,7 +45,7 @@ public class DefaultResultSerializerTest {
      */
 	private static Result numericResultAt(long timestamp) {
 		Result result = numericResult();
-		return new Result(timestamp, result.getAttributeName(), result.getClassName(), result.getObjDomain(), result.getKeyAlias(), result.getTypeName(), result.getValues());
+		return new Result(timestamp, result.getAttributeName(), result.getClassName(), result.getObjDomain(), result.getKeyAlias(), result.getTypeName(), result.getValuePath(), result.getValue());
 	}
 	@Test
 	public void convertSingleNumericToString() throws Exception {
@@ -76,24 +76,6 @@ public class DefaultResultSerializerTest {
 		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), stringResult());
 
 		assertThat(messages).isEmpty();
-	}
-
-	@Test
-	public void convertHashToStrings() throws Exception {
-		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
-		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags, ImmutableList.<String>of());
-
-		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), hashResult());
-
-		assertThat(messages).hasSize(4);
-		for (String message : messages) {
-			assertThat(message)
-					.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.NonHeapMemoryUsage_")
-					.contains("\"value\":")
-					.contains("\"timestamp\":0")
-					.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
-
-		}
 	}
 
 	@Test

@@ -45,7 +45,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.googlecode.jmxtrans.util.NumberUtils.isValidNumber;
@@ -120,19 +119,16 @@ public class GraphiteWriter extends BaseOutputWriter {
 
 			for (Result result : results) {
 				log.debug("Query result: {}", result);
-				Map<String, Object> resultValues = result.getValues();
-				for (Entry<String, Object> values : resultValues.entrySet()) {
-					Object value = values.getValue();
-					if (isValidNumber(value)) {
+				Object value = result.getValue();
+				if (isValidNumber(value)) {
 
-						String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix)
-								.replaceAll("[()]", "_") + " " + value.toString() + " "
-								+ result.getEpoch() / 1000 + "\n";
-						log.debug("Graphite Message: {}", line);
-						writer.write(line);
-					} else {
-						onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
-					}
+					String line = KeyUtils.getKeyString(server, query, result, typeNames, rootPrefix)
+							.replaceAll("[()]", "_") + " " + value.toString() + " "
+							+ result.getEpoch() / 1000 + "\n";
+					log.debug("Graphite Message: {}", line);
+					writer.write(line);
+				} else {
+					onlyOnceLogger.infoOnce("Unable to submit non-numeric value to Graphite: [{}] from result [{}]", value, result);
 				}
 			}
 		} finally {

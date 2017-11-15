@@ -54,7 +54,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -189,21 +188,17 @@ public class StatsDWriter extends BaseOutputWriter {
 		for (Result result : results) {
 			log.debug(result.toString());
 
-			for (Entry<String, Object> values : result.getValues().entrySet()) {
-
-				if (isNotValidValue(values.getValue())) {
-					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
-					continue;
-				}
-
-				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix);
-
-				// These characters can mess with formatting.
-				line = STATSD_INVALID.matcher(line).replaceAll(this.replacementForInvalidChar);
-				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
-
-				doSend(line.trim());
+			String key = KeyUtils.getKeyString(server, query, result, typeNames, rootPrefix);
+			if (isNotValidValue(result.getValue())) {
+				log.debug("Skipping message key[{}] with value: {}.", key, result.getValue());
+				continue;
 			}
+
+			// These characters can mess with formatting.
+			String line = STATSD_INVALID.matcher(key).replaceAll(this.replacementForInvalidChar)
+				+ computeActualValue(result.getValue()) + "|" + bucketType + "\n";
+
+			doSend(line.trim());
 		}
 	}
 

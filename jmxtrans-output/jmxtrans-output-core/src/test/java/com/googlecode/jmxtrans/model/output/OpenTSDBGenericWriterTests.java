@@ -79,8 +79,9 @@ public class OpenTSDBGenericWriterTests {
 		tvMetricLinesSent = new LinkedList<String>();
 
 		// Setup common mock interactions.
-		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("x-att1-x", (Object) "120021"));
+		Mockito.when(this.mockResult.getValue()).thenReturn("120021");
 		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
+		Mockito.when(this.mockResult.getValuePath()).thenReturn(ImmutableList.<String>of());
 		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
 		Mockito.when(this.mockResult.getTypeName()).
 				thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
@@ -96,7 +97,8 @@ public class OpenTSDBGenericWriterTests {
 				false,
 				settings);
 
-		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
+		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
+		Mockito.when(this.mockResult.getValue()).thenReturn("120021");
 
 		// Verify empty tag map.
 		Assertions.assertThat(writer.getTypeNames()).isEmpty();

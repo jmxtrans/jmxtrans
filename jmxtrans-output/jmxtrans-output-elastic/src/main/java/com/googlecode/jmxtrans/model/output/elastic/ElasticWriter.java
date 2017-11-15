@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model.output.elastic;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
@@ -49,7 +50,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
@@ -61,9 +61,9 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 @NotThreadSafe
 public class ElasticWriter extends BaseOutputWriter {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(ElasticWriter.class);
-	
+
 	private static final String DEFAULT_ROOT_PREFIX = "jmxtrans";
 	private static final String ELASTIC_TYPE_NAME = "jmx-entry";
 
@@ -112,33 +112,28 @@ public class ElasticWriter extends BaseOutputWriter {
 
 		for (Result result : results) {
 			log.debug("Query result: [{}]", result);
-			Map<String, Object> resultValues = result.getValues();
-			for (Entry<String, Object> values : resultValues.entrySet()) {
-				Object value = values.getValue();
-				if (isNumeric(value)) {
+			if (isNumeric(result.getValue())) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("serverAlias", server.getAlias());
+				map.put("server", server.getHost());
+				map.put("port", server.getPort());
+				map.put("objDomain", result.getObjDomain());
+				map.put("className", result.getClassName());
+				map.put("typeName", result.getTypeName());
+				map.put("attributeName", result.getAttributeName());
+				map.put("valuePath", Joiner.on('/').join(result.getValuePath()));
+				map.put("keyAlias", result.getKeyAlias());
+				map.put("value", Double.parseDouble(result.getValue().toString()));
+				map.put("timestamp", result.getEpoch());
 
-					Map<String, Object> map = new HashMap<>();
-					map.put("serverAlias", server.getAlias());
-					map.put("server", server.getHost());
-					map.put("port", server.getPort());
-					map.put("objDomain", result.getObjDomain());
-					map.put("className", result.getClassName());
-					map.put("typeName", result.getTypeName());
-					map.put("attributeName", result.getAttributeName());
-					map.put("key", values.getKey());
-					map.put("keyAlias", result.getKeyAlias());
-					map.put("value", Double.parseDouble(value.toString()));
-					map.put("timestamp", result.getEpoch());
-
-					log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, ELASTIC_TYPE_NAME, map);
-					Index index = new Index.Builder(map).index(indexName).type(ELASTIC_TYPE_NAME).build();
-					JestResult addToIndex = jestClient.execute(index);
-					if (!addToIndex.isSucceeded()) {
-						throw new ElasticWriterException(String.format("Unable to write entry to elastic: %s", addToIndex.getErrorMessage()));
-					}
-				} else {
-					log.warn("Unable to submit non-numeric value to Elastic: [{}] from result [{}]", value, result);
+				log.debug("Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]", indexName, ELASTIC_TYPE_NAME, map);
+				Index index = new Index.Builder(map).index(indexName).type(ELASTIC_TYPE_NAME).build();
+				JestResult addToIndex = jestClient.execute(index);
+				if (!addToIndex.isSucceeded()) {
+					throw new ElasticWriterException(String.format("Unable to write entry to elastic: %s", addToIndex.getErrorMessage()));
 				}
+			} else {
+				log.warn("Unable to submit non-numeric value to Elastic: [{}] from result [{}]", result.getValue(), result);
 			}
 		}
 	}
