@@ -40,10 +40,19 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.OpenDataException;
+
 import java.lang.management.ManagementFactory;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import static com.google.common.collect.FluentIterable.from;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQueryWithResultAlias;
@@ -98,6 +107,18 @@ public class JmxResultProcessorTest {
 		Result integerResult = results.get(0);
 		assertThat(integerResult.getTypeName()).isEqualTo(propertiesOutOfOrder);
 
+	}
+
+	@Test
+	public void testNullValueInCompositeData() throws MalformedObjectNameException, OpenDataException, InstanceNotFoundException {
+		ObjectInstance runtime = getRuntime();
+		List<Result> results = new JmxResultProcessor(
+				dummyQueryWithResultAlias(),
+				runtime,
+				ImmutableList.of(new Attribute("SomeAttribute", getCompositeData())),
+				runtime.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
+		assertThat(results).hasSize(1);
 	}
 
 	@Test
@@ -303,7 +324,16 @@ public class JmxResultProcessorTest {
 		return ManagementFactory.getPlatformMBeanServer().getObjectInstance(
 				new ObjectName("java.lang", keyProperties));
 	}
-
+	
+	private CompositeData getCompositeData() throws OpenDataException {
+		String[] keys = new String[]{"p1"};
+		OpenType[] itemTypes = new OpenType[]{SimpleType.STRING};
+		CompositeType compType = new CompositeType("compType", "descr", keys, keys, itemTypes);	
+		Map<String, Object> values = new HashMap();
+		values.put("p1", null);
+		return new CompositeDataSupport(compType, values);
+	}
+	
 	private static class ByAttributeName implements Predicate<Result> {
 		private final String attributeName;
 
@@ -318,5 +348,5 @@ public class JmxResultProcessorTest {
 			}
 			return attributeName.equals(result.getAttributeName());
 		}
-	}
+	}	
 }

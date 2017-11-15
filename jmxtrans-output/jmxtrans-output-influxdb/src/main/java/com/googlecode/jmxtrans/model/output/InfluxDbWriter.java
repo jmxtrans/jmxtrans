@@ -200,7 +200,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
-			resultAttribute.addAttribute(resultTagMap, result);
+			resultAttribute.addTo(resultTagMap, result);
 		}
 
 		return resultTagMap;

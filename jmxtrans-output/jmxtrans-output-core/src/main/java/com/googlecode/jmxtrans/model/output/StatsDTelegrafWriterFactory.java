@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.ResultAttribute;
+import com.googlecode.jmxtrans.model.ResultAttributes;
 import com.googlecode.jmxtrans.model.output.support.UdpOutputWriterBuilder;
 import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
@@ -39,13 +40,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.immutableEnumSet;
 import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.createFlushStrategy;
 
 @EqualsAndHashCode
@@ -98,16 +97,12 @@ public class StatsDTelegrafWriterFactory implements OutputWriterFactory {
 	 * @return
 	 */
 	private ImmutableSet<ResultAttribute> initResultAttributesToWriteAsTags(List<String> resultTags) {
-		EnumSet<ResultAttribute> resultAttributes = EnumSet.noneOf(ResultAttribute.class);
-		if (resultTags != null) {
-			for (String resultTag : resultTags) {
-				resultAttributes.add(ResultAttribute.fromAttribute(resultTag));
-			}
+		ImmutableSet<ResultAttribute> result;
+		if (resultTags == null) {
+			result = ImmutableSet.copyOf(ResultAttributes.values());
 		} else {
-			resultAttributes = EnumSet.allOf(ResultAttribute.class);
+			result = ResultAttributes.forNames(resultTags);
 		}
-
-		ImmutableSet<ResultAttribute> result = immutableEnumSet(resultAttributes);
 		LOG.debug("Result Tags to write set to: {}", result);
 		return result;
 	}

@@ -22,39 +22,42 @@
  */
 package com.googlecode.jmxtrans;
 
+import com.google.inject.Injector;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import org.junit.Test;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.guice.JmxTransModule;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.Date;
-import java.util.List;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+public class JmxTransDummyApp {
+    private final String jsonFile;
+    private JmxTransformer jmxTransformer;
 
-public class JmxTransformerTest {
+    public JmxTransDummyApp(String jsonFile) {
+        this.jsonFile = jsonFile;
+    }
 
-	@Test
-	public void startDateIsSpreadAccordingToRunPeriod() {
-		JmxTransformer jmxTransformer = new JmxTransformer(null, new JmxTransConfiguration(), null, null, null, null);
+    public void start() throws LifecycleException, URISyntaxException {
+        JmxTransConfiguration configuration = new JmxTransConfiguration();
+        configuration.setRunPeriod(1);
+        File file = file(jsonFile);
+        configuration.setProcessConfigFile(file);
+        Injector injector = JmxTransModule.createInjector(configuration);
+        jmxTransformer = injector.getInstance(JmxTransformer.class);
+        jmxTransformer.start();
+    }
 
-		Date now = new Date();
+    private File file(String filename) throws URISyntaxException {
+        return new File(getClass().getClassLoader().getResource(filename).toURI());
+    }
 
-		assertThat(jmxTransformer.computeSpreadStartDate(60))
-				.isBetween(now, new Date(now.getTime() + MILLISECONDS.convert(60, SECONDS)));
-	}
+    public void stop() throws LifecycleException {
+        jmxTransformer.stop();
+    }
 
-	@Test
-	public void findProcessConfigFiles() throws URISyntaxException {
-		JmxTransConfiguration configuration = new JmxTransConfiguration();
-		configuration.setProcessConfigDir(new File(ConfigurationParserTest.class.getResource("/example.json").toURI()).getParentFile());
-		JmxTransformer jmxTransformer = new JmxTransformer(null, configuration, null, null, null, null);
-
-		List<File> processConfigFiles = jmxTransformer.getProcessConfigFiles();
-
-		assertThat(processConfigFiles).hasSize(7);
-	}
+    public static void main(String[] args) throws LifecycleException, URISyntaxException, InterruptedException {
+        new JmxTransDummyApp(args[0]).start();
+        Thread.sleep(Long.valueOf(args[1])*1000L);
+    }
 }

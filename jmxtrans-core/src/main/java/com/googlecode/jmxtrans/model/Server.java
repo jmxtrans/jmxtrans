@@ -512,6 +512,7 @@ public class Server implements JmxConnectionProvider {
 			this.runPeriodSeconds = server.runPeriodSeconds;
 			this.numQueryThreads = server.numQueryThreads;
 			this.local = server.local;
+			this.ssl = server.ssl;
 			this.queries.addAll(server.queries);
 			this.pool = server.pool;
 		}

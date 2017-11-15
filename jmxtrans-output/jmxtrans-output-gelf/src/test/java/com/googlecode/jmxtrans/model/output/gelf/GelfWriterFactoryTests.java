@@ -226,8 +226,7 @@ public class GelfWriterFactoryTests {
 
 		assertThat(
 			gelfWriterFactory.getGelfConfiguration().getTlsTrustCertChainFile()
-				.getPath()
-		).isEqualTo("/somefile")
+		).hasName("somefile")
 			.as("Invalid tls trustcertchain file");
 
 		assertThat(

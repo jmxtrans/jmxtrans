@@ -20,50 +20,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.model.output.kafka;
 
-import lombok.Getter;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
+import java.io.IOException;
+import java.util.Collection;
 
-/**
- * Attributes of {@link Result}
- *
- * @author Simon Hutchinson
- *         <a href="https://github.com/sihutch">github.com/sihutch</a>
- *
- */
-@ToString
-public abstract class ResultAttribute {
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
+@JsonSerialize(include = NON_NULL)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+public interface ResultSerializer {
 	/**
-	 * Attribute name in camel case
+	 * Converts query result into one or more strings
 	 */
-	@Getter
 	@Nonnull
-	private final String name;
-
-	ResultAttribute(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Get attribute on result
-     */
-	public abstract String get(Result result);
-
-	/**
-	 * Calls the Getter defined by the {@link #get(Result)} on the
-	 * {@link Result} add adds the entry to the supplied {@link Map}
-	 *
-	 * @param attributeMap
-	 *            The map to add the {@link Result} data to
-	 * @param result
-	 *            The {@link Result} to get the data from
-	 */
-	public void addTo(@Nonnull Map<String, String> attributeMap, @Nonnull Result result) {
-		attributeMap.put(name, get(result));
-	}
+	Collection<String> serialize(Server server, Query query, Result result) throws IOException;
 }

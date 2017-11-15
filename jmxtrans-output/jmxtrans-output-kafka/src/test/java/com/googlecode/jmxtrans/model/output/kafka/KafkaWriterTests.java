@@ -24,8 +24,11 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import kafka.javaapi.producer.Producer;
-import kafka.producer.KeyedMessage;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -45,42 +48,53 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class KafkaWriterTests {
 
-	@Mock private Producer<String, String> producer;
-	@Captor private ArgumentCaptor<KeyedMessage<String, String>> messageCaptor;
+	@Mock
+	private Producer<String, String> producer;
+	@Captor
+	private ArgumentCaptor<ProducerRecord<String, String>> messageCaptor;
+	private Map<String, Object> settings;
+	private final ImmutableMap<String, String> tags =	ImmutableMap.of("myTagKey1", "myTagValue1");
 
-	@Test public void
-	kafkaWriterNotNull() throws Exception {
-		assertThat(getTestKafkaWriter()).isNotNull();
-	}
-
-	@Test public void
-	messagesAreSentToKafka() throws Exception {
-		KafkaWriter writer = getTestKafkaWriter();
-		writer.setProducer(producer);
-		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
-
-		verify(producer).send(messageCaptor.capture());
-		KeyedMessage<String, String> message = messageCaptor.getValue();
-
-		assertThat(message.topic()).isEqualTo("myTopic");
-		assertThat(message.message())
-				.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
-				.contains("\"value\":\"10\"")
-				.contains("\"timestamp\":0")
-				.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
-	}
-	
-	private static KafkaWriter getTestKafkaWriter() {
-		ImmutableList typenames = ImmutableList.of();
-		Map<String,Object> settings = new HashMap<String,Object>();
-		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1"); 
-		settings.put("zk.connect", "host:2181");
-		settings.put("metadata.broker.list", "10.231.1.1:9180");
-		settings.put("serializer.class", "kafka.serializer.StringEncoder");
+	@Before
+	public void before() {
+		settings = new HashMap<String, Object>();
+		settings.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 		settings.put("debug", false);
 		settings.put("booleanAsNumber", true);
 		settings.put("topics", "myTopic");
-		return new KafkaWriter(typenames, true, "rootPrefix", true, "myTopic", tags, settings);
 	}
-	
+
+	@Test
+	public void messagesAreSentToKafka() throws Exception {
+		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings, producer)) {
+			writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+
+			verify(producer).send(messageCaptor.capture());
+			ProducerRecord<String, String> message = messageCaptor.getValue();
+
+			assertThat(message.topic()).isEqualTo("myTopic");
+			assertThat(message.value())
+					.contains("\"keyspace\":\"rootPrefix.host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount\"")
+					.contains("\"value\":\"10\"")
+					.contains("\"timestamp\":0")
+					.contains("\"tags\":{\"myTagKey1\":\"myTagValue1\"");
+		}
+	}
+
+	@Test
+	public void producerClosed() throws Exception {
+		KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings, producer);
+
+		writer.close();
+
+		verify(producer).close();
+	}
+
+	@Test
+	public void createKafkaProducer() throws Exception {
+		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings)) {
+			assertThat(writer.getProducer()).isInstanceOf(KafkaProducer.class);
+		}
+	}
+
 }

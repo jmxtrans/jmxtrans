@@ -66,6 +66,13 @@ JMXTRANS_OPTS="$JMXTRANS_OPTS -Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log.d
 
 MONITOR_OPTS=${MONITOR_OPTS:-"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=${JMX_PORT}"}
 GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}m -Xmx${HEAP_SIZE}m -XX:PermSize=${PERM_SIZE}m -XX:MaxPermSize=${MAX_PERM_SIZE}m"}
+SSL_OPTS=${SSL_OPTS:-""}
+if [[ "${SSL_TRUSTSTORE}" != "" ]]; then
+    SSL_OPTS="${SSL_OPTS} -Djavax.net.ssl.trustStore=${SSL_TRUSTSTORE}"
+    if [[ "${SSL_TRUSTSTORE_PASSWORD}" != "" ]]; then
+        SSL_OPTS="${SSL_OPTS} -Djavax.net.ssl.trustStorePassword=${SSL_TRUSTSTORE_PASSWORD}"
+    fi
+fi
 
 if [ "${ADDITIONAL_JARS}" == "" ]; then
   ADDITIONAL_JARS_OPTS=""
@@ -116,7 +123,7 @@ start() {
         EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
     fi
 
-    nohup $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS $EXEC >>$LOG_FILE 2>&1 &
+    nohup $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS ${SSL_OPTS} $EXEC >>$LOG_FILE 2>&1 &
 
     if [ ! -z "$PIDFILE" ]; then
         echo $! > "$PIDFILE"

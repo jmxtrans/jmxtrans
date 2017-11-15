@@ -23,12 +23,12 @@
 package com.googlecode.jmxtrans.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * 
+ *
  * @author Simon Hutchinson
  *         <a href="https://github.com/sihutch">github.com/sihutch</a>
  *
@@ -47,7 +47,7 @@ import com.google.common.collect.ImmutableMap;
 public class ResultAttributeTests {
 
 	private Map<String, String> attributeMap;
-	Result result = new Result(2l, "attributeName1", "className1", "objDomain1", "keyAlias1", "typeName1",
+	Result result = new Result(2l, "attributeName1", "className1", "objDomain1", "keyAlias1", "type=Type1,name=Name1",
 			ImmutableMap.of("key", (Object) 1));
 
 	@Before
@@ -57,18 +57,37 @@ public class ResultAttributeTests {
 
 	@Test
 	public void attributeNamesFromResultAreWrittenToMap() throws Exception {
-		
-		for (ResultAttribute resultAttribute : ResultAttribute.values()) {
-			resultAttribute.addAttribute(attributeMap, result);
-			String attributeName = enumValueToAttribute(resultAttribute);
+		for (ResultAttribute resultAttribute : ResultAttributes.values()) {
+			resultAttribute.addTo(attributeMap, result);
+			String attributeName = resultAttribute.getName();
 			Method m = result.getClass().getMethod("get" + WordUtils.capitalize(attributeName));
 			String expectedValue = (String) m.invoke(result);
 			assertThat(attributeMap).containsEntry(attributeName, expectedValue);
 		}
 	}
-	
-	private String enumValueToAttribute(ResultAttribute attribute) {
-		String[] split = attribute.name().split("_");
-		return StringUtils.lowerCase(split[0]) + WordUtils.capitalizeFully(split[1]);
+
+	@Test
+	public void typeNamePropertyResultAttribute() {
+		ResultAttribute typeAttr = ResultAttributes.forName("typeName.type");
+		assertThat(typeAttr.getName()).isEqualTo("typeName.type");
+		String type = typeAttr.get(result);
+		assertThat(type).isEqualTo("Type1");
+
+		ResultAttribute nameAttr = ResultAttributes.forName("typeName.name");
+		assertThat(nameAttr.getName()).isEqualTo("typeName.name");
+		String name = nameAttr.get(result);
+		assertThat(name).isEqualTo("Name1");
+
+		ResultAttribute notExistAttr = ResultAttributes.forName("typeName.notExist");
+		assertThat(notExistAttr.getName()).isEqualTo("typeName.notExist");
+		String notExist = notExistAttr.get(result);
+		assertThat(notExist).isNull();
+
+		try {
+			ResultAttributes.forName("notExist");
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+
+		}
 	}
 }

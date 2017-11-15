@@ -1,0 +1,7 @@
+{
+  "@class": "com.googlecode.jmxtrans.model.output.kafka.KafkaWriterFactory",
+  "producerConfig": {
+    "bootstrap.servers": "localhost:9092"
+  },
+  "topic": "jmxtrans"
+}
