@@ -56,7 +56,7 @@
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>      @Test
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> hashResultAttribues() <strong class="jxr_keyword">throws</strong> IOException {
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>          StatsDTelegrafWriter w = <strong class="jxr_keyword">new</strong> StatsDTelegrafWriter(<strong class="jxr_keyword">new</strong> String[]{StatsDMetricType.COUNTER.getKey()}, ImmutableMap.&lt;String, String&gt;of(), ImmutableSet.&lt;ResultAttribute&gt;of());
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>          w.write(writer, dummyServer(), dummyQuery(), ImmutableList.of(hashResult()) );
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          w.write(writer, dummyServer(), dummyQuery(), hashResults());
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>          assertThat(writer.toString()).isEqualTo(
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  			<span class="jxr_string">"MemoryAlias,jmxport=4321,attribute=NonHeapMemoryUsage,resultKey=committed:12345|c\n"</span> +
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  			<span class="jxr_string">"MemoryAlias,jmxport=4321,attribute=NonHeapMemoryUsage,resultKey=init:23456|c\n"</span> +

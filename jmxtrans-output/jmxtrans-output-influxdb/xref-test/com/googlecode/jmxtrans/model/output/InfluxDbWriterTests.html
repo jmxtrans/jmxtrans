@@ -90,7 +90,7 @@
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> ImmutableSet&lt;ResultAttribute&gt; DEFAULT_RESULT_ATTRIBUTES = ImmutableSet.copyOf(ResultAttributes.values());
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  	Result result = <strong class="jxr_keyword">new</strong> Result(2l, <span class="jxr_string">"attributeName"</span>, <span class="jxr_string">"className"</span>, <span class="jxr_string">"objDomain"</span>, <span class="jxr_string">"keyAlias"</span>, <span class="jxr_string">"type=test,name=name"</span>,
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			ImmutableMap.of(<span class="jxr_string">"key"</span>, (Object) 1));
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			ImmutableList.of(<span class="jxr_string">"key"</span>), 1);
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  	ImmutableList&lt;Result&gt; results = ImmutableList.of(result);
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  	@Test
@@ -166,7 +166,7 @@
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 		assertThat(points).hasSize(1);
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> 		Point point = points.get(0);
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		assertThat(point.lineProtocol()).contains(<span class="jxr_string">"name.key"</span>);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		assertThat(point.lineProtocol()).contains(<span class="jxr_string">"name.attributeName_key"</span>);
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 	}
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 	@Test
@@ -193,11 +193,11 @@
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> 			BatchPoints batchPoints = messageCaptor.getValue();
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> 			String lineProtocol = batchPoints.getPoints().get(0).lineProtocol();
 <a class="jxr_linenumber" name="L187" href="#L187">187</a> 
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 			assertThat(lineProtocol).contains(expectedResultTag.getName());
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 			assertThat(lineProtocol).contains(expectedResultTag.getName()+<span class="jxr_string">"="</span>);
 <a class="jxr_linenumber" name="L189" href="#L189">189</a> 			Set&lt;ResultAttribute&gt; unexpectedResultTags = <strong class="jxr_keyword">new</strong> HashSet&lt;ResultAttribute&gt;(ResultAttributes.values());
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 			unexpectedResultTags.remove(expectedResultTag);
 <a class="jxr_linenumber" name="L191" href="#L191">191</a> 			<strong class="jxr_keyword">for</strong> (ResultAttribute unexpectedResultTag : unexpectedResultTags) {
-<a class="jxr_linenumber" name="L192" href="#L192">192</a> 				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getName());
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 				assertThat(lineProtocol).doesNotContain(unexpectedResultTag.getName()+<span class="jxr_string">"="</span>);
 <a class="jxr_linenumber" name="L193" href="#L193">193</a> 			}
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 		}
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> 	}

@@ -120,39 +120,37 @@
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 		StringBuilder jsonoutput = <strong class="jxr_keyword">new</strong> StringBuilder();
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 		List&lt;String&gt; typeNames = getTypeNames();
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">for</strong> (Result result : results) {
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, Object&gt; values : result.getValues().entrySet()) {
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				<strong class="jxr_keyword">if</strong> (isNumeric(values.getValue())) {
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 					Object value = values.getValue();
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 					jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, <strong class="jxr_keyword">null</strong>)).append(<span class="jxr_string">" "</span>)
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 							.append(value).append(<span class="jxr_string">" "</span>)
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 							.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 							.append(System.getProperty(<span class="jxr_string">"line.separator"</span>));
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 				}
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			}
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		}
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		g.writeStringField(<span class="jxr_string">"output"</span>, jsonoutput.toString());
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		g.writeEndObject();
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 		g.flush();
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 		g.close();
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	}
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeToSensu(<a href="../../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server, <a href="../../../../../com/googlecode/jmxtrans/model/Query.html">Query</a> query, List&lt;Result&gt; results) {
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		<strong class="jxr_keyword">try</strong> (Socket socketConnection = <strong class="jxr_keyword">new</strong> Socket(host, 3030)) {
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			serialize(server, query, results, socketConnection.getOutputStream());
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			logger.warn(<span class="jxr_string">"Failure to send result to Sensu server '{}'"</span>, host, e);
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		}
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	}
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	<strong class="jxr_keyword">public</strong> String getHost() {
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		<strong class="jxr_keyword">return</strong> host;
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 	}
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 	<strong class="jxr_keyword">public</strong> String getHandler() {
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		<strong class="jxr_keyword">return</strong> handler;
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 	}
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> }
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<strong class="jxr_keyword">if</strong> (isNumeric(result.getValue())) {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				Object value = result.getValue();
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 				jsonoutput.append(KeyUtils.getKeyString(server, query, result, typeNames, <strong class="jxr_keyword">null</strong>)).append(<span class="jxr_string">" "</span>)
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 						.append(value).append(<span class="jxr_string">" "</span>)
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 						.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 						.append(System.getProperty(<span class="jxr_string">"line.separator"</span>));
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			}
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		}
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		g.writeStringField(<span class="jxr_string">"output"</span>, jsonoutput.toString());
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		g.writeEndObject();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		g.flush();
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		g.close();
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeToSensu(<a href="../../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server, <a href="../../../../../com/googlecode/jmxtrans/model/Query.html">Query</a> query, List&lt;Result&gt; results) {
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		<strong class="jxr_keyword">try</strong> (Socket socketConnection = <strong class="jxr_keyword">new</strong> Socket(host, 3030)) {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			serialize(server, query, results, socketConnection.getOutputStream());
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			logger.warn(<span class="jxr_string">"Failure to send result to Sensu server '{}'"</span>, host, e);
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 		}
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	}
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	<strong class="jxr_keyword">public</strong> String getHost() {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 		<strong class="jxr_keyword">return</strong> host;
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	}
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 	<strong class="jxr_keyword">public</strong> String getHandler() {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 		<strong class="jxr_keyword">return</strong> handler;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 	}
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>

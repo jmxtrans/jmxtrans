@@ -58,64 +58,64 @@
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> java.util.Map.Entry;
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> java.util.TreeMap;
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkState;
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * This takes a JRobin template.xml file and then creates the database if it</em>
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * doesn't already exist.</em>
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * </em>
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * It will then write the contents of the Query (the Results) to the database.</em>
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * </em>
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> * This method exec's out to use the command line version of rrdtool. You need</em>
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * to specify the path to the directory where the binary rrdtool lives.</em>
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * </em>
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> * @author jon</em>
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a> <strong class="jxr_keyword">extends</strong> BaseOutputWriter {
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger log = LoggerFactory.getLogger(RRDToolWriter.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String GENERATE = <span class="jxr_string">"generate"</span>;
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">char</strong>[] INITIALS = { ' ', '.' };
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> File outputFile;
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> File templateFile;
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> File binaryPath;
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> generate;
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	@JsonCreator
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a>(
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@JsonProperty(<span class="jxr_string">"typeNames"</span>) ImmutableList&lt;String&gt; typeNames,
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			@JsonProperty(<span class="jxr_string">"booleanAsNumber"</span>) <strong class="jxr_keyword">boolean</strong> booleanAsNumber,
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			@JsonProperty(<span class="jxr_string">"debug"</span>) Boolean debugEnabled,
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@JsonProperty(<span class="jxr_string">"outputFile"</span>) String outputFile,
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@JsonProperty(<span class="jxr_string">"templateFile"</span>) String templateFile,
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			@JsonProperty(<span class="jxr_string">"binaryPath"</span>) String binaryPath,
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			@JsonProperty(<span class="jxr_string">"generate"</span>) Boolean generate,
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@JsonProperty(<span class="jxr_string">"settings"</span>) Map&lt;String, Object&gt; settings) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<strong class="jxr_keyword">super</strong>(typeNames, booleanAsNumber, debugEnabled, settings);
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<strong class="jxr_keyword">this</strong>.outputFile = <strong class="jxr_keyword">new</strong> File(MoreObjects.firstNonNull(outputFile, (String) getSettings().get(OUTPUT_FILE)));
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		<strong class="jxr_keyword">this</strong>.templateFile = <strong class="jxr_keyword">new</strong> File(MoreObjects.firstNonNull(templateFile, (String) getSettings().get(TEMPLATE_FILE)));
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">this</strong>.binaryPath = <strong class="jxr_keyword">new</strong> File(MoreObjects.firstNonNull(binaryPath, (String) getSettings().get(BINARY_PATH)));
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">this</strong>.generate = MoreObjects.firstNonNull(generate, Settings.getBooleanSetting(getSettings(), <span class="jxr_string">"generate"</span>, Boolean.TRUE));
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		checkState(<strong class="jxr_keyword">this</strong>.outputFile.exists(), <span class="jxr_string">"Output file must exist"</span>);
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		checkState(<strong class="jxr_keyword">this</strong>.templateFile.exists(), <span class="jxr_string">"Template file must exist"</span>);
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		checkState(<strong class="jxr_keyword">this</strong>.binaryPath.exists(), <span class="jxr_string">"RRD Binary must exist"</span>);
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	}
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	@Override
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateSetup(Server server, Query query) <strong class="jxr_keyword">throws</strong> ValidationException {}
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">	 * rrd datasources must be less than 21 characters in length, so work to</em>
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 * make it shorter. Not ideal at all, but works fairly well it seems.</em>
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<strong class="jxr_keyword">public</strong> String getDataSourceName(String typeName, String attributeName, String entry) {
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		String result;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> java.util.TreeMap;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkState;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * This takes a JRobin template.xml file and then creates the database if it</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * doesn't already exist.</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * It will then write the contents of the Query (the Results) to the database.</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * This method exec's out to use the command line version of rrdtool. You need</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> * to specify the path to the directory where the binary rrdtool lives.</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * @author jon</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a> <strong class="jxr_keyword">extends</strong> BaseOutputWriter {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger log = LoggerFactory.getLogger(RRDToolWriter.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String GENERATE = <span class="jxr_string">"generate"</span>;
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">char</strong>[] INITIALS = { ' ', '.' };
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> File outputFile;
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> File templateFile;
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> File binaryPath;
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> generate;
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	@JsonCreator
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a>(
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			@JsonProperty(<span class="jxr_string">"typeNames"</span>) ImmutableList&lt;String&gt; typeNames,
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@JsonProperty(<span class="jxr_string">"booleanAsNumber"</span>) <strong class="jxr_keyword">boolean</strong> booleanAsNumber,
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			@JsonProperty(<span class="jxr_string">"debug"</span>) Boolean debugEnabled,
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			@JsonProperty(<span class="jxr_string">"outputFile"</span>) String outputFile,
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@JsonProperty(<span class="jxr_string">"templateFile"</span>) String templateFile,
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@JsonProperty(<span class="jxr_string">"binaryPath"</span>) String binaryPath,
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			@JsonProperty(<span class="jxr_string">"generate"</span>) Boolean generate,
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			@JsonProperty(<span class="jxr_string">"settings"</span>) Map&lt;String, Object&gt; settings) {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  		<strong class="jxr_keyword">super</strong>(typeNames, booleanAsNumber, debugEnabled, settings);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<strong class="jxr_keyword">this</strong>.outputFile = <strong class="jxr_keyword">new</strong> File(MoreObjects.firstNonNull(outputFile, (String) getSettings().get(OUTPUT_FILE)));
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<strong class="jxr_keyword">this</strong>.templateFile = <strong class="jxr_keyword">new</strong> File(MoreObjects.firstNonNull(templateFile, (String) getSettings().get(TEMPLATE_FILE)));
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		<strong class="jxr_keyword">this</strong>.binaryPath = <strong class="jxr_keyword">new</strong> File(MoreObjects.firstNonNull(binaryPath, (String) getSettings().get(BINARY_PATH)));
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">this</strong>.generate = MoreObjects.firstNonNull(generate, Settings.getBooleanSetting(getSettings(), <span class="jxr_string">"generate"</span>, Boolean.TRUE));
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		checkState(<strong class="jxr_keyword">this</strong>.outputFile.exists(), <span class="jxr_string">"Output file must exist"</span>);
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		checkState(<strong class="jxr_keyword">this</strong>.templateFile.exists(), <span class="jxr_string">"Template file must exist"</span>);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		checkState(<strong class="jxr_keyword">this</strong>.binaryPath.exists(), <span class="jxr_string">"RRD Binary must exist"</span>);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	}
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	@Override
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateSetup(Server server, Query query) <strong class="jxr_keyword">throws</strong> ValidationException {}
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">	 * rrd datasources must be less than 21 characters in length, so work to</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">	 * make it shorter. Not ideal at all, but works fairly well it seems.</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	<strong class="jxr_keyword">public</strong> String getDataSourceName(String typeName, String attributeName, List&lt;String&gt; valuePath) {
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		String result;
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		String entry = StringUtils.join(valuePath, '.');
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<strong class="jxr_keyword">if</strong> (typeName != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 			result = typeName + attributeName + entry;
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 		} <strong class="jxr_keyword">else</strong> {
@@ -146,261 +146,256 @@
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 		<em class="jxr_comment">// keys from the result values</em>
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 		<strong class="jxr_keyword">for</strong> (Result res : results) {
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 			log.debug(res.toString());
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			Map&lt;String, Object&gt; values = res.getValues();
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			<strong class="jxr_keyword">for</strong> (Entry&lt;String, Object&gt; entry : values.entrySet()) {
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 				String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 				<strong class="jxr_keyword">if</strong> (isNumeric(entry.getValue())) {
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 					log.debug(<span class="jxr_string">"Generated DataSource name:value: {} : {}"</span>, key, entry.getValue());
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 					<strong class="jxr_keyword">if</strong> (dsNames.contains(key)) {
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 						dataMap.put(key, entry.getValue().toString());
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 					}
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 				}
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			}
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 		}
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 		doGenerate(results);
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 		<strong class="jxr_keyword">if</strong> (!dataMap.keySet().isEmpty() &amp;&amp; !dataMap.values().isEmpty()) {
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			rrdToolUpdate(StringUtils.join(dataMap.keySet(), ':'), StringUtils.join(dataMap.values(), ':'));
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			log.error(<span class="jxr_string">"Nothing was logged for query: "</span> + query);
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		}
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 	}
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> doGenerate(List&lt;Result&gt; results) <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 		<strong class="jxr_keyword">if</strong> (isDebugEnabled() &amp;&amp; generate) {
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder(<span class="jxr_string">"\n"</span>);
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			List&lt;String&gt; keys = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			<strong class="jxr_keyword">for</strong> (Result res : results) {
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 				<strong class="jxr_keyword">for</strong> (Entry&lt;String, Object&gt; entry : res.getValues().entrySet()) {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 					<strong class="jxr_keyword">if</strong> (isNumeric(entry.getValue())) {
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 						String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), entry.getKey());
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 						<strong class="jxr_keyword">if</strong> (keys.contains(key)) {
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 							<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> Exception(<span class="jxr_string">"Duplicate datasource name found: '"</span> + key
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 									+ <span class="jxr_string">"'. Please try to add more typeName keys to the writer to make the name more unique. "</span> + res.toString());
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 						}
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 						keys.add(key);
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 						sb.append(<span class="jxr_string">"&lt;datasource&gt;&lt;!-- "</span>).append(res.getTypeName()).append(<span class="jxr_string">":"</span>)
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 								.append(res.getAttributeName()).append(<span class="jxr_string">":"</span>).append(entry.getKey())
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 								.append(<span class="jxr_string">" --&gt;&lt;name&gt;"</span>).append(key)
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 								.append(<span class="jxr_string">"&lt;/name&gt;&lt;type&gt;GAUGE&lt;/type&gt;&lt;heartbeat&gt;400&lt;/heartbeat&gt;&lt;min&gt;U&lt;/min&gt;&lt;max&gt;U&lt;/max&gt;&lt;/datasource&gt;\n"</span>);
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 					}
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 				}
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> 			}
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 			log.debug(sb.toString());
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 		}
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> 	}
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 
-<a class="jxr_linenumber" name="L189" href="#L189">189</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_javadoccomment">	 * Executes the rrdtool update command.</em>
-<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L192" href="#L192">192</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> rrdToolUpdate(String template, String data) <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		List&lt;String&gt; commands = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L194" href="#L194">194</a> 		commands.add(binaryPath + <span class="jxr_string">"/rrdtool"</span>);
-<a class="jxr_linenumber" name="L195" href="#L195">195</a> 		commands.add(<span class="jxr_string">"update"</span>);
-<a class="jxr_linenumber" name="L196" href="#L196">196</a> 		commands.add(outputFile.getCanonicalPath());
-<a class="jxr_linenumber" name="L197" href="#L197">197</a> 		commands.add(<span class="jxr_string">"-t"</span>);
-<a class="jxr_linenumber" name="L198" href="#L198">198</a> 		commands.add(template);
-<a class="jxr_linenumber" name="L199" href="#L199">199</a> 		commands.add(<span class="jxr_string">"N:"</span> + data);
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), res.getValuePath());
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			<strong class="jxr_keyword">if</strong> (isNumeric(res.getValue())) {
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 				log.debug(<span class="jxr_string">"Generated DataSource name:value: {} : {}"</span>, key, res.getValue());
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 				<strong class="jxr_keyword">if</strong> (dsNames.contains(key)) {
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 					dataMap.put(key, res.getValue().toString());
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 				}
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			}
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 		}
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 		doGenerate(results);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 		<strong class="jxr_keyword">if</strong> (!dataMap.keySet().isEmpty() &amp;&amp; !dataMap.values().isEmpty()) {
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			rrdToolUpdate(StringUtils.join(dataMap.keySet(), ':'), StringUtils.join(dataMap.values(), ':'));
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			log.error(<span class="jxr_string">"Nothing was logged for query: "</span> + query);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		}
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 	}
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> doGenerate(List&lt;Result&gt; results) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		<strong class="jxr_keyword">if</strong> (isDebugEnabled() &amp;&amp; generate) {
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 			StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder(<span class="jxr_string">"\n"</span>);
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			List&lt;String&gt; keys = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			<strong class="jxr_keyword">for</strong> (Result res : results) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 				<strong class="jxr_keyword">if</strong> (isNumeric(res.getValue())) {
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 					String key = getDataSourceName(getConcatedTypeNameValues(res.getTypeName()), res.getAttributeName(), res.getValuePath());
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 					<strong class="jxr_keyword">if</strong> (keys.contains(key)) {
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> Exception(<span class="jxr_string">"Duplicate datasource name found: '"</span> + key
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 								+ <span class="jxr_string">"'. Please try to add more typeName keys to the writer to make the name more unique. "</span> + res.toString());
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 					}
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 					keys.add(key);
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 					sb.append(<span class="jxr_string">"&lt;datasource&gt;&lt;!-- "</span>).append(res.getTypeName()).append(<span class="jxr_string">":"</span>)
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 							.append(res.getAttributeName()).append(<span class="jxr_string">":"</span>).append(res.getValuePath())
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 							.append(<span class="jxr_string">" --&gt;&lt;name&gt;"</span>).append(key)
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 							.append(<span class="jxr_string">"&lt;/name&gt;&lt;type&gt;GAUGE&lt;/type&gt;&lt;heartbeat&gt;400&lt;/heartbeat&gt;&lt;min&gt;U&lt;/min&gt;&lt;max&gt;U&lt;/max&gt;&lt;/datasource&gt;\n"</span>);
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 				}
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 			}
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 			log.debug(sb.toString());
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		}
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	}
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">	 * Executes the rrdtool update command.</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> rrdToolUpdate(String template, String data) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 		List&lt;String&gt; commands = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 		commands.add(binaryPath + <span class="jxr_string">"/rrdtool"</span>);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 		commands.add(<span class="jxr_string">"update"</span>);
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 		commands.add(outputFile.getCanonicalPath());
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 		commands.add(<span class="jxr_string">"-t"</span>);
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		commands.add(template);
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 		commands.add(<span class="jxr_string">"N:"</span> + data);
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 		ProcessBuilder pb = <strong class="jxr_keyword">new</strong> ProcessBuilder(commands);
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 		Process process = pb.start();
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 		checkErrorStream(process);
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 	}
 <a class="jxr_linenumber" name="L200" href="#L200">200</a> 
-<a class="jxr_linenumber" name="L201" href="#L201">201</a> 		ProcessBuilder pb = <strong class="jxr_keyword">new</strong> ProcessBuilder(commands);
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		Process process = pb.start();
-<a class="jxr_linenumber" name="L203" href="#L203">203</a> 		checkErrorStream(process);
-<a class="jxr_linenumber" name="L204" href="#L204">204</a> 	}
-<a class="jxr_linenumber" name="L205" href="#L205">205</a> 
-<a class="jxr_linenumber" name="L206" href="#L206">206</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">	 * If the database file doesn't exist, it'll get created, otherwise, it'll</em>
-<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">	 * be returned in r/w mode.</em>
-<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L210" href="#L210">210</a> 	<strong class="jxr_keyword">protected</strong> RrdDef getDatabaseTemplateSpec() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L211" href="#L211">211</a> 		RrdDefTemplate t = <strong class="jxr_keyword">new</strong> RrdDefTemplate(templateFile);
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 		t.setVariable(<span class="jxr_string">"database"</span>, <strong class="jxr_keyword">this</strong>.outputFile.getCanonicalPath());
-<a class="jxr_linenumber" name="L213" href="#L213">213</a> 		RrdDef def = t.getRrdDef();
-<a class="jxr_linenumber" name="L214" href="#L214">214</a> 		<strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">this</strong>.outputFile.exists()) {
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> 			FileUtils.forceMkdir(<strong class="jxr_keyword">this</strong>.outputFile.getParentFile());
-<a class="jxr_linenumber" name="L216" href="#L216">216</a> 			rrdToolCreateDatabase(def);
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		}
-<a class="jxr_linenumber" name="L218" href="#L218">218</a> 		<strong class="jxr_keyword">return</strong> def;
-<a class="jxr_linenumber" name="L219" href="#L219">219</a> 	}
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 
-<a class="jxr_linenumber" name="L221" href="#L221">221</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">	 * Calls out to the rrdtool binary with the 'create' command.</em>
-<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L224" href="#L224">224</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> rrdToolCreateDatabase(RrdDef def) <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		List&lt;String&gt; commands = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L226" href="#L226">226</a> 		commands.add(<strong class="jxr_keyword">this</strong>.binaryPath + <span class="jxr_string">"/rrdtool"</span>);
-<a class="jxr_linenumber" name="L227" href="#L227">227</a> 		commands.add(<span class="jxr_string">"create"</span>);
-<a class="jxr_linenumber" name="L228" href="#L228">228</a> 		commands.add(<strong class="jxr_keyword">this</strong>.outputFile.getCanonicalPath());
-<a class="jxr_linenumber" name="L229" href="#L229">229</a> 		commands.add(<span class="jxr_string">"-s"</span>);
-<a class="jxr_linenumber" name="L230" href="#L230">230</a> 		commands.add(String.valueOf(def.getStep()));
-<a class="jxr_linenumber" name="L231" href="#L231">231</a> 
-<a class="jxr_linenumber" name="L232" href="#L232">232</a> 		<strong class="jxr_keyword">for</strong> (DsDef dsdef : def.getDsDefs()) {
-<a class="jxr_linenumber" name="L233" href="#L233">233</a> 			commands.add(getDsDefStr(dsdef));
-<a class="jxr_linenumber" name="L234" href="#L234">234</a> 		}
-<a class="jxr_linenumber" name="L235" href="#L235">235</a> 
-<a class="jxr_linenumber" name="L236" href="#L236">236</a> 		<strong class="jxr_keyword">for</strong> (ArcDef adef : def.getArcDefs()) {
-<a class="jxr_linenumber" name="L237" href="#L237">237</a> 			commands.add(getRraStr(adef));
-<a class="jxr_linenumber" name="L238" href="#L238">238</a> 		}
-<a class="jxr_linenumber" name="L239" href="#L239">239</a> 
-<a class="jxr_linenumber" name="L240" href="#L240">240</a> 		ProcessBuilder pb = <strong class="jxr_keyword">new</strong> ProcessBuilder(commands);
-<a class="jxr_linenumber" name="L241" href="#L241">241</a> 		Process process = pb.start();
-<a class="jxr_linenumber" name="L242" href="#L242">242</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L243" href="#L243">243</a> 			checkErrorStream(process);
-<a class="jxr_linenumber" name="L244" href="#L244">244</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L245" href="#L245">245</a> 			IOUtils.closeQuietly(process.getInputStream());
-<a class="jxr_linenumber" name="L246" href="#L246">246</a> 			IOUtils.closeQuietly(process.getOutputStream());
-<a class="jxr_linenumber" name="L247" href="#L247">247</a> 			IOUtils.closeQuietly(process.getErrorStream());
-<a class="jxr_linenumber" name="L248" href="#L248">248</a> 		}
-<a class="jxr_linenumber" name="L249" href="#L249">249</a> 	}
-<a class="jxr_linenumber" name="L250" href="#L250">250</a> 
-<a class="jxr_linenumber" name="L251" href="#L251">251</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">	 * Check to see if there was an error processing an rrdtool command</em>
-<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L254" href="#L254">254</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> checkErrorStream(Process process) <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L255" href="#L255">255</a> 		<em class="jxr_comment">// rrdtool should use platform encoding (unless you did something</em>
-<a class="jxr_linenumber" name="L256" href="#L256">256</a> 		<em class="jxr_comment">// very strange with your installation of rrdtool). So let's be</em>
-<a class="jxr_linenumber" name="L257" href="#L257">257</a> 		<em class="jxr_comment">// explicit and use the presumed correct encoding to read errors.</em>
-<a class="jxr_linenumber" name="L258" href="#L258">258</a> 		<strong class="jxr_keyword">try</strong> (
-<a class="jxr_linenumber" name="L259" href="#L259">259</a> 				InputStream is = process.getErrorStream();
-<a class="jxr_linenumber" name="L260" href="#L260">260</a> 				InputStreamReader isr = <strong class="jxr_keyword">new</strong> InputStreamReader(is, Charset.defaultCharset());
-<a class="jxr_linenumber" name="L261" href="#L261">261</a> 				BufferedReader br = <strong class="jxr_keyword">new</strong> BufferedReader(isr)
-<a class="jxr_linenumber" name="L262" href="#L262">262</a> 		) {
-<a class="jxr_linenumber" name="L263" href="#L263">263</a> 			StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L264" href="#L264">264</a> 			String line;
-<a class="jxr_linenumber" name="L265" href="#L265">265</a> 			<strong class="jxr_keyword">while</strong> ((line = br.readLine()) != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L266" href="#L266">266</a> 				sb.append(line);
-<a class="jxr_linenumber" name="L267" href="#L267">267</a> 			}
-<a class="jxr_linenumber" name="L268" href="#L268">268</a> 			<strong class="jxr_keyword">if</strong> (sb.length() &gt; 0) {
-<a class="jxr_linenumber" name="L269" href="#L269">269</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(sb.toString());
-<a class="jxr_linenumber" name="L270" href="#L270">270</a> 			}
-<a class="jxr_linenumber" name="L271" href="#L271">271</a> 		}
-<a class="jxr_linenumber" name="L272" href="#L272">272</a> 	}
-<a class="jxr_linenumber" name="L273" href="#L273">273</a> 
-<a class="jxr_linenumber" name="L274" href="#L274">274</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">	 * Generate a RRA line for rrdtool</em>
-<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L277" href="#L277">277</a> 	<strong class="jxr_keyword">private</strong> String getRraStr(ArcDef def) {
-<a class="jxr_linenumber" name="L278" href="#L278">278</a> 		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"RRA:"</span> + def.getConsolFun() + <span class="jxr_string">":"</span> + def.getXff() + <span class="jxr_string">":"</span> + def.getSteps() + <span class="jxr_string">":"</span> + def.getRows();
-<a class="jxr_linenumber" name="L279" href="#L279">279</a> 	}
-<a class="jxr_linenumber" name="L280" href="#L280">280</a> 
-<a class="jxr_linenumber" name="L281" href="#L281">281</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">	 * "rrdtool create temperature.rrd --step 300 &#92;&#92;\n" +</em>
-<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment">	 * "         DS:temp:GAUGE:600:-273:5000 &#92;&#92;\n" +</em>
-<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">	 * "         RRA:AVERAGE:0.5:1:1200 &#92;&#92;\n" +</em>
-<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment">	 * "         RRA:MIN:0.5:12:2400 &#92;&#92;\n" + "         RRA:MAX:0.5:12:2400 &#92;&#92;\n"</em>
-<a class="jxr_linenumber" name="L286" href="#L286">286</a> <em class="jxr_javadoccomment">	 * + "         RRA:AVERAGE:0.5:12:2400"</em>
-<a class="jxr_linenumber" name="L287" href="#L287">287</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	<strong class="jxr_keyword">private</strong> String getDsDefStr(DsDef def) {
-<a class="jxr_linenumber" name="L289" href="#L289">289</a> 		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"DS:"</span> + def.getDsName() + <span class="jxr_string">":"</span> + def.getDsType() + <span class="jxr_string">":"</span> + def.getHeartbeat() + <span class="jxr_string">":"</span> + formatDouble(def.getMinValue()) + <span class="jxr_string">":"</span>
-<a class="jxr_linenumber" name="L290" href="#L290">290</a> 				+ formatDouble(def.getMaxValue());
-<a class="jxr_linenumber" name="L291" href="#L291">291</a> 	}
-<a class="jxr_linenumber" name="L292" href="#L292">292</a> 
-<a class="jxr_linenumber" name="L293" href="#L293">293</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L294" href="#L294">294</a> <em class="jxr_javadoccomment">	 * Get a list of DsNames used to create the datasource.</em>
-<a class="jxr_linenumber" name="L295" href="#L295">295</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L296" href="#L296">296</a> 	<strong class="jxr_keyword">private</strong> List&lt;String&gt; getDsNames(DsDef[] defs) {
-<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		List&lt;String&gt; names = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		<strong class="jxr_keyword">for</strong> (DsDef def : defs) {
-<a class="jxr_linenumber" name="L299" href="#L299">299</a> 			names.add(def.getDsName());
-<a class="jxr_linenumber" name="L300" href="#L300">300</a> 		}
-<a class="jxr_linenumber" name="L301" href="#L301">301</a> 		<strong class="jxr_keyword">return</strong> names;
-<a class="jxr_linenumber" name="L302" href="#L302">302</a> 	}
-<a class="jxr_linenumber" name="L303" href="#L303">303</a> 
-<a class="jxr_linenumber" name="L304" href="#L304">304</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">	 * If dbl is NaN, then return U</em>
-<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 	<strong class="jxr_keyword">private</strong> String formatDouble(<strong class="jxr_keyword">double</strong> dbl) {
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> 		<strong class="jxr_keyword">if</strong> (Double.isNaN(dbl)) {
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> 			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"U"</span>;
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> 		}
-<a class="jxr_linenumber" name="L311" href="#L311">311</a> 		<strong class="jxr_keyword">return</strong> String.valueOf(dbl);
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 	}
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 
-<a class="jxr_linenumber" name="L314" href="#L314">314</a> 	<strong class="jxr_keyword">public</strong> String getOutputFile() {
-<a class="jxr_linenumber" name="L315" href="#L315">315</a> 		<strong class="jxr_keyword">return</strong> outputFile.getPath();
-<a class="jxr_linenumber" name="L316" href="#L316">316</a> 	}
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 
-<a class="jxr_linenumber" name="L318" href="#L318">318</a> 	<strong class="jxr_keyword">public</strong> String getTemplateFile() {
-<a class="jxr_linenumber" name="L319" href="#L319">319</a> 		<strong class="jxr_keyword">return</strong> templateFile.getPath();
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 	}
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 	<strong class="jxr_keyword">public</strong> String getBinaryPath() {
-<a class="jxr_linenumber" name="L323" href="#L323">323</a> 		<strong class="jxr_keyword">return</strong> binaryPath.getPath();
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 	}
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> builder() {
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a>();
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 	}
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> {
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ImmutableList.Builder&lt;String&gt; typeNames = ImmutableList.builder();
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> booleanAsNumber;
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		<strong class="jxr_keyword">private</strong> Boolean debugEnabled;
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		<strong class="jxr_keyword">private</strong> File outputFile;
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 		<strong class="jxr_keyword">private</strong> File templateFile;
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		<strong class="jxr_keyword">private</strong> File binaryPath;
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 		<strong class="jxr_keyword">private</strong> Boolean generate;
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a>() {}
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">	 * If the database file doesn't exist, it'll get created, otherwise, it'll</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">	 * be returned in r/w mode.</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 	<strong class="jxr_keyword">protected</strong> RrdDef getDatabaseTemplateSpec() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 		RrdDefTemplate t = <strong class="jxr_keyword">new</strong> RrdDefTemplate(templateFile);
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 		t.setVariable(<span class="jxr_string">"database"</span>, <strong class="jxr_keyword">this</strong>.outputFile.getCanonicalPath());
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> 		RrdDef def = t.getRrdDef();
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 		<strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">this</strong>.outputFile.exists()) {
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 			FileUtils.forceMkdir(<strong class="jxr_keyword">this</strong>.outputFile.getParentFile());
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 			rrdToolCreateDatabase(def);
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 		}
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 		<strong class="jxr_keyword">return</strong> def;
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 	}
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">	 * Calls out to the rrdtool binary with the 'create' command.</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> rrdToolCreateDatabase(RrdDef def) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		List&lt;String&gt; commands = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 		commands.add(<strong class="jxr_keyword">this</strong>.binaryPath + <span class="jxr_string">"/rrdtool"</span>);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 		commands.add(<span class="jxr_string">"create"</span>);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 		commands.add(<strong class="jxr_keyword">this</strong>.outputFile.getCanonicalPath());
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 		commands.add(<span class="jxr_string">"-s"</span>);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		commands.add(String.valueOf(def.getStep()));
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 		<strong class="jxr_keyword">for</strong> (DsDef dsdef : def.getDsDefs()) {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 			commands.add(getDsDefStr(dsdef));
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 		}
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> 		<strong class="jxr_keyword">for</strong> (ArcDef adef : def.getArcDefs()) {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 			commands.add(getRraStr(adef));
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 		}
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 		ProcessBuilder pb = <strong class="jxr_keyword">new</strong> ProcessBuilder(commands);
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 		Process process = pb.start();
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 			checkErrorStream(process);
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> 			IOUtils.closeQuietly(process.getInputStream());
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> 			IOUtils.closeQuietly(process.getOutputStream());
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 			IOUtils.closeQuietly(process.getErrorStream());
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 		}
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 	}
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">	 * Check to see if there was an error processing an rrdtool command</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> checkErrorStream(Process process) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 		<em class="jxr_comment">// rrdtool should use platform encoding (unless you did something</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 		<em class="jxr_comment">// very strange with your installation of rrdtool). So let's be</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 		<em class="jxr_comment">// explicit and use the presumed correct encoding to read errors.</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 		<strong class="jxr_keyword">try</strong> (
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 				InputStream is = process.getErrorStream();
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 				InputStreamReader isr = <strong class="jxr_keyword">new</strong> InputStreamReader(is, Charset.defaultCharset());
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 				BufferedReader br = <strong class="jxr_keyword">new</strong> BufferedReader(isr)
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 		) {
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 			StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 			String line;
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 			<strong class="jxr_keyword">while</strong> ((line = br.readLine()) != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 				sb.append(line);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> 			}
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 			<strong class="jxr_keyword">if</strong> (sb.length() &gt; 0) {
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(sb.toString());
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 			}
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 		}
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 	}
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">	 * Generate a RRA line for rrdtool</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 	<strong class="jxr_keyword">private</strong> String getRraStr(ArcDef def) {
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"RRA:"</span> + def.getConsolFun() + <span class="jxr_string">":"</span> + def.getXff() + <span class="jxr_string">":"</span> + def.getSteps() + <span class="jxr_string">":"</span> + def.getRows();
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 	}
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">	 * "rrdtool create temperature.rrd --step 300 &#92;&#92;\n" +</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">	 * "         DS:temp:GAUGE:600:-273:5000 &#92;&#92;\n" +</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">	 * "         RRA:AVERAGE:0.5:1:1200 &#92;&#92;\n" +</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">	 * "         RRA:MIN:0.5:12:2400 &#92;&#92;\n" + "         RRA:MAX:0.5:12:2400 &#92;&#92;\n"</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">	 * + "         RRA:AVERAGE:0.5:12:2400"</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> 	<strong class="jxr_keyword">private</strong> String getDsDefStr(DsDef def) {
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"DS:"</span> + def.getDsName() + <span class="jxr_string">":"</span> + def.getDsType() + <span class="jxr_string">":"</span> + def.getHeartbeat() + <span class="jxr_string">":"</span> + formatDouble(def.getMinValue()) + <span class="jxr_string">":"</span>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 				+ formatDouble(def.getMaxValue());
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 	}
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment">	 * Get a list of DsNames used to create the datasource.</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 	<strong class="jxr_keyword">private</strong> List&lt;String&gt; getDsNames(DsDef[] defs) {
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 		List&lt;String&gt; names = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		<strong class="jxr_keyword">for</strong> (DsDef def : defs) {
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 			names.add(def.getDsName());
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		}
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 		<strong class="jxr_keyword">return</strong> names;
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 	}
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> <em class="jxr_javadoccomment">	 * If dbl is NaN, then return U</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 	<strong class="jxr_keyword">private</strong> String formatDouble(<strong class="jxr_keyword">double</strong> dbl) {
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 		<strong class="jxr_keyword">if</strong> (Double.isNaN(dbl)) {
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"U"</span>;
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 		}
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 		<strong class="jxr_keyword">return</strong> String.valueOf(dbl);
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 	}
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 	<strong class="jxr_keyword">public</strong> String getOutputFile() {
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 		<strong class="jxr_keyword">return</strong> outputFile.getPath();
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 	}
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 	<strong class="jxr_keyword">public</strong> String getTemplateFile() {
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 		<strong class="jxr_keyword">return</strong> templateFile.getPath();
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 	}
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 	<strong class="jxr_keyword">public</strong> String getBinaryPath() {
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 		<strong class="jxr_keyword">return</strong> binaryPath.getPath();
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 	}
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> builder() {
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a>();
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 	}
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> {
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ImmutableList.Builder&lt;String&gt; typeNames = ImmutableList.builder();
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> booleanAsNumber;
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		<strong class="jxr_keyword">private</strong> Boolean debugEnabled;
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 		<strong class="jxr_keyword">private</strong> File outputFile;
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 		<strong class="jxr_keyword">private</strong> File templateFile;
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 		<strong class="jxr_keyword">private</strong> File binaryPath;
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 		<strong class="jxr_keyword">private</strong> Boolean generate;
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a>() {}
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> addTypeNames(List&lt;String&gt; typeNames) {
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 			<strong class="jxr_keyword">this</strong>.typeNames.addAll(typeNames);
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 		}
 <a class="jxr_linenumber" name="L340" href="#L340">340</a> 
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> addTypeNames(List&lt;String&gt; typeNames) {
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 			<strong class="jxr_keyword">this</strong>.typeNames.addAll(typeNames);
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> addTypeName(String typeName) {
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 			typeNames.add(typeName);
 <a class="jxr_linenumber" name="L343" href="#L343">343</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L344" href="#L344">344</a> 		}
 <a class="jxr_linenumber" name="L345" href="#L345">345</a> 
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> addTypeName(String typeName) {
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 			typeNames.add(typeName);
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setBooleanAsNumber(<strong class="jxr_keyword">boolean</strong> booleanAsNumber) {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 			<strong class="jxr_keyword">this</strong>.booleanAsNumber = booleanAsNumber;
 <a class="jxr_linenumber" name="L348" href="#L348">348</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L349" href="#L349">349</a> 		}
 <a class="jxr_linenumber" name="L350" href="#L350">350</a> 
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setBooleanAsNumber(<strong class="jxr_keyword">boolean</strong> booleanAsNumber) {
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> 			<strong class="jxr_keyword">this</strong>.booleanAsNumber = booleanAsNumber;
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setDebugEnabled(<strong class="jxr_keyword">boolean</strong> debugEnabled) {
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 			<strong class="jxr_keyword">this</strong>.debugEnabled = debugEnabled;
 <a class="jxr_linenumber" name="L353" href="#L353">353</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L354" href="#L354">354</a> 		}
 <a class="jxr_linenumber" name="L355" href="#L355">355</a> 
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setDebugEnabled(<strong class="jxr_keyword">boolean</strong> debugEnabled) {
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 			<strong class="jxr_keyword">this</strong>.debugEnabled = debugEnabled;
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setOutputFile(File outputFile) {
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 			<strong class="jxr_keyword">this</strong>.outputFile = outputFile;
 <a class="jxr_linenumber" name="L358" href="#L358">358</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L359" href="#L359">359</a> 		}
 <a class="jxr_linenumber" name="L360" href="#L360">360</a> 
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setOutputFile(File outputFile) {
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 			<strong class="jxr_keyword">this</strong>.outputFile = outputFile;
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setTemplateFile(File templateFile) {
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 			<strong class="jxr_keyword">this</strong>.templateFile = templateFile;
 <a class="jxr_linenumber" name="L363" href="#L363">363</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L364" href="#L364">364</a> 		}
 <a class="jxr_linenumber" name="L365" href="#L365">365</a> 
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setTemplateFile(File templateFile) {
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 			<strong class="jxr_keyword">this</strong>.templateFile = templateFile;
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setBinaryPath(File binaryPath) {
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 			<strong class="jxr_keyword">this</strong>.binaryPath = binaryPath;
 <a class="jxr_linenumber" name="L368" href="#L368">368</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L369" href="#L369">369</a> 		}
 <a class="jxr_linenumber" name="L370" href="#L370">370</a> 
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setBinaryPath(File binaryPath) {
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 			<strong class="jxr_keyword">this</strong>.binaryPath = binaryPath;
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setGenerate(Boolean generate) {
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 			<strong class="jxr_keyword">this</strong>.generate = generate;
 <a class="jxr_linenumber" name="L373" href="#L373">373</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L374" href="#L374">374</a> 		}
 <a class="jxr_linenumber" name="L375" href="#L375">375</a> 
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">Builder</a> setGenerate(Boolean generate) {
-<a class="jxr_linenumber" name="L377" href="#L377">377</a> 			<strong class="jxr_keyword">this</strong>.generate = generate;
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L379" href="#L379">379</a> 		}
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a> build() {
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a>(
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 					typeNames.build(),
-<a class="jxr_linenumber" name="L384" href="#L384">384</a> 					booleanAsNumber,
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> 					debugEnabled,
-<a class="jxr_linenumber" name="L386" href="#L386">386</a> 					outputFile.getPath(),
-<a class="jxr_linenumber" name="L387" href="#L387">387</a> 					templateFile.getPath(),
-<a class="jxr_linenumber" name="L388" href="#L388">388</a> 					binaryPath.getPath(),
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 					generate,
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 					<strong class="jxr_keyword">null</strong>
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 			);
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 		}
-<a class="jxr_linenumber" name="L393" href="#L393">393</a> 	}
-<a class="jxr_linenumber" name="L394" href="#L394">394</a> 
-<a class="jxr_linenumber" name="L395" href="#L395">395</a> }
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a> build() {
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../com/googlecode/jmxtrans/model/output/RRDToolWriter.html">RRDToolWriter</a>(
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 					typeNames.build(),
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> 					booleanAsNumber,
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 					debugEnabled,
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 					outputFile.getPath(),
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 					templateFile.getPath(),
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 					binaryPath.getPath(),
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 					generate,
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 					<strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 			);
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 		}
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 	}
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>

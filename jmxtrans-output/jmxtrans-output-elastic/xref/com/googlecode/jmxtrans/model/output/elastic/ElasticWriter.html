@@ -33,31 +33,31 @@
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.fasterxml.jackson.annotation.JsonCreator;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> com.fasterxml.jackson.annotation.JsonProperty;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Charsets;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> com.google.common.io.Resources;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.exceptions.LifecycleException;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Query;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Result;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Server;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.ValidationException;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.output.BaseOutputWriter;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.JestClient;
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.JestClientFactory;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.JestResult;
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.config.HttpClientConfig;
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> io.searchbox.core.Index;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> io.searchbox.indices.CreateIndex;
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> io.searchbox.indices.IndicesExists;
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> io.searchbox.indices.mapping.PutMapping;
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.slf4j.Logger;
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.slf4j.LoggerFactory;
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> javax.annotation.concurrent.NotThreadSafe;
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> java.net.URL;
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> java.util.HashMap;
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> java.util.Map.Entry;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Joiner;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> com.google.common.io.Resources;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.exceptions.LifecycleException;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Query;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Result;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.Server;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.ValidationException;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> com.googlecode.jmxtrans.model.output.BaseOutputWriter;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.JestClient;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.JestClientFactory;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.JestResult;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> io.searchbox.client.config.HttpClientConfig;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> io.searchbox.core.Index;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> io.searchbox.indices.CreateIndex;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> io.searchbox.indices.IndicesExists;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> io.searchbox.indices.mapping.PutMapping;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.slf4j.Logger;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.slf4j.LoggerFactory;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> javax.annotation.concurrent.NotThreadSafe;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> java.net.URL;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> java.util.HashMap;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
@@ -69,9 +69,9 @@
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  @NotThreadSafe
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../com/googlecode/jmxtrans/model/output/elastic/ElasticWriter.html">ElasticWriter</a> <strong class="jxr_keyword">extends</strong> BaseOutputWriter {
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger log = LoggerFactory.getLogger(ElasticWriter.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_ROOT_PREFIX = <span class="jxr_string">"jmxtrans"</span>;
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String ELASTIC_TYPE_NAME = <span class="jxr_string">"jmx-entry"</span>;
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
@@ -120,94 +120,89 @@
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<strong class="jxr_keyword">for</strong> (Result result : results) {
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 			log.debug(<span class="jxr_string">"Query result: [{}]"</span>, result);
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			Map&lt;String, Object&gt; resultValues = result.getValues();
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			<strong class="jxr_keyword">for</strong> (Entry&lt;String, Object&gt; values : resultValues.entrySet()) {
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 				Object value = values.getValue();
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 				<strong class="jxr_keyword">if</strong> (isNumeric(value)) {
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 					Map&lt;String, Object&gt; map = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 					map.put(<span class="jxr_string">"serverAlias"</span>, server.getAlias());
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 					map.put(<span class="jxr_string">"server"</span>, server.getHost());
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 					map.put(<span class="jxr_string">"port"</span>, server.getPort());
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 					map.put(<span class="jxr_string">"objDomain"</span>, result.getObjDomain());
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 					map.put(<span class="jxr_string">"className"</span>, result.getClassName());
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 					map.put(<span class="jxr_string">"typeName"</span>, result.getTypeName());
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 					map.put(<span class="jxr_string">"attributeName"</span>, result.getAttributeName());
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 					map.put(<span class="jxr_string">"key"</span>, values.getKey());
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 					map.put(<span class="jxr_string">"keyAlias"</span>, result.getKeyAlias());
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 					map.put(<span class="jxr_string">"value"</span>, Double.parseDouble(value.toString()));
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 					map.put(<span class="jxr_string">"timestamp"</span>, result.getEpoch());
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 					log.debug(<span class="jxr_string">"Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]"</span>, indexName, ELASTIC_TYPE_NAME, map);
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 					Index index = <strong class="jxr_keyword">new</strong> Index.Builder(map).index(indexName).type(ELASTIC_TYPE_NAME).build();
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 					JestResult addToIndex = jestClient.execute(index);
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 					<strong class="jxr_keyword">if</strong> (!addToIndex.isSucceeded()) {
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../com/googlecode/jmxtrans/model/output/elastic/ElasticWriterException.html">ElasticWriterException</a>(String.format(<span class="jxr_string">"Unable to write entry to elastic: %s"</span>, addToIndex.getErrorMessage()));
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 					}
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 					log.warn(<span class="jxr_string">"Unable to submit non-numeric value to Elastic: [{}] from result [{}]"</span>, value, result);
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 				}
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			}
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 		}
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 	}
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<strong class="jxr_keyword">if</strong> (isNumeric(result.getValue())) {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				Map&lt;String, Object&gt; map = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 				map.put(<span class="jxr_string">"serverAlias"</span>, server.getAlias());
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 				map.put(<span class="jxr_string">"server"</span>, server.getHost());
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 				map.put(<span class="jxr_string">"port"</span>, server.getPort());
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 				map.put(<span class="jxr_string">"objDomain"</span>, result.getObjDomain());
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 				map.put(<span class="jxr_string">"className"</span>, result.getClassName());
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 				map.put(<span class="jxr_string">"typeName"</span>, result.getTypeName());
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 				map.put(<span class="jxr_string">"attributeName"</span>, result.getAttributeName());
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 				map.put(<span class="jxr_string">"valuePath"</span>, Joiner.on('/').join(result.getValuePath()));
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 				map.put(<span class="jxr_string">"keyAlias"</span>, result.getKeyAlias());
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 				map.put(<span class="jxr_string">"value"</span>, Double.parseDouble(result.getValue().toString()));
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 				map.put(<span class="jxr_string">"timestamp"</span>, result.getEpoch());
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 				log.debug(<span class="jxr_string">"Insert into Elastic: Index: [{}] Type: [{}] Map: [{}]"</span>, indexName, ELASTIC_TYPE_NAME, map);
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 				Index index = <strong class="jxr_keyword">new</strong> Index.Builder(map).index(indexName).type(ELASTIC_TYPE_NAME).build();
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 				JestResult addToIndex = jestClient.execute(index);
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 				<strong class="jxr_keyword">if</strong> (!addToIndex.isSucceeded()) {
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../com/googlecode/jmxtrans/model/output/elastic/ElasticWriterException.html">ElasticWriterException</a>(String.format(<span class="jxr_string">"Unable to write entry to elastic: %s"</span>, addToIndex.getErrorMessage()));
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 				}
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 				log.warn(<span class="jxr_string">"Unable to submit non-numeric value to Elastic: [{}] from result [{}]"</span>, result.getValue(), result);
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			}
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 		}
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	}
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) <strong class="jxr_keyword">throws</strong> ElasticWriterException, IOException {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 		<strong class="jxr_keyword">synchronized</strong> (CREATE_MAPPING_LOCK) {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			IndicesExists indicesExists = <strong class="jxr_keyword">new</strong> IndicesExists.Builder(indexName).build();
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 			<strong class="jxr_keyword">boolean</strong> indexExists = jestClient.execute(indicesExists).isSucceeded();
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> createMappingIfNeeded(JestClient jestClient, String indexName, String typeName) <strong class="jxr_keyword">throws</strong> ElasticWriterException, IOException {
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 		<strong class="jxr_keyword">synchronized</strong> (CREATE_MAPPING_LOCK) {
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			IndicesExists indicesExists = <strong class="jxr_keyword">new</strong> IndicesExists.Builder(indexName).build();
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			<strong class="jxr_keyword">boolean</strong> indexExists = jestClient.execute(indicesExists).isSucceeded();
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			<strong class="jxr_keyword">if</strong> (!indexExists) {
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 				CreateIndex createIndex = <strong class="jxr_keyword">new</strong> CreateIndex.Builder(indexName).build();
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 				jestClient.execute(createIndex);
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			<strong class="jxr_keyword">if</strong> (!indexExists) {
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 				CreateIndex createIndex = <strong class="jxr_keyword">new</strong> CreateIndex.Builder(indexName).build();
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 				jestClient.execute(createIndex);
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 				URL url = ElasticWriter.<strong class="jxr_keyword">class</strong>.getResource(<span class="jxr_string">"/elastic-mapping.json"</span>);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 				String mapping = Resources.toString(url, Charsets.UTF_8);
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 				PutMapping putMapping = <strong class="jxr_keyword">new</strong> PutMapping.Builder(indexName, typeName,mapping).build();
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 				URL url = ElasticWriter.<strong class="jxr_keyword">class</strong>.getResource(<span class="jxr_string">"/elastic-mapping.json"</span>);
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 				String mapping = Resources.toString(url, Charsets.UTF_8);
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 				PutMapping putMapping = <strong class="jxr_keyword">new</strong> PutMapping.Builder(indexName, typeName,mapping).build();
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 				JestResult result = jestClient.execute(putMapping);
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 				<strong class="jxr_keyword">if</strong> (!result.isSucceeded()) {
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../com/googlecode/jmxtrans/model/output/elastic/ElasticWriterException.html">ElasticWriterException</a>(String.format(<span class="jxr_string">"Failed to create mapping: %s"</span>, result.getErrorMessage()));
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 				}
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 				<strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 					log.info(<span class="jxr_string">"Created mapping for index {}"</span>, indexName);
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 				}
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			}
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		}
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 	}
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 	@Override
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> start() <strong class="jxr_keyword">throws</strong> LifecycleException {
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		<strong class="jxr_keyword">super</strong>.start();
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 			createMappingIfNeeded(jestClient, indexName, ELASTIC_TYPE_NAME);
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> LifecycleException(<span class="jxr_string">"Failed to create elastic mapping."</span>, e);
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		}
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 	}
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	@Override
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> close() <strong class="jxr_keyword">throws</strong> LifecycleException {
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> 		<strong class="jxr_keyword">super</strong>.close();
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 		jestClient.shutdownClient();
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 				JestResult result = jestClient.execute(putMapping);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 				<strong class="jxr_keyword">if</strong> (!result.isSucceeded()) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../com/googlecode/jmxtrans/model/output/elastic/ElasticWriterException.html">ElasticWriterException</a>(String.format(<span class="jxr_string">"Failed to create mapping: %s"</span>, result.getErrorMessage()));
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 				}
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 				<strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 					log.info(<span class="jxr_string">"Created mapping for index {}"</span>, indexName);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 				}
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			}
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 		}
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 	}
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 	@Override
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> start() <strong class="jxr_keyword">throws</strong> LifecycleException {
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		<strong class="jxr_keyword">super</strong>.start();
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			createMappingIfNeeded(jestClient, indexName, ELASTIC_TYPE_NAME);
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> LifecycleException(<span class="jxr_string">"Failed to create elastic mapping."</span>, e);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		}
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	}
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 	@Override
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> close() <strong class="jxr_keyword">throws</strong> LifecycleException {
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		<strong class="jxr_keyword">super</strong>.close();
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		jestClient.shutdownClient();
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 	}
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 	@Override
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateSetup(Server server, Query query) <strong class="jxr_keyword">throws</strong> ValidationException {
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 		<em class="jxr_comment">// no validations</em>
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> 	}
 <a class="jxr_linenumber" name="L187" href="#L187">187</a> 
 <a class="jxr_linenumber" name="L188" href="#L188">188</a> 	@Override
-<a class="jxr_linenumber" name="L189" href="#L189">189</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateSetup(Server server, Query query) <strong class="jxr_keyword">throws</strong> ValidationException {
-<a class="jxr_linenumber" name="L190" href="#L190">190</a> 		<em class="jxr_comment">// no validations</em>
-<a class="jxr_linenumber" name="L191" href="#L191">191</a> 	}
-<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
-<a class="jxr_linenumber" name="L193" href="#L193">193</a> 	@Override
-<a class="jxr_linenumber" name="L194" href="#L194">194</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L195" href="#L195">195</a> 		<strong class="jxr_keyword">final</strong> StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder(<span class="jxr_string">"ElasticWriter{"</span>);
-<a class="jxr_linenumber" name="L196" href="#L196">196</a> 		sb.append(<span class="jxr_string">"rootPrefix='"</span>).append(rootPrefix).append('\'');
-<a class="jxr_linenumber" name="L197" href="#L197">197</a> 		sb.append(<span class="jxr_string">", connectionUrl='"</span>).append(connectionUrl).append('\'');
-<a class="jxr_linenumber" name="L198" href="#L198">198</a> 		sb.append(<span class="jxr_string">", indexName='"</span>).append(indexName).append('\'');
-<a class="jxr_linenumber" name="L199" href="#L199">199</a> 		sb.append('}');
-<a class="jxr_linenumber" name="L200" href="#L200">200</a> 		<strong class="jxr_keyword">return</strong> sb.toString();
-<a class="jxr_linenumber" name="L201" href="#L201">201</a> 	}
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> }
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 		<strong class="jxr_keyword">final</strong> StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder(<span class="jxr_string">"ElasticWriter{"</span>);
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 		sb.append(<span class="jxr_string">"rootPrefix='"</span>).append(rootPrefix).append('\'');
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 		sb.append(<span class="jxr_string">", connectionUrl='"</span>).append(connectionUrl).append('\'');
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		sb.append(<span class="jxr_string">", indexName='"</span>).append(indexName).append('\'');
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 		sb.append('}');
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 		<strong class="jxr_keyword">return</strong> sb.toString();
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 	}
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>

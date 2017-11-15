@@ -50,8 +50,8 @@
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> javax.annotation.Nonnull;
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> java.io.ByteArrayOutputStream;
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
@@ -96,47 +96,43 @@
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  	@Override
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>  	<strong class="jxr_keyword">public</strong> Collection&lt;String&gt; serialize(<a href="../../../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server, <a href="../../../../../../com/googlecode/jmxtrans/model/Query.html">Query</a> query, <a href="../../../../../../com/googlecode/jmxtrans/model/Result.html">Result</a> result) <strong class="jxr_keyword">throws</strong> IOException {
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  		log.debug(<span class="jxr_string">"Query result: [{}]"</span>, result);
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		Map&lt;String, Object&gt; resultValues = result.getValues();
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		List&lt;String&gt; messages = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		<strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, Object&gt; values : resultValues.entrySet()) {
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			Object value = values.getValue();
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			<strong class="jxr_keyword">if</strong> (isNumeric(value)) {
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  				messages.add(createJsonMessage(server, query, result, values, value));
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  				log.warn(<span class="jxr_string">"Unable to submit non-numeric value to Kafka: [{}] from result [{}]"</span>, value, result);
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			}
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		}
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		<strong class="jxr_keyword">return</strong> messages;
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	}
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		Object value = result.getValue();
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<strong class="jxr_keyword">if</strong> (isNumeric(value)) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			<strong class="jxr_keyword">return</strong> Collections.singleton(createJsonMessage(server, query, result, result.getValuePath(), value));
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			log.warn(<span class="jxr_string">"Unable to submit non-numeric value to Kafka: [{}] from result [{}]"</span>, value, result);
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			<strong class="jxr_keyword">return</strong> Collections.emptyList();
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		}
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  	}
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	<strong class="jxr_keyword">private</strong> String createJsonMessage(<a href="../../../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server, <a href="../../../../../../com/googlecode/jmxtrans/model/Query.html">Query</a> query, <a href="../../../../../../com/googlecode/jmxtrans/model/Result.html">Result</a> result, List&lt;String&gt; valuePath, Object value) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		String keyString = getKeyString(server, query, result, typeNames, <strong class="jxr_keyword">this</strong>.rootPrefix);
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		String cleanKeyString = keyString.replaceAll(<span class="jxr_string">"[()]"</span>, <span class="jxr_string">"_"</span>);
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	<strong class="jxr_keyword">private</strong> String createJsonMessage(<a href="../../../../../../com/googlecode/jmxtrans/model/Server.html">Server</a> server, <a href="../../../../../../com/googlecode/jmxtrans/model/Query.html">Query</a> query, <a href="../../../../../../com/googlecode/jmxtrans/model/Result.html">Result</a> result, Map.Entry&lt;String, Object&gt; values, Object value) <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		String keyString = getKeyString(server, query, result, values, typeNames, <strong class="jxr_keyword">this</strong>.rootPrefix);
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		String cleanKeyString = keyString.replaceAll(<span class="jxr_string">"[()]"</span>, <span class="jxr_string">"_"</span>);
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">try</strong> (
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 				ByteArrayOutputStream out = <strong class="jxr_keyword">new</strong> ByteArrayOutputStream();
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 				JsonGenerator generator = jsonFactory.createGenerator(out, UTF8)
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		) {
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			generator.writeStartObject();
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			generator.writeStringField(<span class="jxr_string">"keyspace"</span>, cleanKeyString);
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			generator.writeStringField(<span class="jxr_string">"value"</span>, value.toString());
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			generator.writeNumberField(<span class="jxr_string">"timestamp"</span>, result.getEpoch() / 1000);
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			generator.writeObjectFieldStart(<span class="jxr_string">"tags"</span>);
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			<strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; tag : <strong class="jxr_keyword">this</strong>.tags.entrySet()) {
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 				generator.writeStringField(tag.getKey(), tag.getValue());
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			}
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			<strong class="jxr_keyword">for</strong> (ResultAttribute resultAttribute : <strong class="jxr_keyword">this</strong>.resultAttributesToWriteAsTags) {
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 				generator.writeStringField(resultAttribute.getName(), resultAttribute.get(result));
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			}
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			generator.writeEndObject();
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			generator.writeEndObject();
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 			generator.close();
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			<strong class="jxr_keyword">return</strong> out.toString(<span class="jxr_string">"UTF-8"</span>);
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 		}
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	}
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> }
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		<strong class="jxr_keyword">try</strong> (
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 				ByteArrayOutputStream out = <strong class="jxr_keyword">new</strong> ByteArrayOutputStream();
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 				JsonGenerator generator = jsonFactory.createGenerator(out, UTF8)
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		) {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			generator.writeStartObject();
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			generator.writeStringField(<span class="jxr_string">"keyspace"</span>, cleanKeyString);
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			generator.writeStringField(<span class="jxr_string">"value"</span>, value.toString());
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			generator.writeNumberField(<span class="jxr_string">"timestamp"</span>, result.getEpoch() / 1000);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			generator.writeObjectFieldStart(<span class="jxr_string">"tags"</span>);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			<strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; tag : <strong class="jxr_keyword">this</strong>.tags.entrySet()) {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 				generator.writeStringField(tag.getKey(), tag.getValue());
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			}
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 			<strong class="jxr_keyword">for</strong> (ResultAttribute resultAttribute : <strong class="jxr_keyword">this</strong>.resultAttributesToWriteAsTags) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 				generator.writeStringField(resultAttribute.getName(), resultAttribute.get(result));
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			}
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			generator.writeEndObject();
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			generator.writeEndObject();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			generator.close();
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			<strong class="jxr_keyword">return</strong> out.toString(<span class="jxr_string">"UTF-8"</span>);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		}
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	}
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>

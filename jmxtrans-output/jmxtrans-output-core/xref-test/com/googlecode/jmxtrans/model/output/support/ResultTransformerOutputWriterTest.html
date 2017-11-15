@@ -69,23 +69,25 @@
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  		assertThat(resultsCaptor.getValue()).hasSize(1);
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  		Result transformedResult = resultsCaptor.getValue().get(0);
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		assertThat(transformedResult.getValues()).containsEntry(<span class="jxr_string">"Verbose"</span>, 1);
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	}
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  	@Test
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> identityTransformerDoesNotTransformValues() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		ResultTransformerOutputWriter&lt;OutputWriter&gt; resultTransformerOutputWriter = identity(outputWriter);
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		resultTransformerOutputWriter.doWrite(dummyServer(), dummyQuery(), singleFalseResult());
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		verify(outputWriter)
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  				.doWrite(any(Server.<strong class="jxr_keyword">class</strong>), any(Query.<strong class="jxr_keyword">class</strong>), resultsCaptor.capture());
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		assertThat(resultsCaptor.getValue()).hasSize(1);
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		Result transformedResult = resultsCaptor.getValue().get(0);
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		assertThat(transformedResult.getValues()).containsEntry(<span class="jxr_string">"Verbose"</span>, FALSE);
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  }
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		assertThat(transformedResult.getValue()).isEqualTo(1);
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		assertThat(transformedResult.getValuePath()).isEmpty();
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	}
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	@Test
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> identityTransformerDoesNotTransformValues() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		ResultTransformerOutputWriter&lt;OutputWriter&gt; resultTransformerOutputWriter = identity(outputWriter);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  		resultTransformerOutputWriter.doWrite(dummyServer(), dummyQuery(), singleFalseResult());
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		verify(outputWriter)
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  				.doWrite(any(Server.<strong class="jxr_keyword">class</strong>), any(Query.<strong class="jxr_keyword">class</strong>), resultsCaptor.capture());
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		assertThat(resultsCaptor.getValue()).hasSize(1);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		Result transformedResult = resultsCaptor.getValue().get(0);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		assertThat(transformedResult.getValue()).isEqualTo(FALSE);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		assertThat(transformedResult.getValuePath()).isEmpty();
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>
