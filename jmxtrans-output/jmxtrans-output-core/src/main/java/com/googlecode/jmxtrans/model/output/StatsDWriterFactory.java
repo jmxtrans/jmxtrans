@@ -51,6 +51,8 @@ public class StatsDWriterFactory implements OutputWriterFactory {
 	@Nonnull private final InetSocketAddress server;
 	@Nonnull private final FlushStrategy flushStrategy;
 	private final int poolSize;
+	@Nonnull private final String replacementForInvalidChar;
+
 
 	public StatsDWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
@@ -62,7 +64,9 @@ public class StatsDWriterFactory implements OutputWriterFactory {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("flushStrategy") String flushStrategy,
 			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
-			@JsonProperty("poolSize") Integer poolSize) {
+			@JsonProperty("poolSize") Integer poolSize,
+			@JsonProperty("replacementForInvalidChar") String replacementForInvalidChar
+	) {
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
 		this.rootPrefix = firstNonNull(rootPrefix, "servers");
 		this.stringsValuesAsKey = stringsValuesAsKey;
@@ -73,13 +77,14 @@ public class StatsDWriterFactory implements OutputWriterFactory {
 				checkNotNull(port, "Port cannot be null."));
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
+		this.replacementForInvalidChar = firstNonNull(replacementForInvalidChar, "_");
 	}
 
 	@Override
 	public WriterPoolOutputWriter<StatsDWriter2> create() {
 		return UdpOutputWriterBuilder.builder(
 				server,
-				new StatsDWriter2(typeNames, rootPrefix, bucketType, stringsValuesAsKey, stringValueDefaultCount))
+				new StatsDWriter2(typeNames, rootPrefix, bucketType, stringsValuesAsKey, stringValueDefaultCount, replacementForInvalidChar))
 				.setCharset(UTF_8)
 				.setFlushStrategy(flushStrategy)
 				.setPoolSize(poolSize)

@@ -70,6 +70,22 @@ public final class ResultFixtures {
 				numericValue);
 	}
 
+	public static Result numericResultWithColon() {
+		return numericResultWithColon(10);
+	}
+
+	public static Result numericResultWithColon(Object numericValue) {
+		return new Result(
+				0,
+				"Count",
+				"com.yammer.metrics.reporting.JmxReporter$Meter",
+				"fakehostname.example.com-org.openrepose.core",
+				null,
+				"type=\"ResponseCode\",scope=\"127.0.0.1:8008\",name=\"4XX\"",
+				ImmutableList.<String>of(),
+				numericValue);
+	}
+
 	public static Result stringResult() {
 		return stringResult("value is a string");
 	}
@@ -148,6 +164,13 @@ public final class ResultFixtures {
 				booleanTrueResult(),
 				booleanFalseResult());
 	}
+
+	public static ImmutableList<Result> dummyResultWithColon() {
+		return ImmutableList.of(
+				numericResultWithColon(),
+				booleanTrueResult());
+	}
+
 
 	public static ImmutableList<Result> singleResult(Result result) {
 		return ImmutableList.of(result);

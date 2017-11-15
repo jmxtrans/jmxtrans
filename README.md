@@ -26,3 +26,8 @@ The core engine is very solid and there are writers for [Graphite](http://graphi
 Coda Hale did [an excellent talk](http://pivotallabs.com/talks/139-metrics-metrics-everywhere) for [Pivotal Labs](http://pivotallabs.com/) on *why* metrics matter. Great justification for using a tool like jmxtrans.
 
 ![render](http://jmxtrans.googlecode.com/svn/wiki/render.png)
+
+## Special thanks:
+
+* [JetBrains](https://www.jetbrains.com/buy/opensource/) for providing us with IntelliJ licenses,
+* [EJ Technologies](https://www.ej-technologies.com/) for providing us with licenses of their [Java profiler](https://www.ej-technologies.com/products/jprofiler/overview.html).

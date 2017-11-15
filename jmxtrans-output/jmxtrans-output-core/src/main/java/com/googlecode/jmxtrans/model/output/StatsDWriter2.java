@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
@@ -53,21 +54,28 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	private final String bucketType;
 	@Nonnull
 	private final String stringValueDefaultCount;
+	@Nonnull
+	private final String replacementForInvalidChar;
 
 	@Nonnull
 	private final ValueTransformer valueTransformer = new CPrecisionValueTransformer();
+
+	private static final Pattern STATSD_INVALID = Pattern.compile("[:|]");
 
 	public StatsDWriter2(
 			@Nonnull List<String> typeNames,
 			@Nonnull String rootPrefix,
 			@Nonnull String bucketType,
 			boolean stringsValuesAsKey,
-			@Nonnull Long stringValueDefaultCount) {
+			@Nonnull Long stringValueDefaultCount,
+			@Nonnull String replacementForInvalidChar) {
 		this.typeNames = typeNames;
 		this.rootPrefix = rootPrefix;
 		this.stringsValuesAsKey = stringsValuesAsKey;
 		this.bucketType = bucketType;
 		this.stringValueDefaultCount = stringValueDefaultCount.toString();
+		this.replacementForInvalidChar = replacementForInvalidChar;
+
 	}
 
 	@Override
@@ -79,8 +87,9 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 				continue;
 			}
 
-			String line = key
-					+ computeActualValue(result.getValue()) + "|" + bucketType + "\n";
+			// These characters can mess with formatting.
+			String line = STATSD_INVALID.matcher(key).replaceAll(replacementForInvalidChar)
+				+ computeActualValue(result.getValue()) + "|" + bucketType + "\n";
 
 			writer.write(line);
 		}

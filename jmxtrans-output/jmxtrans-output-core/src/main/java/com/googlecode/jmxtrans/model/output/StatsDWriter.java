@@ -36,6 +36,7 @@ import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
+import com.google.common.base.MoreObjects;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -53,6 +54,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
@@ -74,11 +76,13 @@ public class StatsDWriter extends BaseOutputWriter {
 	private static final String BUCKET_TYPE = "bucketType";
 	private static final String STRING_VALUE_AS_KEY = "stringValuesAsKey";
 	private static final String STRING_VALUE_DEFAULT_COUNTER = "stringValueDefaultCount";
+	private static final Pattern STATSD_INVALID = Pattern.compile("[:|]");
 
 	private final ByteBuffer sendBuffer;
 
 	private final String bucketType;
 	private final String rootPrefix;
+	private final String replacementForInvalidChar;
 	private final InetSocketAddress address;
 	private final DatagramChannel channel;
 	private final Boolean stringsValuesAsKey;
@@ -106,7 +110,9 @@ public class StatsDWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty(STRING_VALUE_AS_KEY) Boolean stringsValuesAsKey,
 			@JsonProperty(STRING_VALUE_DEFAULT_COUNTER) Long stringValueDefaultCount,
-			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
+			@JsonProperty("settings") Map<String, Object> settings,
+			@JsonProperty("replacementForInvalidChar") String replacementForInvalidChar
+			) throws IOException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		log.warn("StatsDWriter is deprecated. Please use StatsDWriterFactory instead.");
 		channel = DatagramChannel.open();
@@ -128,6 +134,8 @@ public class StatsDWriter extends BaseOutputWriter {
 		if (port == null) {
 			port = Settings.getIntegerSetting(getSettings(), PORT, null);
 		}
+		this.replacementForInvalidChar = MoreObjects.firstNonNull(replacementForInvalidChar, "_");
+
 		checkNotNull(host, "Host cannot be null");
 		checkNotNull(port, "Port cannot be null");
 		this.address = new InetSocketAddress(host, port);
@@ -186,8 +194,9 @@ public class StatsDWriter extends BaseOutputWriter {
 				continue;
 			}
 
-			String line = key
-					+ computeActualValue(result.getValue()) + "|" + bucketType + "\n";
+			// These characters can mess with formatting.
+			String line = STATSD_INVALID.matcher(key).replaceAll(this.replacementForInvalidChar)
+				+ computeActualValue(result.getValue()) + "|" + bucketType + "\n";
 
 			doSend(line.trim());
 		}
