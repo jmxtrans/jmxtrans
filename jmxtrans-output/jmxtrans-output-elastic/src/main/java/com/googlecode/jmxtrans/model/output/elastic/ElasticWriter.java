@@ -41,6 +41,7 @@ import io.searchbox.core.Index;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +67,8 @@ public class ElasticWriter extends BaseOutputWriter {
 	
 	private static final String DEFAULT_ROOT_PREFIX = "jmxtrans";
 	private static final String ELASTIC_TYPE_NAME = "jmx-entry";
+	private static final Integer ELASTIC_CONNECTION_TIMEOUT = 6000;
+	private static final Integer ELASTIC_READ_TIMEOUT = 6000;
 
 	private static final Object CREATE_MAPPING_LOCK = new Object();
 
@@ -75,6 +78,9 @@ public class ElasticWriter extends BaseOutputWriter {
 	private final String rootPrefix;
 	private final String connectionUrl;
 	private final String indexName;
+	private final String username;
+	private final Integer readTimeout;
+	private final Integer connTimeout;
 
 	@JsonCreator
 	public ElasticWriter(
@@ -83,6 +89,10 @@ public class ElasticWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("connectionUrl") String connectionUrl,
+			@JsonProperty("connTimeout") Integer connTimeout,
+			@JsonProperty("readTimeout") Integer readTimeout,
+			@JsonProperty("username") String username,
+			@JsonProperty("password") String password,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
@@ -91,19 +101,24 @@ public class ElasticWriter extends BaseOutputWriter {
 						rootPrefix,
 						(String) getSettings().get("rootPrefix"),
 						DEFAULT_ROOT_PREFIX);
+		this.readTimeout = firstNonNull(connTimeout, (Integer) getSettings().get("connTimeout"), ELASTIC_CONNECTION_TIMEOUT);
+		this.connTimeout = firstNonNull(readTimeout, (Integer) getSettings().get("readTimeout"), ELASTIC_READ_TIMEOUT);
 
 		this.connectionUrl = connectionUrl;
+
+		this.username = username;
 		this.indexName = this.rootPrefix + "_jmx-entries";
-		this.jestClient = createJestClient(connectionUrl);
+		this.jestClient = createJestClient(connectionUrl, username, password);
 	}
 
-	private JestClient createJestClient(String connectionUrl) {
+	private JestClient createJestClient(String connectionUrl, String username, String password) {
 		log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
 		JestClientFactory factory = new JestClientFactory();
-		factory.setHttpClientConfig(
-				new HttpClientConfig.Builder(connectionUrl)
-						.multiThreaded(true)
-						.build());
+		HttpClientConfig.Builder httpClientBuilder  = new HttpClientConfig.Builder(connectionUrl).connTimeout(connTimeout).readTimeout(readTimeout).multiThreaded(true);
+		if (StringUtils.isNotEmpty(username)) {
+			httpClientBuilder.defaultCredentials(username, password);
+		}
+		factory.setHttpClientConfig(httpClientBuilder.build());
 		return factory.getObject();
 	}
 
@@ -195,6 +210,7 @@ public class ElasticWriter extends BaseOutputWriter {
 		final StringBuilder sb = new StringBuilder("ElasticWriter{");
 		sb.append("rootPrefix='").append(rootPrefix).append('\'');
 		sb.append(", connectionUrl='").append(connectionUrl).append('\'');
+		sb.append(", username='").append(username).append('\'');
 		sb.append(", indexName='").append(indexName).append('\'');
 		sb.append('}');
 		return sb.toString();

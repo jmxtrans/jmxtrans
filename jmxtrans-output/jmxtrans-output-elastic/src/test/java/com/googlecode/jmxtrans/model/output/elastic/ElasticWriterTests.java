@@ -77,6 +77,9 @@ public class ElasticWriterTests {
 	@InjectMocks
 	private ElasticWriter writer = createElasticWriter();
 
+	@InjectMocks
+	private ElasticWriter writerAuth = createElasticWriter("elastic", "changeme");
+
 	private Result result;
 
 	@Before
@@ -98,14 +101,37 @@ public class ElasticWriterTests {
 		// return for call, add index entry
 		when(mockClient.execute(isA(Index.class))).thenReturn(jestResultTrue);
 
-        // creates the index if needed
-        writer.start();
+		// creates the index if needed
+		writer.start();
 
-        writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
+		writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
 
-        writer.close();
+		writer.close();
 
-        Mockito.verify(mockClient, times(4)).execute(Matchers.<Action<JestResult>>any());
+		Mockito.verify(mockClient, times(4)).execute(Matchers.<Action<JestResult>>any());
+
+	}
+
+	@Test
+	public void sendMessageToElasticWithAuth() throws Exception {
+
+		// return for call, does index exist
+		when(mockClient.execute(isA(IndicesExists.class))).thenReturn(jestResultFalse);
+
+		// return for call, is index created
+		when(mockClient.execute(isA(PutMapping.class))).thenReturn(jestResultTrue);
+
+		// return for call, add index entry
+		when(mockClient.execute(isA(Index.class))).thenReturn(jestResultTrue);
+
+		// creates the index if needed
+		writerAuth.start();
+
+		writerAuth.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(result));
+
+		writerAuth.close();
+
+		Mockito.verify(mockClient, times(4)).execute(Matchers.<Action<JestResult>>any());
 
 	}
 
@@ -208,13 +234,27 @@ public class ElasticWriterTests {
 		Map<String,Object> settings = new HashMap<String,Object>();
 
 		String connectionUrl = "http://localhost";
-
 		ElasticWriter writer;
 
 		try {
-			writer = new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, settings);
+			writer = new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, null, null, null, null, settings);
 		} catch (IOException e) {
-			throw new RuntimeException("Unexpected failure to creare elastic writer for test", e);
+			throw new RuntimeException("Unexpected failure to create elastic writer for test", e);
+		}
+		return writer;
+	}
+
+	private ElasticWriter createElasticWriter(String username, String password) {
+		ImmutableList<String> typenames = ImmutableList.of();
+		Map<String,Object> settings = new HashMap<String,Object>();
+
+		String connectionUrl = "http://localhost";
+		ElasticWriter writer;
+
+		try {
+		    writer = new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, null, null, username, password, settings);
+		} catch (IOException e) {
+		    throw new RuntimeException("Unexpected failure to creare elastic writer for test", e);
 		}
 		return writer;
 	}
