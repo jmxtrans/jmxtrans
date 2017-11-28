@@ -142,7 +142,7 @@
 		<github.global.server>github</github.global.server>
 		<jackson.version>2.8.9</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
-		<kafka.version>0.11.0.0</kafka.version>
+		<kafka.version>0.11.0.1</kafka.version>
 		<logback.version>1.2.3</logback.version>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
@@ -242,7 +242,7 @@
 			<dependency>
 				<groupId>com.google.inject</groupId>
 				<artifactId>guice</artifactId>
-				<version>4.0</version>
+				<version>4.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
@@ -252,12 +252,12 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.10</version>
+				<version>1.11</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.5</version>
+				<version>2.6</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-lang</groupId>
@@ -277,7 +277,7 @@
 			<dependency>
 				<groupId>io.searchbox</groupId>
 				<artifactId>jest</artifactId>
-				<version>5.3.2</version>
+				<version>5.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.inject</groupId>
@@ -480,51 +480,11 @@
 			</dependency>
 			<dependency>
 				<!--
-					There is no compile time dependency on acplt. There might be a runtime dependency that I did not
-					identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-				-->
-				<groupId>org.acplt</groupId>
-				<artifactId>oncrpc</artifactId>
-				<version>1.0.7</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<!--
 					AWS CloudWatch and Jest (elastic search client) need a recent version of http client.
 				-->
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>4.5.3</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<!--
-					There is no compile time dependency on jgit. There might be a runtime dependency that I did not
-					identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-				-->
-				<groupId>org.eclipse.jgit</groupId>
-				<artifactId>org.eclipse.jgit</artifactId>
-				<version>4.0.2.201509141540-r</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<!--
-					There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
-					identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-				-->
-				<groupId>org.jboss.remoting3</groupId>
-				<artifactId>remoting-jmx</artifactId>
-				<version>1.0.1.Final</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<!--
-					There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
-					identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-				-->
-				<groupId>org.jboss.remotingjmx</groupId>
-				<artifactId>remoting-jmx</artifactId>
-				<version>2.0.1.Final</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
@@ -811,7 +771,7 @@
 						<dependency>
 							<groupId>de.andrena.tools.nopackagecycles</groupId>
 							<artifactId>no-package-cycles-enforcer-rule</artifactId>
-							<version>1.0.5</version>
+							<version>1.0.8</version>
 						</dependency>
 					</dependencies>
 					<executions>
@@ -919,12 +879,12 @@
 						<dependency>
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-api</artifactId>
-							<version>1.9.4</version>
+							<version>1.9.5</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-provider-jgit</artifactId>
-							<version>1.9.4</version>
+							<version>1.9.5</version>
 							<!-- required in order to hide password value in command logging on travis -->
 						</dependency>
 					</dependencies>
