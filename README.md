@@ -7,7 +7,7 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jmxtrans/jmxtrans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Maven site](https://img.shields.io/badge/Maven-site-blue.svg)](http://www.jmxtrans.org/jmxtrans/)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jmxtrans/jmxtrans/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jmxtrans/jmxtrans)
-[![Nemo - SonarQube](https://img.shields.io/badge/SonarQube-Nemo-lightgrey.svg)](https://sonarcloud.io/dashboard?id=org.jmxtrans%3Ajmxtrans-parent)
+[![sonarcloud.io](https://img.shields.io/badge/sonarcloud-quality-lightgrey.svg)](https://sonarcloud.io/dashboard?id=org.jmxtrans%3Ajmxtrans-parent)
 
 This is the source code repository for the jmxtrans project.
 
