@@ -57,10 +57,11 @@ public class ProcessConfigUtils {
 	 * tree representation of that json.
 	 */
 	public JmxProcess parseProcess(File file) throws IOException {
-		ObjectMapper mapper = file.getName().endsWith(".yml") || file.getName().endsWith(".yaml") ? yamlMapper : jsonMapper;
+		String fileName = file.getName();
+		ObjectMapper mapper = fileName.endsWith(".yml") || fileName.endsWith(".yaml") ? yamlMapper : jsonMapper;
 		JsonNode jsonNode = mapper.readTree(file);
 		JmxProcess jmx = mapper.treeToValue(jsonNode, JmxProcess.class);
-		jmx.setName(file.getName());
+		jmx.setName(fileName);
 		return jmx;
 	}
 }

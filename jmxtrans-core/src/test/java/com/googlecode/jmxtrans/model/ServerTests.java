@@ -302,8 +302,6 @@ public class ServerTests {
 			}
 		}
 
-		verify(conn).close();
-
 		verify(pool, never()).returnObject(server, conn);
 
 		InOrder orderVerifier = inOrder(pool);
@@ -343,8 +341,6 @@ public class ServerTests {
 				fail("Wrong exception thrown (" + e + " instead of mock");
 			}
 		}
-
-		verify(conn).close();
 
 		verify(pool, never()).returnObject(server, conn);
 
