@@ -84,11 +84,11 @@ public class JmxTransModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(new TypeLiteral<GenericKeyedObjectPool<InetSocketAddress, Socket>>(){})
-				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName()));
+				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName(), 0));
 		bind(new TypeLiteral<GenericKeyedObjectPool<SocketAddress, DatagramSocket>>(){})
-				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName()));
+				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName(), 0));
 		bind(new TypeLiteral<KeyedObjectPool<JmxConnectionProvider, JMXConnection>>(){}).annotatedWith(Names.named("mbeanPool"))
-				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName()));
+				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName(), 20000));
 	}
 
 	@Provides
@@ -149,13 +149,14 @@ public class JmxTransModule extends AbstractModule {
 				.build();
 	}
 
-	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName) {
+	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName, long maxWaitMillis) {
 		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<>(factory);
 		pool.setTestOnBorrow(true);
 		pool.setMaxActive(-1);
 		pool.setMaxIdle(-1);
 		pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
 		pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
+		pool.setMaxWait(maxWaitMillis);
 
 		try {
 			ManagedGenericKeyedObjectPool mbean =
