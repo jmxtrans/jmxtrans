@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.connections;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import javax.management.MBeanServer;
@@ -30,9 +31,7 @@ import javax.management.remote.JMXConnector;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class MBeanServerConnectionFactoryTest {
 
@@ -73,7 +72,8 @@ public class MBeanServerConnectionFactoryTest {
 
 		factory.destroyObject(server, connection);
 
-		verify(connection).close();
+		verify(connection).setMarkedAsDestroyed();
+		verify(connection, timeout(2000)).close();
 	}
 
 }
