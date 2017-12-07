@@ -284,7 +284,7 @@ public class Server implements JmxConnectionProvider {
 			// since we will invalidate the connection in the pool, prevent connection leaks
 			try {
 				jmxConnection.close();
-			} catch (IOException | RuntimeException re) {
+			} catch (RuntimeException re) {
 				// drop these, we don't really know what caused the original exception.
 				logger.warn("An error occurred trying to close a JMX Connection during error handling.", re);
 			}

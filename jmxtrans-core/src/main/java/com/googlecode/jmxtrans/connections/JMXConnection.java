@@ -34,15 +34,12 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @ToString
 @ThreadSafe
 public class JMXConnection implements Closeable {
 	@Nullable private final JMXConnector connector;
 	@Nonnull @Getter private final MBeanServerConnection mBeanServerConnection;
-	@Nonnull private final ExecutorService executor;
 	private boolean markedAsDestroyed;
 	private static final Logger logger = LoggerFactory.getLogger(JMXConnection.class);
 
@@ -51,32 +48,24 @@ public class JMXConnection implements Closeable {
 		this.mBeanServerConnection = mBeanServerConnection;
 		this.markedAsDestroyed = false;
 
-		executor = Executors.newSingleThreadExecutor();
+
 	}
 
 	public boolean isAlive(){
 		return !markedAsDestroyed;
 	}
+	public void setMarkedAsDestroyed(){
+		markedAsDestroyed = true;
+	}
 
 	@Override
-	public void close() throws IOException {
-		markedAsDestroyed = true;
+	public void close() {
 		if (connector != null) {
-			// when you call close it tries to notify server about it
-			// so if your server is down you will wait until connection timed out
-			// but we want to release thread asap
-			// that's why we do it here through ExecutorService
-			executor.submit(new Runnable() {
-				public void run() {
-					if (connector != null) {
-						try {
-							connector.close();
-						} catch (IOException e) {
-							logger.error("Error occurred during close connection {}", this, e);
-						}
-					}
-				}
-			});
+			try {
+				connector.close();
+			} catch (IOException e) {
+				logger.error("Error occurred during close connection {}", this, e);
+			}
 		}
 	}
 }

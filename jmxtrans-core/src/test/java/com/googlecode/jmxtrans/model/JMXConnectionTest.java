@@ -31,7 +31,6 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 public class JMXConnectionTest {
@@ -52,7 +51,7 @@ public class JMXConnectionTest {
 		JMXConnection jmxConnection = new JMXConnection(jmxConnector, mBeanServerConnection);
 
 		jmxConnection.close();
-		verify(jmxConnector, timeout(2000)).close();
+		verify(jmxConnector).close();
 	}
 
 	@Test
