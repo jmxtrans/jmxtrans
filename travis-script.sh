@@ -44,7 +44,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       --settings ${MVN_SETTINGS} -B -V \
       -PwithMutationTests,gpg,rpm,deb \
       -Ddocker.skip=false \
-      -Dsonar.host.url=https://sonarqube.com/ -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.login=$SONAR_TOKEN
   elif [ "$TRAVIS_BRANCH" == "release" ]; then
     if [[ `git log --format=%B -n 1` == *"[maven-release-plugin]"* ]]; then
       echo "Do not release commits created by maven release plugin"
@@ -83,7 +83,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       -PwithMutationTests,rpm,deb,\!gpg \
       -Dgpg.passphraseServerId=skip \
       -Ddocker.skip=false \
-      -Dsonar.host.url=https://sonarqube.com/ -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.login=$SONAR_TOKEN
   fi
 else
   echo "Building pull request"

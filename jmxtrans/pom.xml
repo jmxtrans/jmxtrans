@@ -54,34 +54,6 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<!--
-				There is no compile time dependency on acplt. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
-			<groupId>org.acplt</groupId>
-			<artifactId>oncrpc</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<!-- JSR160 (JMX Remoting) protocol -->
-			<!--
-				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
-			<groupId>org.jboss.remoting3</groupId>
-			<artifactId>remoting-jmx</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<!--
-				There is no compile time dependency on jboss remoting. There might be a runtime dependency that I did not
-				identify yet, so let's keep it for the moment. After further analysis, we might be able to remove it.
-			-->
-			<groupId>org.jboss.remotingjmx</groupId>
-			<artifactId>remoting-jmx</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-core</artifactId>
 			<scope>runtime</scope>

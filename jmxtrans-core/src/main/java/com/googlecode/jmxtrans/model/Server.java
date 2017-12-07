@@ -270,26 +270,28 @@ public class Server implements JmxConnectionProvider {
 	}
 
 	public Iterable<Result> execute(Query query) throws Exception {
-		JMXConnection jmxConnection = pool.borrowObject(this);
+		JMXConnection jmxConnection = null;
 		try {
+			jmxConnection = pool.borrowObject(this);
 			ImmutableList.Builder<Result> results = ImmutableList.builder();
 			MBeanServerConnection connection = jmxConnection.getMBeanServerConnection();
 
 			for (ObjectName queryName : query.queryNames(connection)) {
 				results.addAll(query.fetchResults(connection, queryName));
 			}
-			pool.returnObject(this, jmxConnection);
+
 			return results.build();
 		} catch (Exception e) {
-			// since we will invalidate the connection in the pool, prevent connection leaks
-			try {
-				jmxConnection.close();
-			} catch (RuntimeException re) {
-				// drop these, we don't really know what caused the original exception.
-				logger.warn("An error occurred trying to close a JMX Connection during error handling.", re);
+			if (jmxConnection != null) {
+				pool.invalidateObject(this, jmxConnection);
+				jmxConnection = null;
 			}
-			pool.invalidateObject(this, jmxConnection);
 			throw e;
+		}
+		finally {
+			if (jmxConnection != null) {
+				pool.returnObject(this, jmxConnection);
+			}
 		}
 	}
 
