@@ -51,7 +51,6 @@ public class JMXConnectionTest {
 		JMXConnection jmxConnection = new JMXConnection(jmxConnector, mBeanServerConnection);
 
 		jmxConnection.close();
-
 		verify(jmxConnector).close();
 	}
 

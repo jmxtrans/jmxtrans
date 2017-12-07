@@ -325,18 +325,18 @@ public class ServerTests {
 
 		JMXConnection conn = mock(JMXConnection.class);
 		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
-		doThrow(new IOException()).when(conn).close();
+		doThrow(new RuntimeException()).when(conn).close();
 
 		when(pool.borrowObject(server)).thenReturn(conn);
 
 		Query query = mock(Query.class);
-		IOException e = mock(IOException.class);
+		RuntimeException e = mock(RuntimeException.class);
 		when(query.queryNames(mBeanConn)).thenThrow(e);
 
 		try {
 			server.execute(query);
 			fail("No exception got throws");
-		} catch (IOException e2) {
+		} catch (RuntimeException e2) {
 			if (e != e2) {
 				fail("Wrong exception thrown (" + e + " instead of mock");
 			}

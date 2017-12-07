@@ -27,8 +27,16 @@ import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import javax.annotation.Nonnull;
 import javax.management.remote.JMXConnector;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<JmxConnectionProvider, JMXConnection> {
+	@Nonnull private final ExecutorService executor;
+
+	public MBeanServerConnectionFactory(){
+		executor = Executors.newCachedThreadPool();
+	}
+
 	@Override
 	@Nonnull
 	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws IOException {
@@ -41,7 +49,27 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 	}
 
 	@Override
-	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection obj) throws IOException {
-		obj.close();
+	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull final JMXConnection jmxConnection) throws IOException {
+		if (!jmxConnection.isAlive()) {
+			return;
+		}
+
+		jmxConnection.setMarkedAsDestroyed();
+
+		// when you call close it tries to notify server about it
+		// so if your server is down you will wait until connection timed out
+		// but we want to release thread asap
+		// that's why we do it here through ExecutorService
+		executor.submit(new Runnable() {
+			public void run() {
+				jmxConnection.close();
+			}
+		});
 	}
+
+	@Override
+	public boolean validateObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection jmxConnection){
+		return jmxConnection.isAlive();
+	}
+
 }
