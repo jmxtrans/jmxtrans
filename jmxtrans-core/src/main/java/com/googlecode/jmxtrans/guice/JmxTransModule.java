@@ -157,6 +157,8 @@ public class JmxTransModule extends AbstractModule {
 		pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
 		pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
 		pool.setMaxWait(maxWaitMillis);
+		pool.setTestOnReturn(true);
+		pool.setTestOnBorrow(true);
 
 		try {
 			ManagedGenericKeyedObjectPool mbean =

@@ -41,7 +41,17 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 	}
 
 	@Override
-	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection obj) throws IOException {
-		obj.close();
+	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection jmxConnection) throws IOException {
+		if (!jmxConnection.isAlive()) {
+			return;
+		}
+
+		jmxConnection.close();
 	}
+
+	@Override
+	public boolean validateObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection jmxConnection){
+		return jmxConnection.isAlive();
+	}
+
 }

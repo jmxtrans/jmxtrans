@@ -24,6 +24,8 @@ package com.googlecode.jmxtrans.connections;
 
 import lombok.Getter;
 import lombok.ToString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,20 +34,45 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @ToString
 @ThreadSafe
 public class JMXConnection implements Closeable {
 	@Nullable private final JMXConnector connector;
 	@Nonnull @Getter private final MBeanServerConnection mBeanServerConnection;
+	@Nonnull private final ExecutorService executor;
+	private boolean markedAsDestroyed;
+	private static final Logger logger = LoggerFactory.getLogger(JMXConnection.class);
 
 	public JMXConnection(@Nullable JMXConnector connector, @Nonnull MBeanServerConnection mBeanServerConnection) {
 		this.connector = connector;
 		this.mBeanServerConnection = mBeanServerConnection;
+		this.markedAsDestroyed = false;
+
+		executor = Executors.newSingleThreadExecutor();
+	}
+
+	public boolean isAlive(){
+		return !markedAsDestroyed;
 	}
 
 	@Override
 	public void close() throws IOException {
-		if (connector != null) connector.close();
+		markedAsDestroyed = true;
+		if (connector != null) {
+			executor.submit(new Runnable() {
+				public void run() {
+					if (connector != null) {
+						try {
+							connector.close();
+						} catch (IOException e) {
+							logger.error("Error occurred during close connection {}", this, e);
+						}
+					}
+				}
+			});
+		}
 	}
 }

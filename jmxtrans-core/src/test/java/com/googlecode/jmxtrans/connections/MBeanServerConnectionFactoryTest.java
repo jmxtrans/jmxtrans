@@ -66,9 +66,12 @@ public class MBeanServerConnectionFactoryTest {
 
 	@Test
 	public void connectionIsClosedOnDestroy() throws IOException {
+		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		JMXConnection connection = mock(JMXConnection.class);
 
-		factory.destroyObject(null, connection);
+		when(connection.isAlive()).thenReturn(true);
+
+		factory.destroyObject(server, connection);
 
 		verify(connection).close();
 	}
