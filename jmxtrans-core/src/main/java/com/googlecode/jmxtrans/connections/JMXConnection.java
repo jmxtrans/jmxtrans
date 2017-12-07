@@ -62,6 +62,10 @@ public class JMXConnection implements Closeable {
 	public void close() throws IOException {
 		markedAsDestroyed = true;
 		if (connector != null) {
+			// when you call close it tries to notify server about it
+			// so if your server is down you will wait until connection timed out
+			// but we want to release thread asap
+			// that's why we do it here through ExecutorService
 			executor.submit(new Runnable() {
 				public void run() {
 					if (connector != null) {
