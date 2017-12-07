@@ -25,7 +25,7 @@ under the License.
     <language>en-us</language>
     <copyright>&#169;2010 - 2017 JmxTrans team</copyright>
     <item>
-      <title>File: 178,
+      <title>File: 179,
              Errors: 0,
              Warnings: 0,
              Infos: 0
@@ -173,6 +173,20 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder.java">com/googlecode/jmxtrans/model/naming/typename/TypeNameValuesStringBuilder.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.jmxtrans.org/checkstyle.html#com.googlecode.jmxtrans.model.JmxTransRMIClientSocketFactory.java">com/googlecode/jmxtrans/model/JmxTransRMIClientSocketFactory.java</a>
                 </td>
                 <td>
                   0

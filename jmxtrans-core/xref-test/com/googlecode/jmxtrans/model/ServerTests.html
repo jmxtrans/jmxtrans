@@ -333,18 +333,18 @@
 <a class="jxr_linenumber" name="L325" href="#L325">325</a> 
 <a class="jxr_linenumber" name="L326" href="#L326">326</a> 		JMXConnection conn = mock(JMXConnection.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L327" href="#L327">327</a> 		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		doThrow(<strong class="jxr_keyword">new</strong> IOException()).when(conn).close();
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		doThrow(<strong class="jxr_keyword">new</strong> RuntimeException()).when(conn).close();
 <a class="jxr_linenumber" name="L329" href="#L329">329</a> 
 <a class="jxr_linenumber" name="L330" href="#L330">330</a> 		when(pool.borrowObject(server)).thenReturn(conn);
 <a class="jxr_linenumber" name="L331" href="#L331">331</a> 
 <a class="jxr_linenumber" name="L332" href="#L332">332</a> 		Query query = mock(Query.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		IOException e = mock(IOException.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		RuntimeException e = mock(RuntimeException.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L334" href="#L334">334</a> 		when(query.queryNames(mBeanConn)).thenThrow(e);
 <a class="jxr_linenumber" name="L335" href="#L335">335</a> 
 <a class="jxr_linenumber" name="L336" href="#L336">336</a> 		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L337" href="#L337">337</a> 			server.execute(query);
 <a class="jxr_linenumber" name="L338" href="#L338">338</a> 			fail(<span class="jxr_string">"No exception got throws"</span>);
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 		} <strong class="jxr_keyword">catch</strong> (IOException e2) {
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 		} <strong class="jxr_keyword">catch</strong> (RuntimeException e2) {
 <a class="jxr_linenumber" name="L340" href="#L340">340</a> 			<strong class="jxr_keyword">if</strong> (e != e2) {
 <a class="jxr_linenumber" name="L341" href="#L341">341</a> 				fail(<span class="jxr_string">"Wrong exception thrown ("</span> + e + <span class="jxr_string">" instead of mock"</span>);
 <a class="jxr_linenumber" name="L342" href="#L342">342</a> 			}

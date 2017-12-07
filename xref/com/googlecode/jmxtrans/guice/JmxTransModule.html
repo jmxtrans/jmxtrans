@@ -92,11 +92,11 @@
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  	@Override
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> configure() {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		bind(<strong class="jxr_keyword">new</strong> TypeLiteral&lt;GenericKeyedObjectPool&lt;InetSocketAddress, Socket&gt;&gt;(){})
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  				.toInstance(getObjectPool(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/connections/SocketFactory.html">SocketFactory</a>(), SocketFactory.<strong class="jxr_keyword">class</strong>.getSimpleName()));
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  				.toInstance(getObjectPool(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/connections/SocketFactory.html">SocketFactory</a>(), SocketFactory.<strong class="jxr_keyword">class</strong>.getSimpleName(), 0));
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  		bind(<strong class="jxr_keyword">new</strong> TypeLiteral&lt;GenericKeyedObjectPool&lt;SocketAddress, DatagramSocket&gt;&gt;(){})
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  				.toInstance(getObjectPool(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/connections/DatagramSocketFactory.html">DatagramSocketFactory</a>(), DatagramSocketFactory.<strong class="jxr_keyword">class</strong>.getSimpleName()));
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  				.toInstance(getObjectPool(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/connections/DatagramSocketFactory.html">DatagramSocketFactory</a>(), DatagramSocketFactory.<strong class="jxr_keyword">class</strong>.getSimpleName(), 0));
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  		bind(<strong class="jxr_keyword">new</strong> TypeLiteral&lt;KeyedObjectPool&lt;JmxConnectionProvider, JMXConnection&gt;&gt;(){}).annotatedWith(Names.named(<span class="jxr_string">"mbeanPool"</span>))
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				.toInstance(getObjectPool(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/connections/MBeanServerConnectionFactory.html">MBeanServerConnectionFactory</a>(), MBeanServerConnectionFactory.<strong class="jxr_keyword">class</strong>.getSimpleName()));
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				.toInstance(getObjectPool(<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/connections/MBeanServerConnectionFactory.html">MBeanServerConnectionFactory</a>(), MBeanServerConnectionFactory.<strong class="jxr_keyword">class</strong>.getSimpleName(), 20000));
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  	}
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>  
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  	@Provides
@@ -157,41 +157,44 @@
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 				.build();
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 	}
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	<strong class="jxr_keyword">private</strong> &lt;K, V&gt; GenericKeyedObjectPool&lt;K, V&gt; getObjectPool(KeyedPoolableObjectFactory&lt;K, V&gt; factory, String poolName) {
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	<strong class="jxr_keyword">private</strong> &lt;K, V&gt; GenericKeyedObjectPool&lt;K, V&gt; getObjectPool(KeyedPoolableObjectFactory&lt;K, V&gt; factory, String poolName, <strong class="jxr_keyword">long</strong> maxWaitMillis) {
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 		GenericKeyedObjectPool&lt;K, V&gt; pool = <strong class="jxr_keyword">new</strong> GenericKeyedObjectPool&lt;&gt;(factory);
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 		pool.setTestOnBorrow(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 		pool.setMaxActive(-1);
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 		pool.setMaxIdle(-1);
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 		pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 		pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			ManagedGenericKeyedObjectPool mbean =
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 					<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/monitoring/ManagedGenericKeyedObjectPool.html">ManagedGenericKeyedObjectPool</a>(
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 							pool,
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 							poolName);
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			ManagementFactory.getPlatformMBeanServer()
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 					.registerMBean(mbean, mbean.getObjectName());
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			log.error(<span class="jxr_string">"Could not register mbean for pool [{}]"</span>, poolName, e);
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		}
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 		<strong class="jxr_keyword">return</strong> pool;
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 	}
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 		pool.setMaxWait(maxWaitMillis);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		pool.setTestOnReturn(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		pool.setTestOnBorrow(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			ManagedGenericKeyedObjectPool mbean =
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 					<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/monitoring/ManagedGenericKeyedObjectPool.html">ManagedGenericKeyedObjectPool</a>(
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 							pool,
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 							poolName);
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			ManagementFactory.getPlatformMBeanServer()
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 					.registerMBean(mbean, mbean.getObjectName());
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			log.error(<span class="jxr_string">"Could not register mbean for pool [{}]"</span>, poolName, e);
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		}
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> 
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 	@Nonnull
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Injector createInjector(@Nonnull <a href="../../../../com/googlecode/jmxtrans/cli/JmxTransConfiguration.html">JmxTransConfiguration</a> configuration) {
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 		<strong class="jxr_keyword">return</strong> Guice.createInjector(
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 				<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/guice/JmxTransModule.html">JmxTransModule</a>(configuration),
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 				<strong class="jxr_keyword">new</strong> ObjectMapperModule(JsonFormat.<strong class="jxr_keyword">class</strong>)
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 						.registerModule(<strong class="jxr_keyword">new</strong> GuavaModule()),
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 				<strong class="jxr_keyword">new</strong> ObjectMapperModule(YamlFormat.<strong class="jxr_keyword">class</strong>)
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 						.withObjectMapper(<strong class="jxr_keyword">new</strong> ObjectMapper(<strong class="jxr_keyword">new</strong> YAMLFactory()))
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 						.registerModule(<strong class="jxr_keyword">new</strong> GuavaModule())
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 		);
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> 	}
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> }
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		<strong class="jxr_keyword">return</strong> pool;
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	}
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 	@Nonnull
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Injector createInjector(@Nonnull <a href="../../../../com/googlecode/jmxtrans/cli/JmxTransConfiguration.html">JmxTransConfiguration</a> configuration) {
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		<strong class="jxr_keyword">return</strong> Guice.createInjector(
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 				<strong class="jxr_keyword">new</strong> <a href="../../../../com/googlecode/jmxtrans/guice/JmxTransModule.html">JmxTransModule</a>(configuration),
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 				<strong class="jxr_keyword">new</strong> ObjectMapperModule(JsonFormat.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 						.registerModule(<strong class="jxr_keyword">new</strong> GuavaModule()),
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 				<strong class="jxr_keyword">new</strong> ObjectMapperModule(YamlFormat.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 						.withObjectMapper(<strong class="jxr_keyword">new</strong> ObjectMapper(<strong class="jxr_keyword">new</strong> YAMLFactory()))
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 						.registerModule(<strong class="jxr_keyword">new</strong> GuavaModule())
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 		);
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 	}
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>
