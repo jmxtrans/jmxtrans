@@ -108,6 +108,9 @@ public class Server implements JmxConnectionProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
+	/** Returns id for internal logic */
+	@Getter private final String id;
+
 	/**
 	 * Some writers (GraphiteWriter) use the alias in generation of the unique
 	 * key which references this server.
@@ -267,6 +270,7 @@ public class Server implements JmxConnectionProvider {
 		this.pool = checkNotNull(pool);
 		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
+		this.id = String.format("%s_%s_%s", host, port, pid);
 	}
 
 	public Iterable<Result> execute(Query query) throws Exception {

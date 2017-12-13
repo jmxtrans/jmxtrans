@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.jmx;
 
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
@@ -42,22 +43,24 @@ public class JmxUtils {
 
 	@Nonnull private static final Logger logger = LoggerFactory.getLogger(JmxUtils.class);
 
-	@Nonnull private final ThreadPoolExecutor executorService;
+	@Nonnull private final ExecutorRepository queryExecutorRepository;
 	@Nonnull private final ResultProcessor resultProcessor;
 
 	@Inject
 	public JmxUtils(
-			@Named("queryProcessorExecutor") @Nonnull ThreadPoolExecutor executorService,
+			@Nonnull @Named("queryExecutorRepository") ExecutorRepository queryExecutorRepository,
 			@Nonnull ResultProcessor resultProcessor) {
-		this.executorService = executorService;
+		this.queryExecutorRepository = queryExecutorRepository;
 		this.resultProcessor = resultProcessor;
 	}
 
 	public void processServer(Server server) throws Exception {
+		final ThreadPoolExecutor executor = queryExecutorRepository.getExecutor(server);
+
 		for (Query query : server.getQueries()) {
 			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
 			try {
-				executorService.submit(pqt);
+				executor.submit(pqt);
 			} catch (RejectedExecutionException ree) {
 				logger.error("Could not submit query {}. You could try to size the 'queryProcessorExecutor' to a larger size.", pqt, ree);
 			}
