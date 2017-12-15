@@ -27,20 +27,22 @@ import com.googlecode.jmxtrans.monitoring.ManagedThreadPoolExecutor;
 
 import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class SeparateExecutorRepository implements ExecutorRepository {
 	@Nonnull private final ConcurrentHashMap<Server, ThreadPoolExecutor> repository;
 	@Nonnull private final ExecutorFactory executorFactory;
-	@Nonnull private final ArrayList<ManagedThreadPoolExecutor> mBeans;
+	@Nonnull private final List<ManagedThreadPoolExecutor> mBeans;
 
 	public SeparateExecutorRepository(ExecutorFactory executorFactory){
 		this.executorFactory = executorFactory;
 		this.repository = new ConcurrentHashMap<>();
-		mBeans = new ArrayList<>();
+		mBeans = new CopyOnWriteArrayList<>();
 	}
 
 	@Override
@@ -55,7 +57,7 @@ public class SeparateExecutorRepository implements ExecutorRepository {
 
 	@Override
 	public Collection<ManagedThreadPoolExecutor> getMBeans() {
-		return mBeans;
+		return Collections.unmodifiableList(mBeans);
 	}
 
 	@Override
