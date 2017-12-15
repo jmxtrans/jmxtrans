@@ -29,17 +29,17 @@ import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class SeparateExecutorRepository implements ExecutorRepository {
-	@Nonnull private final Hashtable<Server, ThreadPoolExecutor> repository;
+	@Nonnull private final ConcurrentHashMap<Server, ThreadPoolExecutor> repository;
 	@Nonnull private final ExecutorFactory executorFactory;
 	@Nonnull private final ArrayList<ManagedThreadPoolExecutor> mBeans;
 
 	public SeparateExecutorRepository(ExecutorFactory executorFactory){
 		this.executorFactory = executorFactory;
-		this.repository = new Hashtable<>();
+		this.repository = new ConcurrentHashMap<>();
 		mBeans = new ArrayList<>();
 	}
 
