@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.module.guice.ObjectMapperModule;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -43,6 +42,10 @@ import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
 import com.googlecode.jmxtrans.connections.SocketFactory;
+import com.googlecode.jmxtrans.executors.CommonExecutorRepository;
+import com.googlecode.jmxtrans.executors.ExecutorFactory;
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
+import com.googlecode.jmxtrans.executors.SeparateExecutorRepository;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
@@ -54,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.management.MalformedObjectNameException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,10 +67,6 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -118,35 +118,30 @@ public class JmxTransModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	@Named("queryProcessorExecutor")
-	ThreadPoolExecutor queryProcessorExecutor() {
+	@Named("queryExecutorRepository")
+	ExecutorRepository queryExecutorRepository() throws MalformedObjectNameException {
 		int poolSize = configuration.getQueryProcessorExecutorPoolSize();
 		int workQueueCapacity = configuration.getQueryProcessorExecutorWorkQueueCapacity();
-		String componentName = "query";
-		return createExecutorService(poolSize, workQueueCapacity, componentName);
+		String executorAlias = "query";
+		return createExecutorRepository(poolSize, workQueueCapacity, executorAlias);
 	}
 
 	@Provides
 	@Singleton
-	@Named("resultProcessorExecutor")
-	ThreadPoolExecutor resultProcessorExecutor() {
+	@Named("resultExecutorRepository")
+	ExecutorRepository resultExecutorRepository() throws MalformedObjectNameException {
 		int poolSize = configuration.getResultProcessorExecutorPoolSize();
 		int workQueueCapacity = configuration.getResultProcessorExecutorWorkQueueCapacity();
-		String componentName = "result";
-		return createExecutorService(poolSize, workQueueCapacity, componentName);
+		String executorAlias = "result";
+		return createExecutorRepository(poolSize, workQueueCapacity, executorAlias);
 	}
 
-	private ThreadPoolExecutor createExecutorService(int poolSize, int workQueueCapacity, String componentName) {
-		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(workQueueCapacity);
-		ThreadFactory threadFactory = threadFactory(componentName);
-		return new ThreadPoolExecutor(poolSize, poolSize, 0L, MILLISECONDS, workQueue, threadFactory);
-	}
-
-	private ThreadFactory threadFactory(String componentName) {
-		return new ThreadFactoryBuilder()
-				.setDaemon(true)
-				.setNameFormat("jmxtrans-" + componentName + "-%d")
-				.build();
+	private ExecutorRepository createExecutorRepository(int poolSize, int workQueueCapacity, String executorAlias) throws MalformedObjectNameException {
+		final ExecutorFactory executorFactory = new ExecutorFactory(poolSize, workQueueCapacity, executorAlias);
+		final boolean useSeparateExecutors = configuration.isUseSeparateExecutors();
+		return useSeparateExecutors
+			? new SeparateExecutorRepository(executorFactory)
+			: new CommonExecutorRepository(executorFactory);
 	}
 
 	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName, long maxWaitMillis) {

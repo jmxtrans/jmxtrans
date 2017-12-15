@@ -31,6 +31,7 @@ import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
 import com.googlecode.jmxtrans.cli.JCommanderArgumentParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
 import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
@@ -56,8 +57,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.text.ParseException;
@@ -99,9 +102,13 @@ public class JmxTransformer implements WatchedCallback {
 	private Thread shutdownHook = new ShutdownHook();
 
 	private volatile boolean isRunning = false;
-	@Nonnull private final ThreadPoolExecutor queryProcessorExecutor;
-	@Nonnull private final ThreadPoolExecutor resultProcessorExecutor;
+	@Nonnull private ExecutorRepository queryExecutorRepository;
+	@Nonnull private ExecutorRepository resultExecutorRepository;
 	@Nonnull private final ThreadLocalRandom random = ThreadLocalRandom.current();
+	@Nonnull private final MBeanServer platformMBeanServer;
+	@Nullable private ManagedJmxTransformerProcess jmxTransformerProcessMBean;
+	@Nullable private ImmutableList<ManagedThreadPoolExecutor> queryExecutorMBeans;
+	@Nullable private ImmutableList<ManagedThreadPoolExecutor> resultExecutorMBeans;
 
 	@Inject
 	public JmxTransformer(
@@ -109,14 +116,16 @@ public class JmxTransformer implements WatchedCallback {
 			JmxTransConfiguration configuration,
 			ConfigurationParser configurationParser,
 			Injector injector,
-			@Nonnull @Named("queryProcessorExecutor") ThreadPoolExecutor queryProcessorExecutor,
-			@Nonnull @Named("resultProcessorExecutor") ThreadPoolExecutor resultProcessorExecutor) {
+			@Nonnull @Named("queryExecutorRepository") ExecutorRepository queryExecutorRepository,
+			@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository) {
 		this.serverScheduler = serverScheduler;
 		this.configuration = configuration;
 		this.configurationParser = configurationParser;
 		this.injector = injector;
-		this.queryProcessorExecutor = queryProcessorExecutor;
-		this.resultProcessorExecutor = resultProcessorExecutor;
+		this.queryExecutorRepository = queryExecutorRepository;
+		this.resultExecutorRepository = resultExecutorRepository;
+
+		this.platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -142,17 +151,6 @@ public class JmxTransformer implements WatchedCallback {
 	 * The real main method.
 	 */
 	private void doMain() throws Exception {
-		MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-
-		ManagedJmxTransformerProcess mbean = new ManagedJmxTransformerProcess(this, configuration);
-		platformMBeanServer.registerMBean(mbean, mbean.getObjectName());
-
-		ManagedThreadPoolExecutor queryExecutorMBean = new ManagedThreadPoolExecutor(queryProcessorExecutor, "queryProcessorExecutor");
-		platformMBeanServer.registerMBean(queryExecutorMBean, queryExecutorMBean.getObjectName());
-
-		ManagedThreadPoolExecutor resultExecutorMBean = new ManagedThreadPoolExecutor(resultProcessorExecutor, "resultProcessorExecutor");
-		platformMBeanServer.registerMBean(resultExecutorMBean, resultExecutorMBean.getObjectName());
-
 		// Start the process
 		this.start();
 
@@ -169,9 +167,7 @@ public class JmxTransformer implements WatchedCallback {
 			}
 		}
 
-		platformMBeanServer.unregisterMBean(mbean.getObjectName());
-		platformMBeanServer.unregisterMBean(queryExecutorMBean.getObjectName());
-		platformMBeanServer.unregisterMBean(resultExecutorMBean.getObjectName());
+		this.unregisterMBeans();
 	}
 
 	public synchronized void start() throws LifecycleException {
@@ -237,8 +233,13 @@ public class JmxTransformer implements WatchedCallback {
 				}
 			}
 
-			shutdownAndAwaitTermination(queryProcessorExecutor, 10, SECONDS);
-			shutdownAndAwaitTermination(resultProcessorExecutor, 10, SECONDS);
+			for (ThreadPoolExecutor executor : queryExecutorRepository.getExecutors()) {
+				shutdownAndAwaitTermination(executor, 10, SECONDS);
+			}
+
+			for (ThreadPoolExecutor executor : resultExecutorRepository.getExecutors()) {
+				shutdownAndAwaitTermination(executor, 10, SECONDS);
+			}
 
 			// Shutdown the file watch service
 			if (watcher != null) {
@@ -317,12 +318,22 @@ public class JmxTransformer implements WatchedCallback {
 	/**
 	 * Processes files into Server objects and then processesServers into jobs
 	 */
-	private void startupSystem() throws LifecycleException {
-		// process all the json files into Server objects
+	private void startupSystem() throws Exception {
 		this.processFilesIntoServers();
-
-		// process the servers into jobs
+		this.initializeExecutors();
+		this.registerMBeans();
 		this.processServersIntoJobs();
+	}
+
+	private void initializeExecutors() throws MalformedObjectNameException {
+		this.initializeExecutors(queryExecutorRepository);
+		this.initializeExecutors(resultExecutorRepository);
+	}
+
+	private void initializeExecutors(ExecutorRepository executorRepository) throws MalformedObjectNameException {
+		for (Server server : this.masterServersList) {
+			executorRepository.put(server);
+		}
 	}
 
 	private void validateSetup(Server server, ImmutableSet<Query> queries) throws ValidationException {
@@ -382,6 +393,41 @@ public class JmxTransformer implements WatchedCallback {
 				throw new LifecycleException("Error scheduling job for server: " + server, ex);
 			} catch (ValidationException ex) {
 				throw new LifecycleException("Error validating json setup for query", ex);
+			}
+		}
+	}
+
+	private void registerMBeans() throws Exception {
+		jmxTransformerProcessMBean = new ManagedJmxTransformerProcess(this, configuration);
+		platformMBeanServer.registerMBean(jmxTransformerProcessMBean, jmxTransformerProcessMBean.getObjectName());
+
+		queryExecutorMBeans = registerExecutors(queryExecutorRepository);
+		resultExecutorMBeans = registerExecutors(resultExecutorRepository);
+	}
+
+	private ImmutableList<ManagedThreadPoolExecutor> registerExecutors(ExecutorRepository executorRepository) throws Exception {
+		ImmutableList.Builder<ManagedThreadPoolExecutor> executorMBeansBuilder = ImmutableList.builder();
+		for (ManagedThreadPoolExecutor executorMBean : executorRepository.getMBeans()) {
+			platformMBeanServer.registerMBean(executorMBean, executorMBean.getObjectName());
+			executorMBeansBuilder.add(executorMBean);
+		}
+
+		return executorMBeansBuilder.build();
+	}
+
+	private void unregisterMBeans() throws Exception {
+		if (jmxTransformerProcessMBean != null) {
+			platformMBeanServer.unregisterMBean(jmxTransformerProcessMBean.getObjectName());
+		}
+
+		unregisterExecutors(queryExecutorMBeans);
+		unregisterExecutors(resultExecutorMBeans);
+	}
+
+	private void unregisterExecutors(ImmutableList<ManagedThreadPoolExecutor> executorMBeans) throws Exception {
+		if (executorMBeans != null) {
+			for (ManagedThreadPoolExecutor executorMBean : executorMBeans) {
+				platformMBeanServer.unregisterMBean(executorMBean.getObjectName());
 			}
 		}
 	}

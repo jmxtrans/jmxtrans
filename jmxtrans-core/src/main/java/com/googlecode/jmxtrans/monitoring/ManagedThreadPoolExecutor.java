@@ -22,6 +22,8 @@
  */
 package com.googlecode.jmxtrans.monitoring;
 
+import lombok.Getter;
+
 import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -31,7 +33,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class ManagedThreadPoolExecutor implements ThreadPoolExecutorMXBean {
 
-	@Nonnull private final ThreadPoolExecutor executor;
+	@Getter @Nonnull private final ThreadPoolExecutor executor;
 	private ObjectName objectName;
 
 	public ManagedThreadPoolExecutor(@Nonnull ThreadPoolExecutor executor, @Nonnull String name) throws MalformedObjectNameException {

@@ -144,4 +144,10 @@ public class JmxTransConfiguration {
 	@Getter @Setter
 	private int resultProcessorExecutorWorkQueueCapacity = 100000;
 
+	@Parameter(
+			names = {"--use-separate-executors"},
+			description = "If this set every server node will be handed by separate executor."
+	)
+	@Getter @Setter
+	private boolean useSeparateExecutors = false;
 }

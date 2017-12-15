@@ -23,13 +23,13 @@
 package com.googlecode.jmxtrans;
 
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import org.junit.Test;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -40,7 +40,7 @@ public class JmxTransformerTest {
 
 	@Test
 	public void startDateIsSpreadAccordingToRunPeriod() {
-		JmxTransformer jmxTransformer = new JmxTransformer(null, new JmxTransConfiguration(), null, null, mock(ThreadPoolExecutor.class), mock(ThreadPoolExecutor.class));
+		JmxTransformer jmxTransformer = new JmxTransformer(null, new JmxTransConfiguration(), null, null, mock(ExecutorRepository.class), mock(ExecutorRepository.class));
 
 		Date now = new Date();
 
@@ -52,7 +52,7 @@ public class JmxTransformerTest {
 	public void findProcessConfigFiles() throws URISyntaxException {
 		JmxTransConfiguration configuration = new JmxTransConfiguration();
 		configuration.setProcessConfigDir(new File(ConfigurationParserTest.class.getResource("/example.json").toURI()).getParentFile());
-		JmxTransformer jmxTransformer = new JmxTransformer(null, configuration, null, null, mock(ThreadPoolExecutor.class), mock(ThreadPoolExecutor.class));
+		JmxTransformer jmxTransformer = new JmxTransformer(null, configuration, null, null, mock(ExecutorRepository.class), mock(ExecutorRepository.class));
 
 		List<File> processConfigFiles = jmxTransformer.getProcessConfigFiles();
 
