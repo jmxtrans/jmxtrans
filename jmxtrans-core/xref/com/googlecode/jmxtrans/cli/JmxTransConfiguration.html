@@ -152,7 +152,13 @@
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 	@Getter @Setter
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> resultProcessorExecutorWorkQueueCapacity = 100000;
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> }
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 	@Parameter(
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			names = {<span class="jxr_string">"--use-separate-executors"</span>},
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			description = <span class="jxr_string">"If this set every server node will be handed by separate executor."</span>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 	)
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 	@Getter @Setter
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> useSeparateExecutors = false;
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2010&#x2013;2017 <a href="https://github.com/jmxtrans/">JmxTrans team</a>. All rights reserved.</div>

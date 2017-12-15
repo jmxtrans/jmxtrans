@@ -2,6 +2,7 @@ com.googlecode.jmxtrans
 com.googlecode.jmxtrans.cli
 com.googlecode.jmxtrans.connections
 com.googlecode.jmxtrans.exceptions
+com.googlecode.jmxtrans.executors
 com.googlecode.jmxtrans.guice
 com.googlecode.jmxtrans.jmx
 com.googlecode.jmxtrans.jobs
