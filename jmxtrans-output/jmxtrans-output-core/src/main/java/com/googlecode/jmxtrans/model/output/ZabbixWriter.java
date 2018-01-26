@@ -89,12 +89,12 @@ public class ZabbixWriter implements WriterBasedOutputWriter {
 				g.writeStringField("host", server.getHost());
 				g.writeStringField("key", key);
 				g.writeStringField("value", value.toString());
-				g.writeNumberField("clock", result.getEpoch());
+				g.writeNumberField("clock", result.getEpoch() / 1000);
 				g.writeEndObject();
 			}
 
 			g.writeEndArray();
-			g.writeNumberField("clock", System.currentTimeMillis());
+			g.writeNumberField("clock", System.currentTimeMillis() / 1000);
 			g.writeEndObject();
 			g.flush();
 		} catch (Throwable t) {
