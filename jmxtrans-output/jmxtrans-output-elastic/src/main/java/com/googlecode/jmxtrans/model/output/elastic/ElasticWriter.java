@@ -83,6 +83,8 @@ public class ElasticWriter extends BaseOutputWriter {
 			@JsonProperty("rootPrefix") String rootPrefix,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("connectionUrl") String connectionUrl,
+			@JsonProperty("username") String username,
+			@JsonProperty("password") String password,
 			@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
@@ -94,16 +96,27 @@ public class ElasticWriter extends BaseOutputWriter {
 
 		this.connectionUrl = connectionUrl;
 		this.indexName = this.rootPrefix + "_jmx-entries";
-		this.jestClient = createJestClient(connectionUrl);
+		this.jestClient = createJestClient(connectionUrl, username, password);
 	}
 
-	private JestClient createJestClient(String connectionUrl) {
+	private JestClient createJestClient(String connectionUrl, String username, String password) {
 		log.info("Create a jest elastic search client for connection url [{}]", connectionUrl);
 		JestClientFactory factory = new JestClientFactory();
-		factory.setHttpClientConfig(
-				new HttpClientConfig.Builder(connectionUrl)
-						.multiThreaded(true)
-						.build());
+		HttpClientConfig httpClientConfig;
+
+		if (username != null) {
+			log.info("Using HTTP Basic Authentication");
+			httpClientConfig = new HttpClientConfig.Builder(connectionUrl)
+					.defaultCredentials(username, password)
+					.multiThreaded(true)
+					.build();
+		} else {
+			httpClientConfig = new HttpClientConfig.Builder(connectionUrl)
+					.multiThreaded(true)
+					.build();
+		}
+
+		factory.setHttpClientConfig(httpClientConfig);
 		return factory.getObject();
 	}
 
@@ -146,14 +159,19 @@ public class ElasticWriter extends BaseOutputWriter {
 			if (!indexExists) {
 
 				CreateIndex createIndex = new CreateIndex.Builder(indexName).build();
-				jestClient.execute(createIndex);
+				JestResult result = jestClient.execute(createIndex);
+				if (!result.isSucceeded()) {
+					throw new ElasticWriterException(String.format("Failed to create index: %s", result.getErrorMessage()));
+				} else {
+					log.info("Created index {}", indexName);
+				}
 
 				URL url = ElasticWriter.class.getResource("/elastic-mapping.json");
 				String mapping = Resources.toString(url, Charsets.UTF_8);
 
 				PutMapping putMapping = new PutMapping.Builder(indexName, typeName,mapping).build();
 
-				JestResult result = jestClient.execute(putMapping);
+				result = jestClient.execute(putMapping);
 				if (!result.isSucceeded()) {
 					throw new ElasticWriterException(String.format("Failed to create mapping: %s", result.getErrorMessage()));
 				}
