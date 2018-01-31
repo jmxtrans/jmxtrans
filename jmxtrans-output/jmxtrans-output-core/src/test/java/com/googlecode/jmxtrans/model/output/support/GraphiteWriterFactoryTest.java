@@ -33,6 +33,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.RetryingAllocator;
+import com.googlecode.jmxtrans.model.output.support.pool.SocketExpiration;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.junit.Before;
@@ -40,6 +41,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import stormpot.BlazePool;
 import stormpot.LifecycledPool;
+import stormpot.TimeExpiration;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -173,6 +175,83 @@ public class GraphiteWriterFactoryTest {
 			allocatorLv3.setAccessible(true);
 			Object level3Allocator = allocatorLv3.get(level2Allocator);
 			assertThat(level3Allocator).isInstanceOf(DatagramChannelAllocator.class);
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void socketExpirationIsUsedByDefault() throws LifecycleException, URISyntaxException {
+		ImmutableList<Server> servers = configurationParser.parseServers(ImmutableList.of(file("/graphite-writer-factory-example2.json")), false);
+
+		assertThat(servers).hasSize(1);
+		Server server = servers.get(0);
+
+		assertThat(server.getQueries()).hasSize(1);
+		Query query = server.getQueries().iterator().next();
+
+		assertThat(query.getOutputWriterInstances()).hasSize(1);
+		OutputWriter outputWriter = query.getOutputWriterInstances().iterator().next();
+
+		assertThat(outputWriter).isInstanceOf(ResultTransformerOutputWriter.class);
+
+		ResultTransformerOutputWriter resultTransformerOutputWriter = (ResultTransformerOutputWriter) outputWriter;
+		OutputWriter target = resultTransformerOutputWriter.getTarget();
+
+		assertThat(target).isInstanceOf(WriterPoolOutputWriter.class);
+
+		LifecycledPool writerPool = ((WriterPoolOutputWriter) target).getWriterPool();
+
+		assertThat(writerPool).isInstanceOf(BlazePool.class);
+
+		BlazePool blazePool = (BlazePool) writerPool;
+
+		try {
+			Field expirationField = blazePool.getClass().getDeclaredField("deallocRule");
+			expirationField.setAccessible(true);
+			Object expiration = expirationField.get(blazePool);
+			assertThat(expiration).isInstanceOf(SocketExpiration.class);
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void timedSocketExpirationIsUsedWhenConfigured() throws LifecycleException, URISyntaxException {
+		ImmutableList<Server> servers = configurationParser.parseServers(ImmutableList.of(file("/graphite-writer-factory-example-with-timed-socket-expiration.json")), false);
+
+		assertThat(servers).hasSize(1);
+		Server server = servers.get(0);
+
+		assertThat(server.getQueries()).hasSize(1);
+		Query query = server.getQueries().iterator().next();
+
+		assertThat(query.getOutputWriterInstances()).hasSize(1);
+		OutputWriter outputWriter = query.getOutputWriterInstances().iterator().next();
+
+		assertThat(outputWriter).isInstanceOf(ResultTransformerOutputWriter.class);
+
+		ResultTransformerOutputWriter resultTransformerOutputWriter = (ResultTransformerOutputWriter) outputWriter;
+		OutputWriter target = resultTransformerOutputWriter.getTarget();
+
+		assertThat(target).isInstanceOf(WriterPoolOutputWriter.class);
+
+		LifecycledPool writerPool = ((WriterPoolOutputWriter) target).getWriterPool();
+
+		assertThat(writerPool).isInstanceOf(BlazePool.class);
+
+		BlazePool blazePool = (BlazePool) writerPool;
+
+		try {
+			Field expirationField = blazePool.getClass().getDeclaredField("deallocRule");
+			expirationField.setAccessible(true);
+			Object expiration = expirationField.get(blazePool);
+			assertThat(expiration).isInstanceOf(TimeExpiration.class);
+			Field maxPermittedAgeMillisField = expiration.getClass().getDeclaredField("maxPermittedAgeMillis");
+			maxPermittedAgeMillisField.setAccessible(true);
+			Object maxPermittedAgeMillis = maxPermittedAgeMillisField.get(expiration);
+			assertThat(maxPermittedAgeMillis).isInstanceOf(Number.class);
+			assertThat(((Number) maxPermittedAgeMillis).intValue()).isEqualTo(15000);
 		} catch (IllegalAccessException | NoSuchFieldException e) {
 			fail();
 		}

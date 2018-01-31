@@ -32,13 +32,16 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import stormpot.BlazePool;
 import stormpot.Config;
+import stormpot.Expiration;
 import stormpot.LifecycledPool;
+import stormpot.TimeExpiration;
 import stormpot.Timeout;
 
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Accessors(chain = true)
@@ -50,6 +53,7 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	@Setter private int poolSize = 1;
 	@Nonnull @Setter private FlushStrategy flushStrategy = new NeverFlush();
 	@Setter private int poolClaimTimeoutSeconds = 1;
+	@Setter private int socketExpirationMs;
 
 	private UdpOutputWriterBuilder(@Nonnull InetSocketAddress server, @Nonnull T target) {
 		this.server = server;
@@ -69,9 +73,17 @@ public class UdpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 						bufferSize,
 						charset,
 						flushStrategy))
-				.setExpiration(new DatagramChannelExpiration())
+				.setExpiration(createSocketExpiration())
 				.setSize(poolSize);
 		return new BlazePool<>(config);
+	}
+
+	private Expiration<DatagramChannelPoolable> createSocketExpiration() {
+		if (socketExpirationMs <= 0) {
+			return new DatagramChannelExpiration();
+		} else {
+			return new TimeExpiration<DatagramChannelPoolable>(socketExpirationMs, MILLISECONDS);
+		}
 	}
 
 	public WriterPoolOutputWriter<T> build() {
