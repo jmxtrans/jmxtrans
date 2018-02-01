@@ -36,6 +36,7 @@ import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Category({IntegrationTest.class, RequiresIO.class})
 public class TcpOutputWriterBuilderIT {
@@ -55,11 +56,36 @@ public class TcpOutputWriterBuilderIT {
 		await().atMost(200, MILLISECONDS).until(messageReceived("message"));
 	}
 
-	private Callable<Boolean> messageReceived(final String message) {
+	@Test
+	public void messageIsSentOnDistinctConnectionAfterTimeout() throws Exception {
+		int timeout = 15;
+		WriterPoolOutputWriter<DummySequenceWriterBasedOutputWriter> outputWriter = TcpOutputWriterBuilder.builder(
+				tcpEchoServer.getLocalSocketAddress(),
+				new DummySequenceWriterBasedOutputWriter("messageTimeout"))
+				.setSocketExpirationMs(timeout)
+				.build();
+
+		int connectionsBefore = tcpEchoServer.getConnectionsAccepted();
+		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
+		Thread.sleep(timeout + 10);
+		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
+		outputWriter.close();
+
+		await().atMost(200, MILLISECONDS).until(messageReceived("messageTimeout0", "messageTimeout1"));
+		int connectionsCreated = tcpEchoServer.getConnectionsAccepted() - connectionsBefore;
+		assertThat(connectionsCreated).isGreaterThan(1);
+	}
+
+	private Callable<Boolean> messageReceived(final String... messages) {
 		return new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
-				return tcpEchoServer.messageReceived(message);
+				for (String message : messages) {
+					if (!tcpEchoServer.messageReceived(message)) {
+						return false;
+					}
+				}
+				return true;
 			}
 		};
 	}

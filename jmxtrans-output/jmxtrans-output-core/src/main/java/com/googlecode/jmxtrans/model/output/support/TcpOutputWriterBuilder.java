@@ -32,6 +32,7 @@ import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import stormpot.BlazePool;
+import stormpot.CompoundExpiration;
 import stormpot.Config;
 import stormpot.Expiration;
 import stormpot.LifecycledPool;
@@ -83,7 +84,9 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 		if (socketExpirationMs <= 0) {
 			return new SocketExpiration();
 		} else {
-			return new TimeExpiration<SocketPoolable>(socketExpirationMs, MILLISECONDS);
+			return new CompoundExpiration<>(
+					new TimeExpiration<SocketPoolable>(socketExpirationMs, MILLISECONDS),
+					new SocketExpiration());
 		}
 	}
 

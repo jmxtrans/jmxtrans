@@ -114,7 +114,6 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 					.setFlushStrategy(flushStrategy)
 					.setPoolSize(poolSize)
 					.setPoolClaimTimeoutSeconds(poolClaimTimeoutSeconds)
-					.setSocketExpirationMs(socketExpirationMs)
 					.build();
 		} else {
 			writerPoolOutputWriter = TcpOutputWriterBuilder.builder(graphiteServer, new GraphiteWriter2(typeNames, rootPrefix))
