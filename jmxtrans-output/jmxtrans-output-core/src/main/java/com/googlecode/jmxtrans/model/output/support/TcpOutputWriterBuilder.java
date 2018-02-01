@@ -32,14 +32,18 @@ import com.googlecode.jmxtrans.model.output.support.pool.SocketPoolable;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import stormpot.BlazePool;
+import stormpot.CompoundExpiration;
 import stormpot.Config;
+import stormpot.Expiration;
 import stormpot.LifecycledPool;
+import stormpot.TimeExpiration;
 import stormpot.Timeout;
 
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Accessors(chain = true)
@@ -51,6 +55,7 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 	@Setter private int poolClaimTimeoutSeconds = 1;
 	@Setter private int poolSize = 1;
 	@Nonnull @Setter private FlushStrategy flushStrategy = new NeverFlush();
+	@Setter private int socketExpirationMs;
 
 	private TcpOutputWriterBuilder(@Nonnull InetSocketAddress server, @Nonnull T target) {
 		this.server = server;
@@ -70,9 +75,19 @@ public class TcpOutputWriterBuilder<T extends WriterBasedOutputWriter> {
 						socketTimeoutMillis,
 						charset,
 						flushStrategy)))
-				.setExpiration(new SocketExpiration())
+				.setExpiration(createSocketExpiration())
 				.setSize(poolSize);
 		return new BlazePool<>(config);
+	}
+
+	private Expiration<SocketPoolable> createSocketExpiration() {
+		if (socketExpirationMs <= 0) {
+			return new SocketExpiration();
+		} else {
+			return new CompoundExpiration<>(
+					new TimeExpiration<SocketPoolable>(socketExpirationMs, MILLISECONDS),
+					new SocketExpiration());
+		}
 	}
 
 	public WriterPoolOutputWriter<T> build() {

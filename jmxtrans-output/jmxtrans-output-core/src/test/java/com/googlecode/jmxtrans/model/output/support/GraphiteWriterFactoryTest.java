@@ -33,13 +33,16 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.output.support.pool.DatagramChannelAllocator;
 import com.googlecode.jmxtrans.model.output.support.pool.RetryingAllocator;
+import com.googlecode.jmxtrans.model.output.support.pool.SocketExpiration;
 import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import stormpot.BlazePool;
+import stormpot.CompoundExpiration;
 import stormpot.LifecycledPool;
+import stormpot.TimeExpiration;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -173,6 +176,64 @@ public class GraphiteWriterFactoryTest {
 			allocatorLv3.setAccessible(true);
 			Object level3Allocator = allocatorLv3.get(level2Allocator);
 			assertThat(level3Allocator).isInstanceOf(DatagramChannelAllocator.class);
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void socketExpirationIsUsedByDefault() throws LifecycleException, URISyntaxException {
+		ImmutableList<Server> servers = configurationParser.parseServers(ImmutableList.of(file("/graphite-writer-factory-example2.json")), false);
+
+		Server server = servers.get(0);
+		Query query = server.getQueries().iterator().next();
+		OutputWriter outputWriter = query.getOutputWriterInstances().iterator().next();
+		ResultTransformerOutputWriter resultTransformerOutputWriter = (ResultTransformerOutputWriter) outputWriter;
+		OutputWriter target = resultTransformerOutputWriter.getTarget();
+		LifecycledPool writerPool = ((WriterPoolOutputWriter) target).getWriterPool();
+		BlazePool blazePool = (BlazePool) writerPool;
+		try {
+			Field expirationField = blazePool.getClass().getDeclaredField("deallocRule");
+			expirationField.setAccessible(true);
+			Object expiration = expirationField.get(blazePool);
+			assertThat(expiration).isInstanceOf(SocketExpiration.class);
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void timedSocketExpirationIsUsedWhenConfigured() throws LifecycleException, URISyntaxException {
+		ImmutableList<Server> servers = configurationParser.parseServers(ImmutableList.of(file("/graphite-writer-factory-example-with-timed-socket-expiration.json")), false);
+
+		Server server = servers.get(0);
+		Query query = server.getQueries().iterator().next();
+		OutputWriter outputWriter = query.getOutputWriterInstances().iterator().next();
+		ResultTransformerOutputWriter resultTransformerOutputWriter = (ResultTransformerOutputWriter) outputWriter;
+		OutputWriter target = resultTransformerOutputWriter.getTarget();
+		LifecycledPool writerPool = ((WriterPoolOutputWriter) target).getWriterPool();
+		BlazePool blazePool = (BlazePool) writerPool;
+
+		try {
+			Field expirationField = blazePool.getClass().getDeclaredField("deallocRule");
+			expirationField.setAccessible(true);
+			Object compoundExpiration = expirationField.get(blazePool);
+			assertThat(compoundExpiration).isInstanceOf(CompoundExpiration.class);
+
+			Field timeExpirationField = compoundExpiration.getClass().getDeclaredField("firstExpiration");
+			timeExpirationField.setAccessible(true);
+			Object timeExpiration = timeExpirationField.get(compoundExpiration);
+			assertThat(timeExpiration).isInstanceOf(TimeExpiration.class);
+			Field maxPermittedAgeMillisField = timeExpiration.getClass().getDeclaredField("maxPermittedAgeMillis");
+			maxPermittedAgeMillisField.setAccessible(true);
+			Object maxPermittedAgeMillis = maxPermittedAgeMillisField.get(timeExpiration);
+			assertThat(maxPermittedAgeMillis).isInstanceOf(Number.class);
+			assertThat(((Number) maxPermittedAgeMillis).intValue()).isEqualTo(15000);
+
+			Field socketExpirationField = compoundExpiration.getClass().getDeclaredField("secondExpiration");
+			socketExpirationField.setAccessible(true);;
+			Object socketExpiration = socketExpirationField.get(compoundExpiration);
+			assertThat(socketExpiration).isInstanceOf(SocketExpiration.class);
 		} catch (IllegalAccessException | NoSuchFieldException e) {
 			fail();
 		}
