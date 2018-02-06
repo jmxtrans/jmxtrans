@@ -57,8 +57,6 @@ public class ZabbixWriterFactory implements OutputWriterFactory {
 	private final boolean booleanAsNumber;
 	@Nonnull private final FlushStrategy flushStrategy;
 	private final int poolSize;
-	private final int socketTimeoutMs;
-	private final Integer poolClaimTimeoutSeconds;
 
 	public ZabbixWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
@@ -67,36 +65,29 @@ public class ZabbixWriterFactory implements OutputWriterFactory {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("flushStrategy") String flushStrategy,
 			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
-			@JsonProperty("poolSize") Integer poolSize,
-			@JsonProperty("socketTimeoutMs") Integer socketTimeoutMs,
-			@JsonProperty("poolClaimTimeoutSeconds") Integer poolClaimTimeoutSeconds) {
-
+			@JsonProperty("poolSize") Integer poolSize) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
-
 		this.zabbixServer = new InetSocketAddress(
 				checkNotNull(host, "Host cannot be null."),
 				checkNotNull(port, "Port cannot be null."));
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
-		this.socketTimeoutMs = firstNonNull(socketTimeoutMs, 200);
-		this.poolClaimTimeoutSeconds = firstNonNull(poolClaimTimeoutSeconds, 1);
 	}
 
 	@Override
 	public ResultTransformerOutputWriter<WriterPoolOutputWriter<ZabbixWriter>> create() {
-
-		WriterPoolOutputWriter<ZabbixWriter> writerPoolOutputWriter;
-		writerPoolOutputWriter = TcpOutputWriterBuilder.builder(zabbixServer, new ZabbixWriter(new JsonFactory(), typeNames))
-				.setCharset(UTF_8)
-				.setFlushStrategy(flushStrategy)
-				.setPoolSize(poolSize)
-				.setSocketTimeoutMillis(socketTimeoutMs)
-				.setPoolClaimTimeoutSeconds(poolClaimTimeoutSeconds)
-				.build();
-
-		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, writerPoolOutputWriter);
-
+		return ResultTransformerOutputWriter.booleanToNumber(
+				booleanAsNumber,
+				TcpOutputWriterBuilder.builder(
+						zabbixServer,
+						new ZabbixWriter(new JsonFactory(), typeNames)
+				)
+						.setCharset(UTF_8)
+						.setFlushStrategy(flushStrategy)
+						.setPoolSize(poolSize)
+						.build()
+		);
 	}
 
 }

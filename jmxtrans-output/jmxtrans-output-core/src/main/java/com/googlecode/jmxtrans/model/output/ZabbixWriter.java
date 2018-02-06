@@ -25,7 +25,6 @@ package com.googlecode.jmxtrans.model.output;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -68,11 +67,9 @@ public class ZabbixWriter implements WriterBasedOutputWriter {
 			"clock": 1381482905
 		}
 		*/
-		Closer closer = Closer.create();
-
-		try {
+		try (
 			JsonGenerator g = jsonFactory.createGenerator(writer);
-
+		) {
 			g.useDefaultPrettyPrinter();
 			g.writeStartObject();
 			g.writeStringField("request", "sender data");
@@ -81,12 +78,12 @@ public class ZabbixWriter implements WriterBasedOutputWriter {
 			for (Result result : results) {
 				log.debug("Query result: {}", result);
 
+				String zabbixHostName = server.getAlias() != null ? server.getAlias() : server.getHost();
+				String key = "jmxtrans." + KeyUtils.getKeyString(query, result, typeNames);
 				Object value = result.getValue();
 
-				String key = "jmxtrans." + KeyUtils.getKeyString(query, result, typeNames);
-
 				g.writeStartObject();
-				g.writeStringField("host", server.getHost());
+				g.writeStringField("host", zabbixHostName);
 				g.writeStringField("key", key);
 				g.writeStringField("value", value.toString());
 				g.writeNumberField("clock", result.getEpoch() / 1000);
@@ -97,10 +94,6 @@ public class ZabbixWriter implements WriterBasedOutputWriter {
 			g.writeNumberField("clock", System.currentTimeMillis() / 1000);
 			g.writeEndObject();
 			g.flush();
-		} catch (Throwable t) {
-			throw closer.rethrow(t);
-		} finally {
-			closer.close();
 		}
 	}
 }
