@@ -78,12 +78,11 @@ public class ZabbixWriter implements WriterBasedOutputWriter {
 			for (Result result : results) {
 				log.debug("Query result: {}", result);
 
-				String zabbixHostName = server.getAlias() != null ? server.getAlias() : server.getHost();
 				String key = "jmxtrans." + KeyUtils.getKeyString(query, result, typeNames);
 				Object value = result.getValue();
 
 				g.writeStartObject();
-				g.writeStringField("host", zabbixHostName);
+				g.writeStringField("host", server.getLabel());
 				g.writeStringField("key", key);
 				g.writeStringField("value", value.toString());
 				g.writeNumberField("clock", result.getEpoch() / 1000);
