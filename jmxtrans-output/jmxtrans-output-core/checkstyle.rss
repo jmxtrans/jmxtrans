@@ -25,7 +25,7 @@ under the License.
     <language>en-us</language>
     <copyright>&#169;2010 - 2018 JmxTrans team</copyright>
     <item>
-      <title>File: 46,
+      <title>File: 48,
              Errors: 0,
              Warnings: 0,
              Infos: 0
@@ -187,6 +187,20 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.support.pool.RetryingAllocator.java">com/googlecode/jmxtrans/model/output/support/pool/RetryingAllocator.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.ZabbixWriterFactory.java">com/googlecode/jmxtrans/model/output/ZabbixWriterFactory.java</a>
                 </td>
                 <td>
                   0
@@ -411,6 +425,20 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.OpenTSDBWriter.java">com/googlecode/jmxtrans/model/output/OpenTSDBWriter.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.jmxtrans.org/jmxtrans-output/jmxtrans-output-core/checkstyle.html#com.googlecode.jmxtrans.model.output.ZabbixWriter.java">com/googlecode/jmxtrans/model/output/ZabbixWriter.java</a>
                 </td>
                 <td>
                   0
