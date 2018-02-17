@@ -343,7 +343,7 @@ public class Server implements JmxConnectionProvider {
 	@Override
 	@JsonIgnore
 	public JMXConnector getServerConnection() throws IOException {
-		JMXServiceURL url = new JMXServiceURL(getUrl());
+		JMXServiceURL url = getJmxServiceURL();
 		return JMXConnectorFactory.connect(url, this.getEnvironment());
 	}
 
