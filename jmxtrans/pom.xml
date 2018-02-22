@@ -49,11 +49,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>apache-log4j-extras</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-core</artifactId>
 			<scope>runtime</scope>
@@ -106,11 +101,6 @@
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-output-velocity</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

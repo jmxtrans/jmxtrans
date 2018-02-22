@@ -284,12 +284,7 @@
 				<artifactId>javax.inject</artifactId>
 				<version>1</version>
 			</dependency>
-			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>apache-log4j-extras</artifactId>
-				<version>1.2.17</version>
-			</dependency>
-			<dependency>
+			<dependency><!-- Used in jmxtrans-output-log4j -->
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
 				<version>1.2.17</version>
@@ -438,15 +433,10 @@
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>log4j-over-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
-			<dependency>
+			<dependency><!-- Used in jmxtrans-output-log4j -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
 				<version>${slf4j.version}</version>
@@ -586,8 +576,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
