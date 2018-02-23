@@ -32,8 +32,9 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.naming.StringUtils;
-import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.List;
 import java.util.Map;
@@ -49,21 +50,22 @@ import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
  * <br /> attributeName: HeapMemoryUsage <br /> key: committed <br /> epoch: 1388343325728 <br />
  *
  * @author Yannick Robin
+ * TODO This class duplicates many features of {@link com.googlecode.jmxtrans.model.output.Slf4JOutputWriter}
  */
-public class Log4JWriter extends BaseOutputWriter {
+public class LogbackWriter extends BaseOutputWriter {
 	private final Logger log;
 	private final String logger;
 
 	@JsonCreator
-	public Log4JWriter(
+	public LogbackWriter(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("logger") String logger,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
-		this.logger = firstNonNull(logger, (String) getSettings().get("logger"), "Log4JWriter");
-		this.log = Logger.getLogger("Log4JWriter." + this.logger);
+		this.logger = firstNonNull(logger, (String) getSettings().get("logger"), "LogbackWriter");
+		this.log = LoggerFactory.getLogger("LogbackWriter." + this.logger);
 	}
 
 	@Override
@@ -88,7 +90,7 @@ public class Log4JWriter extends BaseOutputWriter {
 
 				MDC.put("server", alias);
 				MDC.put("metric", KeyUtils.getKeyString(server, query, result, typeNames, null));
-				MDC.put("value", result.getValue());
+				MDC.put("value", result.getValue().toString());
 				if (result.getKeyAlias() != null) {
 					MDC.put("resultAlias", result.getKeyAlias());
 				}

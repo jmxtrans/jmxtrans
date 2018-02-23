@@ -31,9 +31,9 @@
 		<version>268-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>jmxtrans-output-log4j</artifactId>
+	<artifactId>jmxtrans-output-logback</artifactId>
 
-	<name>JmxTrans - log4j output writers</name>
+	<name>JmxTrans - Logback output writers</name>
 
 	<description>This module contains output writers that have direct dependencies on logging frameworks.</description>
 
@@ -47,12 +47,10 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -61,11 +59,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
@@ -78,10 +71,6 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

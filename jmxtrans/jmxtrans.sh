@@ -52,7 +52,7 @@ JPS=${JPS:-"${JAVA_HOME}/bin/jps -l"}
 USE_JPS=${USE_JPS:-"true"}
 JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
 CHECK_JAVA=${CHECK_JAVA:-"true"}
-PSJAVA=${PSJAVA:-"ps aux | grep [j]ava"} 
+PSJAVA=${PSJAVA:-"ps aux | grep [j]ava"}
 PSCMD="$JPS | grep -i jmxtrans | awk '{ print \$1 };'"
 JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"}
 HEAP_SIZE=${HEAP_SIZE:-"512"}
@@ -131,6 +131,16 @@ start() {
 
 }
 
+run() {
+    if [ -z "$FILENAME" ]; then
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
+    else
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
+    fi
+
+    $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS ${SSL_OPTS} $EXEC
+}
+
 stop() {
     if [ ! -z "$PIDFILE" ]; then
         if [ -r "$PIDFILE" ]; then
@@ -193,6 +203,9 @@ status() {
 }
 
 case $1 in
+    run)
+        run
+    ;;
     start)
         start
     ;;

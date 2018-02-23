@@ -284,7 +284,7 @@
 				<artifactId>javax.inject</artifactId>
 				<version>1</version>
 			</dependency>
-			<dependency><!-- Used in jmxtrans-output-log4j -->
+			<dependency><!-- Used in quartz -->
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
 				<version>1.2.17</version>
@@ -308,6 +308,12 @@
 				<groupId>org.apache.kafka</groupId>
 				<artifactId>kafka_2.11</artifactId>
 				<version>${kafka.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -318,6 +324,12 @@
 				<groupId>org.apache.zookeeper</groupId>
 				<artifactId>zookeeper</artifactId>
 				<version>3.4.10</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.mojo</groupId>
@@ -408,7 +420,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jmxtrans</groupId>
-				<artifactId>jmxtrans-output-log4j</artifactId>
+				<artifactId>jmxtrans-output-logback</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -431,19 +443,14 @@
 				<artifactId>quartz</artifactId>
 				<version>1.8.6</version>
 			</dependency>
+			<dependency><!-- quartz and jmxtrans-output-log4j depend on log4j -->
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency><!-- Used in jmxtrans-output-log4j -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-simple</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>

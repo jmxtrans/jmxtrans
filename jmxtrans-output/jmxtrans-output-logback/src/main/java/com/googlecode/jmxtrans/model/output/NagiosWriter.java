@@ -22,6 +22,11 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.util.FileSize;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
@@ -31,11 +36,8 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.spi.LoggerFactory;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 import static com.google.common.collect.ImmutableList.copyOf;
+import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 
 /**
@@ -55,7 +57,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
  */
 public class NagiosWriter extends BaseOutputWriter {
 
-	protected static final String LOG_PATTERN = "%m%n";
+	protected static final String LOG_PATTERN = "%msg%n";
 	protected static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
 
 	private static final String NAGIOS_HOST = "nagiosHost";
@@ -204,23 +206,27 @@ public class NagiosWriter extends BaseOutputWriter {
 	 * @throws IOException
 	 */
 	protected Logger initLogger(String fileStr) throws IOException {
-		PatternLayout pl = new PatternLayout(LOG_PATTERN);
+		String loggerName = "NagiosWriter" + this.hashCode();
 
-		final FileAppender appender = new FileAppender(pl, fileStr, true);
-		appender.setBufferedIO(false);
-		appender.setBufferSize(LOG_IO_BUFFER_SIZE_BYTES);
+		final PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setPattern(LOG_PATTERN);
+		encoder.start(); // TODO Stop Encoder
 
-		LoggerFactory loggerFactory = new LoggerFactory() {
-			@Override
-			public Logger makeNewLoggerInstance(String name) {
-				Logger logger = Logger.getLogger(name);
-				logger.addAppender(appender);
-				logger.setLevel(Level.INFO);
-				logger.setAdditivity(false);
-				return logger;
-			}
-		};
-		return loggerFactory.makeNewLoggerInstance("NagiosWriter" + this.hashCode());
+		final FileAppender appender = new FileAppender();
+		appender.setName(loggerName + "File");
+		appender.setAppend(true);
+		appender.setBufferSize(new FileSize(LOG_IO_BUFFER_SIZE_BYTES));
+		appender.setFile(fileStr);
+		appender.setEncoder(encoder);
+		appender.start(); // TODO Stop appender
+
+		ILoggerFactory loggerFactory = new LoggerContext();
+		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) loggerFactory.getLogger(loggerName);
+		logger.addAppender(appender);
+		logger.setLevel(Level.INFO);
+		logger.setAdditive(false);
+
+		return logger;
 	}
 
 	/**

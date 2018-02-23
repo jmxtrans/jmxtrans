@@ -95,7 +95,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
-			<artifactId>jmxtrans-output-log4j</artifactId>
+			<artifactId>jmxtrans-output-logback</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
