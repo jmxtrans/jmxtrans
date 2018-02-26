@@ -37,7 +37,7 @@
 
 	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<append>true</append>
-		<file>${logDir}//jmxtrans.log</file>
+		<file>${logDir}/jmxtrans.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 			<fileNamePattern>${logDir}/jmxtrans-%d{yyyyMMdd}-%i.log.gz</fileNamePattern>
 			<maxFileSize>100MB</maxFileSize>
