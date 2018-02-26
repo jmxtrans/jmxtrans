@@ -134,16 +134,6 @@
 			<scope>system</scope>
 			<systemPath>${toolsjar}</systemPath>
 		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 		<dependency><!-- quartz depends on Log4J -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>

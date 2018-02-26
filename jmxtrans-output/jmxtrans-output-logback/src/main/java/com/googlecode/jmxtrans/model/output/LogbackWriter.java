@@ -98,6 +98,7 @@ public class LogbackWriter extends BaseOutputWriter {
 				MDC.put("valuePath", Joiner.on('.').join(result.getValuePath()));
 				MDC.put("Epoch", String.valueOf(result.getEpoch()));
 				log.info("");
+				MDC.clear();
 			}
 		}
 	}
