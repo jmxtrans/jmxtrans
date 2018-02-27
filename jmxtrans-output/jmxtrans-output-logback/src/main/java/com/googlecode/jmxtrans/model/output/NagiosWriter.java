@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.model.output;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.FileAppender;
@@ -36,8 +37,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +65,7 @@ public class NagiosWriter extends BaseOutputWriter {
 	private static final String FILTERS = "filters";
 	private static final String THRESHOLDS = "thresholds";
 
+	private final LoggerContext loggerContext = new LoggerContext();
 	protected final Map<String, Logger> loggers = new ConcurrentHashMap<>();
 	private final ImmutableList<String> filters;
 	private final ImmutableList<String> thresholds;
@@ -138,7 +138,7 @@ public class NagiosWriter extends BaseOutputWriter {
 					logger = initLogger("/dev/null");
 					loggers.put("/dev/null", logger);
 				} catch (IOException e) {
-					throw new ValidationException("Failed to setup log4j", query, e);
+					throw new ValidationException("Failed to setup logback", query, e);
 				}
 			}
 
@@ -155,7 +155,7 @@ public class NagiosWriter extends BaseOutputWriter {
 			logger = initLogger(outputFile.getAbsolutePath());
 			loggers.put(outputFile.getAbsolutePath(), logger);
 		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query, e);
+			throw new ValidationException("Failed to setup logback", query, e);
 
 		}
 	}
@@ -209,19 +209,20 @@ public class NagiosWriter extends BaseOutputWriter {
 		String loggerName = "NagiosWriter" + this.hashCode();
 
 		final PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setContext(loggerContext);
 		encoder.setPattern(LOG_PATTERN);
-		encoder.start(); // TODO Stop Encoder
+		encoder.start();
 
 		final FileAppender appender = new FileAppender();
+		appender.setContext(loggerContext);
 		appender.setName(loggerName + "File");
 		appender.setAppend(true);
 		appender.setBufferSize(new FileSize(LOG_IO_BUFFER_SIZE_BYTES));
 		appender.setFile(fileStr);
 		appender.setEncoder(encoder);
-		appender.start(); // TODO Stop appender
+		appender.start();
 
-		ILoggerFactory loggerFactory = new LoggerContext();
-		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) loggerFactory.getLogger(loggerName);
+		Logger logger = loggerContext.getLogger(loggerName);
 		logger.addAppender(appender);
 		logger.setLevel(Level.INFO);
 		logger.setAdditive(false);
@@ -297,6 +298,14 @@ public class NagiosWriter extends BaseOutputWriter {
 		}
 
 		return simpleRange.matches("^-{0,1}[0-9]+$") && (0 > value || value > Double.parseDouble(simpleRange));
+	}
+
+	@Override
+	public void close() {
+		for(Logger logger: this.loggers.values()) {
+			logger.detachAndStopAllAppenders();
+		}
+		this.loggers.clear();
 	}
 
 	public ImmutableList<String> getFilters() {

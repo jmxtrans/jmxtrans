@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.rolling.RollingPolicy;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.rolling.TriggeringPolicy;
@@ -77,8 +78,9 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 	}
 
 	@Override
-	protected RollingPolicy buildRollingPolicy(String fileStr) {
+	protected RollingPolicy buildRollingPolicy(FileAppender<?> appender, String fileStr) {
 		SizeAndTimeBasedRollingPolicy rollingPolicy = new SizeAndTimeBasedRollingPolicy();
+		rollingPolicy.setParent(appender);
 		rollingPolicy.setContext(loggerContext);
 		if (getMaxLogFileSize() == null) {
 			rollingPolicy.setFileNamePattern(fileStr + "%d{" + datePattern + "}");

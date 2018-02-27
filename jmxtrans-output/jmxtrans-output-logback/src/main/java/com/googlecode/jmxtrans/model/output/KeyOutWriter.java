@@ -27,6 +27,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
@@ -36,6 +37,7 @@ import ch.qos.logback.core.rolling.TriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
@@ -129,7 +131,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		// Check if we've already created a logger for this file. If so, use it.
 		if (loggers.containsKey(outputFile)) {
-			logger = loggers.get(outputFile);
+			logger = getLogger(outputFile);
 			return;
 		}
 		// need to create a logger
@@ -137,8 +139,13 @@ public class KeyOutWriter extends BaseOutputWriter {
 			logger = buildLogger(outputFile);
 			loggers.put(outputFile, logger);
 		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query, e);
+			throw new ValidationException("Failed to setup logback", query, e);
 		}
+	}
+
+	@VisibleForTesting
+	Logger getLogger(String outputFile) {
+		return loggers.get(outputFile);
 	}
 
 	/**
@@ -189,8 +196,9 @@ public class KeyOutWriter extends BaseOutputWriter {
 		return encoder;
 	}
 
-	protected RollingPolicy buildRollingPolicy(String fileStr) {
+	protected RollingPolicy buildRollingPolicy(FileAppender<?> appender, String fileStr) {
 		FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
+		rollingPolicy.setParent(appender);
 		rollingPolicy.setContext(loggerContext);
 		rollingPolicy.setMinIndex(1);
 		rollingPolicy.setMaxIndex(maxLogBackupFiles);
@@ -219,10 +227,19 @@ public class KeyOutWriter extends BaseOutputWriter {
 		if (triggeringPolicy != null) {
 			appender.setTriggeringPolicy(triggeringPolicy);
 		}
-		appender.setRollingPolicy(buildRollingPolicy(fileStr));
+		appender.setRollingPolicy(buildRollingPolicy(appender, fileStr));
 		appender.start();
 		return appender;
 	}
+
+	@Override
+	public void close() {
+		for(Logger logger: this.loggers.values()) {
+			logger.detachAndStopAllAppenders();
+		}
+		this.loggers.clear();
+	}
+
 
 	public String  getMaxLogFileSize() {
 		return maxLogFileSize;
