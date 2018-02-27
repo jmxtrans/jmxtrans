@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
@@ -79,10 +80,16 @@ import static java.util.Arrays.asList;
 @ToString(exclude = {"outputWriters", "typeNameValuesStringBuilder"})
 public class Query {
 
+	public enum QueryType {
+		POLL,
+		NOTIFICATIONS;
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(Query.class);
 
 	/** The JMX object representation: java.lang:type=Memory */
 	@Nonnull @Getter private final ObjectName objectName;
+	@Getter private final QueryType queryType;
 	@Nonnull @Getter private final ImmutableList<String> keys;
 
 	@Nonnull @Getter private final ImmutableList<String> attr;
@@ -122,6 +129,7 @@ public class Query {
 	@JsonCreator
 	public Query(
 			@JsonProperty("obj") String obj,
+			@JsonProperty("type") String type,
 			@JsonProperty("keys") List<String> keys,
 			@JsonProperty("attr") List<String> attr,
 			@JsonProperty("typeNames") List<String> typeNames,
@@ -133,12 +141,13 @@ public class Query {
 	) {
 		// For typeName, note the using copyOf does not change the order of
 		// the elements.
-		this(obj, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+		this(obj, type != null ? QueryType.valueOf(type) : QueryType.POLL, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
 				outputWriters, ImmutableList.<OutputWriter>of());
 	}
 
 	public Query(
 			String obj,
+			QueryType queryType,
 			List<String> keys,
 			List<String> attr,
 			Set<String> typeNames,
@@ -148,12 +157,13 @@ public class Query {
 			boolean useAllTypeNames,
 			List<OutputWriterFactory> outputWriters
 	) {
-		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
 				outputWriters, ImmutableList.<OutputWriter>of());
 	}
 
 	public Query(
 			String obj,
+			QueryType queryType,
 			List<String> keys,
 			List<String> attr,
 			Set<String> typeNames,
@@ -163,12 +173,13 @@ public class Query {
 			boolean useAllTypeNames,
 			ImmutableList<OutputWriter> outputWriters
 	) {
-		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
 				ImmutableList.<OutputWriterFactory>of(), outputWriters);
 	}
 
 	private Query(
 			String obj,
+			QueryType queryType,
 			List<String> keys,
 			List<String> attr,
 			Set<String> typeNames,
@@ -198,6 +209,7 @@ public class Query {
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 
 		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
+		this.queryType = queryType;
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -241,6 +253,26 @@ public class Query {
 		return ImmutableList.of();
 	}
 
+	public synchronized boolean isNotificationListenerRegistered(JMXConnection jmxConnection) {
+		return jmxConnection.isNotificationListenerRegistered(this);
+	}
+
+	public void subscribeToNotifications(JMXConnection jmxConnection) throws IOException, InstanceNotFoundException {
+		// TODO: JMXConnection cannot depend on Query as this would create a package cycle
+		// but it needs to be able to associate a listener with the query...
+		jmxConnection.addNotificationListener(this, this.objectName, this.attr);
+	}
+
+	public Iterable<Result> processNotifications(JMXConnection jmxConnection) throws IOException, InstanceNotFoundException, ReflectionException {
+		// TODO: review parameters
+		ObjectInstance oi = jmxConnection.getMBeanServerConnection().getObjectInstance(objectName);
+		AttributeList al = jmxConnection.getMBeanServerConnection().getAttributes(objectName,
+				attr.toArray(new String[attr.size()]));
+
+		return new JmxResultProcessor(this, oi, al.asList(),
+				oi.getClassName(), objectName.getDomain()).getResults();
+	}
+
 	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {
 		String separator = isAllowDottedKeys() ? "." : TypeNameValuesStringBuilder.DEFAULT_SEPARATOR;
 		Set<String> typeNames = getTypeNames();
@@ -272,6 +304,7 @@ public class Query {
 	@Accessors(chain = true)
 	public static final class Builder {
 		@Setter private String obj;
+		@Setter private QueryType queryType;
 		private final List<String> attr = newArrayList();
 		@Setter private String resultAlias;
 		private final List<String> keys = newArrayList();
@@ -289,6 +322,7 @@ public class Query {
 		/** This builder does NOT copy output writers from the given query. */
 		private Builder(Query query) {
 			this.obj = query.objectName.toString();
+			this.queryType = query.queryType;
 			this.attr.addAll(query.attr);
 			this.resultAlias = query.resultAlias;
 			this.keys.addAll(query.keys);
@@ -335,6 +369,7 @@ public class Query {
 			if (!outputWriterFactories.isEmpty()) {
 				return new Query(
 						this.obj,
+						this.queryType,
 						this.keys,
 						this.attr,
 						this.typeNames,
@@ -347,6 +382,7 @@ public class Query {
 			}
 			return new Query(
 					this.obj,
+					this.queryType,
 					this.keys,
 					this.attr,
 					this.typeNames,

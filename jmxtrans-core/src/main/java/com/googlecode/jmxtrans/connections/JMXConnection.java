@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.connections;
 
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.ToString;
 import org.slf4j.Logger;
@@ -30,31 +31,107 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
+import javax.management.AttributeChangeNotification;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
+import javax.management.Notification;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
 
 @ToString
 @ThreadSafe
 public class JMXConnection implements Closeable {
-	@Nullable private final JMXConnector connector;
-	@Nonnull @Getter private final MBeanServerConnection mBeanServerConnection;
+	@Nullable
+	private final JMXConnector connector;
+	@Nonnull
+	@Getter
+	private final MBeanServerConnection mBeanServerConnection;
 	private boolean markedAsDestroyed;
 	private static final Logger logger = LoggerFactory.getLogger(JMXConnection.class);
+
+	private final IdentityHashMap<Object, QueryNotificationListener> notificationListeners = new IdentityHashMap<>();
+
+	private static class QueryNotificationListener implements NotificationListener {
+
+		private final List<Notification> notifications = new ArrayList<>();
+
+		private final ObjectName objectName;
+
+		private QueryNotificationListener(ObjectName objectName) {
+			this.objectName = objectName;
+		}
+
+		@Override
+		public void handleNotification(Notification notification, Object handback) {
+			addNotification(notification);
+		}
+
+		private synchronized void addNotification(Notification notification) {
+			notifications.add(notification);
+		}
+
+		public synchronized void dumpNotifiations(List<Notification> target) {
+			target.addAll(notifications);
+			notifications.clear();
+		}
+	}
 
 	public JMXConnection(@Nullable JMXConnector connector, @Nonnull MBeanServerConnection mBeanServerConnection) {
 		this.connector = connector;
 		this.mBeanServerConnection = mBeanServerConnection;
 		this.markedAsDestroyed = false;
-
-
 	}
 
-	public boolean isAlive(){
+	private static NotificationFilter getNotificationFilter(final ImmutableList<String> attributes) {
+		return new NotificationFilter() {
+			@Override
+			public boolean isNotificationEnabled(Notification notification) {
+				if (notification instanceof AttributeChangeNotification) {
+					// Check if subscribed attribute
+					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
+					return attributes.contains(changeNotification.getAttributeName());
+				}
+				return false;
+			}
+		};
+	}
+
+	public synchronized boolean isNotificationListenerRegistered(Object query) {
+		return notificationListeners.containsKey(query);
+	}
+
+	public synchronized void addNotificationListener(Object query, ObjectName objectName, ImmutableList<String> attributes) throws IOException, InstanceNotFoundException {
+		if (notificationListeners.containsKey(query)) {
+			logger.warn("Notification listener was already registered {}", query);
+			return;
+		}
+		QueryNotificationListener notificationListener = new QueryNotificationListener(objectName);
+		notificationListeners.put(query, notificationListener);
+		this.mBeanServerConnection.addNotificationListener(objectName,
+				notificationListener, getNotificationFilter(attributes), null);
+	}
+
+	public synchronized List<Notification> getNotifications(Object query) {
+		List<Notification> notifications = new ArrayList<>();
+		QueryNotificationListener queryNotificationListener = this.notificationListeners.get(query);
+		if (queryNotificationListener != null) {
+			queryNotificationListener.dumpNotifiations(notifications);
+		}
+		return notifications;
+	}
+
+	public boolean isAlive() {
 		return !markedAsDestroyed;
 	}
-	public void setMarkedAsDestroyed(){
+
+	public void setMarkedAsDestroyed() {
 		markedAsDestroyed = true;
 	}
 
@@ -65,6 +142,13 @@ public class JMXConnection implements Closeable {
 				connector.close();
 			} catch (IOException e) {
 				logger.error("Error occurred during close connection {}", this, e);
+			}
+		}
+		for (QueryNotificationListener listener : notificationListeners.values()) {
+			try {
+				mBeanServerConnection.removeNotificationListener(listener.objectName, listener);
+			} catch (Exception ex) {
+				logger.error("Error occurred while removing notification listeners {}", listener.objectName, ex);
 			}
 		}
 	}
