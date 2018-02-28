@@ -45,7 +45,7 @@
 			<totalSizeCap>5GB</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
-			<pattern>d{yyyy-MM-dd HH:mm:ss} [%thread] level %logger [%file:%line] - %msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] level %logger [%file:%line] - %msg%n</pattern>
 		</encoder>
 	</appender>
 
