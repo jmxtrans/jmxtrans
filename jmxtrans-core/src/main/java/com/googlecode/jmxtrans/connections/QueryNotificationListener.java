@@ -20,42 +20,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.test;
+package com.googlecode.jmxtrans.connections;
 
-import javax.management.AttributeChangeNotification;
 import javax.management.Notification;
-import javax.management.NotificationBroadcasterSupport;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
+import java.util.ArrayList;
+import java.util.List;
 
-class Counter extends NotificationBroadcasterSupport implements CounterMXBean {
-	private int counter = 0;
-	private final String name;
+/**
+ * Collects received notifications for a query.
+ * Notifications should be fetched via {@link #dumpNotifiations(List)}.
+ * TODO: if no one is calling dumpNotifiations() but we continue to receive
+ * notifications, jmxtrans would eventually go into OOM
+ */
+class QueryNotificationListener implements NotificationListener {
 
-	Counter(String name) {
-		this.name = name;
+	private final List<Notification> notifications = new ArrayList<>();
+
+	private final ObjectName objectName;
+
+	QueryNotificationListener(ObjectName objectName) {
+		this.objectName = objectName;
 	}
 
 	@Override
-	public synchronized Integer getValue() {
-		int oldValue = counter;
-		int newValue = counter++;
-		// Send value change via notification also.
-		try {
-			// Value == sequence nr - just a simple test ;)
-			Notification n = new AttributeChangeNotification(this,
-					newValue, System.currentTimeMillis(),
-					"NotificationValue changed", "NotificationValue", "int",
-					oldValue, newValue);
-
-			sendNotification(n);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return newValue;
+	public void handleNotification(Notification notification, Object handback) {
+		addNotification(notification);
 	}
 
+	private synchronized void addNotification(Notification notification) {
+		notifications.add(notification);
+	}
 
-	@Override
-	public String getName() {
-		return name;
+	public synchronized void dumpNotifiations(List<Notification> target) {
+		target.addAll(notifications);
+		notifications.clear();
+	}
+
+	public ObjectName getObjectName() {
+		return objectName;
 	}
 }

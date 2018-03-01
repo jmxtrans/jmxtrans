@@ -36,7 +36,6 @@ import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.Notification;
 import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import java.io.Closeable;
@@ -57,31 +56,6 @@ public class JMXConnection implements Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(JMXConnection.class);
 
 	private final IdentityHashMap<Object, QueryNotificationListener> notificationListeners = new IdentityHashMap<>();
-
-	private static class QueryNotificationListener implements NotificationListener {
-
-		private final List<Notification> notifications = new ArrayList<>();
-
-		private final ObjectName objectName;
-
-		private QueryNotificationListener(ObjectName objectName) {
-			this.objectName = objectName;
-		}
-
-		@Override
-		public void handleNotification(Notification notification, Object handback) {
-			addNotification(notification);
-		}
-
-		private synchronized void addNotification(Notification notification) {
-			notifications.add(notification);
-		}
-
-		public synchronized void dumpNotifiations(List<Notification> target) {
-			target.addAll(notifications);
-			notifications.clear();
-		}
-	}
 
 	public JMXConnection(@Nullable JMXConnector connector, @Nonnull MBeanServerConnection mBeanServerConnection) {
 		this.connector = connector;
@@ -146,9 +120,9 @@ public class JMXConnection implements Closeable {
 		}
 		for (QueryNotificationListener listener : notificationListeners.values()) {
 			try {
-				mBeanServerConnection.removeNotificationListener(listener.objectName, listener);
+				mBeanServerConnection.removeNotificationListener(listener.getObjectName(), listener);
 			} catch (Exception ex) {
-				logger.error("Error occurred while removing notification listeners {}", listener.objectName, ex);
+				logger.error("Error occurred while removing notification listeners {}", listener.getObjectName(), ex);
 			}
 		}
 	}

@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
+import javax.management.Attribute;
+import javax.management.AttributeChangeNotification;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -50,6 +52,7 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
+import javax.management.Notification;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -266,11 +269,26 @@ public class Query {
 	public Iterable<Result> processNotifications(JMXConnection jmxConnection) throws IOException, InstanceNotFoundException, ReflectionException {
 		// TODO: review parameters
 		ObjectInstance oi = jmxConnection.getMBeanServerConnection().getObjectInstance(objectName);
-		AttributeList al = jmxConnection.getMBeanServerConnection().getAttributes(objectName,
-				attr.toArray(new String[attr.size()]));
+		List<Notification> notifications = jmxConnection.getNotifications(this);
+		logger.info("Received {} notifications", notifications.size());
 
-		return new JmxResultProcessor(this, oi, al.asList(),
+		List<Attribute> attributes = convertToAttributes(notifications);
+
+		return new JmxResultProcessor(this, oi, attributes,
 				oi.getClassName(), objectName.getDomain()).getResults();
+	}
+
+	private List<Attribute> convertToAttributes(List<Notification> notifications) {
+		List<Attribute> attributes = new ArrayList<>(notifications.size());
+		for(Notification notification : notifications) {
+			if(notification instanceof AttributeChangeNotification) {
+				AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
+				attributes.add(new Attribute(changeNotification.getAttributeName(),
+						changeNotification.getNewValue()));
+			}
+		}
+		System.out.println(attributes);
+		return attributes;
 	}
 
 	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {
