@@ -48,17 +48,10 @@
 		</encoder>
 	</appender>
 
-	<appender name="asyncFile" class="ch.qos.logback.classic.AsyncAppender">
-		<includeCallerData>true</includeCallerData>
-		<queueSize>1024</queueSize>
-		<neverBlock>false</neverBlock>
-		<appender-ref ref="file" />
-	</appender>
-
 	<logger name="com.googlecode.jmxtrans" level="info"/>
 
 	<root level="info">
 		<appender-ref ref="console" />
-		<appender-ref ref="asyncFile" />
+		<appender-ref ref="file" />
 	</root>
 </configuration>

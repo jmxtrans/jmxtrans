@@ -36,7 +36,6 @@
 	</appender>
 
 	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<append>true</append>
 		<file>${logDir}/jmxtrans.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 			<fileNamePattern>${logDir}/jmxtrans-%d{yyyyMMdd}-%i.log.gz</fileNamePattern>
@@ -49,17 +48,10 @@
 		</encoder>
 	</appender>
 
-	<appender name="asyncFile" class="ch.qos.logback.classic.AsyncAppender">
-		<includeCallerData>true</includeCallerData>
-		<queueSize>1024</queueSize>
-		<neverBlock>false</neverBlock>
-		<appender-ref ref="file" />
-	</appender>
-
 	<logger name="com.googlecode.jmxtrans" level="${logLevel}"/>
 
 	<root level="info">
 		<appender-ref ref="console" />
-		<appender-ref ref="asyncFile" />
+		<appender-ref ref="file" />
 	</root>
 </configuration>
