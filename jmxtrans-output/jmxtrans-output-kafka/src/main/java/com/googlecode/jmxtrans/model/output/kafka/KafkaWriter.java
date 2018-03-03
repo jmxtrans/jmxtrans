@@ -32,6 +32,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.output.BaseOutputWriter;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import com.googlecode.jmxtrans.model.output.Settings;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -124,11 +125,10 @@ public class KafkaWriter extends BaseOutputWriter {
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (Result result : results) {
 			log.debug("Query result: [{}]", result);
-			for (String message : resultSerializer.serialize(server, query, result)) {
-				for (String topic : this.topics) {
-					log.debug("Topic: [{}] ; Kafka Message: [{}]", topic, message);
-					producer.send(new ProducerRecord<String, String>(topic, message));
-				}
+			String message = resultSerializer.serialize(server, query, result);
+			for (String topic : this.topics) {
+				log.debug("Topic: [{}] ; Kafka Message: [{}]", topic, message);
+				producer.send(new ProducerRecord<String, String>(topic, message));
 			}
 		}
 	}

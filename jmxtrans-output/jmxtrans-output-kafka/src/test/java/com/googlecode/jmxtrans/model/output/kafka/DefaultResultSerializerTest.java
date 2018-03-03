@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -53,10 +54,8 @@ public class DefaultResultSerializerTest {
 		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags, asList("typeName.type", "className"));
 
 		long now = System.currentTimeMillis();
-		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResultAt(now));
+		String message = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResultAt(now));
 
-		assertThat(messages).hasSize(1);
-		String message = messages.iterator().next();
 		// Check JSON syntax
 		assertThat(message).endsWith("}}");
 		JsonNode jsonNode = objectMapper.readValue(message, JsonNode.class);
@@ -73,13 +72,13 @@ public class DefaultResultSerializerTest {
 		ImmutableMap<String, String> tags = ImmutableMap.of("myTagKey1", "myTagValue1");
 		ResultSerializer resultSerializer = new DefaultResultSerializer(ImmutableList.<String>of(), false, "rootPrefix", tags, ImmutableList.<String>of());
 
-		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), stringResult());
+		String message = resultSerializer.serialize(dummyServer(), dummyQuery(), stringResult());
 
-		assertThat(messages).isEmpty();
+		assertThat(message).isNull();
 	}
 
 	@Test
-	public void initDefaults() throws Exception {
+	public void initDefaults() {
 		DefaultResultSerializer resultSerializer = new DefaultResultSerializer(null, false, null, null, null);
 
 		assertThat(resultSerializer.getTypeNames()).isNotNull();
@@ -89,7 +88,7 @@ public class DefaultResultSerializerTest {
 	}
 
 	@Test
-	public void equalsHashCodeWhenSame() throws Exception {
+	public void equalsHashCodeWhenSame() {
 		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null, null);
 		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(null, false, null, null, null);
 
@@ -98,7 +97,7 @@ public class DefaultResultSerializerTest {
 	}
 
 	@Test
-	public void equalsWhenDifferent() throws Exception {
+	public void equalsWhenDifferent() {
 		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null, null);
 		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(asList("Type"), true, "root", null, null);
 

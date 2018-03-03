@@ -43,10 +43,10 @@ import java.util.Set;
 /**
  * Walks a JMX tree and prints out all of the attribute values actually using
  * the JmxTrans api.
- * 
+ *
  * This is a good test of the core engine of JmxTrans to ensure that it covers
  * all cases.
- * 
+ *
  * @author jon
  */
 public class TreeWalker2 {
@@ -83,7 +83,7 @@ public class TreeWalker2 {
 
 			Query.Builder queryBuilder = Query.builder()
 					.setObj(name.getCanonicalName())
-					.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()));
+					.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, null, Collections.<String, Object>emptyMap()));
 
 			for (MBeanAttributeInfo attrInfo : attrs) {
 				queryBuilder.addAttr(attrInfo.getName());

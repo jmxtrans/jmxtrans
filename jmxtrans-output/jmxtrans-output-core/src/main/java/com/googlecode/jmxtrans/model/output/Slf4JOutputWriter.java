@@ -53,6 +53,13 @@ import static java.lang.String.valueOf;
 public class Slf4JOutputWriter extends BaseOutputWriter {
 
 	private final Logger logger;
+	private final ResultSerializer resultSerializer;
+	private static final ResultSerializer EMPTY_RESULT_SERIALIZER = new ResultSerializer() {
+		@Override
+		public String serialize(Server server, Query query, Result result) {
+			return "";
+		}
+	};
 
 	@JsonCreator
 	public Slf4JOutputWriter(
@@ -60,19 +67,22 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("logger") String logger,
+			@JsonProperty("resultSerialiazer") ResultSerializer resultSerializer,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		String loggerName = MoreObjects.firstNonNull(logger, "jmxtrans.output");
 		this.logger = LoggerFactory.getLogger(loggerName);
+		this.resultSerializer = MoreObjects.firstNonNull(resultSerializer, EMPTY_RESULT_SERIALIZER);
 	}
 
 	@VisibleForTesting
-	Slf4JOutputWriter(Logger logger) {
+	Slf4JOutputWriter(Logger logger, ResultSerializer resultSerializer) {
 		super(ImmutableList.<String>of(),
 				true,
 				false,
 				new HashMap<String, Object>());
 		this.logger = logger;
+		this.resultSerializer = resultSerializer;
 	}
 
 	@Override
@@ -87,7 +97,11 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 	private void logValue(Server server, Query query, List<String> typeNames, Result result) throws IOException {
 		Object value = result.getValue();
 
-		if (value != null && isNumeric(value)) {
+		if (isNumeric(value)) {
+			String resultAsString = resultSerializer.serialize(server, query, result);
+			if (resultAsString == null) {
+				return;
+			}
 			Closer closer = Closer.create();
 			try {
 				closer.register(MDC.putCloseable("server", computeAlias(server)));
@@ -100,7 +114,7 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 				closer.register(MDC.putCloseable("key", KeyUtils.getValueKey(result)));
 				closer.register(MDC.putCloseable("epoch", valueOf(result.getEpoch())));
 
-				logger.info("");
+				logger.info(resultAsString);
 			} catch (Throwable t) {
 				throw closer.rethrow(t);
 			} finally {
@@ -115,6 +129,6 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {}
+	public void validateSetup(Server server, Query query) {}
 
 }

@@ -29,6 +29,7 @@ import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -74,14 +75,15 @@ public class KafkaWriter2 extends OutputWriterAdapter {
 	@Override
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		for (Result result : results) {
-			for (String message : resultSerializer.serialize(server, query, result)) {
+			String message = resultSerializer.serialize(server, query, result);
+			if (message != null) {
 				producer.send(new ProducerRecord<String, String>(topic, message));
 			}
 		}
 	}
 
 	@Override
-	public void close() throws LifecycleException {
+	public void close() {
 		producer.close();
 	}
 }

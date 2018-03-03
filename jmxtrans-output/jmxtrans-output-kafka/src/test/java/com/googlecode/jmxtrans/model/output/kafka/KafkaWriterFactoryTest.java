@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.junit.Test;
 
