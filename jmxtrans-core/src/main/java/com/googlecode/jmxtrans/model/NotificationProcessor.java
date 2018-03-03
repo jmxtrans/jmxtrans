@@ -49,7 +49,7 @@ class NotificationProcessor {
 	private final Query query;
 	private final ObjectInstance oi;
 
-	public NotificationProcessor(Server server, Query query, ObjectInstance oi) {
+	NotificationProcessor(Server server, Query query, ObjectInstance oi) {
 		this.server = server;
 		this.query = query;
 		this.oi = oi;
@@ -72,8 +72,10 @@ class NotificationProcessor {
 			List<Attribute> attributes = new ArrayList<>(1);
 			attributes.add(new Attribute(changeNotification.getAttributeName(),
 					changeNotification.getNewValue()));
+			long epoch = notification.getTimeStamp();
 			return new JmxResultProcessor(query, oi, attributes,
-					oi.getClassName(), query.getObjectName().getDomain()).getResults();
+					oi.getClassName(), query.getObjectName().getDomain(),
+					epoch).getResults();
 		} else {
 			//TODO: log a warning here?
 		}
