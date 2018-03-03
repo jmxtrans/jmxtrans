@@ -46,7 +46,9 @@ import com.googlecode.jmxtrans.executors.CommonExecutorRepository;
 import com.googlecode.jmxtrans.executors.ExecutorFactory;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.executors.SeparateExecutorRepository;
+import com.googlecode.jmxtrans.model.NotificationProcessorFactory;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
+import com.googlecode.jmxtrans.notifications.NotificationProcessorFactoryImpl;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -89,6 +91,7 @@ public class JmxTransModule extends AbstractModule {
 				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName(), 0));
 		bind(new TypeLiteral<KeyedObjectPool<JmxConnectionProvider, JMXConnection>>(){}).annotatedWith(Names.named("mbeanPool"))
 				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName(), 20000));
+		bind(NotificationProcessorFactory.class).to(NotificationProcessorFactoryImpl.class);
 	}
 
 	@Provides

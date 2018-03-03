@@ -22,8 +22,10 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import javax.management.Notification;
+import javax.management.ObjectInstance;
 
-public interface NotificationProcessor {
-	void handleNotification(Notification notification);
+public interface NotificationProcessorFactory {
+
+	NotificationProcessor create(Server server, Query query, ObjectInstance oi);
+
 }

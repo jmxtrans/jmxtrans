@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -137,6 +138,9 @@ public class Query {
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriterInstances;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
 
+	@Nonnull
+	private final NotificationProcessorFactory notificationProcessorFactory;
+
 	@JsonCreator
 	public Query(
 			@JsonProperty("obj") String obj,
@@ -148,12 +152,14 @@ public class Query {
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
-			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
+			@JacksonInject NotificationProcessorFactory notificationProcessorFactory
 	) {
 		// For typeName, note the using copyOf does not change the order of
 		// the elements.
 		this(obj, type != null ? QueryType.valueOf(type) : QueryType.POLL, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+				outputWriters, ImmutableList.<OutputWriter>of(),
+				notificationProcessorFactory);
 	}
 
 	public Query(
@@ -166,10 +172,12 @@ public class Query {
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			List<OutputWriterFactory> outputWriters
+			List<OutputWriterFactory> outputWriters,
+			NotificationProcessorFactory notificationProcessorFactory
 	) {
 		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+				outputWriters, ImmutableList.<OutputWriter>of(),
+				notificationProcessorFactory);
 	}
 
 	public Query(
@@ -182,10 +190,12 @@ public class Query {
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			ImmutableList<OutputWriter> outputWriters
+			ImmutableList<OutputWriter> outputWriters,
+			NotificationProcessorFactory notificationProcessorFactory
 	) {
 		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				ImmutableList.<OutputWriterFactory>of(), outputWriters);
+				ImmutableList.<OutputWriterFactory>of(), outputWriters,
+				notificationProcessorFactory);
 	}
 
 	private Query(
@@ -199,7 +209,8 @@ public class Query {
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
 			List<OutputWriterFactory> outputWriterFactories,
-			List<OutputWriter> outputWriters
+			List<OutputWriter> outputWriters,
+			NotificationProcessorFactory notificationProcessorFactory
 	) {
 		try {
 			this.objectName = new ObjectName(obj);
@@ -221,6 +232,7 @@ public class Query {
 
 		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
 		this.queryType = queryType;
+		this.notificationProcessorFactory = notificationProcessorFactory;
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -271,7 +283,7 @@ public class Query {
 			// TODO: what about MBeans added / removed during runtime of the monitored application???
 			// TODO: does this whole loop make sense?? :) do we need to "query names"?
 			final ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
-			Object handback = new NotificationProcessor(server, this, oi);
+			Object handback = notificationProcessorFactory.create(server, this, oi);
 			NotificationListener notificationListener = new NotificationListener() {
 				@Override
 				public void handleNotification(Notification notification, Object handback) {
@@ -350,6 +362,8 @@ public class Query {
 		// avoid unpredictable ordering of typeNames.
 		private final Set<String> typeNames = newLinkedHashSet();
 
+		private NotificationProcessorFactory notificationProcessorFactory;
+
 		private Builder() {}
 
 		/** This builder does NOT copy output writers from the given query. */
@@ -363,6 +377,7 @@ public class Query {
 			this.allowDottedKeys = query.allowDottedKeys;
 			this.useAllTypeNames = query.useAllTypeNames;
 			this.typeNames.addAll(query.typeNames);
+			this.notificationProcessorFactory = query.notificationProcessorFactory;
 		}
 
 		public Builder addAttr(String... attr) {
@@ -410,7 +425,8 @@ public class Query {
 						this.useObjDomainAsKey,
 						this.allowDottedKeys,
 						this.useAllTypeNames,
-						this.outputWriterFactories
+						this.outputWriterFactories,
+						this.notificationProcessorFactory
 				);
 			}
 			return new Query(
@@ -423,7 +439,8 @@ public class Query {
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
 					this.useAllTypeNames,
-					copyOf(this.outputWriters)
+					copyOf(this.outputWriters),
+					this.notificationProcessorFactory
 			);
 		}
 

@@ -20,10 +20,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model;
+package com.googlecode.jmxtrans.notifications;
 
-import javax.management.Notification;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
+import com.googlecode.jmxtrans.model.NotificationProcessor;
+import com.googlecode.jmxtrans.model.NotificationProcessorFactory;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
 
-public interface NotificationProcessor {
-	void handleNotification(Notification notification);
+import javax.annotation.Nonnull;
+import javax.management.ObjectInstance;
+
+public class NotificationProcessorFactoryImpl implements NotificationProcessorFactory {
+
+	private final ExecutorRepository resultExecutorRepository;
+
+	@Inject
+	public NotificationProcessorFactoryImpl(@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository) {
+		this.resultExecutorRepository = resultExecutorRepository;
+	}
+
+
+	@Override
+	public NotificationProcessor create(Server server, Query query, ObjectInstance oi) {
+		return new NotificationProcessorImpl(server, query, oi, resultExecutorRepository);
+	}
 }
