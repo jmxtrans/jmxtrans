@@ -46,13 +46,19 @@ public class JmxResultProcessor {
 	private final String className;
 	private final String objDomain;
 	private final List<Attribute> attributes;
+	private final long epoch;
 
 	public JmxResultProcessor(Query query, ObjectInstance objectInstance, List<Attribute> attributes, String className, String objDomain) {
+		this(query, objectInstance, attributes, className, objDomain, System.currentTimeMillis());
+	}
+
+	public JmxResultProcessor(Query query, ObjectInstance objectInstance, List<Attribute> attributes, String className, String objDomain, long epoch) {
 		this.query = query;
 		this.objectInstance = objectInstance;
 		this.className = className;
 		this.objDomain = objDomain;
 		this.attributes = attributes;
+		this.epoch = epoch;
 	}
 
 	public ImmutableList<Result> getResults() {
@@ -69,7 +75,6 @@ public class JmxResultProcessor {
 	 */
 	private class ResultsBuilder {
 		private final Builder<Result> accumulator = ImmutableList.builder();
-		private final long epoch = System.currentTimeMillis();
 
 		private void add(String attributeName, Object value) {
 			add(attributeName, ImmutableList.<String>builder(), value);
