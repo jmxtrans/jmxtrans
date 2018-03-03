@@ -53,8 +53,8 @@ public class OutputCapture extends ExternalResource {
 		System.setOut(originalOut);
 		System.setErr(originalErr);
 		// I guess it's useful to print this after completion
-		System.out.println("What was captured:");
-		System.out.println(out);
+		//System.out.println("What was captured:");
+		//System.out.println(out);
 	}
 
 	public Callable<Boolean> stdoutHasLineContaining(final String content) {
