@@ -279,22 +279,11 @@ public class Server implements JmxConnectionProvider {
 			jmxConnection = pool.borrowObject(this);
 			ImmutableList.Builder<Result> results = ImmutableList.builder();
 
-			if(query.getQueryType() == Query.QueryType.POLL) {
-				// Fetch results from mbeans
-				MBeanServerConnection connection = jmxConnection.getMBeanServerConnection();
+			MBeanServerConnection connection = jmxConnection.getMBeanServerConnection();
 
-				for (ObjectName queryName : query.queryNames(connection)) {
-					results.addAll(query.fetchResults(connection, queryName));
-				}
-			} else {
-				// Subscribe to notifications
-				if(!query.isNotificationListenerRegistered(jmxConnection)) {
-					query.subscribeToNotifications(jmxConnection);
-				}
-				// Process received notifications
-				results.addAll(query.processNotifications(jmxConnection));
+			for (ObjectName queryName : query.queryNames(connection)) {
+				results.addAll(query.fetchResults(connection, queryName));
 			}
-
 			return results.build();
 		} catch (Exception e) {
 			if (jmxConnection != null) {
@@ -446,6 +435,20 @@ public class Server implements JmxConnectionProvider {
 			writer.doWrite(this, query, results);
 		}
 		logger.debug("Finished running outputWriters for query: {}", query);
+	}
+
+	// Called when a new jmxConnection is created
+	@Override
+	public void subscribeToNotifications(JMXConnection jmxConnection) throws Exception {
+		for (Query query : queries) {
+			try {
+				if(query.getQueryType() == Query.QueryType.NOTIFICATIONS) {
+					query.subscribeToNotifications(this, jmxConnection);
+				}
+			} catch (Exception ex) {
+				logger.error("Error while registering notification listeners", ex);
+			}
+		}
 	}
 
 	/**

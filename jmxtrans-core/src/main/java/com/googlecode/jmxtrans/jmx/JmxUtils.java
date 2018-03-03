@@ -58,11 +58,13 @@ public class JmxUtils {
 		final ThreadPoolExecutor executor = queryExecutorRepository.getExecutor(server);
 
 		for (Query query : server.getQueries()) {
-			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			try {
-				executor.submit(pqt);
-			} catch (RejectedExecutionException ree) {
-				logger.error("Could not submit query {}. You could try to size the 'queryProcessorExecutor' to a larger size.", pqt, ree);
+			if(query.getQueryType() != Query.QueryType.NOTIFICATIONS) {
+				ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
+				try {
+					executor.submit(pqt);
+				} catch (RejectedExecutionException ree) {
+					logger.error("Could not submit query {}. You could try to size the 'queryProcessorExecutor' to a larger size.", pqt, ree);
+				}
 			}
 		}
 	}

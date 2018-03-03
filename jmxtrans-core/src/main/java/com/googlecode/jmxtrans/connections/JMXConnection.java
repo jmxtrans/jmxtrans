@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.connections;
 
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.ToString;
 import org.slf4j.Logger;
@@ -31,18 +30,14 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
-import javax.management.AttributeChangeNotification;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
-import javax.management.Notification;
 import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
 
 @ToString
 @ThreadSafe
@@ -55,50 +50,19 @@ public class JMXConnection implements Closeable {
 	private boolean markedAsDestroyed;
 	private static final Logger logger = LoggerFactory.getLogger(JMXConnection.class);
 
-	private final IdentityHashMap<Object, QueryNotificationListener> notificationListeners = new IdentityHashMap<>();
-
 	public JMXConnection(@Nullable JMXConnector connector, @Nonnull MBeanServerConnection mBeanServerConnection) {
 		this.connector = connector;
 		this.mBeanServerConnection = mBeanServerConnection;
 		this.markedAsDestroyed = false;
 	}
 
-	private static NotificationFilter getNotificationFilter(final ImmutableList<String> attributes) {
-		return new NotificationFilter() {
-			@Override
-			public boolean isNotificationEnabled(Notification notification) {
-				if (notification instanceof AttributeChangeNotification) {
-					// Check if subscribed attribute
-					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
-					return attributes.contains(changeNotification.getAttributeName());
-				}
-				return false;
-			}
-		};
-	}
-
-	public synchronized boolean isNotificationListenerRegistered(Object query) {
-		return notificationListeners.containsKey(query);
-	}
-
-	public synchronized void addNotificationListener(Object query, ObjectName objectName, ImmutableList<String> attributes) throws IOException, InstanceNotFoundException {
-		if (notificationListeners.containsKey(query)) {
-			logger.warn("Notification listener was already registered {}", query);
-			return;
-		}
-		QueryNotificationListener notificationListener = new QueryNotificationListener(objectName);
-		notificationListeners.put(query, notificationListener);
+	public void addNotificationListener(ObjectName objectName,
+										NotificationListener notificationListener,
+										NotificationFilter notificationFilter,
+										Object handback) throws IOException, InstanceNotFoundException {
+		logger.info("Add notification listener for {}", objectName);
 		this.mBeanServerConnection.addNotificationListener(objectName,
-				notificationListener, getNotificationFilter(attributes), null);
-	}
-
-	public synchronized List<Notification> getNotifications(Object query) {
-		List<Notification> notifications = new ArrayList<>();
-		QueryNotificationListener queryNotificationListener = this.notificationListeners.get(query);
-		if (queryNotificationListener != null) {
-			queryNotificationListener.dumpNotifiations(notifications);
-		}
-		return notifications;
+				notificationListener, notificationFilter, handback);
 	}
 
 	public boolean isAlive() {
@@ -116,13 +80,6 @@ public class JMXConnection implements Closeable {
 				connector.close();
 			} catch (IOException e) {
 				logger.error("Error occurred during close connection {}", this, e);
-			}
-		}
-		for (QueryNotificationListener listener : notificationListeners.values()) {
-			try {
-				mBeanServerConnection.removeNotificationListener(listener.getObjectName(), listener);
-			} catch (Exception ex) {
-				logger.error("Error occurred while removing notification listeners {}", listener.getObjectName(), ex);
 			}
 		}
 	}

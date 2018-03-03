@@ -39,13 +39,17 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 
 	@Override
 	@Nonnull
-	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws IOException {
+	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws Exception {
+		JMXConnection newJMXConnection;
 		if (server.isLocal()) {
-			return new JMXConnection(null, server.getLocalMBeanServer());
+			newJMXConnection = new JMXConnection(null, server.getLocalMBeanServer());
 		} else {
 			JMXConnector connection = server.getServerConnection();
-			return new JMXConnection(connection, connection.getMBeanServerConnection());
+			newJMXConnection =  new JMXConnection(connection, connection.getMBeanServerConnection());
+			// TODO: also for local???
+			server.subscribeToNotifications(newJMXConnection);
 		}
+		return newJMXConnection;
 	}
 
 	@Override

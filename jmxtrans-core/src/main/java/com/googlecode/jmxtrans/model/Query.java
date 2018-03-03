@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
-import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
@@ -53,6 +52,8 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.Notification;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -84,7 +85,14 @@ import static java.util.Arrays.asList;
 public class Query {
 
 	public enum QueryType {
+		/**
+		 * jmxtrans polls configured servers / queries at a regular interval.
+		 */
 		POLL,
+		/**
+		 * JMX notifications are used to send attribute change events
+		 * from the source to jmxtrans.
+		 */
 		NOTIFICATIONS;
 	}
 
@@ -92,7 +100,7 @@ public class Query {
 
 	/** The JMX object representation: java.lang:type=Memory */
 	@Nonnull @Getter private final ObjectName objectName;
-	@Getter private final QueryType queryType;
+	@Nonnull @Getter private final QueryType queryType;
 	@Nonnull @Getter private final ImmutableList<String> keys;
 
 	@Nonnull @Getter private final ImmutableList<String> attr;
@@ -256,39 +264,46 @@ public class Query {
 		return ImmutableList.of();
 	}
 
-	public synchronized boolean isNotificationListenerRegistered(JMXConnection jmxConnection) {
-		return jmxConnection.isNotificationListenerRegistered(this);
-	}
+	public void subscribeToNotifications(final Server server, JMXConnection jmxConnection) throws IOException, InstanceNotFoundException {
+		MBeanServerConnection mbeanServer = jmxConnection.getMBeanServerConnection();
+		Iterable<ObjectName> queryNames = queryNames(mbeanServer);
+		for(ObjectName queryName : queryNames) {
+			// TODO: what about MBeans added / removed during runtime of the monitored application???
+			// TODO: does this whole loop make sense?? :) do we need to "query names"?
+			final ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
+			Object handback = new NotificationProcessor(server, this, oi);
+			NotificationListener notificationListener = new NotificationListener() {
+				@Override
+				public void handleNotification(Notification notification, Object handback) {
+					NotificationProcessor handler = (NotificationProcessor) handback;
+					handler.handleNotification(notification);
+				}
+			};
 
-	public void subscribeToNotifications(JMXConnection jmxConnection) throws IOException, InstanceNotFoundException {
-		// TODO: JMXConnection cannot depend on Query as this would create a package cycle
-		// but it needs to be able to associate a listener with the query...
-		jmxConnection.addNotificationListener(this, this.objectName, this.attr);
-	}
-
-	public Iterable<Result> processNotifications(JMXConnection jmxConnection) throws IOException, InstanceNotFoundException, ReflectionException {
-		// TODO: review parameters
-		ObjectInstance oi = jmxConnection.getMBeanServerConnection().getObjectInstance(objectName);
-		List<Notification> notifications = jmxConnection.getNotifications(this);
-		logger.info("Received {} notifications", notifications.size());
-
-		List<Attribute> attributes = convertToAttributes(notifications);
-
-		return new JmxResultProcessor(this, oi, attributes,
-				oi.getClassName(), objectName.getDomain()).getResults();
-	}
-
-	private List<Attribute> convertToAttributes(List<Notification> notifications) {
-		List<Attribute> attributes = new ArrayList<>(notifications.size());
-		for(Notification notification : notifications) {
-			if(notification instanceof AttributeChangeNotification) {
-				AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
-				attributes.add(new Attribute(changeNotification.getAttributeName(),
-						changeNotification.getNewValue()));
-			}
+			jmxConnection.addNotificationListener(oi.getObjectName(),
+					notificationListener,
+					getNotificationFilter(getAttr()),
+					handback);
 		}
-		System.out.println(attributes);
-		return attributes;
+	}
+
+	private static NotificationFilter getNotificationFilter(final ImmutableList<String> attr) {
+		return new NotificationFilter() {
+			@Override
+			public boolean isNotificationEnabled(Notification notification) {
+				if (notification instanceof AttributeChangeNotification) {
+					// Check if subscribed attribute
+					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
+					if (attr.isEmpty()) {
+						// Subscribe to all attribute changes.
+						return true;
+					} else {
+						return attr.contains(changeNotification.getAttributeName());
+					}
+				}
+				return false;
+			}
+		};
 	}
 
 	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {

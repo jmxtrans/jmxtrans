@@ -38,7 +38,7 @@ public class MBeanServerConnectionFactoryTest {
 	private MBeanServerConnectionFactory factory = new MBeanServerConnectionFactory();
 
 	@Test
-	public void connectionIsCreatedForRemoteServer() throws IOException {
+	public void connectionIsCreatedForRemoteServer() throws Exception {
 		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		JMXConnector jmxConnector = mock(JMXConnector.class);
 		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
@@ -52,7 +52,7 @@ public class MBeanServerConnectionFactoryTest {
 	}
 
 	@Test
-	public void connectionIsCreatedForLocalServer() throws IOException {
+	public void connectionIsCreatedForLocalServer() throws Exception {
 		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		MBeanServer mBeanServerConnection = mock(MBeanServer.class);
 		when(server.isLocal()).thenReturn(true);
@@ -64,7 +64,7 @@ public class MBeanServerConnectionFactoryTest {
 	}
 
 	@Test
-	public void connectionIsClosedOnDestroy() throws IOException {
+	public void connectionIsClosedOnDestroy() throws Exception {
 		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
 		JMXConnection connection = mock(JMXConnection.class);
 
