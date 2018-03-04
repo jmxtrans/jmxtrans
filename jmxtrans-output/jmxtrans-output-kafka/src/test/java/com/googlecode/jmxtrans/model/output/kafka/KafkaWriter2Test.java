@@ -55,7 +55,6 @@ public class KafkaWriter2Test {
     public void testWrite() throws Exception {
         // Given
         KafkaWriter2 writer = new KafkaWriter2(
-                objectMapper,
                 producerMock,
                 TOPIC,
                 new DetailedResultSerializer());
@@ -80,7 +79,6 @@ public class KafkaWriter2Test {
 	public void producerClosed() throws Exception {
 		// Given
 		KafkaWriter2 writer = new KafkaWriter2(
-				objectMapper,
 				producerMock,
 				TOPIC,
 				new DetailedResultSerializer());
@@ -94,7 +92,6 @@ public class KafkaWriter2Test {
 	public void testFilterResultSerializer() throws Exception {
 		// Given
 		KafkaWriter2 writer = new KafkaWriter2(
-				objectMapper,
 				producerMock,
 				TOPIC,
 				mock(ResultSerializer.class));

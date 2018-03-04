@@ -83,6 +83,10 @@ public class DefaultResultSerializer implements ResultSerializer {
 		this.resultAttributesToWriteAsTags = resultTags == null ? ImmutableSet.<ResultAttribute>of() : ResultAttributes.forNames(resultTags);
 	}
 
+	static DefaultResultSerializer createDefault() {
+		return new DefaultResultSerializer(null, false, "", null, null);
+	}
+
 	@Override
 	public String serialize(Server server, Query query, Result result) throws IOException {
 		log.debug("Query result: [{}]", result);

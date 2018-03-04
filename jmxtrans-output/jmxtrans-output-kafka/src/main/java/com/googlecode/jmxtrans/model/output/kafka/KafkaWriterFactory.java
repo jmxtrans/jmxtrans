@@ -23,30 +23,22 @@
 package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.output.ResultSerializer;
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @EqualsAndHashCode(exclude = {"objectMapper"})
 public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
-	@Nonnull
-	@Getter(AccessLevel.PROTECTED)
-	@JsonIgnore
-	private final ObjectMapper objectMapper;
 	@Nonnull
 	@Getter
 	private final Map<String, Object> producerConfig;
@@ -64,7 +56,6 @@ public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
 			@JsonProperty("producerConfig") @Nonnull Map<String, Object> producerConfig,
 			@JsonProperty("topic") @Nonnull String topic,
 			@JsonProperty("resultSerializer") ResultSerializer resultSerializer) {
-		this.objectMapper = new ObjectMapper();
 		ImmutableMap.Builder<String, Object> producerConfigBuilder = ImmutableMap.<String, Object>builder()
 				.putAll(producerConfig);
 		// Add default settings
@@ -77,16 +68,12 @@ public class KafkaWriterFactory implements OutputWriterFactory<KafkaWriter2> {
 		this.producerConfig = producerConfigBuilder.build();
 		this.topic = topic;
 		checkNotNull(topic);
-		this.resultSerializer = resultSerializer == null ? new DefaultResultSerializer(
-				Collections.<String>emptyList(),
-				false, "",
-				Collections.<String, String>emptyMap(),
-				Collections.<String>emptyList()) : resultSerializer;
+		this.resultSerializer = resultSerializer == null ? DefaultResultSerializer.createDefault() : resultSerializer;
 	}
 
 	@Nonnull
 	@Override
 	public KafkaWriter2 create() {
-		return new KafkaWriter2(objectMapper, producerConfig, topic, resultSerializer);
+		return new KafkaWriter2(producerConfig, topic, resultSerializer);
 	}
 }

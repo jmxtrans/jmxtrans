@@ -79,7 +79,7 @@ public class DefaultResultSerializerTest {
 
 	@Test
 	public void initDefaults() {
-		DefaultResultSerializer resultSerializer = new DefaultResultSerializer(null, false, null, null, null);
+		DefaultResultSerializer resultSerializer = DefaultResultSerializer.createDefault();
 
 		assertThat(resultSerializer.getTypeNames()).isNotNull();
 		assertThat(resultSerializer.getTypeNames()).isEmpty();
@@ -89,8 +89,8 @@ public class DefaultResultSerializerTest {
 
 	@Test
 	public void equalsHashCodeWhenSame() {
-		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null, null);
-		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(null, false, null, null, null);
+		DefaultResultSerializer resultSerializer1 = DefaultResultSerializer.createDefault();
+		DefaultResultSerializer resultSerializer2 = DefaultResultSerializer.createDefault();
 
 		assertThat(resultSerializer1).isEqualTo(resultSerializer2);
 		assertThat(resultSerializer1.hashCode()).isEqualTo(resultSerializer2.hashCode());
@@ -98,7 +98,7 @@ public class DefaultResultSerializerTest {
 
 	@Test
 	public void equalsWhenDifferent() {
-		DefaultResultSerializer resultSerializer1 = new DefaultResultSerializer(null, false, null, null, null);
+		DefaultResultSerializer resultSerializer1 = DefaultResultSerializer.createDefault();
 		DefaultResultSerializer resultSerializer2 = new DefaultResultSerializer(asList("Type"), true, "root", null, null);
 
 		assertThat(resultSerializer1).isNotEqualTo(resultSerializer2);
