@@ -66,7 +66,7 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("logger") String logger,
-			@JsonProperty("resultSerialiazer") ResultSerializer resultSerializer,
+			@JsonProperty("resultSerializer") ResultSerializer resultSerializer,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		String loggerName = MoreObjects.firstNonNull(logger, "jmxtrans.output");
