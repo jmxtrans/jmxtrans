@@ -20,9 +20,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans;
+package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.test.JHadesBaseTest;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
-public class JHadesIT extends JHadesBaseTest {
+import java.io.IOException;
+
+import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+
+/**
+ * Converts query result into a string, in order to display it, to write it to disk or send it over the wire.
+ */
+@JsonSerialize(include = NON_NULL)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+public interface ResultSerializer {
+	/**
+	 * Converts query result into zero or one string
+	 */
+	String serialize(Server server, Query query, Result result) throws IOException;
 }

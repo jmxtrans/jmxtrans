@@ -29,18 +29,16 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
-import static java.util.Collections.singletonList;
 
 @EqualsAndHashCode(exclude = {"objectMapper"})
 public class DetailedResultSerializer implements ResultSerializer {
@@ -51,10 +49,9 @@ public class DetailedResultSerializer implements ResultSerializer {
 		this.objectMapper = new ObjectMapper();
 	}
 
-	@Nonnull
 	@Override
-	public Collection<String> serialize(final Server server, final Query query, final Result result) throws IOException {
-		return singletonList(objectMapper.writeValueAsString(new KResult(server, result)));
+	public String serialize(final Server server, final Query query, final Result result) throws IOException {
+		return objectMapper.writeValueAsString(new KResult(server, result));
 	}
 
 	/**

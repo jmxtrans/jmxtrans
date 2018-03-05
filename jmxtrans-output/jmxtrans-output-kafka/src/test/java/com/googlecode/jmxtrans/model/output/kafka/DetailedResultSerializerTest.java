@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -42,11 +43,8 @@ public class DetailedResultSerializerTest {
 
 		Result result = numericResult();
 		result = new Result(result.getEpoch(), result.getAttributeName(), result.getClassName(), result.getObjDomain(), result.getKeyAlias(), result.getTypeName(), ImmutableList.<String>of("used"), result.getValue());
-		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), result);
+		String message = resultSerializer.serialize(dummyServer(), dummyQuery(), result);
 
-		assertThat(messages).hasSize(1);
-
-		String message = messages.iterator().next();
 		// Check JSON Syntax and detailed content
 		JsonNode jsonNode = new ObjectMapper().readValue(message, JsonNode.class);
 		assertThat(jsonNode.get("host").asText()).isEqualTo("host.example.net");
@@ -68,10 +66,8 @@ public class DetailedResultSerializerTest {
 	public void serializeNumericResult() throws Exception {
 		ResultSerializer resultSerializer = new DetailedResultSerializer();
 
-		Collection<String> messages = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
+		String message = resultSerializer.serialize(dummyServer(), dummyQuery(), numericResult());
 
-		assertThat(messages).hasSize(1);
-		String message = messages.iterator().next();
 		assertThat(message)
 				.contains("\"host\":\"host.example.net\"")
 				.contains("\"attributeName\":\"ObjectPendingFinalizationCount\"")
@@ -82,7 +78,7 @@ public class DetailedResultSerializerTest {
 	}
 
 	@Test
-	public void equalsHashCodeWhenSame() throws Exception {
+	public void equalsHashCodeWhenSame() {
 		DetailedResultSerializer resultSerializer1 = new DetailedResultSerializer();
 		DetailedResultSerializer resultSerializer2 = new DetailedResultSerializer();
 

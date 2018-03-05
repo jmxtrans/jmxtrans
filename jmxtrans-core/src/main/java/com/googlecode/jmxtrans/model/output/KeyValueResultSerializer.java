@@ -20,26 +20,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.model.output.kafka;
+package com.googlecode.jmxtrans.model.output;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.Collection;
+import java.util.List;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
+/**
+ * Format results in the form <code><pre>
+ *     [MBean Id].[Type Name].[Attribute Name]=[Value]
+ * </pre></code>
+ */
+public class KeyValueResultSerializer implements ResultSerializer {
+	private static final String DEFAULT_FORMAT = "%s=%s";
+	private final String format;
+	private final List<String> typeNames;
 
-@JsonSerialize(include = NON_NULL)
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-public interface ResultSerializer {
-	/**
-	 * Converts query result into one or more strings
-	 */
-	@Nonnull
-	Collection<String> serialize(Server server, Query query, Result result) throws IOException;
+	public KeyValueResultSerializer(@JsonProperty("format") String format, @JsonProperty List<String> typeNames) {
+		this.format = MoreObjects.firstNonNull(format, DEFAULT_FORMAT);
+		this.typeNames = typeNames;
+	}
+
+	public static KeyValueResultSerializer createDefault(List<String> typeNames) {
+		return new KeyValueResultSerializer(DEFAULT_FORMAT, typeNames);
+	}
+
+	@Override
+	public String serialize(Server server, Query query, Result result) {
+		return String.format(format, KeyUtils.getKeyString(query, result, typeNames), result.getValue());
+	}
 }

@@ -23,8 +23,11 @@
 package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
@@ -52,7 +55,6 @@ public class KafkaWriterFactoryTest {
             assertThat(writerFactory.getTopic()).isEqualTo("jmxtrans");
             assertThat(writerFactory.getProducerConfig().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG)).isEqualTo("localhost:9092");
             assertThat(writerFactory.getResultSerializer()).isInstanceOf(DefaultResultSerializer.class);
-			assertThat(writerFactory.getObjectMapper()).isNotNull();
             try (KafkaWriter2 writer = writerFactory.create()) {
                 assertThat(writer.getTopic()).isEqualTo("jmxtrans");
                 assertThat(writer.getProducerConfig().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG)).isEqualTo("localhost:9092");
@@ -116,5 +118,13 @@ public class KafkaWriterFactoryTest {
 		assertThat(defaultResultSerializer.getRootPrefix()).isEmpty();
 		assertThat(defaultResultSerializer.getTypeNames()).isEmpty();
 		assertThat(defaultResultSerializer.isBooleanAsNumber()).isFalse();
+	}
+
+	@Test
+	public void testDefaultSerializers() {
+    	KafkaWriterFactory writerFactory = new KafkaWriterFactory(ImmutableMap.<String, Object>of(), "topic", null);
+		String defaultSerializer = StringSerializer.class.getName();
+		assertThat(writerFactory.getProducerConfig().get(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)).isEqualTo(defaultSerializer);
+		assertThat(writerFactory.getProducerConfig().get(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)).isEqualTo(defaultSerializer);
 	}
 }
