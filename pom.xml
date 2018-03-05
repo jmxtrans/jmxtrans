@@ -654,6 +654,8 @@
 							<exclude>**/pitest-history.xml</exclude>
 							<exclude>*.bak</exclude>
 							<exclude>.puml</exclude>
+							<exclude>mvnw.cmd</exclude>
+							<exclude>**/maven-wrapper.properties</exclude>
 						</excludes>
 					</configuration>
 					<executions>
