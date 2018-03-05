@@ -963,6 +963,25 @@
 					</configuration>
 				</plugin>
 				<plugin>
+					<groupId>org.basepom.maven</groupId>
+					<artifactId>duplicate-finder-maven-plugin</artifactId>
+					<version>1.3.0</version>
+					<configuration>
+						<failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+						<failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+						<failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
+					</configuration>
+					<executions>
+						<execution>
+							<id>duplicate-classes-check</id>
+							<goals>
+								<goal>check</goal>
+							</goals>
+							<phase>verify</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
 					<version>${animal-sniffer.version}</version>
@@ -1082,6 +1101,10 @@
 				<artifactId>sortpom-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>com.github.ekryd.sortpom</groupId>
+				<artifactId>sortpom-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
 			</plugin>
@@ -1116,6 +1139,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
