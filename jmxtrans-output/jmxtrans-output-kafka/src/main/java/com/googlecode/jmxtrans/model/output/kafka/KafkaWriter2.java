@@ -22,14 +22,12 @@
  */
 package com.googlecode.jmxtrans.model.output.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import lombok.AccessLevel;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -41,9 +39,6 @@ import java.util.Map;
 
 public class KafkaWriter2 extends OutputWriterAdapter {
 	@Nonnull
-	@Getter(AccessLevel.PROTECTED)
-	private final ObjectMapper objectMapper;
-	@Nonnull
 	@Getter
 	private final Map<String, Object> producerConfig;
 	@Nonnull
@@ -54,8 +49,7 @@ public class KafkaWriter2 extends OutputWriterAdapter {
 	@Getter
 	private final ResultSerializer resultSerializer;
 
-	public KafkaWriter2(@Nonnull ObjectMapper objectMapper, @Nonnull Map<String, Object> producerConfig, @Nonnull String topic, @Nonnull ResultSerializer resultSerializer) {
-		this.objectMapper = objectMapper;
+	public KafkaWriter2(@Nonnull Map<String, Object> producerConfig, @Nonnull String topic, @Nonnull ResultSerializer resultSerializer) {
 		this.producerConfig = producerConfig;
 		this.topic = topic;
 		this.resultSerializer = resultSerializer;
@@ -63,8 +57,7 @@ public class KafkaWriter2 extends OutputWriterAdapter {
 	}
 
 	@VisibleForTesting
-	KafkaWriter2(@Nonnull ObjectMapper objectMapper, Producer<String, String> producer, @Nonnull String topic, @Nonnull ResultSerializer resultSerializer) {
-		this.objectMapper = objectMapper;
+	KafkaWriter2(Producer<String, String> producer, @Nonnull String topic, @Nonnull ResultSerializer resultSerializer) {
 		this.producerConfig = Collections.emptyMap();
 		this.topic = topic;
 		this.resultSerializer = resultSerializer;
@@ -74,14 +67,15 @@ public class KafkaWriter2 extends OutputWriterAdapter {
 	@Override
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
 		for (Result result : results) {
-			for (String message : resultSerializer.serialize(server, query, result)) {
+			String message = resultSerializer.serialize(server, query, result);
+			if (message != null) {
 				producer.send(new ProducerRecord<String, String>(topic, message));
 			}
 		}
 	}
 
 	@Override
-	public void close() throws LifecycleException {
+	public void close() {
 		producer.close();
 	}
 }

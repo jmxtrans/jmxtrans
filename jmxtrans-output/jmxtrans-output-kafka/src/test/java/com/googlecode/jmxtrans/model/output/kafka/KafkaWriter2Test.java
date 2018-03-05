@@ -24,26 +24,29 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.googlecode.jmxtrans.model.ServerFixtures.DEFAULT_HOST;
+
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class KafkaWriter2Test {
 
-    public static final String TOPIC = "topic";
+    private static final String TOPIC = "topic";
     private final ObjectMapper objectMapper =  new ObjectMapper();
     @Mock
     public Producer<String, String> producerMock;
@@ -52,7 +55,6 @@ public class KafkaWriter2Test {
     public void testWrite() throws Exception {
         // Given
         KafkaWriter2 writer = new KafkaWriter2(
-                objectMapper,
                 producerMock,
                 TOPIC,
                 new DetailedResultSerializer());
@@ -77,7 +79,6 @@ public class KafkaWriter2Test {
 	public void producerClosed() throws Exception {
 		// Given
 		KafkaWriter2 writer = new KafkaWriter2(
-				objectMapper,
 				producerMock,
 				TOPIC,
 				new DetailedResultSerializer());
@@ -85,6 +86,19 @@ public class KafkaWriter2Test {
 		writer.close();
 
 		verify(producerMock).close();
+	}
+
+	@Test
+	public void testFilterResultSerializer() throws Exception {
+		// Given
+		KafkaWriter2 writer = new KafkaWriter2(
+				producerMock,
+				TOPIC,
+				mock(ResultSerializer.class));
+		// When
+		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
+		// Then
+		verifyNoMoreInteractions(producerMock);
 	}
 
 }

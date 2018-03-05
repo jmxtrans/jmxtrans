@@ -45,7 +45,7 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class KafkaWriterTests {
 
 	@Mock
@@ -82,7 +82,7 @@ public class KafkaWriterTests {
 	}
 
 	@Test
-	public void producerClosed() throws Exception {
+	public void producerClosed() {
 		KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings, producer);
 
 		writer.close();
@@ -91,10 +91,16 @@ public class KafkaWriterTests {
 	}
 
 	@Test
-	public void createKafkaProducer() throws Exception {
+	public void createKafkaProducer() {
 		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings)) {
 			assertThat(writer.getProducer()).isInstanceOf(KafkaProducer.class);
 		}
 	}
 
+	@Test
+	public void filteringResultSerializer() {
+		try(KafkaWriter writer = new KafkaWriter(ImmutableList.<String>of(), true, "rootPrefix", true, "myTopic", tags, settings)) {
+			assertThat(writer.getProducer()).isInstanceOf(KafkaProducer.class);
+		}
+	}
 }

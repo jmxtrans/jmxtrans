@@ -40,7 +40,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * This class produces the json that is in example.json.
- * 
+ *
  * @author jon
  */
 @SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
@@ -64,7 +64,7 @@ public class InterestingInfo {
 				.setPort(2003)
 				.build();
 
-		StdOutWriter sw = new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap());
+		StdOutWriter sw = new StdOutWriter(ImmutableList.<String>of(), false, false, null, Collections.<String, Object>emptyMap());
 
 		Query q = Query.builder()
 				.setObj("java.lang:type=Memory")

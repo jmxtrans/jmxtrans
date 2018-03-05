@@ -20,9 +20,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.util;
+package com.googlecode.jmxtrans.model.output;
 
-import com.googlecode.jmxtrans.test.JHadesBaseTest;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 
-public class JHadesIT extends JHadesBaseTest {
+/**
+ * Format result using {@link com.googlecode.jmxtrans.model.Result#toString}
+ */
+public class ToStringResultSerializer implements ResultSerializer {
+	/**
+	 * Flag to show Server and Query info as well
+	 */
+	private final boolean verbose;
+
+	public static final ToStringResultSerializer DEFAULT = new ToStringResultSerializer();
+
+	public ToStringResultSerializer() {
+		this(false);
+	}
+
+	public ToStringResultSerializer(@JsonProperty("verbose") boolean verbose) {
+		this.verbose = verbose;
+	}
+
+	@Override
+	public String serialize(Server server, Query query, Result result) {
+		if (verbose) {
+			return server.toString() + " " + query.toString() + " " + result.toString();
+		}
+		return result.toString();
+	}
+
 }
