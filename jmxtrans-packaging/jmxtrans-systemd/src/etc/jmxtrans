@@ -9,4 +9,4 @@ if [ -z "$JAVACMD" ] ; then
   fi
 fi
 
-${JAVACMD} -Dlogback.configurationFile=/etc/jmxtrans/logback.xml ${JAVA_OPTS} -jar /usr/share/java/jmxtrans-all.jar "$@"
+${JAVACMD} -Dlogback.configurationFile=file:///etc/jmxtrans/logback.xml ${JAVA_OPTS} -jar /usr/share/java/jmxtrans-all.jar "$@"

@@ -56,7 +56,7 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 	private static final ResultSerializer EMPTY_RESULT_SERIALIZER = new ResultSerializer() {
 		@Override
 		public String serialize(Server server, Query query, Result result) {
-			return "";
+			return isNumeric(result.getValue()) ? "" : null;
 		}
 	};
 
@@ -81,7 +81,7 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 				false,
 				new HashMap<String, Object>());
 		this.logger = logger;
-		this.resultSerializer = resultSerializer;
+		this.resultSerializer = MoreObjects.firstNonNull(resultSerializer, EMPTY_RESULT_SERIALIZER);
 	}
 
 	@Override
@@ -96,29 +96,27 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 	private void logValue(Server server, Query query, List<String> typeNames, Result result) throws IOException {
 		Object value = result.getValue();
 
-		if (isNumeric(value)) {
-			String resultAsString = resultSerializer.serialize(server, query, result);
-			if (resultAsString == null) {
-				return;
+		String resultAsString = resultSerializer.serialize(server, query, result);
+		if (resultAsString == null) {
+			return;
+		}
+		Closer closer = Closer.create();
+		try {
+			closer.register(MDC.putCloseable("server", computeAlias(server)));
+			closer.register(MDC.putCloseable("metric", KeyUtils.getKeyString(server, query, result, typeNames, null)));
+			closer.register(MDC.putCloseable("value", value.toString()));
+			if (result.getKeyAlias() != null) {
+				closer.register(MDC.putCloseable("resultAlias", result.getKeyAlias()));
 			}
-			Closer closer = Closer.create();
-			try {
-				closer.register(MDC.putCloseable("server", computeAlias(server)));
-				closer.register(MDC.putCloseable("metric", KeyUtils.getKeyString(server, query, result, typeNames, null)));
-				closer.register(MDC.putCloseable("value", value.toString()));
-				if (result.getKeyAlias() != null) {
-					closer.register(MDC.putCloseable("resultAlias", result.getKeyAlias()));
-				}
-				closer.register(MDC.putCloseable("attributeName", result.getAttributeName()));
-				closer.register(MDC.putCloseable("key", KeyUtils.getValueKey(result)));
-				closer.register(MDC.putCloseable("epoch", valueOf(result.getEpoch())));
+			closer.register(MDC.putCloseable("attributeName", result.getAttributeName()));
+			closer.register(MDC.putCloseable("key", KeyUtils.getValueKey(result)));
+			closer.register(MDC.putCloseable("epoch", valueOf(result.getEpoch())));
 
-				logger.info(resultAsString);
-			} catch (Throwable t) {
-				throw closer.rethrow(t);
-			} finally {
-				closer.close();
-			}
+			logger.info(resultAsString);
+		} catch (Throwable t) {
+			throw closer.rethrow(t);
+		} finally {
+			closer.close();
 		}
 	}
 
