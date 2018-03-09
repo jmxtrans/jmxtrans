@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans;
 
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import org.junit.Test;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class JmxTransformerTest {
 
 	@Test
 	public void startDateIsSpreadAccordingToRunPeriod() {
-		JmxTransformer jmxTransformer = new JmxTransformer(null, new JmxTransConfiguration(), null, null, null, null);
+		JmxTransformer jmxTransformer = new JmxTransformer(null, new JmxTransConfiguration(), null, null, mock(ExecutorRepository.class), mock(ExecutorRepository.class));
 
 		Date now = new Date();
 
@@ -51,7 +52,7 @@ public class JmxTransformerTest {
 	public void findProcessConfigFiles() throws URISyntaxException {
 		JmxTransConfiguration configuration = new JmxTransConfiguration();
 		configuration.setProcessConfigDir(new File(ConfigurationParserTest.class.getResource("/example.json").toURI()).getParentFile());
-		JmxTransformer jmxTransformer = new JmxTransformer(null, configuration, null, null, null, null);
+		JmxTransformer jmxTransformer = new JmxTransformer(null, configuration, null, null, mock(ExecutorRepository.class), mock(ExecutorRepository.class));
 
 		List<File> processConfigFiles = jmxTransformer.getProcessConfigFiles();
 

@@ -55,7 +55,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -105,8 +104,12 @@ public class Server implements JmxConnectionProvider {
 	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
+	private static final int DEFAULT_SOCKET_SO_TIMEOUT_MILLIS = 10000;
 
 	private static final Logger logger = LoggerFactory.getLogger(Server.class);
+
+	/** Returns id for internal logic */
+	@Getter private final String id;
 
 	/**
 	 * Some writers (GraphiteWriter) use the alias in generation of the unique
@@ -267,29 +270,32 @@ public class Server implements JmxConnectionProvider {
 		this.pool = checkNotNull(pool);
 		this.outputWriterFactories = ImmutableList.copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
 		this.outputWriters = ImmutableList.copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
+		this.id = String.format("%s_%s_%s", host, port, pid);
 	}
 
 	public Iterable<Result> execute(Query query) throws Exception {
-		JMXConnection jmxConnection = pool.borrowObject(this);
+		JMXConnection jmxConnection = null;
 		try {
+			jmxConnection = pool.borrowObject(this);
 			ImmutableList.Builder<Result> results = ImmutableList.builder();
 			MBeanServerConnection connection = jmxConnection.getMBeanServerConnection();
 
 			for (ObjectName queryName : query.queryNames(connection)) {
 				results.addAll(query.fetchResults(connection, queryName));
 			}
-			pool.returnObject(this, jmxConnection);
+
 			return results.build();
 		} catch (Exception e) {
-			// since we will invalidate the connection in the pool, prevent connection leaks
-			try {
-				jmxConnection.close();
-			} catch (IOException | RuntimeException re) {
-				// drop these, we don't really know what caused the original exception.
-				logger.warn("An error occurred trying to close a JMX Connection during error handling.", re);
+			if (jmxConnection != null) {
+				pool.invalidateObject(this, jmxConnection);
+				jmxConnection = null;
 			}
-			pool.invalidateObject(this, jmxConnection);
 			throw e;
+		}
+		finally {
+			if (jmxConnection != null) {
+				pool.returnObject(this, jmxConnection);
+			}
 		}
 	}
 
@@ -317,17 +323,16 @@ public class Server implements JmxConnectionProvider {
 			environment.put(JMXConnector.CREDENTIALS, credentials);
 		}
 
-		if (ssl) {
-			SslRMIClientSocketFactory rmiClientSocketFactory = new SslRMIClientSocketFactory();
-			// The following is required when JMX is secured with SSL
-			// with com.sun.management.jmxremote.ssl=true
-			// as shown in http://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdfvq
-			environment.put(RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rmiClientSocketFactory);
-			// The following is required when JNDI Registry is secured with SSL
-			// with com.sun.management.jmxremote.registry.ssl=true
-			// This property is defined in com.sun.jndi.rmi.registry.RegistryContext.SOCKET_FACTORY
-			environment.put("com.sun.jndi.rmi.factory.socket", rmiClientSocketFactory);
-		}
+		JmxTransRMIClientSocketFactory rmiClientSocketFactory = new JmxTransRMIClientSocketFactory(DEFAULT_SOCKET_SO_TIMEOUT_MILLIS, ssl);
+		// The following is required when JMX is secured with SSL
+		// with com.sun.management.jmxremote.ssl=true
+		// as shown in http://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdfvq
+		environment.put(RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rmiClientSocketFactory);
+		// The following is required when JNDI Registry is secured with SSL
+		// with com.sun.management.jmxremote.registry.ssl=true
+		// This property is defined in com.sun.jndi.rmi.registry.RegistryContext.SOCKET_FACTORY
+		environment.put("com.sun.jndi.rmi.factory.socket", rmiClientSocketFactory);
+
 		return environment.build();
 	}
 
@@ -338,7 +343,7 @@ public class Server implements JmxConnectionProvider {
 	@Override
 	@JsonIgnore
 	public JMXConnector getServerConnection() throws IOException {
-		JMXServiceURL url = new JMXServiceURL(getUrl());
+		JMXServiceURL url = getJmxServiceURL();
 		return JMXConnectorFactory.connect(url, this.getEnvironment());
 	}
 

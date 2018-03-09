@@ -42,19 +42,26 @@ import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.googlecode.jmxtrans.model.ServerFixtures.createPool;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class OpenTSDBMessageFormatterTest {
 	private Result mockResult;
 
 	@Before
 	public void setupTest() {
-		this.mockResult = Mockito.mock(Result.class);
+		this.mockResult = mock(Result.class);
 
 		// Setup common mock interactions.
-		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("x-att1-x", (Object) "120021"));
-		Mockito.when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
-		Mockito.when(this.mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
-		Mockito.when(this.mockResult.getTypeName()).
+		mockResult(this.mockResult);
+	}
+
+	private void mockResult(Result mockResult) {
+		when(mockResult.getValue()).thenReturn("120021");
+		when(mockResult.getValuePath()).thenReturn(ImmutableList.<String>of());
+		when(mockResult.getAttributeName()).thenReturn("X-ATT-X");
+		when(mockResult.getClassName()).thenReturn("X-DOMAIN.PKG.CLASS-X");
+		when(mockResult.getTypeName()).
 				thenReturn("Type=x-type-x,Group=x-group-x,Other=x-other-x,Name=x-name-x");
 	}
 
@@ -73,7 +80,7 @@ public class OpenTSDBMessageFormatterTest {
 		Assert.assertEquals(1, Iterables.size(strings));
 		String resultString = strings.iterator().next();
 		Assert.assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-		Assert.assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
+		//Assert.assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
 		Assert.assertTrue(resultString.matches(".*\\bTypeGroupNameMissing=x-type-x_x-group-x_x-name-x\\b.*"));
 	}
 
@@ -106,7 +113,7 @@ public class OpenTSDBMessageFormatterTest {
 		Assert.assertEquals(1, Iterables.size(strings));
 		String resultString = strings.iterator().next();
 		Assert.assertTrue(resultString.matches("^X-DOMAIN.PKG.CLASS-X\\.X-ATT-X 0 120021.*"));
-		Assert.assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
+		//Assert.assertTrue(resultString.matches(".*\\btype=x-att1-x\\b.*"));
 		Assert.assertTrue(resultString.matches(".*\\bType=x-type-x\\b.*"));
 		Assert.assertTrue(resultString.matches(".*\\bGroup=x-group-x\\b.*"));
 		Assert.assertTrue(resultString.matches(".*\\bName=x-name-x\\b.*"));
@@ -119,7 +126,7 @@ public class OpenTSDBMessageFormatterTest {
 		OpenTSDBMessageFormatter formatter =
 				new OpenTSDBMessageFormatter(ImmutableList.<String>of(), ImmutableMap.<String, String>of());
 
-		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
+		when(this.mockResult.getValue()).thenReturn("120021");
 
 		Iterable<String> strings = formatter.formatResults(
 				ImmutableList.of(this.mockResult),
@@ -190,27 +197,12 @@ public class OpenTSDBMessageFormatterTest {
 	}
 
 	@Test
-	public void testEmptyResultValues() throws Exception {
-
-		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
-
-		ImmutableMap<String, Object> values = ImmutableMap.of();
-		Mockito.when(this.mockResult.getValues()).thenReturn(values);
-
-		Iterable<String> strings = formatter.formatResults(
-				ImmutableList.of(this.mockResult),
-				ServerFixtures.dummyServer());
-
-		Assert.assertEquals(0, Iterables.size(strings));
-
-	}
-
-	@Test
 	public void testOneValueMatchingAttribute() throws Exception {
 
 		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
 
-		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021"));
+		when(this.mockResult.getValue()).thenReturn("120021");
+		when(this.mockResult.getAttributeName()).thenReturn("X-ATT-X");
 
 		Iterable<String> strings = formatter.formatResults(
 				ImmutableList.of(this.mockResult),
@@ -230,11 +222,17 @@ public class OpenTSDBMessageFormatterTest {
 
 		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
 
-		Mockito.when(this.mockResult.getValues()).
-				thenReturn(ImmutableMap.of("X-ATT-X", (Object) "120021", "XX-ATT-XX", (Object) "210012"));
+		when(this.mockResult.getValuePath()).
+				thenReturn(ImmutableList.of("X-ATT-X"));
+		Result mockResult2 = mock(Result.class);
+		mockResult(mockResult2);
+		when(mockResult2.getValue()).
+				thenReturn(210012);
+		when(mockResult2.getValuePath()).
+				thenReturn(ImmutableList.of("XX-ATT-XX"));
 
 		Iterable<String> strings = formatter.formatResults(
-				ImmutableList.of(this.mockResult),
+				ImmutableList.of(this.mockResult, mockResult2),
 				ServerFixtures.dummyServer());
 
 		Assert.assertEquals(2, Iterables.size(strings));
@@ -264,7 +262,8 @@ public class OpenTSDBMessageFormatterTest {
 	public void testNonNumericValue() throws Exception {
 
 		OpenTSDBMessageFormatter formatter = createDefaultFormatter();
-		Mockito.when(this.mockResult.getValues()).thenReturn(ImmutableMap.of("X-ATT-X", (Object) "THIS-IS-NOT-A-NUMBER"));
+		when(this.mockResult.getValue()).thenReturn("THIS-IS-NOT-A-NUMBER");
+		when(this.mockResult.getValuePath()).thenReturn(ImmutableList.of("X-ATT-X"));
 		Iterable<String> strings = formatter.formatResults(
 				ImmutableList.of(this.mockResult),
 				ServerFixtures.dummyServer());

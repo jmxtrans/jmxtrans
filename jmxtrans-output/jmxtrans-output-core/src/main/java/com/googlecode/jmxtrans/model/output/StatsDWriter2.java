@@ -36,7 +36,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
@@ -82,21 +81,17 @@ public class StatsDWriter2 implements WriterBasedOutputWriter {
 	@Override
 	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
 		for (Result result : results) {
-			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
-
-				if (isNotValidValue(values.getValue())) {
-					log.debug("Skipping message key[{}] with value: {}.", values.getKey(), values.getValue());
-					continue;
-				}
-
-				String line = KeyUtils.getKeyString(server, query, result, values, typeNames, rootPrefix);
-
-				// These characters can mess with formatting.
-				line = STATSD_INVALID.matcher(line).replaceAll(replacementForInvalidChar);
-				line += computeActualValue(values.getValue()) + "|" + bucketType + "\n";
-
-				writer.write(line);
+			String key = KeyUtils.getKeyString(server, query, result, typeNames, rootPrefix);
+			if (isNotValidValue(result.getValue())) {
+				log.debug("Skipping message key[{}] with value: {}.", key, result.getValue());
+				continue;
 			}
+
+			// These characters can mess with formatting.
+			String line = STATSD_INVALID.matcher(key).replaceAll(replacementForInvalidChar)
+				+ computeActualValue(result.getValue()) + "|" + bucketType + "\n";
+
+			writer.write(line);
 		}
 	}
 

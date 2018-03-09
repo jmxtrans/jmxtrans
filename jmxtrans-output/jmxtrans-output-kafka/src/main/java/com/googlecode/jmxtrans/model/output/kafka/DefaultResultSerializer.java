@@ -34,6 +34,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.ResultAttributes;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -42,8 +43,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -84,25 +83,23 @@ public class DefaultResultSerializer implements ResultSerializer {
 		this.resultAttributesToWriteAsTags = resultTags == null ? ImmutableSet.<ResultAttribute>of() : ResultAttributes.forNames(resultTags);
 	}
 
-	@Nonnull
-	@Override
-	public Collection<String> serialize(Server server, Query query, Result result) throws IOException {
-		log.debug("Query result: [{}]", result);
-		Map<String, Object> resultValues = result.getValues();
-		List<String> messages = new ArrayList<>();
-		for (Map.Entry<String, Object> values : resultValues.entrySet()) {
-			Object value = values.getValue();
-			if (isNumeric(value)) {
-				messages.add(createJsonMessage(server, query, result, values, value));
-			} else {
-				log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
-			}
-		}
-		return messages;
+	static DefaultResultSerializer createDefault() {
+		return new DefaultResultSerializer(null, false, "", null, null);
 	}
 
-	private String createJsonMessage(Server server, Query query, Result result, Map.Entry<String, Object> values, Object value) throws IOException {
-		String keyString = getKeyString(server, query, result, values, typeNames, this.rootPrefix);
+	@Override
+	public String serialize(Server server, Query query, Result result) throws IOException {
+		log.debug("Query result: [{}]", result);
+		Object value = result.getValue();
+		if (!isNumeric(value)) {
+			log.warn("Unable to submit non-numeric value to Kafka: [{}] from result [{}]", value, result);
+			return null;
+		}
+		return createJsonMessage(server, query, result, result.getValuePath(), value);
+	}
+
+	private String createJsonMessage(Server server, Query query, Result result, List<String> valuePath, Object value) throws IOException {
+		String keyString = getKeyString(server, query, result, typeNames, this.rootPrefix);
 		String cleanKeyString = keyString.replaceAll("[()]", "_");
 
 		try (

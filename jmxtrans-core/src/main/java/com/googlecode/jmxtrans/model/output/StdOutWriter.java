@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
@@ -38,7 +39,7 @@ import java.util.Map;
 /**
  * Basic filter good for testing that just outputs the Result objects using
  * System.out.
- * 
+ *
  * @author jon
  */
 @ToString
@@ -47,6 +48,7 @@ public class StdOutWriter implements OutputWriterFactory {
 	private final ImmutableList<String> typeNames;
 	private final  boolean booleanAsNumber;
 	private final  Boolean debugEnabled;
+	private final ResultSerializer resultSerializer;
 	private final  Map<String, Object> settings;
 
 	@JsonCreator
@@ -54,11 +56,14 @@ public class StdOutWriter implements OutputWriterFactory {
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("settings") Map<String, Object> settings) {
+			@JsonProperty("resultSerializer") ResultSerializer resultSerializer,
+			@JsonProperty("settings") Map<String, Object> settings
+			) {
 			this.typeNames = typeNames;
 			this.booleanAsNumber = booleanAsNumber;
 			this.debugEnabled = debugEnabled;
 			this.settings = settings;
+			this.resultSerializer = MoreObjects.firstNonNull(resultSerializer, ToStringResultSerializer.DEFAULT);
 	}
 
 	@Override
@@ -67,18 +72,22 @@ public class StdOutWriter implements OutputWriterFactory {
 				typeNames,
 				booleanAsNumber,
 				debugEnabled,
-				settings
+				settings,
+				resultSerializer
 		);
 	}
 
 
 	public static class W extends BaseOutputWriter {
+		private final ResultSerializer resultSerializer;
 		public W (
 				ImmutableList<String> typeNames,
 				boolean booleanAsNumber,
 				Boolean debugEnabled,
-				Map<String, Object> settings) {
+				Map<String, Object> settings,
+				ResultSerializer resultSerializer) {
 			super(typeNames, booleanAsNumber, debugEnabled, settings);
+			this.resultSerializer = resultSerializer;
 		}
 
 		@Override
@@ -90,7 +99,10 @@ public class StdOutWriter implements OutputWriterFactory {
 		@SuppressWarnings("squid:S106") // using StdOut is the goal of StdOutWriter
 		protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 			for (Result r : results) {
-				System.out.println(r);
+				String s = resultSerializer.serialize(server, query, r);
+				if (s != null) {
+					System.out.println(s);
+				}
 			}
 		}
 	}

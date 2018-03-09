@@ -36,7 +36,7 @@ import java.util.Collections;
 
 /**
  * This class produces the json that is in example.json.
- * 
+ *
  * @author jon
  */
 @SuppressWarnings({"squid:S106", "squid:S1118"}) // using StdOut if fine in an example
@@ -53,17 +53,17 @@ public class Tester {
 				.addQuery(Query.builder()
 						.setObj("java.lang:type=Memory")
 						.addAttr("HeapMemoryUsage", "NonHeapMemoryUsage")
-						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
+						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, null, Collections.<String, Object>emptyMap()))
 						.build())
 				.addQuery(Query.builder()
 						.setObj("java.lang:name=CMS Old Gen,type=MemoryPool")
 						.addAttr("Usage")
-						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
+						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, null, Collections.<String, Object>emptyMap()))
 						.build())
 				.addQuery(Query.builder()
 						.setObj("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector")
 						.addAttr("LastGcInfo")
-						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, Collections.<String, Object>emptyMap()))
+						.addOutputWriterFactory(new StdOutWriter(ImmutableList.<String>of(), false, false, null, Collections.<String, Object>emptyMap()))
 						.build())
 				.build();
 

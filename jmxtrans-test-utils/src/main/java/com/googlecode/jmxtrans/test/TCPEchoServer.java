@@ -37,6 +37,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
@@ -50,6 +51,7 @@ public class TCPEchoServer extends ExternalResource {
 
 	private final Object startSynchro = new Object();
 	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<>();
+	private final AtomicInteger connectionsAccepted = new AtomicInteger();
 
 	@Override
 	public void before() {
@@ -99,6 +101,7 @@ public class TCPEchoServer extends ExternalResource {
 
 	private void processRequests(ServerSocket server) throws IOException {
 		Socket socket = server.accept();
+		connectionsAccepted.incrementAndGet();
 		try (
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8));
 				PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8))
@@ -126,5 +129,9 @@ public class TCPEchoServer extends ExternalResource {
 	public InetSocketAddress getLocalSocketAddress()  {
 		checkState(server != null, "Server not started");
 		return new InetSocketAddress("localhost", server.getLocalPort());
+	}
+
+	public int getConnectionsAccepted() {
+		return connectionsAccepted.get();
 	}
 }

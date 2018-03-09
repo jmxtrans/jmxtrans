@@ -31,7 +31,6 @@ import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -53,6 +52,13 @@ import static java.lang.String.valueOf;
 public class Slf4JOutputWriter extends BaseOutputWriter {
 
 	private final Logger logger;
+	private final ResultSerializer resultSerializer;
+	private static final ResultSerializer EMPTY_RESULT_SERIALIZER = new ResultSerializer() {
+		@Override
+		public String serialize(Server server, Query query, Result result) {
+			return "";
+		}
+	};
 
 	@JsonCreator
 	public Slf4JOutputWriter(
@@ -60,19 +66,22 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("logger") String logger,
+			@JsonProperty("resultSerializer") ResultSerializer resultSerializer,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		String loggerName = MoreObjects.firstNonNull(logger, "jmxtrans.output");
 		this.logger = LoggerFactory.getLogger(loggerName);
+		this.resultSerializer = MoreObjects.firstNonNull(resultSerializer, EMPTY_RESULT_SERIALIZER);
 	}
 
 	@VisibleForTesting
-	Slf4JOutputWriter(Logger logger) {
+	Slf4JOutputWriter(Logger logger, ResultSerializer resultSerializer) {
 		super(ImmutableList.<String>of(),
 				true,
 				false,
 				new HashMap<String, Object>());
 		this.logger = logger;
+		this.resultSerializer = resultSerializer;
 	}
 
 	@Override
@@ -80,29 +89,31 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 		final List<String> typeNames = getTypeNames();
 
 		for (final Result result : results) {
-			for (final Map.Entry<String, Object> values : result.getValues().entrySet()) {
-				logValue(server, query, typeNames, result, values);
-			}
+			logValue(server, query, typeNames, result);
 		}
 	}
 
-	private void logValue(Server server, Query query, List<String> typeNames, Result result, Map.Entry<String, Object> values) throws IOException {
-		Object value = values.getValue();
+	private void logValue(Server server, Query query, List<String> typeNames, Result result) throws IOException {
+		Object value = result.getValue();
 
-		if (value != null && isNumeric(value)) {
+		if (isNumeric(value)) {
+			String resultAsString = resultSerializer.serialize(server, query, result);
+			if (resultAsString == null) {
+				return;
+			}
 			Closer closer = Closer.create();
 			try {
 				closer.register(MDC.putCloseable("server", computeAlias(server)));
-				closer.register(MDC.putCloseable("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null)));
+				closer.register(MDC.putCloseable("metric", KeyUtils.getKeyString(server, query, result, typeNames, null)));
 				closer.register(MDC.putCloseable("value", value.toString()));
 				if (result.getKeyAlias() != null) {
 					closer.register(MDC.putCloseable("resultAlias", result.getKeyAlias()));
 				}
 				closer.register(MDC.putCloseable("attributeName", result.getAttributeName()));
-				closer.register(MDC.putCloseable("key", values.getKey()));
+				closer.register(MDC.putCloseable("key", KeyUtils.getValueKey(result)));
 				closer.register(MDC.putCloseable("epoch", valueOf(result.getEpoch())));
 
-				logger.info("");
+				logger.info(resultAsString);
 			} catch (Throwable t) {
 				throw closer.rethrow(t);
 			} finally {
@@ -117,6 +128,6 @@ public class Slf4JOutputWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {}
+	public void validateSetup(Server server, Query query) {}
 
 }

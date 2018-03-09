@@ -30,6 +30,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.output.support.WriterBasedOutputWriter;
 import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
@@ -79,40 +80,34 @@ public class StatsDTelegrafWriter implements WriterBasedOutputWriter {
 			//tagList.add("objectName=" + query.getObjectName());
 			resultTagList.add("attribute=" + attributeName);
 
-			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
+			if (isNotValidValue(result.getValue())) {
+				log.debug("Skipping message key[{}] with value: {}.", result.getAttributeName(), result.getValue());
+				continue;
+			}
+			List<String> tagList = new ArrayList(resultTagList);
 
-				String field = values.getKey();
-				Object value = values.getValue();
-				if (isNotValidValue(value)) {
-					log.debug("Skipping message key[{}] with value: {}.", field, value);
-					continue;
-				}
-				List<String> tagList = new ArrayList(resultTagList);
+			if( !result.getValuePath().isEmpty() ){
+				tagList.add("resultKey="+ KeyUtils.getValuePathString(result));
+			}
 
-				boolean isSingleValueAttribute = StringUtils.equals(attributeName, field);
-				if( !isSingleValueAttribute ){
-					tagList.add("resultKey="+values.getKey());
-				}
+			for (Map.Entry e : tags.entrySet()) {
+				tagList.add(e.getKey() + "=" + e.getValue());
+			}
 
-				for (Map.Entry e : tags.entrySet()) {
-					tagList.add(e.getKey() + "=" + e.getValue());
-				}
+			Number actualValue = computeActualValue(result.getValue());
+			StringBuilder sb = new StringBuilder(result.getKeyAlias())
+				.append(StringUtils.join(tagList, ","))
+				.append(":").append(actualValue)
+				.append("|").append(bucketType).append("\n");
 
-				Number actualValue = computeActualValue(value);
-				StringBuilder sb = new StringBuilder(result.getKeyAlias())
-					.append(StringUtils.join(tagList, ","))
-					.append(":").append(actualValue)
-					.append("|").append(bucketType).append("\n");
-
-				String output = sb.toString();
-				if( actualValue.floatValue() < 0 && !StatsDMetricType.GAUGE.getKey().equals(bucketType) )
-				{
-					log.debug("Negative values are only supported for gauges, not sending: {}.", output);
-				}
-				else{
-					log.debug(output);
-					writer.write(output);
-				}
+			String output = sb.toString();
+			if( actualValue.floatValue() < 0 && !StatsDMetricType.GAUGE.getKey().equals(bucketType) )
+			{
+				log.debug("Negative values are only supported for gauges, not sending: {}.", output);
+			}
+			else{
+				log.debug(output);
+				writer.write(output);
 			}
 		}
 	}

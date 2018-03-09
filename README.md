@@ -1,12 +1,13 @@
 ![jmxtranslogo](http://www.jmxtrans.org/assets/img/jmxtrans-logo.gif)
 
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjmxtrans%2Fjmxtrans.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjmxtrans%2Fjmxtrans?ref=badge_shield)
 [![Build Status](https://secure.travis-ci.org/jmxtrans/jmxtrans.png?branch=master)](http://travis-ci.org/jmxtrans/jmxtrans)
 [![Build status](https://ci.appveyor.com/api/projects/status/7g88sgeglsm7st17?svg=true)](https://ci.appveyor.com/project/gquintana/jmxtrans)
 [![Dependency Status](https://www.versioneye.com/user/projects/5421de9e3a8c2f2b8b000056/badge.svg?style=flat)](https://www.versioneye.com/user/projects/5421de9e3a8c2f2b8b000056)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jmxtrans/jmxtrans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Maven site](https://img.shields.io/badge/Maven-site-blue.svg)](http://www.jmxtrans.org/jmxtrans/)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jmxtrans/jmxtrans/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jmxtrans/jmxtrans)
-[![Nemo - SonarQube](https://img.shields.io/badge/SonarQube-Nemo-lightgrey.svg)](https://sonarqube.com/overview?id=org.jmxtrans%3Ajmxtrans-parent)
+[![sonarcloud.io](https://img.shields.io/badge/sonarcloud-quality-lightgrey.svg)](https://sonarcloud.io/dashboard?id=org.jmxtrans%3Ajmxtrans-parent)
 
 This is the source code repository for the jmxtrans project.
 
@@ -31,3 +32,7 @@ Coda Hale did [an excellent talk](http://pivotallabs.com/talks/139-metrics-metri
 
 * [JetBrains](https://www.jetbrains.com/buy/opensource/) for providing us with IntelliJ licenses,
 * [EJ Technologies](https://www.ej-technologies.com/) for providing us with licenses of their [Java profiler](https://www.ej-technologies.com/products/jprofiler/overview.html).
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjmxtrans%2Fjmxtrans.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjmxtrans%2Fjmxtrans?ref=badge_large)

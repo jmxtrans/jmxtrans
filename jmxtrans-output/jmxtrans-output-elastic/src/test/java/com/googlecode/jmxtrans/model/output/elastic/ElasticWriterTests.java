@@ -33,6 +33,7 @@ import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.core.DocumentResult;
 import io.searchbox.core.Index;
+import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.IndicesExists;
 import io.searchbox.indices.mapping.PutMapping;
 import org.junit.Before;
@@ -83,7 +84,7 @@ public class ElasticWriterTests {
 	public void initializeMocks() throws IOException {
 		when(jestResultFalse.isSucceeded()).thenReturn(Boolean.FALSE);
 		when(jestResultTrue.isSucceeded()).thenReturn(Boolean.TRUE);
-		result = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)1));
+		result = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableList.of("key"), 1);
 	}
 
 	@Test
@@ -93,6 +94,9 @@ public class ElasticWriterTests {
 		when(mockClient.execute(isA(IndicesExists.class))).thenReturn(jestResultFalse);
 
 		// return for call, is index created
+		when(mockClient.execute(isA(CreateIndex.class))).thenReturn(jestResultTrue);
+
+		// return for call, is mapping created
 		when(mockClient.execute(isA(PutMapping.class))).thenReturn(jestResultTrue);
 
 		// return for call, add index entry
@@ -111,7 +115,7 @@ public class ElasticWriterTests {
 
 	@Test
 	public void sendNonNumericMessageToElastic() throws Exception {
-		Result resultWithNonNumericValue = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableMap.of("key", (Object)"abc"));
+		Result resultWithNonNumericValue = new Result(1, "attributeName", "className", "objDomain", "classNameAlias", "typeName", ImmutableList.of("key"), "abc");
 
 		writer.doWrite(dummyServer(), dummyQuery(), ImmutableList.of(resultWithNonNumericValue));
 
@@ -158,7 +162,7 @@ public class ElasticWriterTests {
         String key = "myKey";
         int value = 1122;
 
-        Result resultWithKnownValues = new Result(epoch, attributeName, className, objDomain, classNameAlias, typeName, ImmutableMap.of(key, (Object) value));
+        Result resultWithKnownValues = new Result(epoch, attributeName, className, objDomain, classNameAlias, typeName, ImmutableList.of(key), value);
 
         ArgumentCaptor<Index> argument = ArgumentCaptor.forClass(Index.class);
 
@@ -193,10 +197,30 @@ public class ElasticWriterTests {
 		when(mockClient.execute(isA(IndicesExists.class))).thenReturn(jestResultFalse);
 
         // return for call, is index created; return false
-        when(mockClient.execute(isA(PutMapping.class))).thenReturn(jestResultFalse);
+        when(mockClient.execute(isA(CreateIndex.class))).thenReturn(jestResultFalse);
 
         // return error message
 		when(jestResultFalse.getErrorMessage()).thenReturn("Unknown error creating index in elastic");
+
+		// expected to throw an exception
+		writer.start();
+
+	}
+
+	@Test(expected = LifecycleException.class)
+	public void mappingCreateFailure() throws Exception {
+
+		// return for call, does index exist
+		when(mockClient.execute(isA(IndicesExists.class))).thenReturn(jestResultFalse);
+
+		// return for call, is index created; return false
+		when(mockClient.execute(isA(CreateIndex.class))).thenReturn(jestResultTrue);
+
+		// return for call, is mapping created; return false
+		when(mockClient.execute(isA(PutMapping.class))).thenReturn(jestResultFalse);
+
+		// return error message
+		when(jestResultFalse.getErrorMessage()).thenReturn("Unknown error creating mapping in elastic");
 
 		// expected to throw an exception
 		writer.start();
@@ -212,7 +236,7 @@ public class ElasticWriterTests {
 		ElasticWriter writer;
 
 		try {
-			writer = new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, settings);
+			writer = new ElasticWriter(typenames, true, PREFIX, true, connectionUrl, null, null, settings);
 		} catch (IOException e) {
 			throw new RuntimeException("Unexpected failure to creare elastic writer for test", e);
 		}

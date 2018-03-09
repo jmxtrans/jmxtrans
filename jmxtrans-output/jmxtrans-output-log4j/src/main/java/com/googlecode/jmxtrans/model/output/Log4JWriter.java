@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -36,7 +37,6 @@ import org.apache.log4j.MDC;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
@@ -77,28 +77,25 @@ public class Log4JWriter extends BaseOutputWriter {
 		final List<String> typeNames = getTypeNames();
 
 		for (final Result result : results) {
-			final Map<String, Object> resultValues = result.getValues();
-			for (final Entry<String, Object> values : resultValues.entrySet()) {
-				if (isNumeric(values.getValue())) {
-					String alias;
-					if (server.getAlias() != null) {
-						alias = server.getAlias();
-					} else {
-						alias = server.getHost() + "_" + server.getPort();
-						alias = StringUtils.cleanupStr(alias);
-					}
-
-					MDC.put("server", alias);
-					MDC.put("metric", KeyUtils.getKeyString(server, query, result, values, typeNames, null));
-					MDC.put("value", values.getValue());
-					if (result.getKeyAlias() != null) {
-						MDC.put("resultAlias", result.getKeyAlias());
-					}
-					MDC.put("attributeName", result.getAttributeName());
-					MDC.put("key", values.getKey());
-					MDC.put("Epoch", String.valueOf(result.getEpoch()));
-					log.info("");
+			if (isNumeric(result.getValue())) {
+				String alias;
+				if (server.getAlias() != null) {
+					alias = server.getAlias();
+				} else {
+					alias = server.getHost() + "_" + server.getPort();
+					alias = StringUtils.cleanupStr(alias);
 				}
+
+				MDC.put("server", alias);
+				MDC.put("metric", KeyUtils.getKeyString(server, query, result, typeNames, null));
+				MDC.put("value", result.getValue());
+				if (result.getKeyAlias() != null) {
+					MDC.put("resultAlias", result.getKeyAlias());
+				}
+				MDC.put("attributeName", result.getAttributeName());
+				MDC.put("valuePath", Joiner.on('.').join(result.getValuePath()));
+				MDC.put("Epoch", String.valueOf(result.getEpoch()));
+				log.info("");
 			}
 		}
 	}

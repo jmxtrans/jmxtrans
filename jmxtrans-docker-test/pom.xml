@@ -59,7 +59,7 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<configuration>
 					<showLogs>true</showLogs>
-					<images />
+					<images></images>
 				</configuration>
 				<executions>
 					<execution>

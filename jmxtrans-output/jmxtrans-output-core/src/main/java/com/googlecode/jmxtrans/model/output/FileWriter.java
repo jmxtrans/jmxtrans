@@ -27,8 +27,6 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,28 +43,35 @@ import java.util.Map;
 public class FileWriter extends BaseOutputWriter {
 	private static final String PROPERTY_BASEPATH = "filepath";
 	private static final String PROPERTY_LINE_FORMAT = "lineFormat";
-	private static final String DEFAULT_LINE_FORMAT = "%s=%s";
 	private static final Logger log = LoggerFactory.getLogger(FileWriter.class);
 
 	private File outputFile;
 	private File outputTempFile;
-	private String lineFormat;
+	private ResultSerializer resultSerializer;
 
 	public FileWriter(@JsonProperty("typeNames") ImmutableList<String> typeNames,
 					@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 					@JsonProperty("debug") Boolean debugEnabled,
 					@JsonProperty(PROPERTY_BASEPATH) String filepath,
 					@JsonProperty(PROPERTY_LINE_FORMAT) String lineFormat,
+					@JsonProperty("resultSerializer") ResultSerializer resultSerializer,
 					@JsonProperty("settings") Map<String, Object> settings) throws IOException {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 
 		this.outputFile = new File(filepath);
 		Path outputFilePath = outputFile.toPath();
 		this.outputTempFile = new File(outputFilePath.getParent() + File.separator + "." + outputFilePath.getFileName());
-		if (lineFormat == null) {
-			this.lineFormat = DEFAULT_LINE_FORMAT;
+		if (resultSerializer == null) {
+			if (lineFormat == null) {
+				this.resultSerializer= KeyValueResultSerializer.createDefault(typeNames);
+			} else {
+				this.resultSerializer= new KeyValueResultSerializer(lineFormat, typeNames);
+			}
 		} else {
-			this.lineFormat = lineFormat;
+			if (lineFormat != null) {
+				log.warn("Both lineFormat and resultSerializer are defined, lineFormat will be ignored");
+			}
+			this.resultSerializer= resultSerializer;
 		}
 
 		// make sure the permissions allow to manage these files:
@@ -81,7 +86,7 @@ public class FileWriter extends BaseOutputWriter {
 	}
 
 	@Override
-	public void validateSetup(Server server, Query query) throws ValidationException {}
+	public void validateSetup(Server server, Query query) {}
 
 	@Override
 	protected void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
@@ -90,10 +95,9 @@ public class FileWriter extends BaseOutputWriter {
 
 			for (Result result : results) {
 				log.debug(result.toString());
-
-				for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
-					outputTempPrintWriter.printf(lineFormat + System.lineSeparator(),
-							KeyUtils.getKeyString(query, result, values, typeNames), values.getValue());
+				String s = resultSerializer.serialize(server, query, result);
+				if (s != null) {
+					outputTempPrintWriter.println(s);
 				}
 			}
 		}

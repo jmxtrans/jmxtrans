@@ -192,16 +192,14 @@ public class GangliaWriter extends BaseOutputWriter {
 	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		for (final Result result : results) {
-			for (final Map.Entry<String, Object> resultValue : result.getValues().entrySet()) {
-				final String name = KeyUtils.getKeyString(query, result, resultValue, getTypeNames());
+			final String name = KeyUtils.getKeyString(query, result, getTypeNames());
 
-				Object transformedValue = valueTransformer.apply(resultValue.getValue());
+			Object transformedValue = valueTransformer.apply(result.getValue());
 
-				GMetricType dataType = getType(resultValue.getValue());
-				log.debug("Sending Ganglia metric {}={} [type={}]", name, transformedValue, dataType);
-				try (GMetric metric = new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName)) {
-					metric.announce(name, transformedValue.toString(), dataType, units, slope, tmax, dmax, groupName);
-				}
+			GMetricType dataType = getType(result.getValue());
+			log.debug("Sending Ganglia metric {}={} [type={}]", name, transformedValue, dataType);
+			try (GMetric metric = new GMetric(host, port, addressingMode, ttl, v31, null, spoofedHostName)) {
+				metric.announce(name, transformedValue.toString(), dataType, units, slope, tmax, dmax, groupName);
 			}
 		}
 	}

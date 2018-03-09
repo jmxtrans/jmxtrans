@@ -23,9 +23,7 @@
 package com.googlecode.jmxtrans.model.results;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.results.ValueTransformer;
 
 import javax.annotation.Nullable;
 
@@ -50,7 +48,8 @@ public class ResultValuesTransformer implements Function<Result, Result> {
 				input.getObjDomain(),
 				input.getKeyAlias(),
 				input.getTypeName(),
-				Maps.transformValues(input.getValues(), valueTransformer)
+				input.getValuePath(),
+				valueTransformer.apply(input.getValue())
 		);
 	}
 

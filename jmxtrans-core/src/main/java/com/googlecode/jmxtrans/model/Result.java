@@ -23,7 +23,7 @@
 package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -35,7 +35,6 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
-import static com.google.common.collect.ImmutableMap.copyOf;
 
 /**
  * Represents the result of a query.
@@ -52,18 +51,20 @@ public class Result {
 	@Getter private final String className;
 	@Getter private final String objDomain;
 	@Getter private final String typeName;
-	@Nonnull @Getter private final ImmutableMap<String, Object> values;
+	@Getter private final ImmutableList<String> valuePath;
+	@Nonnull @Getter private final Object value;
 	@Getter private final long epoch;
 	/** Specified as part of the query. */
 	@Getter private final String keyAlias;
 
 	public Result(
 			long epoch, String attributeName, String className, String objDomain, String keyAlias, String typeName,
-			@Nonnull Map<String, Object> values) {
+			@Nonnull ImmutableList<String> valuePath, Object value) {
 		this.className = className;
 		this.objDomain = objDomain;
 		this.typeName = typeName;
-		this.values = copyOf(values);
+		this.valuePath = valuePath;
+		this.value = value;
 		this.epoch = epoch;
 		this.attributeName = attributeName;
 		this.keyAlias = keyAlias;

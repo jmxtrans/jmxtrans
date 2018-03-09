@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.jmx;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -41,17 +42,21 @@ public class ResultProcessor {
 
 	private final Logger logger = LoggerFactory.getLogger(ResultProcessor.class);
 
-	@Nonnull private final ThreadPoolExecutor executorService;
+	@Nonnull private final ExecutorRepository resultExecutorRepository;
 
 	@Inject
-	public ResultProcessor(@Named("resultProcessorExecutor") @Nonnull ThreadPoolExecutor executorService) {
-		this.executorService = executorService;
+	public ResultProcessor(
+			@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository
+	) {
+		this.resultExecutorRepository = resultExecutorRepository;
 	}
 
 	public void submit(@Nonnull final Server server, @Nonnull final Query query, @Nonnull final Iterable<Result> results) {
+		final ThreadPoolExecutor executor = resultExecutorRepository.getExecutor(server);
+
 		for (final OutputWriter writer : concat(query.getOutputWriterInstances(), server.getOutputWriters())) {
 			try {
-				executorService.submit(new Runnable() {
+				executor.submit(new Runnable() {
 					@Override
 					public void run() {
 						try {

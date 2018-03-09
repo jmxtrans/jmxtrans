@@ -33,6 +33,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -53,7 +54,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -71,15 +71,15 @@ import static org.apache.commons.lang.StringUtils.isAlphanumeric;
  * <ul>
  * <li>"{@code url}": Stackdriver server URL. Optional, default value: {@value #DEFAULT_STACKDRIVER_API_URL}.</li>
  * <li>"{@code token}": Stackdriver API token. Mandatory</li>
- * <li>"{@code prefix}": Prefix for the metric names.  If present will be prepended to the metric name.  Should be alphanumeric.  
+ * <li>"{@code prefix}": Prefix for the metric names.  If present will be prepended to the metric name.  Should be alphanumeric.
  * Optional, shouldn't be used at the same time as source or detectInstance.  Different way of namespacing.</li>
  * <li>"{@code source}": Instance of the machine ID that the JMX data is being collected from. Optional.
- * <li>"{@code detectInstance}": Set to "AWS" if you want to detect the local AWS instance ID on startup.  Optional. 
+ * <li>"{@code detectInstance}": Set to "AWS" if you want to detect the local AWS instance ID on startup.  Optional.
  * <li>"{@code timeoutInMillis}": read timeout of the calls to Stackdriver HTTP API. Optional, default
  * value: {@value #DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS}.</li>
  * <li>"{@code enabled}": flag to enable/disable the writer. Optional, default value: <code>true</code>.</li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:eric@stackdriver.com">Eric Kilby</a>
  */
 @EqualsAndHashCode(exclude = "jsonFactory")
@@ -87,14 +87,14 @@ import static org.apache.commons.lang.StringUtils.isAlphanumeric;
 public class StackdriverWriter extends BaseOutputWriter {
 
 	private static final Logger logger = LoggerFactory.getLogger(StackdriverWriter.class);
-	
+
 	// constant protocol version, this can be updated in future versions for protocol changes
 	public static final int STACKDRIVER_PROTOCOL_VERSION = 1;
-	
+
 	// defaults for values that can be overridden in settings
 	public static final int DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS = 1000;
 	public static final String DEFAULT_STACKDRIVER_API_URL = "https://custom-gateway.stackdriver.com/v1/custom";
-	
+
 	// names of settings
 	public static final String SETTING_STACKDRIVER_API_URL = "url";
 	public static final String SETTING_PROXY_PORT = "proxyPort";
@@ -104,7 +104,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	public static final String SETTING_DETECT_INSTANCE = "detectInstance";
 	public static final String SETTING_STACKDRIVER_API_TIMEOUT_IN_MILLIS = "stackdriverApiTimeoutInMillis";
 	public static final String SETTING_PREFIX = "prefix";
-	
+
 	/**
 	 * The instance ID that metrics from this writer should be associated with in Stackdriver, an example of this
 	 * would be an EC2 instance ID in the form i-00000000 that is present in your environment.
@@ -112,35 +112,35 @@ public class StackdriverWriter extends BaseOutputWriter {
 	private final String instanceId;
 	private final String source;
 	private final String detectInstance;
-	
+
 	/**
-	 *  Prefix sent in the settings of this one writer.  Will be prepended before the metric names that are sent 
+	 *  Prefix sent in the settings of this one writer.  Will be prepended before the metric names that are sent
 	 *  to Stackdriver with a period in between.  Should be alphanumeric [A-Za-z0-9] with no punctuation or spaces.
 	 */
 	private final String prefix;
-	
+
 	/**
 	 * The gateway URL to post metrics to, this can be overridden for testing locally but should generally be
 	 * left at the default.
-	 * 
+	 *
 	 * @see #DEFAULT_STACKDRIVER_API_URL
 	 */
 	private final URL gatewayUrl;
 
 	/**
-	 * A Proxy object that can be set using the proxyHost and proxyPort settings if the server can't post directly 
+	 * A Proxy object that can be set using the proxyHost and proxyPort settings if the server can't post directly
 	 * to the gateway
 	 */
 	private final Proxy proxy;
 	private final String proxyHost;
 	private final Integer proxyPort;
-	
+
 	/**
 	 * Stackdriver API key generated in the account settings section on Stackdriver.  Mandatory for data to be
 	 * recognized in the Stackdriver gateway.
 	 */
 	private final String apiKey;
-	
+
 	private int timeoutInMillis = DEFAULT_STACKDRIVER_API_TIMEOUT_IN_MILLIS;
 
 	private JsonFactory jsonFactory = new JsonFactory();
@@ -260,7 +260,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
 		String gatewayMessage = getGatewayMessage(results);
-		
+
 		// message won't be returned if there are no numeric values in the query results
 		if (gatewayMessage != null) {
 			logger.info(gatewayMessage);
@@ -270,10 +270,10 @@ public class StackdriverWriter extends BaseOutputWriter {
 
 	/**
 	 * Take query results, make a JSON String
-	 * 
+	 *
 	 * @param results List of Result objects
 	 * @return a String containing a JSON message, or null if there are no values to report
-	 * 
+	 *
 	 * @throws IOException if there is some problem generating the JSON, should be uncommon
 	 */
 	private String getGatewayMessage(final List<Result> results) throws IOException {
@@ -286,82 +286,71 @@ public class StackdriverWriter extends BaseOutputWriter {
 		g.writeArrayFieldStart("data");
 
 		List<String> typeNames = this.getTypeNames();
-		
+
 		for (Result metric : results) {
-			Map<String, Object> values = metric.getValues();
-			if (values != null) {
-				for (Entry<String, Object> entry : values.entrySet()) {
-					if (isNumeric(entry.getValue())) {
-						// we have a numeric value, write a value into the message
-						
-						StringBuilder nameBuilder = new StringBuilder();
-						
-						// put the prefix if set
-						if (this.prefix != null) {
-							nameBuilder.append(prefix);
-							nameBuilder.append(".");
-						}
-						
-						// put the class name or its alias if available
-						if (!metric.getKeyAlias().isEmpty()) {
-							nameBuilder.append(metric.getKeyAlias());
-							
-						} else {
-							nameBuilder.append(metric.getClassName());	
-						}
-						
-						// Wildcard "typeNames" substitution
-						String typeName = com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr(
-								TypeNameValuesStringBuilder.getDefaultBuilder().build(typeNames, metric.getTypeName()));
-						if (typeName != null && typeName.length() > 0) {
-							nameBuilder.append(".");
-							nameBuilder.append(typeName);
-						}
-						
-						// add the attribute name
-						nameBuilder.append(".");
-						nameBuilder.append(metric.getAttributeName());
-						
-						// put the value name if it differs from the attribute name
-						if (!entry.getKey().equals(metric.getAttributeName())) {
-							nameBuilder.append(".");
-							nameBuilder.append(entry.getKey());
-						}
-						
-						// check for Float/Double NaN since these will cause the message validation to fail 
-						if (entry.getValue() instanceof Float && ((Float) entry.getValue()).isNaN()) {
-							logger.info("Metric value for " + nameBuilder.toString() + " is NaN, skipping");
-							continue;
-						}
-						
-						if (entry.getValue() instanceof Double && ((Double) entry.getValue()).isNaN()) {
-							logger.info("Metric value for " + nameBuilder.toString() + " is NaN, skipping");
-							continue;
-						}
-						
-						valueCount++;
-						g.writeStartObject();
-						
-						g.writeStringField("name", nameBuilder.toString());
-						
-						g.writeNumberField("value", Double.valueOf(entry.getValue().toString()));
-						
-						// if the metric is attached to an instance, include that in the message
-						if (instanceId != null && !instanceId.isEmpty()) {
-							g.writeStringField("instance", instanceId);
-						}
-						g.writeNumberField("collected_at", metric.getEpoch() / 1000);
-						g.writeEndObject();
-					}
+			if (isNumeric(metric.getValue())) {
+				// we have a numeric value, write a value into the message
+
+				StringBuilder nameBuilder = new StringBuilder();
+
+				// put the prefix if set
+				if (this.prefix != null) {
+					nameBuilder.append(prefix);
+					nameBuilder.append(".");
 				}
+
+				// put the class name or its alias if available
+				if (!metric.getKeyAlias().isEmpty()) {
+					nameBuilder.append(metric.getKeyAlias());
+
+				} else {
+					nameBuilder.append(metric.getClassName());
+				}
+
+				// Wildcard "typeNames" substitution
+				String typeName = com.googlecode.jmxtrans.model.naming.StringUtils.cleanupStr(
+						TypeNameValuesStringBuilder.getDefaultBuilder().build(typeNames, metric.getTypeName()));
+				if (typeName != null && typeName.length() > 0) {
+					nameBuilder.append(".");
+					nameBuilder.append(typeName);
+				}
+
+				// add the attribute name
+				nameBuilder.append(".");
+				nameBuilder.append(KeyUtils.getValueKey(metric));
+
+				// check for Float/Double NaN since these will cause the message validation to fail
+				if (metric.getValue() instanceof Float && ((Float) metric.getValue()).isNaN()) {
+					logger.info("Metric value for " + nameBuilder.toString() + " is NaN, skipping");
+					continue;
+				}
+
+				if (metric.getValue() instanceof Double && ((Double) metric.getValue()).isNaN()) {
+					logger.info("Metric value for " + nameBuilder.toString() + " is NaN, skipping");
+					continue;
+				}
+
+				valueCount++;
+				g.writeStartObject();
+
+				g.writeStringField("name", nameBuilder.toString());
+
+				g.writeNumberField("value", Double.valueOf(metric.getValue().toString()));
+
+				// if the metric is attached to an instance, include that in the message
+				if (instanceId != null && !instanceId.isEmpty()) {
+					g.writeStringField("instance", instanceId);
+				}
+				g.writeNumberField("collected_at", metric.getEpoch() / 1000);
+				g.writeEndObject();
 			}
 		}
-		
+
 		g.writeEndArray();
 		g.writeEndObject();
 		g.flush();
 		g.close();
-		
+
 		// return the message if there are any values to report
 		if (valueCount > 0) {
 			return writer.toString();
@@ -369,10 +358,10 @@ public class StackdriverWriter extends BaseOutputWriter {
 			return null;
 		}
 	}
-	
+
 	/**
-	 * Post the formatted results to the gateway URL over HTTP 
-	 * 
+	 * Post the formatted results to the gateway URL over HTTP
+	 *
 	 * @param gatewayMessage String in the Stackdriver custom metrics JSON format containing the data points
 	 */
 	private void doSend(final String gatewayMessage) {
@@ -397,7 +386,7 @@ public class StackdriverWriter extends BaseOutputWriter {
 			// See https://github.com/Stackdriver/stackdriver-custommetrics-java/blob/master/src/main/java/com/stackdriver/api/custommetrics/CustomMetricsPoster.java#L262
 			// for details.
 			urlConnection.getOutputStream().write(gatewayMessage.getBytes(ISO_8859_1));
-			
+
 			int responseCode = urlConnection.getResponseCode();
 			if (responseCode != 200 && responseCode != 201) {
 				logger.warn("Failed to send results to Stackdriver server: responseCode=" + responseCode + " message=" + urlConnection.getResponseMessage());
@@ -422,12 +411,12 @@ public class StackdriverWriter extends BaseOutputWriter {
 
 		}
 	}
-	
+
 	/**
-	 * Use a Cloud provider local metadata endpoint to determine the instance ID that this code is running on. 
-	 * Useful if you don't want to configure the instance ID manually. 
+	 * Use a Cloud provider local metadata endpoint to determine the instance ID that this code is running on.
+	 * Useful if you don't want to configure the instance ID manually.
 	 * Pass detectInstance param with a cloud provider ID (AWS|GCE) to have this run in your configuration.
-	 * 
+	 *
 	 * @return String containing an instance id, or null if none is found
 	 */
 	private String getLocalInstanceId(final String cloudProvider, final String metadataEndpoint, final Map<String,String> headers) {

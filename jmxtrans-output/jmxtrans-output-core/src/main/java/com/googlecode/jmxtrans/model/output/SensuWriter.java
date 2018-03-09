@@ -112,14 +112,12 @@ public class SensuWriter extends BaseOutputWriter {
 		StringBuilder jsonoutput = new StringBuilder();
 		List<String> typeNames = getTypeNames();
 		for (Result result : results) {
-			for (Map.Entry<String, Object> values : result.getValues().entrySet()) {
-				if (isNumeric(values.getValue())) {
-					Object value = values.getValue();
-					jsonoutput.append(KeyUtils.getKeyString(server, query, result, values, typeNames, null)).append(" ")
-							.append(value).append(" ")
-							.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
-							.append(System.getProperty("line.separator"));
-				}
+			if (isNumeric(result.getValue())) {
+				Object value = result.getValue();
+				jsonoutput.append(KeyUtils.getKeyString(server, query, result, typeNames, null)).append(" ")
+						.append(value).append(" ")
+						.append(TimeUnit.SECONDS.convert(result.getEpoch(), TimeUnit.MILLISECONDS))
+						.append(System.getProperty("line.separator"));
 			}
 		}
 		g.writeStringField("output", jsonoutput.toString());

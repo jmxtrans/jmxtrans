@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.model;
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.test.RequiresIO;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
@@ -33,7 +34,11 @@ import org.mockito.InOrder;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.googlecode.jmxtrans.model.ServerFixtures.createPool;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +47,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -302,8 +308,6 @@ public class ServerTests {
 			}
 		}
 
-		verify(conn).close();
-
 		verify(pool, never()).returnObject(server, conn);
 
 		InOrder orderVerifier = inOrder(pool);
@@ -327,29 +331,53 @@ public class ServerTests {
 
 		JMXConnection conn = mock(JMXConnection.class);
 		when(conn.getMBeanServerConnection()).thenReturn(mBeanConn);
-		doThrow(new IOException()).when(conn).close();
+		doThrow(new RuntimeException()).when(conn).close();
 
 		when(pool.borrowObject(server)).thenReturn(conn);
 
 		Query query = mock(Query.class);
-		IOException e = mock(IOException.class);
+		RuntimeException e = mock(RuntimeException.class);
 		when(query.queryNames(mBeanConn)).thenThrow(e);
 
 		try {
 			server.execute(query);
 			fail("No exception got throws");
-		} catch (IOException e2) {
+		} catch (RuntimeException e2) {
 			if (e != e2) {
 				fail("Wrong exception thrown (" + e + " instead of mock");
 			}
 		}
-
-		verify(conn).close();
 
 		verify(pool, never()).returnObject(server, conn);
 
 		InOrder orderVerifier = inOrder(pool);
 		orderVerifier.verify(pool).borrowObject(server);
 		orderVerifier.verify(pool).invalidateObject(server, conn);
+	}
+
+
+	/**
+	 * Test for issue #642
+	 * @see https://github.com/jmxtrans/jmxtrans/issues/642
+	 */
+	@Test
+	public void testConnectionWithPid() throws IOException {
+		String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+		// jvmName is usually of the form 12345@host where 12345 is the pid
+		Pattern jvmNamePattern = Pattern.compile("^(\\d+)@(.*)$");
+		Matcher jvmNameMatcher = jvmNamePattern.matcher(jvmName);
+		assumeTrue(jvmNameMatcher.matches()); // Skip this test if we don't know how to get PID
+
+		Integer pid = Integer.valueOf(jvmNameMatcher.group(1));
+		String host = jvmNameMatcher.group(2);
+
+		Server server = Server.builder()
+				.setPid(pid.toString())
+				.setPool(mock(KeyedObjectPool.class))
+				.build();
+		assertThat(server.getHost()).isEqualToIgnoringCase(host);
+		try(JMXConnector serverConnection = server.getServerConnection()) {
+			assertThat(serverConnection).isNotNull();
+		}
 	}
 }

@@ -65,6 +65,7 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 	private final int poolSize;
 	private final int socketTimeoutMs;
 	private final Integer poolClaimTimeoutSeconds;
+	private final int socketExpirationMs;
 
 	/**
 	 * protocol to use to send metrics to graphite server.
@@ -84,7 +85,8 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 			@JsonProperty("poolSize") Integer poolSize,
 			@JsonProperty("socketTimeoutMs") Integer socketTimeoutMs,
 			@JsonProperty("poolClaimTimeoutSeconds") Integer poolClaimTimeoutSeconds,
-			@JsonProperty("protocol") String protocol) {
+			@JsonProperty("protocol") String protocol,
+			@JsonProperty("socketExpirationMs") Integer socketExpirationMs) {
 
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
@@ -98,6 +100,7 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 		this.socketTimeoutMs = firstNonNull(socketTimeoutMs, 200);
 		this.poolClaimTimeoutSeconds = firstNonNull(poolClaimTimeoutSeconds, 1);
 		this.protocol = firstNonNull(protocol, DEFAULT_PROTOCOL);
+		this.socketExpirationMs = firstNonNull(socketExpirationMs, 0);
 	}
 
 	@Override
@@ -119,6 +122,7 @@ public class GraphiteWriterFactory implements OutputWriterFactory {
 					.setPoolSize(poolSize)
 					.setSocketTimeoutMillis(socketTimeoutMs)
 					.setPoolClaimTimeoutSeconds(poolClaimTimeoutSeconds)
+					.setSocketExpirationMs(socketExpirationMs)
 					.build();
 
 		}

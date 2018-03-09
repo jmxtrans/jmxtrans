@@ -26,7 +26,7 @@ LOGFILE=/var/log/jmxtrans/jmxtrans.log
 
 echo "$(date) - Looking for log message..."
 
-until grep -q "SpecName=Java Virtual Machine Specification" $LOGFILE; do
+until grep -q "value=Java Virtual Machine Specification" $LOGFILE; do
   echo "$(date) - Log contents:"
   cat $LOGFILE
   echo "----"
