@@ -391,7 +391,6 @@
 									</run>
 								</image>
 
-								<!-- TODO Re enable this section
 								<image>
 									<name>opensuse13.2/${project.artifactId}:${project.version}</name>
 									<build>
@@ -416,7 +415,7 @@
 										</wait>
 									</run>
 								</image>
-								-->
+
 							</images>
 						</configuration>
 					</plugin>
