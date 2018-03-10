@@ -30,7 +30,7 @@ until grep -q "value=Java Virtual Machine Specification" $LOGFILE; do
   echo "$(date) - Log contents:"
   cat $LOGFILE
   echo "----"
-  sleep 1
+  sleep 5s
 done
 
 echo "$(date) - Found log message"
