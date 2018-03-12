@@ -4,7 +4,11 @@
     "host" : "localhost",
     "queries" : [ {
       "outputWriters" : [ {
-        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter"
+        "@class" : "com.googlecode.jmxtrans.model.output.Slf4JOutputWriter",
+        "logger": "com.googlecode.jmxtrans.result",
+        "resultSerializer": {
+          "@class": "com.googlecode.jmxtrans.model.output.ToStringResultSerializer"
+        }
       } ],
       "obj" : "java.lang:type=Runtime",
       "attr" : [ "SpecName" ]

@@ -53,7 +53,7 @@ public class UdpOutputWriterBuilderIT {
 		outputWriter.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		outputWriter.close();
 
-		await().atMost(200, MILLISECONDS).until(messageReceived("message"));
+		await().atMost(500, MILLISECONDS).until(messageReceived("message"));
 	}
 
 	private Callable<Boolean> messageReceived(final String message) {

@@ -57,7 +57,7 @@ docker run -d   -v `pwd`/json-files:/var/lib/jmxtrans
 If you log into the container and exec `ps -ef | grep java`, you will see :
 ```
 jmxtrans     9     1 25 13:09 ?        00:00:01 java -server 
--Dlog4j.configuration=file:////usr/share/jmxtrans/conf/log4j.xml 
+-Dlogback.configurationFile=file:////usr/share/jmxtrans/conf/logback.xml 
 -Xms1024m -Xmx1024m -XX:PermSize=384m -XX:MaxPermSize=384m -Dcom.sun.management.jmxremote 
 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false 
 -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999 

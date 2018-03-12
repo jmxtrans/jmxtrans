@@ -68,7 +68,7 @@ case "$1" in
         if [ ! -e "$CONFIG" ]; then
             echo "# default file for package jmxtrans" > "$CONFIG"
             echo "export LOG_DIR=\"/var/log/jmxtrans\"" >> "$CONFIG"
-            echo "export LOG_FILE=\"/var/log/jmxtrans/jmxtrans.log\"" >> "$CONFIG"
+            echo "export STDOUT_FILE=\"/var/log/jmxtrans/jmxtrans.out\"" >> "$CONFIG"
             echo "export SECONDS_BETWEEN_RUNS=60" >> "$CONFIG"
             echo "export JSON_DIR=\"/var/lib/jmxtrans\"" >> "$CONFIG"
             echo "export HEAP_SIZE=${HEAP_SIZE}" >> "$CONFIG"
@@ -86,7 +86,7 @@ esac
 if [ -x "/etc/init.d/jmxtrans" ]; then
         if [ ! -e "/etc/init/jmxtrans.conf" ]; then
                 update-rc.d jmxtrans defaults >/dev/null
-        fi  
+        fi
         invoke-rc.d jmxtrans start || exit $?
 fi
 

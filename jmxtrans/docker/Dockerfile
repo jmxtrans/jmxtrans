@@ -74,7 +74,7 @@ RUN adduser --system --shell /bin/bash --home /usr/share/jmxtrans --disabled-log
 WORKDIR ${JMXTRANS_HOME}
 RUN mkdir -p ${JMXTRANS_HOME}/conf
 
-COPY log4j.xml ${JMXTRANS_HOME}/conf/log4j.xml
+COPY logback.xml ${JMXTRANS_HOME}/conf/logback.xml
 
 RUN mkdir -p /usr/share/jmxtrans/lib/ \
     && mkdir -p /var/log/jmxtrans \

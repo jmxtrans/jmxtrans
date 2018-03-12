@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -31,15 +30,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
-import java.lang.reflect.InvocationTargetException;
-
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.stringResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -91,6 +90,24 @@ public class Slf4JOutputWriterTest {
 		assertThat(MDC.get("attributeName")).isNull();
 		assertThat(MDC.get("key")).isNull();
 		assertThat(MDC.get("epoch")).isNull();
+	}
+
+	@Test
+	public void nonNumericMetricsAreNotLoggedByDefault() throws Exception {
+		outputWriter = new Slf4JOutputWriter(logger, null);
+
+		outputWriter.doWrite(dummyServer(), dummyQuery(), singleResult(stringResult()));
+
+		verifyNoMoreInteractions(logger);
+	}
+
+	@Test
+	public void numericMetricsAreEmptyByDefault() throws Exception {
+		outputWriter = new Slf4JOutputWriter(logger, null);
+
+		outputWriter.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+
+		verify(logger).info(eq(""));
 	}
 
 	@Test

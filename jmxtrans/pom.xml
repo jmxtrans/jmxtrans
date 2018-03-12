@@ -49,8 +49,13 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>apache-log4j-extras</artifactId>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -100,17 +105,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
-			<artifactId>jmxtrans-output-log4j</artifactId>
+			<artifactId>jmxtrans-output-logback</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jmxtrans</groupId>
 			<artifactId>jmxtrans-output-velocity</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
