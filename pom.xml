@@ -155,9 +155,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<slf4j.version>1.7.25</slf4j.version>
+		<verify.branchCoveredRatio>1.00</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>1.00</verify.lineCoveredRatio>
 		<verify.mutationThreshold>100</verify.mutationThreshold>
-		<verify.totalBranchRate>100</verify.totalBranchRate>
-		<verify.totalLineRate>100</verify.totalLineRate>
 	</properties>
 
 	<dependencyManagement>
@@ -802,7 +802,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.20</version>
+					<version>2.20.1</version>
 					<configuration>
 						<groups>com.googlecode.jmxtrans.test.IntegrationTest</groups>
 					</configuration>
@@ -1003,40 +1003,49 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.7</version>
-					<configuration>
-						<aggregate>true</aggregate>
-						<check>
-							<branchRate>0</branchRate>
-							<lineRate>0</lineRate>
-							<packageBranchRate>0</packageBranchRate>
-							<packageLineRate>0</packageLineRate>
-							<totalBranchRate>${verify.totalBranchRate}</totalBranchRate>
-							<totalLineRate>${verify.totalLineRate}</totalLineRate>
-						</check>
-					</configuration>
+					<artifactId>rpm-maven-plugin</artifactId>
+					<version>2.1.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.0</version>
 					<executions>
 						<execution>
-							<id>cobertura-clean</id>
+							<id>default-prepare-agent</id>
 							<goals>
-								<goal>clean</goal>
+								<goal>prepare-agent</goal>
 							</goals>
-							<phase>clean</phase>
 						</execution>
 						<execution>
-							<id>cobertura-check</id>
+							<id>default-report</id>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>default-check</id>
 							<goals>
 								<goal>check</goal>
 							</goals>
-							<phase>verify</phase>
+							<configuration>
+								<rules>
+									<rule>
+										<limits>
+											<limit>
+												<counter>BRANCH</counter>
+												<minimum>${verify.branchCoveredRatio}</minimum>
+											</limit>
+											<limit>
+												<counter>LINE</counter>
+												<minimum>${verify.lineCoveredRatio}</minimum>
+											</limit>
+										</limits>
+									</rule>
+								</rules>
+							</configuration>
 						</execution>
 					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>rpm-maven-plugin</artifactId>
-					<version>2.1.5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.pitest</groupId>
@@ -1135,8 +1144,8 @@
 				<artifactId>animal-sniffer-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
@@ -1217,19 +1226,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.7</version>
-				<inherited>true</inherited>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>cobertura</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jdepend-maven-plugin</artifactId>
 				<version>2.0</version>
 			</plugin>
@@ -1269,6 +1265,19 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
 				<version>2.4</version>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.0</version>
+				<inherited>true</inherited>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 		</plugins>
 	</reporting>

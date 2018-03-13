@@ -38,9 +38,9 @@
 	<description>This module contains InfluxDB output writers.</description>
 
 	<properties>
+		<verify.branchCoveredRatio>0.4</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.58</verify.lineCoveredRatio>
 		<verify.mutationThreshold>45</verify.mutationThreshold>
-		<verify.totalBranchRate>4</verify.totalBranchRate>
-		<verify.totalLineRate>58</verify.totalLineRate>
 	</properties>
 
 	<dependencies>

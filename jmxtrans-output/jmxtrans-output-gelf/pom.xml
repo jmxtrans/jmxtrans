@@ -36,9 +36,9 @@
 	<name>JmxTrans - GELF output writers</name>
 
 	<properties>
+		<verify.branchCoveredRatio>0.37</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.96</verify.lineCoveredRatio>
 		<verify.mutationThreshold>32</verify.mutationThreshold>
-		<verify.totalBranchRate>37</verify.totalBranchRate>
-		<verify.totalLineRate>96</verify.totalLineRate>
 	</properties>
 
 	<dependencies>

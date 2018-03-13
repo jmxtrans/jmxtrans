@@ -38,9 +38,9 @@
 	<description>This module contains output writers that do not have any special dependencies.</description>
 
 	<properties>
+		<verify.branchCoveredRatio>0.12</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.36</verify.lineCoveredRatio>
 		<verify.mutationThreshold>9</verify.mutationThreshold>
-		<verify.totalBranchRate>12</verify.totalBranchRate>
-		<verify.totalLineRate>36</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
