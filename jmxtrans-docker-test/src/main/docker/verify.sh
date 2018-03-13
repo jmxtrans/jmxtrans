@@ -24,14 +24,25 @@
 
 LOGFILE=/var/log/jmxtrans/jmxtrans.log
 
-echo "$(date) - Looking for log message..."
-
-until grep -q "value=Java Virtual Machine Specification" $LOGFILE; do
-  echo "$(date) - Log contents:"
-  cat $LOGFILE
-  echo "----"
+while [ ! -f "${LOGFILE}" ]; do
+  echo "$(date) - Waiting for log file..."
   sleep 1
 done
 
-echo "$(date) - Found log message"
+echo "$(date) 0 - Found log file, looking for log message..."
+attempt=1
+until grep -q "value=Java Virtual Machine Specification" ${LOGFILE}; do
+  if (( attempt < 60 )); then
+  	echo "$(date) ${attempt} - Waiting for log message."
+  else
+    # After one minute, print the log contents because it smells bad
+    echo "$(date) ${attempt} - Waiting for log message. Log contents:"
+    cat ${LOGFILE}
+    echo "----"
+  fi
+  sleep 1s
+  attempt=$((attempt+1))
+done
+found_log=$(grep "value=Java Virtual Machine Specification" ${LOGFILE})
+echo "$(date) ${attempt} - Found log message ${found_log}"
 echo "${verification.message}"

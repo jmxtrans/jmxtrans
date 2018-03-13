@@ -40,7 +40,7 @@ fi
 
 JAVA_HOME=${JAVA_HOME:-"/usr"}
 LOG_DIR=${LOG_DIR:-"."}
-LOG_FILE=${LOG_FILE:-"/dev/null"}
+STDOUT_FILE=${STDOUT_FILE:-"/dev/null"}
 
 JAR_FILE=${JAR_FILE:-"lib/jmxtrans-all.jar"}
 ADDITIONAL_JARS=${ADDITIONAL_JARS:-""}
@@ -52,7 +52,7 @@ JPS=${JPS:-"${JAVA_HOME}/bin/jps -l"}
 USE_JPS=${USE_JPS:-"true"}
 JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
 CHECK_JAVA=${CHECK_JAVA:-"true"}
-PSJAVA=${PSJAVA:-"ps aux | grep [j]ava"} 
+PSJAVA=${PSJAVA:-"ps aux | grep [j]ava"}
 PSCMD="$JPS | grep -i jmxtrans | awk '{ print \$1 };'"
 JAVA_OPTS=${JAVA_OPTS:-"-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"}
 HEAP_SIZE=${HEAP_SIZE:-"512"}
@@ -123,12 +123,22 @@ start() {
         EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
     fi
 
-    nohup $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS ${SSL_OPTS} $EXEC >>$LOG_FILE 2>&1 &
+    nohup $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS ${SSL_OPTS} $EXEC >>$STDOUT_FILE 2>&1 &
 
     if [ ! -z "$PIDFILE" ]; then
         echo $! > "$PIDFILE"
     fi
 
+}
+
+run() {
+    if [ -z "$FILENAME" ]; then
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
+    else
+        EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
+    fi
+
+    $JAVA -server $JAVA_OPTS $JMXTRANS_OPTS $GC_OPTS $MONITOR_OPTS ${SSL_OPTS} $EXEC
 }
 
 stop() {
@@ -193,6 +203,9 @@ status() {
 }
 
 case $1 in
+    run)
+        run
+    ;;
     start)
         start
     ;;

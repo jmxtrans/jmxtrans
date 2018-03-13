@@ -22,9 +22,22 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.encoder.Encoder;
+import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
+import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.RollingPolicy;
+import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
+import ch.qos.logback.core.rolling.TriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
@@ -32,13 +45,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import org.apache.log4j.Appender;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
-import org.apache.log4j.spi.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.impl.Log4jLoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,11 +52,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
-import static java.lang.Long.parseLong;
 
 /**
  * Writes out data in the same format as the GraphiteWriter, except to a file
- * and tab delimited. Takes advantage of Log4J RollingFileAppender to
+ * and tab delimited. Takes advantage of Logback RollingFileAppender to
  * automatically handle rolling the files after they reach a certain size.
  * <p/>
  * The default max size of the log files are 10MB (maxLogFileSize) The default
@@ -60,24 +65,29 @@ import static java.lang.Long.parseLong;
  */
 public class KeyOutWriter extends BaseOutputWriter {
 
-	protected static final Log4jLoggerFactory log4jLoggerFactory = new Log4jLoggerFactory();
+	/**
+	 * Logback logger factory
+	 */
+	protected static final LoggerContext loggerContext = new LoggerContext();
 	protected static final String SETTING_MAX_LOG_FILE_SIZE = "maxLogFileSize";
 	protected static final String SETTING_MAX_BACK_FILES = "maxLogBackupFiles";
+	protected static final String SETTING_LOG_PATTERN = "logPattern";
 	protected static final String SETTING_DELIMITER = "delimiter";
-	protected static final String LOG_PATTERN = "%m%n";
 	protected static final int LOG_IO_BUFFER_SIZE_BYTES = 1024;
 	protected static final Map<String, Logger> loggers = new ConcurrentHashMap<>();
 
 	protected static final int MAX_LOG_BACKUP_FILES = 200;
 	protected static final String MAX_LOG_FILE_SIZE = "10MB";
+	protected static final String DEFAULT_LOG_PATTERN = "%msg%n";
 	protected static final String DEFAULT_DELIMITER = "\t";
 	protected Logger logger;
 
 
 	private final String outputFile;
-	private final FileSize maxLogFileSize;
+	private final String maxLogFileSize;
 	private final int maxLogBackupFiles;
 	private final String delimiter;
+	private final String logPattern;
 
 	@JsonCreator
 	public KeyOutWriter(
@@ -87,29 +97,31 @@ public class KeyOutWriter extends BaseOutputWriter {
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("maxLogFileSize") String maxLogFileSize,
 			@JsonProperty("maxLogBackupFiles") Integer maxLogBackupFiles,
+			@JsonProperty("logPattern") String logPattern,
 			@JsonProperty("delimiter") String delimiter,
 			@JsonProperty("settings") Map<String, Object> settings) {
 		super(typeNames, booleanAsNumber, debugEnabled, settings);
 		this.outputFile = MoreObjects.firstNonNull(
 				outputFile,
 				(String) getSettings().get("outputFile"));
-		this.maxLogFileSize = toFileSize(firstNonNull(
+		this.maxLogFileSize = firstNonNull(
 				maxLogFileSize,
 				(String) getSettings().get(SETTING_MAX_LOG_FILE_SIZE),
-				MAX_LOG_FILE_SIZE));
+				MAX_LOG_FILE_SIZE);
 		this.maxLogBackupFiles = firstNonNull(
 				maxLogBackupFiles,
 				(Integer) getSettings().get(SETTING_MAX_BACK_FILES),
 				MAX_LOG_BACKUP_FILES);
+		this.logPattern = firstNonNull(
+				logPattern,
+				(String) getSettings().get(SETTING_LOG_PATTERN),
+				DEFAULT_LOG_PATTERN
+		);
 		this.delimiter = firstNonNull(
 				delimiter,
 				(String) getSettings().get(SETTING_DELIMITER),
 				DEFAULT_DELIMITER
 		);
-	}
-
-	private FileSize toFileSize(String s) {
-		return new FileSize(parseLong(s));
 	}
 
 	/**
@@ -119,16 +131,21 @@ public class KeyOutWriter extends BaseOutputWriter {
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		// Check if we've already created a logger for this file. If so, use it.
 		if (loggers.containsKey(outputFile)) {
-			logger = loggers.get(outputFile);
+			logger = getLogger(outputFile);
 			return;
 		}
 		// need to create a logger
 		try {
-			logger = initLogger(outputFile);
+			logger = buildLogger(outputFile);
 			loggers.put(outputFile, logger);
 		} catch (IOException e) {
-			throw new ValidationException("Failed to setup log4j", query, e);
+			throw new ValidationException("Failed to setup logback", query, e);
 		}
+	}
+
+	@VisibleForTesting
+	Logger getLogger(String outputFile) {
+		return loggers.get(outputFile);
 	}
 
 	/**
@@ -155,50 +172,76 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * @return a new Logger instance for the given fileStr
 	 * @throws IOException
 	 */
-	protected Logger initLogger(String fileStr) throws IOException {
-		Appender appender = buildLog4jAppender(fileStr, getMaxLogFileSize(), getMaxLogBackupFiles());
-		LoggerFactory loggerFactory = buildLog4jLoggerFactory(appender);
-
-		String loggerKey = buildLoggerName();
+	protected Logger buildLogger(String fileStr) throws IOException {
+		String loggerName = buildLoggerName();
+		Appender appender = buildAppender(loggerName, fileStr);
 
 		// Create the logger and add to the map of loggers using our factory
-		LogManager.getLogger(loggerKey, loggerFactory);
-		return log4jLoggerFactory.getLogger(loggerKey);
+		Logger logger = loggerContext.getLogger(loggerName);
+		logger.addAppender(appender);
+		logger.setLevel(Level.INFO);
+		logger.setAdditive(false);
+		return logger;
 	}
 
 	protected String buildLoggerName() {
 		return "KeyOutWriter" + this.hashCode();
 	}
 
-	protected Appender buildLog4jAppender(
-			String fileStr, FileSize maxLogFileSize,
-			Integer maxLogBackupFiles) throws IOException {
+	protected Encoder buildEncoder() {
+		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setContext(loggerContext);
+		encoder.setPattern(logPattern);
+		encoder.start();
+		return encoder;
+	}
 
-		PatternLayout pl = new PatternLayout(LOG_PATTERN);
-		final RollingFileAppender appender = new RollingFileAppender(pl, fileStr, true);
+	protected RollingPolicy buildRollingPolicy(FileAppender<?> appender, String fileStr) {
+		FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
+		rollingPolicy.setParent(appender);
+		rollingPolicy.setContext(loggerContext);
+		rollingPolicy.setMinIndex(1);
+		rollingPolicy.setMaxIndex(maxLogBackupFiles);
+		rollingPolicy.setFileNamePattern(fileStr + ".%i");
+		rollingPolicy.start();
+		return rollingPolicy;
+	}
+
+	protected TriggeringPolicy buildTriggeringPolicy() {
+		SizeBasedTriggeringPolicy triggeringPolicy = new SizeBasedTriggeringPolicy();
+		triggeringPolicy.setContext(loggerContext);
+		triggeringPolicy.setMaxFileSize(FileSize.valueOf(maxLogFileSize));
+		triggeringPolicy.start();
+		return triggeringPolicy;
+	}
+
+	protected Appender buildAppender(String loggerName, String fileStr) {
+		final RollingFileAppender appender = new RollingFileAppender();
+		appender.setName(loggerName + "RollingFile");
+		appender.setContext(loggerContext);
 		appender.setImmediateFlush(true);
-		appender.setBufferedIO(false);
-		appender.setBufferSize(LOG_IO_BUFFER_SIZE_BYTES);
-		appender.setMaxFileSize(Long.toString(maxLogFileSize.getSize()));
-		appender.setMaxBackupIndex(maxLogBackupFiles);
-
+		appender.setBufferSize(new FileSize(LOG_IO_BUFFER_SIZE_BYTES));
+		appender.setFile(fileStr);
+		appender.setEncoder(buildEncoder());
+		TriggeringPolicy triggeringPolicy = buildTriggeringPolicy();
+		if (triggeringPolicy != null) {
+			appender.setTriggeringPolicy(triggeringPolicy);
+		}
+		appender.setRollingPolicy(buildRollingPolicy(appender, fileStr));
+		appender.start();
 		return appender;
 	}
 
-	protected LoggerFactory buildLog4jLoggerFactory(final Appender appender) {
-		return new LoggerFactory() {
-			@Override
-			public org.apache.log4j.Logger makeNewLoggerInstance(String name) {
-				org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
-				logger.addAppender(appender);
-				logger.setLevel(org.apache.log4j.Level.INFO);
-				logger.setAdditivity(false);
-				return logger;
-			}
-		};
+	@Override
+	public void close() {
+		for(Logger logger: this.loggers.values()) {
+			logger.detachAndStopAllAppenders();
+		}
+		this.loggers.clear();
 	}
 
-	public FileSize getMaxLogFileSize() {
+
+	public String  getMaxLogFileSize() {
 		return maxLogFileSize;
 	}
 

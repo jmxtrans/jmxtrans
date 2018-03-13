@@ -22,38 +22,38 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.rolling.RollingPolicy;
+import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
+import ch.qos.logback.core.rolling.TriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import org.apache.log4j.Appender;
-import org.apache.log4j.DailyRollingFileAppender;
-import org.apache.log4j.PatternLayout;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
- * This class is derived from KeyOutWriter. It uses DailyRollingFileAppender
- * instead of RollingFileAppender.
+ * This class is derived from KeyOutWriter. It uses SizeAndTimeBasedRollingPolicy
+ * instead of FixedWindowRollingPolicy.
  *
  * Writes out data in the same format as the GraphiteWriter, except to a file
- * and tab delimited. Takes advantage of Log4J DailyRollingFileAppender to
+ * and tab delimited. Takes advantage of Logback RollingFileAppender to
  * automatically handle rolling the files at defined intervals (datePattern).
  *
  * Note that this writer will NOT clean up after itself. The files will not be
  * deleted. It is up to the user to clean things up.
  *
- * The datePattern is taken directly from DailyRollingFileAppender DatePattern.
+ * The datePattern is taken directly from TimeBasedRollingPolicy DatePattern.
  *
  * The default datePattern will roll the files at midnight once a day
- * ("'.'yyyy-MM-dd") See the documentation for DailyRollingFileAppender for
+ * ("yyyy-MM-dd") See the documentation for DailyRollingFileAppender for
  * other useful patterns.
  *
  */
 public class DailyKeyOutWriter extends KeyOutWriter {
 
-	private static final String DATE_PATTERN = "'.'yyyy-MM-dd";
+	private static final String DATE_PATTERN = "yyyy-MM-dd";
 
 	private final String datePattern;
 
@@ -65,10 +65,11 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 			@JsonProperty("outputFile") String outputFile,
 			@JsonProperty("maxLogFileSize") String maxLogFileSize,
 			@JsonProperty("maxLogBackupFiles") Integer maxLogBackupFiles,
+			@JsonProperty("logPattern") String logPattern,
 			@JsonProperty("delimiter") String delimiter,
 			@JsonProperty("datePattern") String datePattern,
 			@JsonProperty("settings") Map<String, Object> settings) {
-		super(typeNames, booleanAsNumber, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, delimiter, settings);
+		super(typeNames, booleanAsNumber, debugEnabled, outputFile, maxLogFileSize, maxLogBackupFiles, logPattern, delimiter, settings);
 		this.datePattern = firstNonNull(
 				datePattern,
 				(String) getSettings().get("datePattern"),
@@ -76,13 +77,25 @@ public class DailyKeyOutWriter extends KeyOutWriter {
 		);
 	}
 
-	/**
-	 * The maxLogFileSize and maxLogBackupFiles are ignored as per the existing behaviour of DailyKeyOutWriter.
-	 */
 	@Override
-	protected Appender buildLog4jAppender(String fileStr, FileSize maxLogFileSize, Integer maxLogBackupFiles)
-			throws IOException {
-		return new DailyRollingFileAppender(new PatternLayout(LOG_PATTERN), fileStr, datePattern);
+	protected RollingPolicy buildRollingPolicy(FileAppender<?> appender, String fileStr) {
+		SizeAndTimeBasedRollingPolicy rollingPolicy = new SizeAndTimeBasedRollingPolicy();
+		rollingPolicy.setParent(appender);
+		rollingPolicy.setContext(loggerContext);
+		if (getMaxLogFileSize() == null) {
+			rollingPolicy.setFileNamePattern(fileStr + "%d{" + datePattern + "}");
+		} else {
+			rollingPolicy.setMaxFileSize(FileSize.valueOf(getMaxLogFileSize()));
+			rollingPolicy.setFileNamePattern(fileStr + "%d{" + datePattern + "}.%i");
+		}
+		rollingPolicy.setMaxHistory(getMaxLogBackupFiles());
+		rollingPolicy.start();
+		return rollingPolicy;
+	}
+
+	@Override
+	protected TriggeringPolicy buildTriggeringPolicy() {
+		return null;
 	}
 
 	@Override

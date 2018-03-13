@@ -21,42 +21,28 @@
 # THE SOFTWARE.
 #
 
-FROM openjdk:8
+FROM openjdk:8-alpine
 
 MAINTAINER Nicolas Muller <n.muller@treeptik.fr>
 
-RUN apt-get update && apt-get install -y \
-		ca-certificates \
-		vim \
-		wget \
-	--no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apk update \
+   && apk add curl \
+   && apk add gnupg \
+   && apk add tini \
+   && apk add bash
 
-# grab gosu for easy step-down from root
+## grab gosu for easy step-down from root
 ENV GOSU_VERSION 1.7
-RUN set -x \
-	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
-	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
-	&& chmod +x /usr/local/bin/gosu \
-	&& gosu nobody true
 
-# grab tini for signal processing and zombie killing
-ENV TINI_VERSION v0.9.0
-RUN set -x \
-	&& wget -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/$TINI_VERSION/tini" \
-	&& wget -O /usr/local/bin/tini.asc "https://github.com/krallin/tini/releases/download/$TINI_VERSION/tini.asc" \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 6380DC428747F6C393FEACA59A84159D7001A4E5 \
-	&& gpg --batch --verify /usr/local/bin/tini.asc /usr/local/bin/tini \
-	&& rm -r "$GNUPGHOME" /usr/local/bin/tini.asc \
-	&& chmod +x /usr/local/bin/tini \
-	&& tini -h
+RUN curl -L -o /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" \
+    && curl -L -o /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+    && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+    && chmod +x /usr/local/bin/gosu \
+    && gosu nobody true
 
-ARG JMXTRANS_VERSION
-ENV JMXTRANS_VERSION ${JMXTRANS_VERSION:-260}
 
 ENV JMXTRANS_HOME /usr/share/jmxtrans
 ENV PATH $JMXTRANS_HOME/bin:$PATH
@@ -69,14 +55,16 @@ ENV CONTINUE_ON_ERROR false
 ENV JSON_DIR /var/lib/jmxtrans
 
 # Install jmxtrans
-RUN adduser --system --shell /bin/bash --home /usr/share/jmxtrans --disabled-login --disabled-password --group jmxtrans
+RUN addgroup jmxtrans \
+   && adduser jmxtrans -s /bin/bash -h /usr/share/jmxtrans -S -D -G jmxtrans
 
 WORKDIR ${JMXTRANS_HOME}
 RUN mkdir -p ${JMXTRANS_HOME}/conf
 
-COPY log4j.xml ${JMXTRANS_HOME}/conf/log4j.xml
+COPY logback.xml ${JMXTRANS_HOME}/conf/logback.xml
 
 RUN mkdir -p /usr/share/jmxtrans/lib/ \
+    && JMXTRANS_VERSION=`curl http://central.maven.org/maven2/org/jmxtrans/jmxtrans/maven-metadata.xml | sed -n 's:.*<release>\(.*\)</release>.*:\1:p'` \
     && mkdir -p /var/log/jmxtrans \
     && wget -q http://central.maven.org/maven2/org/jmxtrans/jmxtrans/${JMXTRANS_VERSION}/jmxtrans-${JMXTRANS_VERSION}-all.jar \
     && mv jmxtrans-${JMXTRANS_VERSION}-all.jar ${JAR_FILE}
