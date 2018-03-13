@@ -64,7 +64,7 @@ RUN mkdir -p ${JMXTRANS_HOME}/conf
 COPY logback.xml ${JMXTRANS_HOME}/conf/logback.xml
 
 RUN mkdir -p /usr/share/jmxtrans/lib/ \
-    && JMXTRANS_VERSION=`curl -s http://central.maven.org/maven2/org/jmxtrans/jmxtrans/ | grep -v maven-metadata | grep '<a' | tail -n 1 | sed -r 's/.*href="([^\/]+).*/\1/'` \
+    && JMXTRANS_VERSION=`curl http://central.maven.org/maven2/org/jmxtrans/jmxtrans/maven-metadata.xml | sed -n 's:.*<release>\(.*\)</release>.*:\1:p'` \
     && mkdir -p /var/log/jmxtrans \
     && wget -q http://central.maven.org/maven2/org/jmxtrans/jmxtrans/${JMXTRANS_VERSION}/jmxtrans-${JMXTRANS_VERSION}-all.jar \
     && mv jmxtrans-${JMXTRANS_VERSION}-all.jar ${JAR_FILE}
