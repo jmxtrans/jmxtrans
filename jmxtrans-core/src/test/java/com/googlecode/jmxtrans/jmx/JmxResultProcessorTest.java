@@ -226,8 +226,8 @@ public class JmxResultProcessorTest {
 		// Should have primitive typed fields
 		assertThat(firstMatch(results, "LastGcInfo", "duration").get()).isNotNull();
 		// assert tabular fields are excluded
-		assertThat(firstMatch(results, "LastGcInfo", "memoryUsageBeforeGc").get()).isNull();
-		assertThat(firstMatch(results, "LastGcInfo", "memoryUsageAfterGc").get()).isNull();
+		assertThat(firstMatch(results, "LastGcInfo", "memoryUsageBeforeGc", "G1 Survivor Space", "value", "used").get()).isNotNull();
+		assertThat(firstMatch(results, "LastGcInfo", "memoryUsageAfterGc", "G1 Old Gen", "value", "committed").get()).isNotNull();
 	}
 
 	@Test
