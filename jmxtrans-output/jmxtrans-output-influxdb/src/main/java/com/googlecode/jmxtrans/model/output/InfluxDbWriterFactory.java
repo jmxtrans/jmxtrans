@@ -63,9 +63,11 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final InfluxDB influxDB;
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 	private final boolean booleanAsNumber;
+	private final boolean typeNamesAsTags;
 	private final boolean createDatabase;
 	private final boolean reportJmxPortAsTag;
 	private final ImmutableList<String> typeNames;
+	private final boolean segregateStringValues;
 
 	/**
 	 * @param url      - The url e.g http://localhost:8086 to InfluxDB
@@ -86,11 +88,15 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
 			@JsonProperty("createDatabase") Boolean createDatabase,
-			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag) {
+			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag,
+			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
+			@JsonProperty("segregateStringValues") Boolean segregateStringValues) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
 		this.createDatabase = firstNonNull(createDatabase, TRUE);
+		this.typeNamesAsTags = firstNonNull(typeNamesAsTags, FALSE);
+		this.segregateStringValues = firstNonNull(segregateStringValues, FALSE);
 
 		this.writeConsistency = StringUtils.isNotBlank(writeConsistency)
 				? InfluxDB.ConsistencyLevel.valueOf(writeConsistency) : InfluxDB.ConsistencyLevel.ALL;
@@ -125,6 +131,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag, typeNamesAsTags, segregateStringValues));
 	}
 }
