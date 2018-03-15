@@ -70,8 +70,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
 	@Nonnull private final ImmutableMap<String,String> tags;
-	@Nonnull private final ImmutableList<String> typeNames;
-	@Nonnull private final ImmutableList<String> typeNamesForTags;
+	@Nonnull ImmutableList<String> typeNames;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -80,8 +79,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	private final boolean createDatabase;
-	private final boolean reportJmxPortAsTag;
 	private final boolean typeNamesAsTags;
+	private final boolean segregateStringValues;
+	private final boolean reportJmxPortAsTag;
 
 	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
 		@Override
@@ -100,18 +100,19 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull ImmutableList<String> typeNames,
 			boolean createDatabase,
 			boolean reportJmxPortAsTag,
-			boolean typeNamesAsTags) {
+			boolean typeNamesAsTags,
+			boolean segregateStringValues) {
 		this.typeNames = typeNames;
-		this.typeNamesForTags = typeNamesAsTags ? typeNames : ImmutableList.<String>of();
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
-		this.typeNamesAsTags = typeNamesAsTags;
 		this.createDatabase = createDatabase;
 		this.reportJmxPortAsTag = reportJmxPortAsTag;
+		this.typeNamesAsTags = typeNamesAsTags;
+		this.segregateStringValues = segregateStringValues;
 	}
 
 	/**
@@ -184,9 +185,20 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 			HashMap<String, Object> filteredValues = newHashMap();
 			Object value = result.getValue();
+
+			ImmutableList<String> typeNamesParam = this.typeNames;
+			// if typeNamesAsTag, we don't concat typeName in values.
+			if (typeNamesAsTags) {
+				typeNamesParam = ImmutableList.<String>of();
+			}
+
+			String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
 			if (isValidNumber(value)) {
-				String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
 				filteredValues.put(key, value);
+			}else {
+				if (segregateStringValues) {
+					filteredValues.put(key + "_str", value);
+				}
 			}
 
 			// send the point if filteredValues isn't empty
@@ -217,7 +229,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 		if (typeNamesAsTags) {
 			Map<String, String> typeNameValueMap = TypeNameValue.extractMap(resultTagMap.get("typeName"));
-			for (String typeToTag : this.typeNamesForTags) {
+			for (String typeToTag : this.typeNames) {
 				if (typeNameValueMap.containsKey(typeToTag)) {
 					resultTagMap.put(typeToTag, typeNameValueMap.get(typeToTag));
 				}

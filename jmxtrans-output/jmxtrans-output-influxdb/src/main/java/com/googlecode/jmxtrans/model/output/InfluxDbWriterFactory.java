@@ -43,7 +43,6 @@ import java.util.List;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static java.lang.Boolean.FALSE;
 
 public class InfluxDbWriterFactory implements OutputWriterFactory {
 
@@ -68,6 +67,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final boolean createDatabase;
 	private final boolean reportJmxPortAsTag;
 	private final ImmutableList<String> typeNames;
+	private final boolean segregateStringValues;
 
 	/**
 	 * @param url      - The url e.g http://localhost:8086 to InfluxDB
@@ -87,14 +87,16 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("writeConsistency") String writeConsistency,
 			@JsonProperty("retentionPolicy") String retentionPolicy,
 			@JsonProperty("resultTags") List<String> resultTags,
-			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
 			@JsonProperty("createDatabase") Boolean createDatabase,
-			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag) {
+			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag,
+			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
+			@JsonProperty("segregateStringValues") Boolean segregateStringValues) {
 		this.typeNames = typeNames;
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
-		this.typeNamesAsTags = firstNonNull(typeNamesAsTags, FALSE);
 		this.createDatabase = firstNonNull(createDatabase, TRUE);
+		this.typeNamesAsTags = firstNonNull(typeNamesAsTags, FALSE);
+		this.segregateStringValues = firstNonNull(segregateStringValues, FALSE);
 
 		this.writeConsistency = StringUtils.isNotBlank(writeConsistency)
 				? InfluxDB.ConsistencyLevel.valueOf(writeConsistency) : InfluxDB.ConsistencyLevel.ALL;
@@ -129,6 +131,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag, typeNamesAsTags));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag, typeNamesAsTags, segregateStringValues));
 	}
 }
