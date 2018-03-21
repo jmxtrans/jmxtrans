@@ -37,13 +37,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class KafkaWriter2Test {
 
     private static final String TOPIC = "topic";

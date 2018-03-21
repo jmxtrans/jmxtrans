@@ -34,9 +34,7 @@ import org.apache.commons.lang.WordUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.common.collect.ImmutableMap;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  *

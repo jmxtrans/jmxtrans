@@ -34,7 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +45,7 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class KafkaWriterTests {
 
 	@Mock
