@@ -38,7 +38,7 @@
 	<description>This module contains Ganglia output writers.</description>
 
 	<properties>
-		<verify.branchCoveredRatio>0.4</verify.branchCoveredRatio>
+		<verify.branchCoveredRatio>0.04</verify.branchCoveredRatio>
 		<verify.lineCoveredRatio>0.58</verify.lineCoveredRatio>
 		<verify.mutationThreshold>0</verify.mutationThreshold>
 	</properties>

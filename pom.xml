@@ -1012,13 +1012,36 @@
 					<version>0.8.0</version>
 					<executions>
 						<execution>
-							<id>default-prepare-agent</id>
+							<id>prepare-agent-ut</id>
 							<goals>
 								<goal>prepare-agent</goal>
 							</goals>
 						</execution>
 						<execution>
-							<id>default-report</id>
+							<id>prepare-agent-it</id>
+							<goals>
+								<goal>prepare-agent-integration</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>merge-it-ut</id>
+							<goals>
+								<goal>merge</goal>
+							</goals>
+							<phase>verify</phase>
+							<configuration>
+								<fileSets>
+									<fileSet>
+										<directory>${project.build.directory}</directory>
+										<includes>
+											<include>*.exec</include>
+										</includes>
+									</fileSet>
+								</fileSets>
+							</configuration>
+						</execution>
+						<execution>
+							<id>report</id>
 							<goals>
 								<goal>report</goal>
 							</goals>
