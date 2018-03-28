@@ -178,7 +178,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 			HashMap<String, Object> filteredValues = newHashMap();
 			Object value = result.getValue();
-			if (isValidNumber(value)) {
+			if (isValidNumber(value) || value instanceof String) {
 				String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
 				filteredValues.put(key, value);
 			}

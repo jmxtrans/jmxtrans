@@ -90,7 +90,7 @@ public class InfluxDbWriterTests {
 	private static final ImmutableSet<ResultAttribute> DEFAULT_RESULT_ATTRIBUTES = ImmutableSet.copyOf(ResultAttributes.values());
 
 	Result result = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "type=test,name=name",
-			ImmutableList.of("key"), 1);
+			ImmutableList.of("key"), "dfgdfgdfg");
 	ImmutableList<Result> results = ImmutableList.of(result);
 
 	@Test
