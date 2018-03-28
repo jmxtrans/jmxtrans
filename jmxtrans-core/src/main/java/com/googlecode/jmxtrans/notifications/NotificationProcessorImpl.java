@@ -66,7 +66,7 @@ class NotificationProcessorImpl implements NotificationProcessor {
 	}
 
 	@Override
-	public void handleNotification(final Notification notification) {
+	public void handleNotification(final AttributeChangeNotification notification) {
 		ThreadPoolExecutor executor = resultExecutorRepository.getExecutor(server);
 		Runnable task = new Runnable() {
 			@Override
@@ -84,19 +84,14 @@ class NotificationProcessorImpl implements NotificationProcessor {
 		executor.submit(task);
 	}
 
-	private List<Result> transform(Notification notification) {
-		if (notification instanceof AttributeChangeNotification) {
-			AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
-			List<Attribute> attributes = new ArrayList<>(1);
-			attributes.add(new Attribute(changeNotification.getAttributeName(),
-					changeNotification.getNewValue()));
-			long epoch = notification.getTimeStamp();
-			return new JmxResultProcessor(query, oi, attributes,
-					oi.getClassName(), query.getObjectName().getDomain(),
-					epoch).getResults();
-		} else {
-			//TODO: log a warning here?
-		}
-		return Collections.emptyList();
+	private List<Result> transform(AttributeChangeNotification notification) {
+		AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
+		List<Attribute> attributes = new ArrayList<>(1);
+		attributes.add(new Attribute(changeNotification.getAttributeName(),
+				changeNotification.getNewValue()));
+		long epoch = notification.getTimeStamp();
+		return new JmxResultProcessor(query, oi, attributes,
+				oi.getClassName(), query.getObjectName().getDomain(),
+				epoch).getResults();
 	}
 }

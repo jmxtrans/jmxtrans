@@ -284,38 +284,20 @@ public class Query {
 			// TODO: does this whole loop make sense?? :) do we need to "query names"?
 			final ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
 			Object handback = notificationProcessorFactory.create(server, this, oi);
-			NotificationListener notificationListener = new NotificationListener() {
-				@Override
-				public void handleNotification(Notification notification, Object handback) {
-					NotificationProcessor handler = (NotificationProcessor) handback;
-					handler.handleNotification(notification);
-				}
-			};
 
 			jmxConnection.addNotificationListener(oi.getObjectName(),
-					notificationListener,
-					getNotificationFilter(getAttr()),
+					new NotificationListener() {
+						@Override
+						public void handleNotification(Notification notification, Object handback) {
+							NotificationProcessor handler = (NotificationProcessor) handback;
+							if (notification instanceof AttributeChangeNotification) {
+								handler.handleNotification((AttributeChangeNotification) notification);
+							} // Else: log error
+						}
+					},
+					null, // TODO: filter??
 					handback);
 		}
-	}
-
-	private static NotificationFilter getNotificationFilter(final ImmutableList<String> attr) {
-		return new NotificationFilter() {
-			@Override
-			public boolean isNotificationEnabled(Notification notification) {
-				if (notification instanceof AttributeChangeNotification) {
-					// Check if subscribed attribute
-					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
-					if (attr.isEmpty()) {
-						// Subscribe to all attribute changes.
-						return true;
-					} else {
-						return attr.contains(changeNotification.getAttributeName());
-					}
-				}
-				return false;
-			}
-		};
 	}
 
 	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {

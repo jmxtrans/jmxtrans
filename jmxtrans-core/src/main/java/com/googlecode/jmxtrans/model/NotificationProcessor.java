@@ -22,8 +22,8 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import javax.management.Notification;
+import javax.management.AttributeChangeNotification;
 
 public interface NotificationProcessor {
-	void handleNotification(Notification notification);
+	void handleNotification(AttributeChangeNotification notification);
 }
