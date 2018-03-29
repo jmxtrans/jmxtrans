@@ -22,29 +22,40 @@
  */
 package com.googlecode.jmxtrans.notifications;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.model.NotificationProcessor;
-import com.googlecode.jmxtrans.model.NotificationProcessorFactory;
-import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerQuery;
+import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
-import javax.annotation.Nonnull;
-import javax.management.ObjectInstance;
+import javax.management.remote.JMXConnector;
 
-public class NotificationProcessorFactoryImpl implements NotificationProcessorFactory {
+/**
+ * Creates notification processor for a given server and query.
+ */
+public class NotificationProcessorFactory extends BaseKeyedPoolableObjectFactory<ServerQuery, NotificationProcessor> {
 
-	private final ExecutorRepository resultExecutorRepository;
+	private final ExecutorRepository executorRepository;
 
-	@Inject
-	public NotificationProcessorFactoryImpl(@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository) {
-		this.resultExecutorRepository = resultExecutorRepository;
+	public NotificationProcessorFactory(ExecutorRepository executorRepository) {
+		this.executorRepository = executorRepository;
 	}
-
 
 	@Override
-	public NotificationProcessor create(Server server, Query query, ObjectInstance oi) {
-		return new NotificationProcessorImpl(server, query, oi, resultExecutorRepository);
+	public NotificationProcessor makeObject(ServerQuery key) throws Exception {
+		Server server = key.getServer();
+		JMXConnection newJMXConnection;
+		if (server.isLocal()) {
+			newJMXConnection = new JMXConnection(null, server.getLocalMBeanServer());
+		} else {
+			JMXConnector connection = server.getServerConnection();
+			newJMXConnection =  new JMXConnection(connection, connection.getMBeanServerConnection());
+		}
+		//FIXME
+		return new NotificationProcessorImpl(key.getServer(), key.getQuery(),
+				executorRepository, newJMXConnection);
 	}
+
+
 }

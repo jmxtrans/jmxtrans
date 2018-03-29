@@ -22,8 +22,20 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import javax.management.AttributeChangeNotification;
+import java.io.Closeable;
 
-public interface NotificationProcessor {
-	void handleNotification(AttributeChangeNotification notification);
+/**
+ * Manages subscriptions to notifications.
+ * Feeds received notifications into output writers.
+ */
+public interface NotificationProcessor extends Closeable {
+	/**
+	 * Needs to be called periodically to ensure that
+	 * a listener for each object name is subscribed.
+	 *
+	 * @param server
+	 * @param query
+	 * @throws Exception
+	 */
+	void subscribe(Server server, Query query) throws Exception;
 }

@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
@@ -38,13 +38,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
-import javax.management.AttributeChangeNotification;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -52,9 +52,6 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
-import javax.management.Notification;
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -138,8 +135,7 @@ public class Query {
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriterInstances;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
 
-	@Nonnull
-	private final NotificationProcessorFactory notificationProcessorFactory;
+	@Nonnull private final KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors;
 
 	@JsonCreator
 	public Query(
@@ -153,13 +149,13 @@ public class Query {
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
-			@JacksonInject NotificationProcessorFactory notificationProcessorFactory
+			@JacksonInject @Named("notificationProcessors") KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
 		// For typeName, note the using copyOf does not change the order of
 		// the elements.
 		this(obj, type != null ? QueryType.valueOf(type) : QueryType.POLL, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
 				outputWriters, ImmutableList.<OutputWriter>of(),
-				notificationProcessorFactory);
+				notificationProcessors);
 	}
 
 	public Query(
@@ -173,11 +169,11 @@ public class Query {
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
 			List<OutputWriterFactory> outputWriters,
-			NotificationProcessorFactory notificationProcessorFactory
+			KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
 		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
 				outputWriters, ImmutableList.<OutputWriter>of(),
-				notificationProcessorFactory);
+				notificationProcessors);
 	}
 
 	public Query(
@@ -191,11 +187,11 @@ public class Query {
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
 			ImmutableList<OutputWriter> outputWriters,
-			NotificationProcessorFactory notificationProcessorFactory
+			KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
 		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
 				ImmutableList.<OutputWriterFactory>of(), outputWriters,
-				notificationProcessorFactory);
+				notificationProcessors);
 	}
 
 	private Query(
@@ -210,7 +206,7 @@ public class Query {
 			boolean useAllTypeNames,
 			List<OutputWriterFactory> outputWriterFactories,
 			List<OutputWriter> outputWriters,
-			NotificationProcessorFactory notificationProcessorFactory
+			KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
 		try {
 			this.objectName = new ObjectName(obj);
@@ -232,7 +228,7 @@ public class Query {
 
 		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
 		this.queryType = queryType;
-		this.notificationProcessorFactory = notificationProcessorFactory;
+		this.notificationProcessors = notificationProcessors;
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -276,27 +272,19 @@ public class Query {
 		return ImmutableList.of();
 	}
 
-	public void subscribeToNotifications(final Server server, JMXConnection jmxConnection) throws IOException, InstanceNotFoundException {
-		MBeanServerConnection mbeanServer = jmxConnection.getMBeanServerConnection();
-		Iterable<ObjectName> queryNames = queryNames(mbeanServer);
-		for(ObjectName queryName : queryNames) {
-			// TODO: what about MBeans added / removed during runtime of the monitored application???
-			// TODO: does this whole loop make sense?? :) do we need to "query names"?
-			final ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
-			Object handback = notificationProcessorFactory.create(server, this, oi);
-
-			jmxConnection.addNotificationListener(oi.getObjectName(),
-					new NotificationListener() {
-						@Override
-						public void handleNotification(Notification notification, Object handback) {
-							NotificationProcessor handler = (NotificationProcessor) handback;
-							if (notification instanceof AttributeChangeNotification) {
-								handler.handleNotification((AttributeChangeNotification) notification);
-							} // Else: log error
-						}
-					},
-					null, // TODO: filter??
-					handback);
+	public void subscribeToNotifications(final Server server) throws Exception {
+		NotificationProcessor processor = null;
+		ServerQuery serverQuery = new ServerQuery(server, this);
+		try {
+			processor = notificationProcessors.borrowObject(serverQuery);
+			processor.subscribe(server, this);
+		} catch (Exception e) {
+			if(processor != null) {
+				notificationProcessors.invalidateObject(serverQuery, processor);
+			}
+			throw e;
+		} finally {
+			notificationProcessors.returnObject(serverQuery, processor);
 		}
 	}
 
@@ -344,7 +332,7 @@ public class Query {
 		// avoid unpredictable ordering of typeNames.
 		private final Set<String> typeNames = newLinkedHashSet();
 
-		private NotificationProcessorFactory notificationProcessorFactory;
+		private KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors;
 
 		private Builder() {}
 
@@ -359,7 +347,7 @@ public class Query {
 			this.allowDottedKeys = query.allowDottedKeys;
 			this.useAllTypeNames = query.useAllTypeNames;
 			this.typeNames.addAll(query.typeNames);
-			this.notificationProcessorFactory = query.notificationProcessorFactory;
+			this.notificationProcessors = query.notificationProcessors;
 		}
 
 		public Builder addAttr(String... attr) {
@@ -408,7 +396,7 @@ public class Query {
 						this.allowDottedKeys,
 						this.useAllTypeNames,
 						this.outputWriterFactories,
-						this.notificationProcessorFactory
+						this.notificationProcessors
 				);
 			}
 			return new Query(
@@ -422,7 +410,7 @@ public class Query {
 					this.allowDottedKeys,
 					this.useAllTypeNames,
 					copyOf(this.outputWriters),
-					this.notificationProcessorFactory
+					this.notificationProcessors
 			);
 		}
 

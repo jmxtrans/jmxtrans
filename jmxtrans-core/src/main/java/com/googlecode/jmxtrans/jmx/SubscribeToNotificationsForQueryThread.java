@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.jmx;
 
 import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import lombok.ToString;
 import org.slf4j.Logger;
@@ -38,8 +37,10 @@ public class SubscribeToNotificationsForQueryThread implements Runnable {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	@Nonnull private final Server server;
-	@Nonnull private final Query query;
+	@Nonnull
+	private final Server server;
+	@Nonnull
+	private final Query query;
 
 	public SubscribeToNotificationsForQueryThread(@Nonnull Server server, @Nonnull Query query) {
 		this.server = server;
@@ -49,6 +50,7 @@ public class SubscribeToNotificationsForQueryThread implements Runnable {
 	@Override
 	public void run() {
 		try {
+			log.info("SubscribeToNotificationsForQueryThread");
 			server.subscribeToNotifications(query);
 		} catch (Exception e) {
 			log.error("Error subscribing to notifications for query {} on server {}", query, server, e);

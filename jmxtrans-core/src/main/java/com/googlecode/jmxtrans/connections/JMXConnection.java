@@ -60,7 +60,8 @@ public class JMXConnection implements Closeable {
 										NotificationListener notificationListener,
 										NotificationFilter notificationFilter,
 										Object handback) throws IOException, InstanceNotFoundException {
-		logger.info("Add notification listener for {}", objectName);
+		logger.info("Add notification listener for name {}, mBeanServerConnection {}.",
+				objectName, mBeanServerConnection);
 		this.mBeanServerConnection.addNotificationListener(objectName,
 				notificationListener, notificationFilter, handback);
 	}

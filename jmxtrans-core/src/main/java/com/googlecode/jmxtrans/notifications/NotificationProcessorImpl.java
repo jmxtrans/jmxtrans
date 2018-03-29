@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.notifications;
 
+import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.model.JmxResultProcessor;
 import com.googlecode.jmxtrans.model.NotificationProcessor;
@@ -34,11 +35,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
+import javax.management.MBeanServerConnection;
 import javax.management.Notification;
+import javax.management.NotificationListener;
 import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -50,28 +55,59 @@ import java.util.concurrent.ThreadPoolExecutor;
  * send over the wire via RMI when registering. The listener should only contain
  * logic and dispatch to the local "handback" when receiving a notification.
  */
-class NotificationProcessorImpl implements NotificationProcessor {
+public class NotificationProcessorImpl implements NotificationProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(NotificationProcessorImpl.class);
 
 	private final Server server;
 	private final Query query;
-	private final ObjectInstance oi;
 	private final ExecutorRepository resultExecutorRepository;
+	private final JMXConnection jmxConnection;
+	private final Set<ObjectName> registeredNames = new HashSet<>();
 
-	NotificationProcessorImpl(Server server, Query query, ObjectInstance oi, ExecutorRepository resultExecutorRepository) {
+	NotificationProcessorImpl(Server server, Query query, ExecutorRepository resultExecutorRepository, JMXConnection jmxConnection) {
 		this.server = server;
 		this.query = query;
-		this.oi = oi;
 		this.resultExecutorRepository = resultExecutorRepository;
+		this.jmxConnection = jmxConnection;
 	}
 
 	@Override
-	public void handleNotification(final AttributeChangeNotification notification) {
+	public synchronized void subscribe(Server server, Query query) throws Exception {
+		MBeanServerConnection mbeanServer = jmxConnection.getMBeanServerConnection();
+		Iterable<ObjectName> queryNames = mbeanServer.queryNames(query.getObjectName(), null);
+		for (ObjectName queryName : queryNames) {
+			if(!registeredNames.add(queryName)) {
+				// Already added.
+				logger.debug("Query name {} was already added.", queryName);
+				continue;
+			}
+			final ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
+			Object handback = this;
+			logger.info("Adding notification listener for object instance {}.", oi);
+			jmxConnection.addNotificationListener(oi.getObjectName(),
+					new NotificationListener() {
+						@Override
+						public void handleNotification(Notification notification, Object handback) {
+							logger.info("Handle notification {}.", notification);
+							NotificationProcessorImpl handler = (NotificationProcessorImpl) handback;
+							if (notification instanceof AttributeChangeNotification) {
+								handler.handleNotification(oi, (AttributeChangeNotification) notification);
+							} else {
+								logger.error("Don't know how to process this notification {}.", notification);
+							}
+						}
+					},
+					null, // TODO: filter??
+					handback);
+		}
+	}
+
+	private void handleNotification(final ObjectInstance oi, final AttributeChangeNotification notification) {
 		ThreadPoolExecutor executor = resultExecutorRepository.getExecutor(server);
 		Runnable task = new Runnable() {
 			@Override
 			public void run() {
-				List<Result> results = transform(notification);
+				List<Result> results = transform(oi, notification);
 				for (OutputWriter outputWriter : query.getOutputWriterInstances()) {
 					try {
 						outputWriter.doWrite(server, query, results);
@@ -84,14 +120,18 @@ class NotificationProcessorImpl implements NotificationProcessor {
 		executor.submit(task);
 	}
 
-	private List<Result> transform(AttributeChangeNotification notification) {
-		AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
+	private List<Result> transform(ObjectInstance oi, AttributeChangeNotification changeNotification) {
 		List<Attribute> attributes = new ArrayList<>(1);
 		attributes.add(new Attribute(changeNotification.getAttributeName(),
 				changeNotification.getNewValue()));
-		long epoch = notification.getTimeStamp();
+		long epoch = changeNotification.getTimeStamp();
 		return new JmxResultProcessor(query, oi, attributes,
 				oi.getClassName(), query.getObjectName().getDomain(),
 				epoch).getResults();
+	}
+
+	@Override
+	public void close() {
+		jmxConnection.close();
 	}
 }

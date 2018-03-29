@@ -437,18 +437,9 @@ public class Server implements JmxConnectionProvider {
 		logger.debug("Finished running outputWriters for query: {}", query);
 	}
 
-	// Called when a new jmxConnection is created
-	@Override
-	public void subscribeToNotifications(JMXConnection jmxConnection) throws Exception {
-		for (Query query : queries) {
-			try {
-				if(query.getQueryType() == Query.QueryType.NOTIFICATIONS) {
-					query.subscribeToNotifications(this, jmxConnection);
-				}
-			} catch (Exception ex) {
-				logger.error("Error while registering notification listeners", ex);
-			}
-		}
+	// Called periodically to deal with newly added MBeans.
+	public void subscribeToNotifications(Query query) throws Exception {
+		query.subscribeToNotifications(this);
 	}
 
 	/**

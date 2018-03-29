@@ -1,7 +1,7 @@
 {
   "servers" : [ {
     "port" : "1099",
-    "host" : "w2",
+    "host" : "localhost",
     "queries" : [ {
       "outputWriters" : [ {
         "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter",

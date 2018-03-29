@@ -22,10 +22,18 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import javax.management.ObjectInstance;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-public interface NotificationProcessorFactory {
+import javax.annotation.Nonnull;
 
-	NotificationProcessor create(Server server, Query query, ObjectInstance oi);
+@EqualsAndHashCode
+public class ServerQuery {
+	@Nonnull @Getter private final Server server;
+	@Nonnull @Getter private final Query query;
 
+	public ServerQuery(Server server, Query query) {
+		this.server = server;
+		this.query = query;
+	}
 }

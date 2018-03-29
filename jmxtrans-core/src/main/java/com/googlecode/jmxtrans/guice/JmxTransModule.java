@@ -46,9 +46,10 @@ import com.googlecode.jmxtrans.executors.CommonExecutorRepository;
 import com.googlecode.jmxtrans.executors.ExecutorFactory;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.executors.SeparateExecutorRepository;
-import com.googlecode.jmxtrans.model.NotificationProcessorFactory;
+import com.googlecode.jmxtrans.model.NotificationProcessor;
+import com.googlecode.jmxtrans.model.ServerQuery;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
-import com.googlecode.jmxtrans.notifications.NotificationProcessorFactoryImpl;
+import com.googlecode.jmxtrans.notifications.NotificationProcessorFactory;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -86,12 +87,18 @@ public class JmxTransModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(new TypeLiteral<GenericKeyedObjectPool<InetSocketAddress, Socket>>(){})
-				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName(), 0));
+				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName(), 0, -1));
 		bind(new TypeLiteral<GenericKeyedObjectPool<SocketAddress, DatagramSocket>>(){})
-				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName(), 0));
+				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName(), 0, -1));
 		bind(new TypeLiteral<KeyedObjectPool<JmxConnectionProvider, JMXConnection>>(){}).annotatedWith(Names.named("mbeanPool"))
-				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName(), 20000));
-		bind(NotificationProcessorFactory.class).to(NotificationProcessorFactoryImpl.class);
+				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName(), 20000, -1));
+	}
+
+	@Provides
+	@Singleton
+	@Named("notificationProcessors")
+	KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors(@Named("resultExecutorRepository") ExecutorRepository executorRepository) {
+		return getObjectPool(new NotificationProcessorFactory(executorRepository), NotificationProcessorFactory.class.getSimpleName(), 20000, 1);
 	}
 
 	@Provides
@@ -147,10 +154,10 @@ public class JmxTransModule extends AbstractModule {
 			: new CommonExecutorRepository(executorFactory);
 	}
 
-	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName, long maxWaitMillis) {
+	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName, long maxWaitMillis, int maxActive) {
 		GenericKeyedObjectPool<K, V> pool = new GenericKeyedObjectPool<>(factory);
 		pool.setTestOnBorrow(true);
-		pool.setMaxActive(-1);
+		pool.setMaxActive(maxActive);
 		pool.setMaxIdle(-1);
 		pool.setTimeBetweenEvictionRunsMillis(MILLISECONDS.convert(5, MINUTES));
 		pool.setMinEvictableIdleTimeMillis(MILLISECONDS.convert(5, MINUTES));
