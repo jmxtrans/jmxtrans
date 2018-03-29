@@ -46,8 +46,6 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 		} else {
 			JMXConnector connection = server.getServerConnection();
 			newJMXConnection =  new JMXConnection(connection, connection.getMBeanServerConnection());
-			// TODO: also for local???
-			server.subscribeToNotifications(newJMXConnection);
 		}
 		return newJMXConnection;
 	}

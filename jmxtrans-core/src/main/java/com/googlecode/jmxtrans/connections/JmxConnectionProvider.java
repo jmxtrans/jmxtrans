@@ -39,14 +39,4 @@ public interface JmxConnectionProvider {
 	MBeanServer getLocalMBeanServer();
 
 	boolean isLocal();
-
-	/**
-	 * Registers notification listeners in the JMX connection
-	 * as needed by the queries configured for the server.
-	 * @see com.googlecode.jmxtrans.model.Query.QueryType#NOTIFICATIONS
-	 *
-	 * @param jmxConnection
-	 * @throws Exception
-	 */
-	void subscribeToNotifications(JMXConnection jmxConnection) throws Exception;
 }
