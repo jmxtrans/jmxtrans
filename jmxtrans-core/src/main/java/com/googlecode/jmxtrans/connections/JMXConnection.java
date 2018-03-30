@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.InstanceNotFoundException;
+import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
@@ -64,6 +65,13 @@ public class JMXConnection implements Closeable {
 				objectName, mBeanServerConnection);
 		this.mBeanServerConnection.addNotificationListener(objectName,
 				notificationListener, notificationFilter, handback);
+	}
+
+	public void removeNotificationListener(ObjectName objectName,
+										   NotificationListener notificationListener) throws IOException, InstanceNotFoundException, ListenerNotFoundException {
+		logger.info("Remove notification listener for name {}, mBeanServerConnection {}.",
+				objectName, mBeanServerConnection);
+		this.mBeanServerConnection.removeNotificationListener(objectName, notificationListener);
 	}
 
 	public boolean isAlive() {

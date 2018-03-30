@@ -25,17 +25,20 @@ package com.googlecode.jmxtrans.model;
 import java.io.Closeable;
 
 /**
- * Manages subscriptions to notifications.
- * Feeds received notifications into output writers.
+ * Manages subscriptions to JMX notifications and acts as a notification listener.
+ * Feeds received notifications into output writers of the query.
+ *
+ * @see javax.management.NotificationListener
  */
 public interface NotificationProcessor extends Closeable {
 	/**
 	 * Needs to be called periodically to ensure that
-	 * a listener for each object name is subscribed.
+	 * a {@link javax.management.NotificationListener} for each (remote) object name
+	 * is subscribed.
 	 *
 	 * @param server
 	 * @param query
 	 * @throws Exception
 	 */
-	void subscribe(Server server, Query query) throws Exception;
+	void subscribeToNotifications(Server server, Query query) throws Exception;
 }
