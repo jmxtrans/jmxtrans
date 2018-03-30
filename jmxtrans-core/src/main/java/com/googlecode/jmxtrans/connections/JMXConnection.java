@@ -67,8 +67,7 @@ public class JMXConnection implements Closeable {
 				notificationListener, notificationFilter, handback);
 	}
 
-	public void removeNotificationListener(ObjectName objectName,
-										   NotificationListener notificationListener) throws IOException, InstanceNotFoundException, ListenerNotFoundException {
+	public void removeNotificationListener(ObjectName objectName, NotificationListener notificationListener) throws IOException, InstanceNotFoundException, ListenerNotFoundException {
 		logger.info("Remove notification listener for name {}, mBeanServerConnection {}.",
 				objectName, mBeanServerConnection);
 		this.mBeanServerConnection.removeNotificationListener(objectName, notificationListener);
