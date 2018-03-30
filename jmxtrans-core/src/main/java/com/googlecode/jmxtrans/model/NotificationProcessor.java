@@ -32,13 +32,13 @@ import java.io.Closeable;
  */
 public interface NotificationProcessor extends Closeable {
 	/**
-	 * Needs to be called periodically to ensure that
-	 * a {@link javax.management.NotificationListener} for each (remote) object name
-	 * is subscribed.
+	 * Should be called periodically.
 	 *
-	 * @param server
-	 * @param query
-	 * @throws Exception
+	 * Gets matching object names from the remote and
+	 * 1) adds a notification listener for each object name where we have not subscribed, yet
+	 * 2) removes the notification listener where the remote object name was removed.
+	 *
+	 * @throws Exception this notification processor should be closed in case of any exception
 	 */
-	void subscribeToNotifications(Server server, Query query) throws Exception;
+	void subscribeToNotifications() throws Exception;
 }

@@ -55,7 +55,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * Processes received notifications and passes them to output writers
  * after converting each notification to a result object.
  * A notification processor instance is registered as a "handback" object
- * per {@link ObjectName} in {@link #subscribeToNotifications(Server, Query)}.
+ * per {@link ObjectName} in {@link #subscribeToNotifications()}.
  *
  * <p>
  * Notification listeners need to be serializable and are
@@ -71,7 +71,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * <p>
  * Notification processors are managed in an object pool, one processor
  * per server - query tuple. If anything goes wrong during
- * {@link #subscribeToNotifications(Server, Query)} the notification processor
+ * {@link #subscribeToNotifications()} the notification processor
  * will be closed ({@link #close()}) and removed from the pool.
  * The next call to subscribe will make sure that subscriptions
  * are re-created.
@@ -94,17 +94,10 @@ public class NotificationProcessorImpl implements NotificationProcessor {
 	}
 
 	/**
-	 *
-	 *
-	 *
 	 * Needs to be synchronized to ensure thread-safe access of registeredListeners map.
-	 *
-	 * @param server
-	 * @param query
-	 * @throws Exception
 	 */
 	@Override
-	public synchronized void subscribeToNotifications(Server server, Query query) throws Exception {
+	public synchronized void subscribeToNotifications() throws Exception {
 		MBeanServerConnection mbeanServer = jmxConnection.getMBeanServerConnection();
 		// Query remote object names periodically to 1) find out if the JMX connection is still alive
 		// and 2) ensure that we have a notification listener in place for all object names.

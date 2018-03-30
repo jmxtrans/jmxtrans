@@ -277,7 +277,7 @@ public class Query {
 		ServerQuery serverQuery = new ServerQuery(server, this);
 		try {
 			processor = notificationProcessors.borrowObject(serverQuery);
-			processor.subscribeToNotifications(server, this);
+			processor.subscribeToNotifications();
 		} catch (Exception e) {
 			if(processor != null) {
 				notificationProcessors.invalidateObject(serverQuery, processor);
