@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
+import javax.management.AttributeChangeNotificationFilter;
 import javax.management.InstanceNotFoundException;
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServerConnection;
@@ -137,9 +138,19 @@ public class NotificationProcessorImpl implements NotificationProcessor {
 		};
 		//Internal bookkeeping so we know which listeners are registered.
 		registeredListeners.put(oi.getObjectName(), listener);
+
+		AttributeChangeNotificationFilter filter = null;
+		if(!query.getAttr().isEmpty()) {
+			filter =
+					new AttributeChangeNotificationFilter();
+			for(String attribute : query.getAttr()) {
+				filter.enableAttribute(attribute);
+			}
+		}
+
 		jmxConnection.addNotificationListener(oi.getObjectName(),
 				listener,
-				null, // TODO: filter??
+				filter,
 				handback);
 	}
 
