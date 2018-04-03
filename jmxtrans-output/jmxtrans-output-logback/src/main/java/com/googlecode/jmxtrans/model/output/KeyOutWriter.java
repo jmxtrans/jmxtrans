@@ -159,7 +159,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 			if (isNumeric(result.getValue())) {
 
 				logger.info(KeyUtils.getKeyString(server, query, result, typeNames, null) + delimiter
-						+ result.getValue().toString() + delimiter + result.getEpoch());
+						+ result.getValue().toString() + delimiter + result.getEpoch()/1000);
 			}
 		}
 	}
