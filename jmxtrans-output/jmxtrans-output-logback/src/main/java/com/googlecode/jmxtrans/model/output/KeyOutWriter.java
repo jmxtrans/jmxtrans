@@ -78,7 +78,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	protected static final String MAX_LOG_FILE_SIZE = "10MB";
 	protected static final String DEFAULT_LOG_PATTERN = "%msg%n";
 	protected static final String DEFAULT_DELIMITER = "\t";
-	protected Logger logger;
+	protected LogWriter logwriter;
 
 
 	private final String outputFile;
@@ -130,17 +130,19 @@ public class KeyOutWriter extends BaseOutputWriter {
 	@Override
 	public void validateSetup(Server server, Query query) throws ValidationException {
 		// Check if we've already created a logger for this file. If so, use it.
+		Logger logger;
 		if (loggers.containsKey(outputFile)) {
 			logger = getLogger(outputFile);
-			return;
+		}else{
+			// need to create a logger
+			try {
+				logger = buildLogger(outputFile);
+				loggers.put(outputFile, logger);
+			} catch (IOException e) {
+				throw new ValidationException("Failed to setup logback", query, e);
+			}
 		}
-		// need to create a logger
-		try {
-			logger = buildLogger(outputFile);
-			loggers.put(outputFile, logger);
-		} catch (IOException e) {
-			throw new ValidationException("Failed to setup logback", query, e);
-		}
+		logwriter = new LogWriter(logger,delimiter);
 	}
 
 	@VisibleForTesting
@@ -154,7 +156,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 * @author a690062
 	 *
 	 */
-	public class LogWriter extends Writer{
+	public static class LogWriter extends Writer{
 		
 		private Logger logger;
 		private String delimiter;
@@ -191,7 +193,6 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 */
 	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		LogWriter logwriter = new LogWriter(logger,delimiter);
 		graphiteWriter.write(logwriter, server, query, results);
 	}
 
