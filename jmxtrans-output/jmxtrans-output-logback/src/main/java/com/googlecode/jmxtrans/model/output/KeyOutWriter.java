@@ -44,14 +44,12 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
 
 import java.io.IOException;
-import java.util.List;
+import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 /**
  * Writes out data in the same format as the GraphiteWriter, except to a file
@@ -88,6 +86,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 	private final int maxLogBackupFiles;
 	private final String delimiter;
 	private final String logPattern;
+	private final GraphiteWriter2 graphiteWriter;
 
 	@JsonCreator
 	public KeyOutWriter(
@@ -122,6 +121,7 @@ public class KeyOutWriter extends BaseOutputWriter {
 				(String) getSettings().get(SETTING_DELIMITER),
 				DEFAULT_DELIMITER
 		);
+		graphiteWriter = new GraphiteWriter2(typeNames, null);
 	}
 
 	/**
@@ -147,21 +147,52 @@ public class KeyOutWriter extends BaseOutputWriter {
 	Logger getLogger(String outputFile) {
 		return loggers.get(outputFile);
 	}
+	
+	/**
+	 * Simple class which extends the Writer Class in order to use
+	 * our logger with the GraphiteWriter2 implementation.
+	 * @author a690062
+	 *
+	 */
+	public class LogWriter extends Writer{
+		
+		private Logger logger;
+		private String delimiter;
+		
+		public LogWriter(Logger logger, String delimiter) {
+			this.logger = logger;
+			this.delimiter = delimiter;
+		}
+		
+		@Override
+		public void write(String str) throws IOException{
+			logger.info(str.replace("\n", "").replace(" ", delimiter));
+		}
+		
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException {
+			logger.info(String.copyValueOf(cbuf, off, len).replace("\n", "").replace(" ", delimiter));
+		}
+		
+		@Override
+		public void flush() throws IOException {
+			//Do nothing			
+		}
+		
+		@Override
+		public void close() throws IOException {
+			// Do nothing
+		}
+	}
 
 	/**
-	 * The meat of the output. Very similar to GraphiteWriter.
+	 * The meat of the output. Reuses the GraphiteWriter2 class but writes in a logfile
+	 * instead of a network socket.
 	 */
 	@Override
 	public void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception {
-		List<String> typeNames = getTypeNames();
-
-		for (Result result : results) {
-			if (isNumeric(result.getValue())) {
-
-				logger.info(KeyUtils.getKeyString(server, query, result, typeNames, null) + delimiter
-						+ result.getValue().toString() + delimiter + result.getEpoch()/1000);
-			}
-		}
+		LogWriter logwriter = new LogWriter(logger,delimiter);
+		graphiteWriter.write(logwriter, server, query, results);
 	}
 
 	/**
