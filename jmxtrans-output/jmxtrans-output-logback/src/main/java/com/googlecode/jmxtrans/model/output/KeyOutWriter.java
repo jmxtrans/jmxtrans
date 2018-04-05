@@ -78,9 +78,8 @@ public class KeyOutWriter extends BaseOutputWriter {
 	protected static final String MAX_LOG_FILE_SIZE = "10MB";
 	protected static final String DEFAULT_LOG_PATTERN = "%msg%n";
 	protected static final String DEFAULT_DELIMITER = "\t";
-	protected LogWriter logwriter;
-
-
+	
+	private LogWriter logwriter;
 	private final String outputFile;
 	private final String maxLogFileSize;
 	private final int maxLogBackupFiles;
@@ -158,8 +157,8 @@ public class KeyOutWriter extends BaseOutputWriter {
 	 */
 	public static class LogWriter extends Writer{
 		
-		private Logger logger;
-		private String delimiter;
+		private final Logger logger;
+		private final String delimiter;
 		
 		public LogWriter(Logger logger, String delimiter) {
 			this.logger = logger;
