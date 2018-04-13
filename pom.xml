@@ -131,7 +131,7 @@
 	</distributionManagement>
 	<properties>
 		<animal-sniffer.version>1.16</animal-sniffer.version>
-		<aws.java.sdk.version>1.11.228</aws.java.sdk.version>
+		<aws.java.sdk.version>1.11.313</aws.java.sdk.version>
 		<!--
 			Maximum number of checkstyle violations allowed. Build will fail
 			if there are more than this number of violations. Feel free to
@@ -442,7 +442,8 @@
 				<artifactId>quartz</artifactId>
 				<version>1.8.6</version>
 			</dependency>
-			<dependency><!-- quartz and jmxtrans-output-log4j depend on log4j -->
+			<dependency>
+				<!-- quartz and jmxtrans-output-log4j depend on log4j -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>
 				<version>${slf4j.version}</version>
@@ -793,7 +794,7 @@
 							<phase>test-compile</phase>
 							<configuration>
 								<rules>
-									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule" />
+									<NoPackageCyclesRule implementation="de.andrena.tools.nopackagecycles.NoPackageCyclesRule"></NoPackageCyclesRule>
 								</rules>
 							</configuration>
 						</execution>

@@ -22,10 +22,24 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
@@ -34,7 +48,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
@@ -42,22 +55,9 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.output.support.MaxBatchSizeWriter;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 import com.googlecode.jmxtrans.util.ObjectToDouble;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Writes data to <a href="http://aws.amazon.com/cloudwatch/">AWS CloudWatch</a> using the AWS Java SDK
@@ -93,10 +93,10 @@ public class CloudWatchWriter implements OutputWriterFactory {
 	 *
 	 * Credentials are loaded from the Amazon EC2 Instance Metadata Service
 	 */
-	private AmazonCloudWatchClient createCloudWatchClient() {
-		AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
-		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));
-		return cloudWatchClient;
+	private AmazonCloudWatch createCloudWatchClient() {
+		return AmazonCloudWatchClientBuilder.standard()
+				.withCredentials(InstanceProfileCredentialsProvider.getInstance())
+				.build();
 	}
 
 	private ImmutableList<Dimension> createDimensions(Iterable<Map<String, Object>> dimensions) {
@@ -109,7 +109,10 @@ public class CloudWatchWriter implements OutputWriterFactory {
 	public OutputWriter create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
-				new Writer(namespace, createCloudWatchClient(), createDimensions(dimensions))
+				new MaxBatchSizeWriter(
+						20, // CloudWatch does not support more than 20 entries in a single request
+						new Writer(namespace, createCloudWatchClient(), createDimensions(dimensions))
+				)
 		);
 	}
 
@@ -128,7 +131,7 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		}
 
 		@Override
-		public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
+		public void doWrite(Server server, Query query, Iterable<Result> results) {
 			PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
 			metricDataRequest.setNamespace(namespace);
 			List<MetricDatum> metricDatumList = new ArrayList<>();
@@ -165,7 +168,7 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		}
 
 		@Override
-		public void close() throws LifecycleException {
+		public void close() {
 			cloudWatchClient.shutdown();
 		}
 	}

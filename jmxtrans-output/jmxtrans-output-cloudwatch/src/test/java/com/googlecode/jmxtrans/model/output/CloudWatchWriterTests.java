@@ -27,14 +27,13 @@ import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
@@ -65,7 +64,7 @@ public class CloudWatchWriterTests {
 	}
 
 	@Test
-	public void testValidationWithoutSettings() throws Exception {
+	public void testValidationWithoutSettings() {
 		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
@@ -84,7 +83,7 @@ public class CloudWatchWriterTests {
 	}
 
 	@Test
-	public void cloudwatchClientIsClosed() throws LifecycleException {
+	public void cloudwatchClientIsClosed() {
 		writer.close();
 		verify(cloudWatchClient).shutdown();
 	}

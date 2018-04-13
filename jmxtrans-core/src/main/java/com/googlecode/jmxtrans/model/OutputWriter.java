@@ -30,15 +30,17 @@ import java.util.Map;
 
 import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
+import javax.annotation.Nonnull;
+
 /**
  * Interface which defines a writer for taking jmx data and writing it out in
  * whatever format you want.
- * 
+ *
  * Note that this class uses a feature of Jackson to serialize anything that
  * implements this as a "@class". That way, when Jackson deserializes
  * implementations of this interface, it is done with new objects that implement
  * this interface.
- * 
+ *
  * @author jon
  */
 @JsonSerialize(include = NON_NULL)
@@ -50,7 +52,7 @@ public interface OutputWriter extends AutoCloseable {
 	@Override
 	void close() throws LifecycleException;
 
-	void doWrite(Server server, Query query, Iterable<Result> results) throws Exception;
+	void doWrite(@Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws Exception;
 
 	/**
 	 * Settings allow you to configure your Writers with whatever they might
