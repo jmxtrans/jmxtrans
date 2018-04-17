@@ -29,6 +29,7 @@ RUN apk update \
    && apk add curl \
    && apk add gnupg \
    && apk add tini \
+   && apk add libc6-compat \
    && apk add bash
 
 ## grab gosu for easy step-down from root
