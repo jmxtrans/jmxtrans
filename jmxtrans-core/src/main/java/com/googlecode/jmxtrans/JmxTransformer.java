@@ -69,6 +69,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.UUID;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
@@ -463,7 +464,7 @@ public class JmxTransformer implements WatchedCallback {
 			trigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			// TODO replace Quartz with a ScheduledExecutorService
 		}
-		trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.nanoTime()));
+		trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.nanoTime()) + "-" + UUID.randomUUID().toString().substring(0, 8));
 		trigger.setStartTime(computeSpreadStartDate(runPeriod));
 		return trigger;
 	}
