@@ -40,10 +40,9 @@ RUN curl -L -o /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/down
     && export GNUPGHOME="$(mktemp -d)" \
     && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
     && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-    && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+    && rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
     && chmod +x /usr/local/bin/gosu \
     && gosu nobody true
-
 
 ENV JMXTRANS_HOME /usr/share/jmxtrans
 ENV PATH $JMXTRANS_HOME/bin:$PATH
@@ -68,6 +67,11 @@ RUN mkdir -p /usr/share/jmxtrans/lib/ \
     && JMXTRANS_VERSION=`curl http://central.maven.org/maven2/org/jmxtrans/jmxtrans/maven-metadata.xml | sed -n 's:.*<release>\(.*\)</release>.*:\1:p'` \
     && mkdir -p /var/log/jmxtrans \
     && wget -q http://central.maven.org/maven2/org/jmxtrans/jmxtrans/${JMXTRANS_VERSION}/jmxtrans-${JMXTRANS_VERSION}-all.jar \
+    && wget -q http://central.maven.org/maven2/org/jmxtrans/jmxtrans/${JMXTRANS_VERSION}/jmxtrans-${JMXTRANS_VERSION}-all.jar.asc \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 0xA86366E77BED6718 \
+    && gpg --batch --verify jmxtrans-${JMXTRANS_VERSION}-all.jar.asc jmxtrans-${JMXTRANS_VERSION}-all.jar \
+    && rm -rf "$GNUPGHOME" jmxtrans-${JMXTRANS_VERSION}-all.jar.asc \
     && mv jmxtrans-${JMXTRANS_VERSION}-all.jar ${JAR_FILE}
 
 COPY docker-entrypoint.sh /
