@@ -25,26 +25,26 @@
 
 # Specify the commonly used configuration options below in a config file.
 CONF_FILE=${CONF_FILE:-"jmxtrans.conf"}
-if [ -e "$CONF_FILE" ]; then
-    . "$CONF_FILE"
+if [ -e "${CONF_FILE}" ]; then
+    . "${CONF_FILE}"
 fi
 
 # Java runtime
 JAVA_HOME=${JAVA_HOME:-"/usr"}
 JAVA=${JAVA:-"${JAVA_HOME}/bin/java"}
 CHECK_JAVA=${CHECK_JAVA:-"true"}
-if [ "$CHECK_JAVA" == "true" ]; then
-    JAVA_VERSION=`$JAVA -version 2>&1`
+if [ "${CHECK_JAVA}" == "true" ]; then
+    ${JAVA} -version 2>&1
     if [ $? != 0 ]; then
-        echo "Cannot execute $JAVA!"
+        echo "Cannot execute ${JAVA}!"
         exit 1
     fi
 fi
 
 # Classpath and additional Jar files
 JAR_FILE=${JAR_FILE:-"lib/jmxtrans-all.jar"}
-if [ ! -f $JAR_FILE ]; then
-  echo "File not found - $JAR_FILE"
+if [ ! -f ${JAR_FILE} ]; then
+  echo "File not found - ${JAR_FILE}"
   exit 1
 fi
 ADDITIONAL_JARS=${ADDITIONAL_JARS:-""}
@@ -57,7 +57,7 @@ fi
 # Logging
 LOG_DIR=${LOG_DIR:-"."}
 LOG_LEVEL=${LOG_LEVEL:-"debug"}
-LOG_OPTS=${LOG_OPTS:-"-Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log.dir=$LOG_DIR"}
+LOG_OPTS=${LOG_OPTS:-"-Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log.dir=${LOG_DIR}"}
 
 # Memory and GC tuning
 HEAP_SIZE=${HEAP_SIZE:-"512"}
@@ -77,6 +77,8 @@ JMXTRANS_OPTS=${JMXTRANS_OPTS:-""}
 
 # SSL truststore for JMX over SSL
 SSL_OPTS=${SSL_OPTS:-""}
+SSL_TRUSTSTORE=${SSL_TRUSTSTORE:-""}
+SSL_TRUSTSTORE_PASSWORD=${SSL_TRUSTSTORE_PASSWORD:-""}
 if [[ "${SSL_TRUSTSTORE}" != "" ]]; then
     SSL_OPTS="${SSL_OPTS} -Djavax.net.ssl.trustStore=${SSL_TRUSTSTORE}"
     if [[ "${SSL_TRUSTSTORE_PASSWORD}" != "" ]]; then
@@ -85,13 +87,13 @@ if [[ "${SSL_TRUSTSTORE}" != "" ]]; then
 fi
 
 # Arguments
-FILENAME=$1
-if [ -z "$FILENAME" ]; then
+FILENAME=${1}
+if [ -z "${FILENAME}" ]; then
 	JSON_DIR=${JSON_DIR:-"."}
-	EXEC=${EXEC:-"-jar $JAR_FILE -e -j $JSON_DIR -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
+	EXEC=${EXEC:-"-jar ${JAR_FILE} -e -j ${JSON_DIR} -s ${SECONDS_BETWEEN_RUNS} -c ${CONTINUE_ON_ERROR} ${ADDITIONAL_JARS_OPTS}"}
 else
-	EXEC=${EXEC:-"-jar $JAR_FILE -e -f $FILENAME -s $SECONDS_BETWEEN_RUNS -c $CONTINUE_ON_ERROR $ADDITIONAL_JARS_OPTS"}
+	EXEC=${EXEC:-"-jar ${JAR_FILE} -e -f ${FILENAME} -s ${SECONDS_BETWEEN_RUNS} -c ${CONTINUE_ON_ERROR} ${ADDITIONAL_JARS_OPTS}"}
 fi
 
-$JAVA $JAVA_OPTS $GC_OPTS ${LOG_OPTS} $MONITOR_OPTS ${SSL_OPTS} $JMXTRANS_OPTS $EXEC
+${JAVA} ${JAVA_OPTS} ${GC_OPTS} ${LOG_OPTS} ${MONITOR_OPTS} ${SSL_OPTS} ${JMXTRANS_OPTS} ${EXEC}
 
