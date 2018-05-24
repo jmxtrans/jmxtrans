@@ -473,6 +473,41 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>docker</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>io.fabric8</groupId>
+						<artifactId>docker-maven-plugin</artifactId>
+						<version>0.26.0</version>
+						<configuration>
+							<images>
+								<image>
+									<alias>jmxtrans</alias>
+									<name>jmxtrans/jmxtrans:${project.version}</name>
+
+									<build>
+										<from>openjdk:8-jre-alpine</from>
+										<assembly>
+											<descriptor>docker.xml</descriptor>
+										</assembly>
+										<dockerFileDir>files</dockerFileDir>
+									</build>
+								</image>
+							</images>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>build</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 </project>
