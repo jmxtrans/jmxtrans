@@ -115,11 +115,15 @@ public class CloudWatchWriter extends BaseOutputWriter {
 	public void start() throws LifecycleException {
 		super.start();
 
-		amazonCloudWatch = AmazonCloudWatchClient.builder()
+		amazonCloudWatch = startAmazonCloudWatch();
+		logger.debug("Started CloudWatch client: {}", amazonCloudWatch);
+	}
+
+	AmazonCloudWatch startAmazonCloudWatch() {
+		return AmazonCloudWatchClient.builder()
 				.withCredentials(InstanceProfileCredentialsProvider.getInstance())
 				.withRegion(Regions.getCurrentRegion().getName())
 				.build();
-		logger.debug("Started CloudWatch client: {}", amazonCloudWatch);
 	}
 
 	@Override
@@ -198,6 +202,14 @@ public class CloudWatchWriter extends BaseOutputWriter {
 
 	private Double toDouble(Object value) {
 		return OBJECT_TO_DOUBLE.apply(value);
+	}
+
+	String getNamespace() {
+		return namespace;
+	}
+
+	Collection<Dimension> getDimensions() {
+		return dimensions;
 	}
 
 }
