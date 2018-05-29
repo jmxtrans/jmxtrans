@@ -32,6 +32,7 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
+import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
@@ -69,7 +70,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
 	@Nonnull private final ImmutableMap<String,String> tags;
-	@Nonnull ImmutableList<String> typeNames;
+	@Nonnull private final ImmutableList<String> typeNames;
+	@Nonnull private final ImmutableList<String> typeNamesForTags;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -79,6 +81,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 	private final boolean createDatabase;
 	private final boolean reportJmxPortAsTag;
+	private final boolean typeNamesAsTags;
 
 	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
 		@Override
@@ -96,14 +99,17 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			@Nonnull ImmutableList<String> typeNames,
 			boolean createDatabase,
-			boolean reportJmxPortAsTag) {
+			boolean reportJmxPortAsTag,
+			boolean typeNamesAsTags) {
 		this.typeNames = typeNames;
+		this.typeNamesForTags = typeNamesAsTags ? typeNames : ImmutableList.<String>of();
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
+		this.typeNamesAsTags = typeNamesAsTags;
 		this.createDatabase = createDatabase;
 		this.reportJmxPortAsTag = reportJmxPortAsTag;
 	}
@@ -207,6 +213,15 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addTo(resultTagMap, result);
+		}
+
+		if (typeNamesAsTags) {
+			Map<String, String> typeNameValueMap = TypeNameValue.extractMap(resultTagMap.get("typeName"));
+			for (String typeToTag : this.typeNamesForTags) {
+				if (typeNameValueMap.containsKey(typeToTag)) {
+					resultTagMap.put(typeToTag, typeNameValueMap.get(typeToTag));
+				}
+			}
 		}
 
 		return resultTagMap;
