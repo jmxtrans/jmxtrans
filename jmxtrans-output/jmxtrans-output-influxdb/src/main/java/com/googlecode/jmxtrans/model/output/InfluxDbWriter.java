@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -102,8 +101,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			boolean createDatabase,
 			boolean reportJmxPortAsTag,
 			boolean typeNamesAsTags) {
-                this.typeNames = typeNames;
-                this.typeNamesForTags = typeNamesAsTags ? typeNames : ImmutableList.<String>of();
+		this.typeNames = typeNames;
+		this.typeNamesForTags = typeNamesAsTags ? typeNames : ImmutableList.<String>of();
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
