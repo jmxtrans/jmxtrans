@@ -454,12 +454,12 @@
 											</mapper>
 										</data>
 										<data>
-											<src>${project.basedir}/src/deb/init.d/</src>
+											<src>${project.basedir}/src/deb/etc/</src>
 											<type>directory</type>
 											<excludes>.DS_Store</excludes>
 											<mapper>
 												<type>perm</type>
-												<prefix>/etc/init.d</prefix>
+												<prefix>/etc</prefix>
 												<filemode>755</filemode>
 												<user>root</user>
 												<group>root</group>
