@@ -186,19 +186,17 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			HashMap<String, Object> filteredValues = newHashMap();
 			Object value = result.getValue();
 
-			ImmutableList<String> typeNamesParam = this.typeNames;
-			// if typeNamesAsTag, we don't concat typeName in values.
-			if (typeNamesAsTags) {
-				typeNamesParam = ImmutableList.<String>of();
+			ImmutableList<String> typeNamesParam = null;
+			// if not typeNamesAsTag, we concat typeName in values.
+			if (!typeNamesAsTags) {
+				typeNamesParam = this.typeNames;
 			}
 
 			String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
 			if (isValidNumber(value)) {
 				filteredValues.put(key, value);
-			}else {
-				if (segregateStringValues) {
+			}else if (segregateStringValues) {
 					filteredValues.put(key + "_str", value);
-				}
 			}
 
 			// send the point if filteredValues isn't empty

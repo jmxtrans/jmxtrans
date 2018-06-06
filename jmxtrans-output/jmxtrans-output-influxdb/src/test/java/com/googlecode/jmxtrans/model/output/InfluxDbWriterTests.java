@@ -202,6 +202,31 @@ public class InfluxDbWriterTests {
 		BatchPoints batchPoints = writeToInfluxDb(getTestInfluxDbWriterWithReportJmxPortAsTag());
 		verifyJMXPortOnlyInToken(batchPoints.getPoints().get(0).lineProtocol(), 0 /*Tags token*/);
 	}
+	
+	@Test
+	public void loadingFromFile() throws URISyntaxException, IOException {
+		File input = new File(InfluxDbWriterTests.class.getResource("/influxDB.json").toURI());
+		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
+		ProcessConfigUtils processConfigUtils = injector.getInstance(ProcessConfigUtils.class);
+		JmxProcess process = processConfigUtils.parseProcess(input);
+		assertThat(process.getName()).isEqualTo("influxDB.json");
+	}
+
+	@Test
+	public void valueString() throws Exception {
+		InfluxDbWriter writer = getTestInfluxDbWriterWithStringValue();
+		writer.doWrite(dummyServer(), dummyQuery(), resultsStr);
+	
+		verify(influxDB).write(messageCaptor.capture());
+		BatchPoints batchPoints = messageCaptor.getValue();
+	
+		assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
+		List<Point> points = batchPoints.getPoints();
+		assertThat(points).hasSize(1);
+	
+		Point point = points.get(0);
+		assertThat(point.lineProtocol()).contains("key_str");
+	}
 
 	private void verifyJMXPortOnlyInToken(String lineProtocol, int tokenContainingJMXPort) {
 		// lineProtocol is from Point.lineProtocol() :
@@ -214,15 +239,6 @@ public class InfluxDbWriterTests {
 		assertThat(protocolTokens).hasSize(3);
 		assertThat(protocolTokens[tokenContainingJMXPort]).contains(JMX_PORT_KEY + "=" + DEFAULT_PORT);
 		assertThat(protocolTokens[1 - tokenContainingJMXPort]).doesNotContain(JMX_PORT_KEY);
-	}
-
-	@Test
-	public void loadingFromFile() throws URISyntaxException, IOException {
-		File input = new File(InfluxDbWriterTests.class.getResource("/influxDB.json").toURI());
-		Injector injector = JmxTransModule.createInjector(new JmxTransConfiguration());
-		ProcessConfigUtils processConfigUtils = injector.getInstance(ProcessConfigUtils.class);
-		JmxProcess process = processConfigUtils.parseProcess(input);
-		assertThat(process.getName()).isEqualTo("influxDB.json");
 	}
 
 	private BatchPoints writeToInfluxDb(InfluxDbWriter writer) throws Exception {
@@ -253,24 +269,7 @@ public class InfluxDbWriterTests {
 		return sb.toString();
 	}
 	
-		@Test
-	public void valueStr() throws Exception {
-		//ImmutableList<String> typeNames = ImmutableList.of("name");
-		InfluxDbWriter writer = getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, DEFAULT_TYPE_NAMES, true, false, false, true);
-		writer.doWrite(dummyServer(), dummyQuery(), resultsStr);
-
-		verify(influxDB).write(messageCaptor.capture());
-		BatchPoints batchPoints = messageCaptor.getValue();
-
-		assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
-		List<Point> points = batchPoints.getPoints();
-		assertThat(points).hasSize(1);
-
-		Point point = points.get(0);
-		assertThat(point.lineProtocol()).contains("key_str");
-	}
-
-	private InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
+		private InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
 		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, DEFAULT_TYPE_NAMES, true, false, false, false);
 	}
 
@@ -290,6 +289,10 @@ public class InfluxDbWriterTests {
 		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, typeNames, true, false, true, false);
 	}
 
+	private InfluxDbWriter getTestInfluxDbWriterWithStringValue() {
+		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, DEFAULT_TYPE_NAMES, true, false, false, true);
+	}
+	
 	private InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
 		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, DEFAULT_TYPE_NAMES, true, false, false, false);
 	}
