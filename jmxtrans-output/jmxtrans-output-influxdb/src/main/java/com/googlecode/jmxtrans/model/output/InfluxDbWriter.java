@@ -180,23 +180,24 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
+		
+		ImmutableList<String> typeNamesParam = null;
+		// if not typeNamesAsTag, we concat typeName in values.
+		if (!typeNamesAsTags) {
+			typeNamesParam = this.typeNames;
+		}
+		
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
 
 			HashMap<String, Object> filteredValues = newHashMap();
 			Object value = result.getValue();
 
-			ImmutableList<String> typeNamesParam = null;
-			// if not typeNamesAsTag, we concat typeName in values.
-			if (!typeNamesAsTags) {
-				typeNamesParam = this.typeNames;
-			}
-
-			String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
+			String key = KeyUtils.getPrefixedKeyString(query, result, typeNamesParam);
 			if (isValidNumber(value)) {
 				filteredValues.put(key, value);
-			}else if (segregateStringValues) {
-					filteredValues.put(key + "_str", value);
+			}else if (segregateStringValues && value instanceof String) {
+				filteredValues.put(key, value);
 			}
 
 			// send the point if filteredValues isn't empty
@@ -228,7 +229,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		if (typeNamesAsTags) {
 			Map<String, String> typeNameValueMap = TypeNameValue.extractMap(resultTagMap.get("typeName"));
 			for (String typeToTag : this.typeNames) {
-				if (typeNameValueMap.get(typeToTag) != null) {
+				if (typeNameValueMap.containsKey(typeToTag)) {
 					resultTagMap.put(typeToTag, typeNameValueMap.get(typeToTag));
 				}
 			}
