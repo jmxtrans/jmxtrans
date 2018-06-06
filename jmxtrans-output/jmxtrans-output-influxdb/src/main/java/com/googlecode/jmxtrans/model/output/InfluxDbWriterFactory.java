@@ -91,7 +91,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag,
 			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
 			@JsonProperty("segregateStringValues") Boolean segregateStringValues) {
-		this.typeNames = typeNames;
+		this.typeNames = firstNonNull(typeNames,ImmutableList.<String>of());
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
 		this.createDatabase = firstNonNull(createDatabase, TRUE);
