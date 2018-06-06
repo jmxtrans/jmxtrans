@@ -225,7 +225,7 @@ public class InfluxDbWriterTests {
 		assertThat(points).hasSize(1);
 	
 		Point point = points.get(0);
-		assertThat(point.lineProtocol()).contains("key_str");
+		assertThat(point.lineProtocol()).contains("key");
 	}
 
 	private void verifyJMXPortOnlyInToken(String lineProtocol, int tokenContainingJMXPort) {
