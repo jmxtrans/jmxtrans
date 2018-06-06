@@ -298,6 +298,7 @@ public class ServerTests {
 		Query query = mock(Query.class);
 		IOException e = mock(IOException.class);
 		when(query.queryNames(mBeanConn)).thenThrow(e);
+		when(query.getQueryType()).thenReturn(Query.QueryType.POLL);
 
 		try {
 			server.execute(query);
@@ -338,6 +339,7 @@ public class ServerTests {
 		Query query = mock(Query.class);
 		RuntimeException e = mock(RuntimeException.class);
 		when(query.queryNames(mBeanConn)).thenThrow(e);
+		when(query.getQueryType()).thenReturn(Query.QueryType.POLL);
 
 		try {
 			server.execute(query);

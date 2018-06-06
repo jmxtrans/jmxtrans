@@ -20,26 +20,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.notifications;
 
+import com.googlecode.jmxtrans.connections.JMXConnection;
+import com.googlecode.jmxtrans.executors.ExecutorRepository;
+import com.googlecode.jmxtrans.model.NotificationProcessor;
+import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.ServerQuery;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
-import javax.annotation.Nonnull;
 import javax.management.remote.JMXConnector;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<JmxConnectionProvider, JMXConnection> {
-	@Nonnull private final ExecutorService executor;
+/**
+ * Creates notification processor for a given server and query.
+ */
+public class NotificationProcessorFactory extends BaseKeyedPoolableObjectFactory<ServerQuery, NotificationProcessor> {
 
-	public MBeanServerConnectionFactory(){
-		executor = Executors.newCachedThreadPool();
+	private final ExecutorRepository executorRepository;
+
+	public NotificationProcessorFactory(ExecutorRepository executorRepository) {
+		this.executorRepository = executorRepository;
 	}
 
 	@Override
-	@Nonnull
-	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws Exception {
+	public NotificationProcessor makeObject(ServerQuery key) throws Exception {
+		Server server = key.getServer();
 		JMXConnection newJMXConnection;
 		if (server.isLocal()) {
 			newJMXConnection = new JMXConnection(null, server.getLocalMBeanServer());
@@ -47,31 +52,10 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 			JMXConnector connection = server.getServerConnection();
 			newJMXConnection =  new JMXConnection(connection, connection.getMBeanServerConnection());
 		}
-		return newJMXConnection;
+		//FIXME
+		return new NotificationProcessorImpl(key.getServer(), key.getQuery(),
+				executorRepository, newJMXConnection);
 	}
 
-	@Override
-	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull final JMXConnection jmxConnection) throws IOException {
-		if (!jmxConnection.isAlive()) {
-			return;
-		}
-
-		jmxConnection.setMarkedAsDestroyed();
-
-		// when you call close it tries to notify server about it
-		// so if your server is down you will wait until connection timed out
-		// but we want to release thread asap
-		// that's why we do it here through ExecutorService
-		executor.submit(new Runnable() {
-			public void run() {
-				jmxConnection.close();
-			}
-		});
-	}
-
-	@Override
-	public boolean validateObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection jmxConnection){
-		return jmxConnection.isAlive();
-	}
 
 }

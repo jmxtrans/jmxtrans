@@ -22,12 +22,14 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
@@ -36,6 +38,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,10 +82,23 @@ import static java.util.Arrays.asList;
 @ToString(exclude = {"outputWriters", "typeNameValuesStringBuilder"})
 public class Query {
 
+	public enum QueryType {
+		/**
+		 * jmxtrans polls configured servers / queries at a regular interval.
+		 */
+		POLL,
+		/**
+		 * JMX notifications are used to send attribute change events
+		 * from the source to jmxtrans.
+		 */
+		NOTIFICATIONS;
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(Query.class);
 
 	/** The JMX object representation: java.lang:type=Memory */
 	@Nonnull @Getter private final ObjectName objectName;
+	@Nonnull @Getter private final QueryType queryType;
 	@Nonnull @Getter private final ImmutableList<String> keys;
 
 	@Nonnull @Getter private final ImmutableList<String> attr;
@@ -119,9 +135,12 @@ public class Query {
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriterInstances;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
 
+	@Nonnull private final KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors;
+
 	@JsonCreator
 	public Query(
 			@JsonProperty("obj") String obj,
+			@JsonProperty("type") String type,
 			@JsonProperty("keys") List<String> keys,
 			@JsonProperty("attr") List<String> attr,
 			@JsonProperty("typeNames") List<String> typeNames,
@@ -129,16 +148,19 @@ public class Query {
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
-			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
+			@JacksonInject @Named("notificationProcessors") KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
 		// For typeName, note the using copyOf does not change the order of
 		// the elements.
-		this(obj, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+		this(obj, type != null ? QueryType.valueOf(type) : QueryType.POLL, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of(),
+				notificationProcessors);
 	}
 
 	public Query(
 			String obj,
+			QueryType queryType,
 			List<String> keys,
 			List<String> attr,
 			Set<String> typeNames,
@@ -146,14 +168,17 @@ public class Query {
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			List<OutputWriterFactory> outputWriters
+			List<OutputWriterFactory> outputWriters,
+			KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
-		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of(),
+				notificationProcessors);
 	}
 
 	public Query(
 			String obj,
+			QueryType queryType,
 			List<String> keys,
 			List<String> attr,
 			Set<String> typeNames,
@@ -161,14 +186,17 @@ public class Query {
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			ImmutableList<OutputWriter> outputWriters
+			ImmutableList<OutputWriter> outputWriters,
+			KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
-		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				ImmutableList.<OutputWriterFactory>of(), outputWriters);
+		this(obj, queryType, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				ImmutableList.<OutputWriterFactory>of(), outputWriters,
+				notificationProcessors);
 	}
 
 	private Query(
 			String obj,
+			QueryType queryType,
 			List<String> keys,
 			List<String> attr,
 			Set<String> typeNames,
@@ -177,7 +205,8 @@ public class Query {
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
 			List<OutputWriterFactory> outputWriterFactories,
-			List<OutputWriter> outputWriters
+			List<OutputWriter> outputWriters,
+			KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors
 	) {
 		try {
 			this.objectName = new ObjectName(obj);
@@ -198,6 +227,8 @@ public class Query {
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 
 		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
+		this.queryType = queryType;
+		this.notificationProcessors = notificationProcessors;
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -241,6 +272,22 @@ public class Query {
 		return ImmutableList.of();
 	}
 
+	public void subscribeToNotifications(final Server server) throws Exception {
+		NotificationProcessor processor = null;
+		ServerQuery serverQuery = new ServerQuery(server, this);
+		try {
+			processor = notificationProcessors.borrowObject(serverQuery);
+			processor.subscribeToNotifications();
+		} catch (Exception e) {
+			if(processor != null) {
+				notificationProcessors.invalidateObject(serverQuery, processor);
+			}
+			throw e;
+		} finally {
+			notificationProcessors.returnObject(serverQuery, processor);
+		}
+	}
+
 	private TypeNameValuesStringBuilder makeTypeNameValuesStringBuilder() {
 		String separator = isAllowDottedKeys() ? "." : TypeNameValuesStringBuilder.DEFAULT_SEPARATOR;
 		Set<String> typeNames = getTypeNames();
@@ -272,6 +319,7 @@ public class Query {
 	@Accessors(chain = true)
 	public static final class Builder {
 		@Setter private String obj;
+		@Setter private QueryType queryType;
 		private final List<String> attr = newArrayList();
 		@Setter private String resultAlias;
 		private final List<String> keys = newArrayList();
@@ -284,11 +332,14 @@ public class Query {
 		// avoid unpredictable ordering of typeNames.
 		private final Set<String> typeNames = newLinkedHashSet();
 
+		private KeyedObjectPool<ServerQuery, NotificationProcessor> notificationProcessors;
+
 		private Builder() {}
 
 		/** This builder does NOT copy output writers from the given query. */
 		private Builder(Query query) {
 			this.obj = query.objectName.toString();
+			this.queryType = query.queryType;
 			this.attr.addAll(query.attr);
 			this.resultAlias = query.resultAlias;
 			this.keys.addAll(query.keys);
@@ -296,6 +347,7 @@ public class Query {
 			this.allowDottedKeys = query.allowDottedKeys;
 			this.useAllTypeNames = query.useAllTypeNames;
 			this.typeNames.addAll(query.typeNames);
+			this.notificationProcessors = query.notificationProcessors;
 		}
 
 		public Builder addAttr(String... attr) {
@@ -335,6 +387,7 @@ public class Query {
 			if (!outputWriterFactories.isEmpty()) {
 				return new Query(
 						this.obj,
+						this.queryType,
 						this.keys,
 						this.attr,
 						this.typeNames,
@@ -342,11 +395,13 @@ public class Query {
 						this.useObjDomainAsKey,
 						this.allowDottedKeys,
 						this.useAllTypeNames,
-						this.outputWriterFactories
+						this.outputWriterFactories,
+						this.notificationProcessors
 				);
 			}
 			return new Query(
 					this.obj,
+					this.queryType,
 					this.keys,
 					this.attr,
 					this.typeNames,
@@ -354,7 +409,8 @@ public class Query {
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
 					this.useAllTypeNames,
-					copyOf(this.outputWriters)
+					copyOf(this.outputWriters),
+					this.notificationProcessors
 			);
 		}
 

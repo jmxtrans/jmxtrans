@@ -20,42 +20,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.test;
+package com.googlecode.jmxtrans.model;
 
-import javax.management.AttributeChangeNotification;
-import javax.management.Notification;
-import javax.management.NotificationBroadcasterSupport;
+import java.io.Closeable;
 
-class Counter extends NotificationBroadcasterSupport implements CounterMXBean {
-	private int counter = 0;
-	private final String name;
-
-	Counter(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public synchronized Integer getValue() {
-		int oldValue = counter;
-		int newValue = counter++;
-		// Send value change via notification also.
-		try {
-			// Value == sequence nr - just a simple test ;)
-			Notification n = new AttributeChangeNotification(this,
-					newValue, System.currentTimeMillis(),
-					"NotificationValue changed", "NotificationValue", "int",
-					oldValue, newValue);
-
-			sendNotification(n);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return newValue;
-	}
-
-
-	@Override
-	public String getName() {
-		return name;
-	}
+/**
+ * Manages subscriptions to JMX notifications and acts as a notification listener.
+ * Feeds received notifications into output writers of the query.
+ *
+ * @see javax.management.NotificationListener
+ */
+public interface NotificationProcessor extends Closeable {
+	/**
+	 * Should be called periodically.
+	 *
+	 * Gets matching object names from the remote and
+	 * 1) adds a notification listener for each object name where we have not subscribed, yet
+	 * 2) removes the notification listener where the remote object name was removed.
+	 *
+	 * @throws Exception this notification processor should be closed in case of any exception
+	 */
+	void subscribeToNotifications() throws Exception;
 }

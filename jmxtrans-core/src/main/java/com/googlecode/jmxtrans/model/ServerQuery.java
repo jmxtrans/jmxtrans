@@ -20,42 +20,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.test;
+package com.googlecode.jmxtrans.model;
 
-import javax.management.AttributeChangeNotification;
-import javax.management.Notification;
-import javax.management.NotificationBroadcasterSupport;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-class Counter extends NotificationBroadcasterSupport implements CounterMXBean {
-	private int counter = 0;
-	private final String name;
+import javax.annotation.Nonnull;
 
-	Counter(String name) {
-		this.name = name;
-	}
+@EqualsAndHashCode
+public class ServerQuery {
+	@Nonnull @Getter private final Server server;
+	@Nonnull @Getter private final Query query;
 
-	@Override
-	public synchronized Integer getValue() {
-		int oldValue = counter;
-		int newValue = counter++;
-		// Send value change via notification also.
-		try {
-			// Value == sequence nr - just a simple test ;)
-			Notification n = new AttributeChangeNotification(this,
-					newValue, System.currentTimeMillis(),
-					"NotificationValue changed", "NotificationValue", "int",
-					oldValue, newValue);
-
-			sendNotification(n);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return newValue;
-	}
-
-
-	@Override
-	public String getName() {
-		return name;
+	public ServerQuery(Server server, Query query) {
+		this.server = server;
+		this.query = query;
 	}
 }

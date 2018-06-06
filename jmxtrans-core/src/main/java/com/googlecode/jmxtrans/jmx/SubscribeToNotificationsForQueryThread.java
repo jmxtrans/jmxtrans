@@ -20,42 +20,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.test;
+package com.googlecode.jmxtrans.jmx;
 
-import javax.management.AttributeChangeNotification;
-import javax.management.Notification;
-import javax.management.NotificationBroadcasterSupport;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Server;
+import lombok.ToString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class Counter extends NotificationBroadcasterSupport implements CounterMXBean {
-	private int counter = 0;
-	private final String name;
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
 
-	Counter(String name) {
-		this.name = name;
+@ThreadSafe
+@ToString(exclude = {"resultProcessor"})
+public class SubscribeToNotificationsForQueryThread implements Runnable {
+
+	private final Logger log = LoggerFactory.getLogger(getClass());
+
+	@Nonnull
+	private final Server server;
+	@Nonnull
+	private final Query query;
+
+	public SubscribeToNotificationsForQueryThread(@Nonnull Server server, @Nonnull Query query) {
+		this.server = server;
+		this.query = query;
 	}
 
 	@Override
-	public synchronized Integer getValue() {
-		int oldValue = counter;
-		int newValue = counter++;
-		// Send value change via notification also.
+	public void run() {
 		try {
-			// Value == sequence nr - just a simple test ;)
-			Notification n = new AttributeChangeNotification(this,
-					newValue, System.currentTimeMillis(),
-					"NotificationValue changed", "NotificationValue", "int",
-					oldValue, newValue);
-
-			sendNotification(n);
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.info("SubscribeToNotificationsForQueryThread");
+			server.subscribeToNotifications(query);
+		} catch (Exception e) {
+			log.error("Error subscribing to notifications for query {} on server {}", query, server, e);
+			throw new RuntimeException(e);
 		}
-		return newValue;
-	}
-
-
-	@Override
-	public String getName() {
-		return name;
 	}
 }

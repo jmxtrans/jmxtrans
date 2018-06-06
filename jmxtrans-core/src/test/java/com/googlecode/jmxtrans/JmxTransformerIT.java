@@ -55,8 +55,11 @@ public class JmxTransformerIT {
 
 	@Test
 	public void metricsAreSentToStdout() throws Exception {
+		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("name=myCounter"));
 		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("value=1"));
 		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("value=2"));
+		// Validate that we've received at least one notification
+		await().atMost(5, SECONDS).until(output.stdoutHasLineContaining("NotificationValue"));
 	}
 
 	@After

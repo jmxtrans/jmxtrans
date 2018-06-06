@@ -30,7 +30,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
+import javax.management.InstanceNotFoundException;
+import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServerConnection;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import java.io.Closeable;
 import java.io.IOException;
@@ -38,8 +43,11 @@ import java.io.IOException;
 @ToString
 @ThreadSafe
 public class JMXConnection implements Closeable {
-	@Nullable private final JMXConnector connector;
-	@Nonnull @Getter private final MBeanServerConnection mBeanServerConnection;
+	@Nullable
+	private final JMXConnector connector;
+	@Nonnull
+	@Getter
+	private final MBeanServerConnection mBeanServerConnection;
 	private boolean markedAsDestroyed;
 	private static final Logger logger = LoggerFactory.getLogger(JMXConnection.class);
 
@@ -47,14 +55,29 @@ public class JMXConnection implements Closeable {
 		this.connector = connector;
 		this.mBeanServerConnection = mBeanServerConnection;
 		this.markedAsDestroyed = false;
-
-
 	}
 
-	public boolean isAlive(){
+	public void addNotificationListener(ObjectName objectName,
+										NotificationListener notificationListener,
+										NotificationFilter notificationFilter,
+										Object handback) throws IOException, InstanceNotFoundException {
+		logger.info("Add notification listener for name {}, mBeanServerConnection {}.",
+				objectName, mBeanServerConnection);
+		this.mBeanServerConnection.addNotificationListener(objectName,
+				notificationListener, notificationFilter, handback);
+	}
+
+	public void removeNotificationListener(ObjectName objectName, NotificationListener notificationListener) throws IOException, InstanceNotFoundException, ListenerNotFoundException {
+		logger.info("Remove notification listener for name {}, mBeanServerConnection {}.",
+				objectName, mBeanServerConnection);
+		this.mBeanServerConnection.removeNotificationListener(objectName, notificationListener);
+	}
+
+	public boolean isAlive() {
 		return !markedAsDestroyed;
 	}
-	public void setMarkedAsDestroyed(){
+
+	public void setMarkedAsDestroyed() {
 		markedAsDestroyed = true;
 	}
 
