@@ -67,13 +67,35 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final boolean createDatabase;
 	private final boolean reportJmxPortAsTag;
 	private final ImmutableList<String> typeNames;
-	private final boolean segregateStringValues;
+	private final boolean allowStringValues;
 
 	/**
-	 * @param url      - The url e.g http://localhost:8086 to InfluxDB
-	 * @param username - The username for InfluxDB
-	 * @param password - The password for InfluxDB
-	 * @param database - The name of the database (created if does not exist) on
+	 * @param typeNames			- List of typeNames keys to use in fields by default
+	 * @param BooleanAsNumber	- output boolean attributes as number
+	 * @param url				- The url e.g http://localhost:8086 to InfluxDB
+	 * @param username			- The username for InfluxDB
+	 * @param password			- The password for InfluxDB
+	 * @param database			- The name of the database (created if does not exist) on
+	 * @param tags				- Map of custom tags with custom values
+	 * @param writeConsistency	- The write consistency for InfluxDB.
+	 * 								<ul>Valid values : 
+	 * 									<li>"ALL" (by default)</li>
+	 * 									<li>"ANY"</li>
+	 * 									<li>"ONE"</li>
+	 * 									<li>"QUORUM"</li>
+	 * 								</ul>
+	 * @param retentionPolicy	- The retention policy for InfluxDB
+	 * @param resultTags		- A list of meta-data from the result to add as tags. Sends all meta-data by default
+	 * 								<ul>Available data : 
+	 * 									<li>"typeName"</li>
+	 * 									<li>"objDomain"</li>
+	 * 									<li>"className"</li>
+	 * 									<li>"attributeName"</li>
+	 * 								</ul>
+	 * @param createDatabase	- Creates the database in InfluxDB if not found
+	 * @param reportJmxPortAsTag - Sends the JMX server port as tag instead of field
+	 * @param typeNamesAsTags	- Sends the given list of typeNames as tags instead of fields keys
+	 * @param allowStringValues - Allows the OutputWriter to send String Values
 	 */
 	@JsonCreator
 	public InfluxDbWriterFactory(
@@ -90,21 +112,20 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("createDatabase") Boolean createDatabase,
 			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag,
 			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
-			@JsonProperty("segregateStringValues") Boolean segregateStringValues) {
+			@JsonProperty("allowStringValues") Boolean allowStringValues) {
+		
 		this.typeNames = firstNonNull(typeNames,ImmutableList.<String>of());
 		this.booleanAsNumber = booleanAsNumber;
 		this.database = database;
 		this.createDatabase = firstNonNull(createDatabase, TRUE);
 		this.typeNamesAsTags = firstNonNull(typeNamesAsTags, FALSE);
-		this.segregateStringValues = firstNonNull(segregateStringValues, FALSE);
-
+		this.allowStringValues = firstNonNull(allowStringValues, FALSE);
 		this.writeConsistency = StringUtils.isNotBlank(writeConsistency)
 				? InfluxDB.ConsistencyLevel.valueOf(writeConsistency) : InfluxDB.ConsistencyLevel.ALL;
-
 		this.retentionPolicy = StringUtils.isNotBlank(retentionPolicy) ? retentionPolicy : DEFAULT_RETENTION_POLICY;
-
 		this.resultAttributesToWriteAsTags = initResultAttributesToWriteAsTags(resultTags);
 		this.tags = initCustomTagsMap(tags);
+		
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
 
 		influxDB = InfluxDBFactory.connect(url, username, password);
@@ -131,6 +152,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag, typeNamesAsTags, segregateStringValues));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag, typeNamesAsTags, allowStringValues));
 	}
 }

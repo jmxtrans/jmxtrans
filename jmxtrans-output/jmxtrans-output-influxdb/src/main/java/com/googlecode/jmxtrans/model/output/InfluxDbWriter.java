@@ -80,7 +80,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 	private final boolean createDatabase;
 	private final boolean typeNamesAsTags;
-	private final boolean segregateStringValues;
+	private final boolean allowStringValues;
 	private final boolean reportJmxPortAsTag;
 
 	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
@@ -101,7 +101,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			boolean createDatabase,
 			boolean reportJmxPortAsTag,
 			boolean typeNamesAsTags,
-			boolean segregateStringValues) {
+			boolean allowStringValues) {
 		this.typeNames = typeNames;
 		this.database = database;
 		this.writeConsistency = writeConsistency;
@@ -112,7 +112,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.createDatabase = createDatabase;
 		this.reportJmxPortAsTag = reportJmxPortAsTag;
 		this.typeNamesAsTags = typeNamesAsTags;
-		this.segregateStringValues = segregateStringValues;
+		this.allowStringValues = allowStringValues;
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			String key = KeyUtils.getPrefixedKeyString(query, result, typeNamesParam);
 			if (isValidNumber(value)) {
 				filteredValues.put(key, value);
-			}else if (segregateStringValues && value instanceof String) {
+			}else if (allowStringValues && value instanceof String) {
 				filteredValues.put(key, value);
 			}
 
