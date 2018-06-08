@@ -32,7 +32,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
@@ -194,9 +193,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			Object value = result.getValue();
 
 			String key = KeyUtils.getPrefixedKeyString(query, result, typeNamesParam);
-			if (isValidNumber(value)) {
-				filteredValues.put(key, value);
-			}else if (allowStringValues && value instanceof String) {
+			if (isValidNumber(value) || allowStringValues && value instanceof String) {
 				filteredValues.put(key, value);
 			}
 
@@ -219,7 +216,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		influxDB.write(batchPoints);
 	}
 
-	private Map<String, String> buildResultTagMap(Result result) throws Exception {
+	private Map<String, String> buildResultTagMap(Result result) {
 
 		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
