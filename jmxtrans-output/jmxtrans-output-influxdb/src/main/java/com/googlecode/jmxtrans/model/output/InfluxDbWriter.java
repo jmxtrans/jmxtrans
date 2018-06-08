@@ -227,7 +227,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		if (typeNamesAsTags) {
-			Map<String, String> typeNameValueMap = TypeNameValue.extractMap(resultTagMap.get("typeName"));
+			Map<String, String> typeNameValueMap = result.getTypeNameMap();
 			for (String typeToTag : this.typeNames) {
 				if (typeNameValueMap.containsKey(typeToTag)) {
 					resultTagMap.put(typeToTag, typeNameValueMap.get(typeToTag));
