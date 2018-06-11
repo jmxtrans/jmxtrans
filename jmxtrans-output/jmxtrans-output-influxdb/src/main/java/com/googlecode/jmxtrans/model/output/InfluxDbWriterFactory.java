@@ -68,6 +68,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	private final boolean reportJmxPortAsTag;
 	private final ImmutableList<String> typeNames;
 	private final boolean allowStringValues;
+	private final ImmutableList<String> attributesAsTags;
 
 	/**
 	 * @param typeNames			- List of typeNames keys to use in fields by default
@@ -96,6 +97,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	 * @param reportJmxPortAsTag - Sends the JMX server port as tag instead of field
 	 * @param typeNamesAsTags	- Sends the given list of typeNames as tags instead of fields keys
 	 * @param allowStringValues - Allows the OutputWriter to send String Values
+	 * @param attributesAsTags	- List of MBean attributes to write as tags instead of fields
 	 */
 	@JsonCreator
 	public InfluxDbWriterFactory(
@@ -112,7 +114,8 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 			@JsonProperty("createDatabase") Boolean createDatabase,
 			@JsonProperty("reportJmxPortAsTag") Boolean reportJmxPortAsTag,
 			@JsonProperty("typeNamesAsTags") Boolean typeNamesAsTags,
-			@JsonProperty("allowStringValues") Boolean allowStringValues) {
+			@JsonProperty("allowStringValues") Boolean allowStringValues,
+			@JsonProperty("attributesAsTags") ImmutableList<String> attributesAsTags) {
 		
 		this.typeNames = firstNonNull(typeNames,ImmutableList.<String>of());
 		this.booleanAsNumber = booleanAsNumber;
@@ -124,6 +127,7 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 				? InfluxDB.ConsistencyLevel.valueOf(writeConsistency) : InfluxDB.ConsistencyLevel.ALL;
 		this.retentionPolicy = StringUtils.isNotBlank(retentionPolicy) ? retentionPolicy : DEFAULT_RETENTION_POLICY;
 		this.resultAttributesToWriteAsTags = initResultAttributesToWriteAsTags(resultTags);
+		this.attributesAsTags = firstNonNull(attributesAsTags,ImmutableList.<String>of());
 		this.tags = initCustomTagsMap(tags);
 		
 		LOG.debug("Connecting to url: {} as: username: {}", url, username);
@@ -152,6 +156,6 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	@Override
 	public ResultTransformerOutputWriter<InfluxDbWriter> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(booleanAsNumber, new InfluxDbWriter(influxDB, database,
-				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, createDatabase, reportJmxPortAsTag, typeNamesAsTags, allowStringValues));
+				writeConsistency, retentionPolicy, tags, resultAttributesToWriteAsTags, typeNames, attributesAsTags, createDatabase, reportJmxPortAsTag, typeNamesAsTags, allowStringValues));
 	}
 }
