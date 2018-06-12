@@ -464,7 +464,7 @@ public class JmxTransformer implements WatchedCallback {
 			trigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
 			// TODO replace Quartz with a ScheduledExecutorService
 		}
-		trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.nanoTime()) + "-" + UUID.randomUUID().toString().substring(0, 8));
+		trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.nanoTime()) + "-" + Long.toHexString(random.nextLong()));
 		trigger.setStartTime(computeSpreadStartDate(runPeriod));
 		return trigger;
 	}
