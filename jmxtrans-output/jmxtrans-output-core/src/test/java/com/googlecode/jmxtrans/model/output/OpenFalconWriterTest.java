@@ -49,6 +49,15 @@ public class OpenFalconWriterTest {
 
         String json = writer.toString();
 
-        assertThatJson(json).isArray().ofLength(1);
+        assertThatJson(json)
+				.isArray().ofLength(1);
+
+        assertThatJson(json)
+				.node("[0].metric").isEqualTo("MemoryAlias.ObjectPendingFinalizationCount")
+				.node("[0].endpoint").isEqualTo("localhost")
+				.node("[0].counterType").isEqualTo("GAUGE")
+				.node("[0].step").isEqualTo(60)
+				.node("[0].value").isEqualTo(10);
+
     }
 }
