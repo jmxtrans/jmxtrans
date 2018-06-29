@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 
 import java.io.File;
@@ -60,7 +60,7 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.JMX_PORT_KEY;
 import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_HOSTNAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -225,7 +225,7 @@ public class InfluxDbWriterTests {
 		assertThat(points).hasSize(1);
 	
 		Point point = points.get(0);
-		assertThat(point.lineProtocol()).contains("key");
+		assertThat(point.lineProtocol()).contains("key=\"hello\"");
 	}
 
 	private void verifyJMXPortOnlyInToken(String lineProtocol, int tokenContainingJMXPort) {

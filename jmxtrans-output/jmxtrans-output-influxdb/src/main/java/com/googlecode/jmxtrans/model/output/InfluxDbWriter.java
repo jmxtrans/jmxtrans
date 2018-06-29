@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
@@ -81,13 +80,6 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	private final boolean typeNamesAsTags;
 	private final boolean allowStringValues;
 	private final boolean reportJmxPortAsTag;
-
-	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
-		@Override
-		public boolean apply(Object input) {
-			return !input.toString().equals("NaN");
-		}
-	};
 
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
