@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
@@ -32,7 +31,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
@@ -70,8 +68,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
 	@Nonnull private final ImmutableMap<String,String> tags;
-	@Nonnull private final ImmutableList<String> typeNames;
-	@Nonnull private final ImmutableList<String> typeNamesForTags;
+	@Nonnull ImmutableList<String> typeNames;
 
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
@@ -80,15 +77,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	private final boolean createDatabase;
-	private final boolean reportJmxPortAsTag;
 	private final boolean typeNamesAsTags;
-
-	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
-		@Override
-		public boolean apply(Object input) {
-			return !input.toString().equals("NaN");
-		}
-	};
+	private final boolean allowStringValues;
+	private final boolean reportJmxPortAsTag;
 
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
@@ -100,18 +91,19 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull ImmutableList<String> typeNames,
 			boolean createDatabase,
 			boolean reportJmxPortAsTag,
-			boolean typeNamesAsTags) {
+			boolean typeNamesAsTags,
+			boolean allowStringValues) {
 		this.typeNames = typeNames;
-		this.typeNamesForTags = typeNamesAsTags ? typeNames : ImmutableList.<String>of();
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
 		this.influxDB = influxDB;
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
-		this.typeNamesAsTags = typeNamesAsTags;
 		this.createDatabase = createDatabase;
 		this.reportJmxPortAsTag = reportJmxPortAsTag;
+		this.typeNamesAsTags = typeNamesAsTags;
+		this.allowStringValues = allowStringValues;
 	}
 
 	/**
@@ -179,13 +171,21 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
+		
+		ImmutableList<String> typeNamesParam = null;
+		// if not typeNamesAsTag, we concat typeName in values.
+		if (!typeNamesAsTags) {
+			typeNamesParam = this.typeNames;
+		}
+		
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
 
 			HashMap<String, Object> filteredValues = newHashMap();
 			Object value = result.getValue();
-			if (isValidNumber(value)) {
-				String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
+
+			String key = KeyUtils.getPrefixedKeyString(query, result, typeNamesParam);
+			if (isValidNumber(value) || allowStringValues && value instanceof String) {
 				filteredValues.put(key, value);
 			}
 
@@ -208,7 +208,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		influxDB.write(batchPoints);
 	}
 
-	private Map<String, String> buildResultTagMap(Result result) throws Exception {
+	private Map<String, String> buildResultTagMap(Result result) {
 
 		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
@@ -216,8 +216,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		if (typeNamesAsTags) {
-			Map<String, String> typeNameValueMap = TypeNameValue.extractMap(resultTagMap.get("typeName"));
-			for (String typeToTag : this.typeNamesForTags) {
+			Map<String, String> typeNameValueMap = result.getTypeNameMap();
+			for (String typeToTag : this.typeNames) {
 				if (typeNameValueMap.containsKey(typeToTag)) {
 					resultTagMap.put(typeToTag, typeNameValueMap.get(typeToTag));
 				}
