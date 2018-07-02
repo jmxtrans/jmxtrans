@@ -33,15 +33,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
-import com.googlecode.jmxtrans.connections.JMXConnection;
-import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
-import com.googlecode.jmxtrans.connections.SocketFactory;
 import com.googlecode.jmxtrans.executors.CommonExecutorRepository;
 import com.googlecode.jmxtrans.executors.ExecutorFactory;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
@@ -63,10 +58,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -83,11 +74,7 @@ public class JmxTransModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(new TypeLiteral<GenericKeyedObjectPool<InetSocketAddress, Socket>>(){})
-				.toInstance(getObjectPool(new SocketFactory(), SocketFactory.class.getSimpleName(), 0));
-		bind(new TypeLiteral<GenericKeyedObjectPool<SocketAddress, DatagramSocket>>(){})
-				.toInstance(getObjectPool(new DatagramSocketFactory(), DatagramSocketFactory.class.getSimpleName(), 0));
-		bind(new TypeLiteral<KeyedObjectPool<JmxConnectionProvider, JMXConnection>>(){}).annotatedWith(Names.named("mbeanPool"))
+		bind(KeyedObjectPool.class).annotatedWith(Names.named("mbeanPool"))
 				.toInstance(getObjectPool(new MBeanServerConnectionFactory(), MBeanServerConnectionFactory.class.getSimpleName(), 20000));
 	}
 
