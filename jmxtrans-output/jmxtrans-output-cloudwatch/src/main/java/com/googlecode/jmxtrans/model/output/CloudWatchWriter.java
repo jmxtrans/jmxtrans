@@ -42,6 +42,7 @@ import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
+import com.googlecode.jmxtrans.model.naming.KeyUtils;
 import com.googlecode.jmxtrans.util.NumberUtils;
 import com.googlecode.jmxtrans.util.ObjectToDouble;
 import org.slf4j.Logger;
@@ -176,9 +177,12 @@ public class CloudWatchWriter extends BaseOutputWriter {
 				.append(toDimensions(typeNames, typeNameValues))
 				.toList();
 
+		String metricName = result.getValuePath().isEmpty() ? result.getAttributeName()
+		    	                                   	        : result.getAttributeName() + "_" + KeyUtils.getValuePathString(result);
+
 		return new MetricDatum()
 				.withDimensions(dimensions)
-				.withMetricName(result.getAttributeName())
+				.withMetricName(metricName)
 				.withTimestamp(new Date(result.getEpoch()))
 				.withValue(toDouble(result.getValue()));
 	}

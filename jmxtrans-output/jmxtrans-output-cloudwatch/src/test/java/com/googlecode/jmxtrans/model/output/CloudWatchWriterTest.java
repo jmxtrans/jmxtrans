@@ -236,6 +236,37 @@ public class CloudWatchWriterTest {
 	}
 
 	@Test
+	public void testInternalWriteValuePath() throws Exception {
+		String namespace = "TestNamespace";
+
+		cloudWatchWriter = new CloudWatchWriter(
+				ImmutableList.<String>of(), false, false,
+				namespace, ImmutableList.<Map<String, Object>>of(),
+				ImmutableMap.<String, Object>of()) {
+			@Override
+			AmazonCloudWatch startAmazonCloudWatch() {
+				return amazonCloudWatch;
+			}
+		};
+		cloudWatchWriter.validateSetup(server, query);
+		cloudWatchWriter.start();
+
+		Iterable<Result> results = ImmutableList.of(
+				result("TestResult1", 123.456d, valuePath()),
+				result("TestResult2", 123.456d, valuePath("TestValuePath")),
+				result("TestResult3", 123.456d, valuePath("Test", "Value", "Path"))
+		);
+
+		cloudWatchWriter.doWrite(server, query, results);
+
+		verify(amazonCloudWatch).putMetricData(argThat(requestWith(namespace, hasMetrics(
+				metricWith("TestResult1", 123.456),
+				metricWith("TestResult2_TestValuePath", 123.456),
+				metricWith("TestResult3_Test.Value.Path", 123.456)
+		))));
+	}
+
+	@Test
 	public void testInternalWriteNoResults() throws Exception {
 		String namespace = "TestNamespace";
 
@@ -379,16 +410,28 @@ public class CloudWatchWriterTest {
 		return new Dimension().withName(name).withValue(value);
 	}
 
+	private ImmutableList<String> valuePath(String... valuePath) {
+		return ImmutableList.copyOf(valuePath);
+	}
+
 	private String typeNameValue(String name, String value) {
 		return name + "=" + value;
 	}
 
 	private Result result(String name, Object value) {
-		return result(name, value, typeNameValue("TestTypeName", "TestTypeValue"));
+		return result(name, value, valuePath());
+	}
+
+	private Result result(String name, Object value, ImmutableList<String> valuePath) {
+		return result(name, value, ImmutableList.of(typeNameValue("TestTypeName", "TestTypeValue")), valuePath);
 	}
 
 	private Result result(String name, Object value, String... typeNameValues) {
-		return new Result(System.currentTimeMillis(), name, "TestClassName", "TestObjDomain", "TestKeyAlias", Joiner.on(",").join(typeNameValues), ImmutableList.<String>of(), value);
+		return result(name, value, ImmutableList.copyOf(typeNameValues), valuePath());
+	}
+
+	private Result result(String name, Object value, ImmutableList<String> typeNameValues, ImmutableList<String> valuePath) {
+		return new Result(System.currentTimeMillis(), name, "TestClassName", "TestObjDomain", "TestKeyAlias", Joiner.on(",").join(typeNameValues), valuePath, value);
 	}
 
 	private ArgumentMatcher<PutMetricDataRequest> requestWith(String namespace) {
