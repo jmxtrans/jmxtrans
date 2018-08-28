@@ -131,7 +131,7 @@
 	</distributionManagement>
 	<properties>
 		<animal-sniffer.version>1.16</animal-sniffer.version>
-		<aws.java.sdk.version>1.11.228</aws.java.sdk.version>
+		<aws.java.sdk.version>1.11.397</aws.java.sdk.version>
 		<!--
 			Maximum number of checkstyle violations allowed. Build will fail
 			if there are more than this number of violations. Feel free to
