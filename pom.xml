@@ -437,12 +437,7 @@
 				<artifactId>jrobin</artifactId>
 				<version>1.5.9</version>
 			</dependency>
-			<dependency>
-				<groupId>org.quartz-scheduler</groupId>
-				<artifactId>quartz</artifactId>
-				<version>1.8.6</version>
-			</dependency>
-			<dependency><!-- quartz and jmxtrans-output-log4j depend on log4j -->
+			<dependency><!-- jmxtrans-output-log4j depend on log4j -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>
 				<version>${slf4j.version}</version>

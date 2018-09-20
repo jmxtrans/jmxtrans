@@ -142,30 +142,6 @@ public abstract class CliArgumentParserBase {
 		}
 	}
 
-	@Test(expected = Exception.class)
-	public void quartzConfigFileCannotBeADirectory() throws OptionsException, ParseException, IOException {
-		try {
-			parseConfiguration(requiredOptionsAnd(
-					"-q", mockConfigurationDirectory.getRoot().getAbsolutePath()
-			));
-		} catch (OptionsException oe) {
-			assertThat(oe.getMessage(), startsWith("Could not find path to the quartz properties file"));
-			throw oe;
-		}
-	}
-
-	@Test(expected = Exception.class)
-	public void quartzConfigFileMustExist() throws OptionsException, ParseException, IOException {
-		try {
-			parseConfiguration(requiredOptionsAnd(
-					"-q", new File(mockConfigurationDirectory.getRoot(), "non-existing").getAbsolutePath()
-			));
-		} catch (OptionsException oe) {
-			assertThat(oe.getMessage(), startsWith("Could not find path to the quartz properties file"));
-			throw oe;
-		}
-	}
-
 	@Test
 	public void canParseRunInterval() throws OptionsException, ParseException, IOException {
 		JmxTransConfiguration configuration = parseConfiguration(requiredOptionsAnd(
