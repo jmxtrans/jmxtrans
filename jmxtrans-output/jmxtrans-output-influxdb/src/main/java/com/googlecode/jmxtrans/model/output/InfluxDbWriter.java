@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -183,21 +184,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			typeNamesParam = this.typeNames;
 		}
 		
-		//Creates a tag map, associated by the typeName.
-		//Results fields with the same typeName will receive the same tag values.
-		HashMap<String,HashMap<String, String>> attrTagByTypeName = newHashMap();
-		if (!attributesAsTags.isEmpty()) {
-			for (Result result : results) {
-				if (attributesAsTags.contains(result.getAttributeName())){
-					if(!attrTagByTypeName.containsKey(result.getTypeName()))
-						attrTagByTypeName.put(result.getTypeName(), new HashMap<String, String>());
-					
-					String key = KeyUtils.getPrefixedKeyString(query, result, typeNamesParam);
-					attrTagByTypeName.get(result.getTypeName())
-						.put(key, String.valueOf(result.getValue()));
-				}
-			}
-		}
+
+		Map<String,Map<String, String>> attrTagByTypeName = buildAttrTagByTypeName(query, results, typeNamesParam);
 
 		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
 		
@@ -216,7 +204,7 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			// send the point if filteredValues isn't empty
 			if (!fieldValues.isEmpty()) {
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
-				HashMap<String, String> tagValues = firstNonNull(attrTagByTypeName.get(result.getTypeName()),
+				Map<String, String> tagValues = firstNonNull(attrTagByTypeName.get(result.getTypeName()),
 																	new HashMap<String, String>());
 				if (reportJmxPortAsTag) {
 					resultTagsToApply.put(JMX_PORT_KEY, server.getPort());
@@ -252,6 +240,37 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 		return resultTagMap;
 
+	}
+	
+	/**
+	 * Process the "attributesAsTags" parameter.<br>
+	 * Creates a tag map, associated by the typeName.
+	 * Results fields with the same typeName will receive the same tag values.
+	 * @param query
+	 * @param results
+	 * @param typeNames
+	 * @return a map built as follows :
+	 * 	<ul>
+	 * 	<li>key : the typeName, in order to link tags to the corresponding fields in InfluxDB</li>
+	 * 	<li>values : a key-value map of every attributes converted into tags, ready for the InlfuxDB query</li>
+	 * 	</ul>
+	 */
+	private Map<String,Map<String, String>> buildAttrTagByTypeName(Query query, Iterable<Result> results, List<String> typeNames){
+		Map<String,Map<String, String>> attrTagByTypeName = newHashMap();
+		
+		if (!attributesAsTags.isEmpty()) {
+			for (Result result : results) {
+				if (attributesAsTags.contains(result.getAttributeName())){
+					if(!attrTagByTypeName.containsKey(result.getTypeName()))
+						attrTagByTypeName.put(result.getTypeName(), new HashMap<String, String>());
+					
+					String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
+					attrTagByTypeName.get(result.getTypeName())
+						.put(key, String.valueOf(result.getValue()));
+				}
+			}
+		}
+		return attrTagByTypeName;
 	}
 	
 	private boolean isValidValue(Object value) {
