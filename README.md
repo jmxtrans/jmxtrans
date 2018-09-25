@@ -8,6 +8,8 @@
 [![Maven site](https://img.shields.io/badge/Maven-site-blue.svg)](http://www.jmxtrans.org/jmxtrans/)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jmxtrans/jmxtrans/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jmxtrans/jmxtrans)
 [![sonarcloud.io](https://img.shields.io/badge/sonarcloud-quality-lightgrey.svg)](https://sonarcloud.io/dashboard?id=org.jmxtrans%3Ajmxtrans-parent)
+[![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/jmxtrans/jmxtrans.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jmxtrans/jmxtrans/context:java)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/jmxtrans/jmxtrans.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jmxtrans/jmxtrans/alerts)
 
 This is the source code repository for the jmxtrans project.
 
