@@ -22,11 +22,13 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +36,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.List;
+import java.util.Map;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
@@ -47,45 +52,67 @@ import static org.mockito.Mockito.verify;
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class CloudWatchWriterTests {
 
-	@Mock private AmazonCloudWatchClient cloudWatchClient;
-	@Captor private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
-	private CloudWatchWriter.Writer writer;
+	@Mock
+	private AmazonCloudWatchClient cloudWatchClient;
+
+	@Captor
+	private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
+
+	private CloudWatchWriter writer;
 
 	@Before
-	public void createCloudWatchWriter() {
-		ImmutableList<Dimension> dimensions = ImmutableList.of(
-				new Dimension().withName("SomeKey").withValue("SomeValue"),
-				new Dimension().withName("InstanceId").withValue("$InstanceId")
+	public void createCloudWatchWriter() throws Exception {
+		List<Map<String, Object>> dimensions = ImmutableList.<Map<String, Object>>of(
+				ImmutableMap.<String, Object>of("name", "SomeKey", "value", "SomeValue"),
+				ImmutableMap.<String, Object>of("name", "InstanceId", "value", "$InstanceId")
 		);
 
-		writer = new CloudWatchWriter.Writer("testNS", cloudWatchClient, dimensions);
+		writer = new CloudWatchWriter(
+				ImmutableList.<String>of(), false, false,
+				"testNS", dimensions,
+				ImmutableMap.<String, Object>of()) {
+			@Override
+			protected AmazonCloudWatch startAmazonCloudWatch() {
+				return cloudWatchClient;
+			}
+		};
+
+		writer.validateSetup(dummyServer(), dummyQuery());
+
+		writer.start();
 	}
 
 	@Test
 	public void testValidationWithoutSettings() throws Exception {
 		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
+
 		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
 		PutMetricDataRequest request = requestCaptor.getValue();
-
 		assertThat(request).isNotNull();
 		assertThat(request.getNamespace()).isEqualTo("testNS");
-
 		assertThat(request.getMetricData()).hasSize(1);
+
 		MetricDatum metricDatum = request.getMetricData().get(0);
 		assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
 		assertThat(metricDatum.getValue()).isEqualTo(10);
 		assertThat(metricDatum.getDimensions().size()).isEqualTo(2);
-		assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
-		assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
+
+		Dimension dimension0 = metricDatum.getDimensions().get(0);
+		assertThat(dimension0.getName()).isEqualTo("SomeKey");
+		assertThat(dimension0.getValue()).isEqualTo("SomeValue");
+
+		Dimension dimension1 = metricDatum.getDimensions().get(1);
+		assertThat(dimension1.getName()).isEqualTo("InstanceId");
 	}
 
 	@Test
 	public void cloudwatchClientIsClosed() throws LifecycleException {
 		writer.close();
+
 		verify(cloudWatchClient).shutdown();
 	}
 

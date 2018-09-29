@@ -61,7 +61,8 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 @PrepareForTest({CloudWatchWriter.class, Regions.class})
 public class CloudWatchWriterIT {
 
-	@Mock private AmazonCloudWatchClient cloudWatchClient;
+	@Mock
+	private AmazonCloudWatchClient cloudWatchClient;
 
 	@Before
 	public void mockAmazonAPI() throws Exception {
