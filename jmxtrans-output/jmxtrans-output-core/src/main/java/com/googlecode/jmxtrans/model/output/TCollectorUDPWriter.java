@@ -24,12 +24,12 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +95,7 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 		this.startOutput();
 		for (String resultString : messageFormatter.formatResults(results, server)){
 			log.debug("TCollectorUDP Message: {}", resultString);
-			this.sendOutput(resultString);
+			this.sendOutput(resultString + "\n");
 		}
 		this.finishOutput();
 	}
