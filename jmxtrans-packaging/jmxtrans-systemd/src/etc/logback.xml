@@ -24,7 +24,7 @@
 
 -->
 <configuration debug="false">
-	<property name="logDir">/var/log/jmxtrans</property>
+	<property name="logDir" value="/var/log/jmxtrans"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<!-- encoders are assigned the type
@@ -51,7 +51,6 @@
 	<logger name="com.googlecode.jmxtrans" level="info"/>
 
 	<root level="info">
-		<appender-ref ref="console" />
 		<appender-ref ref="file" />
 	</root>
 </configuration>
