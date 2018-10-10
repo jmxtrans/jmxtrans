@@ -22,42 +22,35 @@
  */
 package com.googlecode.jmxtrans.cli;
 
-import com.beust.jcommander.JCommander;
+import com.beust.jcommander.IStringConverter;
+import com.beust.jcommander.IStringConverterFactory;
 import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.internal.DefaultConverterFactory;
+import com.google.common.base.Strings;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
-public class JCommanderArgumentParser implements CliArgumentParser {
+class TypedProperties {
+
 	@Nonnull
-	@Override
-	public JmxTransConfiguration parseOptions(@Nonnull String[] args) throws IOException {
-		JmxTransConfiguration tempConfig = new JmxTransConfiguration();
-		new JCommander(tempConfig, args);
+	private final Properties properties;
+	private final IStringConverterFactory stringConverterFactory = new DefaultConverterFactory();
 
-		JmxTransConfiguration propertiesConfig = new JmxTransConfiguration();
-		propertiesConfig.loadProperties(tempConfig.getConfigFile());
-		FileConfiguration defaultProvider = new FileConfiguration(propertiesConfig);
-
-		JmxTransConfiguration configuration = new JmxTransConfiguration();
-		JCommander jCommander = new JCommander();
-		jCommander.setDefaultProvider(defaultProvider);
-		jCommander.addObject(configuration);
-		jCommander.parse(args);
-
-		if (configuration.isHelp()) jCommander.usage();
-		else validate(configuration);
-
-		return configuration;
+	public TypedProperties(@Nonnull Properties properties) {
+		this.properties = properties;
 	}
 
-
-	private void validate(JmxTransConfiguration configuration) {
-		if (configuration.getProcessConfigDirOrFile() == null) throw new ParameterException("Please specify either the -f or -j option.");
+	public <T> T getTypedProperty(String key, Class<T> type) {
+		String value = properties.getProperty(key);
+		if (Strings.isNullOrEmpty(value)) {
+			return null;
+		}
+		try {
+			IStringConverter<T> converter = stringConverterFactory.getConverter(type).newInstance();
+			return converter.convert(value);
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new ParameterException("Failed to convert " + key + " to " + type, e);
+		}
 	}
-
 }

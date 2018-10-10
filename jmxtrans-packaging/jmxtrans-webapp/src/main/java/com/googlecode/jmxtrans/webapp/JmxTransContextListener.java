@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,28 +64,13 @@ public class JmxTransContextListener implements ServletContextListener {
 		if (configFile == null) {
 			configFile = servletContextEvent.getServletContext().getInitParameter("configFile");
 		}
-		if (configFile == null) {
-			configFile = "/etc/jmxtrans/jmxtrans.properties";
+		File configFileF = new File(configFile);
+		JmxTransConfiguration configuration = new JmxTransConfiguration();
+		if (configFileF.isFile()) {
+			log.info("Starting JMXTrans with config file {}", configFile);
+			configuration.loadProperties(configFileF);
 		}
-		log.info("Starting JMXTrans with config file {}", configFile);
-		Properties configProps = new Properties();
-		try (InputStream configIS = new FileInputStream(configFile)) {
-			configProps.load(configIS);
-		}
-		List<String> args = new ArrayList<>();
-		args.add("--config");
-		args.add(configFile);
-		String jsonDir = configProps.getProperty("json.dir");
-		if (jsonDir != null) {
-			args.add("--json-directory");
-			args.add(jsonDir);
-		}
-		String jsonFile = configProps.getProperty("json.file");
-		if (jsonFile != null) {
-			args.add("--json-file");
-			args.add(jsonFile);
-		}
-		return new JCommanderArgumentParser().parseOptions(args.toArray(new String[0]));
+		return configuration;
 	}
 
 	@Override
