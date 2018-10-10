@@ -418,6 +418,22 @@ public class JmxTransformer implements WatchedCallback {
 		return new Date(new Date().getTime() + spread);
 	}
 
+	private void uninitializeExecutors() throws MalformedObjectNameException {
+		uninitializeExecutors(queryExecutorRepository);
+		uninitializeExecutors(resultExecutorRepository);
+	}
+
+	private void uninitializeExecutors(ExecutorRepository executorRepository) {
+		executorRepository.clear();
+	}
+
+	private void restartSystem() throws Exception {
+		serverScheduler.unscheduleAll();
+		unregisterMBeans();
+		uninitializeExecutors();
+		startupSystem();
+	}
+
 	/**
 	 * If getJsonFile() is a file, then that is all we load. Otherwise, look in
 	 * the jsonDir for files.
@@ -469,8 +485,7 @@ public class JmxTransformer implements WatchedCallback {
 			@Override
 			public void run() {
 				try {
-					serverScheduler.unscheduleAll();
-					startupSystem();
+					restartSystem();
 				} catch(Exception e) {
 					throw new RuntimeException(e);
 				}

@@ -46,6 +46,11 @@ public class CommonExecutorRepository implements ExecutorRepository {
 	}
 
 	@Override
+	public void clear() {
+		//nothing here because every server uses common thread pool
+	}
+
+	@Override
 	public Collection<ThreadPoolExecutor> getExecutors() {
 		return Arrays.asList(managedThreadPoolExecutor.getExecutor());
 	}
