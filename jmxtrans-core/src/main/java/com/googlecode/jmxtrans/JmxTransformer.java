@@ -62,7 +62,9 @@ import javax.inject.Inject;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -134,6 +136,13 @@ public class JmxTransformer implements WatchedCallback {
 			return;
 		}
 
+		JmxTransformer transformer = create(configuration);
+
+		// Start the process
+		transformer.doMain();
+	}
+
+	public static JmxTransformer create(JmxTransConfiguration configuration) throws MalformedURLException, FileNotFoundException {
 		ClassLoaderEnricher enricher = new ClassLoaderEnricher();
 		for (File jar : configuration.getAdditionalJars()) {
 			enricher.add(jar);
@@ -141,10 +150,7 @@ public class JmxTransformer implements WatchedCallback {
 
 		Injector injector = JmxTransModule.createInjector(configuration);
 
-		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
-
-		// Start the process
-		transformer.doMain();
+		return injector.getInstance(JmxTransformer.class);
 	}
 
 	/**

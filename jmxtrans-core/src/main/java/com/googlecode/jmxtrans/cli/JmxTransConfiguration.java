@@ -47,6 +47,7 @@ public class JmxTransConfiguration {
 
 	@Parameter(names = {"-j", "--json-directory"}, validateValueWith = ExistingDirectoryValidator.class)
 	@Setter private File processConfigDir;
+
 	@Parameter(names = {"-f", "--json-file"}, validateValueWith = ExistingFileValidator.class)
 	@Setter private File processConfigFile;
 
