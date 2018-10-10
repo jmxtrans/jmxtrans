@@ -42,6 +42,7 @@ import com.googlecode.jmxtrans.monitoring.ManagedThreadPoolExecutor;
 import com.googlecode.jmxtrans.scheduler.ServerScheduler;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +131,19 @@ public class JmxTransformer implements WatchedCallback {
 		if (configuration.isHelp()) {
 			return;
 		}
+
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			@SuppressFBWarnings(value = "DM_EXIT", justification = "To avoid leaving jmxtrans in an inconsistent state, terminate the VM when an uncaught exception causes a thread to unexpectedly terminate")
+			public void uncaughtException(Thread thread, Throwable throwable) {
+				try {
+					log.error("Exception in thread \"" + thread.getName() + "\"", throwable);
+				}
+				finally {
+					System.exit(1);
+				}
+			}
+		});
 
 		ClassLoaderEnricher enricher = new ClassLoaderEnricher();
 		for (File jar : configuration.getAdditionalJars()) {
