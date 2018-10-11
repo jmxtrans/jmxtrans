@@ -25,9 +25,11 @@ package com.googlecode.jmxtrans.cli;
 import com.beust.jcommander.IDefaultProvider;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.google.common.base.Joiner;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
+import java.util.Collection;
 
 public class FileConfiguration implements IDefaultProvider {
 
@@ -49,7 +51,7 @@ public class FileConfiguration implements IDefaultProvider {
 				try {
 					if (name.equals(optionName)) {
 						Object value = getField(field, configuration);
-						return value == null ? null : value.toString();
+						return toString(value);
 					}
 				} catch (IllegalAccessException e) {
 					throw new ParameterException("Invalid option " + optionName);
@@ -57,6 +59,19 @@ public class FileConfiguration implements IDefaultProvider {
 			}
 		}
 		throw new ParameterException("Unsupported option " + optionName);
+	}
+
+	private static String toString(Object value) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Collection) {
+			Collection collection = (Collection) value;
+			if (collection.isEmpty()) {
+				return null;
+			}
+			return Joiner.on(',').join(collection);
+		}
+		return value.toString();
 	}
 
 	private static Object getField(Field field, Object target) throws IllegalAccessException {

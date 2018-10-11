@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.webapp;
 
 import com.googlecode.jmxtrans.JmxTransformer;
-import com.googlecode.jmxtrans.cli.JCommanderArgumentParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.slf4j.Logger;
@@ -32,12 +31,7 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * Servlet listener used to start and stop JMXTrans

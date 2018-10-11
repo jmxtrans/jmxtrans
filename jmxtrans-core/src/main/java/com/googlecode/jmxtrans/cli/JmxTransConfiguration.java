@@ -36,13 +36,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
-import static java.util.Arrays.asList;
 
 @SuppressWarnings("squid:S1213") // having instance variables close to their getters is more readable in this class
 public class JmxTransConfiguration {
@@ -178,11 +173,18 @@ public class JmxTransConfiguration {
 	private boolean useSeparateExecutors = false;
 
 	private static abstract class PropertySetter<T> {
-		private final String key;
-		private final Class<T> type;
-		public PropertySetter(String key, Class<T> type) {
+		protected final String key;
+		protected final Class<T> type;
+		protected PropertySetter(String key, Class<T> type) {
 			this.key = key;
 			this.type = type;
+		}
+		public abstract void setValue(TypedProperties typedProperties, JmxTransConfiguration configuration);
+	}
+
+	private static abstract class SinglePropertySetter<T> extends PropertySetter<T>{
+		SinglePropertySetter(String key, Class<T> type) {
+			super(key, type);
 		}
 		public void setValue(TypedProperties typedProperties, JmxTransConfiguration configuration) {
 			T value = typedProperties.getTypedProperty(key, type);
@@ -194,79 +196,95 @@ public class JmxTransConfiguration {
 		protected abstract void doSetValue(T value, JmxTransConfiguration configuration);
 	}
 
+	private static abstract class MultiPropertySetter<T> extends PropertySetter<T> {
+		MultiPropertySetter(String key, Class<T> type) {
+			super(key, type);
+		}
+
+		public void setValue(TypedProperties typedProperties, JmxTransConfiguration configuration) {
+			List<T> values = typedProperties.getTypedProperties(key, type);
+			if (values != null && !values.isEmpty()) {
+				doSetValue(values, configuration);
+			}
+		}
+
+		protected abstract void doSetValue(List<T> value, JmxTransConfiguration configuration);
+	}
+
 	private static PropertySetter[] SETTERS = new PropertySetter[]{
-			new PropertySetter<Boolean>(CONTINUE_ON_ERROR_PROPERTY, Boolean.class) {
+			new SinglePropertySetter<Boolean>(CONTINUE_ON_ERROR_PROPERTY, Boolean.class) {
 				@Override
 				protected void doSetValue(Boolean value, JmxTransConfiguration configuration) {
 					configuration.setContinueOnJsonError(value);
 				}
 			},
-			new PropertySetter<File>(JSON_DIRECTORY_PROPERTY, File.class) {
+			new SinglePropertySetter<File>(JSON_DIRECTORY_PROPERTY, File.class) {
 				@Override
 				protected void doSetValue(File value, JmxTransConfiguration configuration) {
 					configuration.setProcessConfigDir(value);
 				}
 			},
-			new PropertySetter<File>(JSON_FILE_PROPERTY, File.class) {
+			new SinglePropertySetter<File>(JSON_FILE_PROPERTY, File.class) {
 				@Override
 				protected void doSetValue(File value, JmxTransConfiguration configuration) {
 					configuration.setProcessConfigFile(value);
 				}
 			},
-			new PropertySetter<File>(CONFIG_FILE_PROPERTY, File.class) {
+			new SinglePropertySetter<File>(CONFIG_FILE_PROPERTY, File.class) {
 				@Override
 				protected void doSetValue(File value, JmxTransConfiguration configuration) {
 					configuration.setConfigFile(value);
 				}
 			},
-			new PropertySetter<Boolean>(RUN_ENDLESSLY_PROPERTY, Boolean.class) {
+			new SinglePropertySetter<Boolean>(RUN_ENDLESSLY_PROPERTY, Boolean.class) {
 				@Override
 				protected void doSetValue(Boolean value, JmxTransConfiguration configuration) {
 					configuration.setRunEndlessly(value);
 				}
 			},
-			new PropertySetter<File>(QUARTZ_PROPERTIES_FILE_PROPERTY, File.class) {
+			new SinglePropertySetter<File>(QUARTZ_PROPERTIES_FILE_PROPERTY, File.class) {
 				@Override
 				protected void doSetValue(File value, JmxTransConfiguration configuration) {
 					configuration.setQuartzPropertiesFile(value);
 				}
 			},
-			new PropertySetter<Integer>(RUN_ENDLESSLY_PROPERTY, Integer.class) {
+			new SinglePropertySetter<Integer>(RUN_PERIOD_IN_SECONDS_PROPERTY, Integer.class) {
 				@Override
 				protected void doSetValue(Integer value, JmxTransConfiguration configuration) {
 					configuration.setRunPeriod(value);
 				}
 			},
-			new PropertySetter<String>(ADDITIONAL_JARS_PROPERTY, String.class) {
+			new MultiPropertySetter<String>(ADDITIONAL_JARS_PROPERTY, String.class) {
 				@Override
-				protected void doSetValue(String value, JmxTransConfiguration configuration) {
+				protected void doSetValue(List<String> value, JmxTransConfiguration configuration) {
+					configuration.setAdditionalJars(value);
 				}
 			},
-			new PropertySetter<Integer>(QUERY_PROCESSOR_EXECUTOR_POOL_SIZE_PROPERTY, Integer.class) {
+			new SinglePropertySetter<Integer>(QUERY_PROCESSOR_EXECUTOR_POOL_SIZE_PROPERTY, Integer.class) {
 				@Override
 				protected void doSetValue(Integer value, JmxTransConfiguration configuration) {
 					configuration.setQueryProcessorExecutorPoolSize(value);
 				}
 			},
-			new PropertySetter<Integer>(QUERY_PROCESSOR_EXECUTOR_WORK_QUEUE_CAPACITY_PROPERTY, Integer.class) {
+			new SinglePropertySetter<Integer>(QUERY_PROCESSOR_EXECUTOR_WORK_QUEUE_CAPACITY_PROPERTY, Integer.class) {
 				@Override
 				protected void doSetValue(Integer value, JmxTransConfiguration configuration) {
 					configuration.setQueryProcessorExecutorWorkQueueCapacity(value);
 				}
 			},
-			new PropertySetter<Integer>(RESULT_PROCESSOR_EXECUTOR_POOL_SIZE_PROPERTY, Integer.class) {
+			new SinglePropertySetter<Integer>(RESULT_PROCESSOR_EXECUTOR_POOL_SIZE_PROPERTY, Integer.class) {
 				@Override
 				protected void doSetValue(Integer value, JmxTransConfiguration configuration) {
 					configuration.setResultProcessorExecutorPoolSize(value);
 				}
 			},
-			new PropertySetter<Integer>(RESULT_PROCESSOR_EXECUTOR_WORK_QUEUE_CAPACITY_PROPERTY, Integer.class) {
+			new SinglePropertySetter<Integer>(RESULT_PROCESSOR_EXECUTOR_WORK_QUEUE_CAPACITY_PROPERTY, Integer.class) {
 				@Override
 				protected void doSetValue(Integer value, JmxTransConfiguration configuration) {
 					configuration.setResultProcessorExecutorWorkQueueCapacity(value);
 				}
 			},
-			new PropertySetter<Boolean>(USE_SEPARATE_EXECUTORS_PROPERTY, Boolean.class) {
+			new SinglePropertySetter<Boolean>(USE_SEPARATE_EXECUTORS_PROPERTY, Boolean.class) {
 				@Override
 				protected void doSetValue(Boolean value, JmxTransConfiguration configuration) {
 					configuration.setUseSeparateExecutors(value);
@@ -289,12 +307,14 @@ public class JmxTransConfiguration {
 			properties.load(in);
 		}
 		if (configFile != null) {
+			setConfigFile(configFile);
 			try (InputStream in = new FileInputStream(configFile)) {
 				properties.load(in);
 			}
 		} else {
 			File defaultSystemProperties = new File("/etc/jmxtrans/jmxtrans.properties");
 			if (defaultSystemProperties.isFile()) {
+				setConfigFile(defaultSystemProperties);
 				try (InputStream in = new FileInputStream(defaultSystemProperties)) {
 					properties.load(in);
 				}

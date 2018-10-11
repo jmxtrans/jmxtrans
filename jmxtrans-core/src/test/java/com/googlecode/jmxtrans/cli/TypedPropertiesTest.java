@@ -22,38 +22,44 @@
  */
 package com.googlecode.jmxtrans.cli;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
+import org.junit.Before;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
-public class JCommanderArgumentParser implements CliArgumentParser {
-	@Nonnull
-	@Override
-	public JmxTransConfiguration parseOptions(@Nonnull String[] args) throws IOException {
-		JmxTransConfiguration tempConfig = new JmxTransConfiguration();
-		JmxTransConfiguration configuration = new JmxTransConfiguration();
-		new JCommander(tempConfig, args);
+import static org.assertj.core.api.Assertions.*;
 
-		JmxTransConfiguration propertiesConfig = new JmxTransConfiguration();
-		propertiesConfig.loadProperties(tempConfig.getConfigFile());
-		FileConfiguration defaultProvider = new FileConfiguration(propertiesConfig);
+public class TypedPropertiesTest {
+	private TypedProperties typedProperties;
 
-		JCommander jCommander = new JCommander();
-		jCommander.setDefaultProvider(defaultProvider);
-		jCommander.addObject(configuration);
-		jCommander.parse(args);
-
-		if (configuration.isHelp()) jCommander.usage();
-		else validate(configuration);
-
-		return configuration;
+	@Before
+	public void setUp() throws IOException {
+		try (InputStream inputStream = getClass().getResourceAsStream("/example-typed.properties")) {
+			Properties properties = new Properties();
+			properties.load(inputStream);
+			typedProperties = new TypedProperties(properties);
+		}
 	}
 
-
-	private void validate(JmxTransConfiguration configuration) {
-		if (configuration.getProcessConfigDirOrFile() == null) throw new ParameterException("Please specify either the -f or -j option.");
+	@Test
+	public void testGetString() {
+		assertThat(typedProperties.getTypedProperty("string", String.class)).isEqualTo("Hello JMXTrans");
 	}
 
+	@Test
+	public void testGetInteger() {
+		assertThat(typedProperties.getTypedProperty("integer", Integer.class)).isEqualTo(1234);
+	}
+
+	@Test
+	public void testGetBoolean() {
+		assertThat(typedProperties.getTypedProperty("boolean", Boolean.class)).isTrue();
+	}
+
+	@Test
+	public void testGetMulti() {
+		assertThat(typedProperties.getTypedProperties("multi", String.class)).containsExactly("one", "two", "three", "four");
+	}
 }
