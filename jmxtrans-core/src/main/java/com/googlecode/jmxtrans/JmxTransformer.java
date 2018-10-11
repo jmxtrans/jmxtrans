@@ -472,7 +472,7 @@ public class JmxTransformer implements WatchedCallback {
 					serverScheduler.unscheduleAll();
 					startupSystem();
 				} catch(Exception e) {
-					throw new RuntimeException(e);
+					Thread.currentThread().getThreadGroup().uncaughtException(Thread.currentThread(), e);
 				}
 			}
 		}, 1, TimeUnit.SECONDS);
