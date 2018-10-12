@@ -4,6 +4,6 @@ Maintainer: Guillaume Lederrey <guillaume.lederrey@gmail.com>
 Architecture: all
 Section: admin
 Priority: optional
-Depends: java7-runtime-headless | openjdk-7-jre-headless
+Depends: java7-runtime-headless | openjdk-7-jre-headless | java8-runtime-headless | default-jre-headless
 Description: [[version]] - jmxtrans
  dependency package, installs jmxtrans
