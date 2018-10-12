@@ -37,6 +37,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import java.util.concurrent.Executors;
+
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
@@ -54,8 +56,7 @@ public class ServerSchedulerTest {
 
 	@Before
 	public void setUp() {
-		when(configuration.getScheduledExecutorPoolSize()).thenReturn(2);
-		serverScheduler = new ServerScheduler(configuration, queryExecutorRepository, resultProcessor);
+		serverScheduler = new ServerScheduler(configuration, Executors.newScheduledThreadPool(2), queryExecutorRepository, resultProcessor);
 		serverScheduler.start();
 	}
 

@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -77,6 +79,14 @@ public class JmxTransModule extends AbstractModule {
 
 	@Provides
 	@Singleton
+	public ScheduledExecutorService scheduledExecutor() {
+		return Executors.newScheduledThreadPool(
+				configuration.getScheduledExecutorPoolSize(),
+				ExecutorFactory.threadFactory("scheduler"));
+	}
+
+	@Provides
+	@Singleton
 	@Named("queryExecutorRepository")
 	ExecutorRepository queryExecutorRepository() throws MalformedObjectNameException {
 		int poolSize = configuration.getQueryProcessorExecutorPoolSize();
@@ -99,8 +109,8 @@ public class JmxTransModule extends AbstractModule {
 		final ExecutorFactory executorFactory = new ExecutorFactory(poolSize, workQueueCapacity, executorAlias);
 		final boolean useSeparateExecutors = configuration.isUseSeparateExecutors();
 		return useSeparateExecutors
-			? new SeparateExecutorRepository(executorFactory)
-			: new CommonExecutorRepository(executorFactory);
+				? new SeparateExecutorRepository(executorFactory)
+				: new CommonExecutorRepository(executorFactory);
 	}
 
 	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName, long maxWaitMillis) {

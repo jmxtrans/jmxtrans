@@ -56,7 +56,6 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
@@ -92,7 +91,7 @@ public class JmxTransformer implements WatchedCallback {
 
 	private Thread shutdownHook = new ShutdownHook();
 
-	private final ScheduledExecutorService reloadScheduler = Executors.newScheduledThreadPool(1);
+	@Nonnull  private final ScheduledExecutorService reloadScheduler;
 
 	private volatile boolean isRunning = false;
 	@Nonnull private ExecutorRepository queryExecutorRepository;
@@ -112,13 +111,16 @@ public class JmxTransformer implements WatchedCallback {
 			ConfigurationParser configurationParser,
 			Injector injector,
 			@Nonnull @Named("queryExecutorRepository") ExecutorRepository queryExecutorRepository,
-			@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository) {
+			@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository,
+			@Nonnull ScheduledExecutorService scheduledExecutor
+	) {
 		this.serverScheduler = serverScheduler;
 		this.configuration = configuration;
 		this.configurationParser = configurationParser;
 		this.injector = injector;
 		this.queryExecutorRepository = queryExecutorRepository;
 		this.resultExecutorRepository = resultExecutorRepository;
+		this.reloadScheduler = scheduledExecutor;
 
 		this.platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 	}

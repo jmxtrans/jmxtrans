@@ -25,7 +25,6 @@ package com.googlecode.jmxtrans.scheduler;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
-import com.googlecode.jmxtrans.executors.ExecutorFactory;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.jmx.ResultProcessor;
 import com.googlecode.jmxtrans.model.Server;
@@ -36,7 +35,6 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +43,7 @@ public class ServerScheduler {
 	private static final Logger log = LoggerFactory.getLogger(ServerScheduler.class);
 
 	private final JmxTransConfiguration configuration;
-	private final ScheduledExecutorService scheduledExecutorService;
+	private final ScheduledExecutorService scheduledExecutor;
 	private final List<ScheduledServerCommand> scheduledServerCommands = new ArrayList<>();
 	private final ExecutorRepository queryExecutorRepository;
 	private final ResultProcessor resultProcessor;
@@ -53,12 +51,11 @@ public class ServerScheduler {
 	@Inject
 	public ServerScheduler(
 			@Nonnull JmxTransConfiguration configuration,
+			@Nonnull ScheduledExecutorService scheduledExecutor,
 			@Nonnull @Named("queryExecutorRepository") ExecutorRepository queryExecutorRepository,
 			@Nonnull ResultProcessor resultProcessor) {
 		this.configuration = configuration;
-		this.scheduledExecutorService = Executors.newScheduledThreadPool(
-				configuration.getScheduledExecutorPoolSize(),
-				ExecutorFactory.threadFactory("scheduler"));
+		this.scheduledExecutor = scheduledExecutor;
 		this.queryExecutorRepository = queryExecutorRepository;
 		this.resultProcessor = resultProcessor;
 	}
@@ -87,7 +84,7 @@ public class ServerScheduler {
 	public void schedule(Server server) {
 		ServerCommand serverCommand = new ServerCommand(server, queryExecutorRepository, resultProcessor);
 		long runPeriod = serverCommand.getRunPeriodSeconds(configuration.getRunPeriod());
-		ScheduledFuture<?> scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(serverCommand, runPeriod, runPeriod, TimeUnit.SECONDS);
+		ScheduledFuture<?> scheduledFuture = scheduledExecutor.scheduleAtFixedRate(serverCommand, runPeriod, runPeriod, TimeUnit.SECONDS);
 		synchronized (this.scheduledServerCommands) {
 			this.scheduledServerCommands.add(new ScheduledServerCommand(serverCommand, scheduledFuture));
 		}
@@ -107,8 +104,8 @@ public class ServerScheduler {
 	}
 
 	public void stop() {
-		if (!scheduledExecutorService.isShutdown()) {
-			scheduledExecutorService.shutdown();
+		if (!scheduledExecutor.isShutdown()) {
+			scheduledExecutor.shutdown();
 			log.debug("Shutdown scheduler");
 		}
 	}
