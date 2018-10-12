@@ -23,7 +23,7 @@
     THE SOFTWARE.
 
 -->
-<configuration>
+<configuration debug="false">
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<!-- encoders are assigned the type
@@ -33,7 +33,10 @@
 		</encoder>
 	</appender>
 
-	<logger name="com.googlecode.jmxtrans" level="debug"/>
+	<logger name="com.googlecode.jmxtrans" level="info"/>
+	<logger name="org.apache.kafka" level="warn"/>
+	<logger name="org.apache.zookeeper" level="warn"/>
+	<logger name="kafka" level="warn"/>
 
 	<root level="info">
 		<appender-ref ref="console" />
