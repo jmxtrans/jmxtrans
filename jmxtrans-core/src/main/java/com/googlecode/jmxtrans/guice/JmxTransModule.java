@@ -29,7 +29,6 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.module.guice.ObjectMapperModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -45,19 +44,14 @@ import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -84,23 +78,11 @@ public class JmxTransModule extends AbstractModule {
 	}
 
 	@Provides
-	@Inject
-	Scheduler scheduler(JmxTransConfiguration configuration, GuiceJobFactory jobFactory) throws SchedulerException, IOException {
-		StdSchedulerFactory serverSchedFact = new StdSchedulerFactory();
-		try (InputStream stream = openQuartzConfiguration(configuration)) {
-			serverSchedFact.initialize(stream);
-		}
-		Scheduler scheduler = serverSchedFact.getScheduler();
-		scheduler.setJobFactory(jobFactory);
-		return scheduler;
-	}
-
-	private InputStream openQuartzConfiguration(JmxTransConfiguration configuration) throws FileNotFoundException {
-		if (configuration.getQuartzPropertiesFile() == null) {
-			return JmxTransModule.class.getResourceAsStream("/quartz.server.properties");
-		} else {
-			return new FileInputStream(configuration.getQuartzPropertiesFile());
-		}
+	@Singleton
+	public ScheduledExecutorService scheduledExecutor() {
+		return Executors.newScheduledThreadPool(
+				configuration.getScheduledExecutorPoolSize(),
+				ExecutorFactory.threadFactory("scheduler"));
 	}
 
 	@Provides
@@ -127,8 +109,8 @@ public class JmxTransModule extends AbstractModule {
 		final ExecutorFactory executorFactory = new ExecutorFactory(poolSize, workQueueCapacity, executorAlias);
 		final boolean useSeparateExecutors = configuration.isUseSeparateExecutors();
 		return useSeparateExecutors
-			? new SeparateExecutorRepository(executorFactory)
-			: new CommonExecutorRepository(executorFactory);
+				? new SeparateExecutorRepository(executorFactory)
+				: new CommonExecutorRepository(executorFactory);
 	}
 
 	private <K, V> GenericKeyedObjectPool<K, V> getObjectPool(KeyedPoolableObjectFactory<K, V> factory, String poolName, long maxWaitMillis) {

@@ -52,9 +52,6 @@ public class FileConfiguration implements IDefaultProvider {
 			case "-e":
 			case "--run-endlessly":
 				return properties.getProperty("run.endlessly");
-			case "-q":
-			case "--quartz-properties-file":
-				return properties.getProperty("quartz.properties.file");
 			case "-s":
 			case "--run-period-in-seconds":
 				return properties.getProperty("run.period.in.seconds");
@@ -69,6 +66,8 @@ public class FileConfiguration implements IDefaultProvider {
 				return properties.getProperty("result.processor.executor.pool.size");
 			case "--result-processor-executor-work-queue-capacity":
 				return properties.getProperty("result.processor.executor.work.queue.capacity");
+			case "--scheduled-executor-pool-size":
+				return properties.getProperty("scheduled.executor.pool.size");
 			default:
 				return null;
 		}

@@ -33,26 +33,16 @@ import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
-import com.googlecode.jmxtrans.jobs.ServerJob;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ValidationException;
 import com.googlecode.jmxtrans.monitoring.ManagedThreadPoolExecutor;
+import com.googlecode.jmxtrans.scheduler.ServerScheduler;
 import com.googlecode.jmxtrans.util.WatchDir;
 import com.googlecode.jmxtrans.util.WatchedCallback;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.RandomStringUtils;
-import org.quartz.CronExpression;
-import org.quartz.CronTrigger;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,11 +53,9 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
@@ -76,7 +64,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
-import static java.lang.Thread.currentThread;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -91,13 +78,12 @@ public class JmxTransformer implements WatchedCallback {
 
 	private static final Logger log = LoggerFactory.getLogger(JmxTransformer.class);
 
-	private final Scheduler serverScheduler;
-
 	private final JmxTransConfiguration configuration;
 
 	private final ConfigurationParser configurationParser;
 
 	private final Injector injector;
+
 
 	private WatchDir watcher;
 
@@ -105,10 +91,11 @@ public class JmxTransformer implements WatchedCallback {
 
 	private Thread shutdownHook = new ShutdownHook();
 
-	private final ScheduledExecutorService reloadScheduler = Executors.newScheduledThreadPool(1);
+	@Nonnull  private final ScheduledExecutorService reloadScheduler;
 
 	private volatile boolean isRunning = false;
 	@Nonnull private ExecutorRepository queryExecutorRepository;
+	private final ServerScheduler serverScheduler;
 	@Nonnull private ExecutorRepository resultExecutorRepository;
 	@Nonnull private final ThreadLocalRandom random = ThreadLocalRandom.current();
 	@Nonnull private final MBeanServer platformMBeanServer;
@@ -119,18 +106,21 @@ public class JmxTransformer implements WatchedCallback {
 
 	@Inject
 	public JmxTransformer(
-			Scheduler serverScheduler,
+			@Nonnull ServerScheduler serverScheduler,
 			JmxTransConfiguration configuration,
 			ConfigurationParser configurationParser,
 			Injector injector,
 			@Nonnull @Named("queryExecutorRepository") ExecutorRepository queryExecutorRepository,
-			@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository) {
+			@Nonnull @Named("resultExecutorRepository") ExecutorRepository resultExecutorRepository,
+			@Nonnull ScheduledExecutorService scheduledExecutor
+	) {
 		this.serverScheduler = serverScheduler;
 		this.configuration = configuration;
 		this.configurationParser = configurationParser;
 		this.injector = injector;
 		this.queryExecutorRepository = queryExecutorRepository;
 		this.resultExecutorRepository = resultExecutorRepository;
+		this.reloadScheduler = scheduledExecutor;
 
 		this.platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 	}
@@ -221,24 +211,10 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	// There is a sleep to work around a Quartz issue. The issue is marked to be
-	// fixed, but will require further analysis. This should not be reported by
-	// Findbugs, but as a more complex issue.
-	@SuppressFBWarnings(value = "SWL_SLEEP_WITH_LOCK_HELD", justification = "Workaround for Quartz issue")
 	private synchronized void stopServices() throws LifecycleException {
 		try {
 			// Shutdown the scheduler
-			if (serverScheduler.isStarted()) {
-				serverScheduler.shutdown(true);
-				log.debug("Shutdown server scheduler");
-				try {
-					// FIXME: Quartz issue, need to sleep
-					Thread.sleep(1500);
-				} catch (InterruptedException e) {
-					log.error(e.getMessage(), e);
-					currentThread().interrupt();
-				}
-			}
+			serverScheduler.stop();
 
 			for (ThreadPoolExecutor executor : queryExecutorRepository.getExecutors()) {
 				shutdownAndAwaitTermination(executor, 10, SECONDS);
@@ -393,11 +369,7 @@ public class JmxTransformer implements WatchedCallback {
 				this.validateSetup(server, server.getQueries());
 
 				// Now schedule the jobs for execution.
-				this.scheduleJob(server);
-			} catch (ParseException ex) {
-				throw new LifecycleException("Error parsing cron expression: " + server.getCronExpression(), ex);
-			} catch (SchedulerException ex) {
-				throw new LifecycleException("Error scheduling job for server: " + server, ex);
+				this.serverScheduler.schedule(server);
 			} catch (ValidationException ex) {
 				throw new LifecycleException("Error validating json setup for query", ex);
 			}
@@ -439,64 +411,11 @@ public class JmxTransformer implements WatchedCallback {
 		}
 	}
 
-	private void scheduleJob(Server server) throws ParseException, SchedulerException {
-		String name = server.getHost() + ":" + server.getPort() + "-" + System.nanoTime() + "-" + RandomStringUtils.randomNumeric(10);
-		JobDetail jd = new JobDetail(name, "ServerJob", ServerJob.class);
-
-		JobDataMap map = new JobDataMap();
-		map.put(Server.class.getName(), server);
-		jd.setJobDataMap(map);
-
-		Trigger trigger = createTrigger(server);
-
-		serverScheduler.scheduleJob(jd, trigger);
-		if (log.isDebugEnabled()) {
-			log.debug("Scheduled job: " + jd.getName() + " for server: " + server);
-		}
-	}
-
-	private Trigger createTrigger(Server server) throws ParseException {
-		int runPeriod = configuration.getRunPeriod();
-		Trigger trigger;
-
-		if (server.getCronExpression() != null && CronExpression.isValidExpression(server.getCronExpression())) {
-			CronTrigger cTrigger = new CronTrigger();
-			cTrigger.setCronExpression(server.getCronExpression());
-			trigger = cTrigger;
-		} else {
-			if (server.getRunPeriodSeconds() != null) {
-				runPeriod = server.getRunPeriodSeconds();
-			}
-			trigger = TriggerUtils.makeSecondlyTrigger(runPeriod);
-			// TODO replace Quartz with a ScheduledExecutorService
-		}
-		trigger.setName(server.getHost() + ":" + server.getPort() + "-" + Long.toString(System.nanoTime()));
-		trigger.setStartTime(computeSpreadStartDate(runPeriod));
-		return trigger;
-	}
 
 	@VisibleForTesting
 	Date computeSpreadStartDate(int runPeriod) {
 		long spread = random.nextLong(MILLISECONDS.convert(runPeriod, SECONDS));
 		return new Date(new Date().getTime() + spread);
-	}
-
-	private void deleteAllJobs() throws Exception {
-		List<JobDetail> allJobs = new ArrayList<>();
-		String[] jobGroups = serverScheduler.getJobGroupNames();
-		for (String jobGroup : jobGroups) {
-			String[] jobNames = serverScheduler.getJobNames(jobGroup);
-			for (String jobName : jobNames) {
-				allJobs.add(serverScheduler.getJobDetail(jobName, jobGroup));
-			}
-		}
-
-		for (JobDetail jd : allJobs) {
-			serverScheduler.deleteJob(jd.getName(), jd.getGroup());
-			if (log.isDebugEnabled()) {
-				log.debug("Deleted scheduled job: " + jd.getName() + " group: " + jd.getGroup());
-			}
-		}
 	}
 
 	/**
@@ -550,7 +469,7 @@ public class JmxTransformer implements WatchedCallback {
 			@Override
 			public void run() {
 				try {
-					deleteAllJobs();
+					serverScheduler.unscheduleAll();
 					startupSystem();
 				} catch(Exception e) {
 					throw new RuntimeException(e);

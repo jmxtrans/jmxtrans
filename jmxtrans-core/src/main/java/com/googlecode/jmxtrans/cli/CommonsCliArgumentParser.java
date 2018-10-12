@@ -64,14 +64,6 @@ public class CommonsCliArgumentParser implements CliArgumentParser {
 				}
 			} else if (option.getOpt().equals("e")) {
 				configuration.setRunEndlessly(true);
-			} else if (option.getOpt().equals("q")) {
-				File quartzConfigFile = new File(option.getValue());
-				if (quartzConfigFile.exists() && quartzConfigFile.isFile()) {
-					configuration.setQuartzPropertiesFile(quartzConfigFile);
-				} else {
-					throw new OptionsException("Could not find path to the quartz properties file: "
-							+ quartzConfigFile.getAbsolutePath());
-				}
 			} else if (option.getOpt().equals("s")) {
 				try {
 					configuration.setRunPeriod(Integer.parseInt(option.getValue()));
@@ -99,7 +91,6 @@ public class CommonsCliArgumentParser implements CliArgumentParser {
 		options.addOption("j", true, "Directory where json configuration is stored. Default is .");
 		options.addOption("f", true, "A single json file to execute.");
 		options.addOption("e", false, "Run endlessly. Default false.");
-		options.addOption("q", true, "Path to quartz configuration file.");
 		options.addOption("s", true, "Seconds between server job runs (not defined with cron). Default: 60");
 		options.addOption(OptionBuilder
 				.withArgName("a")

@@ -79,22 +79,6 @@ public class ManagedJmxTransformerProcess implements ManagedJmxTransformerProces
 	}
 
 	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#getQuartzPropertiesFile()
-	 */
-	@Override
-	public String getQuartPropertiesFile() {
-		return configuration.getQuartzPropertiesFile().getAbsolutePath();
-	}
-
-	/* (non-Javadoc)
-	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#setQuartzPropertiesFile(java.lang.String)
-	 */
-	@Override
-	public void setQuartPropertiesFile(String quartPropertiesFile) {
-		configuration.setQuartzPropertiesFile(new File(quartPropertiesFile));
-	}
-
-	/* (non-Javadoc)
 	 * @see com.googlecode.jmxtrans.monitoring.ManagedJmxTransformerProcessMXBean#getRunPeriod()
 	 */
 	@Override

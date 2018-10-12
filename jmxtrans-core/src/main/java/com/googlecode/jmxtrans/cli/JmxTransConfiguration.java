@@ -68,17 +68,6 @@ public class JmxTransConfiguration {
 	@Getter @Setter
 	private boolean runEndlessly = false;
 	/**
-	 * The Quartz server properties.
-	 */
-	@Parameter(
-			names = {"-q", "--quartz-properties-file"},
-			description = "The Quartz server properties.",
-			validateValueWith = ExistingFileValidator.class
-	)
-	@Getter @Setter
-	private File quartzPropertiesFile = null;
-
-	/**
 	 * The seconds between server job runs.
 	 */
 	@Parameter(
@@ -150,4 +139,12 @@ public class JmxTransConfiguration {
 	)
 	@Getter @Setter
 	private boolean useSeparateExecutors = false;
+
+	@Parameter(
+			names = {"--scheduled-executor-pool-size"},
+			description = "Number of threads used to run scheduler",
+			validateWith = PositiveInteger.class
+	)
+	@Getter @Setter
+	private int scheduledExecutorPoolSize = 2;
 }
