@@ -23,7 +23,7 @@
     THE SOFTWARE.
 
 -->
-<configuration>
+<configuration debug="false">
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<!-- encoders are assigned the type
@@ -33,7 +33,8 @@
 		</encoder>
 	</appender>
 
-	<logger name="com.googlecode.jmxtrans" level="debug"/>
+	<logger name="com.googlecode.jmxtrans" level="info"/>
+	<logger name="io.searchbox.client" level="warn"/>
 
 	<root level="info">
 		<appender-ref ref="console" />
