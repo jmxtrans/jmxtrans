@@ -60,7 +60,7 @@ public class ExecutorFactory {
 		return executorMBean;
 	}
 
-	private static ThreadFactory threadFactory(String alias) {
+	public static ThreadFactory threadFactory(String alias) {
 		return new ThreadFactoryBuilder()
 				.setDaemon(true)
 				.setNameFormat("jmxtrans-" + alias + "-%d")

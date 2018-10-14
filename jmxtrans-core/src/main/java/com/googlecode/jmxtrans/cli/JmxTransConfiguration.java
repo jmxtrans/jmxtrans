@@ -79,18 +79,6 @@ public class JmxTransConfiguration {
 	@Getter @Setter
 	private boolean runEndlessly = false;
 
-	private static final String QUARTZ_PROPERTIES_FILE_PROPERTY = "quartz.properties.file";
-	/**
-	 * The Quartz server properties.
-	 */
-	@Parameter(
-			names = {"-q", "--quartz-properties-file"},
-			description = "The Quartz server properties.",
-			validateValueWith = ExistingFileValidator.class
-	)
-	@Getter @Setter
-	private File quartzPropertiesFile = null;
-
 	private static final String RUN_PERIOD_IN_SECONDS_PROPERTY = "run.period.in.seconds";
 	/**
 	 * The seconds between server job runs.
@@ -172,6 +160,15 @@ public class JmxTransConfiguration {
 	@Getter @Setter
 	private boolean useSeparateExecutors = false;
 
+	private static final String SCHEDULED_EXECUTOR_POOL_SIZE_PROPERTY = "scheduled.executor.pool.size";
+	@Parameter(
+			names = {"--scheduled-executor-pool-size"},
+			description = "Number of threads used to run scheduler",
+			validateWith = PositiveInteger.class
+	)
+	@Getter @Setter
+	private int scheduledExecutorPoolSize = 2;
+
 	private static abstract class PropertySetter<T> {
 		protected final String key;
 		protected final Class<T> type;
@@ -242,12 +239,6 @@ public class JmxTransConfiguration {
 					configuration.setRunEndlessly(value);
 				}
 			},
-			new SinglePropertySetter<File>(QUARTZ_PROPERTIES_FILE_PROPERTY, File.class) {
-				@Override
-				protected void doSetValue(File value, JmxTransConfiguration configuration) {
-					configuration.setQuartzPropertiesFile(value);
-				}
-			},
 			new SinglePropertySetter<Integer>(RUN_PERIOD_IN_SECONDS_PROPERTY, Integer.class) {
 				@Override
 				protected void doSetValue(Integer value, JmxTransConfiguration configuration) {
@@ -288,6 +279,12 @@ public class JmxTransConfiguration {
 				@Override
 				protected void doSetValue(Boolean value, JmxTransConfiguration configuration) {
 					configuration.setUseSeparateExecutors(value);
+				}
+			},
+			new SinglePropertySetter<Integer>(SCHEDULED_EXECUTOR_POOL_SIZE_PROPERTY, Integer.class) {
+				@Override
+				protected void doSetValue(Integer value, JmxTransConfiguration configuration) {
+					configuration.setScheduledExecutorPoolSize(value);
 				}
 			}
 	};
