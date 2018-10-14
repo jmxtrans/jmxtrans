@@ -36,8 +36,7 @@ public class JCommanderArgumentParser implements CliArgumentParser {
 		JmxTransConfiguration configuration = new JmxTransConfiguration();
 		new JCommander(tempConfig, args);
 
-		JmxTransConfiguration propertiesConfig = new JmxTransConfiguration();
-		propertiesConfig.loadProperties(tempConfig.getConfigFile());
+		JmxTransConfiguration propertiesConfig = JmxTransConfigurationFactory.fromProperties(tempConfig.getConfigFile());
 		FileConfiguration defaultProvider = new FileConfiguration(propertiesConfig);
 
 		JCommander jCommander = new JCommander();

@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.webapp;
 
 import com.googlecode.jmxtrans.JmxTransformer;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.cli.JmxTransConfigurationFactory;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,13 +59,7 @@ public class JmxTransContextListener implements ServletContextListener {
 		if (configFile == null) {
 			configFile = servletContextEvent.getServletContext().getInitParameter("configFile");
 		}
-		File configFileF = new File(configFile);
-		JmxTransConfiguration configuration = new JmxTransConfiguration();
-		if (configFileF.isFile()) {
-			log.info("Starting JMXTrans with config file {}", configFile);
-			configuration.loadProperties(configFileF);
-		}
-		return configuration;
+		return JmxTransConfigurationFactory.fromProperties(configFile == null ? null : new File(configFile));
 	}
 
 	@Override

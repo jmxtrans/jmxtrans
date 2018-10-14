@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
-import com.googlecode.jmxtrans.cli.JCommanderArgumentParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.cli.JmxTransConfigurationFactory;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
@@ -128,7 +128,7 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	public static void main(String[] args) throws Exception {
-		JmxTransConfiguration configuration = new JCommanderArgumentParser().parseOptions(args);
+		JmxTransConfiguration configuration = JmxTransConfigurationFactory.fromArgs(args);
 		if (configuration.isHelp()) {
 			return;
 		}

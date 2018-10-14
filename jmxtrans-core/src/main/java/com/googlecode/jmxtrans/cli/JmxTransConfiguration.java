@@ -33,9 +33,6 @@ import lombok.Setter;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -296,28 +293,6 @@ public class JmxTransConfiguration {
 		for(PropertySetter setter: SETTERS) {
 			setter.setValue(typedProperties, this);
 		}
-	}
-
-	public void loadProperties(File configFile) throws IOException {
-		Properties properties = new Properties();
-		try (InputStream in = this.getClass().getClassLoader().getResourceAsStream("jmxtrans.properties")) {
-			properties.load(in);
-		}
-		if (configFile != null) {
-			setConfigFile(configFile);
-			try (InputStream in = new FileInputStream(configFile)) {
-				properties.load(in);
-			}
-		} else {
-			File defaultSystemProperties = new File("/etc/jmxtrans/jmxtrans.properties");
-			if (defaultSystemProperties.isFile()) {
-				setConfigFile(defaultSystemProperties);
-				try (InputStream in = new FileInputStream(defaultSystemProperties)) {
-					properties.load(in);
-				}
-			}
-		}
-		loadProperties(properties);
 	}
 
 }
