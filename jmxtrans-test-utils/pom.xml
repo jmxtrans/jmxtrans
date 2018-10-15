@@ -38,9 +38,9 @@
 	<description>This module contains utilities used purely in tests.</description>
 
 	<properties>
+		<verify.branchCoveredRatio>0.0</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.0</verify.lineCoveredRatio>
 		<verify.mutationThreshold>0</verify.mutationThreshold>
-		<verify.totalBranchRate>0</verify.totalBranchRate>
-		<verify.totalLineRate>0</verify.totalLineRate>
 	</properties>
 
 	<dependencies>

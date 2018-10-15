@@ -36,9 +36,9 @@
 	<name>JmxTrans - Kafka output writers</name>
 
 	<properties>
+		<verify.branchCoveredRatio>0.40</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.90</verify.lineCoveredRatio>
 		<verify.mutationThreshold>51</verify.mutationThreshold>
-		<verify.totalBranchRate>40</verify.totalBranchRate>
-		<verify.totalLineRate>90</verify.totalLineRate>
 	</properties>
 	<dependencies>
 		<dependency>

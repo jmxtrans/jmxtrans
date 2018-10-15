@@ -38,9 +38,9 @@
 	<description>This module contains utilities that do not have direct dependencies on JmxTrans.</description>
 
 	<properties>
+		<verify.branchCoveredRatio>0.66</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.60</verify.lineCoveredRatio>
 		<verify.mutationThreshold>34</verify.mutationThreshold>
-		<verify.totalBranchRate>66</verify.totalBranchRate>
-		<verify.totalLineRate>60</verify.totalLineRate>
 	</properties>
 
 	<dependencies>

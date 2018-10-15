@@ -38,9 +38,9 @@
 	<description>This module contains output writers based on CloudWatch (AWS).</description>
 
 	<properties>
+		<verify.branchCoveredRatio>0.66</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.63</verify.lineCoveredRatio>
 		<verify.mutationThreshold>45</verify.mutationThreshold>
-		<verify.totalBranchRate>66</verify.totalBranchRate>
-		<verify.totalLineRate>63</verify.totalLineRate>
 	</properties>
 
 	<dependencies>
@@ -128,7 +128,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>-Dno.security.manager</argLine>
+					<argLine>${argLine} -Dno.security.manager</argLine>
 				</configuration>
 			</plugin>
 		</plugins>

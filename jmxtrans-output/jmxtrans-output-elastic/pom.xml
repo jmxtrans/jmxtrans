@@ -36,9 +36,9 @@
 	<name>JmxTrans - ElasticSearch output writers</name>
 
 	<properties>
+		<verify.branchCoveredRatio>0.75</verify.branchCoveredRatio>
+		<verify.lineCoveredRatio>0.75</verify.lineCoveredRatio>
 		<verify.mutationThreshold>60</verify.mutationThreshold>
-		<verify.totalBranchRate>75</verify.totalBranchRate>
-		<verify.totalLineRate>75</verify.totalLineRate>
 	</properties>
 	<dependencies>
 		<dependency>
