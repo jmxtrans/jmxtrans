@@ -1,0 +1,13 @@
+[Unit]
+Description=JmxTrans
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/default/jmxtrans
+ExecStart=/usr/share/jmxtrans/bin/jmxtrans-run.sh
+User=jmxtrans
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

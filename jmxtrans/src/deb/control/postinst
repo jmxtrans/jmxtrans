@@ -11,6 +11,8 @@ CONFIG="/etc/default/jmxtrans"
 # defaults for JVM
 HEAP_SIZE="512"
 
+SYSTEMD_PID=$(pidof systemd)
+
 purge_line () {
     if [ -s "$1" ]; then
         # safely create a temp file
@@ -76,6 +78,11 @@ case "$1" in
             echo "export JAR_FILE=/usr/share/jmxtrans/lib/jmxtrans-all.jar" >> "$CONFIG"
         fi
 
+		# No need to export env vars when systemd
+		if [ "${SYSTEMD_PID}" != "" ]; then
+			sed -i "s/^export //g" "$CONFIG"
+		fi
+
         chmod 644 "${CONFIG}" || true
     ;;
     *)
@@ -83,13 +90,21 @@ case "$1" in
     ;;
 esac
 
-if [ -x "/etc/init.d/jmxtrans" ]; then
-        if [ ! -e "/etc/init/jmxtrans.conf" ]; then
-                update-rc.d jmxtrans defaults >/dev/null
-        fi
-        invoke-rc.d jmxtrans start || exit $?
+if [ "${SYSTEMD_PID}" != "" ]; then
+	# systemd
+	systemctl enable jmxtrans.service
+	systemctl start jmxtrans.service
+	rm -f /etc/init.d/jmxtrans
+else
+	# sysvinit or something else
+	if [ -x "/etc/init.d/jmxtrans" ]; then
+			if [ ! -e "/etc/init/jmxtrans.conf" ]; then
+					update-rc.d jmxtrans defaults >/dev/null
+			fi
+			invoke-rc.d jmxtrans start || exit $?
+	fi
+	rm -f /etc/systemd/system/jmxtrans.service
 fi
-
 
 exit 0
 
