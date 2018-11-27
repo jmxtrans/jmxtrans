@@ -31,8 +31,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public interface ExecutorRepository {
 	void put(Server server) throws MalformedObjectNameException;
+	void clear();
 	Collection<ThreadPoolExecutor> getExecutors();
 	ThreadPoolExecutor getExecutor(Server server);
 	Collection<ManagedThreadPoolExecutor> getMBeans();
 }
-

@@ -66,5 +66,11 @@ public class SeparateExecutorRepository implements ExecutorRepository {
 		repository.put(server, managedThreadPoolExecutor.getExecutor());
 		mBeans.add(managedThreadPoolExecutor);
 	}
+
+	@Override
+	public void clear() {
+		mBeans.clear();
+		repository.clear();
+	}
 }
 
