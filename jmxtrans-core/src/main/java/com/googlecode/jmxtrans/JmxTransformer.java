@@ -456,7 +456,13 @@ public class JmxTransformer implements WatchedCallback {
 			return file.equals(this.configuration.getProcessConfigDirOrFile());
 		}
 
-		return file.isFile() && (file.getName().endsWith(".json") || file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"));
+		// If the file doesn't exist anymore, treat it as a regular file (to handle file deletion events)
+		if(file.exists() && !file.isFile()) {
+			return false;
+		}
+
+		final String fileName = file.getName();
+		return !fileName.startsWith(".") && (fileName.endsWith(".json") || fileName.endsWith(".yml") || fileName.endsWith(".yaml"));
 	}
 
 	private void scheduleReload() {
@@ -478,26 +484,26 @@ public class JmxTransformer implements WatchedCallback {
 		}, 1, TimeUnit.SECONDS);
 	}
 
-	@Override
-	public void fileModified(File file) throws Exception {
+	private void handleFileEvent(File file, String event) throws Exception {
 		if (this.isProcessConfigFile(file)) {
-			log.info("Configuration file modified: " + file);
+			log.info("Configuration file {}: {}", event, file);
 			scheduleReload();
 		}
+	}
+
+	@Override
+	public void fileModified(File file) throws Exception {
+		handleFileEvent(file, "modified");
 	}
 
 	@Override
 	public void fileDeleted(File file) throws Exception {
-		log.info("Configuration file deleted: " + file);
-		scheduleReload();
+		handleFileEvent(file, "deleted");
 	}
 
 	@Override
 	public void fileAdded(File file) throws Exception {
-		if (this.isProcessConfigFile(file)) {
-			log.info("Configuration file added: " + file);
-			scheduleReload();
-		}
+		handleFileEvent(file, "added");
 	}
 
 	protected class ShutdownHook extends Thread {
