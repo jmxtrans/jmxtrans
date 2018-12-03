@@ -23,53 +23,61 @@
 package com.googlecode.jmxtrans.cli;
 
 import com.beust.jcommander.IDefaultProvider;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import com.google.common.base.Joiner;
 
 import javax.annotation.Nonnull;
-import java.util.Properties;
+import java.lang.reflect.Field;
+import java.util.Collection;
 
 public class FileConfiguration implements IDefaultProvider {
 
-	@Nonnull private final Properties properties;
+	@Nonnull
+	private final JmxTransConfiguration configuration;
 
-	public FileConfiguration(@Nonnull Properties properties) {
-		this.properties = properties;
+	public FileConfiguration(@Nonnull JmxTransConfiguration configuration) {
+		this.configuration = configuration;
 	}
 
 	@Override
 	public String getDefaultValueFor(String optionName) {
-		switch (optionName) {
-			case "-c":
-			case "--continue-on-error":
-				return properties.getProperty("continue.on.error");
-			case "-j":
-			case "--json-directory":
-				return properties.getProperty("json.directory");
-			case "-f":
-			case "--json-file":
-				return properties.getProperty("json.file");
-			case "--config":
-				return properties.getProperty("config.file");
-			case "-e":
-			case "--run-endlessly":
-				return properties.getProperty("run.endlessly");
-			case "-s":
-			case "--run-period-in-seconds":
-				return properties.getProperty("run.period.in.seconds");
-			case "-a":
-			case "--additional-jars":
-				return properties.getProperty("additional.jars");
-			case "--query-processor-executor-pool-size":
-				return properties.getProperty("query.processor.executor.pool.size");
-			case "--query-processor-executor-work-queue-capacity":
-				return properties.getProperty("query.processor.executor.work.queue.capacity");
-			case "--result-processor-executor-pool-size":
-				return properties.getProperty("result.processor.executor.pool.size");
-			case "--result-processor-executor-work-queue-capacity":
-				return properties.getProperty("result.processor.executor.work.queue.capacity");
-			case "--scheduled-executor-pool-size":
-				return properties.getProperty("scheduled.executor.pool.size");
-			default:
-				return null;
+		for (Field field : JmxTransConfiguration.class.getDeclaredFields()) {
+			Parameter parameterAnnot = field.getAnnotation(Parameter.class);
+			if (parameterAnnot == null) {
+				continue;
+			}
+			for (String name : parameterAnnot.names()) {
+				try {
+					if (name.equals(optionName)) {
+						Object value = getField(field, configuration);
+						return toString(value);
+					}
+				} catch (IllegalAccessException e) {
+					throw new ParameterException("Invalid option " + optionName);
+				}
+			}
 		}
+		throw new ParameterException("Unsupported option " + optionName);
+	}
+
+	private static String toString(Object value) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Collection) {
+			Collection collection = (Collection) value;
+			if (collection.isEmpty()) {
+				return null;
+			}
+			return Joiner.on(',').join(collection);
+		}
+		return value.toString();
+	}
+
+	private static Object getField(Field field, Object target) throws IllegalAccessException {
+		if (!field.isAccessible()) {
+			field.setAccessible(true);
+		}
+		return field.get(target);
 	}
 }

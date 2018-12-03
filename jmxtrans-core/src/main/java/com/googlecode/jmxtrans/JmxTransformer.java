@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.classloader.ClassLoaderEnricher;
-import com.googlecode.jmxtrans.cli.JCommanderArgumentParser;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
+import com.googlecode.jmxtrans.cli.JmxTransConfigurationFactory;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.guice.JmxTransModule;
@@ -52,7 +52,9 @@ import javax.inject.Inject;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -126,11 +128,18 @@ public class JmxTransformer implements WatchedCallback {
 	}
 
 	public static void main(String[] args) throws Exception {
-		JmxTransConfiguration configuration = new JCommanderArgumentParser().parseOptions(args);
+		JmxTransConfiguration configuration = JmxTransConfigurationFactory.fromArgs(args);
 		if (configuration.isHelp()) {
 			return;
 		}
 
+		JmxTransformer transformer = create(configuration);
+
+		// Start the process
+		transformer.doMain();
+	}
+
+	public static JmxTransformer create(JmxTransConfiguration configuration) throws MalformedURLException, FileNotFoundException {
 		ClassLoaderEnricher enricher = new ClassLoaderEnricher();
 		for (File jar : configuration.getAdditionalJars()) {
 			enricher.add(jar);
@@ -138,10 +147,7 @@ public class JmxTransformer implements WatchedCallback {
 
 		Injector injector = JmxTransModule.createInjector(configuration);
 
-		JmxTransformer transformer = injector.getInstance(JmxTransformer.class);
-
-		// Start the process
-		transformer.doMain();
+		return injector.getInstance(JmxTransformer.class);
 	}
 
 	/**

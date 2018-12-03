@@ -39,6 +39,7 @@
 
 	<modules>
 		<module>jmxtrans-systemd</module>
+		<module>jmxtrans-webapp</module>
 	</modules>
 
 	<properties>
