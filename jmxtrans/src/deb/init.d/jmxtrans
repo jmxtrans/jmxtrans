@@ -19,7 +19,7 @@ PIDFILE="/var/run/jmxtrans.pid"
 JMXTRANS_USER=jmxtrans
 JMXTRANS_GROUP=jmxtrans
 
-RUNCMD="/usr/share/jmxtrans/bin/jmxtrans.sh"
+RUNCMD="/usr/share/jmxtrans/bin/jmxtrans-init.sh"
 
 # overwrite settings from default file
 if [ -f /etc/default/jmxtrans ]; then
