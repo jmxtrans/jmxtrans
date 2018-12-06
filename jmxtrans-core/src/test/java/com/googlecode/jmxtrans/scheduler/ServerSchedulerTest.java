@@ -75,8 +75,7 @@ public class ServerSchedulerTest {
 		// When
 		serverScheduler.schedule(server);
 		// Then
-		Thread.sleep(6000L);
-		verify(queryExecutorRepository, atLeastOnce()).getExecutor(same(server));
+		verify(queryExecutorRepository, timeout(6000).atLeastOnce()).getExecutor(same(server));
 	}
 
 	@Test
@@ -88,8 +87,7 @@ public class ServerSchedulerTest {
 		// When
 		serverScheduler.schedule(server);
 		// Then
-		Thread.sleep(6000L);
-		verify(queryExecutorRepository, atLeast(2)).getExecutor(same(server));
+		verify(queryExecutorRepository, timeout(6000L).atLeast(2)).getExecutor(same(server));
 	}
 
 	@Test
@@ -102,7 +100,7 @@ public class ServerSchedulerTest {
 		when(server1.getQueries()).then(new Answer<ImmutableSet>() {
 			@Override
 			public ImmutableSet answer(InvocationOnMock invocationOnMock) throws Throwable {
-				Thread.sleep(20000L);
+				Thread.sleep(10000L);
 				return ImmutableSet.<Query>of();
 			}
 		});
@@ -116,8 +114,7 @@ public class ServerSchedulerTest {
 		serverScheduler.schedule(server1);
 		serverScheduler.schedule(server2);
 		// Then
-		Thread.sleep(6000L);
-		verify(queryExecutorRepository, atLeastOnce()).getExecutor(same(server1));
-		verify(queryExecutorRepository, atLeast(2)).getExecutor(same(server2));
+		verify(queryExecutorRepository, timeout(6000L).atLeastOnce()).getExecutor(same(server1));
+		verify(queryExecutorRepository, timeout(6000L).atLeast(2)).getExecutor(same(server2));
 	}
 }
