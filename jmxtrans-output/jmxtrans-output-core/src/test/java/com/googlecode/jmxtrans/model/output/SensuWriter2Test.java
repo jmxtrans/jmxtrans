@@ -39,7 +39,7 @@ public class SensuWriter2Test {
 	@Test
 	public void metricsAreFormattedCorrectly() throws IOException {
 		StringWriter writer = new StringWriter();
-		SensuWriter2 sensuWriter = new SensuWriter2(new GraphiteWriter2(ImmutableList.<String>of(), null), new JsonFactory());
+		SensuWriter2 sensuWriter = new SensuWriter2(new GraphiteWriter2(ImmutableList.<String>of(), null), new JsonFactory(), null, null, null);
 
 		sensuWriter.write(writer, ServerFixtures.dummyServer(), QueryFixtures.dummyQuery(), ResultFixtures.dummyResults());
 		String lineSep = System.lineSeparator();
