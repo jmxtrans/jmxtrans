@@ -376,6 +376,14 @@ public class Server implements JmxConnectionProvider {
 		return url.substring(url.lastIndexOf("//") + 2, url.lastIndexOf(':'));
 	}
 
+  public String getAlias() {
+		if (alias == null) {
+			return null;
+		}
+
+		return alias;
+  }
+
 	public String getSource() {
 		if (alias != null) {
 			return alias;
