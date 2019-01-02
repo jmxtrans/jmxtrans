@@ -55,30 +55,30 @@ public class SensuWriterFactory implements OutputWriterFactory {
 	private final int poolSize;
 
 	public SensuWriterFactory(
+		@JsonProperty("typeNames") ImmutableList<String> typeNames,
 		@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
-		@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
-		@JsonProperty("flushStrategy") String flushStrategy,
-		@JsonProperty("handler") String handler,
 		@JsonProperty("host") String host,
-		@JsonProperty("name") String name,
 		@JsonProperty("port") Integer port,
 		@JsonProperty("rootPrefix") String rootPrefix,
-		@JsonProperty("type") String type,
-		@JsonProperty("typeNames") ImmutableList<String> typeNames,
-		@JsonProperty("poolSize") Integer poolSize
+		@JsonProperty("flushStrategy") String flushStrategy,
+		@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+		@JsonProperty("poolSize") Integer poolSize,
+		@JsonProperty("handler") String handler,
+		@JsonProperty("name") String name,
+		@JsonProperty("type") String type
 	) {
-		this.booleanAsNumber = booleanAsNumber;
-		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
-		this.handler = firstNonNull(handler, "graphite");
-		this.name = firstNonNull(name, "metrics-jmxtrans");
-		this.poolSize = firstNonNull(poolSize, 1);
 		this.rootPrefix = rootPrefix;
+		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
+		this.booleanAsNumber = booleanAsNumber;
 		this.server = new InetSocketAddress(
 			firstNonNull(host, "localhost"),
 			firstNonNull(port, 3030)
 		);
+		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
+		this.poolSize = firstNonNull(poolSize, 1);
+		this.handler = firstNonNull(handler, "graphite");
+		this.name = firstNonNull(name, "metrics-jmxtrans");
 		this.type = firstNonNull(type, "metric");
-		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
 	}
 
 	@Override
