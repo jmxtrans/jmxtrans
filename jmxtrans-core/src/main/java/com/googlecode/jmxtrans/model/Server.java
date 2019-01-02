@@ -377,10 +377,6 @@ public class Server implements JmxConnectionProvider {
 	}
 
 	public String getAlias() {
-		if (alias == null) {
-			return null;
-		}
-
 		return alias;
 	}
 
