@@ -140,7 +140,7 @@
 		-->
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
-		<jackson.version>2.9.7</jackson.version>
+		<jackson.version>2.9.8</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<kafka.version>0.11.0.1</kafka.version>
 		<logback.version>1.2.3</logback.version>
@@ -1031,7 +1031,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>rpm-maven-plugin</artifactId>
-					<version>2.1.5</version>
+					<version>2.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.pitest</groupId>
@@ -1167,9 +1167,9 @@
 					<links>
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
 						<link>http://commons.apache.org/pool/api-1.6</link>
-						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.4</link>
-						<link>http://fasterxml.github.io/jackson-core/javadoc/2.4</link>
-						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.4</link>
+						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.9</link>
+						<link>http://fasterxml.github.io/jackson-core/javadoc/2.9</link>
+						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.9</link>
 						<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc</link>
 					</links>
 				</configuration>
