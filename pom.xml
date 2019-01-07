@@ -797,7 +797,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.20</version>
+					<version>3.0.0-M3</version>
 					<configuration>
 						<groups>com.googlecode.jmxtrans.test.IntegrationTest</groups>
 					</configuration>
@@ -941,8 +941,9 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.20</version>
+					<version>3.0.0-M3</version>
 					<configuration>
+						<useSystemClassLoader>false</useSystemClassLoader>
 						<includes>
 							<include>**/Test*.java</include>
 							<include>**/*Test.java</include>
@@ -1208,7 +1209,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.20</version>
+				<version>3.0.0-M3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
