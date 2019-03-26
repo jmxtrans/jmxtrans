@@ -182,7 +182,8 @@ public class JmxTransformer implements WatchedCallback {
 				this.serverScheduler.start();
 
 				this.startupWatchdir();
-
+				this.initializeExecutors();
+				this.registerMBeans();
 				this.startupSystem();
 
 			} catch (Exception e) {
@@ -309,8 +310,6 @@ public class JmxTransformer implements WatchedCallback {
 	 */
 	private void startupSystem() throws Exception {
 		this.processFilesIntoServers();
-		this.initializeExecutors();
-		this.registerMBeans();
 		this.processServersIntoJobs();
 	}
 
