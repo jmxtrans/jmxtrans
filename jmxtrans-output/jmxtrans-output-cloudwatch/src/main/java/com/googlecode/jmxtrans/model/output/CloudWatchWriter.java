@@ -64,56 +64,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
-public class CloudWatchWriter implements OutputWriterFactory {
+public class CloudWatchWriter extends OutputWriterAdapter {
 	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
-	public static final MapEntryToDimension MAP_ENTRY_TO_DIMENSION = new MapEntryToDimension();
-
-	private final String namespace;
-	private final Iterable<Map<String, Object>> dimensions;
-
-	private final boolean booleanAsNumber;
-
-	@JsonCreator
-	public CloudWatchWriter(
-			@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
-			@JsonProperty("debug") Boolean debugEnabled,
-			@JsonProperty("namespace") String namespace,
-			@JsonProperty("dimensions") Collection<Map<String,Object>> dimensions,
-			@JsonProperty("settings") Map<String, Object> settings) {
-		this.booleanAsNumber = booleanAsNumber;
-		this.namespace = firstNonNull(namespace, (String) settings.get("namespace"));
-		checkArgument(!isNullOrEmpty(this.namespace), "namespace cannot be null or empty");
-
-		this.dimensions = firstNonNull(dimensions, (Collection<Map<String, Object>>) settings.get("dimensions"));
-	}
-
-	/**
-	 * Configuring the CloudWatch client.
-	 *
-	 * Credentials are loaded from the Amazon EC2 Instance Metadata Service
-	 */
-	private AmazonCloudWatchClient createCloudWatchClient() {
-		AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
-		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));
-		return cloudWatchClient;
-	}
-
-	private ImmutableList<Dimension> createDimensions(Iterable<Map<String, Object>> dimensions) {
-		if (dimensions == null) return ImmutableList.of();
-
-		return FluentIterable.from(dimensions).transform(MAP_ENTRY_TO_DIMENSION).toList();
-	}
-
-	@Override
-	public OutputWriter create() {
-		return ResultTransformerOutputWriter.booleanToNumber(
-				booleanAsNumber,
-				new Writer(namespace, createCloudWatchClient(), createDimensions(dimensions))
-		);
-	}
-
-	public static class Writer extends OutputWriterAdapter {
 
 		@Nonnull private final String namespace;
 		@Nonnull private final AmazonCloudWatch cloudWatchClient;
@@ -121,7 +73,7 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		@Nonnull private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
 		@Nonnull private final ImmutableCollection<Dimension> dimensions;
 
-		public Writer(@Nonnull String namespace, @Nonnull AmazonCloudWatch cloudWatchClient, @Nonnull ImmutableCollection<Dimension> dimensions) {
+		public CloudWatchWriter(@Nonnull String namespace, @Nonnull AmazonCloudWatch cloudWatchClient, @Nonnull ImmutableCollection<Dimension> dimensions) {
 			this.namespace = namespace;
 			this.cloudWatchClient = cloudWatchClient;
 			this.dimensions = dimensions;
@@ -168,6 +120,4 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		public void close() throws LifecycleException {
 			cloudWatchClient.shutdown();
 		}
-	}
-
 }

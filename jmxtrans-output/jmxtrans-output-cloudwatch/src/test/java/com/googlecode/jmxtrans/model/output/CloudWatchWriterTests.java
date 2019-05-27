@@ -52,7 +52,7 @@ public class CloudWatchWriterTests {
 
 	@Mock private AmazonCloudWatchClient cloudWatchClient;
 	@Captor private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
-	private CloudWatchWriter.Writer writer;
+	private CloudWatchWriter writer;
 
 	@Before
 	public void createCloudWatchWriter() {
@@ -61,7 +61,7 @@ public class CloudWatchWriterTests {
 				new Dimension().withName("InstanceId").withValue("$InstanceId")
 		);
 
-		writer = new CloudWatchWriter.Writer("testNS", cloudWatchClient, dimensions);
+		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions);
 	}
 
 	@Test
