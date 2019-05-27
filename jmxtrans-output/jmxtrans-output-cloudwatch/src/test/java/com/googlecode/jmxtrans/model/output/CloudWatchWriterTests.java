@@ -38,6 +38,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -66,7 +68,7 @@ public class CloudWatchWriterTests {
 
 	@Test
 	public void testValidationWithoutSettings() throws Exception {
-		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
+		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
 		PutMetricDataRequest request = requestCaptor.getValue();
