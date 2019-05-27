@@ -28,6 +28,7 @@ public class CloudWatchWriterFactory implements OutputWriterFactory {
 		public static final MapEntryToDimension MAP_ENTRY_TO_DIMENSION = new MapEntryToDimension();
 
 		private final String namespace;
+		private final ImmutableList<String> typeNames;
 		private final Iterable<Map<String, Object>> dimensions;
 
 		private final boolean booleanAsNumber;
@@ -38,18 +39,19 @@ public class CloudWatchWriterFactory implements OutputWriterFactory {
 				@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 				@JsonProperty("debug") Boolean debugEnabled,
 				@JsonProperty("namespace") String namespace,
-				@JsonProperty("dimensions") Collection<Map<String,Object>> dimensions,
+				@JsonProperty("dimensions") Collection<Map<String, Object>> dimensions,
 				@JsonProperty("settings") Map<String, Object> settings) {
 				this.booleanAsNumber = booleanAsNumber;
 				this.namespace = firstNonNull(namespace, (String) settings.get("namespace"));
 				checkArgument(!isNullOrEmpty(this.namespace), "namespace cannot be null or empty");
 
+				this.typeNames = typeNames;
 				this.dimensions = firstNonNull(dimensions, (Collection<Map<String, Object>>) settings.get("dimensions"));
 		}
 
 		/**
 		 * Configuring the CloudWatch client.
-		 *
+		 * <p>
 		 * Credentials are loaded from the Amazon EC2 Instance Metadata Service
 		 */
 		private AmazonCloudWatchClient createCloudWatchClient() {
@@ -59,7 +61,9 @@ public class CloudWatchWriterFactory implements OutputWriterFactory {
 		}
 
 		private ImmutableList<Dimension> createDimensions(Iterable<Map<String, Object>> dimensions) {
-				if (dimensions == null) return ImmutableList.of();
+				if (dimensions == null) {
+						return ImmutableList.of();
+				}
 
 				return FluentIterable.from(dimensions).transform(MAP_ENTRY_TO_DIMENSION).toList();
 		}
@@ -69,7 +73,7 @@ public class CloudWatchWriterFactory implements OutputWriterFactory {
 		public ResultTransformerOutputWriter<CloudWatchWriter> create() {
 				return ResultTransformerOutputWriter.booleanToNumber(
 						booleanAsNumber,
-						new CloudWatchWriter(namespace, createCloudWatchClient(), createDimensions(dimensions))
+						new CloudWatchWriter(namespace, createCloudWatchClient(), createDimensions(dimensions), typeNames)
 				);
 		}
 }

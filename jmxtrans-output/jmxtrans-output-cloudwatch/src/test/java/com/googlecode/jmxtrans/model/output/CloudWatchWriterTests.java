@@ -61,7 +61,7 @@ public class CloudWatchWriterTests {
 				new Dimension().withName("InstanceId").withValue("$InstanceId")
 		);
 
-		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions);
+		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
 	}
 
 	@Test
@@ -78,9 +78,10 @@ public class CloudWatchWriterTests {
 		MetricDatum metricDatum = request.getMetricData().get(0);
 		assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
 		assertThat(metricDatum.getValue()).isEqualTo(10);
-		assertThat(metricDatum.getDimensions().size()).isEqualTo(2);
+		assertThat(metricDatum.getDimensions().size()).isEqualTo(3);
 		assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
 		assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
+		assertThat(metricDatum.getDimensions().get(2).getName()).isEqualTo("type");
 	}
 
 	@Test
