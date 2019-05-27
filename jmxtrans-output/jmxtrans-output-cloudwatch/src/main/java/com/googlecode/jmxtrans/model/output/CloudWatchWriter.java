@@ -117,7 +117,7 @@ public class CloudWatchWriter extends OutputWriterAdapter {
 		}
 
 		private ImmutableList<Dimension> convertTypeNamesToDimensions(final Map<String, String> typeNameMap) {
-				if (null != typeNameMap && typeNameMap.size() > 0) {
+				if (null != typeNames && null != typeNameMap && typeNameMap.size() > 0) {
 						return FluentIterable.from(typeNames)
 								.filter(new Predicate<String>() {
 										@Override
