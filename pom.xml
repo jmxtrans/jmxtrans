@@ -142,7 +142,7 @@
 		<github.global.server>github</github.global.server>
 		<jackson.version>2.9.7</jackson.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
-		<kafka.version>0.11.0.1</kafka.version>
+		<kafka.version>1.1.1</kafka.version>
 		<logback.version>1.2.3</logback.version>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
@@ -301,7 +301,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.kafka</groupId>
-				<artifactId>kafka_2.11</artifactId>
+				<artifactId>kafka_2.12</artifactId>
 				<version>${kafka.version}</version>
 				<exclusions>
 					<exclusion>
@@ -318,7 +318,7 @@
 			<dependency>
 				<groupId>org.apache.zookeeper</groupId>
 				<artifactId>zookeeper</artifactId>
-				<version>3.4.10</version>
+				<version>3.4.14</version>
 				<exclusions>
 					<exclusion>
 						<groupId>log4j</groupId>
