@@ -43,25 +43,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link com.googlecode.jmxtrans.model.output.CloudWatchWriter}.
+ * Tests for {@link CloudWatchWriter2}.
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CloudWatchWriterTests {
+public class CloudWatchWriter2Test {
 
 	@Mock
 	private AmazonCloudWatchClient cloudWatchClient;
 	@Captor
 	private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
-	private CloudWatchWriter writer;
-
-		/*public void testInit(){
-				CloudWatchWriterFactory cloudWatchWriterFactory = new CloudWatchWriterFactory(
-						ImmutableList.<String>of(),
-						false,
-				);
-		}*/
+	private CloudWatchWriter2 writer;
 
 	@Test
 	public void testValidationWithTypeName() throws Exception {
@@ -70,10 +63,9 @@ public class CloudWatchWriterTests {
 				new Dimension().withName("InstanceId").withValue("$InstanceId")
 		);
 
-		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
+		writer = new CloudWatchWriter2("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
 
 		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
-//				writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
 		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
 		PutMetricDataRequest request = requestCaptor.getValue();
@@ -93,10 +85,10 @@ public class CloudWatchWriterTests {
 
 	@Test
 	public void testValidationWithTypeNameWithNoValue() throws Exception {
-		writer = new CloudWatchWriter("testNS", cloudWatchClient, ImmutableList.<Dimension>of(),
+		writer = new CloudWatchWriter2("testNS", cloudWatchClient, ImmutableList.<Dimension>of(),
 				ImmutableList.of("invalidType"));
 
-		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
 		PutMetricDataRequest request = requestCaptor.getValue();
@@ -118,9 +110,9 @@ public class CloudWatchWriterTests {
 				new Dimension().withName("InstanceId").withValue("$InstanceId")
 		);
 
-		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, null);
+		writer = new CloudWatchWriter2("testNS", cloudWatchClient, dimensions, null);
 
-		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
 		PutMetricDataRequest request = requestCaptor.getValue();
@@ -141,9 +133,9 @@ public class CloudWatchWriterTests {
 	public void testValidationWithoutDimensions() throws Exception {
 		ImmutableList<Dimension> dimensions = ImmutableList.of();
 
-		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, null);
+		writer = new CloudWatchWriter2("testNS", cloudWatchClient, dimensions, null);
 
-		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
 		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
 		PutMetricDataRequest request = requestCaptor.getValue();
@@ -165,7 +157,7 @@ public class CloudWatchWriterTests {
 				new Dimension().withName("InstanceId").withValue("$InstanceId")
 		);
 
-		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
+		writer = new CloudWatchWriter2("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
 
 		writer.close();
 		verify(cloudWatchClient).shutdown();

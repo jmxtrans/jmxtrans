@@ -18,6 +18,9 @@
             {
               "@class": "com.googlecode.jmxtrans.model.output.CloudWatchWriterFactory",
               "namespace": "jmx",
+              "typeNames": [
+                "type"
+              ],
               "dimensions": [
                 {
                   "name": "InstanceId",

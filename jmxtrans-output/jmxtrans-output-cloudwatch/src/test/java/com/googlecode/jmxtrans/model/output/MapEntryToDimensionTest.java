@@ -64,6 +64,16 @@ public class MapEntryToDimensionTest {
 	}
 
 	@Test
+	public void invalidEc2MetadataMethod() {
+		Dimension dimension = mapEntryToDimension.apply(ImmutableMap.of(
+				"name", (Object) "some_name",
+				"value", (Object)"$InvalidMetadata"));
+
+		assertThat(dimension.getName()).isEqualTo("some_name");
+		assertThat(dimension.getValue()).isEqualTo("$InvalidMetadata");
+	}
+
+	@Test
 	@Ignore("Should run on EC2 to be actually relevant")
 	public void dimensionIsCreatedFromEC2Metadata() {
 		Dimension dimension = mapEntryToDimension.apply(ImmutableMap.of(

@@ -22,123 +22,57 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.model.Dimension;
-import com.amazonaws.services.cloudwatch.model.MetricDatum;
-import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableCollection;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.OutputWriterAdapter;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.naming.KeyUtils;
-import com.googlecode.jmxtrans.util.ObjectToDouble;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.googlecode.jmxtrans.model.OutputWriterFactory;
+import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+
 /**
- * Writes data to <a href="http://aws.amazon.com/cloudwatch/">AWS CloudWatch</a> using the AWS Java SDK
+ * Kept for backward compatibility with the older json files having output writer mentioned as CloudWatchWriter.
  *
- * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
+ * @deprecated use {@link CloudWatchWriterFactory} instead.
  */
-public class CloudWatchWriter extends OutputWriterAdapter {
-	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
+@Deprecated
+public class CloudWatchWriter implements OutputWriterFactory {
 
 	@Nonnull
-	private final String namespace;
-	@Nonnull
-	private final AmazonCloudWatch cloudWatchClient;
+	private final CloudWatchWriterFactory cloudWatchWriterFactory;
 
-	@Nonnull
-	private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
-	@Nonnull
-	private final ImmutableCollection<Dimension> dimensions;
-	private final ImmutableCollection<String> typeNames;
 
-	public CloudWatchWriter(@Nonnull String namespace,
-							@Nonnull AmazonCloudWatch cloudWatchClient,
-							@Nonnull ImmutableCollection<Dimension> dimensions,
-							ImmutableCollection<String> typeNames
-	) {
-		this.namespace = namespace;
-		this.cloudWatchClient = cloudWatchClient;
-		this.dimensions = dimensions;
-		this.typeNames = typeNames;
+	@JsonCreator
+	public CloudWatchWriter(
+			@JsonProperty("typeNames") ImmutableList<String> typeNames,
+			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
+			@JsonProperty("debug") Boolean debugEnabled,
+			@JsonProperty("namespace") String namespace,
+			@JsonProperty("dimensions") Collection<Map<String, Object>> dimensions,
+			@JsonProperty("settings") Map<String, Object> settings) {
+		this.cloudWatchWriterFactory = new CloudWatchWriterFactory(
+				typeNames,
+				booleanAsNumber,
+				debugEnabled,
+				firstNonNull(namespace, (String) settings.get("namespace")),
+				firstNonNull(dimensions, (Collection<Map<String, Object>>) settings.get("dimensions"))
+		);
 	}
 
+	@Nonnull
 	@Override
-	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
-		PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
-		metricDataRequest.setNamespace(namespace);
-		List<MetricDatum> metricDatumList = new ArrayList<>();
-
-		// Iterating through the list of query results
-
-		for (Result result : results) {
-			try {
-				metricDatumList.add(processResult(result));
-			} catch (IllegalArgumentException iae) {
-				log.error("Could not convert result to double", iae);
-			}
-		}
-
-		metricDataRequest.setMetricData(metricDatumList);
-		cloudWatchClient.putMetricData(metricDataRequest);
+	public ResultTransformerOutputWriter<CloudWatchWriter2> create() {
+		return this.cloudWatchWriterFactory.create();
 	}
 
-	private MetricDatum processResult(Result result) {
-		// Sometimes the attribute name and the key of the value are the same
-		MetricDatum metricDatum = new MetricDatum();
-		if (result.getValuePath().isEmpty()) {
-			metricDatum.setMetricName(result.getAttributeName());
-		} else {
-			metricDatum.setMetricName(result.getAttributeName() + "_" + KeyUtils.getValuePathString(result));
-		}
-
-		metricDatum.setDimensions(FluentIterable.from(this.dimensions)
-				.append(convertTypeNamesToDimensions(result.getTypeNameMap()))
-				.toList());
-
-		// Converts the Objects to Double-values for CloudWatch
-		metricDatum.setValue(toDoubleConverter.apply(result.getValue()));
-		metricDatum.setTimestamp(new Date());
-		return metricDatum;
-	}
-
-	private ImmutableList<Dimension> convertTypeNamesToDimensions(final Map<String, String> typeNameMap) {
-		if (null != typeNames && null != typeNameMap && typeNameMap.size() > 0) {
-			return FluentIterable.from(typeNames)
-					.filter(new Predicate<String>() {
-						@Override
-						public boolean apply(String typeName) {
-							return typeNameMap.containsKey(typeName);
-						}
-					})
-					.transform(new Function<String, Dimension>() {
-						@Override
-						public Dimension apply(String typeName) {
-							return new Dimension().withName(typeName).withValue(typeNameMap.get(typeName));
-						}
-					})
-					.toList();
-		} else {
-			return ImmutableList.of();
-		}
-	}
-
-	@Override
-	public void close() throws LifecycleException {
-		cloudWatchClient.shutdown();
+	@VisibleForTesting
+	@Nonnull
+	CloudWatchWriterFactory getCloudWatchWriterFactory() {
+		return cloudWatchWriterFactory;
 	}
 }
