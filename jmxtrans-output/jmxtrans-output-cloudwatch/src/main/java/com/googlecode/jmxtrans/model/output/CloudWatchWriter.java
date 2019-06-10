@@ -53,92 +53,92 @@ import java.util.Map;
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
 public class CloudWatchWriter extends OutputWriterAdapter {
-		private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
+	private static final Logger log = LoggerFactory.getLogger(CloudWatchWriter.class);
 
-		@Nonnull
-		private final String namespace;
-		@Nonnull
-		private final AmazonCloudWatch cloudWatchClient;
+	@Nonnull
+	private final String namespace;
+	@Nonnull
+	private final AmazonCloudWatch cloudWatchClient;
 
-		@Nonnull
-		private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
-		@Nonnull
-		private final ImmutableCollection<Dimension> dimensions;
-		private final ImmutableCollection<String> typeNames;
+	@Nonnull
+	private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
+	@Nonnull
+	private final ImmutableCollection<Dimension> dimensions;
+	private final ImmutableCollection<String> typeNames;
 
-		public CloudWatchWriter(@Nonnull String namespace,
-														@Nonnull AmazonCloudWatch cloudWatchClient,
-														@Nonnull ImmutableCollection<Dimension> dimensions,
-														ImmutableCollection<String> typeNames
-		) {
-				this.namespace = namespace;
-				this.cloudWatchClient = cloudWatchClient;
-				this.dimensions = dimensions;
-				this.typeNames = typeNames;
+	public CloudWatchWriter(@Nonnull String namespace,
+							@Nonnull AmazonCloudWatch cloudWatchClient,
+							@Nonnull ImmutableCollection<Dimension> dimensions,
+							ImmutableCollection<String> typeNames
+	) {
+		this.namespace = namespace;
+		this.cloudWatchClient = cloudWatchClient;
+		this.dimensions = dimensions;
+		this.typeNames = typeNames;
+	}
+
+	@Override
+	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
+		PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
+		metricDataRequest.setNamespace(namespace);
+		List<MetricDatum> metricDatumList = new ArrayList<>();
+
+		// Iterating through the list of query results
+
+		for (Result result : results) {
+			try {
+				metricDatumList.add(processResult(result));
+			} catch (IllegalArgumentException iae) {
+				log.error("Could not convert result to double", iae);
+			}
 		}
 
-		@Override
-		public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
-				PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
-				metricDataRequest.setNamespace(namespace);
-				List<MetricDatum> metricDatumList = new ArrayList<>();
+		metricDataRequest.setMetricData(metricDatumList);
+		cloudWatchClient.putMetricData(metricDataRequest);
+	}
 
-				// Iterating through the list of query results
+	private MetricDatum processResult(Result result) {
+		// Sometimes the attribute name and the key of the value are the same
+		MetricDatum metricDatum = new MetricDatum();
+		if (result.getValuePath().isEmpty()) {
+			metricDatum.setMetricName(result.getAttributeName());
+		} else {
+			metricDatum.setMetricName(result.getAttributeName() + "_" + KeyUtils.getValuePathString(result));
+		}
 
-				for (Result result : results) {
-						try {
-								metricDatumList.add(processResult(result));
-						} catch (IllegalArgumentException iae) {
-								log.error("Could not convert result to double", iae);
+		metricDatum.setDimensions(FluentIterable.from(this.dimensions)
+				.append(convertTypeNamesToDimensions(result.getTypeNameMap()))
+				.toList());
+
+		// Converts the Objects to Double-values for CloudWatch
+		metricDatum.setValue(toDoubleConverter.apply(result.getValue()));
+		metricDatum.setTimestamp(new Date());
+		return metricDatum;
+	}
+
+	private ImmutableList<Dimension> convertTypeNamesToDimensions(final Map<String, String> typeNameMap) {
+		if (null != typeNames && null != typeNameMap && typeNameMap.size() > 0) {
+			return FluentIterable.from(typeNames)
+					.filter(new Predicate<String>() {
+						@Override
+						public boolean apply(String typeName) {
+							return typeNameMap.containsKey(typeName);
 						}
-				}
-
-				metricDataRequest.setMetricData(metricDatumList);
-				cloudWatchClient.putMetricData(metricDataRequest);
+					})
+					.transform(new Function<String, Dimension>() {
+						@Override
+						public Dimension apply(String typeName) {
+							return new Dimension().withName(typeName).withValue(typeNameMap.get(typeName));
+						}
+					})
+					.toList();
+		} else {
+			return ImmutableList.of();
 		}
+	}
 
-		private MetricDatum processResult(Result result) {
-				// Sometimes the attribute name and the key of the value are the same
-				MetricDatum metricDatum = new MetricDatum();
-				if (result.getValuePath().isEmpty()) {
-						metricDatum.setMetricName(result.getAttributeName());
-				} else {
-						metricDatum.setMetricName(result.getAttributeName() + "_" + KeyUtils.getValuePathString(result));
-				}
-
-				metricDatum.setDimensions(FluentIterable.from(this.dimensions)
-						.append(convertTypeNamesToDimensions(result.getTypeNameMap()))
-						.toList());
-
-				// Converts the Objects to Double-values for CloudWatch
-				metricDatum.setValue(toDoubleConverter.apply(result.getValue()));
-				metricDatum.setTimestamp(new Date());
-				return metricDatum;
-		}
-
-		private ImmutableList<Dimension> convertTypeNamesToDimensions(final Map<String, String> typeNameMap) {
-				if (null != typeNames && null != typeNameMap && typeNameMap.size() > 0) {
-						return FluentIterable.from(typeNames)
-								.filter(new Predicate<String>() {
-										@Override
-										public boolean apply(String typeName) {
-												return typeNameMap.containsKey(typeName);
-										}
-								})
-								.transform(new Function<String, Dimension>() {
-										@Override
-										public Dimension apply(String typeName) {
-												return new Dimension().withName(typeName).withValue(typeNameMap.get(typeName));
-										}
-								})
-								.toList();
-				} else {
-						return ImmutableList.of();
-				}
-		}
-
-		@Override
-		public void close() throws LifecycleException {
-				cloudWatchClient.shutdown();
-		}
+	@Override
+	public void close() throws LifecycleException {
+		cloudWatchClient.shutdown();
+	}
 }

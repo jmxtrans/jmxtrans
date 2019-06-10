@@ -50,11 +50,11 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudWatchWriterTests {
 
-		@Mock
-		private AmazonCloudWatchClient cloudWatchClient;
-		@Captor
-		private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
-		private CloudWatchWriter writer;
+	@Mock
+	private AmazonCloudWatchClient cloudWatchClient;
+	@Captor
+	private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
+	private CloudWatchWriter writer;
 
 		/*public void testInit(){
 				CloudWatchWriterFactory cloudWatchWriterFactory = new CloudWatchWriterFactory(
@@ -63,112 +63,112 @@ public class CloudWatchWriterTests {
 				);
 		}*/
 
-		@Test
-		public void testValidationWithTypeName() throws Exception {
-				ImmutableList<Dimension> dimensions = ImmutableList.of(
-						new Dimension().withName("SomeKey").withValue("SomeValue"),
-						new Dimension().withName("InstanceId").withValue("$InstanceId")
-				);
+	@Test
+	public void testValidationWithTypeName() throws Exception {
+		ImmutableList<Dimension> dimensions = ImmutableList.of(
+				new Dimension().withName("SomeKey").withValue("SomeValue"),
+				new Dimension().withName("InstanceId").withValue("$InstanceId")
+		);
 
-				writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
+		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
 
-				writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
+		writer.doWrite(dummyServer(), dummyQuery(), dummyResults());
 //				writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
-				verify(cloudWatchClient).putMetricData(requestCaptor.capture());
+		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
-				PutMetricDataRequest request = requestCaptor.getValue();
+		PutMetricDataRequest request = requestCaptor.getValue();
 
-				assertThat(request).isNotNull();
-				assertThat(request.getNamespace()).isEqualTo("testNS");
+		assertThat(request).isNotNull();
+		assertThat(request.getNamespace()).isEqualTo("testNS");
 
-				assertThat(request.getMetricData()).hasSize(1);
-				MetricDatum metricDatum = request.getMetricData().get(0);
-				assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
-				assertThat(metricDatum.getValue()).isEqualTo(10);
-				assertThat(metricDatum.getDimensions().size()).isEqualTo(3);
-				assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
-				assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
-				assertThat(metricDatum.getDimensions().get(2).getName()).isEqualTo("type");
-		}
+		assertThat(request.getMetricData()).hasSize(1);
+		MetricDatum metricDatum = request.getMetricData().get(0);
+		assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
+		assertThat(metricDatum.getValue()).isEqualTo(10);
+		assertThat(metricDatum.getDimensions().size()).isEqualTo(3);
+		assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
+		assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
+		assertThat(metricDatum.getDimensions().get(2).getName()).isEqualTo("type");
+	}
 
-		@Test
-		public void testValidationWithTypeNameWithNoValue() throws Exception {
-				writer = new CloudWatchWriter("testNS", cloudWatchClient, ImmutableList.<Dimension>of(),
-						ImmutableList.of("invalidType"));
+	@Test
+	public void testValidationWithTypeNameWithNoValue() throws Exception {
+		writer = new CloudWatchWriter("testNS", cloudWatchClient, ImmutableList.<Dimension>of(),
+				ImmutableList.of("invalidType"));
 
-				writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
-				verify(cloudWatchClient).putMetricData(requestCaptor.capture());
+		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
-				PutMetricDataRequest request = requestCaptor.getValue();
+		PutMetricDataRequest request = requestCaptor.getValue();
 
-				assertThat(request).isNotNull();
-				assertThat(request.getNamespace()).isEqualTo("testNS");
+		assertThat(request).isNotNull();
+		assertThat(request.getNamespace()).isEqualTo("testNS");
 
-				assertThat(request.getMetricData()).hasSize(1);
-				MetricDatum metricDatum = request.getMetricData().get(0);
-				assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
-				assertThat(metricDatum.getValue()).isEqualTo(10);
-				assertThat(metricDatum.getDimensions()).isEmpty();
-		}
+		assertThat(request.getMetricData()).hasSize(1);
+		MetricDatum metricDatum = request.getMetricData().get(0);
+		assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
+		assertThat(metricDatum.getValue()).isEqualTo(10);
+		assertThat(metricDatum.getDimensions()).isEmpty();
+	}
 
-		@Test
-		public void testValidationWithoutTypeName() throws Exception {
-				ImmutableList<Dimension> dimensions = ImmutableList.of(
-						new Dimension().withName("SomeKey").withValue("SomeValue"),
-						new Dimension().withName("InstanceId").withValue("$InstanceId")
-				);
+	@Test
+	public void testValidationWithoutTypeName() throws Exception {
+		ImmutableList<Dimension> dimensions = ImmutableList.of(
+				new Dimension().withName("SomeKey").withValue("SomeValue"),
+				new Dimension().withName("InstanceId").withValue("$InstanceId")
+		);
 
-				writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, null);
+		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, null);
 
-				writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
-				verify(cloudWatchClient).putMetricData(requestCaptor.capture());
+		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
-				PutMetricDataRequest request = requestCaptor.getValue();
+		PutMetricDataRequest request = requestCaptor.getValue();
 
-				assertThat(request).isNotNull();
-				assertThat(request.getNamespace()).isEqualTo("testNS");
+		assertThat(request).isNotNull();
+		assertThat(request.getNamespace()).isEqualTo("testNS");
 
-				assertThat(request.getMetricData()).hasSize(1);
-				MetricDatum metricDatum = request.getMetricData().get(0);
-				assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
-				assertThat(metricDatum.getValue()).isEqualTo(10);
-				assertThat(metricDatum.getDimensions().size()).isEqualTo(2);
-				assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
-				assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
-		}
+		assertThat(request.getMetricData()).hasSize(1);
+		MetricDatum metricDatum = request.getMetricData().get(0);
+		assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
+		assertThat(metricDatum.getValue()).isEqualTo(10);
+		assertThat(metricDatum.getDimensions().size()).isEqualTo(2);
+		assertThat(metricDatum.getDimensions().get(0).getName()).isEqualTo("SomeKey");
+		assertThat(metricDatum.getDimensions().get(1).getName()).isEqualTo("InstanceId");
+	}
 
-		@Test
-		public void testValidationWithoutDimensions() throws Exception {
-				ImmutableList<Dimension> dimensions = ImmutableList.of();
+	@Test
+	public void testValidationWithoutDimensions() throws Exception {
+		ImmutableList<Dimension> dimensions = ImmutableList.of();
 
-				writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, null);
+		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, null);
 
-				writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
-				verify(cloudWatchClient).putMetricData(requestCaptor.capture());
+		writer.doWrite(dummyServer(), dummyQuery(), singleNumericResult());
+		verify(cloudWatchClient).putMetricData(requestCaptor.capture());
 
-				PutMetricDataRequest request = requestCaptor.getValue();
+		PutMetricDataRequest request = requestCaptor.getValue();
 
-				assertThat(request).isNotNull();
-				assertThat(request.getNamespace()).isEqualTo("testNS");
+		assertThat(request).isNotNull();
+		assertThat(request.getNamespace()).isEqualTo("testNS");
 
-				assertThat(request.getMetricData()).hasSize(1);
-				MetricDatum metricDatum = request.getMetricData().get(0);
-				assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
-				assertThat(metricDatum.getValue()).isEqualTo(10);
-				assertThat(metricDatum.getDimensions()).isEmpty();
-		}
+		assertThat(request.getMetricData()).hasSize(1);
+		MetricDatum metricDatum = request.getMetricData().get(0);
+		assertThat(metricDatum.getMetricName()).isEqualTo("ObjectPendingFinalizationCount");
+		assertThat(metricDatum.getValue()).isEqualTo(10);
+		assertThat(metricDatum.getDimensions()).isEmpty();
+	}
 
-		@Test
-		public void cloudwatchClientIsClosed() throws LifecycleException {
-				ImmutableList<Dimension> dimensions = ImmutableList.of(
-						new Dimension().withName("SomeKey").withValue("SomeValue"),
-						new Dimension().withName("InstanceId").withValue("$InstanceId")
-				);
+	@Test
+	public void cloudwatchClientIsClosed() throws LifecycleException {
+		ImmutableList<Dimension> dimensions = ImmutableList.of(
+				new Dimension().withName("SomeKey").withValue("SomeValue"),
+				new Dimension().withName("InstanceId").withValue("$InstanceId")
+		);
 
-				writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
+		writer = new CloudWatchWriter("testNS", cloudWatchClient, dimensions, ImmutableList.of("type"));
 
-				writer.close();
-				verify(cloudWatchClient).shutdown();
-		}
+		writer.close();
+		verify(cloudWatchClient).shutdown();
+	}
 
 }
