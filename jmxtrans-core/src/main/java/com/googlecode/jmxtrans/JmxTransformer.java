@@ -313,6 +313,41 @@ public class JmxTransformer implements WatchedCallback {
 		this.processServersIntoJobs();
 	}
 
+	/**
+	 * Reloads servers from watchdir.
+	 */
+	private void reloadSystem() throws Exception {
+		serverScheduler.unscheduleAll();
+		this.removeExecutors();
+		this.processFilesIntoServers();
+		this.startExecutors();
+		this.processServersIntoJobs();
+	}
+
+	/**
+	 * Stops executors and removes servers for a reload.
+	 */
+	private void removeExecutors() throws Exception {
+		log.debug("Clearing executors for reload.");
+
+		unregisterExecutors(queryExecutorMBeans);
+		unregisterExecutors(resultExecutorMBeans);
+
+		for (Server server : masterServersList) {
+			queryExecutorRepository.remove(server);
+			resultExecutorRepository.remove(server);
+		}
+	}
+
+	/**
+	 * Starts executors for a reload.
+	 */
+	private void startExecutors() throws Exception {
+		initializeExecutors();
+		queryExecutorMBeans = registerExecutors(queryExecutorRepository);
+		resultExecutorMBeans = registerExecutors(resultExecutorRepository);
+	}
+
 	private void initializeExecutors() throws MalformedObjectNameException {
 		this.initializeExecutors(queryExecutorRepository);
 		this.initializeExecutors(resultExecutorRepository);
@@ -480,9 +515,9 @@ public class JmxTransformer implements WatchedCallback {
 			@Override
 			public void run() {
 				try {
-					serverScheduler.unscheduleAll();
-					startupSystem();
+					reloadSystem();
 				} catch(Exception e) {
+					log.error("Error during reload.", e);
 					throw new RuntimeException(e);
 				}
 			}
