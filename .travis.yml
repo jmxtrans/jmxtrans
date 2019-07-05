@@ -32,5 +32,4 @@ env:
   # GITHUB_TOKEN
   - secure: "RHBvhM5DFIIVmImN+p4Zg2n4bVKc9cXj9JeoXigxqo0ZRyuov5BSG1sgdaTh/l/h5CodvOwQH2hrpwlO9waw0Kg5fSiNoU2b3aCucA02LP1ks2ycsamusEsuJl+QStJ6ObQZLQ0zNoUOyS5HfhjM+7XPWK0FPlePkjHBS71fptE="
   # SONAR_TOKEN
-  - secure: "cPeZQMtUxh6dpZNje5I3VaZT0joCIbH8ndX/pMRg53QhLrKuZrPC60HlSR0F+4Wx5c1B1YEZxaVy+u00gI5ObBauUOvPmRT8+5hCvnDQPtvGLvmSaQdrPv0O8XimlxwhxheYZka5AYwnglcMJ8qD/qK184j6B2ZXJvk9kgw7bn0="
-
+  - secure: "cSdkoZFcN0FCbbKJEnutGMmeIdvXuMnfR73v/2EFm4P5+uLfUdXxWHXKsjWiUYF8tP2/+rPSspuZ1qm9L27omW3JKyJYuaxwMY/KHr/LReyWAay/IruOkbNc9YZBGKOJShOHFrb1lBbAcsizRUrhN/qVD2u8yTp6VJvMKBAiDhE="
