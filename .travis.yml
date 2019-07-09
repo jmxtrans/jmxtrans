@@ -24,11 +24,11 @@ branches:
 env:
   global:
   # GPG_PASSPHRASE
-  - secure: "aVsw/zSi7VrW/rU5yzeCpL2aC09of8hgO12mASBW4jn8SXS6J3a9Vxx6bHHSNqWiBys/TTw4WSXv0QX2FU0hbMBUitw6wT5zMikLPJPoI57/JwbRG1kXvNKl1v2efP2wm04qlvJPhhUlzo/eIQJlWDE590sZ8lo8FdoDOx986cQ="
+  - secure: "XxRmwFd7rzjtH9GJhmjy45evvs3wOIAihfChy91JBC1sFK+72b0YB6xx79csh+g8NIwAyWSpcbiCn2lCAlQqH8awI5LmozYtjCzUUHA5nvVtcAgPCHtXeVaslIoL0Hqvy2chtQXr4UuUFTYP8QDUGwk9EY8llgEfTlRIf2ZevDE="
   # SONATYPE_USERNAME
-  - secure: "c3AJ8jsBh3CwwyCQjGnCUGH2gDgX+n6OQdr4ec+z/fmdJbzVpen/JHFD6EoaN//mctOblRbT8tM0RCG47WtiFg7PCeXZsBvn5NkSuDgGjrCO3gVfvsdYwH1wkhPDEcwZGK6M29pA5gib/L2xrqhuYMmxzyjGQ08GmcS2yQrnhw4="
+  - secure: "FvfjQW/OFbqzR5OLb97P+IFAtJERxUCDW6ki0AlsBDLjzBgax0qQ8CusXYL3UJDvcISpyZHzw91NePXPhUqsdZa9pKvIVQLNnPb87Kk25rv8iIhwMc1mtVyJG/QruMKUdFBTwGus2nXhPoFB4XcredAA/zqK3AoW6PmzL89PPRk="
   # SONATYPE_PASSWORD
-  - secure: "FyjSlx58Cl6xq44BCpHo2/bg9wZHIO7i1AU1T9TjxkQlyD+uqNjM49i6a8fzkyt6BDrKOtsruStD5pP/xqVBsGHMGmH+D4g5CXtlwfvTsCzuoElgJCOuiCNdDb+2R83uYOxQhTq7BtZUTyLky77B1nsBG6ANaU27JcpvYbSksh4="
+  - secure: "Fp0Nu3c6GnXcsxbunuY5DTMvkWtGwBAqB3ZiCvUURMpgSpxA0pXXWs/cugy+NimI/Lkl2fPOx8lVuHcjm1FgW571PaeAzwE2AduZMgmuRtimcfrYodBLhW6b1pepI9VlWQ+NLZAk0VmAUjwQjEXDH7nAlGk5neUVZF11ZjS9jOk="
   # GITHUB_TOKEN
   - secure: "RHBvhM5DFIIVmImN+p4Zg2n4bVKc9cXj9JeoXigxqo0ZRyuov5BSG1sgdaTh/l/h5CodvOwQH2hrpwlO9waw0Kg5fSiNoU2b3aCucA02LP1ks2ycsamusEsuJl+QStJ6ObQZLQ0zNoUOyS5HfhjM+7XPWK0FPlePkjHBS71fptE="
   # SONAR_TOKEN
