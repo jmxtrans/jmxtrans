@@ -23,15 +23,34 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.amazonaws.services.cloudwatch.model.Dimension;
+import com.amazonaws.util.EC2MetadataUtils;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({EC2MetadataUtils.class})
 public class MapEntryToDimensionTest {
 
 	private final MapEntryToDimension mapEntryToDimension = new MapEntryToDimension();
+	private final String amiId = UUID.randomUUID().toString();
+
+	@Before
+	public void mockAmazonAPI() throws Exception {
+		mockStatic(EC2MetadataUtils.class);
+		when(EC2MetadataUtils.getAmiId()).thenReturn(amiId);
+		when(EC2MetadataUtils.getAmiLaunchIndex()).thenThrow(new RuntimeException());
+	}
 
 	@Test
 	public void simpleDimensionIsCreated() {
@@ -64,14 +83,25 @@ public class MapEntryToDimensionTest {
 	}
 
 	@Test
-	@Ignore("Should run on EC2 to be actually relevant")
+	//@Ignore("Should run on EC2 to be actually relevant")
 	public void dimensionIsCreatedFromEC2Metadata() {
-		Dimension dimension = mapEntryToDimension.apply(ImmutableMap.of(
-				"name", (Object) "some_name",
-				"value", (Object)"$AmiId"));
+		Map<String,String> tests = ImmutableMap.of(
+				"$AmiId", amiId,
+				"$UnknownField", "$UnknownField",
+				"$AmiLaunchIndex", "$AmiLaunchIndex"
+		);
 
-		assertThat(dimension.getName()).isEqualTo("some_name");
-		assertThat(dimension.getValue()).isEqualTo("null");
+		for (Map.Entry<String,String> test : tests.entrySet()) {
+			Dimension dimension = mapEntryToDimension.apply(ImmutableMap.of(
+					"name", (Object) "some_name",
+					"value", (Object) test.getKey()));
+
+			assertThat(dimension.getName()).isEqualTo("some_name");
+			assertThat(dimension.getValue()).isEqualTo(test.getValue());
+		}
+
+
+
 	}
 
 }
