@@ -1,8 +1,12 @@
 [Unit]
 Description=JmxTrans
+
 [Service]
 Type=simple
 EnvironmentFile=/etc/default/jmxtrans
 ExecStart=/usr/bin/jmxtrans --run-endlessly --json-directory /etc/jmxtrans --continue-on-error true
 User=jmxtrans
 Restart=always
+
+[Install]
+WantedBy=multi-user.target
