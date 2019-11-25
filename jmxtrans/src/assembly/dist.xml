@@ -64,6 +64,7 @@
             <includes>
                 <include>*json</include>
                 <include>*xml</include>
+                <include>jmxtrans.service</include>
             </includes>
             <excludes>
                 <exclude>pom.xml</exclude>

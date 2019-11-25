@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/default/jmxtrans
-ExecStart=/usr/bin/jmxtrans --run-endlessly --json-directory /etc/jmxtrans --continue-on-error true
+ExecStart=/usr/share/jmxtrans/bin/jmxtrans.sh /var/lib/jmxtrans
 User=jmxtrans
 Restart=always
 
