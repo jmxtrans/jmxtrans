@@ -22,9 +22,8 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -79,9 +78,10 @@ public class CloudWatchWriterFactory implements OutputWriterFactory {
 	 * <p>
 	 * Credentials are loaded from the Amazon EC2 Instance Metadata Service
 	 */
-	private AmazonCloudWatchClient createCloudWatchClient() {
-		AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
-		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));
+	private AmazonCloudWatch createCloudWatchClient() {
+		/*AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
+		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));*/
+		AmazonCloudWatch cloudWatchClient = AmazonCloudWatchClientBuilder.defaultClient();
 		return cloudWatchClient;
 	}
 
