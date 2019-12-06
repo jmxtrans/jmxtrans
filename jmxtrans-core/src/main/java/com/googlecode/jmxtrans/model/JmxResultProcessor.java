@@ -143,6 +143,10 @@ public class JmxResultProcessor {
 			CompositeType t = cds.getCompositeType();
 			Set<String> keys = t.keySet();
 			for (String key : keys) {
+				if (!query.getKeys().isEmpty() && !query.getKeys().contains(key)) {
+					continue;
+				}
+
 				Object value = cds.get(key);
 				add(attributeName, newValuePath(valuePath, key), value);
 			}

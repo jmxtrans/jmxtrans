@@ -40,7 +40,7 @@ public class JmxTransformerTest {
 
 	@Test
 	public void startDateIsSpreadAccordingToRunPeriod() {
-		JmxTransformer jmxTransformer = new JmxTransformer(null, new JmxTransConfiguration(), null, null, mock(ExecutorRepository.class), mock(ExecutorRepository.class));
+		JmxTransformer jmxTransformer = createJmxTransformer(new JmxTransConfiguration());
 
 		Date now = new Date();
 
@@ -52,10 +52,14 @@ public class JmxTransformerTest {
 	public void findProcessConfigFiles() throws URISyntaxException {
 		JmxTransConfiguration configuration = new JmxTransConfiguration();
 		configuration.setProcessConfigDir(new File(ConfigurationParserTest.class.getResource("/example.json").toURI()).getParentFile());
-		JmxTransformer jmxTransformer = new JmxTransformer(null, configuration, null, null, mock(ExecutorRepository.class), mock(ExecutorRepository.class));
+		JmxTransformer jmxTransformer = createJmxTransformer(configuration);
 
 		List<File> processConfigFiles = jmxTransformer.getProcessConfigFiles();
 
 		assertThat(processConfigFiles).hasSize(7);
+	}
+
+	private JmxTransformer createJmxTransformer(JmxTransConfiguration configuration) {
+		return new JmxTransformer(null, configuration, null, null, mock(ExecutorRepository.class), mock(ExecutorRepository.class), null);
 	}
 }

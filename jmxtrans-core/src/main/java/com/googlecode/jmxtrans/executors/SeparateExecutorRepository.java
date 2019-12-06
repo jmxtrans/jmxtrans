@@ -28,21 +28,23 @@ import com.googlecode.jmxtrans.monitoring.ManagedThreadPoolExecutor;
 import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import static com.google.common.util.concurrent.MoreExecutors
+		.shutdownAndAwaitTermination;
 
 public class SeparateExecutorRepository implements ExecutorRepository {
 	@Nonnull private final ConcurrentHashMap<Server, ThreadPoolExecutor> repository;
 	@Nonnull private final ExecutorFactory executorFactory;
-	@Nonnull private final List<ManagedThreadPoolExecutor> mBeans;
+	@Nonnull private final ConcurrentHashMap<Server, ManagedThreadPoolExecutor> mBeans;
 
 	public SeparateExecutorRepository(ExecutorFactory executorFactory){
 		this.executorFactory = executorFactory;
 		this.repository = new ConcurrentHashMap<>();
-		mBeans = new CopyOnWriteArrayList<>();
+		mBeans = new ConcurrentHashMap<>();
 	}
 
 	@Override
@@ -57,14 +59,23 @@ public class SeparateExecutorRepository implements ExecutorRepository {
 
 	@Override
 	public Collection<ManagedThreadPoolExecutor> getMBeans() {
-		return Collections.unmodifiableList(mBeans);
+		return mBeans.values();
 	}
 
 	@Override
 	public void put(Server server) throws MalformedObjectNameException {
 		final ManagedThreadPoolExecutor managedThreadPoolExecutor = executorFactory.create(server.getId());
 		repository.put(server, managedThreadPoolExecutor.getExecutor());
-		mBeans.add(managedThreadPoolExecutor);
+		mBeans.put(server, managedThreadPoolExecutor);
+	}
+
+	@Override
+	public void remove(Server server) {
+		ExecutorService executor = repository.remove(server);
+		if (executor != null) {
+			shutdownAndAwaitTermination(executor, 10, TimeUnit.SECONDS);
+		}
+		mBeans.remove(server);
 	}
 }
 

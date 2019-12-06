@@ -22,104 +22,111 @@
  */
 package com.googlecode.jmxtrans.test;
 
-import com.google.common.io.Closer;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkState;
 
 public class UdpLoggingServer extends ExternalResource {
-	private final Logger log = LoggerFactory.getLogger(getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(UdpLoggingServer.class);
 
-	@Nullable private Thread thread = null;
-
-	private final Object startSynchro = new Object();
-	private volatile DatagramSocket socket;
-
-	private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<String>();
 	private final Charset charset;
+	private ProcessRequestLoop loop;
 
 	public UdpLoggingServer(@Nonnull Charset charset) {
 		this.charset = charset;
 	}
 
-	@SuppressWarnings("squid:S2189") // server is only stopped when interrupted. Might be ugly, but good enough for a test server.
-	private void start() {
-		checkState(thread == null, "UDP Server already started");
+	private static class ProcessRequestLoop implements Runnable {
+		private final DatagramSocket socket;
+		private final Charset charset;
+		private final AtomicBoolean running = new AtomicBoolean();
+		private final ConcurrentLinkedQueue<String> receivedMessages = new ConcurrentLinkedQueue<String>();
 
-		thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Closer closer = Closer.create();
-					try {
-						socket = closer.register(new DatagramSocket());
-						while (true) {
-							processRequests(socket);
-						}
-					} catch (Throwable t) {
-						throw closer.rethrow(t);
-					} finally {
-						closer.close();
-						socket = null;
-					}
-				} catch (IOException ioe) {
-					log.error("Exception in TCP echo server", ioe);
-				}
-			}
-		});
-		thread.start();
-
-		try {
-			synchronized (startSynchro) {
-				startSynchro.wait(1000);
-			}
-		} catch (InterruptedException interrupted) {
-			log.error("UDP server seems to take too long to start", interrupted);
+		private ProcessRequestLoop(Charset charset) throws SocketException {
+			this.socket = new DatagramSocket();
+			running.set(true);
+			this.charset = charset;
 		}
-	}
 
-	private void processRequests(DatagramSocket socket) throws IOException {
-		byte[] buffer = new byte[1024];
-		DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-		socket.receive(packet);
-		String messageReceived = new String(packet.getData(), 0, packet.getLength(), charset);
-		log.debug("Message received: {}", messageReceived);
-		receivedMessages.add(messageReceived);
-	}
+		public int getPort() {
+			return this.socket.getLocalPort();
+		}
 
-	public boolean messageReceived(@Nonnull String message) {
-		return receivedMessages.contains(message);
-	}
+		@Override
+		public void run() {
+			LOGGER.info("UDP server started on port {}", getPort());
+			try {
+				while (isRunning()) {
+					processRequests();
+				}
+			} catch (IOException ioe) {
+				LOGGER.error("Exception in UDP server", ioe);
+			} finally {
+				running.set(false);
+			}
+		}
 
-	private void stop() {
-		checkState(thread != null, "UDP server not started");
-		thread.interrupt();
-	}
+		private boolean isRunning() {
+			return running.get();
+		}
 
-	@Nonnull
-	public InetSocketAddress getLocalSocketAddress()  {
-		checkState(socket != null, "Server not started");
-		return new InetSocketAddress("localhost", socket.getLocalPort());
+		private void processRequests() throws IOException {
+			byte[] buffer = new byte[1024];
+			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+			socket.receive(packet);
+			String messageReceived = new String(packet.getData(), 0, packet.getLength(), charset);
+			LOGGER.debug("Message received: {}", messageReceived);
+			receivedMessages.add(messageReceived);
+		}
+
+		private boolean messageReceived(@Nonnull String message) {
+			return receivedMessages.contains(message);
+		}
+
+		private void stop() {
+			running.set(false);
+		}
 	}
 
 	@Override
 	protected void before() throws Throwable {
-		start();
+		checkState(!isRunning(), "UDP Server already started");
+		loop = new ProcessRequestLoop(charset);
+		Thread thread = new Thread(loop);
+		thread.start();
 	}
+
+	public boolean isRunning() {
+		return loop != null && loop.isRunning();
+	}
+
+	public boolean messageReceived(@Nonnull String message) {
+		checkState(loop != null, "UDP server not started");
+		return loop.messageReceived(message);
+	}
+
+	@Nonnull
+	public InetSocketAddress getLocalSocketAddress() {
+		checkState(isRunning(), "Server not started");
+		return new InetSocketAddress("localhost", loop.getPort());
+	}
+
 
 	@Override
 	protected void after() {
-		stop();
+		checkState(isRunning(), "UDP server not started");
+		loop.stop();
 	}
 }

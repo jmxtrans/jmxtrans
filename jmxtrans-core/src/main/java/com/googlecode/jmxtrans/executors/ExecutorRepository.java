@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public interface ExecutorRepository {
+	void remove(Server server);
 	void put(Server server) throws MalformedObjectNameException;
 	Collection<ThreadPoolExecutor> getExecutors();
 	ThreadPoolExecutor getExecutor(Server server);

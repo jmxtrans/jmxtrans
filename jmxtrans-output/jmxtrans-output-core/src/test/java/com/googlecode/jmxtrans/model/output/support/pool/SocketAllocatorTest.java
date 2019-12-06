@@ -50,7 +50,7 @@ public class SocketAllocatorTest {
 		try {
 			echoServer.start();
 
-			SocketAllocator socketAllocator = new SocketAllocator(echoServer.getLocalSocketAddress(), 100, UTF_8, new NeverFlush());
+			SocketAllocator socketAllocator = new SocketAllocator(echoServer.getLocalSocketAddress(), 500, UTF_8, new NeverFlush());
 			SocketPoolable socketPoolable = socketAllocator.allocate(mock(Slot.class));
 
 			try {

@@ -28,6 +28,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.JmxResultProcessor;
+import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import org.junit.Test;
 
@@ -244,6 +245,37 @@ public class JmxResultProcessorTest {
 				TEST_DOMAIN_NAME).getResults();
 
 		assertThat(results).hasSize(4);
+
+		for(Result result: results) {
+			assertThat(result.getAttributeName()).isEqualTo("HeapMemoryUsage");
+			assertThat(result.getTypeName()).isEqualTo("type=Memory");
+		}
+
+		Optional<Result> optionalResult = firstMatch(results, "HeapMemoryUsage", "init");
+		assertThat(optionalResult.isPresent()).isTrue();
+		Object objectValue = optionalResult.get().getValue();
+		assertThat(objectValue).isInstanceOf(Long.class);
+	}
+
+
+	@Test
+	public void canReadCompositeDataWithFilteringKeys() throws MalformedObjectNameException, AttributeNotFoundException, MBeanException,
+			ReflectionException, InstanceNotFoundException {
+		ObjectInstance memory = getMemory();
+		AttributeList attr = ManagementFactory.getPlatformMBeanServer().getAttributes(
+				memory.getObjectName(), new String[]{"HeapMemoryUsage"});
+		List<Result> results = new JmxResultProcessor(
+				Query.builder()
+						.setObj("myQuery:key=val")
+						.setResultAlias("resultAlias")
+						.addKey("init")
+						.build(),
+				memory,
+				attr.asList(),
+				memory.getClassName(),
+				TEST_DOMAIN_NAME).getResults();
+
+		assertThat(results).hasSize(1);
 
 		for(Result result: results) {
 			assertThat(result.getAttributeName()).isEqualTo("HeapMemoryUsage");
