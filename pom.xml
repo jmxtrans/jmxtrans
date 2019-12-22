@@ -141,7 +141,6 @@
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
 		<jackson-bom.version>2.9.9.20190807</jackson-bom.version>
-		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<kafka.version>1.1.1</kafka.version>
 		<logback.version>1.2.3</logback.version>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
@@ -969,11 +968,6 @@
 							<phase>test</phase>
 						</execution>
 					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>appassembler-maven-plugin</artifactId>
-					<version>2.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
