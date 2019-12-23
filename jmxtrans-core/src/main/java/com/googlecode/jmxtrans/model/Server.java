@@ -24,17 +24,17 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
+import com.googlecode.jmxtrans.attach.JVMAttacher;
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
-import com.sun.tools.attach.VirtualMachine;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -55,10 +55,10 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,9 +72,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
+import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
 import static javax.naming.Context.SECURITY_PRINCIPAL;
-import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the
@@ -101,7 +101,6 @@ import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_F
 @ToString(of = {"pid", "host", "port", "url", "cronExpression", "numQueryThreads"})
 public class Server implements JmxConnectionProvider {
 
-	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
 	private static final int DEFAULT_SOCKET_SO_TIMEOUT_MILLIS = 10000;
@@ -422,11 +421,14 @@ public class Server implements JmxConnectionProvider {
 	}
 
 	@JsonIgnore
-	public JMXServiceURL getJmxServiceURL() throws IOException {
-		if(this.pid != null) {
-			return JMXServiceURLFactory.extractJMXServiceURLFromPid(this.pid);
+	public JMXServiceURL getJmxServiceURL() throws MalformedURLException {
+		String sUrl;
+		if(this.pid == null) {
+			sUrl = getUrl();
+		} else {
+			sUrl = JMXServiceURLFactory.extractJMXServiceURLFromPid(this.pid);
 		}
-		return new JMXServiceURL(getUrl());
+		return new JMXServiceURL(sUrl);
 	}
 
 	@JsonIgnore
@@ -449,32 +451,9 @@ public class Server implements JmxConnectionProvider {
 
 		private JMXServiceURLFactory() {}
 
-		public static JMXServiceURL extractJMXServiceURLFromPid(String pid) throws IOException {
-
-			try {
-				VirtualMachine vm = VirtualMachine.attach(pid);
-
-				try {
-					String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-
-					if (connectorAddress == null) {
-						String agent = vm.getSystemProperties().getProperty("java.home") +
-								File.separator + "lib" + File.separator + "management-agent.jar";
-						vm.loadAgent(agent);
-
-						connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-					}
-
-					return new JMXServiceURL(connectorAddress);
-				} finally {
-					vm.detach();
-				}
-			}
-			catch(Exception e) {
-				throw new IOException(e);
-			}
+		public static String extractJMXServiceURLFromPid(String pid) {
+			return JVMAttacher.attachToJVM(pid);
 		}
-
 	}
 
 	public static Builder builder() {
