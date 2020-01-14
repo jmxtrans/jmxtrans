@@ -79,8 +79,6 @@ public class CloudWatchWriterFactory implements OutputWriterFactory {
 	 * Credentials are loaded from the Amazon EC2 Instance Metadata Service
 	 */
 	private AmazonCloudWatch createCloudWatchClient() {
-		/*AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
-		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));*/
 		AmazonCloudWatch cloudWatchClient = AmazonCloudWatchClientBuilder.defaultClient();
 		return cloudWatchClient;
 	}
