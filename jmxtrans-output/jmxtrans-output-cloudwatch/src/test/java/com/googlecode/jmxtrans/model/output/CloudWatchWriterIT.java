@@ -24,6 +24,8 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
 import com.googlecode.jmxtrans.model.JmxProcess;
 import com.googlecode.jmxtrans.test.IntegrationTest;
@@ -41,6 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import static com.amazonaws.regions.Region.getRegion;
 import static com.amazonaws.regions.Regions.AP_NORTHEAST_1;
@@ -51,17 +54,18 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 /**
- * Tests for {@link CloudWatchWriter}.
+ * Tests for {@link CloudWatchWriterFactory}.
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
 @Category({RequiresIO.class, IntegrationTest.class})
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@PrepareForTest({CloudWatchWriter.class, Regions.class})
+@PrepareForTest({CloudWatchWriter2.class, Regions.class})
 public class CloudWatchWriterIT {
 
-	@Mock private AmazonCloudWatchClient cloudWatchClient;
+	@Mock
+	private AmazonCloudWatchClient cloudWatchClient;
 
 	@Before
 	public void mockAmazonAPI() throws Exception {
@@ -74,11 +78,69 @@ public class CloudWatchWriterIT {
 	}
 
 	@Test
-	public void loadingFromFile() throws URISyntaxException, IOException {
-		ProcessConfigUtils processConfigUtils = createInjector(new JmxTransConfiguration()).getInstance(ProcessConfigUtils.class);
+	public void testReadConfigDefault() throws IOException, URISyntaxException {
+		ProcessConfigUtils processConfigUtils = createInjector(new JmxTransConfiguration()).getInstance(
+				ProcessConfigUtils.class);
 		File input = new File(CloudWatchWriterIT.class.getResource("/cloud-watch.json").toURI());
 		JmxProcess process = processConfigUtils.parseProcess(input);
 		assertThat(process.getName()).isEqualTo("cloud-watch.json");
+
+		CloudWatchWriterFactory writerFactory = (CloudWatchWriterFactory) process.getServers()
+				.get(0).getQueries().asList().get(0).getOutputWriters().get(0);
+		assertThat(writerFactory.getNamespace()).isEqualTo("jmx");
+		assertThat(writerFactory.getTypeNames()).isNull();
+		assertThat(writerFactory.isBooleanAsNumber()).isFalse();
+
+		ImmutableList<Map<String, Object>> dimensions = FluentIterable.from(writerFactory.getDimensions()).toList();
+		assertThat(dimensions.get(0).get("name")).isEqualTo("InstanceId");
+		assertThat(dimensions.get(0).get("value")).isEqualTo("$InstanceId");
+
+		assertThat(dimensions.get(1).get("name")).isEqualTo("SomeKey");
+		assertThat(dimensions.get(1).get("value")).isEqualTo("SomeValue");
 	}
 
+	@Test
+	public void testReadConfigWithTypeName() throws IOException, URISyntaxException {
+		ProcessConfigUtils processConfigUtils = createInjector(new JmxTransConfiguration()).getInstance(
+				ProcessConfigUtils.class);
+		File input = new File(CloudWatchWriterIT.class.getResource("/cloud-watch-config-typename.json").toURI());
+		JmxProcess process = processConfigUtils.parseProcess(input);
+		assertThat(process.getName()).isEqualTo("cloud-watch-config-typename.json");
+
+		CloudWatchWriterFactory writerFactory = (CloudWatchWriterFactory) process.getServers()
+				.get(0).getQueries().asList().get(0).getOutputWriters().get(0);
+		assertThat(writerFactory.getNamespace()).isEqualTo("jmx");
+		assertThat(writerFactory.getTypeNames().size()).isEqualTo(1);
+		assertThat(writerFactory.getTypeNames().get(0)).isEqualTo("type");
+		assertThat(writerFactory.isBooleanAsNumber()).isFalse();
+
+		ImmutableList<Map<String, Object>> dimensions = FluentIterable.from(writerFactory.getDimensions()).toList();
+		assertThat(dimensions.get(0).get("name")).isEqualTo("InstanceId");
+		assertThat(dimensions.get(0).get("value")).isEqualTo("$InstanceId");
+
+		assertThat(dimensions.get(1).get("name")).isEqualTo("SomeKey");
+		assertThat(dimensions.get(1).get("value")).isEqualTo("SomeValue");
+	}
+
+	@Test
+	public void testReadDeprecatedConfig() throws URISyntaxException, IOException {
+		ProcessConfigUtils processConfigUtils = createInjector(new JmxTransConfiguration()).getInstance(
+				ProcessConfigUtils.class);
+		File input = new File(CloudWatchWriterIT.class.getResource("/cloud-watch-deprecated.json").toURI());
+		JmxProcess process = processConfigUtils.parseProcess(input);
+		assertThat(process.getName()).isEqualTo("cloud-watch-deprecated.json");
+
+		CloudWatchWriterFactory writerFactory = ((CloudWatchWriter) process.getServers()
+				.get(0).getQueries().asList().get(0).getOutputWriters().get(0)).getCloudWatchWriterFactory();
+		assertThat(writerFactory.getNamespace()).isEqualTo("jmx");
+		assertThat(writerFactory.getTypeNames()).isNull();
+		assertThat(writerFactory.isBooleanAsNumber()).isFalse();
+
+		ImmutableList<Map<String, Object>> dimensions = FluentIterable.from(writerFactory.getDimensions()).toList();
+		assertThat(dimensions.get(0).get("name")).isEqualTo("InstanceId");
+		assertThat(dimensions.get(0).get("value")).isEqualTo("$InstanceId");
+
+		assertThat(dimensions.get(1).get("name")).isEqualTo("SomeKey");
+		assertThat(dimensions.get(1).get("value")).isEqualTo("SomeValue");
+	}
 }
