@@ -48,40 +48,56 @@ public class SensuWriterFactory implements OutputWriterFactory {
 	@Nonnull private final InetSocketAddress server;
 	@Nonnull private final ImmutableList<String> typeNames;
 	@Nullable private final String rootPrefix;
+	@Nonnull private final String handler;
+	@Nonnull private final String name;
+	@Nonnull private final String type;
 	@Nonnull private final FlushStrategy flushStrategy;
 	private final int poolSize;
 
 	public SensuWriterFactory(
-			@JsonProperty("typeNames") ImmutableList<String> typeNames,
-			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
-			@JsonProperty("host") String host,
-			@JsonProperty("port") Integer port,
-			@JsonProperty("rootPrefix") String rootPrefix,
-			@JsonProperty("flushStrategy") String flushStrategy,
-			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
-			@JsonProperty("poolSize") Integer poolSize) {
+		@JsonProperty("typeNames") ImmutableList<String> typeNames,
+		@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
+		@JsonProperty("host") String host,
+		@JsonProperty("port") Integer port,
+		@JsonProperty("rootPrefix") String rootPrefix,
+		@JsonProperty("flushStrategy") String flushStrategy,
+		@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
+		@JsonProperty("poolSize") Integer poolSize,
+		@JsonProperty("handler") String handler,
+		@JsonProperty("name") String name,
+		@JsonProperty("type") String type
+	) {
 		this.rootPrefix = rootPrefix;
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
 		this.booleanAsNumber = booleanAsNumber;
 		this.server = new InetSocketAddress(
-				firstNonNull(host, "localhost"),
-				firstNonNull(port, 3030));
+			firstNonNull(host, "localhost"),
+			firstNonNull(port, 3030)
+		);
 		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
 		this.poolSize = firstNonNull(poolSize, 1);
+		this.handler = firstNonNull(handler, "graphite");
+		this.name = firstNonNull(name, "metrics-jmxtrans");
+		this.type = firstNonNull(type, "metric");
 	}
 
 	@Override
 	public ResultTransformerOutputWriter<WriterPoolOutputWriter<SensuWriter2>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
-				booleanAsNumber,
-				TcpOutputWriterBuilder.builder(
-						server,
-						new SensuWriter2(
-								new GraphiteWriter2(typeNames, rootPrefix),
-								new JsonFactory()))
-						.setFlushStrategy(flushStrategy)
-						.setPoolSize(poolSize)
-						.build());
+			booleanAsNumber,
+			TcpOutputWriterBuilder.builder(
+				server,
+				new SensuWriter2(
+					new GraphiteWriter2(typeNames, rootPrefix),
+					new JsonFactory(),
+					handler,
+					name,
+					type
+				)
+			)
+			.setFlushStrategy(flushStrategy)
+			.setPoolSize(poolSize)
+			.build()
+		);
 	}
-
 }

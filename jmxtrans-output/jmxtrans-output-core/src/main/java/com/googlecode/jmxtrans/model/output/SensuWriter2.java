@@ -38,23 +38,40 @@ public class SensuWriter2 implements WriterBasedOutputWriter {
 
 	@Nonnull private final GraphiteWriter2 graphiteWriter;
 	@Nonnull private final JsonFactory jsonFactory;
+	@Nonnull private final String handler;
+	@Nonnull private final String name;
+	@Nonnull private final String type;
 
-	public SensuWriter2(@Nonnull GraphiteWriter2 graphiteWriter, @Nonnull JsonFactory jsonFactory) {
+	public SensuWriter2(
+		@Nonnull GraphiteWriter2 graphiteWriter,
+		@Nonnull JsonFactory jsonFactory,
+		@Nonnull String handler,
+		@Nonnull String name,
+		@Nonnull String type
+	) {
 		this.graphiteWriter = graphiteWriter;
 		this.jsonFactory = jsonFactory;
+		this.handler = handler;
+		this.name = name;
+		this.type = type;
 	}
 
 	@Override
-	public void write(@Nonnull Writer writer, @Nonnull Server server, @Nonnull Query query, @Nonnull Iterable<Result> results) throws IOException {
+	public void write(
+		@Nonnull Writer writer,
+		@Nonnull Server server,
+		@Nonnull Query query,
+		@Nonnull Iterable<Result> results
+	) throws IOException {
 		try (
-				JsonGenerator g = jsonFactory.createGenerator(writer);
-				StringWriter temporaryWriter = new StringWriter()
+			JsonGenerator g = jsonFactory.createGenerator(writer);
+			StringWriter temporaryWriter = new StringWriter()
 		) {
 			g.useDefaultPrettyPrinter();
 			g.writeStartObject();
-			g.writeStringField("name", "jmxtrans");
-			g.writeStringField("type", "metric");
-			g.writeStringField("handler", "graphite");
+			g.writeStringField("name", name);
+			g.writeStringField("type", type);
+			g.writeStringField("handler", handler);
 
 			graphiteWriter.write(temporaryWriter, server, query, results);
 
