@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -68,13 +70,15 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	@Nonnull private final ConsistencyLevel writeConsistency;
 	@Nonnull private final String retentionPolicy;
 	@Nonnull private final ImmutableMap<String,String> tags;
-	@Nonnull ImmutableList<String> typeNames;
-
 	/**
 	 * The {@link ImmutableSet} of {@link ResultAttribute} attributes of
 	 * {@link Result} that will be written as {@link Point} tags
 	 */
-	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
+	@Nonnull private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
+	@Nonnull ImmutableList<String> typeNames;
+	@Nonnull private final ImmutableList<String> attributesAsTags;
+
+
 
 	private final boolean createDatabase;
 	private final boolean typeNamesAsTags;
@@ -89,17 +93,19 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull ImmutableMap<String,String> tags,
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			@Nonnull ImmutableList<String> typeNames,
+			@Nonnull ImmutableList<String> attributesAsTags,
 			boolean createDatabase,
 			boolean reportJmxPortAsTag,
 			boolean typeNamesAsTags,
 			boolean allowStringValues) {
-		this.typeNames = typeNames;
+		this.influxDB = influxDB;
 		this.database = database;
 		this.writeConsistency = writeConsistency;
 		this.retentionPolicy = retentionPolicy;
-		this.influxDB = influxDB;
 		this.tags = tags;
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
+		this.typeNames = typeNames;
+		this.attributesAsTags = attributesAsTags;
 		this.createDatabase = createDatabase;
 		this.reportJmxPortAsTag = reportJmxPortAsTag;
 		this.typeNamesAsTags = typeNamesAsTags;
@@ -161,16 +167,16 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	 */
 	@Override
 	public void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
+
 		// Creates only if it doesn't already exist
 		if (createDatabase) influxDB.createDatabase(database);
 		BatchPoints.Builder batchPointsBuilder = BatchPoints.database(database).retentionPolicy(retentionPolicy)
 				.tag(TAG_HOSTNAME, server.getSource());
 
+		//Custom tags
 		for(Map.Entry<String,String> tag : tags.entrySet()) {
 			batchPointsBuilder.tag(tag.getKey(),tag.getValue());
 		}
-
-		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
 		
 		ImmutableList<String> typeNamesParam = null;
 		// if not typeNamesAsTag, we concat typeName in values.
@@ -178,27 +184,35 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			typeNamesParam = this.typeNames;
 		}
 		
+
+		Map<String,Map<String, String>> attrTagByTypeName = buildAttrTagByTypeName(query, results, typeNamesParam);
+
+		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
+		
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
 
-			HashMap<String, Object> filteredValues = newHashMap();
+			HashMap<String, Object> fieldValues = newHashMap();
+			
 			Object value = result.getValue();
 
 			String key = KeyUtils.getPrefixedKeyString(query, result, typeNamesParam);
-			if (isValidNumber(value) || allowStringValues && value instanceof String) {
-				filteredValues.put(key, value);
+			if (isValidValue(value) && !attributesAsTags.contains(result.getAttributeName())) {
+					fieldValues.put(key, value);
 			}
 
 			// send the point if filteredValues isn't empty
-			if (!filteredValues.isEmpty()) {
+			if (!fieldValues.isEmpty()) {
 				Map<String, String> resultTagsToApply = buildResultTagMap(result);
+				Map<String, String> tagValues = firstNonNull(attrTagByTypeName.get(result.getTypeName()),
+																	new HashMap<String, String>());
 				if (reportJmxPortAsTag) {
 					resultTagsToApply.put(JMX_PORT_KEY, server.getPort());
 				} else {
-					filteredValues.put(JMX_PORT_KEY, Integer.parseInt(server.getPort()));
+					fieldValues.put(JMX_PORT_KEY, Integer.parseInt(server.getPort()));
 				}
 				Point point = Point.measurement(result.getKeyAlias()).time(result.getEpoch(), MILLISECONDS)
-						.tag(resultTagsToApply).fields(filteredValues).build();
+						.tag(resultTagsToApply).tag(tagValues).fields(fieldValues).build();
 
 				log.debug("Point: {}", point);
 				batchPoints.point(point);
@@ -226,6 +240,41 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 
 		return resultTagMap;
 
+	}
+	
+	/**
+	 * Process the "attributesAsTags" parameter.<br>
+	 * Creates a tag map, associated by the typeName.
+	 * Results fields with the same typeName will receive the same tag values.
+	 * @param query
+	 * @param results
+	 * @param typeNames
+	 * @return a map built as follows :
+	 * 	<ul>
+	 * 	<li>key : the typeName, in order to link tags to the corresponding fields in InfluxDB</li>
+	 * 	<li>values : a key-value map of every attributes converted into tags, ready for the InlfuxDB query</li>
+	 * 	</ul>
+	 */
+	private Map<String,Map<String, String>> buildAttrTagByTypeName(Query query, Iterable<Result> results, List<String> typeNames){
+		Map<String,Map<String, String>> attrTagByTypeName = newHashMap();
+		
+		if (!attributesAsTags.isEmpty()) {
+			for (Result result : results) {
+				if (attributesAsTags.contains(result.getAttributeName())){
+					if(!attrTagByTypeName.containsKey(result.getTypeName()))
+						attrTagByTypeName.put(result.getTypeName(), new HashMap<String, String>());
+					
+					String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
+					attrTagByTypeName.get(result.getTypeName())
+						.put(key, String.valueOf(result.getValue()));
+				}
+			}
+		}
+		return attrTagByTypeName;
+	}
+	
+	private boolean isValidValue(Object value) {
+		return isValidNumber(value) || allowStringValues && value instanceof String;
 	}
 
 }
