@@ -207,7 +207,7 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<!-- guava 20.0 is the last Java 7 compatible version -->
-				<version>24.1.1-jre</version>
+				<version>19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.inject</groupId>
@@ -243,6 +243,11 @@
 				<groupId>info.ganglia.gmetric4j</groupId>
 				<artifactId>gmetric4j</artifactId>
 				<version>1.0.10</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-codec</artifactId>
+				<version>4.1.46.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>io.searchbox</groupId>
