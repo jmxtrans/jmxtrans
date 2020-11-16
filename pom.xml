@@ -194,11 +194,6 @@
 				<version>1.72</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>2.10.0</version>
-			</dependency>
-			<dependency>
 				<groupId>com.github.chrisvest</groupId>
 				<artifactId>stormpot</artifactId>
 				<version>2.4.1</version>
@@ -212,7 +207,7 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<!-- guava 20.0 is the last Java 7 compatible version -->
-				<version>19.0</version>
+				<version>24.1.1-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.inject</groupId>
