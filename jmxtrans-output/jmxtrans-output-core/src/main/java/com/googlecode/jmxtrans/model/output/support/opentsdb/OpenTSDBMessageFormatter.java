@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.model.output.support.opentsdb;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
@@ -45,8 +44,9 @@ import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.googlecode.jmxtrans.util.NumberUtils.isNumeric;
 
 @EqualsAndHashCode
@@ -164,14 +164,10 @@ public class OpenTSDBMessageFormatter {
 	}
 
 	public Iterable<String> formatResults(Iterable<Result> results, final Server server) {
-		return from(results).transformAndConcat(new Function<Result, List<String>>() {
-
-			@Override
-			public List<String> apply(Result input) {
-				return formatResult(input, server);
-			}
-
-		}).toList();
+		return StreamSupport.stream(results.spliterator(), false)
+				.map(r -> String.join("", formatResult(r, server)))
+				.filter(s -> !s.isEmpty())
+				.collect(Collectors.toList());
 	}
 
 	/**

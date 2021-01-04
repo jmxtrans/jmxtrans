@@ -36,7 +36,6 @@ import stormpot.Slot;
 
 import java.io.IOException;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.when;
 

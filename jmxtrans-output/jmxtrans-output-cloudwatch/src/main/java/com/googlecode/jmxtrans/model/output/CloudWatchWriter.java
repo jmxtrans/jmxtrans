@@ -31,8 +31,6 @@ import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
@@ -53,6 +51,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -69,7 +68,7 @@ public class CloudWatchWriter implements OutputWriterFactory {
 	public static final MapEntryToDimension MAP_ENTRY_TO_DIMENSION = new MapEntryToDimension();
 
 	private final String namespace;
-	private final Iterable<Map<String, Object>> dimensions;
+	private final Collection<Map<String, Object>> dimensions;
 
 	private final boolean booleanAsNumber;
 
@@ -99,10 +98,10 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		return cloudWatchClient;
 	}
 
-	private ImmutableList<Dimension> createDimensions(Iterable<Map<String, Object>> dimensions) {
+	private List<Dimension> createDimensions(Collection<Map<String, Object>> dimensions) {
 		if (dimensions == null) return ImmutableList.of();
 
-		return FluentIterable.from(dimensions).transform(MAP_ENTRY_TO_DIMENSION).toList();
+		return dimensions.stream().map(MAP_ENTRY_TO_DIMENSION).collect(Collectors.toList());
 	}
 
 	@Override
@@ -119,9 +118,9 @@ public class CloudWatchWriter implements OutputWriterFactory {
 		@Nonnull private final AmazonCloudWatch cloudWatchClient;
 
 		@Nonnull private final ObjectToDouble toDoubleConverter = new ObjectToDouble();
-		@Nonnull private final ImmutableCollection<Dimension> dimensions;
+		@Nonnull private final Collection<Dimension> dimensions;
 
-		public Writer(@Nonnull String namespace, @Nonnull AmazonCloudWatch cloudWatchClient, @Nonnull ImmutableCollection<Dimension> dimensions) {
+		public Writer(@Nonnull String namespace, @Nonnull AmazonCloudWatch cloudWatchClient, @Nonnull Collection<Dimension> dimensions) {
 			this.namespace = namespace;
 			this.cloudWatchClient = cloudWatchClient;
 			this.dimensions = dimensions;

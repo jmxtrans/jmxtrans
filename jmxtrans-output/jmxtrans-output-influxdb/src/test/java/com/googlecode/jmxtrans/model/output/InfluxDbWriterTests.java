@@ -61,10 +61,7 @@ import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.JMX_PORT_KEY;
 import static com.googlecode.jmxtrans.model.output.InfluxDbWriter.TAG_HOSTNAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link InfluxDbWriter}.
@@ -91,7 +88,7 @@ public class InfluxDbWriterTests {
 
 	Result result = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "type=test,name=name",
 			ImmutableList.of("key"), 1);
-	Result resultStr = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "type=test,name=name", 
+	Result resultStr = new Result(2l, "attributeName", "className", "objDomain", "keyAlias", "type=test,name=name",
 			ImmutableList.of("key"), (Object) "hello");
 
 	ImmutableList<Result> results = ImmutableList.of(result);
@@ -202,7 +199,7 @@ public class InfluxDbWriterTests {
 		BatchPoints batchPoints = writeToInfluxDb(getTestInfluxDbWriterWithReportJmxPortAsTag());
 		verifyJMXPortOnlyInToken(batchPoints.getPoints().get(0).lineProtocol(), 0 /*Tags token*/);
 	}
-	
+
 	@Test
 	public void loadingFromFile() throws URISyntaxException, IOException {
 		File input = new File(InfluxDbWriterTests.class.getResource("/influxDB.json").toURI());
@@ -216,14 +213,14 @@ public class InfluxDbWriterTests {
 	public void valueString() throws Exception {
 		InfluxDbWriter writer = getTestInfluxDbWriterWithStringValue();
 		writer.doWrite(dummyServer(), dummyQuery(), resultsStr);
-	
+
 		verify(influxDB).write(messageCaptor.capture());
 		BatchPoints batchPoints = messageCaptor.getValue();
-	
+
 		assertThat(batchPoints.getDatabase()).isEqualTo(DATABASE_NAME);
 		List<Point> points = batchPoints.getPoints();
 		assertThat(points).hasSize(1);
-	
+
 		Point point = points.get(0);
 		assertThat(point.lineProtocol()).contains("key=\"hello\"");
 	}
@@ -268,7 +265,7 @@ public class InfluxDbWriterTests {
 		}
 		return sb.toString();
 	}
-	
+
 		private InfluxDbWriter getTestInfluxDbWriterWithDefaultSettings() {
 		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, DEFAULT_TYPE_NAMES, true, false, false, false);
 	}
@@ -292,7 +289,7 @@ public class InfluxDbWriterTests {
 	private InfluxDbWriter getTestInfluxDbWriterWithStringValue() {
 		return getTestInfluxDbWriter(DEFAULT_CONSISTENCY_LEVEL, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, DEFAULT_TYPE_NAMES, true, false, false, true);
 	}
-	
+
 	private InfluxDbWriter getTestInfluxDbWriterWithWriteConsistency(ConsistencyLevel consistencyLevel) {
 		return getTestInfluxDbWriter(consistencyLevel, DEFAULT_RETENTION_POLICY, DEFAULT_CUSTOM_TAGS, DEFAULT_RESULT_ATTRIBUTES, DEFAULT_TYPE_NAMES, true, false, false, false);
 	}
