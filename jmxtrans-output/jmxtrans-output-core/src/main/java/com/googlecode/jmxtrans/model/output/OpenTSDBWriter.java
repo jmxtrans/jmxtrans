@@ -75,18 +75,6 @@ public class OpenTSDBWriter extends OpenTSDBGenericWriter {
 		super(typeNames, booleanAsNumber, debugEnabled, host, port, tags, tagName, mergeTypeNamesTags, metricNamingExpression,
 				addHostnameTag, settings);
 		log.warn("OpenTSDBWriter is deprecated. Please use OpenTSDBWriterFactory instead.");
-		if (host == null) {
-			host = (String) getSettings().get(HOST);
-		}
-		if (host == null) {
-			throw new NullPointerException("Host cannot be null.");
-		}
-		if (port == null) {
-			port = Settings.getIntegerSetting(getSettings(), PORT, null);
-		}
-		if (port == null) {
-			throw new NullPointerException("Port cannot be null.");
-		}
 		this.address = new InetSocketAddress(host, port);
 
 	}
