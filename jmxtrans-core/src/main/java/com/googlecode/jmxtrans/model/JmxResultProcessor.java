@@ -58,7 +58,9 @@ public class JmxResultProcessor {
 	public ImmutableList<Result> getResults() {
 		ResultsBuilder builder = new ResultsBuilder();
 		for (Attribute attribute : attributes) {
-			builder.add(attribute.getName(), attribute.getValue());
+			if (attribute != null){
+				builder.add(attribute.getName(), attribute.getValue());
+			}
 		}
 		return builder.build();
 	}
