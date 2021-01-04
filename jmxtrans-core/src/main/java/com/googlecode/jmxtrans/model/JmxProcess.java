@@ -23,21 +23,19 @@
 package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
-
 /**
  * This is the container for a list of Servers.
  *
  * @author jon
  */
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class JmxProcess {
 
 	@Getter @Setter private String name;

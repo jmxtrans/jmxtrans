@@ -22,7 +22,7 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValue;
 import lombok.EqualsAndHashCode;
@@ -34,14 +34,12 @@ import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
-
 /**
  * Represents the result of a query.
  *
  * @author jon
  */
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @ThreadSafe
 @Immutable
 @EqualsAndHashCode
