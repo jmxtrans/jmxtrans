@@ -1321,11 +1321,6 @@
 						<plugin>
 							<groupId>org.pitest</groupId>
 							<artifactId>pitest-maven</artifactId>
-							<configuration>
-								<jvmArgs>
-									<value>-XX:MaxPermSize=256M</value>
-								</jvmArgs>
-							</configuration>
 						</plugin>
 					</plugins>
 				</pluginManagement>
