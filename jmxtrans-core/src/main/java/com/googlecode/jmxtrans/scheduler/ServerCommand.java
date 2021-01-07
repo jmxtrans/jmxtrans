@@ -48,12 +48,6 @@ public class ServerCommand implements Runnable {
 		this.resultProcessor = resultProcessor;
 	}
 
-	public int getRunPeriodSeconds(int defaultRunPeriod) {
-		return server.getRunPeriodSeconds() == null || server.getRunPeriodSeconds().intValue() <= 0 ?
-				defaultRunPeriod :
-				server.getRunPeriodSeconds().intValue();
-	}
-
 	@Override
 	public void run() {
 

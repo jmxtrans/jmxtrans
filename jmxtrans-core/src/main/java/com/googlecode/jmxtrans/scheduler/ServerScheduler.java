@@ -82,14 +82,17 @@ public class ServerScheduler {
 	}
 
 	public void schedule(Server server) {
+		if (server.getRunPeriodSeconds() == null || server.getRunPeriodSeconds().intValue() <= 0) {
+			server = Server.builder(server).setRunPeriodSeconds(configuration.getRunPeriod()).build();
+		}
 		ServerCommand serverCommand = new ServerCommand(server, queryExecutorRepository, resultProcessor);
-		long runPeriod = serverCommand.getRunPeriodSeconds(configuration.getRunPeriod());
+		long runPeriod = server.getRunPeriodSeconds();
 		ScheduledFuture<?> scheduledFuture = scheduledExecutor.scheduleAtFixedRate(serverCommand, runPeriod, runPeriod, TimeUnit.SECONDS);
 		synchronized (this.scheduledServerCommands) {
 			this.scheduledServerCommands.add(new ScheduledServerCommand(serverCommand, scheduledFuture));
 		}
 
-		log.debug("Scheduled job for server {}", serverCommand.getName());
+		log.debug("Scheduled job for server {} every {}s", serverCommand.getName(), runPeriod);
 	}
 
 	public void unscheduleAll() {
