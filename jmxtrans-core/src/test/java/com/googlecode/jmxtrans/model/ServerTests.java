@@ -42,18 +42,9 @@ import java.util.regex.Pattern;
 
 import static com.googlecode.jmxtrans.model.ServerFixtures.createPool;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author lanyonm
@@ -124,7 +115,6 @@ public class ServerTests {
 				.setPort("8008")
 				.setPool(createPool())
 				.setCronExpression("cron")
-				.setNumQueryThreads(123)
 				.setPassword("pass")
 				.setUsername("user")
 				.build();
@@ -135,7 +125,6 @@ public class ServerTests {
 				.setPort("8008")
 				.setPool(createPool())
 				.setCronExpression("cron")
-				.setNumQueryThreads(123)
 				.setPassword("pass")
 				.setUsername("user")
 				.build();
@@ -146,7 +135,6 @@ public class ServerTests {
 				.setPort("8008")
 				.setPool(createPool())
 				.setCronExpression("cron")
-				.setNumQueryThreads(123)
 				.setPassword("pass")
 				.setUsername("user")
 				.build();
@@ -200,7 +188,6 @@ public class ServerTests {
 				.setPool(createPool())
 				.setPid("123")
 				.setCronExpression("cron")
-				.setNumQueryThreads(2)
 				.build();
 
 		Server s2 = Server.builder()
@@ -209,19 +196,16 @@ public class ServerTests {
 			.setPool(createPool())
 			.setUrl("service:jmx:remoting-jmx://mysys.mydomain:8004")
 			.setCronExpression("cron")
-			.setNumQueryThreads(2)
 			.build();
 
 		assertThat(s1.toString())
 				.contains("pid=123")
-				.contains("cronExpression=cron")
-				.contains("numQueryThreads=2");
+				.contains("cronExpression=cron");
 		assertThat(s2.toString())
 				.contains("host=mydomain")
 				.contains("port=1234")
 				.contains("url=service:jmx:remoting-jmx://mysys.mydomain:8004")
-				.contains("cronExpression=cron")
-				.contains("numQueryThreads=2");
+				.contains("cronExpression=cron");
 	}
 
 	@Test
