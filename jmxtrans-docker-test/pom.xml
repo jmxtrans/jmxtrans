@@ -117,6 +117,7 @@
 
 						<configuration>
 							<images combine.children="append">
+<!--
 								<image>
 									<name>ubuntu-14.04.3/${project.artifactId}:${project.version}</name>
 									<build>
@@ -166,7 +167,7 @@
 										</wait>
 									</run>
 								</image>
-
+-->
 							</images>
 						</configuration>
 					</plugin>
@@ -194,7 +195,7 @@
 
 						<configuration>
 							<images combine.children="append">
-
+<!--
 								<image>
 									<name>debian-8.3/${project.artifactId}:${project.version}</name>
 									<build>
@@ -244,6 +245,7 @@
 										</wait>
 									</run>
 								</image>
+-->
 							</images>
 						</configuration>
 					</plugin>
@@ -296,7 +298,7 @@
 										</wait>
 									</run>
 								</image>
-
+<!--
 								<image>
 									<name>centos6.7/${project.artifactId}:${project.version}</name>
 									<build>
@@ -371,7 +373,7 @@
 										</wait>
 									</run>
 								</image>
-
+-->
 								<image>
 									<name>opensuse42.1/${project.artifactId}:${project.version}</name>
 									<build>
@@ -396,7 +398,7 @@
 										</wait>
 									</run>
 								</image>
-
+<!--
 								<image>
 									<name>opensuse13.2/${project.artifactId}:${project.version}</name>
 									<build>
@@ -421,7 +423,7 @@
 										</wait>
 									</run>
 								</image>
-
+-->
 							</images>
 						</configuration>
 					</plugin>
