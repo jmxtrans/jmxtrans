@@ -117,16 +117,23 @@
 
 						<configuration>
 							<images combine.children="append">
-<!--
 								<image>
-									<name>ubuntu-14.04.3/${project.artifactId}:${project.version}</name>
+									<name>ubuntu-20.04/${project.artifactId}:${project.version}</name>
 									<build>
+										<from>ubuntu:20.04</from><!-- codename focal -->
+										<runCmds>
+											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
+											<run>apt update</run>
+											<run>apt install -y wget apt-transport-https gnupg</run>
+											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb focal main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>apt update</run>
+											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
+										</runCmds>
 										<assembly>
 											<descriptor>assembly-docker.xml</descriptor>
 											<basedir>/</basedir>
 										</assembly>
-
-										<from>jmxtrans/testing:ubuntu14.04.3-0</from>
 									</build>
 									<run>
 										<cmd>
@@ -142,16 +149,23 @@
 										</wait>
 									</run>
 								</image>
-
 								<image>
-									<name>ubuntu-12.04.5/${project.artifactId}:${project.version}</name>
+									<name>ubuntu-18.04/${project.artifactId}:${project.version}</name>
 									<build>
+										<from>ubuntu:18.04</from><!-- codename bionic -->
+										<runCmds>
+											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
+											<run>apt update</run>
+											<run>apt install -y wget apt-transport-https gnupg</run>
+											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb bionic main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>apt update</run>
+											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
+										</runCmds>
 										<assembly>
 											<descriptor>assembly-docker.xml</descriptor>
 											<basedir>/</basedir>
 										</assembly>
-
-										<from>jmxtrans/testing:ubuntu12.04.5-0</from>
 									</build>
 									<run>
 										<cmd>
@@ -167,7 +181,38 @@
 										</wait>
 									</run>
 								</image>
--->
+								<image>
+									<name>ubuntu-16.04/${project.artifactId}:${project.version}</name>
+									<build>
+										<from>ubuntu:16.04</from><!-- codename xenial -->
+										<runCmds>
+											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
+											<run>apt update</run>
+											<run>apt install -y wget apt-transport-https gnupg</run>
+											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb xenial main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>apt update</run>
+											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
+										</runCmds>
+										<assembly>
+											<descriptor>assembly-docker.xml</descriptor>
+											<basedir>/</basedir>
+										</assembly>
+									</build>
+									<run>
+										<cmd>
+											<exec>
+												<arg>/bin/bash</arg>
+												<arg>-c</arg>
+												<arg>${deb.run.cmd}</arg>
+											</exec>
+										</cmd>
+										<wait>
+											<log>${verification.message}</log>
+											<time>${verification.wait.time}</time>
+										</wait>
+									</run>
+								</image>
 							</images>
 						</configuration>
 					</plugin>
@@ -195,16 +240,23 @@
 
 						<configuration>
 							<images combine.children="append">
-<!--
 								<image>
-									<name>debian-8.3/${project.artifactId}:${project.version}</name>
+									<name>debian-10/${project.artifactId}:${project.version}</name>
 									<build>
+										<from>debian:10</from><!-- codename buster -->
+										<runCmds>
+											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
+											<run>apt update</run>
+											<run>apt install -y wget apt-transport-https gnupg</run>
+											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb buster main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>apt update</run>
+											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
+										</runCmds>
 										<assembly>
 											<descriptor>assembly-docker.xml</descriptor>
 											<basedir>/</basedir>
 										</assembly>
-
-										<from>jmxtrans/testing:debian8.3-0</from>
 									</build>
 									<run>
 										<cmd>
@@ -220,32 +272,6 @@
 										</wait>
 									</run>
 								</image>
-
-								<image>
-									<name>debian-7.9/${project.artifactId}:${project.version}</name>
-									<build>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
-
-										<from>jmxtrans/testing:debian7.9-0</from>
-									</build>
-									<run>
-										<cmd>
-											<exec>
-												<arg>/bin/bash</arg>
-												<arg>-c</arg>
-												<arg>${deb.run.cmd}</arg>
-											</exec>
-										</cmd>
-										<wait>
-											<log>${verification.message}</log>
-											<time>${verification.wait.time}</time>
-										</wait>
-									</run>
-								</image>
--->
 							</images>
 						</configuration>
 					</plugin>
@@ -275,6 +301,41 @@
 							<images combine.children="append">
 
 								<image>
+									<name>centos8/${project.artifactId}:${project.version}</name>
+									<build>
+										<from>jmxtrans/testing:centos7-0</from>
+										<runCmds>
+											<run><![CDATA[cat <<'EOF' > /etc/yum.repos.d/adoptopenjdk.repo
+[AdoptOpenJDK]
+name=AdoptOpenJDK
+baseurl=http://adoptopenjdk.jfrog.io/adoptopenjdk/rpm/centos/$releasever/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
+EOF
+											]]></run>
+											<run>yum install -y adoptopenjdk-8-hotspot</run>
+										</runCmds>
+										<assembly>
+											<descriptor>assembly-docker.xml</descriptor>
+											<basedir>/</basedir>
+										</assembly>
+									</build>
+									<run>
+										<cmd>
+											<exec>
+												<arg>/bin/bash</arg>
+												<arg>-c</arg>
+												<arg>${rpm.run.cmd}</arg>
+											</exec>
+										</cmd>
+										<wait>
+											<log>${verification.message}</log>
+											<time>${verification.wait.time}</time>
+										</wait>
+									</run>
+								</image>
+								<image>
 									<name>centos7/${project.artifactId}:${project.version}</name>
 									<build>
 										<assembly>
@@ -298,82 +359,6 @@
 										</wait>
 									</run>
 								</image>
-<!--
-								<image>
-									<name>centos6.7/${project.artifactId}:${project.version}</name>
-									<build>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
-
-										<from>jmxtrans/testing:centos6.7-0</from>
-									</build>
-									<run>
-										<cmd>
-											<exec>
-												<arg>/bin/bash</arg>
-												<arg>-c</arg>
-												<arg>${rpm.run.cmd}</arg>
-											</exec>
-										</cmd>
-										<wait>
-											<log>${verification.message}</log>
-											<time>${verification.wait.time}</time>
-										</wait>
-									</run>
-								</image>
-
-								<image>
-									<name>centos6.6/${project.artifactId}:${project.version}</name>
-									<build>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
-
-										<from>jmxtrans/testing:centos6.6-0</from>
-									</build>
-									<run>
-										<cmd>
-											<exec>
-												<arg>/bin/bash</arg>
-												<arg>-c</arg>
-												<arg>${rpm.run.cmd}</arg>
-											</exec>
-										</cmd>
-										<wait>
-											<log>${verification.message}</log>
-											<time>${verification.wait.time}</time>
-										</wait>
-									</run>
-								</image>
-
-								<image>
-									<name>centos5.11/${project.artifactId}:${project.version}</name>
-									<build>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
-
-										<from>jmxtrans/testing:centos5.11-0</from>
-									</build>
-									<run>
-										<cmd>
-											<exec>
-												<arg>/bin/bash</arg>
-												<arg>-c</arg>
-												<arg>${rpm.run.cmd}</arg>
-											</exec>
-										</cmd>
-										<wait>
-											<log>${verification.message}</log>
-											<time>${verification.wait.time}</time>
-										</wait>
-									</run>
-								</image>
--->
 								<image>
 									<name>opensuse42.1/${project.artifactId}:${project.version}</name>
 									<build>
@@ -398,32 +383,6 @@
 										</wait>
 									</run>
 								</image>
-<!--
-								<image>
-									<name>opensuse13.2/${project.artifactId}:${project.version}</name>
-									<build>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
-
-										<from>jmxtrans/testing:opensuse13.2-0</from>
-									</build>
-									<run>
-										<cmd>
-											<exec>
-												<arg>/bin/bash</arg>
-												<arg>-c</arg>
-												<arg>${rpm.run.cmd}</arg>
-											</exec>
-										</cmd>
-										<wait>
-											<log>${verification.message}</log>
-											<time>${verification.wait.time}</time>
-										</wait>
-									</run>
-								</image>
--->
 							</images>
 						</configuration>
 					</plugin>
