@@ -121,6 +121,10 @@
 									<name>ubuntu-20.04/${project.artifactId}:${project.version}</name>
 									<build>
 										<from>ubuntu:20.04</from><!-- codename focal -->
+										<assembly>
+											<descriptor>assembly-docker-deb.xml</descriptor>
+											<basedir>/</basedir>
+										</assembly>
 										<runCmds>
 											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
 											<run>apt update</run>
@@ -130,10 +134,6 @@
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
 									</build>
 									<run>
 										<cmd>
@@ -153,6 +153,10 @@
 									<name>ubuntu-18.04/${project.artifactId}:${project.version}</name>
 									<build>
 										<from>ubuntu:18.04</from><!-- codename bionic -->
+										<assembly>
+											<descriptor>assembly-docker-deb.xml</descriptor>
+											<basedir>/</basedir>
+										</assembly>
 										<runCmds>
 											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
 											<run>apt update</run>
@@ -162,10 +166,6 @@
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
 									</build>
 									<run>
 										<cmd>
@@ -185,6 +185,10 @@
 									<name>ubuntu-16.04/${project.artifactId}:${project.version}</name>
 									<build>
 										<from>ubuntu:16.04</from><!-- codename xenial -->
+										<assembly>
+											<descriptor>assembly-docker-deb.xml</descriptor>
+											<basedir>/</basedir>
+										</assembly>
 										<runCmds>
 											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
 											<run>apt update</run>
@@ -194,10 +198,6 @@
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
 									</build>
 									<run>
 										<cmd>
@@ -244,6 +244,10 @@
 									<name>debian-10/${project.artifactId}:${project.version}</name>
 									<build>
 										<from>debian:10</from><!-- codename buster -->
+										<assembly>
+											<descriptor>assembly-docker-deb.xml</descriptor>
+											<basedir>/</basedir>
+										</assembly>
 										<runCmds>
 											<!-- See https://adoptopenjdk.net/installation.html#linux-pkg -->
 											<run>apt update</run>
@@ -253,10 +257,6 @@
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
-										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
-											<basedir>/</basedir>
-										</assembly>
 									</build>
 									<run>
 										<cmd>
@@ -304,22 +304,13 @@
 									<name>centos8/${project.artifactId}:${project.version}</name>
 									<build>
 										<from>jmxtrans/testing:centos7-0</from>
-										<runCmds>
-											<run><![CDATA[cat <<'EOF' > /etc/yum.repos.d/adoptopenjdk.repo
-[AdoptOpenJDK]
-name=AdoptOpenJDK
-baseurl=http://adoptopenjdk.jfrog.io/adoptopenjdk/rpm/centos/$releasever/$basearch
-enabled=1
-gpgcheck=1
-gpgkey=https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
-EOF
-											]]></run>
-											<run>yum install -y adoptopenjdk-8-hotspot</run>
-										</runCmds>
 										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
+											<descriptor>assembly-docker-rpm.xml</descriptor>
 											<basedir>/</basedir>
 										</assembly>
+										<runCmds>
+											<run>yum install -y adoptopenjdk-8-hotspot</run>
+										</runCmds>
 									</build>
 									<run>
 										<cmd>
@@ -339,7 +330,7 @@ EOF
 									<name>centos7/${project.artifactId}:${project.version}</name>
 									<build>
 										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
+											<descriptor>assembly-docker-rpm.xml</descriptor>
 											<basedir>/</basedir>
 										</assembly>
 
@@ -363,7 +354,7 @@ EOF
 									<name>opensuse42.1/${project.artifactId}:${project.version}</name>
 									<build>
 										<assembly>
-											<descriptor>assembly-docker.xml</descriptor>
+											<descriptor>assembly-docker-rpm.xml</descriptor>
 											<basedir>/</basedir>
 										</assembly>
 
