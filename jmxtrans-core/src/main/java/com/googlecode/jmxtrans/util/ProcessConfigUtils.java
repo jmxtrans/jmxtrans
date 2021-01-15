@@ -22,17 +22,16 @@
  */
 package com.googlecode.jmxtrans.util;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.googlecode.jmxtrans.guice.JsonFormat;
 import com.googlecode.jmxtrans.guice.YamlFormat;
 import com.googlecode.jmxtrans.model.JmxProcess;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
 
 public class ProcessConfigUtils {
 

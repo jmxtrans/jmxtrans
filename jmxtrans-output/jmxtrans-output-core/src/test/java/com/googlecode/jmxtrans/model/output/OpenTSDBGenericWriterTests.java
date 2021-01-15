@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;

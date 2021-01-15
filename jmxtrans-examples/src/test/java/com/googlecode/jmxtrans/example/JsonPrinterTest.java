@@ -24,9 +24,6 @@ package com.googlecode.jmxtrans.example;
 
 import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.JmxProcess;
-import com.googlecode.jmxtrans.model.Query;
-import com.googlecode.jmxtrans.model.Server;
-import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;

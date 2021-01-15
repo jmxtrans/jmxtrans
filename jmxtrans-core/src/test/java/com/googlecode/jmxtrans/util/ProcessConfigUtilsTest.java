@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.util;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.io.Closer;
 import com.google.inject.Injector;
@@ -44,8 +43,8 @@ import javax.management.ObjectName;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
-import static com.google.common.collect.FluentIterable.from;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Category(RequiresIO.class)
@@ -99,7 +98,7 @@ public class ProcessConfigUtilsTest {
 		assertThat(server.getPort()).isEqualTo("1099");
 		assertThat(server.getNumQueryThreads()).isEqualTo(2);
 
-		Optional<Query> queryOptional = from(server.getQueries()).firstMatch(new ByObj("java.lang:type=Memory"));
+		Optional<Query> queryOptional = server.getQueries().stream().filter(new ByObj("java.lang:type=Memory")).findFirst();
 		assertThat(queryOptional.isPresent()).isTrue();
 		assertThat(queryOptional.get().getAttr().get(0)).isEqualTo("HeapMemoryUsage");
 	}

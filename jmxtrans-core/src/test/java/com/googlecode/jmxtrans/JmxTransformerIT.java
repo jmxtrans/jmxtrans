@@ -24,8 +24,8 @@ package com.googlecode.jmxtrans;
 
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.test.DummyApp;
-import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.ExternalApp;
+import com.googlecode.jmxtrans.test.IntegrationTest;
 import com.googlecode.jmxtrans.test.OutputCapture;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.junit.After;

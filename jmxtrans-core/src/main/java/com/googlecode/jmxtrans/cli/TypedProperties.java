@@ -26,13 +26,12 @@ import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.IStringConverterFactory;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.internal.DefaultConverterFactory;
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -61,11 +60,9 @@ class TypedProperties {
 			return emptyList();
 		}
 
-		return Lists.transform(asList(value.split("\\s*,\\s*")), new Function<String, T>() {
-			public T apply(String input) {
-				return convert(key, input, type);
-			}
-		});
+		return asList(value.split("\\s*,\\s*")).stream()
+				.map(input -> convert(key, input, type))
+				.collect(Collectors.toList());
 	}
 
 	private <T> T convert(String key, String value, Class<T> type) {

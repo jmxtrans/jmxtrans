@@ -36,9 +36,7 @@ import java.net.Socket;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @Category(RequiresIO.class)
 public class SocketAllocatorTest {

@@ -58,13 +58,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -476,7 +476,7 @@ public class JmxTransformer implements WatchedCallback {
 			files = new File[1];
 			files[0] = configurationDirOrFile;
 		} else {
-			files = firstNonNull(configurationDirOrFile.listFiles(), new File[0]);
+			files = Optional.ofNullable(configurationDirOrFile.listFiles()).orElse(new File[0]);
 		}
 
 		List<File> result = new ArrayList<>();

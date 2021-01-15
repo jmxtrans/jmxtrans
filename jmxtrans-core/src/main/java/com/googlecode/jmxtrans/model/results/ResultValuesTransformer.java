@@ -22,10 +22,9 @@
  */
 package com.googlecode.jmxtrans.model.results;
 
-import com.google.common.base.Function;
 import com.googlecode.jmxtrans.model.Result;
 
-import javax.annotation.Nullable;
+import java.util.function.Function;
 
 public class ResultValuesTransformer implements Function<Result, Result> {
 
@@ -35,9 +34,8 @@ public class ResultValuesTransformer implements Function<Result, Result> {
 		this.valueTransformer = valueTransformer;
 	}
 
-	@Nullable
 	@Override
-	public Result apply(@Nullable Result input) {
+	public Result apply(Result input) {
 		if (input == null) {
 			return null;
 		}

@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.model.output.elastic;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.Result;
@@ -51,17 +50,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
-import static com.googlecode.jmxtrans.model.ServerFixtures.DEFAULT_HOST;
-import static com.googlecode.jmxtrans.model.ServerFixtures.DEFAULT_PORT;
-import static com.googlecode.jmxtrans.model.ServerFixtures.SERVER_ALIAS;
-import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
-import static com.googlecode.jmxtrans.model.ServerFixtures.serverWithAliasAndNoQuery;
+import static com.googlecode.jmxtrans.model.ServerFixtures.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ElasticWriterTests {

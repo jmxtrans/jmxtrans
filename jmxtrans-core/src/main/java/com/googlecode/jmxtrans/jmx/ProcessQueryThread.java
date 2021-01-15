@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.Collection;
 
 @ThreadSafe
 @ToString(exclude = {"resultProcessor"})
@@ -51,7 +52,7 @@ public class ProcessQueryThread implements Runnable {
 	@Override
 	public void run() {
 		try {
-			Iterable<Result> results = server.execute(query);
+			Collection<Result> results = server.execute(query);
 			resultProcessor.submit(server, query, results);
 		} catch (Exception e) {
 			log.error("Error executing query {} on server {}", query, server, e);

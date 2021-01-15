@@ -328,7 +328,7 @@
 									fi</script>
 							</preremoveScriptlet>
 							<requires>
-								<require>java &gt;= 1.7</require>
+								<require>java &gt;= 1.8</require>
 							</requires>
 							<mappings>
 								<mapping>

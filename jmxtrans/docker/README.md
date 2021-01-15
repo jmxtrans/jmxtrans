@@ -58,7 +58,7 @@ If you log into the container and exec `ps -ef | grep java`, you will see :
 ```
 jmxtrans     9     1 25 13:09 ?        00:00:01 java -server 
 -Dlogback.configurationFile=file:////usr/share/jmxtrans/conf/logback.xml 
--Xms1024m -Xmx1024m -XX:PermSize=384m -XX:MaxPermSize=384m -Dcom.sun.management.jmxremote 
+-Xms1024m -Xmx1024m -Dcom.sun.management.jmxremote 
 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false 
 -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999 
 -Djava.rmi.server.hostname=192.168.50.4 -jar /usr/share/jmxtrans/lib/jmxtrans-all.jar 

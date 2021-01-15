@@ -24,7 +24,11 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServerStartable;
-import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.rules.ExternalResource;
@@ -34,7 +38,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.googlecode.jmxtrans.model.output.kafka.EmbeddedZookeeper.getResourceAsProperties;
 

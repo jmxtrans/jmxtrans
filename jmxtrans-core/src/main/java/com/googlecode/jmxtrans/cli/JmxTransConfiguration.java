@@ -25,16 +25,14 @@ package com.googlecode.jmxtrans.cli;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.validators.PositiveInteger;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("squid:S1213") // having instance variables close to their getters is more readable in this class
 public class JmxTransConfiguration {
@@ -102,15 +100,7 @@ public class JmxTransConfiguration {
 	@Setter
 	private List<String> additionalJars = ImmutableList.of();
 	public Iterable<File> getAdditionalJars() {
-		return FluentIterable.from(additionalJars)
-				.transform(new Function<String, File>() {
-					@Nullable
-					@Override
-					public File apply(String input) {
-						return new File(input);
-					}
-				})
-				.toList();
+		return additionalJars.stream().map(File::new).collect(Collectors.toList());
 	}
 
 	private static final String QUERY_PROCESSOR_EXECUTOR_POOL_SIZE_PROPERTY = "query.processor.executor.pool.size";
