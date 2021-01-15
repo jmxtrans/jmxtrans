@@ -141,11 +141,14 @@
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
 		<jackson-bom.version>2.12.0</jackson-bom.version>
+		<java.version>1.8</java.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<kafka.version>1.1.1</kafka.version>
 		<logback.version>1.2.3</logback.version>
 		<main.class>com.googlecode.jmxtrans.JmxTransformer</main.class>
 		<maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<package.daemon.name>${project.artifactId}</package.daemon.name>
 		<package.group>${project.artifactId}</package.group>
 		<package.install.dir>/usr/share/${project.artifactId}</package.install.dir>
@@ -206,8 +209,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<!-- guava 20.0 is the last Java 7 compatible version -->
-				<version>19.0</version>
+				<version>29.0-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.inject</groupId>
@@ -449,8 +451,8 @@
 			</dependency>
 			<dependency>
 				<groupId>com.github.tomakehurst</groupId>
-				<artifactId>wiremock</artifactId>
-				<version>2.8.0</version>
+				<artifactId>wiremock-jre8</artifactId>
+				<version>2.27.2</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -462,7 +464,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.12</version>
+				<version>4.13.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -731,10 +733,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.8.1</version>
-					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -956,7 +954,7 @@
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
-							<artifactId>java17</artifactId>
+							<artifactId>java18</artifactId>
 							<version>1.0</version>
 						</signature>
 					</configuration>
@@ -1164,7 +1162,7 @@
 				<version>3.8</version>
 				<configuration>
 					<sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
-					<targetJdk>1.7</targetJdk>
+					<targetJdk>${java.version}</targetJdk>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -1323,11 +1321,6 @@
 						<plugin>
 							<groupId>org.pitest</groupId>
 							<artifactId>pitest-maven</artifactId>
-							<configuration>
-								<jvmArgs>
-									<value>-XX:MaxPermSize=256M</value>
-								</jvmArgs>
-							</configuration>
 						</plugin>
 					</plugins>
 				</pluginManagement>

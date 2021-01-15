@@ -22,13 +22,6 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.WordUtils;
 import org.junit.Before;
@@ -36,7 +29,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.collect.ImmutableMap;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  *

@@ -22,14 +22,13 @@
  */
 package com.googlecode.jmxtrans.model;
 
-import java.util.List;
-
 import org.junit.Test;
+
+import java.util.List;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class QueryTests {
@@ -41,7 +40,7 @@ public class QueryTests {
 				.setObj("obj:key=val")
 				.setTypeNames(expected)
 				.build();
-		
+
 		List<String> actual = newArrayList(query.getTypeNames());
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -54,7 +53,7 @@ public class QueryTests {
 				.setObj("obj:key=val")
 				.setTypeNames(expected)
 				.build();
-		
+
 		List<String> actual = newArrayList(query.getTypeNames());
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -67,7 +66,7 @@ public class QueryTests {
 				.setObj("obj:key=val")
 				.setTypeNames(newLinkedHashSet(expected))
 				.build();
-		
+
 		List<String> actual = newArrayList(query.getTypeNames());
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -80,7 +79,7 @@ public class QueryTests {
 				.setObj("obj:key=val")
 				.setTypeNames(newLinkedHashSet(expected))
 				.build();
-		
+
 		List<String> actual = newArrayList(query.getTypeNames());
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -95,7 +94,7 @@ public class QueryTests {
 				.build();
 
 		String actual = query.makeTypeNameValueString(typeNames, typeNameStr);
-		
+
 		assertThat(actual).isEqualTo("FOO_BAR");
 	}
 
@@ -109,7 +108,7 @@ public class QueryTests {
 				.build();
 
 		String actual = query.makeTypeNameValueString(typeNames, typeNameStr);
-		
+
 		assertThat(actual).isEqualTo("BAR_FOO");
 	}
 }

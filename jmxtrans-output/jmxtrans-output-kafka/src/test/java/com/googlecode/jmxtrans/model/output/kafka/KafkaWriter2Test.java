@@ -24,12 +24,6 @@ package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
-import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
-import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
-import static com.googlecode.jmxtrans.model.ServerFixtures.DEFAULT_HOST;
-
 import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -40,6 +34,10 @@ import org.mockito.Mock;
 
 import java.util.List;
 
+import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
+import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
+import static com.googlecode.jmxtrans.model.ServerFixtures.DEFAULT_HOST;
+import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 

@@ -29,8 +29,6 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.junit.Test;
 
-import java.util.Collection;
-
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;

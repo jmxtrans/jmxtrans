@@ -22,12 +22,9 @@
  */
 package com.googlecode.jmxtrans.test;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 import org.junit.rules.ExternalResource;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -36,9 +33,11 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
 
 public class ExternalApp extends ExternalResource {
@@ -52,15 +51,15 @@ public class ExternalApp extends ExternalResource {
 	/**
 	 * @param appClass Main class to run
 	 * @param args Program arguments
-     */
-	public ExternalApp(Class<?> appClass, String ... args) {
+	 */
+	public ExternalApp(Class<?> appClass, String... args) {
 		this.appClass = appClass;
 		this.appArgs = args;
 	}
 
 	/**
 	 * Enable JMX server in app
-     */
+	 */
 	public ExternalApp enableJmx(int jmxPort) {
 		properties.put("com.sun.management.jmxremote.authenticate", "false");
 		properties.put("com.sun.management.jmxremote.ssl", "false");
@@ -97,18 +96,19 @@ public class ExternalApp extends ExternalResource {
 	}
 
 	@Override
-	@IgnoreJRERequirement // ProcessBuilder.inheritIO() was introduced in Java 7. As this is only used in test, let's ignore it.
+	@IgnoreJRERequirement
+	// ProcessBuilder.inheritIO() was introduced in Java 7. As this is only used in test, let's ignore it.
 	protected void before() throws Throwable {
 		List<String> command = new ArrayList<String>(asList("java", "-cp", getCurrentClasspath()));
-		for(Map.Entry<Object, Object> property: properties.entrySet()) {
-			command.add("-D"+property.getKey()+"="+property.getValue());
+		for (Map.Entry<Object, Object> property : properties.entrySet()) {
+			command.add("-D" + property.getKey() + "=" + property.getValue());
 		}
 		command.add(appClass.getCanonicalName());
 		if (appArgs != null) {
 			command.addAll(asList(appArgs));
 		}
 		ProcessBuilder processBuilder = new ProcessBuilder().command(command)
-			.inheritIO();
+				.inheritIO();
 		if (outputFile != null) {
 			processBuilder.redirectOutput(outputFile);
 		}
@@ -121,22 +121,19 @@ public class ExternalApp extends ExternalResource {
 
 	private String getCurrentClasspath() {
 		ClassLoader cl = ClassLoader.getSystemClassLoader();
-		URL[] urls = ((URLClassLoader)cl).getURLs();
+		URL[] urls = ((URLClassLoader) cl).getURLs();
 
-		return  Joiner.on(File.pathSeparator)
-				.join(
-						from(asList(urls))
-								.transform(new Function<URL, String>() {
-									@Nullable
-									@Override
-									public String apply(URL input) {
-										try {
-											return new File(input.toURI()).getPath();
-										} catch(URISyntaxException e) {
-											return input.getPath();
-										}
-									}
-								}));
+		return Stream.of(urls).filter(Objects::nonNull)
+				.map(this::convertToPath)
+				.collect(Collectors.joining(File.pathSeparator));
+	}
+
+	private String convertToPath(URL input) {
+		try {
+			return new File(input.toURI()).getPath();
+		} catch (URISyntaxException e) {
+			return input.getPath();
+		}
 	}
 
 	@Override

@@ -47,10 +47,10 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.ImmutableList.copyOf;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
 
@@ -88,14 +88,14 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 			@JsonProperty("debug") Boolean debugEnabled,
 			@JsonProperty("settings") Map<String, Object> settings) {
 
-		if (settings != null && !settings.isEmpty()) {
-			logger.warn("Using 'settings' is deprecated, please pass attributes directly to the OutputWriter.");
-		}
-
 		// resolve and initialize settings first, so we can refer to them to initialize other fields
 		this.settings = copyOf(MoreObjects.firstNonNull(
 				settings,
 				Collections.<String, Object>emptyMap()));
+
+		if (!this.settings.isEmpty()) {
+			logger.warn("Using 'settings' is deprecated, please pass attributes directly to the OutputWriter.");
+		}
 
 		this.typeNames = copyOf(firstNonNull(
 				typeNames,
@@ -117,10 +117,21 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 		}
 	}
 
+	/**
+	 * @see MoreObjects#firstNonNull(Object, Object)
+	 */
 	protected <T> T firstNonNull(@Nullable T first, @Nullable T second, @Nullable T third) {
-		return first != null ? first : (second != null ? second : checkNotNull(third));
+		if (first != null) {
+			return first;
+		} else if (second != null) {
+			return second;
+		} else if (third != null) {
+			return third;
+		} else {
+			throw new NullPointerException("All parameters are null");
+		}
 	}
-	
+
 	/**
 	 * @deprecated Don't use the settings Map, please extract necessary bits at construction time.
 	 */
@@ -154,7 +165,9 @@ public abstract class BaseOutputWriter implements OutputWriter, OutputWriterFact
 
 	@Override
 	public final void doWrite(Server server, Query query, Iterable<Result> results) throws Exception {
-		internalWrite(server, query, from(results).transform(new ResultValuesTransformer(valueTransformer)).toList());
+		internalWrite(server, query, StreamSupport.stream(results.spliterator(), false)
+				.map(new ResultValuesTransformer(valueTransformer))
+				.collect(toImmutableList()));
 	}
 
 	protected abstract void internalWrite(Server server, Query query, ImmutableList<Result> results) throws Exception;

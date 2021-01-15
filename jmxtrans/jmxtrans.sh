@@ -58,7 +58,7 @@ JMXTRANS_OPTS="${JMXTRANS_OPTS} -Djmxtrans.log.level=${LOG_LEVEL} -Djmxtrans.log
 
 
 MONITOR_OPTS=${MONITOR_OPTS:-"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=${JMX_PORT}"}
-GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}m -Xmx${HEAP_SIZE}m -XX:PermSize=${PERM_SIZE}m -XX:MaxPermSize=${MAX_PERM_SIZE}m"}
+GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}m -Xmx${HEAP_SIZE}m"}
 SSL_OPTS=${SSL_OPTS:-""}
 if [[ "${SSL_TRUSTSTORE}" != "" ]]; then
     SSL_OPTS="${SSL_OPTS} -Djavax.net.ssl.trustStore=${SSL_TRUSTSTORE}"

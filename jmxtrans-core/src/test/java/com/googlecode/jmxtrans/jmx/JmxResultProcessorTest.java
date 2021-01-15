@@ -22,9 +22,6 @@
  */
 package com.googlecode.jmxtrans.jmx;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.JmxResultProcessor;
@@ -42,21 +39,20 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.OpenDataException;
-
 import java.lang.management.ManagementFactory;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.Optional;
+import java.util.function.Predicate;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQueryWithResultAlias;
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -162,9 +158,8 @@ public class JmxResultProcessorTest {
 	}
 
 	private Optional<Result> firstMatch(List<Result> results, String attributeName, String  ... valuePath) {
-		return from(results).firstMatch(Predicates.and(
-				new ByAttributeName(attributeName),
-				new ByValuePath(valuePath)));
+		Predicate<Result> resultPredicate = new ByAttributeName(attributeName).and(new ByValuePath(valuePath));
+		return results.stream().filter(resultPredicate).findFirst();
 	}
 
 	@Test
@@ -368,7 +363,7 @@ public class JmxResultProcessorTest {
 		}
 
 		@Override
-		public boolean apply(@Nullable Result result) {
+		public boolean test(@Nullable Result result) {
 			if (result == null) {
 				return false;
 			}
@@ -383,7 +378,7 @@ public class JmxResultProcessorTest {
 		}
 
 		@Override
-		public boolean apply(@Nullable Result result) {
+		public boolean test(@Nullable Result result) {
 			if (result == null) {
 				return false;
 			}

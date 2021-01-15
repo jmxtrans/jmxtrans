@@ -23,6 +23,8 @@
 package com.googlecode.jmxtrans.model.output.support;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.exceptions.LifecycleException;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
@@ -32,11 +34,8 @@ import com.googlecode.jmxtrans.model.results.BooleanAsNumberValueTransformer;
 import com.googlecode.jmxtrans.model.results.IdentityValueTransformer;
 import com.googlecode.jmxtrans.model.results.ResultValuesTransformer;
 
-import com.googlecode.jmxtrans.exceptions.LifecycleException;
-
 import javax.annotation.Nonnull;
-
-import static com.google.common.collect.FluentIterable.from;
+import java.util.stream.StreamSupport;
 
 public class ResultTransformerOutputWriter<T extends OutputWriter> extends OutputWriterAdapter {
 
@@ -53,7 +52,9 @@ public class ResultTransformerOutputWriter<T extends OutputWriter> extends Outpu
 		target.doWrite(
 				server,
 				query,
-				from(results).transform(resultValuesTransformer).toList());
+				StreamSupport.stream(results.spliterator(), false)
+						.map(resultValuesTransformer)
+						.collect(ImmutableList.toImmutableList()));
 	}
 
 	public static <T extends OutputWriter> ResultTransformerOutputWriter<T> booleanToNumber(boolean booleanToNumber, T target) {

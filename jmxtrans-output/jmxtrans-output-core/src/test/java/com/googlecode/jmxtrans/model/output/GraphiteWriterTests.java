@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -44,15 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.collect.ImmutableList.of;
-import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
-import static com.googlecode.jmxtrans.model.QueryFixtures.queryAllowingDottedKeys;
-import static com.googlecode.jmxtrans.model.QueryFixtures.queryUsingDomainAsKey;
-import static com.googlecode.jmxtrans.model.QueryFixtures.queryWithAllTypeNames;
-import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
-import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
-import static com.googlecode.jmxtrans.model.ResultFixtures.numericResultWithTypenames;
-import static com.googlecode.jmxtrans.model.ResultFixtures.singleTrueResult;
-import static com.googlecode.jmxtrans.model.ResultFixtures.stringResult;
+import static com.googlecode.jmxtrans.model.QueryFixtures.*;
+import static com.googlecode.jmxtrans.model.ResultFixtures.*;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static com.googlecode.jmxtrans.model.ServerFixtures.serverWithNoQuery;
 import static org.assertj.core.api.Assertions.assertThat;

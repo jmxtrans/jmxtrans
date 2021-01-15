@@ -272,7 +272,7 @@ public class Server implements JmxConnectionProvider {
 		this.id = String.format("%s_%s_%s", host, port, pid);
 	}
 
-	public Iterable<Result> execute(Query query) throws Exception {
+	public Collection<Result> execute(Query query) throws Exception {
 		JMXConnection jmxConnection = null;
 		try {
 			jmxConnection = pool.borrowObject(this);
@@ -433,7 +433,7 @@ public class Server implements JmxConnectionProvider {
 		return numQueryThreads > 0;
 	}
 
-	public void runOutputWriters(Query query, Iterable<Result> results) throws Exception {
+	public void runOutputWriters(Query query, Collection<Result> results) throws Exception {
 		for (OutputWriter writer : outputWriters) {
 			writer.doWrite(this, query, results);
 		}
