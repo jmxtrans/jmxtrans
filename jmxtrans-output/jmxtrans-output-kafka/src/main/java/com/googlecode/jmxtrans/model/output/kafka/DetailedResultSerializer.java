@@ -23,8 +23,8 @@
 package com.googlecode.jmxtrans.model.output.kafka;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -37,8 +37,6 @@ import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.util.Map;
-
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
 @EqualsAndHashCode(exclude = {"objectMapper"})
 public class DetailedResultSerializer implements ResultSerializer {
@@ -57,7 +55,7 @@ public class DetailedResultSerializer implements ResultSerializer {
 	/**
 	 * DTO containing server and result information
 	 */
-	@JsonSerialize(include = NON_NULL)
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@Immutable
 	@ThreadSafe
 	private static class KResult {

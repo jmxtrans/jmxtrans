@@ -22,20 +22,18 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
 
 import java.io.IOException;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
-
 /**
  * Converts query result into a string, in order to display it, to write it to disk or send it over the wire.
  */
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public interface ResultSerializer {
 	/**

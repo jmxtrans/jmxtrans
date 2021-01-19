@@ -33,7 +33,6 @@ import java.io.StringWriter;
 
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.*;
-import static com.googlecode.jmxtrans.model.ResultFixtures.singleNumericResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -23,7 +23,6 @@
 package com.googlecode.jmxtrans.model.output;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.googlecode.jmxtrans.model.Query;

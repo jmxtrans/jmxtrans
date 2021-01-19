@@ -25,9 +25,9 @@ package com.googlecode.jmxtrans.model;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -65,7 +65,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -82,7 +81,7 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
  *
  * @author jon
  */
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder(value = {
 		"alias",
 		"local",
@@ -266,7 +265,7 @@ public class Server implements JmxConnectionProvider {
 		this.id = String.format("%s_%s_%s", host, port, pid);
 	}
 
-	public Iterable<Result> execute(Query query) throws Exception {
+	public Collection<Result> execute(Query query) throws Exception {
 		JMXConnection jmxConnection = null;
 		try {
 			jmxConnection = pool.borrowObject(this);
