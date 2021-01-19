@@ -140,7 +140,7 @@
 		-->
 		<checkstyle.max.allowed.violations>0</checkstyle.max.allowed.violations>
 		<github.global.server>github</github.global.server>
-		<jackson-bom.version>2.9.9.20190807</jackson-bom.version>
+		<jackson-bom.version>2.12.0</jackson-bom.version>
 		<java.version>1.8</java.version>
 		<jsw.dir>${project.build.directory}/generated-resources/appassembler/jsw/${package.daemon.name}</jsw.dir>
 		<kafka.version>1.1.1</kafka.version>
@@ -1144,9 +1144,9 @@
 					<links>
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
 						<link>http://commons.apache.org/pool/api-1.6</link>
-						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.9</link>
-						<link>http://fasterxml.github.io/jackson-core/javadoc/2.9</link>
-						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.9</link>
+						<link>http://fasterxml.github.io/jackson-annotations/javadoc/2.12</link>
+						<link>http://fasterxml.github.io/jackson-core/javadoc/2.12</link>
+						<link>http://fasterxml.github.io/jackson-databind/javadoc/2.12</link>
 						<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc</link>
 					</links>
 				</configuration>

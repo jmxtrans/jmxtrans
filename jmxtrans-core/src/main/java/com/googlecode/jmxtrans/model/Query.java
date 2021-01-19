@@ -23,9 +23,9 @@
 package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
@@ -60,7 +60,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
@@ -72,7 +71,7 @@ import static java.util.Arrays.asList;
  *
  * @author jon
  */
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
 @ThreadSafe
 @EqualsAndHashCode(exclude = {"outputWriters", "outputWriterInstances"})
@@ -192,7 +191,7 @@ public class Query {
 		this.useAllTypeNames = useAllTypeNames;
 		this.outputWriters = copyOf(firstNonNull(outputWriterFactories, ImmutableList.<OutputWriterFactory>of()));
 		// We need to preserve the order of typeNames. So note that copyOf
-		// does not mess with the order. 
+		// does not mess with the order.
 		this.typeNames = ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet()));
 
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
