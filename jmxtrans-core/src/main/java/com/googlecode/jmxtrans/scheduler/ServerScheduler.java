@@ -82,6 +82,7 @@ public class ServerScheduler {
 	}
 
 	public void schedule(Server server) {
+		// Apply default runPeriodSeconds on server when undefined
 		if (server.getRunPeriodSeconds() == null || server.getRunPeriodSeconds().intValue() <= 0) {
 			server = Server.builder(server).setRunPeriodSeconds(configuration.getRunPeriod()).build();
 		}
