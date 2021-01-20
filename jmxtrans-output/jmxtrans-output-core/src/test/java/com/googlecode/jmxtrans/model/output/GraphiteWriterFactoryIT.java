@@ -80,8 +80,6 @@ public class GraphiteWriterFactoryIT {
 		assertThat(servers).hasSize(1);
 		Server server = servers.get(0);
 
-		assertThat(server.getNumQueryThreads()).isEqualTo(2);
-
 		assertThat(server.getQueries()).hasSize(1);
 		Query query = server.getQueries().iterator().next();
 

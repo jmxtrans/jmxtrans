@@ -96,7 +96,6 @@ public class ProcessConfigUtilsTest {
 
 		Server server = process.getServers().get(0);
 		assertThat(server.getPort()).isEqualTo("1099");
-		assertThat(server.getNumQueryThreads()).isEqualTo(2);
 
 		Optional<Query> queryOptional = server.getQueries().stream().filter(new ByObj("java.lang:type=Memory")).findFirst();
 		assertThat(queryOptional.isPresent()).isTrue();

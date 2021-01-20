@@ -10,7 +10,6 @@
       } ],
       "obj" : "java.lang:type=Memory",
       "attr" : [ "${server.attribute}", "NonHeapMemoryUsage"]
-    } ],
-    "numQueryThreads" : "${server.thread}"
+    } ]
   } ]
 }
