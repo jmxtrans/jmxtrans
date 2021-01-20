@@ -12,7 +12,6 @@
       } ],
       "obj" : "java.lang:type=Runtime",
       "attr" : [ "SpecName" ]
-    } ],
-    "numQueryThreads" : 2
+    } ]
   } ]
 }

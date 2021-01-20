@@ -22,26 +22,24 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
 
 import java.util.Map;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
-
 /**
  * Interface which defines a writer for taking jmx data and writing it out in
  * whatever format you want.
- * 
+ *
  * Note that this class uses a feature of Jackson to serialize anything that
  * implements this as a "@class". That way, when Jackson deserializes
  * implementations of this interface, it is done with new objects that implement
  * this interface.
- * 
+ *
  * @author jon
  */
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public interface OutputWriter extends AutoCloseable {
 

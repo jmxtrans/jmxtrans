@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans.connections;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import javax.management.MBeanServer;

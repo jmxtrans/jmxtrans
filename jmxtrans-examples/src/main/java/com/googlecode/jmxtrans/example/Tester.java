@@ -49,7 +49,6 @@ public class Tester {
 		Server server = Server.builder()
 				.setHost("w2")
 				.setPort("1099")
-				.setNumQueryThreads(2)
 				.addQuery(Query.builder()
 						.setObj("java.lang:type=Memory")
 						.addAttr("HeapMemoryUsage", "NonHeapMemoryUsage")

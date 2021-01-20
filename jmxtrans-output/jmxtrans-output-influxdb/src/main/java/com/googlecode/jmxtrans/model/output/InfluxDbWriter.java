@@ -22,9 +22,9 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -35,7 +35,6 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,13 +170,13 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
-		
+
 		ImmutableList<String> typeNamesParam = null;
 		// if not typeNamesAsTag, we concat typeName in values.
 		if (!typeNamesAsTags) {
 			typeNamesParam = this.typeNames;
 		}
-		
+
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
 

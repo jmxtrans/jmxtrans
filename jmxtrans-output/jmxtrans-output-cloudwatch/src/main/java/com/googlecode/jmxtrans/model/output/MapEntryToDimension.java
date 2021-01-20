@@ -24,7 +24,6 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.util.EC2MetadataUtils;
-import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +32,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 
@@ -47,6 +47,9 @@ class MapEntryToDimension implements Function<Map<String, Object>, Dimension> {
 	public Dimension apply(Map<String, Object> dimension) {
 		String name = null;
 		String value = null;
+		if (dimension == null) {
+			return null;
+		}
 
 		if (dimension.containsKey(NAME)) {
 			name = String.valueOf(dimension.get(NAME));

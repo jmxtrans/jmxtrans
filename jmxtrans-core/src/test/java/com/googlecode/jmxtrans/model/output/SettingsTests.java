@@ -27,10 +27,7 @@ import org.junit.Test;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.googlecode.jmxtrans.model.output.Settings.getBooleanSetting;
-import static com.googlecode.jmxtrans.model.output.Settings.getIntSetting;
-import static com.googlecode.jmxtrans.model.output.Settings.getIntegerSetting;
-import static com.googlecode.jmxtrans.model.output.Settings.getStringSetting;
+import static com.googlecode.jmxtrans.model.output.Settings.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;

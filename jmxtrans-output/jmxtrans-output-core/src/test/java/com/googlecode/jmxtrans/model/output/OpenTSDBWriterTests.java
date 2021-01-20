@@ -25,7 +25,6 @@ package com.googlecode.jmxtrans.model.output;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
@@ -52,7 +51,7 @@ import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link OpenTSDBWriter}.
+ * Tests for {@link OpenTSDBWriterOpenTSDBWriter}.
  */
 @Category(RequiresIO.class)
 public class OpenTSDBWriterTests {
@@ -98,7 +97,7 @@ public class OpenTSDBWriterTests {
 		Mockito.verify(pool, Mockito.never()).returnObject(Matchers.any(InetSocketAddress.class), Matchers.eq(socket));
 	}
 
-	
+
 	private static OpenTSDBWriter getOpenTSDBWriter(OutputStream out) throws Exception {
 		return getOpenTSDBWriter(out, new ArrayList<String>());
 	}

@@ -22,16 +22,15 @@
  */
 package com.googlecode.jmxtrans.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import javax.annotation.Nonnull;
 
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeInfo(use = Id.CLASS, include = As.PROPERTY, property = "@class")
 public interface OutputWriterFactory<T extends OutputWriter> {
 	@Nonnull T create();

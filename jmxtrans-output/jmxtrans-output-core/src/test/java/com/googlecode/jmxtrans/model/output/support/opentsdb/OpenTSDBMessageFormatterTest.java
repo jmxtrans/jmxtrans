@@ -26,22 +26,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
-import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
-import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.ServerFixtures;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.googlecode.jmxtrans.model.ServerFixtures.createPool;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
