@@ -33,7 +33,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.connections.JMXConnection;
-import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
+import com.googlecode.jmxtrans.connections.JMXConnectionProvider;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,9 +48,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -96,7 +94,7 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 @ThreadSafe
 @EqualsAndHashCode(exclude = {"queries", "pool", "outputWriters", "outputWriterFactories"})
 @ToString(of = {"pid", "host", "port", "url", "cronExpression"})
-public class Server implements JmxConnectionProvider {
+public class Server implements JMXConnectionProvider {
 
 	private static final String FRONT = "service:jmx:rmi:///jndi/rmi://";
 	private static final String BACK = "/jmxrmi";
@@ -157,7 +155,7 @@ public class Server implements JmxConnectionProvider {
 
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
 
-	@Nonnull private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
+	@Nonnull private final KeyedObjectPool<JMXConnectionProvider, JMXConnection> pool;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
 
 	@JsonCreator
@@ -176,7 +174,7 @@ public class Server implements JmxConnectionProvider {
 			@JsonProperty("ssl") boolean ssl,
 			@JsonProperty("queries") List<Query> queries,
 			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
-			@JacksonInject @Named("mbeanPool") KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
+			@JacksonInject @Named("mbeanPool") KeyedObjectPool<JMXConnectionProvider, JMXConnection> pool) {
 
 		this(alias, pid, host, port, username, password, protocolProviderPackages, url, cronExpression,
 				runPeriodSeconds, local, ssl, queries, outputWriters, ImmutableList.<OutputWriter>of(),
@@ -198,7 +196,7 @@ public class Server implements JmxConnectionProvider {
 			boolean ssl,
 			List<Query> queries,
 			ImmutableList<OutputWriter> outputWriters,
-			KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
+			KeyedObjectPool<JMXConnectionProvider, JMXConnection> pool) {
 
 		this(alias, pid, host, port, username, password, protocolProviderPackages, url, cronExpression,
 				runPeriodSeconds, local, ssl, queries, ImmutableList.<OutputWriterFactory>of(),
@@ -221,7 +219,7 @@ public class Server implements JmxConnectionProvider {
 			List<Query> queries,
 			List<OutputWriterFactory> outputWriterFactories,
 			List<OutputWriter> outputWriters,
-			KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
+			KeyedObjectPool<JMXConnectionProvider, JMXConnection> pool) {
 
 		checkArgument(pid != null || url != null || host != null,
 				"You must provide the pid or the [url|host and port]");
@@ -267,14 +265,9 @@ public class Server implements JmxConnectionProvider {
 		JMXConnection jmxConnection = null;
 		try {
 			jmxConnection = pool.borrowObject(this);
-			ImmutableList.Builder<Result> results = ImmutableList.builder();
 			MBeanServerConnection connection = jmxConnection.getMBeanServerConnection();
 
-			for (ObjectName queryName : query.queryNames(connection)) {
-				results.addAll(query.fetchResults(connection, queryName));
-			}
-
-			return results.build();
+			return query.execute(connection);
 		} catch (Exception e) {
 			if (jmxConnection != null) {
 				pool.invalidateObject(this, jmxConnection);
@@ -332,22 +325,20 @@ public class Server implements JmxConnectionProvider {
 	 */
 	@Override
 	@JsonIgnore
-	public JMXConnector getServerConnection() throws IOException {
-		String sUrl;
-		if(this.pid == null) {
-			sUrl = getUrl();
+	public JMXConnection getServerConnection() throws IOException {
+		MBeanServerConnection mBeanServerConnection;
+		JMXConnector jmxConnector;
+		if (isLocal()) {
+			// Getting the platform MBean server is cheap (expect for th first call) no need to cache it.
+			mBeanServerConnection = ManagementFactory.getPlatformMBeanServer();
+			jmxConnector = null;
 		} else {
-			sUrl = attachToJVM(pid);
+			String sUrl = this.pid == null ? getUrl() : attachToJVM(pid);
+			JMXServiceURL url = new JMXServiceURL(sUrl);
+			jmxConnector = JMXConnectorFactory.connect(url, this.getEnvironment());
+			mBeanServerConnection = jmxConnector.getMBeanServerConnection();
 		}
-		JMXServiceURL url = new JMXServiceURL(sUrl);
-		return JMXConnectorFactory.connect(url, this.getEnvironment());
-	}
-
-	@Override
-	@JsonIgnore
-	public MBeanServer getLocalMBeanServer() {
-		// Getting the platform MBean server is cheap (expect for th first call) no need to cache it.
-		return ManagementFactory.getPlatformMBeanServer();
+		return new JMXConnection(jmxConnector, mBeanServerConnection);
 	}
 
 	@JsonIgnore
@@ -417,13 +408,6 @@ public class Server implements JmxConnectionProvider {
 		return this.url;
 	}
 
-	public void runOutputWriters(Query query, Iterable<Result> results) throws Exception {
-		for (OutputWriter writer : outputWriters) {
-			writer.doWrite(this, query, results);
-		}
-		logger.debug("Finished running outputWriters for query: {}", query);
-	}
-
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -450,7 +434,7 @@ public class Server implements JmxConnectionProvider {
 		private final List<OutputWriterFactory> outputWriterFactories = new ArrayList<>();
 		private final List<OutputWriter> outputWriters = new ArrayList<>();
 		private final List<Query> queries = new ArrayList<>();
-		@Setter private KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
+		@Setter private KeyedObjectPool<JMXConnectionProvider, JMXConnection> pool;
 
 		private Builder() {}
 

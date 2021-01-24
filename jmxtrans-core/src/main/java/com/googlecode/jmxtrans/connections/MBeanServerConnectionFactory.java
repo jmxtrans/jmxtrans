@@ -25,12 +25,11 @@ package com.googlecode.jmxtrans.connections;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
 import javax.annotation.Nonnull;
-import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<JmxConnectionProvider, JMXConnection> {
+public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory<JMXConnectionProvider, JMXConnection> {
 	@Nonnull private final ExecutorService executor;
 
 	public MBeanServerConnectionFactory(){
@@ -39,17 +38,12 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 
 	@Override
 	@Nonnull
-	public JMXConnection makeObject(@Nonnull JmxConnectionProvider server) throws IOException {
-		if (server.isLocal()) {
-			return new JMXConnection(null, server.getLocalMBeanServer());
-		} else {
-			JMXConnector connection = server.getServerConnection();
-			return new JMXConnection(connection, connection.getMBeanServerConnection());
-		}
+	public JMXConnection makeObject(@Nonnull JMXConnectionProvider server) throws IOException {
+		return server.getServerConnection();
 	}
 
 	@Override
-	public void destroyObject(@Nonnull JmxConnectionProvider key, @Nonnull final JMXConnection jmxConnection) throws IOException {
+	public void destroyObject(@Nonnull JMXConnectionProvider server, @Nonnull final JMXConnection jmxConnection) throws IOException {
 		if (!jmxConnection.isAlive()) {
 			return;
 		}
@@ -68,7 +62,7 @@ public class MBeanServerConnectionFactory extends BaseKeyedPoolableObjectFactory
 	}
 
 	@Override
-	public boolean validateObject(@Nonnull JmxConnectionProvider key, @Nonnull JMXConnection jmxConnection){
+	public boolean validateObject(@Nonnull JMXConnectionProvider server, @Nonnull JMXConnection jmxConnection){
 		return jmxConnection.isAlive();
 	}
 

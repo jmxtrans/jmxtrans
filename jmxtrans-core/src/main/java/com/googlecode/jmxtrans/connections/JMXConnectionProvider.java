@@ -24,19 +24,13 @@ package com.googlecode.jmxtrans.connections;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.management.MBeanServer;
-import javax.management.remote.JMXConnector;
 import java.io.IOException;
 
 /**
+ * Interface to break cyclic dependency between Server and MBeanServerConnectionFactory
  * Created by gehel on 29.12.15.
  */
-public interface JmxConnectionProvider {
+public interface JMXConnectionProvider {
 	@JsonIgnore
-	JMXConnector getServerConnection() throws IOException;
-
-	@JsonIgnore
-	MBeanServer getLocalMBeanServer();
-
-	boolean isLocal();
+	JMXConnection getServerConnection() throws IOException;
 }

@@ -24,9 +24,6 @@ package com.googlecode.jmxtrans.connections;
 
 import org.junit.Test;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,34 +34,19 @@ public class MBeanServerConnectionFactoryTest {
 	private MBeanServerConnectionFactory factory = new MBeanServerConnectionFactory();
 
 	@Test
-	public void connectionIsCreatedForRemoteServer() throws IOException {
-		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
-		JMXConnector jmxConnector = mock(JMXConnector.class);
-		MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
-		when(server.isLocal()).thenReturn(false);
-		when(server.getServerConnection()).thenReturn(jmxConnector);
-		when(jmxConnector.getMBeanServerConnection()).thenReturn(mBeanServerConnection);
+	public void connectionIsCreated() throws IOException {
+		JMXConnectionProvider server = mock(JMXConnectionProvider.class);
+		JMXConnection jmxConnection = mock(JMXConnection.class);
+		when(server.getServerConnection()).thenReturn(jmxConnection);
 
-		JMXConnection jmxConnection = factory.makeObject(server);
+		JMXConnection jmxConnection2 = factory.makeObject(server);
 
-		assertThat(jmxConnection.getMBeanServerConnection()).isSameAs(mBeanServerConnection);
-	}
-
-	@Test
-	public void connectionIsCreatedForLocalServer() throws IOException {
-		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
-		MBeanServer mBeanServerConnection = mock(MBeanServer.class);
-		when(server.isLocal()).thenReturn(true);
-		when(server.getLocalMBeanServer()).thenReturn(mBeanServerConnection);
-
-		JMXConnection jmxConnection = factory.makeObject(server);
-
-		assertThat(jmxConnection.getMBeanServerConnection()).isSameAs(mBeanServerConnection);
+		assertThat(jmxConnection2).isSameAs(jmxConnection);
 	}
 
 	@Test
 	public void connectionIsClosedOnDestroy() throws IOException {
-		JmxConnectionProvider server = mock(JmxConnectionProvider.class);
+		JMXConnectionProvider server = mock(JMXConnectionProvider.class);
 		JMXConnection connection = mock(JMXConnection.class);
 
 		when(connection.isAlive()).thenReturn(true);

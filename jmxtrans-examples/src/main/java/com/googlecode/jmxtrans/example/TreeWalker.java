@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.example;
 
+import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,6 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeDataSupport;
-import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -58,19 +58,13 @@ public class TreeWalker {
 	public static void main(String[] args) throws Exception {
 		Server server = Server.builder().setHost("localhost").setPort("1099").build();
 
-		JMXConnector conn = null;
-		try {
-			conn = server.getServerConnection();
+		try(JMXConnection conn = server.getServerConnection()) {
 			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
 			TreeWalker tw = new TreeWalker();
 			tw.walkTree(mbeanServer);
 		} catch (IOException e) {
 			log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
-		} finally {
-			if (conn != null) {
-				conn.close();
-			}
 		}
 	}
 

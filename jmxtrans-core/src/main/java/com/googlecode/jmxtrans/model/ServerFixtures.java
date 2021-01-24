@@ -23,7 +23,7 @@
 package com.googlecode.jmxtrans.model;
 
 import com.googlecode.jmxtrans.connections.JMXConnection;
-import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
+import com.googlecode.jmxtrans.connections.JMXConnectionProvider;
 import com.googlecode.jmxtrans.connections.MBeanServerConnectionFactory;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -85,7 +85,7 @@ public final class ServerFixtures {
 				.build();
 	}
 
-	public static KeyedObjectPool<JmxConnectionProvider, JMXConnection> createPool() {
+	public static KeyedObjectPool<JMXConnectionProvider, JMXConnection> createPool() {
 		return new GenericKeyedObjectPool<>(new MBeanServerConnectionFactory());
 	}
 

@@ -23,6 +23,7 @@
 package com.googlecode.jmxtrans.example;
 
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
@@ -35,7 +36,6 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
@@ -57,19 +57,13 @@ public class TreeWalker2 {
 	public static void main(String[] args) throws Exception {
 		Server server = Server.builder().setHost("localhost").setPort("1099").build();
 
-		JMXConnector conn = null;
-		try {
-			conn = server.getServerConnection();
+		try(JMXConnection conn = server.getServerConnection()) {
 			MBeanServerConnection mbeanServer = conn.getMBeanServerConnection();
 
 			TreeWalker2 tw = new TreeWalker2();
 			tw.walkTree(mbeanServer, server);
 		} catch (IOException e) {
 			log.error("Problem processing queries for server: " + server.getHost() + ":" + server.getPort(), e);
-		} finally {
-			if (conn != null) {
-				conn.close();
-			}
 		}
 	}
 
