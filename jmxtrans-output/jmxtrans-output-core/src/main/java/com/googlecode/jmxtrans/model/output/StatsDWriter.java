@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.connections.DatagramSocketFactory;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
@@ -36,7 +37,6 @@ import com.googlecode.jmxtrans.model.results.CPrecisionValueTransformer;
 import com.googlecode.jmxtrans.model.results.ValueTransformer;
 import com.googlecode.jmxtrans.monitoring.ManagedGenericKeyedObjectPool;
 import com.googlecode.jmxtrans.monitoring.ManagedObject;
-import com.google.common.base.MoreObjects;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;

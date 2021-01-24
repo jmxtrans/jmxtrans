@@ -31,4 +31,3 @@ servers:
         attr:
           - ${server.attribute}
           - NonHeapMemoryUsage
-    numQueryThreads: ${server.thread}

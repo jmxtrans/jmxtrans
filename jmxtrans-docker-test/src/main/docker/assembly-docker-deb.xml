@@ -25,7 +25,7 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
-    <id>assembly-docker</id>
+    <id>assembly-docker-deb</id>
 
     <baseDirectory>/</baseDirectory>
 
@@ -36,14 +36,6 @@
             </includes>
             <outputDirectory>/maven</outputDirectory>
             <outputFileNameMapping>${deb.install.file}</outputFileNameMapping>
-        </dependencySet>
-
-        <dependencySet>
-            <includes>
-                <include>${rpm.install.artifact}</include>
-            </includes>
-            <outputDirectory>/maven</outputDirectory>
-            <outputFileNameMapping>${rpm.install.file}</outputFileNameMapping>
         </dependencySet>
     </dependencySets>
 
@@ -65,7 +57,7 @@
             <includes>
                 <include>localhost.json</include>
             </includes>
-            <fileMode>755</fileMode>
+            <fileMode>644</fileMode>
         </fileSet>
     </fileSets>
 

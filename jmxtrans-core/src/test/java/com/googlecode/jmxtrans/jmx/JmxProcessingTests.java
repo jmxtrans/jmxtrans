@@ -41,14 +41,13 @@ import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import java.util.Collection;
 import java.util.List;
 
 import static com.googlecode.jmxtrans.model.ServerFixtures.localServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @Ignore("Needs some refactoring")
@@ -87,7 +86,7 @@ public class JmxProcessingTests {
 
 		Server server = localServer();
 
-		Iterable<Result> results1 = server.execute(query);
+		Collection<Result> results1 = server.execute(query);
 		query.runOutputWritersForQuery(server, results1);
 
 		verify(outputWriter).doWrite(any(Server.class), queryCaptor.capture(), resultsCaptor.capture());

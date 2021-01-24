@@ -42,7 +42,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.io.ByteStreams.copy;
 import static com.google.common.io.ByteStreams.nullOutputStream;
 
@@ -66,7 +65,7 @@ public class HttpOutputWriter<T extends WriterBasedOutputWriter> extends OutputW
 		this.url = url;
 		this.proxy = proxy;
 		this.configurer = configurer;
-		this.charset = firstNonNull(charset, UTF_8);
+		this.charset = charset == null ? UTF_8 : charset;
 	}
 
 	@Override

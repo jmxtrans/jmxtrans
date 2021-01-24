@@ -22,7 +22,7 @@
  */
 package com.googlecode.jmxtrans.model.results;
 
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 public interface ValueTransformer extends Function<Object, Object> {
 }

@@ -30,7 +30,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.Flushable;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.Mockito.verify;
