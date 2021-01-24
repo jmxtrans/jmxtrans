@@ -26,7 +26,7 @@ package com.googlecode.jmxtrans.attach;
  * JVMAttacher failure
  */
 public class JVMAttacherException extends RuntimeException {
-	public JVMAttacherException(Exception e) {
-		super("Failed to attach to JVM", e);
+	public JVMAttacherException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

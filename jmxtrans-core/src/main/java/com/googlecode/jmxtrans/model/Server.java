@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
-import com.googlecode.jmxtrans.attach.JVMAttacher;
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import lombok.EqualsAndHashCode;
@@ -58,7 +57,6 @@ import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,6 +68,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.googlecode.jmxtrans.attach.JVMAttacher.attachToJVM;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
 import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
@@ -334,7 +333,13 @@ public class Server implements JmxConnectionProvider {
 	@Override
 	@JsonIgnore
 	public JMXConnector getServerConnection() throws IOException {
-		JMXServiceURL url = getJmxServiceURL();
+		String sUrl;
+		if(this.pid == null) {
+			sUrl = getUrl();
+		} else {
+			sUrl = attachToJVM(pid);
+		}
+		JMXServiceURL url = new JMXServiceURL(sUrl);
 		return JMXConnectorFactory.connect(url, this.getEnvironment());
 	}
 
@@ -412,35 +417,11 @@ public class Server implements JmxConnectionProvider {
 		return this.url;
 	}
 
-	@JsonIgnore
-	public JMXServiceURL getJmxServiceURL() throws MalformedURLException {
-		String sUrl;
-		if(this.pid == null) {
-			sUrl = getUrl();
-		} else {
-			sUrl = JMXServiceURLFactory.extractJMXServiceURLFromPid(this.pid);
-		}
-		return new JMXServiceURL(sUrl);
-	}
-
 	public void runOutputWriters(Query query, Iterable<Result> results) throws Exception {
 		for (OutputWriter writer : outputWriters) {
 			writer.doWrite(this, query, results);
 		}
 		logger.debug("Finished running outputWriters for query: {}", query);
-	}
-
-	/**
-	 * Factory to create a JMXServiceURL from a pid. Inner class to prevent class
-	 * loader issues when tools.jar isn't present.
-	 */
-	private static class JMXServiceURLFactory {
-
-		private JMXServiceURLFactory() {}
-
-		public static String extractJMXServiceURLFromPid(String pid) {
-			return JVMAttacher.attachToJVM(pid);
-		}
 	}
 
 	public static Builder builder() {

@@ -22,10 +22,19 @@
  */
 package com.googlecode.jmxtrans.attach;
 
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
+import com.sun.tools.attach.VirtualMachine;
+
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Util to class to attach to running JVM using PID
  */
-public class JVMAttacher {
+class JVMAttacherImpl {
+	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
 
 	/**
 	 * Connecto to JVM
@@ -34,13 +43,26 @@ public class JVMAttacher {
 	 * @return JMX Connector address
 	 * @throws JVMAttacherException Failed to attach
 	 */
-	public static String attachToJVM(String pid) {
+	static String attachToJVM(String pid) {
 		try {
-			// Check whether JVM Attach API (tools.jar) is loaded
-			Class.forName("com.sun.tools.attach.VirtualMachine");
-			return JVMAttacherImpl.attachToJVM(pid);
-		} catch (ClassNotFoundException e) {
-			throw new JVMAttacherException("JVM Attach API not available", e);
+			VirtualMachine vm = VirtualMachine.attach(pid);
+			try {
+				String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+
+				if (connectorAddress == null) {
+					String agent = vm.getSystemProperties().getProperty("java.home") +
+							File.separator + "lib" + File.separator + "management-agent.jar";
+					vm.loadAgent(agent);
+
+					connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+				}
+
+				return connectorAddress;
+			} finally {
+				vm.detach();
+			}
+		} catch (AttachNotSupportedException | IOException | AgentLoadException | AgentInitializationException e) {
+			throw new JVMAttacherException("Attach JVM with pid " + pid + " failed", e);
 		}
 	}
 
