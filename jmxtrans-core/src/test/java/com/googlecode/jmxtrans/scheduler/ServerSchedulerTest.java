@@ -28,6 +28,8 @@ import com.googlecode.jmxtrans.executors.ExecutorRepository;
 import com.googlecode.jmxtrans.jmx.ResultProcessor;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.monitoring.ManagedThreadPoolExecutor;
+import org.apache.commons.pool.KeyedObjectPool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,9 +39,13 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,8 +53,7 @@ public class ServerSchedulerTest {
 
 	@Mock
 	private JmxTransConfiguration configuration;
-	@Mock
-	private ExecutorRepository queryExecutorRepository;
+	private DummyExecutorRepository queryExecutorRepository = new DummyExecutorRepository();
 	@Mock
 	private ResultProcessor resultProcessor;
 
@@ -68,53 +73,113 @@ public class ServerSchedulerTest {
 	@Test
 	public void testSchedule() throws InterruptedException {
 		// Given
-		Server server = mock(Server.class);
-		when(server.getRunPeriodSeconds()).thenReturn(2);
-		when(server.getQueries()).thenReturn(ImmutableSet.<Query>of());
-		when(queryExecutorRepository.getExecutor(same(server))).thenReturn(null);
+		Server server = Server.builder()
+				.setRunPeriodSeconds(2)
+				.setPid("1")
+				.setPool(mock(KeyedObjectPool.class))
+				.addQueries(sampleQueries())
+				.build();
+		ThreadPoolExecutor executor = queryExecutorRepository.initExecutor(server);
 		// When
 		serverScheduler.schedule(server);
 		// Then
-		verify(queryExecutorRepository, timeout(6000).atLeastOnce()).getExecutor(same(server));
+		verify(executor, timeout(6000L).atLeast(2)).submit(any(Runnable.class));
 	}
 
 	@Test
 	public void testScheduleWhenRunFails() throws InterruptedException {
 		// Given
-		Server server = mock(Server.class);
-		when(server.getRunPeriodSeconds()).thenReturn(2);
-		when(queryExecutorRepository.getExecutor(same(server))).thenThrow(new IllegalStateException("Command failed"));
+		Server server = Server.builder()
+				.setRunPeriodSeconds(2)
+				.setPid("2")
+				.setPool(mock(KeyedObjectPool.class))
+				.addQueries(sampleQueries())
+				.build();
+		ThreadPoolExecutor executor = queryExecutorRepository.initExecutor(server);
+		when(executor.submit(any(Runnable.class))).thenThrow(new IllegalStateException("Command failed"));
 		// When
 		serverScheduler.schedule(server);
 		// Then
-		verify(queryExecutorRepository, timeout(6000L).atLeast(2)).getExecutor(same(server));
+		verify(executor, timeout(6000L).atLeast(2)).submit(any(Runnable.class));
+	}
+
+	private ImmutableSet<Query> sampleQueries() {
+		return ImmutableSet.<Query>of(Query.builder().setObj("namespace:type=T,name=N").build());
 	}
 
 	@Test
 	public void testScheduleWhenRunBlocks() throws InterruptedException {
 		// Given
-		when(configuration.getRunPeriod()).thenReturn(2);
+		when(configuration.getRunPeriod()).thenReturn(1);
 		//   Server 1
-		Server server1 = mock(Server.class);
-		when(server1.getHost()).thenReturn("test1");
-		when(server1.getQueries()).then(new Answer<ImmutableSet>() {
+		Server server1 = Server.builder()
+				.setRunPeriodSeconds(2)
+				.setHost("test1").setPort("9999")
+				.setPool(mock(KeyedObjectPool.class))
+				.addQueries(sampleQueries())
+				.build();
+		ThreadPoolExecutor executor1 = queryExecutorRepository.initExecutor(server1);
+		when(executor1.submit(any(Runnable.class))).then(new Answer<Future>() {
 			@Override
-			public ImmutableSet answer(InvocationOnMock invocationOnMock) throws Throwable {
+			public Future answer(InvocationOnMock invocationOnMock) throws Throwable {
 				Thread.sleep(10000L);
-				return ImmutableSet.<Query>of();
+				return null;
 			}
 		});
-		when(queryExecutorRepository.getExecutor(same(server1))).thenReturn(null);
 		//   Server 2
-		Server server2 = mock(Server.class);
-		when(server2.getHost()).thenReturn("test2");
-		when(server2.getQueries()).thenReturn(ImmutableSet.<Query>of());
-		when(queryExecutorRepository.getExecutor(same(server2))).thenReturn(null);
+		Server server2 = Server.builder()
+				.setHost("test2").setPort("9999")
+				.setPool(mock(KeyedObjectPool.class))
+				.addQueries(sampleQueries())
+				.build();
+		final ThreadPoolExecutor executor2 = queryExecutorRepository.initExecutor(server2);
 		// When
 		serverScheduler.schedule(server1);
 		serverScheduler.schedule(server2);
 		// Then
-		verify(queryExecutorRepository, timeout(6000L).atLeastOnce()).getExecutor(same(server1));
-		verify(queryExecutorRepository, timeout(6000L).atLeast(2)).getExecutor(same(server2));
+		verify(executor1, timeout(6000L).atLeast(1)).submit(any(Runnable.class));
+		verify(executor2, timeout(6000L).atLeast(2)).submit(any(Runnable.class));
+	}
+
+	static class DummyExecutorRepository implements ExecutorRepository {
+		Map<String, ThreadPoolExecutor> executorMap = new HashMap<>();
+
+		@Override
+		public void remove(Server server) {
+			executorMap.remove(getServerId(server));
+		}
+
+		@Override
+		public void put(Server server) {
+			initExecutor(server);
+		}
+
+		@Override
+		public Collection<ThreadPoolExecutor> getExecutors() {
+			return executorMap.values();
+		}
+
+		@Override
+		public ThreadPoolExecutor getExecutor(Server server) {
+			return initExecutor(server);
+		}
+
+		@Override
+		public Collection<ManagedThreadPoolExecutor> getMBeans() {
+			return null;
+		}
+
+		public ThreadPoolExecutor initExecutor(Server server) {
+			String serverId = getServerId(server);
+			ThreadPoolExecutor executor = executorMap.get(serverId);
+			if (executor == null) {
+				executor = mock(ThreadPoolExecutor.class);
+				executorMap.put(serverId, executor);
+			}
+			return executor;
+		}
+		private String getServerId(Server server) {
+			return server.getPid() == null ? server.getHost() : server.getPid();
+		}
 	}
 }
