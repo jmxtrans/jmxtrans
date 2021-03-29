@@ -24,6 +24,7 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -31,7 +32,9 @@ import com.googlecode.jmxtrans.model.OutputWriterFactory;
 import com.googlecode.jmxtrans.model.ResultAttribute;
 import com.googlecode.jmxtrans.model.ResultAttributes;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -56,19 +59,31 @@ public class InfluxDbWriterFactory implements OutputWriterFactory {
 	 * The retention policy</a> for each measuremen where no retentionPolicy
 	 * setting is provided in the json config
 	 */
-	private static final String DEFAULT_RETENTION_POLICY = "autogen";
+	@VisibleForTesting
+	static final String DEFAULT_RETENTION_POLICY = "autogen";
 
+	@Getter(AccessLevel.PACKAGE)
 	private final String database;
+	@Getter(AccessLevel.PACKAGE)
 	private final InfluxDB.ConsistencyLevel writeConsistency;
+	@Getter(AccessLevel.PACKAGE)
 	private final ImmutableMap<String, String> tags;
+	@Getter(AccessLevel.PACKAGE)
 	private final String retentionPolicy;
 	private final InfluxDB influxDB;
+	@Getter(AccessLevel.PACKAGE)
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
+	@Getter(AccessLevel.PACKAGE)
 	private final boolean booleanAsNumber;
+	@Getter(AccessLevel.PACKAGE)
 	private final boolean typeNamesAsTags;
+	@Getter(AccessLevel.PACKAGE)
 	private final boolean createDatabase;
+	@Getter(AccessLevel.PACKAGE)
 	private final boolean reportJmxPortAsTag;
+	@Getter(AccessLevel.PACKAGE)
 	private final ImmutableList<String> typeNames;
+	@Getter(AccessLevel.PACKAGE)
 	private final boolean allowStringValues;
 
 	/**
