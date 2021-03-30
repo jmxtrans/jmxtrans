@@ -110,6 +110,7 @@ public class ServerListBuilder {
 
 		public Server build() {
 			Server.Builder builder = Server.builder(server)
+					.clearOutputWriters()
 					.addOutputWriters(createOutputWriters(temporaryOutputWriters))
 					.clearQueries();
 			for (Map.Entry<Query, Set<OutputWriterFactory>> queryEntry : queries.entrySet()) {
