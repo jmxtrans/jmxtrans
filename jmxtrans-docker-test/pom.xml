@@ -29,7 +29,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-parent</artifactId>
-		<version>272-SNAPSHOT</version>
+		<version>272</version>
 	</parent>
 
 	<artifactId>jmxtrans-docker-test</artifactId>
@@ -65,7 +65,7 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<configuration>
 					<showLogs>true</showLogs>
-					<images />
+					<images></images>
 				</configuration>
 				<executions>
 					<execution>
@@ -120,7 +120,8 @@
 								<image>
 									<name>ubuntu-20.04/${project.artifactId}:${project.version}</name>
 									<build>
-										<from>ubuntu:20.04</from><!-- codename focal -->
+										<from>ubuntu:20.04</from>
+										<!-- codename focal -->
 										<assembly>
 											<descriptor>assembly-docker-deb.xml</descriptor>
 											<basedir>/</basedir>
@@ -130,7 +131,7 @@
 											<run>apt update</run>
 											<run>apt install -y wget apt-transport-https gnupg</run>
 											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
-											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb focal main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb focal main" &gt; /etc/apt/sources.list.d/adoptopenjdk.list</run>
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
@@ -152,7 +153,8 @@
 								<image>
 									<name>ubuntu-18.04/${project.artifactId}:${project.version}</name>
 									<build>
-										<from>ubuntu:18.04</from><!-- codename bionic -->
+										<from>ubuntu:18.04</from>
+										<!-- codename bionic -->
 										<assembly>
 											<descriptor>assembly-docker-deb.xml</descriptor>
 											<basedir>/</basedir>
@@ -162,7 +164,7 @@
 											<run>apt update</run>
 											<run>apt install -y wget apt-transport-https gnupg</run>
 											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
-											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb bionic main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb bionic main" &gt; /etc/apt/sources.list.d/adoptopenjdk.list</run>
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
@@ -184,7 +186,8 @@
 								<image>
 									<name>ubuntu-16.04/${project.artifactId}:${project.version}</name>
 									<build>
-										<from>ubuntu:16.04</from><!-- codename xenial -->
+										<from>ubuntu:16.04</from>
+										<!-- codename xenial -->
 										<assembly>
 											<descriptor>assembly-docker-deb.xml</descriptor>
 											<basedir>/</basedir>
@@ -194,7 +197,7 @@
 											<run>apt update</run>
 											<run>apt install -y wget apt-transport-https gnupg</run>
 											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
-											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb xenial main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb xenial main" &gt; /etc/apt/sources.list.d/adoptopenjdk.list</run>
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
@@ -243,7 +246,8 @@
 								<image>
 									<name>debian-10/${project.artifactId}:${project.version}</name>
 									<build>
-										<from>debian:10</from><!-- codename buster -->
+										<from>debian:10</from>
+										<!-- codename buster -->
 										<assembly>
 											<descriptor>assembly-docker-deb.xml</descriptor>
 											<basedir>/</basedir>
@@ -253,7 +257,7 @@
 											<run>apt update</run>
 											<run>apt install -y wget apt-transport-https gnupg</run>
 											<run>wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</run>
-											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb buster main" > /etc/apt/sources.list.d/adoptopenjdk.list</run>
+											<run>echo "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb buster main" &gt; /etc/apt/sources.list.d/adoptopenjdk.list</run>
 											<run>apt update</run>
 											<run>apt install -y adoptopenjdk-8-hotspot-jre</run>
 										</runCmds>
