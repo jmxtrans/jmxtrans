@@ -31,9 +31,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.inject.name.Named;
-import com.googlecode.jmxtrans.ServerListBuilder;
 import com.googlecode.jmxtrans.connections.JMXConnection;
 import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
 import com.sun.tools.attach.VirtualMachine;
@@ -159,7 +157,7 @@ public class Server implements JmxConnectionProvider {
 
 	@Getter private final ImmutableSet<Query> queries;
 
-	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
+	@Nonnull @Getter private final ImmutableList<OutputWriter> outputWriters;
 
 	@Nonnull private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
@@ -510,7 +508,7 @@ public class Server implements JmxConnectionProvider {
 			this.local = server.local;
 			this.ssl = server.ssl;
 			this.queries.addAll(server.queries);
-			Iterables.addAll(this.outputWriters, server.outputWriters);
+			this.outputWriters.addAll(server.outputWriters);
 			this.pool = server.pool;
 		}
 
