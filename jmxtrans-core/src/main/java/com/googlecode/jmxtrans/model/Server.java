@@ -157,7 +157,7 @@ public class Server implements JmxConnectionProvider {
 
 	@Getter private final ImmutableSet<Query> queries;
 
-	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
+	@Nonnull @Getter private final ImmutableList<OutputWriter> outputWriters;
 
 	@Nonnull private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
@@ -508,6 +508,7 @@ public class Server implements JmxConnectionProvider {
 			this.local = server.local;
 			this.ssl = server.ssl;
 			this.queries.addAll(server.queries);
+			this.outputWriters.addAll(server.outputWriters);
 			this.pool = server.pool;
 		}
 
@@ -528,6 +529,11 @@ public class Server implements JmxConnectionProvider {
 
 		public Builder addOutputWriterFactory(OutputWriterFactory outputWriterFactory) {
 			this.outputWriterFactories.add(outputWriterFactory);
+			return this;
+		}
+
+		public Builder clearOutputWriters() {
+			this.outputWriters.clear();
 			return this;
 		}
 
