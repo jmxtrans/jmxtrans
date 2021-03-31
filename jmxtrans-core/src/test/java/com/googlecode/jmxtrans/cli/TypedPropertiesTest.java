@@ -20,30 +20,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.guice;
+package com.googlecode.jmxtrans.cli;
 
-import com.google.inject.Injector;
-import org.quartz.Job;
-import org.quartz.JobDetail;
-import org.quartz.SchedulerException;
-import org.quartz.spi.JobFactory;
-import org.quartz.spi.TriggerFiredBundle;
+import org.junit.Before;
+import org.junit.Test;
 
-import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
-public class GuiceJobFactory implements JobFactory {
+import static org.assertj.core.api.Assertions.assertThat;
 
-	private final Injector injector;
+public class TypedPropertiesTest {
+	private TypedProperties typedProperties;
 
-	@Inject
-	public GuiceJobFactory(Injector injector) {
-		this.injector = injector;
+	@Before
+	public void setUp() throws IOException {
+		try (InputStream inputStream = getClass().getResourceAsStream("/example-typed.properties")) {
+			Properties properties = new Properties();
+			properties.load(inputStream);
+			typedProperties = new TypedProperties(properties);
+		}
 	}
 
-	@Override
-	public Job newJob(TriggerFiredBundle bundle) throws SchedulerException {
-		JobDetail jobDetail = bundle.getJobDetail();
-		Class<Job> jobClass = jobDetail.getJobClass();
-		return injector.getInstance(jobClass);
+	@Test
+	public void testGetString() {
+		assertThat(typedProperties.getTypedProperty("string", String.class)).isEqualTo("Hello JMXTrans");
+	}
+
+	@Test
+	public void testGetInteger() {
+		assertThat(typedProperties.getTypedProperty("integer", Integer.class)).isEqualTo(1234);
+	}
+
+	@Test
+	public void testGetBoolean() {
+		assertThat(typedProperties.getTypedProperty("boolean", Boolean.class)).isTrue();
+	}
+
+	@Test
+	public void testGetMulti() {
+		assertThat(typedProperties.getTypedProperties("multi", String.class)).containsExactly("one", "two", "three", "four");
 	}
 }

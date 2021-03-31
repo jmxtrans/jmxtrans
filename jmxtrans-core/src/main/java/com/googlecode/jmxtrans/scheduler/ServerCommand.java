@@ -20,50 +20,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.jmx;
+package com.googlecode.jmxtrans.scheduler;
 
 import com.googlecode.jmxtrans.executors.ExecutorRepository;
+import com.googlecode.jmxtrans.jmx.ProcessQueryThread;
+import com.googlecode.jmxtrans.jmx.ResultProcessor;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * The worker code.
- *
- * @author jon
+ * Per server thread being run periodically
  */
-public class JmxUtils {
+public class ServerCommand implements Runnable {
+	private static final Logger log = LoggerFactory.getLogger(ServerScheduler.class);
+	private final Server server;
+	private final ExecutorRepository queryExecutorRepository;
+	private final ResultProcessor resultProcessor;
 
-	@Nonnull private static final Logger logger = LoggerFactory.getLogger(JmxUtils.class);
-
-	@Nonnull private final ExecutorRepository queryExecutorRepository;
-	@Nonnull private final ResultProcessor resultProcessor;
-
-	@Inject
-	public JmxUtils(
-			@Nonnull @Named("queryExecutorRepository") ExecutorRepository queryExecutorRepository,
-			@Nonnull ResultProcessor resultProcessor) {
+	public ServerCommand(Server server, ExecutorRepository queryExecutorRepository, ResultProcessor resultProcessor) {
+		this.server = server;
 		this.queryExecutorRepository = queryExecutorRepository;
 		this.resultProcessor = resultProcessor;
 	}
 
-	public void processServer(Server server) throws Exception {
-		final ThreadPoolExecutor executor = queryExecutorRepository.getExecutor(server);
+	@Override
+	public void run() {
 
-		for (Query query : server.getQueries()) {
-			ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
-			try {
-				executor.submit(pqt);
-			} catch (RejectedExecutionException ree) {
-				logger.error("Could not submit query {}. You could try to size the 'queryProcessorExecutor' to a larger size.", pqt, ree);
+		log.debug("+++++ Started server job {}", server);
+		try {
+			final ThreadPoolExecutor executor = queryExecutorRepository.getExecutor(server);
+
+			for (Query query : server.getQueries()) {
+				ProcessQueryThread pqt = new ProcessQueryThread(resultProcessor, server, query);
+				try {
+					executor.submit(pqt);
+				} catch (RejectedExecutionException ree) {
+					log.error("Could not submit query {}. You could try to size the 'queryProcessorExecutor' to a larger size.", pqt, ree);
+				}
+			}
+			log.debug("+++++ Finished server job {}", server);
+		} catch (Exception e) {
+			if (log.isDebugEnabled()) {
+				log.warn("+++++ Failed server job " + server, e);
+			} else {
+				log.warn("+++++ Failed server job {}: {} {}", server, e.getClass().getName(), e.getMessage());
 			}
 		}
+
+	}
+
+	public String getName() {
+		return server.getHost() + ":" + server.getPort();
 	}
 }

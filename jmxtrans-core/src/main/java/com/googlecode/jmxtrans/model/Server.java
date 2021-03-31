@@ -24,10 +24,10 @@ package com.googlecode.jmxtrans.model;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -65,16 +65,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion.NON_NULL;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES;
+import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE;
 import static javax.naming.Context.SECURITY_CREDENTIALS;
 import static javax.naming.Context.SECURITY_PRINCIPAL;
-import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE;
 
 /**
  * Represents a jmx server that we want to connect to. This also stores the
@@ -82,7 +81,7 @@ import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_F
  *
  * @author jon
  */
-@JsonSerialize(include = NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder(value = {
 		"alias",
 		"local",
@@ -92,13 +91,12 @@ import static javax.management.remote.rmi.RMIConnectorServer.RMI_CLIENT_SOCKET_F
 		"username",
 		"password",
 		"cronExpression",
-		"numQueryThreads",
 		"protocolProviderPackages"
 })
 @Immutable
 @ThreadSafe
 @EqualsAndHashCode(exclude = {"queries", "pool", "outputWriters", "outputWriterFactories"})
-@ToString(of = {"pid", "host", "port", "url", "cronExpression", "numQueryThreads"})
+@ToString(of = {"pid", "host", "port", "url", "cronExpression"})
 public class Server implements JmxConnectionProvider {
 
 	private static final String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
@@ -144,8 +142,6 @@ public class Server implements JmxConnectionProvider {
 	@Deprecated
 	@Getter @Nullable private final String cronExpression;
 	@Getter @Nullable private final Integer runPeriodSeconds;
-	/** The number of query threads for this server. */
-	@Getter private final int numQueryThreads;
 
 	/**
 	 * Whether the current local Java process should be used or not (useful for
@@ -161,7 +157,7 @@ public class Server implements JmxConnectionProvider {
 
 	@Getter private final ImmutableSet<Query> queries;
 
-	@Nonnull @Getter private final Iterable<OutputWriter> outputWriters;
+	@Nonnull @Getter private final ImmutableList<OutputWriter> outputWriters;
 
 	@Nonnull private final KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool;
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriterFactories;
@@ -178,7 +174,6 @@ public class Server implements JmxConnectionProvider {
 			@JsonProperty("url") String url,
 			@JsonProperty("cronExpression") String cronExpression,
 			@JsonProperty("runPeriodSeconds") Integer runPeriodSeconds,
-			@JsonProperty("numQueryThreads") Integer numQueryThreads,
 			@JsonProperty("local") boolean local,
 			@JsonProperty("ssl") boolean ssl,
 			@JsonProperty("queries") List<Query> queries,
@@ -186,7 +181,7 @@ public class Server implements JmxConnectionProvider {
 			@JacksonInject @Named("mbeanPool") KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
 
 		this(alias, pid, host, port, username, password, protocolProviderPackages, url, cronExpression,
-				runPeriodSeconds, numQueryThreads, local, ssl, queries, outputWriters, ImmutableList.<OutputWriter>of(),
+				runPeriodSeconds, local, ssl, queries, outputWriters, ImmutableList.<OutputWriter>of(),
 				pool);
 	}
 
@@ -201,7 +196,6 @@ public class Server implements JmxConnectionProvider {
 			String url,
 			String cronExpression,
 			Integer runPeriodSeconds,
-			Integer numQueryThreads,
 			boolean local,
 			boolean ssl,
 			List<Query> queries,
@@ -209,7 +203,7 @@ public class Server implements JmxConnectionProvider {
 			KeyedObjectPool<JmxConnectionProvider, JMXConnection> pool) {
 
 		this(alias, pid, host, port, username, password, protocolProviderPackages, url, cronExpression,
-				runPeriodSeconds, numQueryThreads, local, ssl, queries, ImmutableList.<OutputWriterFactory>of(),
+				runPeriodSeconds, local, ssl, queries, ImmutableList.<OutputWriterFactory>of(),
 				outputWriters, pool);
 	}
 
@@ -224,7 +218,6 @@ public class Server implements JmxConnectionProvider {
 			String url,
 			String cronExpression,
 			Integer runPeriodSeconds,
-			Integer numQueryThreads,
 			boolean local,
 			boolean ssl,
 			List<Query> queries,
@@ -250,7 +243,6 @@ public class Server implements JmxConnectionProvider {
 		}
 
 		this.runPeriodSeconds = runPeriodSeconds;
-		this.numQueryThreads = firstNonNull(numQueryThreads, 0);
 		this.local = local;
 		this.ssl = ssl;
 		this.queries = copyOf(queries);
@@ -273,7 +265,7 @@ public class Server implements JmxConnectionProvider {
 		this.id = String.format("%s_%s_%s", host, port, pid);
 	}
 
-	public Iterable<Result> execute(Query query) throws Exception {
+	public Collection<Result> execute(Query query) throws Exception {
 		JMXConnection jmxConnection = null;
 		try {
 			jmxConnection = pool.borrowObject(this);
@@ -376,6 +368,10 @@ public class Server implements JmxConnectionProvider {
 		return url.substring(url.lastIndexOf("//") + 2, url.lastIndexOf(':'));
 	}
 
+	public String getAlias() {
+		return alias;
+	}
+
 	public String getSource() {
 		if (alias != null) {
 			return alias;
@@ -423,11 +419,6 @@ public class Server implements JmxConnectionProvider {
 			return JMXServiceURLFactory.extractJMXServiceURLFromPid(this.pid);
 		}
 		return new JMXServiceURL(getUrl());
-	}
-
-	@JsonIgnore
-	public boolean isQueriesMultiThreaded() {
-		return numQueryThreads > 0;
 	}
 
 	public void runOutputWriters(Query query, Iterable<Result> results) throws Exception {
@@ -494,7 +485,6 @@ public class Server implements JmxConnectionProvider {
 		@Setter private String url;
 		@Setter private String cronExpression;
 		@Setter private Integer runPeriodSeconds;
-		@Setter private Integer numQueryThreads;
 		@Setter private boolean local;
 		@Setter private boolean ssl;
 		private final List<OutputWriterFactory> outputWriterFactories = new ArrayList<>();
@@ -515,10 +505,10 @@ public class Server implements JmxConnectionProvider {
 			this.url = server.url;
 			this.cronExpression = server.cronExpression;
 			this.runPeriodSeconds = server.runPeriodSeconds;
-			this.numQueryThreads = server.numQueryThreads;
 			this.local = server.local;
 			this.ssl = server.ssl;
 			this.queries.addAll(server.queries);
+			this.outputWriters.addAll(server.outputWriters);
 			this.pool = server.pool;
 		}
 
@@ -542,6 +532,11 @@ public class Server implements JmxConnectionProvider {
 			return this;
 		}
 
+		public Builder clearOutputWriters() {
+			this.outputWriters.clear();
+			return this;
+		}
+
 		public Builder addOutputWriters(Collection<OutputWriter> outputWriters) {
 			this.outputWriters.addAll(outputWriters);
 			return this;
@@ -560,7 +555,6 @@ public class Server implements JmxConnectionProvider {
 						url,
 						cronExpression,
 						runPeriodSeconds,
-						numQueryThreads,
 						local,
 						ssl,
 						queries,
@@ -578,7 +572,6 @@ public class Server implements JmxConnectionProvider {
 					url,
 					cronExpression,
 					runPeriodSeconds,
-					numQueryThreads,
 					local,
 					ssl,
 					queries,

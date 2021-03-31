@@ -22,7 +22,6 @@
  */
 package com.googlecode.jmxtrans;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriter;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
@@ -31,14 +30,13 @@ import com.googlecode.jmxtrans.model.Server;
 import com.googlecode.jmxtrans.model.SingletonOutputWriterFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -112,6 +110,7 @@ public class ServerListBuilder {
 
 		public Server build() {
 			Server.Builder builder = Server.builder(server)
+					.clearOutputWriters()
 					.addOutputWriters(createOutputWriters(temporaryOutputWriters))
 					.clearQueries();
 			for (Map.Entry<Query, Set<OutputWriterFactory>> queryEntry : queries.entrySet()) {
@@ -126,13 +125,6 @@ public class ServerListBuilder {
 	}
 
 	private Collection<OutputWriter> createOutputWriters(@Nonnull Set<OutputWriterFactory> outputWriterFactories) {
-		return from(outputWriterFactories)
-				.transform(new Function<OutputWriterFactory, OutputWriter>() {
-			@Nullable
-			@Override
-			public OutputWriter apply(OutputWriterFactory input) {
-				return input.create();
-			}
-		}).toList();
+		return outputWriterFactories.stream().map(OutputWriterFactory::create).collect(Collectors.toList());
 	}
 }

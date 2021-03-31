@@ -40,10 +40,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import yaml
+import copy
 import json
 import sys
-import copy
+import yaml
 from string import Template
 
 
@@ -134,7 +134,6 @@ class Queries(object):
             url = Template(urlTemplate)
             hostentry['url'] = url.substitute(hostname=host_name, query_port=query_port, setname=set_name, hostshortname=hostShortName)
 
-        hostentry['numQueryThreads'] = len(hostentry['queries'])
         return hostentry
 
     def create_host_set_configuration(self, host_names, query_names, query_port, username, password, urlTemplate, set_name, global_host_alias):

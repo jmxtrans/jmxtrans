@@ -47,9 +47,9 @@ public final class KeyUtils {
 		StringBuilder sb = new StringBuilder();
 		addRootPrefix(rootPrefix, sb);
 		addAlias(server, sb);
-		sb.append(".");
+		addSeparator(sb);
 		addMBeanIdentifier(query, result, sb);
-		sb.append(".");
+		addSeparator(sb);
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(query, result, sb);
 		return sb.toString();
@@ -66,10 +66,16 @@ public final class KeyUtils {
 	public static String getKeyString(Query query, Result result, List<String> typeNames) {
 		StringBuilder sb = new StringBuilder();
 		addMBeanIdentifier(query, result, sb);
-		sb.append(".");
+		addSeparator(sb);
 		addTypeName(query, result, typeNames, sb);
 		addKeyString(query, result, sb);
 		return sb.toString();
+	}
+
+	private static void addSeparator(StringBuilder sb) {
+		if (sb.length() > 0 && !sb.substring(sb.length() - 1).equals(".")) {
+			sb.append(".");
+		}
 	}
 
 	/**
@@ -88,7 +94,7 @@ public final class KeyUtils {
 	}
 
 	private static void addRootPrefix(String rootPrefix, StringBuilder sb) {
-		if (rootPrefix != null) {
+		if (rootPrefix != null && rootPrefix.length() > 0) {
 			sb.append(rootPrefix);
 			sb.append(".");
 		}

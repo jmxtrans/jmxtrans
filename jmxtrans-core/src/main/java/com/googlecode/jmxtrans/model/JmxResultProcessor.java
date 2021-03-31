@@ -58,7 +58,9 @@ public class JmxResultProcessor {
 	public ImmutableList<Result> getResults() {
 		ResultsBuilder builder = new ResultsBuilder();
 		for (Attribute attribute : attributes) {
-			builder.add(attribute.getName(), attribute.getValue());
+			if (attribute != null){
+				builder.add(attribute.getName(), attribute.getValue());
+			}
 		}
 		return builder.build();
 	}
@@ -143,6 +145,10 @@ public class JmxResultProcessor {
 			CompositeType t = cds.getCompositeType();
 			Set<String> keys = t.keySet();
 			for (String key : keys) {
+				if (!query.getKeys().isEmpty() && !query.getKeys().contains(key)) {
+					continue;
+				}
+
 				Object value = cds.get(key);
 				add(attributeName, newValuePath(valuePath, key), value);
 			}

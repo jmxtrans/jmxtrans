@@ -58,13 +58,18 @@ public final class ResultFixtures {
 	public static Result numericResult() {
 		return numericResult(10);
 	}
+
 	public static Result numericResult(Object numericValue) {
+		return numericResult("MemoryAlias", numericValue);
+	}
+
+	public static Result numericResult(String keyAlias, Object numericValue) {
 		return new Result(
 				0,
 				"ObjectPendingFinalizationCount",
 				"sun.management.MemoryImpl",
 				"ObjectDomainName",
-				"MemoryAlias",
+				keyAlias,
 				"type=Memory",
 				ImmutableList.<String>of(),
 				numericValue);

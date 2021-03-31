@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.jmxtrans</groupId>
 		<artifactId>jmxtrans-output</artifactId>
-		<version>271-SNAPSHOT</version>
+		<version>273-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jmxtrans-output-influxdb</artifactId>
@@ -63,6 +63,11 @@
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

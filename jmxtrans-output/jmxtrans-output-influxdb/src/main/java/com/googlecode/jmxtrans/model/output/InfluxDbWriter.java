@@ -22,10 +22,9 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
@@ -36,7 +35,6 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,14 +76,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 	private final ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags;
 
 	private final boolean createDatabase;
+	private final boolean typeNamesAsTags;
+	private final boolean allowStringValues;
 	private final boolean reportJmxPortAsTag;
-
-	private final Predicate<Object> isNotNaN = new Predicate<Object>() {
-		@Override
-		public boolean apply(Object input) {
-			return !input.toString().equals("NaN");
-		}
-	};
 
 	public InfluxDbWriter(
 			@Nonnull InfluxDB influxDB,
@@ -96,7 +89,9 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 			@Nonnull ImmutableSet<ResultAttribute> resultAttributesToWriteAsTags,
 			@Nonnull ImmutableList<String> typeNames,
 			boolean createDatabase,
-			boolean reportJmxPortAsTag) {
+			boolean reportJmxPortAsTag,
+			boolean typeNamesAsTags,
+			boolean allowStringValues) {
 		this.typeNames = typeNames;
 		this.database = database;
 		this.writeConsistency = writeConsistency;
@@ -106,6 +101,8 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		this.resultAttributesToWriteAsTags = resultAttributesToWriteAsTags;
 		this.createDatabase = createDatabase;
 		this.reportJmxPortAsTag = reportJmxPortAsTag;
+		this.typeNamesAsTags = typeNamesAsTags;
+		this.allowStringValues = allowStringValues;
 	}
 
 	/**
@@ -173,13 +170,21 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		}
 
 		BatchPoints batchPoints = batchPointsBuilder.consistency(writeConsistency).build();
+
+		ImmutableList<String> typeNamesParam = null;
+		// if not typeNamesAsTag, we concat typeName in values.
+		if (!typeNamesAsTags) {
+			typeNamesParam = this.typeNames;
+		}
+
 		for (Result result : results) {
 			log.debug("Query result: {}", result);
 
 			HashMap<String, Object> filteredValues = newHashMap();
 			Object value = result.getValue();
-			if (isValidNumber(value)) {
-				String key = KeyUtils.getPrefixedKeyString(query, result, typeNames);
+
+			String key = KeyUtils.getPrefixedKeyString(query, result, typeNamesParam);
+			if (isValidNumber(value) || allowStringValues && value instanceof String) {
 				filteredValues.put(key, value);
 			}
 
@@ -202,11 +207,20 @@ public class InfluxDbWriter extends OutputWriterAdapter {
 		influxDB.write(batchPoints);
 	}
 
-	private Map<String, String> buildResultTagMap(Result result) throws Exception {
+	private Map<String, String> buildResultTagMap(Result result) {
 
 		Map<String, String> resultTagMap = new TreeMap<>();
 		for (ResultAttribute resultAttribute : resultAttributesToWriteAsTags) {
 			resultAttribute.addTo(resultTagMap, result);
+		}
+
+		if (typeNamesAsTags) {
+			Map<String, String> typeNameValueMap = result.getTypeNameMap();
+			for (String typeToTag : this.typeNames) {
+				if (typeNameValueMap.containsKey(typeToTag)) {
+					resultTagMap.put(typeToTag, typeNameValueMap.get(typeToTag));
+				}
+			}
 		}
 
 		return resultTagMap;

@@ -59,4 +59,9 @@ public class CommonExecutorRepository implements ExecutorRepository {
 	public Collection<ManagedThreadPoolExecutor> getMBeans() {
 		return Arrays.asList(managedThreadPoolExecutor);
 	}
+
+	@Override
+	public void remove(Server server) {
+		//nothing here because every server uses common thread pool
+	}
 }

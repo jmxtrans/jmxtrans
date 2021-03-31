@@ -1,0 +1,7 @@
+{
+  "@class":"com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+  "url": "http://localhost",
+  "username": "root",
+  "password": "root",
+  "database": "jmxtransDB"
+}

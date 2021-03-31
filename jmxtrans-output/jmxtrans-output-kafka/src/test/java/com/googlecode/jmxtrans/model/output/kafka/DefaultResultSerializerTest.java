@@ -30,10 +30,9 @@ import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.output.ResultSerializer;
 import org.junit.Test;
 
-import java.util.Collection;
-
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
-import static com.googlecode.jmxtrans.model.ResultFixtures.*;
+import static com.googlecode.jmxtrans.model.ResultFixtures.numericResult;
+import static com.googlecode.jmxtrans.model.ResultFixtures.stringResult;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;

@@ -52,8 +52,7 @@ public class InterestingInfo {
 		public static void main(String[] args) throws Exception {
 		Server.Builder serverBuilder = Server.builder()
 				.setHost("w2")
-				.setPort("1099")
-				.setNumQueryThreads(2);
+				.setPort("1099");
 
 		Map<String, Object> settings = newHashMap();
 		settings.put(GraphiteWriter.HOST, "192.168.192.133");

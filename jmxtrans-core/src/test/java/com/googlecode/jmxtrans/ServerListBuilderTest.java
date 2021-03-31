@@ -74,6 +74,24 @@ public class ServerListBuilderTest {
 	}
 
 	@Test
+	public void outputWritersAreKeptOnServerCopy() {
+		Server server1 = Server.builder(dummyServer())
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output 1"))
+				.addOutputWriterFactory(new DummyOutputWriterFactory("output 2"))
+				.build();
+
+		ImmutableList<Server> serverList = new ServerListBuilder()
+				.add(ImmutableList.of(server1))
+				.build();
+		assertThat(serverList).hasSize(1);
+
+		Server createdServer = serverList.iterator().next();
+
+		Server server2 = Server.builder(createdServer).build();
+		assertThat(server2.getOutputWriters()).hasSize(2);
+	}
+
+	@Test
 	public void outputWritersAreReusedOnQueries() {
 		Query q1 = Query.builder(dummyQuery())
 				.addOutputWriterFactory(new DummyOutputWriterFactory("output1"))

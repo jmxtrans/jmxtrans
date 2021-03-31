@@ -27,7 +27,6 @@
       } ],
       "obj" : "java.lang:name=ConcurrentMarkSweep,type=GarbageCollector",
       "attr" : [ "LastGcInfo" ]
-    } ],
-    "numQueryThreads" : 2
+    } ]
   } ]
 }

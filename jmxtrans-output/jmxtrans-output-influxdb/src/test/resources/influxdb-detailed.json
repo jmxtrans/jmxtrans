@@ -1,0 +1,19 @@
+{
+  "@class":"com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+  "url": "http://localhost:8086",
+  "username": "root",
+  "password": "root",
+  "database": "jmxtransDB",
+  "tags" : {
+    "custom":"tag1",
+    "custom2":"tag2"
+  },
+  "resultTags":["typeName","className"],
+  "retentionPolicy":"customPolicy",
+  "writeConsistency":"ONE",
+  "createDatabase":"false",
+  "reportJmxPortAsTag":"true",
+  "booleanAsNumber": "true",
+  "allowStringValues": "true",
+  "typeNamesAsTags": "true"
+}
