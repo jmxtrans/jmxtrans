@@ -22,10 +22,8 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
@@ -55,7 +53,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
@@ -90,11 +87,10 @@ public class CloudWatchWriter implements OutputWriterFactory {
 	/**
 	 * Configuring the CloudWatch client.
 	 *
-	 * Credentials are loaded from the Amazon EC2 Instance Metadata Service
+	 * Credentials are loaded using the default credential provider chain.
 	 */
-	private AmazonCloudWatchClient createCloudWatchClient() {
-		AmazonCloudWatchClient cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
-		cloudWatchClient.setRegion(checkNotNull(Regions.getCurrentRegion(), "Problems getting AWS metadata"));
+	private AmazonCloudWatch createCloudWatchClient() {
+		AmazonCloudWatch cloudWatchClient = AmazonCloudWatchClientBuilder.defaultClient();
 		return cloudWatchClient;
 	}
 
