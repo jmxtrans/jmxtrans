@@ -22,12 +22,19 @@
  */
 package com.googlecode.jmxtrans.model.output;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.regions.DefaultAwsRegionProviderChain;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.googlecode.jmxtrans.exceptions.LifecycleException;
+import com.googlecode.jmxtrans.model.OutputWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,33 +42,81 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+
+import static com.amazonaws.regions.Regions.AP_NORTHEAST_1;
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 /**
  * Tests for {@link com.googlecode.jmxtrans.model.output.CloudWatchWriter}.
  *
  * @author <a href="mailto:sascha.moellering@gmail.com">Sascha Moellering</a>
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({DefaultAWSCredentialsProviderChain.class,DefaultAwsRegionProviderChain.class,AmazonCloudWatchClientBuilder.class,CloudWatchWriter.class})
 public class CloudWatchWriterTests {
 
-	@Mock private AmazonCloudWatchClient cloudWatchClient;
+	@Mock AmazonCloudWatchClient cloudWatchClient;
 	@Captor private ArgumentCaptor<PutMetricDataRequest> requestCaptor;
-	private CloudWatchWriter.Writer writer;
+	private OutputWriter writer;
 
 	@Before
-	public void createCloudWatchWriter() {
-		ImmutableList<Dimension> dimensions = ImmutableList.of(
-				new Dimension().withName("SomeKey").withValue("SomeValue"),
-				new Dimension().withName("InstanceId").withValue("$InstanceId")
+	public void createCloudWatchWriter() throws Exception {
+
+		mockStatic(DefaultAWSCredentialsProviderChain.class);
+
+		DefaultAWSCredentialsProviderChain credentialsProviderChain = mock(DefaultAWSCredentialsProviderChain.class);
+		DefaultAwsRegionProviderChain regionProviderChain = mock(DefaultAwsRegionProviderChain.class);
+
+		when(credentialsProviderChain.getCredentials()).thenReturn(new BasicAWSCredentials("", ""));
+		when(regionProviderChain.getRegion()).thenReturn(AP_NORTHEAST_1.getName());
+
+		when(DefaultAWSCredentialsProviderChain.getInstance()).thenReturn(credentialsProviderChain);
+		whenNew(DefaultAwsRegionProviderChain.class).withNoArguments().thenReturn(regionProviderChain);
+		whenNew(AmazonCloudWatchClient.class).withAnyArguments().thenReturn(cloudWatchClient);
+
+
+
+		CloudWatchWriter cloudWatchWriter = new CloudWatchWriter(
+				ImmutableList.<String>of(),
+				false,
+				false,
+				"testNS",
+				Arrays.asList(
+						(Map<String,Object>)ImmutableMap.of("name", (Object)"SomeKey", "value", (Object) "SomeValue"),
+						(Map<String,Object>)ImmutableMap.of("name", (Object)"InstanceId",  "value", (Object) "$InstanceId")
+				),
+				ImmutableMap.<String, Object>of()
 		);
 
-		writer = new CloudWatchWriter.Writer("testNS", cloudWatchClient, dimensions);
+		writer = cloudWatchWriter.create();
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testEmptyNamespace() {
+		CloudWatchWriter cloudWatchWriter = new CloudWatchWriter(
+				ImmutableList.<String>of(),
+				false,
+				false,
+				"",
+				Arrays.asList(
+						(Map<String,Object>)ImmutableMap.of("name", (Object)"SomeKey", "value", (Object) "SomeValue"),
+						(Map<String,Object>)ImmutableMap.of("name", (Object)"InstanceId",  "value", (Object) "$InstanceId")
+				),
+				ImmutableMap.<String, Object>of()
+		);
 	}
 
 	@Test
