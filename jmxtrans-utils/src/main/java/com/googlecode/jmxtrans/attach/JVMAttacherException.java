@@ -20,23 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import javax.management.MBeanServer;
-import javax.management.remote.JMXConnector;
-import java.io.IOException;
+package com.googlecode.jmxtrans.attach;
 
 /**
- * Created by gehel on 29.12.15.
+ * JVMAttacher failure
  */
-public interface JmxConnectionProvider {
-	@JsonIgnore
-	JMXConnector getServerConnection() throws IOException;
-
-	@JsonIgnore
-	MBeanServer getLocalMBeanServer();
-
-	boolean isLocal();
+public class JVMAttacherException extends RuntimeException {
+	public JVMAttacherException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

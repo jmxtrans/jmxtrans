@@ -23,20 +23,19 @@
 package com.googlecode.jmxtrans.model;
 
 import com.googlecode.jmxtrans.connections.JMXConnection;
-import com.googlecode.jmxtrans.connections.JmxConnectionProvider;
+import com.googlecode.jmxtrans.connections.JMXConnectionProvider;
 import com.googlecode.jmxtrans.test.RequiresIO;
 import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InOrder;
 
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -232,7 +231,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingOk() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		GenericKeyedObjectPool<JMXConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")
@@ -249,8 +248,8 @@ public class ServerTests {
 		when(pool.borrowObject(server)).thenReturn(conn);
 
 		Query query = mock(Query.class);
-		Iterable<ObjectName> objectNames = Lists.emptyList();
-		when(query.queryNames(mBeanConn)).thenReturn(objectNames);
+		Collection<Result> results = Collections.emptyList();
+		when(query.execute(same(mBeanConn))).thenReturn(results);
 		server.execute(query);
 
 		verify(pool, never()).invalidateObject(server, conn);
@@ -263,7 +262,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingSkippedOnError_andConnectionIsClosed() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		GenericKeyedObjectPool<JMXConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")
@@ -281,7 +280,7 @@ public class ServerTests {
 
 		Query query = mock(Query.class);
 		IOException e = mock(IOException.class);
-		when(query.queryNames(mBeanConn)).thenThrow(e);
+		when(query.execute(mBeanConn)).thenThrow(e);
 
 		try {
 			server.execute(query);
@@ -302,7 +301,7 @@ public class ServerTests {
 	@Test
 	public void testConnectionRepoolingSkippedOnError_andErrorClosingConnectionIsIgnored() throws Exception {
 		@SuppressWarnings("unchecked")
-		GenericKeyedObjectPool<JmxConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
+		GenericKeyedObjectPool<JMXConnectionProvider, JMXConnection> pool = mock(GenericKeyedObjectPool.class);
 
 		Server server = Server.builder()
 				.setHost("host.example.net")
@@ -321,7 +320,7 @@ public class ServerTests {
 
 		Query query = mock(Query.class);
 		RuntimeException e = mock(RuntimeException.class);
-		when(query.queryNames(mBeanConn)).thenThrow(e);
+		when(query.execute(mBeanConn)).thenThrow(e);
 
 		try {
 			server.execute(query);
@@ -360,7 +359,7 @@ public class ServerTests {
 				.setPool(mock(KeyedObjectPool.class))
 				.build();
 		assertThat(server.getHost()).isEqualToIgnoringCase(host);
-		try(JMXConnector serverConnection = server.getServerConnection()) {
+		try(JMXConnection serverConnection = server.getServerConnection()) {
 			assertThat(serverConnection).isNotNull();
 		}
 	}

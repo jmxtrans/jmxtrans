@@ -38,7 +38,6 @@
 	<description>This module contains most of the core logic of JmxTrans.</description>
 
 	<properties>
-		<toolsjar>${java.home}/../lib/tools.jar</toolsjar>
 		<verify.mutationThreshold>25</verify.mutationThreshold>
 		<verify.totalBranchRate>38</verify.totalBranchRate>
 		<verify.totalLineRate>45</verify.totalLineRate>
@@ -122,13 +121,6 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sun</groupId>
-			<artifactId>tools</artifactId>
-			<version>1.6.0</version>
-			<scope>system</scope>
-			<systemPath>${toolsjar}</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.awaitility</groupId>

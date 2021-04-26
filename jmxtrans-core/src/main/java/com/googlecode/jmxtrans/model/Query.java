@@ -260,6 +260,14 @@ public class Query {
 		return new Builder(query);
 	}
 
+	public Collection<Result> execute(MBeanServerConnection connection) throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+		ImmutableList.Builder<Result> results = ImmutableList.builder();
+		for (ObjectName queryName : this.queryNames(connection)) {
+			results.addAll(this.fetchResults(connection, queryName));
+		}
+		return results.build();
+	}
+
 	public void runOutputWritersForQuery(Server server, Iterable<Result> results) throws Exception {
 		for (OutputWriter writer : getOutputWriterInstances()) {
 			writer.doWrite(server, this, results);

@@ -20,41 +20,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.googlecode.jmxtrans.connections;
+package com.googlecode.jmxtrans.attach;
 
-import org.junit.Test;
+/**
+ * Util to class to attach to running JVM using PID
+ */
+public class JVMAttacher {
 
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-public class MBeanServerConnectionFactoryTest {
-
-	private MBeanServerConnectionFactory factory = new MBeanServerConnectionFactory();
-
-	@Test
-	public void connectionIsCreated() throws IOException {
-		JMXConnectionProvider server = mock(JMXConnectionProvider.class);
-		JMXConnection jmxConnection = mock(JMXConnection.class);
-		when(server.getServerConnection()).thenReturn(jmxConnection);
-
-		JMXConnection jmxConnection2 = factory.makeObject(server);
-
-		assertThat(jmxConnection2).isSameAs(jmxConnection);
-	}
-
-	@Test
-	public void connectionIsClosedOnDestroy() throws IOException {
-		JMXConnectionProvider server = mock(JMXConnectionProvider.class);
-		JMXConnection connection = mock(JMXConnection.class);
-
-		when(connection.isAlive()).thenReturn(true);
-
-		factory.destroyObject(server, connection);
-
-		verify(connection).setMarkedAsDestroyed();
-		verify(connection, timeout(2000)).close();
+	/**
+	 * Connecto to JVM
+	 *
+	 * @param pid JVM PID
+	 * @return JMX Connector address
+	 * @throws JVMAttacherException Failed to attach
+	 */
+	public static String attachToJVM(String pid) {
+		try {
+			// Check whether JVM Attach API (tools.jar) is loaded
+			Class.forName("com.sun.tools.attach.VirtualMachine");
+			return JVMAttacherImpl.attachToJVM(pid);
+		} catch (ClassNotFoundException e) {
+			throw new JVMAttacherException("JVM Attach API not available", e);
+		}
 	}
 
 }

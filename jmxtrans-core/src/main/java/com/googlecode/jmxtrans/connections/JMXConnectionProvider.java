@@ -22,39 +22,15 @@
  */
 package com.googlecode.jmxtrans.connections;
 
-import org.junit.Test;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-public class MBeanServerConnectionFactoryTest {
-
-	private MBeanServerConnectionFactory factory = new MBeanServerConnectionFactory();
-
-	@Test
-	public void connectionIsCreated() throws IOException {
-		JMXConnectionProvider server = mock(JMXConnectionProvider.class);
-		JMXConnection jmxConnection = mock(JMXConnection.class);
-		when(server.getServerConnection()).thenReturn(jmxConnection);
-
-		JMXConnection jmxConnection2 = factory.makeObject(server);
-
-		assertThat(jmxConnection2).isSameAs(jmxConnection);
-	}
-
-	@Test
-	public void connectionIsClosedOnDestroy() throws IOException {
-		JMXConnectionProvider server = mock(JMXConnectionProvider.class);
-		JMXConnection connection = mock(JMXConnection.class);
-
-		when(connection.isAlive()).thenReturn(true);
-
-		factory.destroyObject(server, connection);
-
-		verify(connection).setMarkedAsDestroyed();
-		verify(connection, timeout(2000)).close();
-	}
-
+/**
+ * Interface to break cyclic dependency between Server and MBeanServerConnectionFactory
+ * Created by gehel on 29.12.15.
+ */
+public interface JMXConnectionProvider {
+	@JsonIgnore
+	JMXConnection getServerConnection() throws IOException;
 }
