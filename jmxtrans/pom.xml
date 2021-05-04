@@ -370,6 +370,14 @@
 									</sources>
 								</mapping>
 								<mapping>
+									<directory>${package.install.dir}/tools</directory>
+									<sources>
+										<source>
+											<location>${project.basedir}/tools</location>
+										</source>
+									</sources>
+								</mapping>
+								<mapping>
 									<directory>/usr/bin</directory>
 									<directoryIncluded>false</directoryIncluded>
 									<filemode>755</filemode>
@@ -382,12 +390,13 @@
 									</sources>
 								</mapping>
 								<mapping>
-									<directory>/etc/${package.daemon.name}</directory>
+									<directory>/etc/cron.daily</directory>
 									<configuration>true</configuration>
+									<filemode>755</filemode>
 									<sources>
-										<softlinkSource>
-											<location>${package.install.dir}/etc</location>
-										</softlinkSource>
+										<source>
+											<location>${project.basedir}/cron.daily</location>
+										</source>
 									</sources>
 								</mapping>
 								<mapping>
@@ -460,6 +469,18 @@
 											<mapper>
 												<type>perm</type>
 												<prefix>/etc/init.d</prefix>
+												<filemode>755</filemode>
+												<user>root</user>
+												<group>root</group>
+											</mapper>
+										</data>
+										<data>
+											<src>${project.basedir}/cron.daily</src>
+											<type>directory</type>
+											<excludes>.DS_Store</excludes>
+											<mapper>
+												<type>perm</type>
+												<prefix>/etc/cron.daily</prefix>
 												<filemode>755</filemode>
 												<user>root</user>
 												<group>root</group>
