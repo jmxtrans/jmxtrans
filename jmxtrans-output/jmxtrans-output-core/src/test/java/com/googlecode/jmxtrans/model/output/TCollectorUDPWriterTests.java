@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
@@ -115,6 +116,30 @@ public class TCollectorUDPWriterTests {
 
 		Assert.assertThat(sentString, Matchers.startsWith("X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021"));
 		Assert.assertThat(sentString, Matchers.not(Matchers.containsString("host=")));
+	}
+
+	@Test
+	public void testMultipleResults() throws Exception {
+		// Prepare
+		ArgumentCaptor<DatagramPacket> packetCapture = ArgumentCaptor.forClass(DatagramPacket.class);
+
+		// Execute
+		this.writer.start();
+		this.writer.doWrite(ServerFixtures.dummyServer(), this.mockQuery, ImmutableList.of(this.mockResult, this.mockResult));
+		this.writer.close();
+
+		// Verifications
+		Mockito.verify(this.mockDgSocket, Mockito.atLeastOnce()).send(packetCapture.capture());
+
+		List<DatagramPacket> packets = packetCapture.getAllValues();
+
+		Assert.assertThat(packets, Matchers.<DatagramPacket>hasSize(2));
+
+		for (DatagramPacket packet : packets) {
+			String sentString = new String(packet.getData(), packet.getOffset(), packet.getLength());
+
+			Assert.assertThat(sentString, Matchers.equalTo("X-DOMAIN.PKG.CLASS-X.X-ATT-X 0 120021 type=x-att1-x\n"));
+		}
 	}
 
 	/**

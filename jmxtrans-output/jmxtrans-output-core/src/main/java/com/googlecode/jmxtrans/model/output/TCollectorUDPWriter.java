@@ -95,7 +95,7 @@ public class TCollectorUDPWriter extends OpenTSDBGenericWriter {
 		this.startOutput();
 		for (String resultString : messageFormatter.formatResults(results, server)){
 			log.debug("TCollectorUDP Message: {}", resultString);
-			this.sendOutput(resultString);
+			this.sendOutput(resultString + "\n");
 		}
 		this.finishOutput();
 	}

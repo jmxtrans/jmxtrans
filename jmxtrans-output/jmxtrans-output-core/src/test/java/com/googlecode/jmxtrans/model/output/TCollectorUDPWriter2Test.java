@@ -59,7 +59,7 @@ public class TCollectorUDPWriter2Test {
 
 		writer.write(outputWriter, ServerFixtures.dummyServer(), null, results);
 
-		Mockito.verify(outputWriter).write("Result1");
-		Mockito.verify(outputWriter).write("Result2");
+		Mockito.verify(outputWriter).write("Result1\n");
+		Mockito.verify(outputWriter).write("Result2\n");
 	}
 }
