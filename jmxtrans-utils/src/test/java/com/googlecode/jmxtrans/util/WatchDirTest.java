@@ -102,7 +102,7 @@ public class WatchDirTest {
 		try {
 			new WatchDir(watchedDir.newFile("toWatch"), callback);
 		} catch (IOException ioe) {
-			assertThat(ioe).hasMessageEndingWith("is not a directory");
+			assertThat(ioe).hasMessageEndingWith("toWatch");
 			throw ioe;
 		}
 	}
