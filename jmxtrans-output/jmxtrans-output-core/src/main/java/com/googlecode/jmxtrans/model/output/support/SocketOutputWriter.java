@@ -22,32 +22,22 @@
  */
 package com.googlecode.jmxtrans.model.output.support;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.io.Closer;
 import com.googlecode.jmxtrans.model.OutputWriterAdapter;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.URL;
 import java.nio.charset.Charset;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.io.ByteStreams.copy;
-import static com.google.common.io.ByteStreams.nullOutputStream;
 
 public class SocketOutputWriter<T extends OutputStreamBasedOutputWriter> extends OutputWriterAdapter {
 

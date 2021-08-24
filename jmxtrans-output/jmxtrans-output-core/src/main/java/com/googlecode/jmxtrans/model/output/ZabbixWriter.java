@@ -60,14 +60,14 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 
 	public ZabbixWriter(@Nonnull JsonFactory jsonFactory,
 						@Nonnull ImmutableList<String> typeNames,
-					    @Nonnull Boolean addPrefix,
-					    @Nonnull String zabbixKeyTemplate,
-					    @Nullable String zabbixDiscoveryRule,
-					    @Nullable String zabbixDiscoveryKey1,
-					    @Nullable String zabbixDiscoveryValue1,
-					    @Nullable String zabbixDiscoveryKey2,
-					    @Nullable String zabbixDiscoveryValue2
-					    ) {
+						@Nonnull Boolean addPrefix,
+						@Nonnull String zabbixKeyTemplate,
+						@Nullable String zabbixDiscoveryRule,
+						@Nullable String zabbixDiscoveryKey1,
+						@Nullable String zabbixDiscoveryValue1,
+						@Nullable String zabbixDiscoveryKey2,
+						@Nullable String zabbixDiscoveryValue2
+						) {
 		this.jsonFactory = jsonFactory;
 		this.typeNames = typeNames;
 		this.addPrefix = addPrefix;
@@ -139,7 +139,7 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 				g3.writeEndObject();
 				g3.writeEndArray();
 				g3.flush();
-				g.writeStringField("value", data3.toString());
+				g.writeStringField("value", data3.toString(charset.toString()));
 				//g.writeEndArray();
 				g.writeEndObject();
 			}
@@ -169,7 +169,7 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 			g.writeEndObject();
 			g.flush();
 
-			log.debug("Request: {}", data.toString());
+			log.debug("Request: {}", data.toString(charset.toString()));
 
 			// Calculate header
 			int dataLen = data.size();
@@ -196,29 +196,29 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 		}
 	}
 
-	 public static byte[] readAllBytes(InputStream inputStream) throws IOException {
-	     final int bufLen = 4 * 0x400; // 4KB
-	     byte[] buf = new byte[bufLen];
-	     int readLen;
-	     IOException exception = null;
+	public static byte[] readAllBytes(InputStream inputStream) throws IOException {
+			final int bufLen = 4 * 0x400; // 4KB
+			byte[] buf = new byte[bufLen];
+			int readLen;
+			IOException exception = null;
 
-	     try {
-	         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-	             while ((readLen = inputStream.read(buf, 0, bufLen)) != -1)
-	                 outputStream.write(buf, 0, readLen);
+			try {
+					try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+							while ((readLen = inputStream.read(buf, 0, bufLen)) != -1)
+									outputStream.write(buf, 0, readLen);
 
-	             return outputStream.toByteArray();
-	         }
-	     } catch (IOException e) {
-	         exception = e;
-	         throw e;
-	     } finally {
-	         if (exception == null) inputStream.close();
-	         else try {
-	             inputStream.close();
-	         } catch (IOException e) {
-	             exception.addSuppressed(e);
-	         }
-	     }
-	 }
+							return outputStream.toByteArray();
+					}
+			} catch (IOException e) {
+					exception = e;
+					throw e;
+			} finally {
+					if (exception == null) inputStream.close();
+					else try {
+							inputStream.close();
+					} catch (IOException e) {
+							exception.addSuppressed(e);
+					}
+			}
+	}
 }
