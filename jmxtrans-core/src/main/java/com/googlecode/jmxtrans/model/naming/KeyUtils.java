@@ -72,6 +72,30 @@ public final class KeyUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Gets the key string for zabbix, without rootPrefix nor Alias
+	 *
+	 * @param template  the template for value
+	 *                  ${MBEAN}, ${TYPENAME} and ${KEY} are replaced in the template
+	 * @param query     the query
+	 * @param result    the result
+	 * @param typeNames the type names
+	 * @return the key string
+	 */
+	public static String getKeyStringZabbix(String template, Query query, Result result, List<String> typeNames) {
+		StringBuilder sbMBean = new StringBuilder();
+		StringBuilder sbTypeName = new StringBuilder();
+		StringBuilder sbKey = new StringBuilder();
+		addMBeanIdentifier(query, result, sbMBean);
+		addTypeName(query, result, typeNames, sbTypeName);
+		addKeyString(query, result, sbKey);
+		
+		template = template.replaceAll("\\$\\{MBEAN\\}", sbMBean.toString());
+		template = template.replaceAll("\\$\\{TYPENAME\\}", sbTypeName.toString());
+		template = template.replaceAll("\\$\\{KEY\\}", sbKey.toString());
+		return template;
+	}
+
 	private static void addSeparator(StringBuilder sb) {
 		if (sb.length() > 0 && !sb.substring(sb.length() - 1).equals(".")) {
 			sb.append(".");

@@ -47,9 +47,12 @@ public class ZabbixWriterFactory implements OutputWriterFactory {
 	@Nonnull private final Integer port;
 	private final int socketTimeoutMs;
 	@Nonnull private final Boolean addPrefix;
+	@Nonnull private final String zabbixKeyTemplate;
 	@Nullable private final String zabbixDiscoveryRule;
-	@Nullable private final String zabbixDiscoveryKey;
-	@Nullable private final String zabbixDiscoveryValue;
+	@Nullable private final String zabbixDiscoveryKey1;
+	@Nullable private final String zabbixDiscoveryValue1;
+	@Nullable private final String zabbixDiscoveryKey2;
+	@Nullable private final String zabbixDiscoveryValue2;
 
 	public ZabbixWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
@@ -58,9 +61,12 @@ public class ZabbixWriterFactory implements OutputWriterFactory {
 			@JsonProperty("port") Integer port,
 			@JsonProperty("socketTimeoutMs") Integer socketTimeoutMs,
 			@JsonProperty("addPrefix") Boolean addPrefix,
+			@JsonProperty("zabbixKeyTemplate") String zabbixKeyTemplate,
 			@JsonProperty("zabbixDiscoveryRule") String zabbixDiscoveryRule,
-			@JsonProperty("zabbixDiscoveryKey") String zabbixDiscoveryKey,
-			@JsonProperty("zabbixDiscoveryValue") String zabbixDiscoveryValue
+			@JsonProperty("zabbixDiscoveryKey1") String zabbixDiscoveryKey1,
+			@JsonProperty("zabbixDiscoveryValue1") String zabbixDiscoveryValue1,
+			@JsonProperty("zabbixDiscoveryKey2") String zabbixDiscoveryKey2,
+			@JsonProperty("zabbixDiscoveryValue2") String zabbixDiscoveryValue2
 			) {
 		this.booleanAsNumber = booleanAsNumber;
 		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
@@ -68,12 +74,18 @@ public class ZabbixWriterFactory implements OutputWriterFactory {
 		this.port = checkNotNull(port, "Port cannot be null.");
 		this.socketTimeoutMs = firstNonNull(socketTimeoutMs, 200);
 		this.addPrefix = firstNonNull(addPrefix, Boolean.TRUE);
+		this.zabbixKeyTemplate = firstNonNull(zabbixKeyTemplate, "${MBEAN}.${TYPENAME}.${KEY}");
 		this.zabbixDiscoveryRule = zabbixDiscoveryRule;
-		this.zabbixDiscoveryKey = zabbixDiscoveryKey;
-		this.zabbixDiscoveryValue = zabbixDiscoveryValue;
+		this.zabbixDiscoveryKey1 = zabbixDiscoveryKey1;
+		this.zabbixDiscoveryValue1 = zabbixDiscoveryValue1;
+		this.zabbixDiscoveryKey2 = zabbixDiscoveryKey2;
+		this.zabbixDiscoveryValue2 = zabbixDiscoveryValue2;
 		if (zabbixDiscoveryRule != null) {
-			if (zabbixDiscoveryKey == null || zabbixDiscoveryValue == null) {
-				throw new NullPointerException("When zabbixDiscoveryRule is used, zabbixDiscoveryKey and zabbixDiscoveryValue must be not null");
+			if (zabbixDiscoveryKey1 == null || zabbixDiscoveryValue1 == null) {
+				throw new NullPointerException("When zabbixDiscoveryRule is used, zabbixDiscoveryKey1 and zabbixDiscoveryValue1 must be not null");
+			}
+			if (zabbixDiscoveryKey2 != null && zabbixDiscoveryValue2 == null) {
+				throw new NullPointerException("When zabbixDiscoveryRule and zabbixDiscoveryKey2 is used, zabbixDiscoveryValue2 must be not null");
 			}
 		}
 	}
@@ -87,9 +99,12 @@ public class ZabbixWriterFactory implements OutputWriterFactory {
 								new JsonFactory(),
 								typeNames,
 								addPrefix,
+								zabbixKeyTemplate,
 								zabbixDiscoveryRule,
-								zabbixDiscoveryKey,
-								zabbixDiscoveryValue
+								zabbixDiscoveryKey1,
+								zabbixDiscoveryValue1,
+								zabbixDiscoveryKey2,
+								zabbixDiscoveryValue2
 								),
 						host,
 						port,

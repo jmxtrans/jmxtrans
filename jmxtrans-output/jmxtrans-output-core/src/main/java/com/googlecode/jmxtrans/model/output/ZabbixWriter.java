@@ -51,22 +51,32 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 	@Nonnull private final JsonFactory jsonFactory;
 	@Nonnull private final ImmutableList<String> typeNames;
 	@Nonnull private final Boolean addPrefix;
+	@Nonnull private final String zabbixKeyTemplate;
 	@Nullable private final String zabbixDiscoveryRule;
-	@Nullable private final String zabbixDiscoveryKey;
-	@Nullable private final String zabbixDiscoveryValue;
+	@Nullable private final String zabbixDiscoveryKey1;
+	@Nullable private final String zabbixDiscoveryValue1;
+	@Nullable private final String zabbixDiscoveryKey2;
+	@Nullable private final String zabbixDiscoveryValue2;
 
-	public ZabbixWriter(@Nonnull JsonFactory jsonFactory, @Nonnull ImmutableList<String> typeNames,
+	public ZabbixWriter(@Nonnull JsonFactory jsonFactory,
+						@Nonnull ImmutableList<String> typeNames,
 					    @Nonnull Boolean addPrefix,
+					    @Nonnull String zabbixKeyTemplate,
 					    @Nullable String zabbixDiscoveryRule,
-					    @Nullable String zabbixDiscoveryKey,
-					    @Nullable String zabbixDiscoveryValue
+					    @Nullable String zabbixDiscoveryKey1,
+					    @Nullable String zabbixDiscoveryValue1,
+					    @Nullable String zabbixDiscoveryKey2,
+					    @Nullable String zabbixDiscoveryValue2
 					    ) {
 		this.jsonFactory = jsonFactory;
 		this.typeNames = typeNames;
 		this.addPrefix = addPrefix;
+		this.zabbixKeyTemplate = zabbixKeyTemplate;
 		this.zabbixDiscoveryRule = zabbixDiscoveryRule;
-		this.zabbixDiscoveryKey = zabbixDiscoveryKey;
-		this.zabbixDiscoveryValue = zabbixDiscoveryValue;
+		this.zabbixDiscoveryKey1 = zabbixDiscoveryKey1;
+		this.zabbixDiscoveryValue1 = zabbixDiscoveryValue1;
+		this.zabbixDiscoveryKey2 = zabbixDiscoveryKey2;
+		this.zabbixDiscoveryValue2 = zabbixDiscoveryValue2;
 	}
 
 	@Override
@@ -95,6 +105,10 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 			OutputStreamWriter w = new OutputStreamWriter(data, charset);
 			JsonGenerator g = jsonFactory.createGenerator(w);
 			ByteArrayOutputStream data2 = new ByteArrayOutputStream();
+				
+			ByteArrayOutputStream data3 = new ByteArrayOutputStream();
+			OutputStreamWriter w3 = new OutputStreamWriter(data3, charset);
+			JsonGenerator g3 = jsonFactory.createGenerator(w3);
 		) {
 			// Make output to JSON
 			//g.useDefaultPrettyPrinter();
@@ -115,11 +129,18 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 				g.writeStartObject();
 				g.writeStringField("host", server.getLabel());
 				g.writeStringField("key", key);
-				g.writeArrayFieldStart("value");
-				g.writeStartObject();
-				g.writeStringField("{#"+zabbixDiscoveryKey+"}", zabbixDiscoveryValue);				
-				g.writeEndObject();
-				g.writeEndArray();
+				//g.writeArrayFieldStart("value");
+				g3.writeStartArray();
+				g3.writeStartObject();
+				g3.writeStringField("{#"+zabbixDiscoveryKey1+"}", zabbixDiscoveryValue1);
+				if (zabbixDiscoveryKey2 != null ) {
+					g3.writeStringField("{#"+zabbixDiscoveryKey2+"}", zabbixDiscoveryValue2);
+				}
+				g3.writeEndObject();
+				g3.writeEndArray();
+				g3.flush();
+				g.writeStringField("value", data3.toString());
+				//g.writeEndArray();
 				g.writeEndObject();
 			}
 
@@ -132,7 +153,7 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 					// Add prefix if requested
 					key = "jmxtrans.";
 				}
-				key += KeyUtils.getKeyString(query, result, typeNames);
+				key += KeyUtils.getKeyStringZabbix(zabbixKeyTemplate, query, result, typeNames);
 				Object value = result.getValue();
 
 				g.writeStartObject();
@@ -144,7 +165,7 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 			}
 
 			g.writeEndArray();
-			g.writeNumberField("clock", System.currentTimeMillis() / 1000);
+			//g.writeNumberField("clock", System.currentTimeMillis() / 1000);
 			g.writeEndObject();
 			g.flush();
 
