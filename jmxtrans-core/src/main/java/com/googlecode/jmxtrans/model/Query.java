@@ -60,6 +60,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.googlecode.jmxtrans.model.JmxErrorHandlingEnum;
+
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
@@ -72,7 +74,7 @@ import static java.util.Arrays.asList;
  * @author jon
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
+@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters", "jmxErrorHandling"})
 @ThreadSafe
 @EqualsAndHashCode(exclude = {"outputWriters", "outputWriterInstances"})
 @ToString(exclude = {"outputWriters", "typeNameValuesStringBuilder"})
@@ -117,6 +119,7 @@ public class Query {
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriters;
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriterInstances;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
+	@Nonnull @Getter private final JmxErrorHandlingEnum jmxErrorHandling;
 
 	@JsonCreator
 	public Query(
@@ -128,12 +131,13 @@ public class Query {
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
-			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
+			@JsonProperty("jmxErrorHandling") String jmxErrorHandlingString
 	) {
 		// For typeName, note the using copyOf does not change the order of
 		// the elements.
 		this(obj, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+				outputWriters, ImmutableList.<OutputWriter>of(), jmxErrorHandlingString);
 	}
 
 	public Query(
@@ -145,10 +149,11 @@ public class Query {
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			List<OutputWriterFactory> outputWriters
+			List<OutputWriterFactory> outputWriters,
+			String jmxErrorHandlingString
 	) {
 		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+				outputWriters, ImmutableList.<OutputWriter>of(), jmxErrorHandlingString);
 	}
 
 	public Query(
@@ -160,10 +165,11 @@ public class Query {
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			ImmutableList<OutputWriter> outputWriters
+			ImmutableList<OutputWriter> outputWriters,
+			String jmxErrorHandlingString
 	) {
 		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				ImmutableList.<OutputWriterFactory>of(), outputWriters);
+				ImmutableList.<OutputWriterFactory>of(), outputWriters, jmxErrorHandlingString);
 	}
 
 	private Query(
@@ -176,13 +182,10 @@ public class Query {
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
 			List<OutputWriterFactory> outputWriterFactories,
-			List<OutputWriter> outputWriters
+			List<OutputWriter> outputWriters,
+			String jmxErrorHandlingString
 	) {
-		try {
-			this.objectName = new ObjectName(obj);
-		} catch (MalformedObjectNameException e) {
-			throw new IllegalArgumentException("Invalid object name: " + obj, e);
-		}
+		this.jmxErrorHandling = JmxErrorHandlingEnum.valueOf(firstNonNull(jmxErrorHandlingString, "dump").toUpperCase());
 		this.attr = copyOf(firstNonNull(attr, Collections.<String>emptyList()));
 		this.resultAlias = resultAlias;
 		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
@@ -197,6 +200,12 @@ public class Query {
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 
 		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
+
+		try {
+			this.objectName = new ObjectName(obj);
+		} catch (MalformedObjectNameException e) {
+			throw new IllegalArgumentException("Invalid object name: " + obj, e);
+		}
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -282,6 +291,7 @@ public class Query {
 		// We need to pick an order preserving Set implementation here to
 		// avoid unpredictable ordering of typeNames.
 		private final Set<String> typeNames = newLinkedHashSet();
+		@Setter private String jmxErrorHandling;
 
 		private Builder() {}
 
@@ -295,6 +305,7 @@ public class Query {
 			this.allowDottedKeys = query.allowDottedKeys;
 			this.useAllTypeNames = query.useAllTypeNames;
 			this.typeNames.addAll(query.typeNames);
+			this.jmxErrorHandling = query.jmxErrorHandling.toString();
 		}
 
 		public Builder addAttr(String... attr) {
@@ -341,7 +352,8 @@ public class Query {
 						this.useObjDomainAsKey,
 						this.allowDottedKeys,
 						this.useAllTypeNames,
-						this.outputWriterFactories
+						this.outputWriterFactories,
+						this.jmxErrorHandling
 				);
 			}
 			return new Query(
@@ -353,7 +365,8 @@ public class Query {
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
 					this.useAllTypeNames,
-					copyOf(this.outputWriters)
+					copyOf(this.outputWriters),
+					this.jmxErrorHandling
 			);
 		}
 
