@@ -89,7 +89,12 @@ public final class KeyUtils {
 		addMBeanIdentifier(query, result, sbMBean);
 		addTypeName(query, result, typeNames, sbTypeName);
 		addKeyString(query, result, sbKey);
-		
+
+		if (sbTypeName.length() > 0) {
+			// Remove last dot
+			sbTypeName.setLength(sbTypeName.length() - 1);
+		}
+
 		template = template.replaceAll("\\$\\{MBEAN\\}", sbMBean.toString());
 		template = template.replaceAll("\\$\\{TYPENAME\\}", sbTypeName.toString());
 		template = template.replaceAll("\\$\\{KEY\\}", sbKey.toString());

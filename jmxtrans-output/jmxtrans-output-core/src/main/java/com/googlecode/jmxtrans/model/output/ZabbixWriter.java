@@ -43,6 +43,8 @@ import java.nio.charset.Charset;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @ThreadSafe
 public class ZabbixWriter implements OutputStreamBasedOutputWriter {
@@ -105,7 +107,7 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 			OutputStreamWriter w = new OutputStreamWriter(data, charset);
 			JsonGenerator g = jsonFactory.createGenerator(w);
 			ByteArrayOutputStream data2 = new ByteArrayOutputStream();
-				
+
 			ByteArrayOutputStream data3 = new ByteArrayOutputStream();
 			OutputStreamWriter w3 = new OutputStreamWriter(data3, charset);
 			JsonGenerator g3 = jsonFactory.createGenerator(w3);
@@ -115,9 +117,10 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 			g.writeStartObject();
 			g.writeStringField("request", "sender data");
 			g.writeArrayFieldStart("data");
-			
+
 			// Add JMX discovery string to request
 			if (zabbixDiscoveryRule != null) {
+				Set<String> unique = new HashSet<String>();
 				String key = "";
 
 				if (addPrefix) {
@@ -129,18 +132,38 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 				g.writeStartObject();
 				g.writeStringField("host", server.getLabel());
 				g.writeStringField("key", key);
-				//g.writeArrayFieldStart("value");
 				g3.writeStartArray();
-				g3.writeStartObject();
-				g3.writeStringField("{#"+zabbixDiscoveryKey1+"}", zabbixDiscoveryValue1);
+
+				// Enumerate all results and create uniq list of zabbixDiscoveryValues
 				if (zabbixDiscoveryKey2 != null ) {
-					g3.writeStringField("{#"+zabbixDiscoveryKey2+"}", zabbixDiscoveryValue2);
+					// Two keys/values
+					for (Result result : results) {
+						String value1 = KeyUtils.getKeyStringZabbix(zabbixDiscoveryValue1, query, result, typeNames);
+						String value2 = KeyUtils.getKeyStringZabbix(zabbixDiscoveryValue2, query, result, typeNames);
+						unique.add(value1+"\0"+value2);
+					}
+					for (String v: unique) {
+						String[] vs = v.split("\0");
+						g3.writeStartObject();
+						g3.writeStringField("{#"+zabbixDiscoveryKey1+"}", vs[0]);
+						g3.writeStringField("{#"+zabbixDiscoveryKey2+"}", vs[1]);
+						g3.writeEndObject();
+					}
+				} else {
+					// One key/value
+					for (Result result : results) {
+						String value1 = KeyUtils.getKeyStringZabbix(zabbixDiscoveryValue1, query, result, typeNames);
+						unique.add(value1);
+					}
+					for (String v: unique) {
+						g3.writeStartObject();
+						g3.writeStringField("{#"+zabbixDiscoveryKey1+"}", v);
+						g3.writeEndObject();
+					}
 				}
-				g3.writeEndObject();
 				g3.writeEndArray();
 				g3.flush();
 				g.writeStringField("value", data3.toString(charset.toString()));
-				//g.writeEndArray();
 				g.writeEndObject();
 			}
 
@@ -185,11 +208,11 @@ public class ZabbixWriter implements OutputStreamBasedOutputWriter {
 			data2.write(header);
 			data2.write(data.toByteArray());
 			data2.flush();
-			
+
 			// Write response to the server
 			outputStream.write(data2.toByteArray());
 			outputStream.flush();
-			
+
 			// Read answer, cut header and write to debug log
 			byte[] response = readAllBytes(inputStream);
 			log.debug("Response: {}", new String(Arrays.copyOfRange(response, 5+4+4, response.length), charset));

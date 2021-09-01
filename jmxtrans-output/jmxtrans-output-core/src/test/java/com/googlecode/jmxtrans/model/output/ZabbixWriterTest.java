@@ -24,6 +24,9 @@ package com.googlecode.jmxtrans.model.output;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.google.common.collect.ImmutableList;
+import com.googlecode.jmxtrans.model.Query;
+import com.googlecode.jmxtrans.model.Result;
+
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -31,11 +34,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import javax.annotation.Nonnull;
+
 import static com.googlecode.jmxtrans.model.QueryFixtures.dummyQuery;
 import static com.googlecode.jmxtrans.model.ResultFixtures.dummyResults;
 import static com.googlecode.jmxtrans.model.ServerFixtures.dummyServer;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.collect.Lists.newArrayList;
 
 public class ZabbixWriterTest {
 
@@ -61,12 +67,12 @@ public class ZabbixWriterTest {
 			"clock": 1381482905
 		}
 		*/
-		
+
 		assertThat(json).startsWith("ZBXD");
 		// Skip header
 		json = json.substring(5+4+4);
 		//System.out.println(json);
-		
+
 		assertThatJson(json)
 			.node("request").isEqualTo("sender data");
 		assertThatJson(json)
@@ -102,12 +108,12 @@ public class ZabbixWriterTest {
 			"clock": 1381482905
 		}
 		*/
-		
+
 		assertThat(json).startsWith("ZBXD");
 		// Skip header
 		json = json.substring(5+4+4);
 		//System.out.println(json);
-		
+
 		assertThatJson(json)
 			.node("request").isEqualTo("sender data");
 		assertThatJson(json)
@@ -149,12 +155,12 @@ public class ZabbixWriterTest {
 			"clock": 1381482905
 		}
 		*/
-		
+
 		assertThat(json).startsWith("ZBXD");
 		// Skip header
 		json = json.substring(5+4+4);
 		//System.out.println(json);
-		
+
 		assertThatJson(json)
 			.node("request").isEqualTo("sender data");
 		assertThatJson(json)
@@ -196,12 +202,12 @@ public class ZabbixWriterTest {
 			"clock": 1381482905
 		}
 		*/
-		
+
 		assertThat(json).startsWith("ZBXD");
 		// Skip header
 		json = json.substring(5+4+4);
 		//System.out.println(json);
-		
+
 		assertThatJson(json)
 			.node("request").isEqualTo("sender data");
 		assertThatJson(json)
@@ -215,6 +221,130 @@ public class ZabbixWriterTest {
 		assertThatJson(json)
 			.node("data[1].host").isEqualTo("host.example.net")
 			.node("data[1].key").isEqualTo("MemoryAlias..ObjectPendingFinalizationCount")
+			.node("data[1].value").isEqualTo("\"10\"")
+			.node("data[1].clock").isEqualTo(0)
+			;
+	}
+
+	@Test
+	public void metricsAreFormattedCorrectlyDiscovery3() throws IOException {
+		Query query = Query.builder()
+			.setObj("java.lang:type=GarbageCollector,name=*")
+			.addAttr("CollectionCount")
+			.addAttr("CollectionTime")
+			.setTypeNames(newArrayList("name"))
+			.setResultAlias("test.18901.gc")
+			.build();
+		Result result = new Result(
+			0,
+			"CollectionCount",
+			"com.ibm.lang.management.internal.ExtendedGarbageCollectorMXBeanImpl",
+			"java.lang",
+			"test.18901.gc",
+//			null,
+			"type=GarbageCollector,name=global",
+			ImmutableList.<String>of(),
+			10
+		);
+
+		//System.out.println(query);
+		//System.out.println(result);
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of("name"), Boolean.FALSE, "${MBEAN} x ${TYPENAME} x ${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1 ${MBEAN} x ${TYPENAME} x ${KEY}", null, null);
+
+		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
+
+		zabbixWriter.write(
+			dataOut,
+			dataIn,
+			Charset.forName("UTF-8"),
+			dummyServer(),
+			query,
+			ImmutableList.of(result)
+		);
+
+		String json = new String(dataOut.toByteArray());
+
+		assertThat(json).startsWith("ZBXD");
+		// Skip header
+		json = json.substring(5+4+4);
+		//System.out.println(json);
+
+		assertThatJson(json)
+			.node("request").isEqualTo("sender data");
+		assertThatJson(json)
+			.node("data").isArray().ofLength(2);
+		assertThatJson(json)
+			.node("data[0].host").isEqualTo("host.example.net")
+			.node("data[0].key").isEqualTo("discoveryRule")
+			;
+		assertThatJson(json)
+			.node("data[0].value").isStringEqualTo("[{\"{#discoveryKey1}\":\"discoveryValue1 test.18901.gc x global x CollectionCount\"}]");
+		assertThatJson(json)
+			.node("data[1].host").isEqualTo("host.example.net")
+			.node("data[1].key").isEqualTo("test.18901.gc x global x CollectionCount")
+			.node("data[1].value").isEqualTo("\"10\"")
+			.node("data[1].clock").isEqualTo(0)
+			;
+	}
+
+	@Test
+	public void metricsAreFormattedCorrectlyDiscovery4() throws IOException {
+		Query query = Query.builder()
+			.setObj("java.lang:type=GarbageCollector,name=*")
+			.addAttr("CollectionCount")
+			.addAttr("CollectionTime")
+			.setTypeNames(newArrayList("name"))
+			.setResultAlias("test.18901.gc")
+			.build();
+		Result result = new Result(
+			0,
+			"CollectionCount",
+			"com.ibm.lang.management.internal.ExtendedGarbageCollectorMXBeanImpl",
+			"java.lang",
+			"test.18901.gc",
+//			null,
+			"type=GarbageCollector,name=global",
+			ImmutableList.<String>of(),
+			10
+		);
+
+		//System.out.println(query);
+		//System.out.println(result);
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of("name"), Boolean.FALSE, "${MBEAN} x ${TYPENAME} x ${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1 ${MBEAN} x ${TYPENAME} x ${KEY}", "discoveryKey2", "discoveryValue2 ${MBEAN} x ${TYPENAME} x ${KEY}");
+
+		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
+
+		zabbixWriter.write(
+			dataOut,
+			dataIn,
+			Charset.forName("UTF-8"),
+			dummyServer(),
+			query,
+			ImmutableList.of(result)
+		);
+
+		String json = new String(dataOut.toByteArray());
+
+		assertThat(json).startsWith("ZBXD");
+		// Skip header
+		json = json.substring(5+4+4);
+		//System.out.println(json);
+
+		assertThatJson(json)
+			.node("request").isEqualTo("sender data");
+		assertThatJson(json)
+			.node("data").isArray().ofLength(2);
+		assertThatJson(json)
+			.node("data[0].host").isEqualTo("host.example.net")
+			.node("data[0].key").isEqualTo("discoveryRule")
+			;
+		assertThatJson(json)
+			.node("data[0].value").isStringEqualTo("[{\"{#discoveryKey1}\":\"discoveryValue1 test.18901.gc x global x CollectionCount\",\"{#discoveryKey2}\":\"discoveryValue2 test.18901.gc x global x CollectionCount\"}]");
+		assertThatJson(json)
+			.node("data[1].host").isEqualTo("host.example.net")
+			.node("data[1].key").isEqualTo("test.18901.gc x global x CollectionCount")
 			.node("data[1].value").isEqualTo("\"10\"")
 			.node("data[1].clock").isEqualTo(0)
 			;
