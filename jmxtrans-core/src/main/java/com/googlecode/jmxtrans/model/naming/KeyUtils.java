@@ -76,7 +76,7 @@ public final class KeyUtils {
 	 * Gets the key string for zabbix, without rootPrefix nor Alias
 	 *
 	 * @param template  the template for value
-	 *                  ${MBEAN}, ${TYPENAME} and ${KEY} are replaced in the template
+	 *                  ${MBEAN}, ${TYPENAMES} and ${KEY} are replaced in the template
 	 * @param query     the query
 	 * @param result    the result
 	 * @param typeNames the type names
@@ -96,7 +96,7 @@ public final class KeyUtils {
 		}
 
 		template = template.replaceAll("\\$\\{MBEAN\\}", sbMBean.toString());
-		template = template.replaceAll("\\$\\{TYPENAME\\}", sbTypeName.toString());
+		template = template.replaceAll("\\$\\{TYPENAMES\\}", sbTypeName.toString());
 		template = template.replaceAll("\\$\\{KEY\\}", sbKey.toString());
 		return template;
 	}

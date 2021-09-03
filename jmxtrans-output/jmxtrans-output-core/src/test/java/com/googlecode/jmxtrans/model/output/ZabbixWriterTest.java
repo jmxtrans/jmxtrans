@@ -47,7 +47,7 @@ public class ZabbixWriterTest {
 
 	@Test
 	public void metricsAreFormattedCorrectly() throws IOException {
-		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.TRUE, "${MBEAN}.${TYPENAME}.${KEY}", null, null, null, null, null);
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.TRUE, "${MBEAN}.${TYPENAMES}.${KEY}", null, null, null, null, null);
 
 		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
 		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
@@ -87,7 +87,7 @@ public class ZabbixWriterTest {
 
 	@Test
 	public void metricsAreFormattedCorrectlyDiscovery1() throws IOException {
-		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.TRUE, "${MBEAN}.${TYPENAME}.${KEY}", "discoveryRule", "discoveryKey", "discoveryValue", null, null);
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.TRUE, "${MBEAN}.${TYPENAMES}.${KEY}", "discoveryRule", "discoveryKey", "discoveryValue", null, null);
 
 		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
 		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
@@ -134,7 +134,7 @@ public class ZabbixWriterTest {
 
 	@Test
 	public void metricsAreFormattedCorrectlyDiscovery2() throws IOException {
-		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.TRUE, "${MBEAN}.${TYPENAME}.${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1", "discoveryKey2", "discoveryValue2");
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.TRUE, "${MBEAN}.${TYPENAMES}.${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1", "discoveryKey2", "discoveryValue2");
 
 		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
 		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
@@ -181,7 +181,7 @@ public class ZabbixWriterTest {
 
 	@Test
 	public void metricsAreFormattedCorrectlyDiscoveryNoPrefix() throws IOException {
-		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.FALSE, "${MBEAN}.${TYPENAME}.${KEY}", "discoveryRule", "discoveryKey", "discoveryValue", null, null);
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of(), Boolean.FALSE, "${MBEAN}.${TYPENAMES}.${KEY}", "discoveryRule", "discoveryKey", "discoveryValue", null, null);
 
 		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
 		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
@@ -249,7 +249,7 @@ public class ZabbixWriterTest {
 
 		//System.out.println(query);
 		//System.out.println(result);
-		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of("name"), Boolean.FALSE, "${MBEAN} x ${TYPENAME} x ${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1 ${MBEAN} x ${TYPENAME} x ${KEY}", null, null);
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of("name"), Boolean.FALSE, "${MBEAN} x ${TYPENAMES} x ${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1 ${MBEAN} x ${TYPENAMES} x ${KEY}", null, null);
 
 		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
 		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
@@ -311,7 +311,7 @@ public class ZabbixWriterTest {
 
 		//System.out.println(query);
 		//System.out.println(result);
-		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of("name"), Boolean.FALSE, "${MBEAN} x ${TYPENAME} x ${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1 ${MBEAN} x ${TYPENAME} x ${KEY}", "discoveryKey2", "discoveryValue2 ${MBEAN} x ${TYPENAME} x ${KEY}");
+		ZabbixWriter zabbixWriter = new ZabbixWriter(new JsonFactory(), ImmutableList.<String>of("name"), Boolean.FALSE, "${MBEAN} x ${TYPENAMES} x ${KEY}", "discoveryRule", "discoveryKey1", "discoveryValue1 ${MBEAN} x ${TYPENAMES} x ${KEY}", "discoveryKey2", "discoveryValue2 ${MBEAN} x ${TYPENAMES} x ${KEY}");
 
 		ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
 		ByteArrayInputStream dataIn = new ByteArrayInputStream(new String("1234567890ABC{\"response\":\"success\",\"info\":\"processed: 2; failed: 0; total: 2; seconds spent: 0.000056\"}").getBytes());
