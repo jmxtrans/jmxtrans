@@ -1,0 +1,17 @@
+{
+  "servers" : [ {
+    "port" : "${filename2}",
+    "host" : "${filename3}",
+    "alias" : "${hostname}",
+    "queries" : [ {
+      "obj" : "java.lang:type=Memory",
+      "resultAlias": "${filenam1}.${filename2}.heap",
+      "attr" : [ "HeapMemoryUsage" ],
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.StdOutWriter",
+        "settings" : {
+        }
+      } ]
+    } ]
+  } ]
+}

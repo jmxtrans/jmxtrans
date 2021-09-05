@@ -273,7 +273,8 @@ public class Server implements JmxConnectionProvider {
 			MBeanServerConnection connection = jmxConnection.getMBeanServerConnection();
 
 			for (ObjectName queryName : query.queryNames(connection)) {
-				results.addAll(query.fetchResults(connection, queryName));
+				results.addAll(query.fetchAttrResults(connection, queryName));
+				results.addAll(query.fetchOperationResults(connection, queryName));
 			}
 
 			return results.build();
