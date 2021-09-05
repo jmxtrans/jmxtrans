@@ -26,68 +26,90 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jmxtrans.model.OutputWriterFactory;
+import com.googlecode.jmxtrans.model.output.support.SocketOutputWriter;
 import com.googlecode.jmxtrans.model.output.support.ResultTransformerOutputWriter;
-import com.googlecode.jmxtrans.model.output.support.TcpOutputWriterBuilder;
-import com.googlecode.jmxtrans.model.output.support.WriterPoolOutputWriter;
-import com.googlecode.jmxtrans.model.output.support.pool.FlushStrategy;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.ThreadSafe;
-import java.net.InetSocketAddress;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.googlecode.jmxtrans.model.output.support.pool.FlushStrategyUtils.createFlushStrategy;
 
-/**
- * This low latency and thread safe output writer sends data to a host/port combination
- * in the Zabbix Sender format.
- *
- * @see <a href="https://www.zabbix.org/wiki/Docs/protocols#Zabbix_protocols">Zabbix sender 2.0 protocol</a>
- */
-@ThreadSafe
 @EqualsAndHashCode
 @ToString
 public class ZabbixWriterFactory implements OutputWriterFactory {
-	@Nonnull private final InetSocketAddress zabbixServer;
-	@Nonnull private final ImmutableList<String> typeNames;
 	private final boolean booleanAsNumber;
-	@Nonnull private final FlushStrategy flushStrategy;
-	private final int poolSize;
+	@Nonnull private final ImmutableList<String> typeNames;
+	@Nonnull private final String host;
+	@Nonnull private final Integer port;
+	private final int socketTimeoutMs;
+	@Nonnull private final Boolean addPrefix;
+	@Nonnull private final String zabbixKeyTemplate;
+	@Nullable private final String zabbixDiscoveryRule;
+	@Nullable private final String zabbixDiscoveryKey1;
+	@Nullable private final String zabbixDiscoveryValue1;
+	@Nullable private final String zabbixDiscoveryKey2;
+	@Nullable private final String zabbixDiscoveryValue2;
 
 	public ZabbixWriterFactory(
 			@JsonProperty("typeNames") ImmutableList<String> typeNames,
 			@JsonProperty("booleanAsNumber") boolean booleanAsNumber,
 			@JsonProperty("host") String host,
 			@JsonProperty("port") Integer port,
-			@JsonProperty("flushStrategy") String flushStrategy,
-			@JsonProperty("flushDelayInSeconds") Integer flushDelayInSeconds,
-			@JsonProperty("poolSize") Integer poolSize) {
-		this.typeNames = typeNames;
+			@JsonProperty("socketTimeoutMs") Integer socketTimeoutMs,
+			@JsonProperty("addPrefix") Boolean addPrefix,
+			@JsonProperty("zabbixKeyTemplate") String zabbixKeyTemplate,
+			@JsonProperty("zabbixDiscoveryRule") String zabbixDiscoveryRule,
+			@JsonProperty("zabbixDiscoveryKey1") String zabbixDiscoveryKey1,
+			@JsonProperty("zabbixDiscoveryValue1") String zabbixDiscoveryValue1,
+			@JsonProperty("zabbixDiscoveryKey2") String zabbixDiscoveryKey2,
+			@JsonProperty("zabbixDiscoveryValue2") String zabbixDiscoveryValue2
+			) {
 		this.booleanAsNumber = booleanAsNumber;
-		this.zabbixServer = new InetSocketAddress(
-				checkNotNull(host, "Host cannot be null."),
-				checkNotNull(port, "Port cannot be null."));
-		this.flushStrategy = createFlushStrategy(flushStrategy, flushDelayInSeconds);
-		this.poolSize = firstNonNull(poolSize, 1);
+		this.typeNames = firstNonNull(typeNames, ImmutableList.<String>of());
+		this.host = checkNotNull(host, "Host cannot be null.");
+		this.port = checkNotNull(port, "Port cannot be null.");
+		this.socketTimeoutMs = firstNonNull(socketTimeoutMs, 200);
+		this.addPrefix = firstNonNull(addPrefix, Boolean.TRUE);
+		this.zabbixKeyTemplate = firstNonNull(zabbixKeyTemplate, "${MBEAN}.${TYPENAME}.${KEY}");
+		this.zabbixDiscoveryRule = zabbixDiscoveryRule;
+		this.zabbixDiscoveryKey1 = zabbixDiscoveryKey1;
+		this.zabbixDiscoveryValue1 = zabbixDiscoveryValue1;
+		this.zabbixDiscoveryKey2 = zabbixDiscoveryKey2;
+		this.zabbixDiscoveryValue2 = zabbixDiscoveryValue2;
+		if (zabbixDiscoveryRule != null) {
+			if (zabbixDiscoveryKey1 == null || zabbixDiscoveryValue1 == null) {
+				throw new NullPointerException("When zabbixDiscoveryRule is used, zabbixDiscoveryKey1 and zabbixDiscoveryValue1 must be not null");
+			}
+			if (zabbixDiscoveryKey2 != null && zabbixDiscoveryValue2 == null) {
+				throw new NullPointerException("When zabbixDiscoveryRule and zabbixDiscoveryKey2 is used, zabbixDiscoveryValue2 must be not null");
+			}
+		}
 	}
 
 	@Override
-	public ResultTransformerOutputWriter<WriterPoolOutputWriter<ZabbixWriter>> create() {
+	public ResultTransformerOutputWriter<SocketOutputWriter<ZabbixWriter>> create() {
 		return ResultTransformerOutputWriter.booleanToNumber(
 				booleanAsNumber,
-				TcpOutputWriterBuilder.builder(
-						zabbixServer,
-						new ZabbixWriter(new JsonFactory(), typeNames)
-				)
-						.setCharset(UTF_8)
-						.setFlushStrategy(flushStrategy)
-						.setPoolSize(poolSize)
-						.build()
-		);
+				new SocketOutputWriter<ZabbixWriter>(
+						new ZabbixWriter(
+								new JsonFactory(),
+								typeNames,
+								addPrefix,
+								zabbixKeyTemplate,
+								zabbixDiscoveryRule,
+								zabbixDiscoveryKey1,
+								zabbixDiscoveryValue1,
+								zabbixDiscoveryKey2,
+								zabbixDiscoveryValue2
+								),
+						host,
+						port,
+						socketTimeoutMs,
+						UTF_8
+				));
 	}
-
 }

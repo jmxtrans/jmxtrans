@@ -25,6 +25,7 @@ package com.googlecode.jmxtrans.jmx;
 import com.googlecode.jmxtrans.model.Query;
 import com.googlecode.jmxtrans.model.Result;
 import com.googlecode.jmxtrans.model.Server;
+import com.googlecode.jmxtrans.model.JmxErrorHandlingEnum;
 import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +53,21 @@ public class ProcessQueryThread implements Runnable {
 	@Override
 	public void run() {
 		try {
-			Collection<Result> results = server.execute(query);
-			resultProcessor.submit(server, query, results);
+			Collection<Result> results = null;
+			try {
+				results = server.execute(query);
+			} catch (Exception e) {
+				if (query.getJmxErrorHandling() == JmxErrorHandlingEnum.DUMP) {
+					throw e;
+				} else if (query.getJmxErrorHandling() == JmxErrorHandlingEnum.WARN) {
+					log.warn("Error executing query {} on server {}", query, server);
+				} else if (query.getJmxErrorHandling() == JmxErrorHandlingEnum.IGNORE) {
+					// Ignore any message
+				}
+			}
+			if (results != null) {
+				resultProcessor.submit(server, query, results);
+			}
 		} catch (Exception e) {
 			log.error("Error executing query {} on server {}", query, server, e);
 			throw new RuntimeException(e);

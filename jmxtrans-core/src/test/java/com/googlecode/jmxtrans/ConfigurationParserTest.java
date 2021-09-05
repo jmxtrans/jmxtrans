@@ -60,11 +60,12 @@ public class ConfigurationParserTest {
 	@Test
 	public void mixJsonAndYamlFormats() throws URISyntaxException, LifecycleException {
 		File jsonInput = new File(ConfigurationParserTest.class.getResource("/example.json").toURI());
+		File jsonInput2 = new File(ConfigurationParserTest.class.getResource("/example_1099_w4.json").toURI());
 		File yamlInput = new File(ConfigurationParserTest.class.getResource("/example2.yml").toURI());
 
-		ImmutableList<Server> servers = configurationParser.parseServers(of(jsonInput, yamlInput), false);
+		ImmutableList<Server> servers = configurationParser.parseServers(of(jsonInput, jsonInput2, yamlInput), false);
 
-		assertThat(servers).hasSize(2);
+		assertThat(servers).hasSize(3);
 	}
 
 	@Test(expected = LifecycleException.class)
@@ -209,6 +210,17 @@ public class ConfigurationParserTest {
 		assertThat(existing).hasSize(2);
 		assertThat(existing.get(0).getQueries()).hasSize(1);
 		assertThat(existing.get(1).getQueries()).hasSize(2);
+	}
+
+	@Test
+	public void fileNameExpanded() throws URISyntaxException, LifecycleException {
+		File jsonInput = new File(ConfigurationParserTest.class.getResource("/example_1099_w4.json").toURI());
+
+		ImmutableList<Server> servers = configurationParser.parseServers(of(jsonInput), false);
+
+		assertThat(servers).hasSize(1);
+		assertThat(servers.get(0).getHost()).matches("w4");
+		assertThat(servers.get(0).getPort()).isEqualTo("1099");
 	}
 
 }

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList.Builder;
 import com.googlecode.jmxtrans.model.naming.typename.PrependingTypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.TypeNameValuesStringBuilder;
 import com.googlecode.jmxtrans.model.naming.typename.UseAllTypeNameValuesStringBuilder;
@@ -60,11 +61,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.googlecode.jmxtrans.model.JmxErrorHandlingEnum;
+
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Arrays.asList;
+import javax.management.MBeanException; 
+
 
 /**
  * Represents a JMX Query to ask for obj, attr and one or more keys.
@@ -72,7 +77,7 @@ import static java.util.Arrays.asList;
  * @author jon
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder(value = {"obj", "attr", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters"})
+@JsonPropertyOrder(value = {"obj", "attr", "oper", "typeNames", "resultAlias", "keys", "allowDottedKeys", "useAllTypeNames", "outputWriters", "jmxErrorHandling"})
 @ThreadSafe
 @EqualsAndHashCode(exclude = {"outputWriters", "outputWriterInstances"})
 @ToString(exclude = {"outputWriters", "typeNameValuesStringBuilder"})
@@ -85,6 +90,8 @@ public class Query {
 	@Nonnull @Getter private final ImmutableList<String> keys;
 
 	@Nonnull @Getter private final ImmutableList<String> attr;
+
+	@Nonnull @Getter private final ImmutableList<String> oper;
 
 	/**
 	 * The list of type names used in a JMX bean string when querying with a
@@ -117,73 +124,79 @@ public class Query {
 	@Nonnull @Getter private final ImmutableList<OutputWriterFactory> outputWriters;
 	@Nonnull @Getter private final Iterable<OutputWriter> outputWriterInstances;
 	private final TypeNameValuesStringBuilder typeNameValuesStringBuilder;
+	@Nonnull @Getter private final JmxErrorHandlingEnum jmxErrorHandling;
 
 	@JsonCreator
 	public Query(
 			@JsonProperty("obj") String obj,
 			@JsonProperty("keys") List<String> keys,
 			@JsonProperty("attr") List<String> attr,
+			@JsonProperty("oper") List<String> oper,
 			@JsonProperty("typeNames") List<String> typeNames,
 			@JsonProperty("resultAlias") String resultAlias,
 			@JsonProperty("useObjDomainAsKey") boolean useObjDomainAsKey,
 			@JsonProperty("allowDottedKeys") boolean allowDottedKeys,
 			@JsonProperty("useAllTypeNames") boolean useAllTypeNames,
-			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters
+			@JsonProperty("outputWriters") List<OutputWriterFactory> outputWriters,
+			@JsonProperty("jmxErrorHandling") String jmxErrorHandlingString
 	) {
 		// For typeName, note the using copyOf does not change the order of
 		// the elements.
-		this(obj, keys, attr, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+		this(obj, keys, attr, oper, ImmutableSet.copyOf(firstNonNull(typeNames, Collections.<String>emptySet())), resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of(), jmxErrorHandlingString);
 	}
 
 	public Query(
 			String obj,
 			List<String> keys,
 			List<String> attr,
+			List<String> oper,
 			Set<String> typeNames,
 			String resultAlias,
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			List<OutputWriterFactory> outputWriters
+			List<OutputWriterFactory> outputWriters,
+			String jmxErrorHandlingString
 	) {
-		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				outputWriters, ImmutableList.<OutputWriter>of());
+		this(obj, keys, attr, oper, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				outputWriters, ImmutableList.<OutputWriter>of(), jmxErrorHandlingString);
 	}
 
 	public Query(
 			String obj,
 			List<String> keys,
 			List<String> attr,
+			List<String> oper,
 			Set<String> typeNames,
 			String resultAlias,
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
-			ImmutableList<OutputWriter> outputWriters
+			ImmutableList<OutputWriter> outputWriters,
+			String jmxErrorHandlingString
 	) {
-		this(obj, keys, attr, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
-				ImmutableList.<OutputWriterFactory>of(), outputWriters);
+		this(obj, keys, attr, oper, typeNames, resultAlias, useObjDomainAsKey, allowDottedKeys, useAllTypeNames,
+				ImmutableList.<OutputWriterFactory>of(), outputWriters, jmxErrorHandlingString);
 	}
 
 	private Query(
 			String obj,
 			List<String> keys,
 			List<String> attr,
+			List<String> oper,
 			Set<String> typeNames,
 			String resultAlias,
 			boolean useObjDomainAsKey,
 			boolean allowDottedKeys,
 			boolean useAllTypeNames,
 			List<OutputWriterFactory> outputWriterFactories,
-			List<OutputWriter> outputWriters
+			List<OutputWriter> outputWriters,
+			String jmxErrorHandlingString
 	) {
-		try {
-			this.objectName = new ObjectName(obj);
-		} catch (MalformedObjectNameException e) {
-			throw new IllegalArgumentException("Invalid object name: " + obj, e);
-		}
+		this.jmxErrorHandling = JmxErrorHandlingEnum.valueOf(firstNonNull(jmxErrorHandlingString, "dump").toUpperCase());
 		this.attr = copyOf(firstNonNull(attr, Collections.<String>emptyList()));
+		this.oper = copyOf(firstNonNull(oper, Collections.<String>emptyList()));
 		this.resultAlias = resultAlias;
 		this.useObjDomainAsKey = firstNonNull(useObjDomainAsKey, false);
 		this.keys = copyOf(firstNonNull(keys, Collections.<String>emptyList()));
@@ -197,6 +210,12 @@ public class Query {
 		this.typeNameValuesStringBuilder = makeTypeNameValuesStringBuilder();
 
 		this.outputWriterInstances = copyOf(firstNonNull(outputWriters, ImmutableList.<OutputWriter>of()));
+
+		try {
+			this.objectName = new ObjectName(obj);
+		} catch (MalformedObjectNameException e) {
+			throw new IllegalArgumentException("Invalid object name: " + obj, e);
+		}
 	}
 
 	public String makeTypeNameValueString(List<String> typeNames, String typeNameStr) {
@@ -207,11 +226,16 @@ public class Query {
 		return mbeanServer.queryNames(objectName, null);
 	}
 
-	public Iterable<Result> fetchResults(MBeanServerConnection mbeanServer, ObjectName queryName) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+	public Iterable<Result> fetchAttrResults(MBeanServerConnection mbeanServer, ObjectName queryName) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 		ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
 
 		List<String> attributes;
 		if (attr.isEmpty()) {
+			if (!oper.isEmpty()) {
+				// When no atts, but operations are defined, we should not read all attrs
+				return ImmutableList.of();
+			}
+
 			attributes = new ArrayList<>();
 			MBeanInfo info = mbeanServer.getMBeanInfo(queryName);
 			for (MBeanAttributeInfo attrInfo : info.getAttributes()) {
@@ -229,6 +253,43 @@ public class Query {
 
 				return new JmxResultProcessor(this, oi, al.asList(), oi.getClassName(), queryName.getDomain()).getResults();
 			}
+		} catch (UnmarshalException ue) {
+			if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
+				logger.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: "
+						+ "http://ehcache.org/xref/net/sf/ehcache/distribution/RMICacheManagerPeerListener.html#52", ue.getMessage());
+			} else {
+				throw ue;
+			}
+		}
+		return ImmutableList.of();
+	}
+
+	public Iterable<Result> fetchOperationResults(MBeanServerConnection mbeanServer, ObjectName queryName) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+		ObjectInstance oi = mbeanServer.getObjectInstance(queryName);
+
+		List<String> operations;
+		if (oper.isEmpty()) {
+			return ImmutableList.of();
+		} else {
+			operations = oper;
+		}
+
+		try {
+			ImmutableList.Builder<Result> results = ImmutableList.builder();
+			   
+			for (String op: operations) {
+				logger.debug("Executing operation [{}] from query [{}]", op, this);
+
+				Object value = mbeanServer.invoke(queryName, op, null, null);
+				long epoch = System.currentTimeMillis();
+
+				results.add(new Result(epoch, op, oi.getClassName(), queryName.getDomain(), resultAlias, oi.getObjectName().getKeyPropertyListString(), ImmutableList.<String>builder().build(), value));
+			}
+			
+			return results.build();
+		} catch (MBeanException mbe) {
+			logger.error("Operation invocation failed {}", mbe);
+			throw new InstanceNotFoundException(mbe.getMessage());
 		} catch (UnmarshalException ue) {
 			if ((ue.getCause() != null) && (ue.getCause() instanceof ClassNotFoundException)) {
 				logger.debug("Bad unmarshall, continuing. This is probably ok and due to something like this: "
@@ -272,6 +333,7 @@ public class Query {
 	public static final class Builder {
 		@Setter private String obj;
 		private final List<String> attr = newArrayList();
+		private final List<String> oper = newArrayList();
 		@Setter private String resultAlias;
 		private final List<String> keys = newArrayList();
 		@Setter private boolean useObjDomainAsKey;
@@ -282,6 +344,7 @@ public class Query {
 		// We need to pick an order preserving Set implementation here to
 		// avoid unpredictable ordering of typeNames.
 		private final Set<String> typeNames = newLinkedHashSet();
+		@Setter private String jmxErrorHandling;
 
 		private Builder() {}
 
@@ -289,12 +352,14 @@ public class Query {
 		private Builder(Query query) {
 			this.obj = query.objectName.toString();
 			this.attr.addAll(query.attr);
+			this.oper.addAll(query.oper);
 			this.resultAlias = query.resultAlias;
 			this.keys.addAll(query.keys);
 			this.useObjDomainAsKey = query.useObjDomainAsKey;
 			this.allowDottedKeys = query.allowDottedKeys;
 			this.useAllTypeNames = query.useAllTypeNames;
 			this.typeNames.addAll(query.typeNames);
+			this.jmxErrorHandling = query.jmxErrorHandling.toString();
 		}
 
 		public Builder addAttr(String... attr) {
@@ -336,24 +401,28 @@ public class Query {
 						this.obj,
 						this.keys,
 						this.attr,
+						this.oper,
 						this.typeNames,
 						this.resultAlias,
 						this.useObjDomainAsKey,
 						this.allowDottedKeys,
 						this.useAllTypeNames,
-						this.outputWriterFactories
+						this.outputWriterFactories,
+						this.jmxErrorHandling
 				);
 			}
 			return new Query(
 					this.obj,
 					this.keys,
 					this.attr,
+					this.oper,
 					this.typeNames,
 					this.resultAlias,
 					this.useObjDomainAsKey,
 					this.allowDottedKeys,
 					this.useAllTypeNames,
-					copyOf(this.outputWriters)
+					copyOf(this.outputWriters),
+					this.jmxErrorHandling
 			);
 		}
 

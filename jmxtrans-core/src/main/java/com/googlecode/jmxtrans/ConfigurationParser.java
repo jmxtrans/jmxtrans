@@ -34,7 +34,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckReturnValue;
 import javax.inject.Inject;
 import java.io.File;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ConfigurationParser {
@@ -42,17 +45,22 @@ public class ConfigurationParser {
 	private static final Logger log = LoggerFactory.getLogger(ConfigurationParser.class);
 
 	private final ProcessConfigUtils processConfigUtils;
+	private int fileNameWords = 0;
 
 	@Inject
 	public ConfigurationParser(ProcessConfigUtils processConfigUtils) {
 		this.processConfigUtils = processConfigUtils;
+		
+		setHostBasedProperties();
 	}
 
 	public ImmutableList parseServers(Iterable<File> processConfigFiles, boolean continueOnJsonError) throws LifecycleException {
 		ServerListBuilder serverListBuilder = new ServerListBuilder();
 		for (File processConfigFile : processConfigFiles) {
 			try {
+				setFileBasedProperties(processConfigFile);
 				JmxProcess process = processConfigUtils.parseProcess(processConfigFile);
+				unsetFileBasedProperties();
 				log.debug("Loaded file: {}", processConfigFile.getAbsolutePath());
 				serverListBuilder.add(process.getServers());
 			} catch (Exception ex) {
@@ -96,5 +104,60 @@ public class ConfigurationParser {
 		return Server.builder(firstServer)
 				.addQueries(secondServer.getQueries())
 				.build();
+	}
+	
+	private String reverseWords(String str, String delimRe, String delim) {  
+		String words[]=str.split(delimRe);
+		List<String> list = Arrays.asList(words);
+		Collections.reverse(list);
+		return String.join(delim, words);  
+	}
+	
+	private void setHostBasedProperties() {
+		try {
+			// Define host based variables
+			System.setProperty("hostname", InetAddress.getLocalHost().getHostName());
+			System.setProperty("reversed_hostname", reverseWords(InetAddress.getLocalHost().getHostName(),"\\.","."));
+			System.setProperty("escaped_hostname", InetAddress.getLocalHost().getHostName().replaceAll("\\.", "_"));
+			System.setProperty("escaped_reversed_hostname", reverseWords(InetAddress.getLocalHost().getHostName(),"\\.",".").replaceAll("\\.", "_"));
+			System.setProperty("canonical_hostname", InetAddress.getLocalHost().getCanonicalHostName());
+			System.setProperty("reversed_canonical_hostname", reverseWords(InetAddress.getLocalHost().getCanonicalHostName(),"\\.","."));
+			System.setProperty("escaped_canonical_hostname", InetAddress.getLocalHost().getCanonicalHostName().replaceAll("\\.", "_"));
+			System.setProperty("escaped_reversed_canonical_hostname", reverseWords(InetAddress.getLocalHost().getCanonicalHostName(),"\\.",".").replaceAll("\\.", "_"));
+			System.setProperty("hostaddress", InetAddress.getLocalHost().getHostAddress());
+			System.setProperty("escaped_hostaddress", InetAddress.getLocalHost().getHostAddress().replaceAll("\\.", "_"));
+		} catch (Exception e) {
+			log.error("Can't set host properties {}", e);
+		}
+	}
+
+	private void setFileBasedProperties(File processConfigFile) {
+		try {
+			String fileName = processConfigFile.getName();
+
+			if (fileName.endsWith(".yml")) {
+				fileName = fileName.substring(0, fileName.length()-4);
+			} else if (fileName.endsWith(".json") || fileName.endsWith(".yaml")) {
+				fileName = fileName.substring(0, fileName.length()-5);
+			}
+
+			// Define host based variables
+			System.setProperty("filename", fileName);
+
+			String words[]=fileName.split("_");
+			fileNameWords = words.length;
+			for(int i = 0; i< fileNameWords; i++) {
+				System.setProperty("filename" + String.format("%d", i+1), words[i]);		    	
+			}
+		} catch (Exception e) {
+			log.error("Can't set file properties {}", e);
+		}
+	}
+	
+	private void unsetFileBasedProperties() {
+		for(int i = 0; i< fileNameWords; i++) {
+			System.clearProperty("filename" + String.format("%d", i+1));		    	
+		}
+		System.clearProperty("filename");		    	
 	}
 }
