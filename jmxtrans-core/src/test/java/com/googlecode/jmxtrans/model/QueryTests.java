@@ -30,6 +30,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 public class QueryTests {
 	@Test
@@ -111,4 +112,60 @@ public class QueryTests {
 
 		assertThat(actual).isEqualTo("BAR_FOO");
 	}
+
+	@Test
+	public void testBuilderJmxErrorHandling1() {
+		List<String> expected = newArrayList("foo", "bar");
+
+		Query query = Query.builder()
+				.setObj("obj:key=val")
+				.setTypeNames(expected)
+				.setJmxErrorHandling("dump")
+				.build();
+
+		List<String> actual = newArrayList(query.getTypeNames());
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void testBuilderJmxErrorHandling2() {
+		List<String> expected = newArrayList("foo", "bar");
+
+		Query query = Query.builder()
+				.setObj("obj:key=val")
+				.setTypeNames(expected)
+				.setJmxErrorHandling("warn")
+				.build();
+
+		List<String> actual = newArrayList(query.getTypeNames());
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void testBuilderJmxErrorHandling3() {
+		List<String> expected = newArrayList("foo", "bar");
+
+		Query query = Query.builder()
+				.setObj("obj:key=val")
+				.setTypeNames(expected)
+				.setJmxErrorHandling("ignore")
+				.build();
+
+		List<String> actual = newArrayList(query.getTypeNames());
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void testBuilderJmxErrorHandling4() {
+		List<String> expected = newArrayList("foo", "bar");
+
+		assertThrows(IllegalArgumentException.class, () -> {
+			Query query = Query.builder()
+					.setObj("obj:key=val")
+					.setTypeNames(expected)
+					.setJmxErrorHandling("bad")
+					.build();
+		});
+	}
+
 }
