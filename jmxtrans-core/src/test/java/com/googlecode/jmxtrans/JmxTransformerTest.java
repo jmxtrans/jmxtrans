@@ -56,7 +56,7 @@ public class JmxTransformerTest {
 
 		List<File> processConfigFiles = jmxTransformer.getProcessConfigFiles();
 
-		assertThat(processConfigFiles).hasSize(8);
+		assertThat(processConfigFiles).hasSize(7);
 	}
 
 	private JmxTransformer createJmxTransformer(JmxTransConfiguration configuration) {
