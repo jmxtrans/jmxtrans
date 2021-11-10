@@ -39,17 +39,17 @@ public class SensuWriter2Test {
 	@Test
 	public void metricsAreFormattedCorrectly() throws IOException {
 		StringWriter writer = new StringWriter();
-		SensuWriter2 sensuWriter = new SensuWriter2(new GraphiteWriter2(ImmutableList.<String>of(), null), new JsonFactory());
+		SensuWriter2 sensuWriter = new SensuWriter2(new GraphiteWriter2(ImmutableList.<String>of(), null), new JsonFactory(), "graphite", "jmxtrans", "metric");
 
 		sensuWriter.write(writer, ServerFixtures.dummyServer(), QueryFixtures.dummyQuery(), ResultFixtures.dummyResults());
 		String lineSep = System.lineSeparator();
 		assertThat(writer.toString()).isEqualTo(
-				"{" + lineSep +
-				"  \"name\" : \"jmxtrans\"," + lineSep +
-				"  \"type\" : \"metric\"," + lineSep +
-				"  \"handler\" : \"graphite\"," + lineSep +
-				"  \"output\" : \"host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0\\n\"" + lineSep +
-				"}");
+			"{" + lineSep +
+			"  \"name\" : \"jmxtrans\"," + lineSep +
+			"  \"type\" : \"metric\"," + lineSep +
+			"  \"handler\" : \"graphite\"," + lineSep +
+			"  \"output\" : \"host_example_net_4321.MemoryAlias.ObjectPendingFinalizationCount 10 0\\n\"" + lineSep +
+			"}"
+		);
 	}
-
 }
