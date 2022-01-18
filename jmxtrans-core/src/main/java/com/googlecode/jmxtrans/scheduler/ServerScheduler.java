@@ -22,6 +22,7 @@
  */
 package com.googlecode.jmxtrans.scheduler;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.googlecode.jmxtrans.cli.JmxTransConfiguration;
@@ -83,7 +84,9 @@ public class ServerScheduler {
 
 	public void schedule(Server server) {
 		if (server.getRunPeriodSeconds() == null || server.getRunPeriodSeconds().intValue() <= 0) {
-			server = Server.builder(server).setRunPeriodSeconds(configuration.getRunPeriod()).build();
+			server = Server.builder(server)
+					.addOutputWriters(ImmutableList.copyOf(server.getOutputWriters()))
+					.setRunPeriodSeconds(configuration.getRunPeriod()).build();
 		}
 		ServerCommand serverCommand = new ServerCommand(server, queryExecutorRepository, resultProcessor);
 		long runPeriod = server.getRunPeriodSeconds();
