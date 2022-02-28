@@ -17,7 +17,7 @@ jmxtrans is very powerful tool which uses easily generated JSON (or [YAML](https
 
 The core engine is very solid and there are writers for [Graphite](http://graphite.wikidot.com/), [StatsD](https://github.com/etsy/statsd), [Ganglia](http://ganglia.sourceforge.net/), [cacti/rrdtool](http://www.cacti.net/), [OpenTSDB](http://opentsdb.net/), text files, and stdout. Feel free to suggest more on the discussion group or issue tracker.
 
-  * [Download a recent stable build](https://repo1.maven.org/maven2/org/jmxtrans/jmxtrans/) (or a [SNAPSHOT one](https://oss.sonatype.org/content/repositories/snapshots/org/jmxtrans/jmxtrans/))
+  * [Download a recent stable build](https://repo1.maven.org/maven2/org/jmxtrans/jmxtrans/) (or a [SNAPSHOT one](https://oss.sonatype.org/content/repositories/snapshots/org/jmxtrans/jmxtrans/), K8S users can use [KoolKits](https://github.com/lightrun-platform/koolkits/tree/main/jvm))
   * See the [Wiki](https://github.com/jmxtrans/jmxtrans/wiki) for full documentation.
   * Join the [Google Group](http://groups.google.com/group/jmxtrans) if you have anything to discuss or [follow the commits](http://groups.google.com/group/jmxtrans-commits). Please don't email Jon directly because he just doesn't have enough time to answer every question individually.
   * People are [talking - this is me! (skip to 21:45)](http://www.justin.tv/kctv88/b/290736874) and [talking](http://www.slideshare.net/cyrille.leclerc/paris-devops-monitoring-and-feature-toggle-pattern-with-jmx) and [talking (skip to 34:40)](http://www.justin.tv/kctv88/b/288229232) and [(french talking)](http://www.slideshare.net/henri.gomez/devops-retour-dexprience-marsjug-du-29-juin-2011) about it.
