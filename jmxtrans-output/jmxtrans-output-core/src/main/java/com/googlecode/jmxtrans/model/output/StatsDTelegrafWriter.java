@@ -110,6 +110,7 @@ public class StatsDTelegrafWriter implements WriterBasedOutputWriter {
 				writer.write(output);
 			}
 		}
+		writer.flush();
 	}
 
 	private String getBucketType(int resultIndex) {
